@@ -141,7 +141,7 @@ export interface IWordPressClient {
   getMedia(params?: MediaQueryParams): Promise<WordPressMedia[]>;
   getMediaItem(id: number, context?: 'view' | 'embed' | 'edit'): Promise<WordPressMedia>;
   uploadMedia(data: UploadMediaRequest): Promise<WordPressMedia>;
-  uploadFile(fileData: Buffer, filename: string, mimeType: string, meta?: Partial<UploadMediaRequest>): Promise<WordPressMedia>;
+  uploadFile(fileData: Buffer, filename: string, mimeType: string, meta?: Partial<UploadMediaRequest>, options?: RequestOptions): Promise<WordPressMedia>;
   updateMedia(data: UpdateMediaRequest): Promise<WordPressMedia>;
   deleteMedia(id: number, force?: boolean): Promise<{ deleted: boolean; previous?: WordPressMedia }>;
 

@@ -363,9 +363,10 @@ export class WordPressClient implements IWordPressClient {
     // Add authentication headers
     this.addAuthHeaders(headers);
 
-    // Set up timeout using AbortController
+    // Set up timeout using AbortController - use options timeout if provided
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+    const requestTimeout = options.timeout || this.timeout;
+    const timeoutId = setTimeout(() => controller.abort(), requestTimeout);
 
     const fetchOptions: any = {
       method,
@@ -379,6 +380,9 @@ export class WordPressClient implements IWordPressClient {
       if (data instanceof FormData || (data && typeof data.append === 'function')) {
         // For FormData, don't set Content-Type (let fetch set it with boundary)
         delete headers['Content-Type'];
+        fetchOptions.body = data;
+      } else if (Buffer.isBuffer(data)) {
+        // For Buffer data (manual multipart), keep Content-Type from headers
         fetchOptions.body = data;
       } else if (typeof data === 'string') {
         fetchOptions.body = data;
@@ -416,6 +420,28 @@ export class WordPressClient implements IWordPressClient {
             throw new RateLimitError(errorMessage, Date.now() + 60000);
           }
           
+          // Handle permission errors specifically for uploads
+          if (response.status === 403 && endpoint.includes('media') && method === 'POST') {
+            throw new AuthenticationError(
+              `Media upload blocked: WordPress REST API media uploads appear to be disabled or restricted by a plugin/security policy. ` +
+              `Error: ${errorMessage}. ` +
+              `Common causes: W3 Total Cache, security plugins, or custom REST API restrictions. ` +
+              `Please check WordPress admin settings or contact your system administrator.`, 
+              this.auth.method
+            );
+          }
+          
+          // Handle general upload permission errors
+          if (errorMessage.includes('Beiträge zu erstellen') && endpoint.includes('media')) {
+            throw new AuthenticationError(
+              `WordPress REST API media upload restriction detected: ${errorMessage}. ` +
+              `This typically indicates that media uploads via REST API are disabled by WordPress configuration, ` +
+              `a security plugin (like W3 Total Cache, Borlabs Cookie), or server policy. ` +
+              `User has sufficient permissions but WordPress/plugins are blocking the upload.`,
+              this.auth.method
+            );
+          }
+          
           throw new WordPressAPIError(errorMessage, response.status);
         }
 
@@ -451,13 +477,21 @@ export class WordPressClient implements IWordPressClient {
         
         // Handle timeout errors
         if ((error as any).name === 'AbortError') {
-          lastError = new Error(`Request timeout after ${this.timeout}ms`);
+          lastError = new Error(`Request timeout after ${requestTimeout}ms`);
+        }
+        
+        // Handle network errors  
+        if (lastError.message.includes('socket hang up') || lastError.message.includes('ECONNRESET')) {
+          lastError = new Error(`Network connection lost during upload: ${lastError.message}`);
         }
         
         debug.log(`Request failed (attempt ${attempt + 1}): ${lastError.message}`);
         
-        // Don't retry on authentication errors or timeouts
-        if (lastError.message.includes('401') || lastError.message.includes('403') || lastError.message.includes('timeout')) {
+        // Don't retry on authentication errors, timeouts, or critical network errors
+        if (lastError.message.includes('401') || 
+            lastError.message.includes('403') || 
+            lastError.message.includes('timeout') ||
+            lastError.message.includes('Network connection lost')) {
           break;
         }
         
@@ -574,11 +608,25 @@ export class WordPressClient implements IWordPressClient {
     const filename = data.title || path.basename(data.file_path);
     const fileBuffer = fs.readFileSync(data.file_path);
     
+    // Check if file is too large (WordPress default is 2MB for most installs)
+    const maxSize = 10 * 1024 * 1024; // 10MB reasonable limit
+    if (stats.size > maxSize) {
+      throw new Error(`File too large: ${(stats.size / 1024 / 1024).toFixed(2)}MB. Maximum allowed: ${(maxSize / 1024 / 1024)}MB`);
+    }
+    
+    debug.log(`Uploading file: ${filename} (${(stats.size / 1024).toFixed(2)}KB)`);
+    
     return this.uploadFile(fileBuffer, filename, this.getMimeType(data.file_path), data);
   }
 
-  async uploadFile(fileData: Buffer, filename: string, mimeType: string, meta: Partial<UploadMediaRequest> = {}): Promise<WordPressMedia> {
+  async uploadFile(fileData: Buffer, filename: string, mimeType: string, meta: Partial<UploadMediaRequest> = {}, options?: RequestOptions): Promise<WordPressMedia> {
+    debug.log(`Uploading file: ${filename} (${fileData.length} bytes)`);
+    
+    // Use FormData but with correct configuration for node-fetch
     const formData = new FormData();
+    formData.setMaxListeners(20);
+    
+    // Add file with correct options
     formData.append('file', fileData, {
       filename,
       contentType: mimeType
@@ -591,7 +639,17 @@ export class WordPressClient implements IWordPressClient {
     if (meta.description) formData.append('description', meta.description);
     if (meta.post) formData.append('post', meta.post.toString());
 
-    return this.post<WordPressMedia>('media', formData);
+    // Use longer timeout for file uploads
+    const uploadTimeout = options?.timeout !== undefined ? options.timeout : 600000; // 10 minutes default
+    const uploadOptions: RequestOptions = { 
+      ...options, 
+      timeout: uploadTimeout
+    };
+    
+    debug.log(`Upload prepared with FormData, timeout: ${uploadTimeout}ms`);
+    
+    // Use the regular post method which handles FormData correctly
+    return this.post<WordPressMedia>('media', formData, uploadOptions);
   }
 
   async updateMedia(data: UpdateMediaRequest): Promise<WordPressMedia> {

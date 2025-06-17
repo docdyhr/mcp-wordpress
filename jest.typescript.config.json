@@ -4,7 +4,8 @@
   "testMatch": [
     "**/typescript-build.test.js",
     "**/server.test.js",
-    "**/env-loading.test.js"
+    "**/env-loading.test.js",
+    "**/api-upload-timeout.test.js"
   ],
   "collectCoverage": false,
   "testTimeout": 10000,
