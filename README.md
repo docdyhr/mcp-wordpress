@@ -40,6 +40,29 @@ The setup wizard guides you through:
 npm start
 ```
 
+## 🚀 Lazy Setup via Claude Desktop
+
+If you're feeling lazy and want Claude to handle the entire setup process for you, just paste this prompt into Claude Desktop:
+
+```
+Build and configure the MCP WordPress server project from https://github.com/AiondaDotCom/mcp-wordpress locally on my computer. 
+
+Please:
+1. Clone the repository to an appropriate directory
+2. Install all dependencies 
+3. Run the setup wizard and help me configure my WordPress connection
+4. Test the connection to make sure everything works
+5. Set up the Claude Desktop MCP configuration
+6. Run a quick test to verify all tools are working
+
+My WordPress site URL is: [YOUR_WORDPRESS_URL]
+My WordPress username is: [YOUR_USERNAME]
+
+Guide me through any steps that require manual input, and let me know if you need any additional information from me.
+```
+
+**Just replace `[YOUR_WORDPRESS_URL]` and `[YOUR_USERNAME]` with your actual WordPress site details, and Claude will handle the rest!**
+
 ## 🔧 Configuration
 
 ### Environment Variables (.env)
