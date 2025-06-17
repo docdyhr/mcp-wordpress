@@ -3,7 +3,6 @@
 import { existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { spawn } from 'child_process';
 import dotenv from 'dotenv';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -55,23 +54,23 @@ class MCPTester {
   }
 
   async checkPrerequisites() {
-    const required = ['WORDPRESS_URL', 'AUTH_METHOD'];
+    const required = ['WORDPRESS_SITE_URL', 'WORDPRESS_USERNAME'];
     return required.every(varName => process.env[varName]);
   }
 
   async testServerStartup() {
     await this.runTest('Server Startup', async () => {
-      const { WordPressMCPServer } = await import('../src/index.js');
-      const server = new WordPressMCPServer();
+      const { MCPWordPressServer } = await import('../src/server.js');
+      const server = new MCPWordPressServer();
       
       // Test server creation
-      if (!server.wordpressClient) {
-        throw new Error('WordPress client not initialized');
+      if (!server.server) {
+        throw new Error('MCP server not initialized');
       }
 
-      // Test tool loading
+      // Test tool loading - simplified approach for testing
       const toolsResult = await server.handle_list_tools();
-      if (!toolsResult.tools || toolsResult.tools.length === 0) {
+      if (!toolsResult || !toolsResult.tools || toolsResult.tools.length === 0) {
         throw new Error('No tools loaded');
       }
 
@@ -82,8 +81,8 @@ class MCPTester {
 
   async testToolListing() {
     await this.runTest('Tool Listing', async () => {
-      const { WordPressMCPServer } = await import('../src/index.js');
-      const server = new WordPressMCPServer();
+      const { MCPWordPressServer } = await import('../src/server.js');
+      const server = new MCPWordPressServer();
       
       const result = await server.handle_list_tools();
       
@@ -108,8 +107,8 @@ class MCPTester {
 
   async testAuthenticationTools() {
     await this.runTest('Authentication Tools', async () => {
-      const { WordPressMCPServer } = await import('../src/index.js');
-      const server = new WordPressMCPServer();
+      const { MCPWordPressServer } = await import('../src/server.js');
+      const server = new MCPWordPressServer();
       
       // Test wp_test_auth
       const authResult = await server.handle_call_tool({
@@ -128,8 +127,8 @@ class MCPTester {
 
   async testPostTools() {
     await this.runTest('Post Management Tools', async () => {
-      const { WordPressMCPServer } = await import('../src/index.js');
-      const server = new WordPressMCPServer();
+      const { MCPWordPressServer } = await import('../src/server.js');
+      const server = new MCPWordPressServer();
       
       // Test listing posts
       const listResult = await server.handle_call_tool({
@@ -164,8 +163,8 @@ class MCPTester {
 
   async testPageTools() {
     await this.runTest('Page Management Tools', async () => {
-      const { WordPressMCPServer } = await import('../src/index.js');
-      const server = new WordPressMCPServer();
+      const { MCPWordPressServer } = await import('../src/server.js');
+      const server = new MCPWordPressServer();
       
       const result = await server.handle_call_tool({
         name: 'wp_list_pages',
@@ -183,8 +182,8 @@ class MCPTester {
 
   async testMediaTools() {
     await this.runTest('Media Management Tools', async () => {
-      const { WordPressMCPServer } = await import('../src/index.js');
-      const server = new WordPressMCPServer();
+      const { MCPWordPressServer } = await import('../src/server.js');
+      const server = new MCPWordPressServer();
       
       const result = await server.handle_call_tool({
         name: 'wp_list_media',
@@ -202,8 +201,8 @@ class MCPTester {
 
   async testUserTools() {
     await this.runTest('User Management Tools', async () => {
-      const { WordPressMCPServer } = await import('../src/index.js');
-      const server = new WordPressMCPServer();
+      const { MCPWordPressServer } = await import('../src/server.js');
+      const server = new MCPWordPressServer();
       
       const result = await server.handle_call_tool({
         name: 'wp_list_users',
@@ -221,8 +220,8 @@ class MCPTester {
 
   async testCommentTools() {
     await this.runTest('Comment Management Tools', async () => {
-      const { WordPressMCPServer } = await import('../src/index.js');
-      const server = new WordPressMCPServer();
+      const { MCPWordPressServer } = await import('../src/server.js');
+      const server = new MCPWordPressServer();
       
       const result = await server.handle_call_tool({
         name: 'wp_list_comments',
@@ -240,8 +239,8 @@ class MCPTester {
 
   async testTaxonomyTools() {
     await this.runTest('Taxonomy Management Tools', async () => {
-      const { WordPressMCPServer } = await import('../src/index.js');
-      const server = new WordPressMCPServer();
+      const { MCPWordPressServer } = await import('../src/server.js');
+      const server = new MCPWordPressServer();
       
       // Test categories
       const catResult = await server.handle_call_tool({
@@ -272,8 +271,8 @@ class MCPTester {
 
   async testSiteTools() {
     await this.runTest('Site Information Tools', async () => {
-      const { WordPressMCPServer } = await import('../src/index.js');
-      const server = new WordPressMCPServer();
+      const { MCPWordPressServer } = await import('../src/server.js');
+      const server = new MCPWordPressServer();
       
       const result = await server.handle_call_tool({
         name: 'wp_get_site_info',
@@ -291,8 +290,8 @@ class MCPTester {
 
   async testErrorHandling() {
     await this.runTest('Error Handling', async () => {
-      const { WordPressMCPServer } = await import('../src/index.js');
-      const server = new WordPressMCPServer();
+      const { MCPWordPressServer } = await import('../src/server.js');
+      const server = new MCPWordPressServer();
       
       // Test invalid tool name
       const invalidResult = await server.handle_call_tool({

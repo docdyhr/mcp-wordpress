@@ -2,22 +2,33 @@
   "name": "@saf/mcp-wordpress",
   "version": "1.0.0",
   "description": "Model Context Protocol server for WordPress REST API integration",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "type": "module",
   "bin": {
-    "mcp-wordpress": "src/index.js",
+    "mcp-wordpress": "dist/index.js",
     "wordpress-setup": "bin/setup.js",
     "wordpress-status": "bin/status.js"
   },
   "scripts": {
-    "start": "node src/index.js",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "start": "npm run build && node dist/index.js",
+    "dev": "npm run build && DEBUG=true node dist/index.js",
     "setup": "node bin/setup.js",
     "status": "node bin/status.js",
+    "test": "npm run test:typescript",
+    "test:typescript": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest --config=jest.typescript.config.json",
+    "test:tools": "node scripts/test-all-tools.js",
+    "test:legacy": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest",
+    "test:watch": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --watch --config=jest.typescript.config.json",
+    "test:coverage": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest --coverage --collectCoverageFrom='dist/**/*.js' --coverageThreshold='{\"global\":{\"branches\":50,\"functions\":50,\"lines\":50,\"statements\":50}}' --config=jest.typescript.config.json",
+    "test:fast": "npm run test:typescript",
     "test:mcp": "node scripts/test-mcp.js",
-    "test": "node scripts/test-mcp.js",
     "test:integration": "node scripts/test-integration.js",
     "test:auth": "node scripts/test-auth.js",
-    "dev": "DEBUG=true node src/index.js"
+    "lint": "eslint src/ tests/ bin/ scripts/",
+    "lint:fix": "eslint src/ tests/ bin/ scripts/ --fix",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "mcp",
@@ -33,17 +44,24 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
     "dotenv": "^16.3.1",
-    "node-fetch": "^3.3.2",
     "form-data": "^4.0.0",
+    "node-fetch": "^3.3.2",
     "open": "^9.1.0"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0"
+    "@types/jest": "^30.0.0",
+    "@types/nock": "^10.0.3",
+    "@types/node": "^20.19.1",
+    "nock": "^14.0.5",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "files": [
+    "dist/",
     "src/",
     "bin/",
     "docs/",

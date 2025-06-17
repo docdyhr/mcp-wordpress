@@ -3,6 +3,7 @@
 import { existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { execSync } from 'child_process';
 import dotenv from 'dotenv';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -93,16 +94,16 @@ class WordPressStatus {
 
   getAuthVars(authMethod) {
     switch (authMethod) {
-      case 'application_password':
-        return ['USERNAME', 'APPLICATION_PASSWORD'];
-      case 'basic':
-        return ['USERNAME', 'PASSWORD'];
-      case 'jwt':
-        return ['USERNAME', 'PASSWORD', 'JWT_SECRET'];
-      case 'api_key':
-        return ['API_KEY'];
-      default:
-        return [];
+    case 'application_password':
+      return ['USERNAME', 'APPLICATION_PASSWORD'];
+    case 'basic':
+      return ['USERNAME', 'PASSWORD'];
+    case 'jwt':
+      return ['USERNAME', 'PASSWORD', 'JWT_SECRET'];
+    case 'api_key':
+      return ['API_KEY'];
+    default:
+      return [];
     }
   }
 
@@ -124,7 +125,7 @@ class WordPressStatus {
     }
 
     try {
-      const { WordPressClient } = await import('../src/client/api.js');
+      const { WordPressClient } = await import('../dist/client/api.js');
       const client = new WordPressClient({
         baseUrl: process.env.WORDPRESS_SITE_URL,
         auth: this.getAuthConfig()
@@ -150,6 +151,8 @@ class WordPressStatus {
 
       // Test authentication
       console.log('🔄 Testing authentication...');
+      const authConfig = this.getAuthConfig();
+      console.log('Debug: Auth config:', authConfig);
       await client.authenticate();
       console.log('✅ Authentication successful');
 
@@ -176,39 +179,54 @@ class WordPressStatus {
   }
 
   getAuthConfig() {
-    // Try Application Password first
-    if (process.env.WORDPRESS_USERNAME && process.env.WORDPRESS_APP_PASSWORD) {
+    // Use explicit auth method if set
+    const authMethod = process.env.WORDPRESS_AUTH_METHOD;
+    
+    if (authMethod === 'app-password' && process.env.WORDPRESS_USERNAME && process.env.WORDPRESS_APP_PASSWORD) {
       return {
-        method: 'application_password',
+        method: 'app-password',
         username: process.env.WORDPRESS_USERNAME,
-        password: process.env.WORDPRESS_APP_PASSWORD
+        appPassword: process.env.WORDPRESS_APP_PASSWORD
       };
     }
     
-    // Try JWT
-    if (process.env.WORDPRESS_JWT_SECRET && process.env.WORDPRESS_JWT_USERNAME && process.env.WORDPRESS_JWT_PASSWORD) {
+    if (authMethod === 'jwt' && process.env.WORDPRESS_JWT_SECRET) {
       return {
         method: 'jwt',
         secret: process.env.WORDPRESS_JWT_SECRET,
-        username: process.env.WORDPRESS_JWT_USERNAME,
-        password: process.env.WORDPRESS_JWT_PASSWORD
+        username: process.env.WORDPRESS_USERNAME,
+        password: process.env.WORDPRESS_PASSWORD
       };
     }
     
-    // Try OAuth
-    if (process.env.WORDPRESS_OAUTH_CLIENT_ID && process.env.WORDPRESS_OAUTH_CLIENT_SECRET) {
+    if (authMethod === 'basic' && process.env.WORDPRESS_USERNAME && process.env.WORDPRESS_PASSWORD) {
       return {
-        method: 'oauth',
-        clientId: process.env.WORDPRESS_OAUTH_CLIENT_ID,
-        clientSecret: process.env.WORDPRESS_OAUTH_CLIENT_SECRET
+        method: 'basic',
+        username: process.env.WORDPRESS_USERNAME,
+        password: process.env.WORDPRESS_PASSWORD
       };
     }
     
-    // Try Cookie
-    if (process.env.WORDPRESS_COOKIE_NONCE) {
+    if (authMethod === 'api-key' && process.env.WORDPRESS_API_KEY) {
+      return {
+        method: 'api-key',
+        apiKey: process.env.WORDPRESS_API_KEY
+      };
+    }
+    
+    if (authMethod === 'cookie' && process.env.WORDPRESS_COOKIE_NONCE) {
       return {
         method: 'cookie',
         nonce: process.env.WORDPRESS_COOKIE_NONCE
+      };
+    }
+    
+    // Fallback: Try Application Password if available
+    if (process.env.WORDPRESS_USERNAME && process.env.WORDPRESS_APP_PASSWORD) {
+      return {
+        method: 'app-password',
+        username: process.env.WORDPRESS_USERNAME,
+        appPassword: process.env.WORDPRESS_APP_PASSWORD
       };
     }
     
@@ -221,24 +239,35 @@ class WordPressStatus {
 
     try {
       // Check if main server file exists
-      const serverPath = join(rootDir, 'src/index.js');
+      const serverPath = join(rootDir, 'dist/index.js');
       if (existsSync(serverPath)) {
         console.log('✅ Main server file exists');
       } else {
-        console.log('❌ Main server file missing');
-        return false;
+        console.log('🔨 Building TypeScript project...');
+        try {
+          execSync('npm run build', { cwd: rootDir, stdio: 'pipe' });
+          if (existsSync(serverPath)) {
+            console.log('✅ Build successful - server file created');
+          } else {
+            console.log('❌ Build failed - server file still missing');
+            return false;
+          }
+        } catch (error) {
+          console.log('❌ TypeScript build failed');
+          return false;
+        }
       }
 
       // Check tool files
       const toolFiles = [
-        'src/tools/posts.js',
-        'src/tools/pages.js',
-        'src/tools/media.js',
-        'src/tools/users.js',
-        'src/tools/comments.js',
-        'src/tools/taxonomies.js',
-        'src/tools/site.js',
-        'src/tools/auth.js'
+        'dist/tools/posts.js',
+        'dist/tools/pages.js',
+        'dist/tools/media.js',
+        'dist/tools/users.js',
+        'dist/tools/comments.js',
+        'dist/tools/taxonomies.js',
+        'dist/tools/site.js',
+        'dist/tools/auth.js'
       ];
 
       let missingTools = 0;

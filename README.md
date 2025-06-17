@@ -1,387 +1,366 @@
 # MCP WordPress Server
 
-A comprehensive Model Context Protocol (MCP) server that provides complete WordPress CMS management capabilities through the WordPress REST API v2. This server includes **54 WordPress management tools** across 8 categories, interactive setup wizard, status monitoring, and comprehensive testing framework.
+Ein vollständiger Model Context Protocol (MCP) Server für WordPress-Management durch die WordPress REST API v2. Komplett in TypeScript geschrieben für maximale Typsicherheit und bessere Developer Experience.
 
-## Overview
+## 🚀 Features
 
-This MCP server enables complete WordPress site management through structured tools and functions, utilizing the WordPress REST API v2 for all operations. Control your WordPress site content, users, media, and settings through natural language interactions with Claude or other MCP-compatible clients.
+- **54 WordPress Management Tools** über 8 Kategorien
+- **100% TypeScript** - Vollständige Typsicherheit und IntelliSense
+- **Moderne ES Modules** - Optimiert für Performance
+- **Interaktiver Setup-Wizard** - Einfache Einrichtung
+- **Umfassende Tests** - Vollständige Test-Suite
+- **Flexible Authentifizierung** - Unterstützt App Passwords, JWT, Basic Auth
+- **Debug & Monitoring** - Strukturiertes Logging und Fehlerverfolgung
 
-## WordPress REST API Integration
+## ⚡ Schnellstart
 
-**WordPress has a powerful REST API!** The WordPress REST API v2 provides complete access to:
+### 1. Installation
 
-- **Posts** (`/wp/v2/posts`) - Create, edit, delete blog posts
-- **Pages** (`/wp/v2/pages`) - Manage static pages  
-- **Media** (`/wp/v2/media`) - Upload and manage images, files
-- **Users** (`/wp/v2/users`) - User management
-- **Categories/Tags** (`/wp/v2/categories`, `/wp/v2/tags`) - Taxonomies
-- **Comments** (`/wp/v2/comments`) - Comment moderation
-- **Settings** (`/wp/v2/settings`) - Site settings
-- **Themes** (`/wp/v2/themes`) - Theme management
-- **Plugins** (`/wp/v2/plugins`) - Plugin management
-- **Menus** - Navigation management
-- **Widgets** - Sidebar widgets
-- **Custom Post Types** - Custom content types
-
-## Architecture
-
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   MCP Client    │───▶│  MCP-WordPress   │───▶│  WordPress Site │
-│   (Claude/LLM)  │    │     Server       │    │   (REST API)    │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+```bash
+git clone <repository-url>
+cd mcp-wordpress
+npm install
 ```
 
-## Features
-
-### Content Management
-- Create, edit, and delete blog posts and pages
-- Manage categories and tags
-- Upload and organize media files
-- Schedule posts for future publication
-- Bulk content operations
-
-### User Management
-- Create and manage user accounts
-- Update user profiles and roles
-- Handle user permissions
-
-### Site Administration
-- Manage site settings
-- Theme and plugin management
-- Navigation menu control
-- Comment moderation
-
-### Advanced Features
-- Site-wide search capabilities
-- Content import/export
-- Analytics integration (when available)
-- SEO management tools
-
-## Quick Start
-
-### 1. Interactive Setup Wizard
-Run the interactive setup wizard to configure your WordPress connection:
+### 2. Setup Wizard
 
 ```bash
 npm run setup
 ```
 
-The setup wizard will:
-- Guide you through WordPress site configuration
-- Help you choose the best authentication method
-- Test your WordPress connection
-- Generate Claude Desktop configuration
-- Provide step-by-step integration instructions
+Der Setup-Wizard führt Sie durch:
+- WordPress-Site-Konfiguration
+- Authentifizierungsmethode-Auswahl
+- Verbindungstest
+- Claude Desktop Konfiguration
 
-### 2. Check Status
-Verify your configuration and WordPress connectivity:
+### 3. Server starten
 
-```bash
-npm run status
-```
-
-### 3. Run Integration Tests
-Test all MCP tools and WordPress connectivity:
-
-```bash
-npm run test:mcp
-```
-
-## Installation
-
-### Prerequisites
-- WordPress 5.0+ with REST API enabled
-- Node.js 18+
-- WordPress site with appropriate user permissions
-
-### WordPress Setup
-1. Ensure REST API is enabled (default in WordPress 5.0+)
-2. Create Application Password for your user account
-3. Configure user permissions appropriately
-4. Optional: Configure CORS headers if needed
-
-### Install Dependencies
-```bash
-npm install
-```
-
-### Configuration
-Create a `.env` file with your WordPress credentials:
-
-```env
-WORDPRESS_SITE_URL=https://your-wordpress-site.com
-WORDPRESS_USERNAME=your-username
-WORDPRESS_APP_PASSWORD=xxxx xxxx xxxx xxxx xxxx xxxx
-WORDPRESS_AUTH_METHOD=app-password
-```
-
-**Alternative Authentication Methods:**
-```env
-# JWT Authentication (requires JWT plugin)
-WORDPRESS_AUTH_METHOD=jwt
-WORDPRESS_JWT_SECRET=your-jwt-secret
-
-# Basic Authentication (not recommended for production)
-WORDPRESS_AUTH_METHOD=basic
-WORDPRESS_PASSWORD=your-actual-password
-
-# API Key Authentication (requires API key plugin)
-WORDPRESS_AUTH_METHOD=api-key
-WORDPRESS_API_KEY=your-api-key
-```
-
-### Test Your Configuration
-```bash
-# Check WordPress connectivity and tool loading
-npm run status
-
-# Run comprehensive integration tests
-npm run test:mcp
-```
-
-### Run the Server
 ```bash
 npm start
 ```
 
-## Authentication
+## 🔧 Konfiguration
 
-WordPress REST API supports multiple authentication methods:
+### Environment Variables (.env)
 
-1. **Application Passwords** (Recommended)
-   - WordPress 5.6+ native support
-   - User-specific app passwords
-   - HTTP Basic Auth over HTTPS
-
-2. **JWT Authentication** (Plugin required)
-   - JSON Web Tokens
-   - Stateless authentication
-
-3. **OAuth 2.0** (Plugin required)
-   - For external applications
-
-## Available Tools (54 Total)
-
-This MCP server provides **54 comprehensive WordPress management tools** organized into 8 categories:
-
-### 📝 Posts (8 tools)
-- `wp_create_post` - Create new blog posts with full content support
-- `wp_get_post` - Retrieve specific post by ID with all metadata
-- `wp_update_post` - Edit existing posts (content, status, metadata)
-- `wp_delete_post` - Delete posts permanently or move to trash
-- `wp_list_posts` - List posts with filtering, sorting, and pagination
-- `wp_search_posts` - Search posts by title, content, or metadata
-- `wp_get_post_revisions` - Get post revision history
-- `wp_duplicate_post` - Duplicate existing posts
-
-### 📄 Pages (7 tools)
-- `wp_create_page` - Create new static pages
-- `wp_get_page` - Retrieve specific page by ID
-- `wp_update_page` - Edit existing pages
-- `wp_delete_page` - Delete pages
-- `wp_list_pages` - List pages with hierarchy support
-- `wp_search_pages` - Search pages by title or content
-- `wp_get_page_hierarchy` - Get page parent-child relationships
-
-### 🖼️ Media (8 tools)
-- `wp_upload_media` - Upload images, videos, documents with metadata
-- `wp_get_media` - Retrieve media file details and URLs
-- `wp_update_media` - Edit media metadata (title, alt text, description)
-- `wp_delete_media` - Delete media files from library
-- `wp_list_media` - Browse media library with filtering
-- `wp_search_media` - Search media by filename or metadata
-- `wp_get_media_sizes` - Get available image sizes for media
-- `wp_regenerate_thumbnails` - Regenerate image thumbnails
-
-### 👥 Users (7 tools)
-- `wp_create_user` - Create new user accounts with roles
-- `wp_get_user` - Get user profile information
-- `wp_update_user` - Update user profiles and settings
-- `wp_delete_user` - Delete user accounts
-- `wp_list_users` - List users with role filtering
-- `wp_search_users` - Search users by name or email
-- `wp_update_user_role` - Change user roles and capabilities
-
-### 💬 Comments (6 tools)
-- `wp_get_comment` - Retrieve specific comment details
-- `wp_update_comment` - Edit comment content and metadata
-- `wp_delete_comment` - Delete comments permanently
-- `wp_list_comments` - List comments with status filtering
-- `wp_approve_comment` - Approve pending comments
-- `wp_spam_comment` - Mark comments as spam
-
-### 🏷️ Taxonomies (8 tools)
-- `wp_create_category` - Create new post categories
-- `wp_get_category` - Get category details
-- `wp_update_category` - Edit category information
-- `wp_delete_category` - Delete categories
-- `wp_list_categories` - List all categories with hierarchy
-- `wp_create_tag` - Create new post tags
-- `wp_get_tag` - Get tag details
-- `wp_list_tags` - List all tags
-
-### ⚙️ Site Management (6 tools)
-- `wp_get_site_info` - Get WordPress site information and stats
-- `wp_get_site_settings` - Retrieve site settings and configuration
-- `wp_update_site_settings` - Update site settings
-- `wp_get_site_health` - Check site health and system status
-- `wp_clear_cache` - Clear various caches (if caching plugins installed)
-- `wp_backup_database` - Create database backup (if backup plugins installed)
-
-### 🔐 Authentication (4 tools)
-- `wp_verify_connection` - Test WordPress REST API connectivity
-- `wp_get_current_user` - Get current authenticated user info
-- `wp_test_permissions` - Test user permissions for various operations
-- `wp_refresh_auth` - Refresh authentication tokens (JWT/OAuth)
-
-## Utility Scripts
-
-### Interactive Setup Wizard
-Run the setup wizard to configure your WordPress connection:
-
-```bash
-npm run setup
-# or
-node bin/setup.js
+```env
+WORDPRESS_SITE_URL=https://ihre-wordpress-site.com
+WORDPRESS_USERNAME=ihr-benutzername
+WORDPRESS_APP_PASSWORD=xxxx xxxx xxxx xxxx xxxx xxxx
+WORDPRESS_AUTH_METHOD=app-password
+DEBUG=false
 ```
 
-**Features:**
-- Interactive WordPress site URL configuration
-- Authentication method selection (App Password, JWT, Basic, API Key)
-- Connection testing and validation
-- Claude Desktop configuration generation
-- Step-by-step integration instructions
+### Claude Desktop Integration
 
-### Status Checker
-Check your WordPress connection and server status:
+Nach dem Setup-Wizard wird automatisch eine MCP-Konfiguration erstellt. Fügen Sie diese in Ihre Claude Desktop `mcp.json` ein:
+
+#### Automatische Konfiguration
+```json
+{
+  "mcpServers": {
+    "mcp-wordpress": {
+      "command": "node",
+      "args": ["/pfad/zu/mcp-wordpress/dist/index.js"],
+      "env": {
+        "WORDPRESS_SITE_URL": "https://ihre-site.com",
+        "WORDPRESS_USERNAME": "ihr-username",
+        "WORDPRESS_APP_PASSWORD": "ihr-app-password",
+        "WORDPRESS_AUTH_METHOD": "app-password"
+      }
+    }
+  }
+}
+```
+
+#### Alternative: Mit .env-Datei
+```json
+{
+  "mcpServers": {
+    "mcp-wordpress": {
+      "command": "node",
+      "args": ["/pfad/zu/mcp-wordpress/dist/index.js"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
+```
+
+### Claude Desktop Konfigurationsdatei Locations
+
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+- **Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+## 🛠 Build System
+
+### TypeScript Build
 
 ```bash
+# Kompilieren
+npm run build
+
+# Watch-Modus
+npm run build:watch
+
+# Typprüfung
+npm run typecheck
+```
+
+### Entwicklung
+
+```bash
+# Development-Modus mit Debug-Ausgabe
+npm run dev
+
+# Status prüfen
 npm run status
-# or  
-node bin/status.js
+
+# Setup erneut ausführen
+npm run setup
 ```
 
-**Diagnostics Include:**
-- ✅ Configuration validation
-- 🔌 WordPress REST API connectivity
-- 🔐 Authentication method testing
-- 🛠️ Tool loading verification (54 tools across 8 categories)
-- 👤 User permissions checking
-- 📊 Detailed connection diagnostics
+## 🔐 Authentifizierung
 
-### MCP Integration Tests
-Run comprehensive integration tests:
+### WordPress Application Passwords (Empfohlen)
+
+1. **WordPress Admin** → **Benutzer** → **Profil**
+2. Scrollen Sie zu **Application Passwords**
+3. Name eingeben (z.B. "MCP WordPress Server")
+4. **Add New Application Password** klicken
+5. Generiertes Passwort kopieren (Format: `xxxx xxxx xxxx xxxx xxxx xxxx`)
+
+### Alternative Authentifizierungsmethoden
+
+```env
+# JWT Authentication (erfordert JWT Plugin)
+WORDPRESS_AUTH_METHOD=jwt
+WORDPRESS_JWT_SECRET=ihr-jwt-secret
+
+# Basic Authentication (nicht für Produktion empfohlen)
+WORDPRESS_AUTH_METHOD=basic
+WORDPRESS_PASSWORD=ihr-echtes-passwort
+
+# API Key Authentication (erfordert API Key Plugin)
+WORDPRESS_AUTH_METHOD=api-key
+WORDPRESS_API_KEY=ihr-api-key
+```
+
+## 📋 Verfügbare Tools (54 Tools)
+
+### 📝 Posts (6 Tools)
+- `wp_list_posts` - Blog-Posts auflisten und filtern
+- `wp_get_post` - Spezifischen Post abrufen
+- `wp_create_post` - Neue Posts erstellen
+- `wp_update_post` - Posts bearbeiten
+- `wp_delete_post` - Posts löschen
+- `wp_get_post_revisions` - Post-Revisionen abrufen
+
+### 📄 Pages (6 Tools)
+- `wp_list_pages` - Seiten auflisten
+- `wp_get_page` - Spezifische Seite abrufen
+- `wp_create_page` - Neue Seiten erstellen
+- `wp_update_page` - Seiten bearbeiten
+- `wp_delete_page` - Seiten löschen
+- `wp_get_page_revisions` - Seiten-Revisionen abrufen
+
+### 🖼️ Media (6 Tools)
+- `wp_list_media` - Medienbibliothek durchsuchen
+- `wp_get_media` - Mediendetails abrufen
+- `wp_upload_media` - Dateien hochladen
+- `wp_update_media` - Medien-Metadaten bearbeiten
+- `wp_delete_media` - Medien löschen
+- `wp_get_media_sizes` - Verfügbare Bildgrößen abrufen
+
+### 👥 Users (6 Tools)
+- `wp_list_users` - Benutzer auflisten
+- `wp_get_user` - Benutzerdetails abrufen
+- `wp_create_user` - Neue Benutzer erstellen
+- `wp_update_user` - Benutzerprofile bearbeiten
+- `wp_delete_user` - Benutzer löschen
+- `wp_get_current_user` - Aktuellen Benutzer abrufen
+
+### 💬 Comments (7 Tools)
+- `wp_list_comments` - Kommentare auflisten
+- `wp_get_comment` - Kommentardetails abrufen
+- `wp_create_comment` - Neue Kommentare erstellen
+- `wp_update_comment` - Kommentare bearbeiten
+- `wp_delete_comment` - Kommentare löschen
+- `wp_approve_comment` - Kommentare genehmigen
+- `wp_spam_comment` - Kommentare als Spam markieren
+
+### 🏷️ Taxonomies (10 Tools)
+- `wp_list_categories` - Kategorien auflisten
+- `wp_get_category` - Kategoriedetails abrufen
+- `wp_create_category` - Neue Kategorien erstellen
+- `wp_update_category` - Kategorien bearbeiten
+- `wp_delete_category` - Kategorien löschen
+- `wp_list_tags` - Tags auflisten
+- `wp_get_tag` - Tag-Details abrufen
+- `wp_create_tag` - Neue Tags erstellen
+- `wp_update_tag` - Tags bearbeiten
+- `wp_delete_tag` - Tags löschen
+
+### ⚙️ Site Management (7 Tools)
+- `wp_get_site_settings` - Site-Einstellungen abrufen
+- `wp_update_site_settings` - Site-Einstellungen aktualisieren
+- `wp_get_site_stats` - Site-Statistiken abrufen
+- `wp_search_site` - Site-weite Suche
+- `wp_get_application_passwords` - App-Passwörter auflisten
+- `wp_create_application_password` - Neue App-Passwörter erstellen
+- `wp_delete_application_password` - App-Passwörter löschen
+
+### 🔐 Authentication (6 Tools)
+- `wp_test_auth` - Authentifizierung testen
+- `wp_get_auth_status` - Authentifizierungsstatus abrufen
+- `wp_start_oauth_flow` - OAuth-Flow starten
+- `wp_complete_oauth_flow` - OAuth-Flow abschließen
+- `wp_refresh_oauth_token` - OAuth-Token erneuern
+- `wp_switch_auth_method` - Authentifizierungsmethode wechseln
+
+## 🧪 Testing
 
 ```bash
-npm run test:mcp
-# or
-node scripts/test-mcp.js
-```
-
-**Test Coverage:**
-- 🚀 MCP server startup and initialization
-- 📋 Tool listing verification (54 tools)
-- 🔐 Authentication method testing
-- 🧪 All tool categories validation
-- ⚡ Error handling verification
-- 📊 Detailed test reporting
-
-## Security
-
-### WordPress Application Passwords (Recommended)
-WordPress 5.6+ includes native Application Password support:
-
-1. Go to **Users → Profile** in WordPress admin
-2. Scroll to **Application Passwords** section
-3. Enter application name (e.g., "MCP WordPress Server")
-4. Click **Add New Application Password**
-5. Copy the generated password (format: `xxxx xxxx xxxx xxxx xxxx xxxx`)
-6. Use this password in your `.env` file as `WORDPRESS_APP_PASSWORD`
-
-### Authentication Methods Comparison
-
-| Method | Security | Setup | WordPress Version | Plugins Required |
-|--------|----------|-------|-------------------|------------------|
-| **App Password** | ⭐⭐⭐⭐⭐ | Easy | 5.6+ | None |
-| **JWT** | ⭐⭐⭐⭐ | Medium | Any | JWT Auth Plugin |
-| **Basic Auth** | ⭐⭐ | Easy | Any | None (not recommended) |
-| **API Key** | ⭐⭐⭐⭐ | Medium | Any | API Key Plugin |
-
-### Best Practices
-- HTTPS only for all API calls
-- Use Application Passwords instead of real user passwords
-- Implement least privilege principle
-- Validate all input parameters
-- Sanitize all output responses
-- Audit log all operations
-
-### WordPress User Roles
-- **Administrator** - Full access to all functions
-- **Editor** - Posts, pages, comments, media
-- **Author** - Own posts and media
-- **Contributor** - Own posts (draft only)
-- **Subscriber** - Read only
-
-## Development
-
-### Project Structure
-```
-src/
-├── index.js              # MCP Server Entry Point
-├── tools/                # MCP Tool Definitions
-│   ├── posts.js         # Post Management Tools
-│   ├── pages.js         # Page Management Tools
-│   ├── media.js         # Media Management Tools
-│   ├── users.js         # User Management Tools
-│   ├── comments.js      # Comment Management Tools
-│   ├── taxonomies.js    # Categories/Tags Tools
-│   ├── site.js          # Site Settings Tools
-│   └── navigation.js    # Menu Management Tools
-├── client/               # WordPress API Client
-│   ├── api.js           # HTTP Client
-│   ├── auth.js          # Authentication
-│   └── types.js         # Type Definitions
-├── utils/                # Utilities
-│   ├── validation.js    # Schema Validation
-│   ├── formatting.js    # Data Formatting
-│   ├── errors.js        # Error Handling
-│   └── debug.js         # Debug Logger
-└── config/
-    └── schema.js         # MCP Tool Schemas
-```
-
-### Testing
-```bash
+# Alle Tests ausführen
 npm test
-npm run test:integration
-npm run test:e2e
+
+# Tests mit Coverage
+npm run test:coverage
+
+# Schnelle Tests
+npm run test:fast
+
+# MCP Integration Tests
+npm run test:mcp
+
+# Tests im Watch-Modus
+npm run test:watch
 ```
 
-### Debug Mode
+## 📊 Status & Monitoring
+
 ```bash
-DEBUG=true npm start
+# Verbindungsstatus prüfen
+npm run status
+
+# Debug-Modus
+DEBUG=true npm run dev
+
+# Lint Code
+npm run lint
+
+# Auto-Fix Linting-Fehler
+npm run lint:fix
 ```
 
-## Contributing
+## 🏗 Projekt-Struktur
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+```
+mcp-wordpress/
+├── src/                     # TypeScript-Quellcode
+│   ├── index.ts            # Haupt-MCP-Server
+│   ├── server.ts           # Server-Kompatibilität
+│   ├── types/              # TypeScript-Definitionen
+│   │   ├── wordpress.ts    # WordPress API-Typen
+│   │   ├── mcp.ts         # MCP-Protokoll-Typen
+│   │   ├── client.ts      # Client-Interface-Typen
+│   │   └── index.ts       # Typ-Exporte
+│   ├── client/             # WordPress API-Client
+│   │   ├── api.ts         # HTTP-Client
+│   │   └── auth.ts        # Authentifizierung
+│   ├── tools/              # MCP-Tool-Implementierungen
+│   │   ├── posts.ts       # Post-Management
+│   │   ├── pages.ts       # Seiten-Management
+│   │   ├── media.ts       # Medien-Management
+│   │   ├── users.ts       # Benutzer-Management
+│   │   ├── comments.ts    # Kommentar-Management
+│   │   ├── taxonomies.ts  # Kategorien/Tags
+│   │   ├── site.ts        # Site-Einstellungen
+│   │   └── auth.ts        # Authentifizierung
+│   └── utils/              # Hilfsfunktionen
+│       └── debug.ts       # Debug-Logger
+├── dist/                   # Kompilierte JavaScript-Dateien
+├── bin/                    # Utility-Skripte
+│   ├── setup.js          # Setup-Wizard
+│   └── status.js          # Status-Checker
+├── tests/                  # Test-Suite
+├── tsconfig.json          # TypeScript-Konfiguration
+├── jest.config.json       # Jest-Test-Konfiguration
+└── package.json           # Node.js-Projekt-Konfiguration
+```
 
-## License
+## 💡 TypeScript-Features
 
-MIT License - see LICENSE file for details
+- **Vollständige Typsicherheit** - Compile-Zeit-Validierung
+- **IntelliSense-Support** - Bessere IDE-Integration
+- **Type-safe API-Client** - Typisierte HTTP-Methoden
+- **Comprehensive WordPress-Typen** - 400+ Zeilen präzise Definitionen
+- **MCP-Protokoll-Typen** - Tool-Definitionen und Handler
+- **Enhanced Error Handling** - Typisierte Exceptions
+- **Source Maps** - Debugging-Unterstützung
 
-## Support
+## 🔧 WordPress-Requirements
 
-For issues and questions:
-- GitHub Issues: [Create an issue](https://github.com/your-repo/issues)
-- Documentation: Check the `docs/` folder
-- WordPress REST API: [Official Documentation](https://developer.wordpress.org/rest-api/)
+- **WordPress 5.0+** mit aktivierter REST API
+- **HTTPS** (empfohlen für Produktion)
+- **Benutzer mit entsprechenden Rechten**
+- **Application Passwords** aktiviert (WordPress 5.6+)
+
+### WordPress-Benutzerrollen
+
+| Rolle | Zugriff |
+|-------|---------|
+| **Administrator** | Vollzugriff auf alle Funktionen |
+| **Editor** | Posts, Seiten, Kommentare, Medien |
+| **Author** | Eigene Posts und Medien |
+| **Contributor** | Eigene Posts (nur Entwürfe) |
+| **Subscriber** | Nur Lesen |
+
+## 🐛 Troubleshooting
+
+### Häufige Probleme
+
+1. **"Cannot connect to WordPress"**
+   - Prüfen Sie WORDPRESS_SITE_URL
+   - Stellen Sie sicher, dass die REST API erreichbar ist
+   - Testen Sie: `curl https://ihre-site.com/wp-json/wp/v2/`
+
+2. **"Authentication failed"**
+   - Überprüfen Sie Username und App-Password
+   - Stellen Sie sicher, dass Application Passwords aktiviert sind
+   - Versuchen Sie `npm run setup` erneut
+
+3. **"TypeScript compilation errors"**
+   - Führen Sie `npm run typecheck` aus
+   - Stellen Sie sicher, dass alle Dependencies installiert sind
+
+### Debug-Logs
+
+```bash
+DEBUG=true npm run dev
+```
+
+## 📚 API-Dokumentationen
+
+- [WordPress REST API](https://developer.wordpress.org/rest-api/)
+- [Model Context Protocol](https://modelcontextprotocol.io/)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+
+## 🤝 Contributing
+
+1. Repository forken
+2. Feature-Branch erstellen: `git checkout -b feature/neue-funktion`
+3. Änderungen committen: `git commit -m 'Neue Funktion hinzufügen'`
+4. Branch pushen: `git push origin feature/neue-funktion`
+5. Pull Request erstellen
+
+## 📄 License
+
+MIT License - siehe LICENSE-Datei für Details
 
 ---
 
-**Note**: This server requires WordPress 5.0+ and uses the WordPress REST API v2. Ensure your WordPress installation has the REST API enabled and properly configured.
+**🚀 Powered by TypeScript for better development experience and type safety!**

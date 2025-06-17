@@ -1,0 +1,17 @@
+{
+  "testEnvironment": "node",
+  "roots": ["<rootDir>/tests"],
+  "testMatch": [
+    "**/typescript-build.test.js",
+    "**/server.test.js",
+    "**/env-loading.test.js"
+  ],
+  "collectCoverage": false,
+  "testTimeout": 10000,
+  "verbose": true,
+  "maxWorkers": 2,
+  "cache": true,
+  "globals": {
+    "__EXECUTION_CONTEXT__": "jest"
+  }
+}

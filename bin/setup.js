@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { writeFileSync, existsSync } from 'fs';
 import { createInterface } from 'readline/promises';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { execSync } from 'child_process';
 import open from 'open';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -69,21 +70,21 @@ class WordPressSetup {
     const authChoice = await this.rl.question('Choose authentication method (1-4): ');
 
     switch (authChoice) {
-      case '1':
-        await this.setupApplicationPassword();
-        break;
-      case '2':
-        await this.setupBasicAuth();
-        break;
-      case '3':
-        await this.setupJWT();
-        break;
-      case '4':
-        await this.setupAPIKey();
-        break;
-      default:
-        console.log('Invalid choice, defaulting to Application Password');
-        await this.setupApplicationPassword();
+    case '1':
+      await this.setupApplicationPassword();
+      break;
+    case '2':
+      await this.setupBasicAuth();
+      break;
+    case '3':
+      await this.setupJWT();
+      break;
+    case '4':
+      await this.setupAPIKey();
+      break;
+    default:
+      console.log('Invalid choice, defaulting to Application Password');
+      await this.setupApplicationPassword();
     }
 
     // Optional settings
@@ -100,7 +101,7 @@ class WordPressSetup {
   }
 
   async setupApplicationPassword() {
-    this.config.AUTH_METHOD = 'application_password';
+    this.config.AUTH_METHOD = 'app-password';
     this.config.USERNAME = await this.rl.question('WordPress Username: ');
     
     console.log('\n📱 Application Password Setup:');
@@ -115,7 +116,7 @@ class WordPressSetup {
     if (openBrowser.toLowerCase() !== 'n') {
       try {
         await open(`${this.config.WORDPRESS_URL}/wp-admin/profile.php#application-passwords-section`);
-      } catch (error) {
+      } catch {
         console.log('Could not open browser automatically');
       }
     }
@@ -141,17 +142,30 @@ class WordPressSetup {
   }
 
   async setupAPIKey() {
-    this.config.AUTH_METHOD = 'api_key';
+    this.config.AUTH_METHOD = 'api-key';
     this.config.API_KEY = await this.rl.question('API Key: ');
     this.config.API_SECRET = await this.rl.question('API Secret (if required): ');
+  }
+
+  async ensureBuild() {
+    console.log('🔨 Building TypeScript project...');
+    try {
+      execSync('npm run build', { cwd: rootDir, stdio: 'pipe' });
+      console.log('✅ Build successful!');
+    } catch (error) {
+      throw new Error('TypeScript build failed. Please run "npm run build" manually.');
+    }
   }
 
   async testConnection() {
     console.log('\n🔄 Testing WordPress connection...');
     
+    // Ensure TypeScript is compiled
+    await this.ensureBuild();
+    
     try {
       // Create a temporary client to test connection
-      const { WordPressClient } = await import('../src/client/api.js');
+      const { WordPressClient } = await import('../dist/client/api.js');
       const client = new WordPressClient({
         baseUrl: this.config.WORDPRESS_URL,
         auth: this.getAuthConfig()
@@ -177,40 +191,63 @@ class WordPressSetup {
 
   getAuthConfig() {
     switch (this.config.AUTH_METHOD) {
-      case 'application_password':
-        return {
-          method: 'application_password',
-          username: this.config.USERNAME,
-          password: this.config.APPLICATION_PASSWORD
-        };
-      case 'basic':
-        return {
-          method: 'basic',
-          username: this.config.USERNAME,
-          password: this.config.PASSWORD
-        };
-      case 'jwt':
-        return {
-          method: 'jwt',
-          secret: this.config.JWT_SECRET,
-          username: this.config.USERNAME,
-          password: this.config.PASSWORD
-        };
-      case 'api_key':
-        return {
-          method: 'api_key',
-          key: this.config.API_KEY,
-          secret: this.config.API_SECRET
-        };
-      default:
-        throw new Error('Invalid authentication method');
+    case 'app-password':
+      return {
+        method: 'app-password',
+        username: this.config.USERNAME,
+        appPassword: this.config.APPLICATION_PASSWORD
+      };
+    case 'basic':
+      return {
+        method: 'basic',
+        username: this.config.USERNAME,
+        password: this.config.PASSWORD
+      };
+    case 'jwt':
+      return {
+        method: 'jwt',
+        secret: this.config.JWT_SECRET,
+        username: this.config.USERNAME,
+        password: this.config.PASSWORD
+      };
+    case 'api-key':
+      return {
+        method: 'api-key',
+        apiKey: this.config.API_KEY,
+        secret: this.config.API_SECRET
+      };
+    default:
+      throw new Error('Invalid authentication method');
     }
   }
 
   async saveConfiguration() {
     console.log('\n💾 Saving configuration...');
 
-    const envContent = Object.entries(this.config)
+    // Map config keys to environment variable names
+    const envVars = {
+      'WORDPRESS_SITE_URL': this.config.WORDPRESS_URL,
+      'WORDPRESS_USERNAME': this.config.USERNAME,
+      'WORDPRESS_AUTH_METHOD': this.config.AUTH_METHOD
+    };
+
+    if (this.config.APPLICATION_PASSWORD) {
+      envVars['WORDPRESS_APP_PASSWORD'] = this.config.APPLICATION_PASSWORD;
+    }
+    if (this.config.PASSWORD) {
+      envVars['WORDPRESS_PASSWORD'] = this.config.PASSWORD;
+    }
+    if (this.config.JWT_SECRET) {
+      envVars['WORDPRESS_JWT_SECRET'] = this.config.JWT_SECRET;
+    }
+    if (this.config.API_KEY) {
+      envVars['WORDPRESS_API_KEY'] = this.config.API_KEY;
+    }
+    if (this.config.API_SECRET) {
+      envVars['WORDPRESS_API_SECRET'] = this.config.API_SECRET;
+    }
+
+    const envContent = Object.entries(envVars)
       .map(([key, value]) => `${key}=${value}`)
       .join('\n');
 
@@ -232,10 +269,10 @@ class WordPressSetup {
   "mcpServers": {
     "wordpress": {
       "command": "node",
-      "args": ["${join(rootDir, 'src/index.js')}"],
+      "args": ["${join(rootDir, 'dist/index.js')}"],
       "env": {
-        "WORDPRESS_URL": "${this.config.WORDPRESS_URL}",
-        "AUTH_METHOD": "${this.config.AUTH_METHOD}",
+        "WORDPRESS_SITE_URL": "${this.config.WORDPRESS_URL}",
+        "WORDPRESS_AUTH_METHOD": "${this.config.AUTH_METHOD}",
         ${this.getEnvVarsForClaudeConfig()}
       }
     }
@@ -246,12 +283,12 @@ class WordPressSetup {
 
   getEnvVarsForClaudeConfig() {
     const envVars = [];
-    if (this.config.USERNAME) envVars.push(`"USERNAME": "${this.config.USERNAME}"`);
-    if (this.config.APPLICATION_PASSWORD) envVars.push(`"APPLICATION_PASSWORD": "${this.config.APPLICATION_PASSWORD}"`);
-    if (this.config.PASSWORD) envVars.push(`"PASSWORD": "${this.config.PASSWORD}"`);
-    if (this.config.JWT_SECRET) envVars.push(`"JWT_SECRET": "${this.config.JWT_SECRET}"`);
-    if (this.config.API_KEY) envVars.push(`"API_KEY": "${this.config.API_KEY}"`);
-    if (this.config.API_SECRET) envVars.push(`"API_SECRET": "${this.config.API_SECRET}"`);
+    if (this.config.USERNAME) envVars.push(`"WORDPRESS_USERNAME": "${this.config.USERNAME}"`);
+    if (this.config.APPLICATION_PASSWORD) envVars.push(`"WORDPRESS_APP_PASSWORD": "${this.config.APPLICATION_PASSWORD}"`);
+    if (this.config.PASSWORD) envVars.push(`"WORDPRESS_PASSWORD": "${this.config.PASSWORD}"`);
+    if (this.config.JWT_SECRET) envVars.push(`"WORDPRESS_JWT_SECRET": "${this.config.JWT_SECRET}"`);
+    if (this.config.API_KEY) envVars.push(`"WORDPRESS_API_KEY": "${this.config.API_KEY}"`);
+    if (this.config.API_SECRET) envVars.push(`"WORDPRESS_API_SECRET": "${this.config.API_SECRET}"`);
     return envVars.join(',\n        ');
   }
 }
