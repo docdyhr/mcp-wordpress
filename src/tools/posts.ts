@@ -167,7 +167,7 @@ export const createPost: MCPTool = {
       },
       content: {
         type: 'string',
-        description: 'Post content (HTML)'
+        description: 'Post content in HTML format (WordPress-compatible HTML markup is required, not Markdown)'
       },
       excerpt: {
         type: 'string',
@@ -237,7 +237,7 @@ export const updatePost: MCPTool = {
       },
       content: {
         type: 'string',
-        description: 'Post content (HTML)'
+        description: 'Post content in HTML format (WordPress-compatible HTML markup is required, not Markdown)'
       },
       excerpt: {
         type: 'string',

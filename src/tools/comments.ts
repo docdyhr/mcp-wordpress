@@ -50,7 +50,7 @@ export const createComment: MCPTool = {
     type: 'object',
     properties: {
       post: { type: 'number', description: 'Post ID', minimum: 1 },
-      content: { type: 'string', description: 'Comment content' },
+      content: { type: 'string', description: 'Comment content in HTML format (WordPress-compatible HTML markup is preferred)' },
       author_name: { type: 'string', description: 'Author name' },
       author_email: { type: 'string', description: 'Author email' },
       parent: { type: 'number', description: 'Parent comment ID' }
@@ -66,7 +66,7 @@ export const updateComment: MCPTool = {
     type: 'object',
     properties: {
       id: { type: 'number', description: 'Comment ID', minimum: 1 },
-      content: { type: 'string', description: 'Comment content' },
+      content: { type: 'string', description: 'Comment content in HTML format (WordPress-compatible HTML markup is preferred)' },
       status: { type: 'string', enum: ['approved', 'unapproved', 'spam'] }
     },
     required: ['id']

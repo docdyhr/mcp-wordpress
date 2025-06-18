@@ -61,7 +61,7 @@ export const createPage: MCPTool = {
     type: 'object',
     properties: {
       title: { type: 'string', description: 'Page title' },
-      content: { type: 'string', description: 'Page content (HTML)' },
+      content: { type: 'string', description: 'Page content in HTML format (WordPress-compatible HTML markup is required, not Markdown)' },
       status: { type: 'string', enum: ['publish', 'draft', 'private'], description: 'Page status' },
       parent: { type: 'number', description: 'Parent page ID' },
       menu_order: { type: 'number', description: 'Menu order' },
@@ -78,7 +78,7 @@ export const updatePage: MCPTool = {
     properties: {
       id: { type: 'number', description: 'Page ID', minimum: 1 },
       title: { type: 'string', description: 'Page title' },
-      content: { type: 'string', description: 'Page content (HTML)' },
+      content: { type: 'string', description: 'Page content in HTML format (WordPress-compatible HTML markup is required, not Markdown)' },
       status: { type: 'string', enum: ['publish', 'draft', 'private'], description: 'Page status' },
       parent: { type: 'number', description: 'Parent page ID' },
       menu_order: { type: 'number', description: 'Menu order' }
