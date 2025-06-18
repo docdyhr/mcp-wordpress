@@ -1,11 +1,11 @@
 {
-  "name": "@saf/mcp-wordpress",
+  "name": "@aiondadotcom/mcp-wordpress",
   "version": "1.0.0",
   "description": "Model Context Protocol server for WordPress REST API integration",
   "main": "dist/index.js",
   "type": "module",
   "bin": {
-    "mcp-wordpress": "dist/index.js",
+    "mcp-wordpress": "bin/mcp-wordpress.js",
     "wordpress-setup": "bin/setup.js",
     "wordpress-status": "bin/status.js"
   },
@@ -39,7 +39,7 @@
     "ai",
     "assistant"
   ],
-  "author": "SAF",
+  "author": "AiondaDotCom",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
@@ -72,10 +72,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/saf/mcp-wordpress.git"
+    "url": "git+https://github.com/AiondaDotCom/mcp-wordpress.git"
   },
   "bugs": {
-    "url": "https://github.com/saf/mcp-wordpress/issues"
+    "url": "https://github.com/AiondaDotCom/mcp-wordpress/issues"
   },
-  "homepage": "https://github.com/saf/mcp-wordpress#readme"
+  "homepage": "https://github.com/AiondaDotCom/mcp-wordpress#readme",
+  "publishConfig": {
+    "access": "public"
+  }
 }

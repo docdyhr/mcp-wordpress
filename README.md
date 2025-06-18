@@ -14,17 +14,36 @@ A comprehensive Model Context Protocol (MCP) server for WordPress management thr
 
 ## ⚡ Quick Start
 
-### 1. Installation
+### Option 1: NPX (Recommended)
+
+The easiest way to get started - no installation required:
 
 ```bash
-git clone <repository-url>
-cd mcp-wordpress
-npm install
+# Run directly with NPX
+npx @aiondadotcom/mcp-wordpress
+
+# Or install globally
+npm install -g @aiondadotcom/mcp-wordpress
+mcp-wordpress
 ```
 
-### 2. Setup Wizard
+### Option 2: Local Development
 
 ```bash
+git clone https://github.com/AiondaDotCom/mcp-wordpress.git
+cd mcp-wordpress
+npm install
+npm run setup
+npm start
+```
+
+### Setup Wizard
+
+```bash
+# For NPX users
+npx @aiondadotcom/mcp-wordpress setup
+
+# For local installation
 npm run setup
 ```
 
@@ -34,15 +53,31 @@ The setup wizard guides you through:
 - Connection testing
 - Claude Desktop configuration
 
-### 3. Start Server
-
-```bash
-npm start
-```
-
 ## 🚀 Lazy Setup via Claude Desktop
 
-If you're feeling lazy and want Claude to handle the entire setup process for you, just paste this prompt into Claude Desktop:
+### Super Easy NPX Setup
+
+If you want the absolute easiest setup, just paste this prompt into Claude Desktop:
+
+```
+Set up the MCP WordPress server using NPX for my Claude Desktop. 
+
+My WordPress details:
+- Site URL: [YOUR_WORDPRESS_URL]
+- Username: [YOUR_USERNAME]
+
+Please:
+1. Help me create a WordPress Application Password
+2. Configure my Claude Desktop mcp.json file with the NPX command
+3. Test the connection to make sure everything works
+4. Show me how to use the WordPress tools
+
+I want to use the NPX version (@aiondadotcom/mcp-wordpress) so I don't need to install anything locally.
+```
+
+### Full Local Development Setup
+
+For local development and customization:
 
 ```
 Build and configure the MCP WordPress server project from https://github.com/AiondaDotCom/mcp-wordpress locally on my computer. 
@@ -77,9 +112,44 @@ DEBUG=false
 
 ### Claude Desktop Integration
 
-After the setup wizard, an MCP configuration is automatically created. Add this to your Claude Desktop `mcp.json`:
+Configure MCP WordPress Server in your Claude Desktop `mcp.json` configuration file:
 
-#### Automatic Configuration
+#### Option 1: NPX (Recommended)
+```json
+{
+  "mcpServers": {
+    "mcp-wordpress": {
+      "command": "npx",
+      "args": ["@aiondadotcom/mcp-wordpress"],
+      "env": {
+        "WORDPRESS_SITE_URL": "https://your-site.com",
+        "WORDPRESS_USERNAME": "your-username", 
+        "WORDPRESS_APP_PASSWORD": "your-app-password",
+        "WORDPRESS_AUTH_METHOD": "app-password"
+      }
+    }
+  }
+}
+```
+
+#### Option 2: Global Installation
+```json
+{
+  "mcpServers": {
+    "mcp-wordpress": {
+      "command": "mcp-wordpress",
+      "env": {
+        "WORDPRESS_SITE_URL": "https://your-site.com",
+        "WORDPRESS_USERNAME": "your-username",
+        "WORDPRESS_APP_PASSWORD": "your-app-password", 
+        "WORDPRESS_AUTH_METHOD": "app-password"
+      }
+    }
+  }
+}
+```
+
+#### Option 3: Local Development
 ```json
 {
   "mcpServers": {
@@ -97,13 +167,15 @@ After the setup wizard, an MCP configuration is automatically created. Add this 
 }
 ```
 
-#### Alternative: Using .env File
+#### Using .env File (Any Option)
+If you prefer to use a `.env` file instead of environment variables in the config:
+
 ```json
 {
   "mcpServers": {
     "mcp-wordpress": {
-      "command": "node",
-      "args": ["/path/to/mcp-wordpress/dist/index.js"],
+      "command": "npx",
+      "args": ["@aiondadotcom/mcp-wordpress"],
       "env": {
         "NODE_ENV": "production"
       }
@@ -117,6 +189,34 @@ After the setup wizard, an MCP configuration is automatically created. Add this 
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 - **Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+### Quick Configuration Steps
+
+1. **Create or locate your Claude Desktop config file** at the path above
+2. **Add the MCP server configuration** using one of the options above
+3. **Restart Claude Desktop** for changes to take effect
+4. **Verify the connection** - you should see WordPress tools available in Claude Desktop
+
+### Example Complete Configuration
+
+Here's a complete `claude_desktop_config.json` file with MCP WordPress:
+
+```json
+{
+  "mcpServers": {
+    "mcp-wordpress": {
+      "command": "npx",
+      "args": ["@aiondadotcom/mcp-wordpress"],
+      "env": {
+        "WORDPRESS_SITE_URL": "https://your-site.com",
+        "WORDPRESS_USERNAME": "your-username",
+        "WORDPRESS_APP_PASSWORD": "your-app-password",
+        "WORDPRESS_AUTH_METHOD": "app-password"
+      }
+    }
+  }
+}
+```
 
 ## 🛠 Build System
 

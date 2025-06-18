@@ -105,7 +105,7 @@ ENVIRONMENT VARIABLES:
   WORDPRESS_AUTH_METHOD      - Authentication method (app-password, jwt, basic, api-key)
   
 DOCUMENTATION:
-  https://github.com/saf/mcp-wordpress
+  https://github.com/AiondaDotCom/mcp-wordpress
 `);
   process.exit(0);
 }
