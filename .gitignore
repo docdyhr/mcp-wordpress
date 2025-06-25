@@ -132,3 +132,36 @@ temp/
 # WordPress MCP Server specific
 mcp-server.log
 wordpress-debug.log
+
+# AI Assistant files
+CLAUDE.md
+.claude/
+.cursor/
+.cursorrules
+.github/copilot-instructions.md
+anthropic-instructions.md
+claude-instructions.md
+ai-instructions.md
+cursor-instructions.md
+copilot-instructions.md
+
+# AI Assistant conversation files
+.ai-conversations/
+.claude-conversations/
+.cursor-conversations/
+claude-conversation-*.md
+anthropic-session-*.md
+
+# AI Assistant project files
+.ai-project/
+.claude-project/
+claude-project.md
+ai-context.md
+project-context.md
+
+# AI Assistant cache and temporary files
+.ai-cache/
+.claude-cache/
+.cursor-cache/
+ai-temp/
+claude-temp/
