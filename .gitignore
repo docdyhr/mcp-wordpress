@@ -133,8 +133,7 @@ temp/
 mcp-server.log
 wordpress-debug.log
 
-# AI Assistant files
-CLAUDE.md
+# AI Assistant files (excluding CLAUDE.md which contains project documentation)
 .claude/
 .cursor/
 .cursorrules
