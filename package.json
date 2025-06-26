@@ -27,6 +27,7 @@
     "test:integration": "node scripts/test-integration.js",
     "test:auth": "node scripts/test-auth.js",
     "health": "node scripts/health-check.js",
+    "verify-claude": "node scripts/verify-claude-integration.js",
     "lint": "eslint src/ tests/ bin/ scripts/",
     "lint:fix": "eslint src/ tests/ bin/ scripts/ --fix",
     "typecheck": "tsc --noEmit"
