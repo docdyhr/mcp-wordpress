@@ -1,547 +1,295 @@
-#!/usr/bin/env node
-
-/**
- * MCP WordPress Server
- * 
- * A Model Context Protocol server that provides comprehensive WordPress CMS management
- * through the WordPress REST API v2. Supports posts, pages, media, users, comments,
- * taxonomies, and site management.
- */
-
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
-import { config } from 'dotenv';
-import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
-// Import types
-import type {
+import {
+  MCPServer,
   MCPTool,
+  MCPToolHandler,
+  MCPToolRequest,
   MCPToolResponse,
-  MCPHandlerRegistry,
-  MCPServerConfig
-} from './types/mcp.js';
-import type {
-  IWordPressClient,
-  WordPressClientConfig
-} from './types/client.js';
+} from "@mcp/server";
+import dotenv from "dotenv";
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
+import WordPressClient from "./client/api.js";
+import { WordPressAuthMethod, WordPressClientConfig } from "./types/client.js";
+import * as Tools from "./tools/index.js";
+import { getErrorMessage } from "./utils/error.js";
 
-// Import WordPress client
-import { WordPressClient } from './client/api.js';
-import { logger, logError, startTimer, validateEnvVars } from './utils/debug.js';
-
-// Import MCP tools and handlers
-import { 
-  listPosts, getPost, createPost, updatePost, deletePost, getPostRevisions,
-  handleListPosts, handleGetPost, handleCreatePost, handleUpdatePost, handleDeletePost, handleGetPostRevisions
-} from './tools/posts.js';
-import { 
-  listPages, getPage, createPage, updatePage, deletePage, getPageRevisions,
-  handleListPages, handleGetPage, handleCreatePage, handleUpdatePage, handleDeletePage, handleGetPageRevisions
-} from './tools/pages.js';
-import { 
-  listMedia, getMedia, uploadMedia, updateMedia, deleteMedia, getMediaSizes,
-  handleListMedia, handleGetMedia, handleUploadMedia, handleUpdateMedia, handleDeleteMedia, handleGetMediaSizes
-} from './tools/media.js';
-import { 
-  listUsers, getUser, createUser, updateUser, deleteUser, getCurrentUser,
-  handleListUsers, handleGetUser, handleCreateUser, handleUpdateUser, handleDeleteUser, handleGetCurrentUser
-} from './tools/users.js';
-import { 
-  listComments, getComment, createComment, updateComment, deleteComment, approveComment, spamComment,
-  handleListComments, handleGetComment, handleCreateComment, handleUpdateComment, handleDeleteComment, handleApproveComment, handleSpamComment
-} from './tools/comments.js';
-import { 
-  listCategories, getCategory, createCategory, updateCategory, deleteCategory,
-  listTags, getTag, createTag, updateTag, deleteTag,
-  handleListCategories, handleGetCategory, handleCreateCategory, handleUpdateCategory, handleDeleteCategory,
-  handleListTags, handleGetTag, handleCreateTag, handleUpdateTag, handleDeleteTag
-} from './tools/taxonomies.js';
-import { 
-  getSiteSettings, updateSiteSettings, getSiteStats, searchSite, 
-  getApplicationPasswords, createApplicationPassword, deleteApplicationPassword,
-  handleGetSiteSettings, handleUpdateSiteSettings, handleGetSiteStats, handleSearchSite,
-  handleGetApplicationPasswords, handleCreateApplicationPassword, handleDeleteApplicationPassword
-} from './tools/site.js';
-import { 
-  testAuth, getAuthStatus, startOAuthFlow, completeOAuthFlow, refreshOAuthToken, switchAuthMethod,
-  handleTestAuth, handleGetAuthStatus, handleStartOAuthFlow, handleCompleteOAuthFlow, handleRefreshOAuthToken, handleSwitchAuthMethod
-} from './tools/auth.js';
-
-// Load environment variables from the correct path
+// --- Constants ---
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const rootDir = join(__dirname, '..');
-const envPath = join(rootDir, '.env');
+const __dirname = path.dirname(__filename);
+const rootDir = path.resolve(__dirname, "..");
+const envPath = path.resolve(rootDir, ".env");
+dotenv.config({ path: envPath });
 
-config({ path: envPath });
+const SERVER_VERSION = "1.1.0-multi-site"; // Updated version
 
-// Server version
-const SERVER_VERSION = '1.0.0';
+// --- Main Server Class ---
+class MCPWordPressServer {
+  private server: MCPServer;
+  // MODIFICATION: Manages multiple WordPress clients, keyed by site ID.
+  private wordpressClients: Map<string, WordPressClient> = new Map();
+  private tools: MCPTool[] = [];
+  private handlers: { [key: string]: MCPToolHandler } = {};
+  private initialized: boolean = false;
+  // MODIFICATION: Stores the configurations for all loaded sites.
+  private siteConfigs: any[] = [];
 
-// CLI argument handling
-const args = process.argv.slice(2);
+  constructor(mcpConfig?: any) {
+    this.loadConfiguration(mcpConfig);
 
-if (args.includes('--version') || args.includes('-v')) {
-  console.log(SERVER_VERSION);
-  process.exit(0);
-}
-
-if (args.includes('--help') || args.includes('-h')) {
-  console.log(`
-MCP WordPress Server v${SERVER_VERSION}
-
-USAGE:
-  node src/index.js                    # Start MCP server
-  npm run setup                        # Run setup wizard
-  npm run status                       # Check status
-  
-ENVIRONMENT VARIABLES:
-  WORDPRESS_SITE_URL         - WordPress site URL
-  WORDPRESS_USERNAME         - WordPress username
-  WORDPRESS_APP_PASSWORD     - WordPress application password
-  WORDPRESS_AUTH_METHOD      - Authentication method (app-password, jwt, basic, api-key)
-  
-DOCUMENTATION:
-  https://github.com/AiondaDotCom/mcp-wordpress
-`);
-  process.exit(0);
-}
-
-// Handle setup command
-if (args.includes('setup')) {
-  (async (): Promise<void> => {
-    try {
-      const __filename = fileURLToPath(import.meta.url);
-      const __dirname = dirname(__filename);
-      const setupPath = join(__dirname, '..', 'bin', 'setup.js');
-      
-      execSync(`node "${setupPath}"`, { stdio: 'inherit' });
-      process.exit(0);
-    } catch (error) {
-      console.error('Setup failed:', (error as Error).message);
+    if (this.wordpressClients.size === 0) {
+      console.error(
+        "No WordPress sites were configured. Please create mcp-wordpress.config.json or set environment variables.",
+      );
       process.exit(1);
     }
-  })();
-}
 
-/**
- * WordPress MCP Server Class
- */
-export class MCPWordPressServer {
-  private server: Server;
-  private wordpressClient: IWordPressClient | null = null;
-  private tools: MCPTool[];
-  private handlers: MCPHandlerRegistry<IWordPressClient>;
-  private initialized = false;
-
-  constructor() {
-    // Initialize MCP Server
-    this.server = new Server(
-      {
-        name: 'mcp-wordpress',
-        version: SERVER_VERSION,
-      },
-      {
-        capabilities: {
-          tools: {},
-        },
-      }
-    );
-
-    // Define all available tools
-    this.tools = [
-      // Authentication tools
-      testAuth,
-      getAuthStatus,
-      startOAuthFlow,
-      completeOAuthFlow,
-      refreshOAuthToken,
-      switchAuthMethod,
-      
-      // Posts tools
-      listPosts,
-      getPost,
-      createPost,
-      updatePost,
-      deletePost,
-      getPostRevisions,
-      
-      // Pages tools
-      listPages,
-      getPage,
-      createPage,
-      updatePage,
-      deletePage,
-      getPageRevisions,
-      
-      // Media tools
-      listMedia,
-      getMedia,
-      uploadMedia,
-      updateMedia,
-      deleteMedia,
-      getMediaSizes,
-      
-      // Users tools
-      listUsers,
-      getUser,
-      createUser,
-      updateUser,
-      deleteUser,
-      getCurrentUser,
-      
-      // Comments tools
-      listComments,
-      getComment,
-      createComment,
-      updateComment,
-      deleteComment,
-      approveComment,
-      spamComment,
-      
-      // Taxonomies tools
-      listCategories,
-      getCategory,
-      createCategory,
-      updateCategory,
-      deleteCategory,
-      listTags,
-      getTag,
-      createTag,
-      updateTag,
-      deleteTag,
-      
-      // Site management tools
-      getSiteSettings,
-      updateSiteSettings,
-      getSiteStats,
-      searchSite,
-      getApplicationPasswords,
-      createApplicationPassword,
-      deleteApplicationPassword
-    ];
-
-    // Define tool handlers
-    this.handlers = {
-      // Authentication handlers
-      'wp_test_auth': handleTestAuth,
-      'wp_get_auth_status': handleGetAuthStatus,
-      'wp_start_oauth_flow': handleStartOAuthFlow,
-      'wp_complete_oauth_flow': handleCompleteOAuthFlow,
-      'wp_refresh_oauth_token': handleRefreshOAuthToken,
-      'wp_switch_auth_method': handleSwitchAuthMethod,
-
-      // Posts handlers
-      'wp_list_posts': handleListPosts,
-      'wp_get_post': handleGetPost,
-      'wp_create_post': handleCreatePost,
-      'wp_update_post': handleUpdatePost,
-      'wp_delete_post': handleDeletePost,
-      'wp_get_post_revisions': handleGetPostRevisions,
-
-      // Pages handlers
-      'wp_list_pages': handleListPages,
-      'wp_get_page': handleGetPage,
-      'wp_create_page': handleCreatePage,
-      'wp_update_page': handleUpdatePage,
-      'wp_delete_page': handleDeletePage,
-      'wp_get_page_revisions': handleGetPageRevisions,
-
-      // Media handlers
-      'wp_list_media': handleListMedia,
-      'wp_get_media': handleGetMedia,
-      'wp_upload_media': handleUploadMedia,
-      'wp_update_media': handleUpdateMedia,
-      'wp_delete_media': handleDeleteMedia,
-      'wp_get_media_sizes': handleGetMediaSizes,
-
-      // Users handlers
-      'wp_list_users': handleListUsers,
-      'wp_get_user': handleGetUser,
-      'wp_create_user': handleCreateUser,
-      'wp_update_user': handleUpdateUser,
-      'wp_delete_user': handleDeleteUser,
-      'wp_get_current_user': handleGetCurrentUser,
-
-      // Comments handlers
-      'wp_list_comments': handleListComments,
-      'wp_get_comment': handleGetComment,
-      'wp_create_comment': handleCreateComment,
-      'wp_update_comment': handleUpdateComment,
-      'wp_delete_comment': handleDeleteComment,
-      'wp_approve_comment': handleApproveComment,
-      'wp_spam_comment': handleSpamComment,
-
-      // Taxonomies handlers
-      'wp_list_categories': handleListCategories,
-      'wp_get_category': handleGetCategory,
-      'wp_create_category': handleCreateCategory,
-      'wp_update_category': handleUpdateCategory,
-      'wp_delete_category': handleDeleteCategory,
-      'wp_list_tags': handleListTags,
-      'wp_get_tag': handleGetTag,
-      'wp_create_tag': handleCreateTag,
-      'wp_update_tag': handleUpdateTag,
-      'wp_delete_tag': handleDeleteTag,
-
-      // Site management handlers
-      'wp_get_site_settings': handleGetSiteSettings,
-      'wp_update_site_settings': handleUpdateSiteSettings,
-      'wp_get_site_stats': handleGetSiteStats,
-      'wp_search_site': handleSearchSite,
-      'wp_get_application_passwords': handleGetApplicationPasswords,
-      'wp_create_application_password': handleCreateApplicationPassword,
-      'wp_delete_application_password': handleDeleteApplicationPassword
-    };
+    this.server = new MCPServer({
+      name: "mcp-wordpress",
+      version: SERVER_VERSION,
+      description:
+        "A server for managing WordPress sites using the Model Context Protocol.",
+    });
 
     this.setupServer();
   }
 
-  /**
-   * Get server configuration
-   */
-  get config(): MCPServerConfig {
-    return {
-      name: 'mcp-wordpress',
-      version: SERVER_VERSION,
-      tools: this.tools.reduce((acc, tool) => {
-        acc[tool.name] = {
-          ...tool,
-          category: this.getToolCategory(tool.name)
-        };
-        return acc;
-      }, {} as any),
-      handlers: this.handlers
-    };
-  }
+  private loadConfiguration(mcpConfig?: any) {
+    const configPath = path.resolve(rootDir, "mcp-wordpress.config.json");
 
-  /**
-   * Get tool category from tool name
-   */
-  private getToolCategory(toolName: string): string {
-    if (toolName.startsWith('wp_test_') || toolName.startsWith('wp_get_auth_') || toolName.includes('oauth') || toolName.includes('auth')) {
-      return 'authentication';
-    } else if (toolName.includes('post')) {
-      return 'posts';
-    } else if (toolName.includes('page')) {
-      return 'pages';
-    } else if (toolName.includes('media')) {
-      return 'media';
-    } else if (toolName.includes('user')) {
-      return 'users';
-    } else if (toolName.includes('comment')) {
-      return 'comments';
-    } else if (toolName.includes('categor') || toolName.includes('tag')) {
-      return 'taxonomies';
+    if (fs.existsSync(configPath)) {
+      console.log(
+        "INFO: Found mcp-wordpress.config.json, loading multi-site configuration.",
+      );
+      this.loadMultiSiteConfig(configPath);
     } else {
-      return 'site';
+      console.log(
+        "INFO: mcp-wordpress.config.json not found, falling back to environment variables for single-site mode.",
+      );
+      this.loadSingleSiteFromEnv(mcpConfig);
     }
   }
 
-  /**
-   * Setup MCP server handlers
-   */
-  private setupServer(): void {
-    // List available tools
-    this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      return {
-        tools: this.tools
-      };
+  private loadMultiSiteConfig(configPath: string) {
+    try {
+      const configFile = fs.readFileSync(configPath, "utf-8");
+      const config = JSON.parse(configFile);
+
+      if (!config.sites || !Array.isArray(config.sites)) {
+        throw new Error('Configuration file must have a "sites" array.');
+      }
+
+      this.siteConfigs = config.sites;
+      for (const site of this.siteConfigs) {
+        if (site.id && site.name && site.config) {
+          const clientConfig: WordPressClientConfig = {
+            siteUrl: site.config.WORDPRESS_SITE_URL,
+            auth: {
+              method:
+                site.config.WORDPRESS_AUTH_METHOD ||
+                WordPressAuthMethod.AppPassword,
+              username: site.config.WORDPRESS_USERNAME,
+              password: site.config.WORDPRESS_APP_PASSWORD,
+            },
+          };
+          const client = new WordPressClient(clientConfig);
+          this.wordpressClients.set(site.id, client);
+          console.log(
+            `INFO: Initialized client for site: ${site.name} (ID: ${site.id})`,
+          );
+        } else {
+          console.warn(
+            "WARN: Skipping invalid site entry in config. Must have id, name, and config.",
+            site,
+          );
+        }
+      }
+    } catch (error) {
+      console.error(
+        `FATAL: Error reading or parsing mcp-wordpress.config.json: ${getErrorMessage(error)}`,
+      );
+      process.exit(1);
+    }
+  }
+
+  private loadSingleSiteFromEnv(mcpConfig?: any) {
+    const siteUrl =
+      mcpConfig?.wordpressSiteUrl || process.env.WORDPRESS_SITE_URL;
+    const username =
+      mcpConfig?.wordpressUsername || process.env.WORDPRESS_USERNAME;
+    const password =
+      mcpConfig?.wordpressAppPassword || process.env.WORDPRESS_APP_PASSWORD;
+    const authMethod = (mcpConfig?.wordpressAuthMethod ||
+      process.env.WORDPRESS_AUTH_METHOD ||
+      "app-password") as WordPressAuthMethod;
+
+    if (!siteUrl || !username || !password) {
+      console.error(
+        "ERROR: Missing required credentials for single-site mode.",
+      );
+      console.error(
+        "Please set WORDPRESS_SITE_URL, WORDPRESS_USERNAME, and WORDPRESS_APP_PASSWORD environment variables.",
+      );
+      return;
+    }
+
+    const singleSiteConfig: WordPressClientConfig = {
+      siteUrl,
+      auth: { method: authMethod, username, password },
+    };
+    const client = new WordPressClient(singleSiteConfig);
+    this.wordpressClients.set("default", client);
+    this.siteConfigs.push({
+      id: "default",
+      name: "Default Site",
+      config: singleSiteConfig,
+    });
+    console.log(
+      "INFO: Initialized client for default site in single-site mode.",
+    );
+  }
+
+  private setupServer() {
+    Object.values(Tools).forEach((ToolClass) => {
+      const toolInstance = new ToolClass();
+      const tools = toolInstance.getTools();
+      this.tools.push(...tools);
     });
 
-    // Handle tool execution
-    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
-      const { name, arguments: args } = request.params;
-      const timer = startTimer(`Tool: ${name}`);
+    // MODIFICATION: Dynamically add a 'site' parameter to all tools.
+    this.tools.forEach((tool) => {
+      tool.parameters = tool.parameters || [];
+      tool.parameters.push({
+        name: "site",
+        type: "string",
+        description:
+          "The ID of the WordPress site to target (from mcp-wordpress.config.json).",
+        required: this.wordpressClients.size > 1,
+      });
+    });
+
+    this.tools.forEach((tool) => {
+      this.handlers[tool.name] = this.createToolHandler(tool);
+    });
+
+    this.server.registerTools(this.tools, this.handlers);
+  }
+
+  private createToolHandler(tool: MCPTool): MCPToolHandler {
+    return async (request: MCPToolRequest): Promise<MCPToolResponse> => {
+      const { params } = request;
+      const siteId = (params.site as string) || "default";
+
+      const client = this.wordpressClients.get(siteId);
+
+      if (!client) {
+        const availableSites = Array.from(this.wordpressClients.keys()).join(
+          ", ",
+        );
+        return {
+          error: {
+            message: `Site with ID '${siteId}' not found. Available sites: ${availableSites}`,
+            code: "SITE_NOT_FOUND",
+          },
+        };
+      }
 
       try {
-        // Initialize WordPress client if not already done
-        if (!this.wordpressClient) {
-          await this.initializeWordPressClient();
-        }
-
-        // Get handler for the tool
-        const handler = this.handlers[name];
-        if (!handler) {
-          throw new Error(`Unknown tool: ${name}`);
-        }
-
-        // Execute the tool handler
-        const result = await handler(this.wordpressClient!, args || {});
-        
-        timer.endWithLog(`Tool ${name} executed successfully`);
-        return {
-          content: result.content,
-          isError: result.isError || false
-        };
-
-      } catch (error) {
-        timer.end();
-        logError(error as Error, { tool: name, args });
-
-        // Check if this is an authentication-related error
-        const isAuthError = this.isAuthenticationError(error as Error);
-        
-        if (isAuthError) {
+        if (typeof (tool as any).handler !== "function") {
           return {
-            content: [
-              {
-                type: "text",
-                text: `🔐 **Authentication Required**\n\n` +
-                      `${(error as Error).message}\n\n` +
-                      `**Solution:** Use the \`wp_test_auth\` tool to authenticate with WordPress, or check your environment configuration.\n\n` +
-                      `**Authentication Methods:**\n` +
-                      `- Application Passwords (recommended)\n` +
-                      `- JWT Authentication\n` +
-                      `- Basic Authentication\n` +
-                      `- API Key Authentication\n\n` +
-                      `Simply call: \`wp_test_auth\` and I'll handle the rest!`
-              }
-            ],
-            isError: true
+            error: {
+              message: `Tool '${tool.name}' is not implemented correctly.`,
+            },
           };
         }
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: `❌ Error executing ${name}: ${(error as Error).message}`
-            }
-          ],
-          isError: true
-        };
+        // MODIFICATION: Pass the selected WordPress client to the tool's handler.
+        return await (tool as any).handler(client, params);
+      } catch (error) {
+        if (this.isAuthenticationError(error)) {
+          return {
+            error: {
+              message: `Authentication failed for site '${siteId}'. Please check your credentials.`,
+              code: "AUTH_ERROR",
+            },
+          };
+        }
+        return { error: { message: getErrorMessage(error) } };
       }
-    });
-  }
-
-  /**
-   * Initialize WordPress client
-   */
-  private async initializeWordPressClient(): Promise<void> {
-    try {
-      // Validate required environment variables
-      const requiredVars = ['WORDPRESS_SITE_URL'];
-      validateEnvVars(requiredVars);
-
-      this.wordpressClient = new WordPressClient();
-      await this.wordpressClient.initialize();
-      
-      this.initialized = true;
-      logger.log('WordPress client initialized successfully');
-    } catch (error) {
-      logError(error as Error, { operation: 'initialize_client' });
-      throw new Error(`Failed to initialize WordPress client: ${(error as Error).message}`);
-    }
-  }
-
-  /**
-   * Check if error is authentication-related
-   */
-  private isAuthenticationError(error: Error): boolean {
-    const authErrorPatterns = [
-      'authentication',
-      'unauthorized',
-      'invalid credentials',
-      'access denied',
-      'forbidden',
-      'jwt',
-      'token',
-      'login',
-      'auth'
-    ];
-
-    const errorMessage = error.message?.toLowerCase() || '';
-    const errorName = error.name?.toLowerCase() || '';
-    
-    return authErrorPatterns.some(pattern => 
-      errorMessage.includes(pattern) || errorName.includes(pattern)
-    ) || (error as any).status === 401 || (error as any).status === 403;
-  }
-
-  /**
-   * Get server statistics
-   */
-  getStats(): {
-    initialized: boolean;
-    toolsCount: number;
-    handlersCount: number;
-    clientConnected: boolean;
-  } {
-    return {
-      initialized: this.initialized,
-      toolsCount: this.tools.length,
-      handlersCount: Object.keys(this.handlers).length,
-      clientConnected: this.wordpressClient?.isAuthenticated || false
     };
   }
 
-  /**
-   * Run the MCP server
-   */
-  async run(): Promise<void> {
-    try {
-      const transport = new StdioServerTransport();
-      await this.server.connect(transport);
-      
-      logger.log(`MCP WordPress Server v${SERVER_VERSION} started and listening on stdio`);
-      logger.log(`Available tools: ${this.tools.length}`);
-      logger.log(`Tool handlers: ${Object.keys(this.handlers).length}`);
-      
-    } catch (error) {
-      logError(error as Error, { operation: 'server_start' });
-      throw error;
-    }
+  private async testClientConnections(): Promise<void> {
+    console.log(
+      "INFO: Testing connections to all configured WordPress sites...",
+    );
+    const connectionPromises = Array.from(this.wordpressClients.entries()).map(
+      async ([siteId, client]) => {
+        try {
+          await client.testConnection();
+          console.log(`SUCCESS: Connection to site '${siteId}' successful.`);
+        } catch (error) {
+          console.error(
+            `ERROR: Failed to connect to site '${siteId}': ${getErrorMessage(error)}`,
+          );
+          if (this.isAuthenticationError(error)) {
+            console.error(
+              `Authentication may have failed for site '${siteId}'. Please check credentials.`,
+            );
+          }
+        }
+      },
+    );
+    await Promise.all(connectionPromises);
+    this.initialized = true;
+    console.log("INFO: Connection tests complete.");
   }
 
-  /**
-   * Graceful shutdown
-   */
-  async shutdown(): Promise<void> {
-    try {
-      if (this.wordpressClient) {
-        await this.wordpressClient.disconnect();
-      }
-      logger.log('MCP WordPress Server shutdown complete');
-    } catch (error) {
-      logError(error as Error, { operation: 'server_shutdown' });
+  private isAuthenticationError(error: any): boolean {
+    if (error?.response?.status && [401, 403].includes(error.response.status)) {
+      return true;
     }
+    return error?.code === "WORDPRESS_AUTH_ERROR";
+  }
+
+  async run() {
+    if (!this.initialized) {
+      await this.testClientConnections();
+    }
+    console.log("INFO: Starting MCP WordPress Server...");
+    await this.server.start();
+    console.log(
+      `INFO: Server started. ${this.tools.length} tools available for ${this.wordpressClients.size} site(s).`,
+    );
+  }
+
+  async shutdown() {
+    console.log("INFO: Shutting down MCP WordPress Server...");
+    await this.server.stop();
+    console.log("INFO: Server stopped.");
   }
 }
 
-// Error handling
-process.on('SIGINT', async () => {
-  logger.log('Received SIGINT, shutting down gracefully...');
-  process.exit(0);
-});
+// --- Main Execution ---
+async function main() {
+  try {
+    const mcpServer = new MCPWordPressServer();
+    await mcpServer.run();
 
-process.on('SIGTERM', async () => {
-  logger.log('Received SIGTERM, shutting down gracefully...');
-  process.exit(0);
-});
+    const shutdown = async () => {
+      await mcpServer.shutdown();
+      process.exit(0);
+    };
 
-process.on('unhandledRejection', (reason, promise) => {
-  logError(new Error(`Unhandled Rejection: ${reason}`), { promise });
-  process.exit(1);
-});
-
-process.on('uncaughtException', (error) => {
-  logError(error, { type: 'uncaught_exception' });
-  process.exit(1);
-});
-
-// Start the server if this file is run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  const server = new MCPWordPressServer();
-  
-  server.run().catch(error => {
-    logError(error, { operation: 'server_startup' });
+    process.on("SIGINT", shutdown);
+    process.on("SIGTERM", shutdown);
+  } catch (error) {
+    console.error(`FATAL: Failed to start server: ${getErrorMessage(error)}`);
     process.exit(1);
-  });
+  }
 }
 
-// Export for use in other modules
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main();
+}
+
 export default MCPWordPressServer;

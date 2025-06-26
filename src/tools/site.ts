@@ -1,227 +1,271 @@
+import { MCPTool, MCPToolResponse } from "@mcp/server";
+import WordPressClient from "../client/api.js";
+import {
+  UpdateSiteSettingsRequest,
+  WordPressApplicationPassword,
+} from "../types/wordpress.js";
+import { getErrorMessage } from "../utils/error.js";
+
 /**
- * WordPress Site Management Tools
+ * Provides tools for managing general site settings and operations on a WordPress site.
+ * This class encapsulates tool definitions and their corresponding handlers.
  */
+export class SiteTools {
+  /**
+   * Retrieves the list of site management tools.
+   * @returns An array of MCPTool definitions.
+   */
+  public getTools(): MCPTool[] {
+    return [
+      {
+        name: "wp_get_site_settings",
+        description: "Retrieves the general settings for a WordPress site.",
+        parameters: [],
+        handler: this.handleGetSiteSettings.bind(this),
+      },
+      {
+        name: "wp_update_site_settings",
+        description:
+          "Updates one or more general settings for a WordPress site.",
+        parameters: [
+          {
+            name: "title",
+            type: "string",
+            description: "The title of the site.",
+          },
+          {
+            name: "description",
+            type: "string",
+            description: "The tagline or description of the site.",
+          },
+          {
+            name: "timezone",
+            type: "string",
+            description:
+              "A city in the same timezone, e.g., 'America/New_York'.",
+          },
+        ],
+        handler: this.handleUpdateSiteSettings.bind(this),
+      },
+      {
+        name: "wp_search_site",
+        description: "Performs a site-wide search for content.",
+        parameters: [
+          {
+            name: "term",
+            type: "string",
+            required: true,
+            description: "The search term to look for.",
+          },
+          {
+            name: "type",
+            type: "string",
+            description: "The type of content to search.",
+            enum: ["posts", "pages", "media"],
+          },
+        ],
+        handler: this.handleSearchSite.bind(this),
+      },
+      {
+        name: "wp_get_application_passwords",
+        description: "Lists application passwords for a specific user.",
+        parameters: [
+          {
+            name: "user_id",
+            type: "number",
+            required: true,
+            description: "The ID of the user to get application passwords for.",
+          },
+        ],
+        handler: this.handleGetApplicationPasswords.bind(this),
+      },
+      {
+        name: "wp_create_application_password",
+        description: "Creates a new application password for a user.",
+        parameters: [
+          {
+            name: "user_id",
+            type: "number",
+            required: true,
+            description: "The ID of the user to create the password for.",
+          },
+          {
+            name: "app_name",
+            type: "string",
+            required: true,
+            description: "The name of the application this password is for.",
+          },
+        ],
+        handler: this.handleCreateApplicationPassword.bind(this),
+      },
+      {
+        name: "wp_delete_application_password",
+        description: "Revokes an existing application password.",
+        parameters: [
+          {
+            name: "user_id",
+            type: "number",
+            required: true,
+            description: "The ID of the user who owns the password.",
+          },
+          {
+            name: "uuid",
+            type: "string",
+            required: true,
+            description: "The UUID of the application password to revoke.",
+          },
+        ],
+        handler: this.handleDeleteApplicationPassword.bind(this),
+      },
+    ];
+  }
 
-import type { MCPTool, MCPToolHandlerWithClient } from '../types/mcp.js';
-import type { IWordPressClient, WordPressSiteSettings, WordPressApplicationPassword } from '../types/index.js';
-import { startTimer } from '../utils/debug.js';
-
-const createSuccessResponse = (text: string) => ({ content: [{ type: 'text' as const, text }], isError: false as const });
-const createErrorResponse = (error: string | Error) => ({ content: [{ type: 'text' as const, text: typeof error === 'string' ? error : error.message }], isError: true as const });
-
-export const getSiteSettings: MCPTool = {
-  name: 'wp_get_site_settings',
-  description: 'Get WordPress site settings and configuration',
-  inputSchema: { type: 'object', properties: {} }
-};
-
-export const updateSiteSettings: MCPTool = {
-  name: 'wp_update_site_settings',
-  description: 'Update WordPress site settings',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      title: { type: 'string', description: 'Site title' },
-      description: { type: 'string', description: 'Site tagline' },
-      timezone: { type: 'string', description: 'Site timezone' },
-      date_format: { type: 'string', description: 'Date format' },
-      time_format: { type: 'string', description: 'Time format' },
-      start_of_week: { type: 'number', minimum: 0, maximum: 6, description: 'Start of week (0=Sunday)' }
+  public async handleGetSiteSettings(
+    client: WordPressClient,
+    params: any,
+  ): Promise<MCPToolResponse> {
+    try {
+      const settings = await client.getSiteSettings();
+      const content =
+        `**Site Settings for ${settings.url}**\n\n` +
+        `- **Title:** ${settings.title}\n` +
+        `- **Description:** ${settings.description}\n` +
+        `- **Timezone:** ${settings.timezone}\n` +
+        `- **Language:** ${settings.language}`;
+      return { content };
+    } catch (error) {
+      return {
+        error: {
+          message: `Failed to get site settings: ${getErrorMessage(error)}`,
+          code: "GET_SETTINGS_FAILED",
+        },
+      };
     }
   }
-};
 
-export const getSiteStats: MCPTool = {
-  name: 'wp_get_site_stats',
-  description: 'Get WordPress site statistics and information',
-  inputSchema: { type: 'object', properties: {} }
-};
-
-export const searchSite: MCPTool = {
-  name: 'wp_search_site',
-  description: 'Search content across the WordPress site',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      query: { type: 'string', description: 'Search query' },
-      type: { type: 'array' as any, items: { type: 'string' }, description: 'Content types to search' },
-      subtype: { type: 'string', description: 'Content subtype' }
-    },
-    required: ['query']
-  }
-};
-
-export const getApplicationPasswords: MCPTool = {
-  name: 'wp_get_application_passwords',
-  description: 'Get application passwords for current user',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      user_id: { type: ['number', 'string'] as any, description: 'User ID or "me" for current user' }
+  public async handleUpdateSiteSettings(
+    client: WordPressClient,
+    params: UpdateSiteSettingsRequest,
+  ): Promise<MCPToolResponse> {
+    try {
+      const updatedSettings = await client.updateSiteSettings(params);
+      return {
+        content: `✅ Site settings updated successfully. New title: ${updatedSettings.title}`,
+      };
+    } catch (error) {
+      return {
+        error: {
+          message: `Failed to update site settings: ${getErrorMessage(error)}`,
+          code: "UPDATE_SETTINGS_FAILED",
+        },
+      };
     }
   }
-};
 
-export const createApplicationPassword: MCPTool = {
-  name: 'wp_create_application_password',
-  description: 'Create a new application password',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      name: { type: 'string', description: 'Application name' },
-      app_id: { type: 'string', description: 'Application ID (optional)' },
-      user_id: { type: ['number', 'string'] as any, description: 'User ID or "me" for current user' }
-    },
-    required: ['name']
-  }
-};
-
-export const deleteApplicationPassword: MCPTool = {
-  name: 'wp_delete_application_password',
-  description: 'Delete an application password',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      uuid: { type: 'string', description: 'Application password UUID' },
-      user_id: { type: ['number', 'string'] as any, description: 'User ID or "me" for current user' }
-    },
-    required: ['uuid']
-  }
-};
-
-// Handlers
-export const handleGetSiteSettings: MCPToolHandlerWithClient<IWordPressClient, {}> = async (client) => {
-  const timer = startTimer('Get Site Settings');
-  try {
-    const settings = await client.getSiteSettings();
-    const result = `**WordPress Site Settings**\n\n` +
-                   `**Title:** ${settings.title}\n` +
-                   `**Description:** ${settings.description}\n` +
-                   `**URL:** ${settings.url}\n` +
-                   `**Email:** ${settings.email}\n` +
-                   `**Timezone:** ${settings.timezone}\n` +
-                   `**Date Format:** ${settings.date_format}\n` +
-                   `**Time Format:** ${settings.time_format}\n` +
-                   `**Start of Week:** ${settings.start_of_week}\n` +
-                   `**Language:** ${settings.language}\n` +
-                   `**Posts per Page:** ${settings.posts_per_page}`;
-    timer.endWithLog();
-    return createSuccessResponse(result);
-  } catch (error) {
-    timer.end();
-    return createErrorResponse(`Failed to get site settings: ${(error as Error).message}`);
-  }
-};
-
-export const handleUpdateSiteSettings: MCPToolHandlerWithClient<IWordPressClient, Partial<WordPressSiteSettings>> = async (client, args) => {
-  const timer = startTimer('Update Site Settings');
-  try {
-    const settings = await client.updateSiteSettings(args);
-    const result = `✅ Site settings updated successfully!\n\nUpdated settings:\n${Object.entries(args).map(([key, value]) => `${key}: ${value}`).join('\n')}`;
-    timer.endWithLog();
-    return createSuccessResponse(result);
-  } catch (error) {
-    timer.end();
-    return createErrorResponse(`Failed to update site settings: ${(error as Error).message}`);
-  }
-};
-
-export const handleGetSiteStats: MCPToolHandlerWithClient<IWordPressClient, {}> = async (client) => {
-  const timer = startTimer('Get Site Stats');
-  try {
-    const [siteInfo, posts, pages, users] = await Promise.all([
-      client.getSiteInfo(),
-      client.getPosts({ per_page: 1 }),
-      client.getPages({ per_page: 1 }),
-      client.getUsers({ per_page: 1 })
-    ]);
-    
-    const result = `**WordPress Site Statistics**\n\n` +
-                   `**Site Name:** ${siteInfo.name || 'Unknown'}\n` +
-                   `**Description:** ${siteInfo.description || 'None'}\n` +
-                   `**Posts:** ${posts.length > 0 ? 'Available' : '0'}\n` +
-                   `**Pages:** ${pages.length > 0 ? 'Available' : '0'}\n` +
-                   `**Users:** ${users.length > 0 ? 'Available' : '0'}\n` +
-                   `**WordPress REST API:** Available\n` +
-                   `**Namespaces:** ${siteInfo.namespaces ? siteInfo.namespaces.join(', ') : 'Unknown'}`;
-    
-    timer.endWithLog();
-    return createSuccessResponse(result);
-  } catch (error) {
-    timer.end();
-    return createErrorResponse(`Failed to get site stats: ${(error as Error).message}`);
-  }
-};
-
-export const handleSearchSite: MCPToolHandlerWithClient<IWordPressClient, {query: string, type?: string[], subtype?: string}> = async (client, args) => {
-  const timer = startTimer('Search Site');
-  try {
-    const results = await client.search(args.query, args.type, args.subtype);
-    
-    if (results.length === 0) {
-      return createSuccessResponse(`No results found for "${args.query}"`);
+  public async handleSearchSite(
+    client: WordPressClient,
+    params: { term: string; type?: "posts" | "pages" | "media" },
+  ): Promise<MCPToolResponse> {
+    try {
+      const results = await client.search(params.term, params.type);
+      if (results.length === 0) {
+        return { content: `No results found for "${params.term}".` };
+      }
+      const content =
+        `Found ${results.length} results for "${params.term}":\n\n` +
+        results
+          .map((r) => `- [${r.type}] **${r.title}**\n  Link: ${r.url}`)
+          .join("\n");
+      return { content };
+    } catch (error) {
+      return {
+        error: {
+          message: `Failed to perform search: ${getErrorMessage(error)}`,
+          code: "SEARCH_FAILED",
+        },
+      };
     }
-    
-    const resultsList = results.map(result => 
-      `**${result.title}** (${result.type})\nURL: ${result.url}`
-    ).join('\n\n');
-    
-    const summary = `Found ${results.length} results for "${args.query}":\n\n${resultsList}`;
-    timer.endWithLog();
-    return createSuccessResponse(summary);
-  } catch (error) {
-    timer.end();
-    return createErrorResponse(`Failed to search site: ${(error as Error).message}`);
   }
-};
 
-export const handleGetApplicationPasswords: MCPToolHandlerWithClient<IWordPressClient, {user_id?: number | 'me'}> = async (client, args) => {
-  const timer = startTimer('Get Application Passwords');
-  try {
-    const passwords = await client.getApplicationPasswords(args.user_id || 'me');
-    
-    if (passwords.length === 0) {
-      return createSuccessResponse('No application passwords found');
+  public async handleGetApplicationPasswords(
+    client: WordPressClient,
+    params: { user_id: number },
+  ): Promise<MCPToolResponse> {
+    try {
+      const passwords = await client.getApplicationPasswords(params.user_id);
+      if (passwords.length === 0) {
+        return {
+          content: `No application passwords found for user ID ${params.user_id}.`,
+        };
+      }
+      const content =
+        `Found ${passwords.length} application passwords for user ID ${params.user_id}:\n\n` +
+        passwords
+          .map(
+            (p: WordPressApplicationPassword) =>
+              `- **${p.name}** (UUID: ${p.uuid})\n  Created: ${new Date(p.created).toLocaleDateString()}`,
+          )
+          .join("\n");
+      return { content };
+    } catch (error) {
+      return {
+        error: {
+          message: `Failed to get application passwords: ${getErrorMessage(
+            error,
+          )}`,
+          code: "GET_APP_PASSWORDS_FAILED",
+        },
+      };
     }
-    
-    const passwordList = passwords.map(pwd => 
-      `**${pwd.name}** (${pwd.uuid})\nCreated: ${new Date(pwd.created).toLocaleDateString()}\nLast Used: ${pwd.last_used ? new Date(pwd.last_used).toLocaleDateString() : 'Never'}`
-    ).join('\n\n');
-    
-    timer.endWithLog();
-    return createSuccessResponse(`Found ${passwords.length} application passwords:\n\n${passwordList}`);
-  } catch (error) {
-    timer.end();
-    return createErrorResponse(`Failed to get application passwords: ${(error as Error).message}`);
   }
-};
 
-export const handleCreateApplicationPassword: MCPToolHandlerWithClient<IWordPressClient, {name: string, app_id?: string, user_id?: number | 'me'}> = async (client, args) => {
-  const timer = startTimer('Create Application Password');
-  try {
-    const password = await client.createApplicationPassword(args.user_id || 'me', args.name, args.app_id);
-    const result = `✅ Application password created successfully!\n\n` +
-                   `**Name:** ${password.name}\n` +
-                   `**UUID:** ${password.uuid}\n` +
-                   `**Password:** ${password.password || 'Hidden'}\n\n` +
-                   `⚠️ **Important:** Save this password now! You won't be able to see it again.`;
-    timer.endWithLog();
-    return createSuccessResponse(result);
-  } catch (error) {
-    timer.end();
-    return createErrorResponse(`Failed to create application password: ${(error as Error).message}`);
+  public async handleCreateApplicationPassword(
+    client: WordPressClient,
+    params: { user_id: number; app_name: string },
+  ): Promise<MCPToolResponse> {
+    try {
+      const result = await client.createApplicationPassword(
+        params.user_id,
+        params.app_name,
+      );
+      const content =
+        `✅ **Application password created successfully!**\n\n` +
+        `**Name:** ${result.name}\n` +
+        `**Password:** \`${result.password}\`\n\n` +
+        `**IMPORTANT:** This password is shown only once. Please save it securely.`;
+      return { content };
+    } catch (error) {
+      return {
+        error: {
+          message: `Failed to create application password: ${getErrorMessage(
+            error,
+          )}`,
+          code: "CREATE_APP_PASSWORD_FAILED",
+        },
+      };
+    }
   }
-};
 
-export const handleDeleteApplicationPassword: MCPToolHandlerWithClient<IWordPressClient, {uuid: string, user_id?: number | 'me'}> = async (client, args) => {
-  const timer = startTimer('Delete Application Password');
-  try {
-    await client.deleteApplicationPassword(args.user_id || 'me', args.uuid);
-    const result = `✅ Application password deleted successfully!\nUUID: ${args.uuid}`;
-    timer.endWithLog();
-    return createSuccessResponse(result);
-  } catch (error) {
-    timer.end();
-    return createErrorResponse(`Failed to delete application password: ${(error as Error).message}`);
+  public async handleDeleteApplicationPassword(
+    client: WordPressClient,
+    params: { user_id: number; uuid: string },
+  ): Promise<MCPToolResponse> {
+    try {
+      await client.deleteApplicationPassword(params.user_id, params.uuid);
+      return {
+        content: `✅ Application password with UUID ${params.uuid} has been revoked.`,
+      };
+    } catch (error) {
+      return {
+        error: {
+          message: `Failed to delete application password: ${getErrorMessage(
+            error,
+          )}`,
+          code: "DELETE_APP_PASSWORD_FAILED",
+        },
+      };
+    }
   }
-};
+}
+
+export default SiteTools;

@@ -1,0 +1,37 @@
+{
+  "_comment": "This is an example configuration file. Rename it to 'mcp-wordpress.config.json' and fill in your site details. You can configure one or more WordPress sites.",
+  "sites": [
+    {
+      "id": "production-site",
+      "name": "My Production WordPress Site",
+      "config": {
+        "_comment_url": "The full URL of your WordPress installation.",
+        "WORDPRESS_SITE_URL": "https://your-wordpress-site.com",
+
+        "_comment_auth": "The authentication method. Supported values: 'app-password', 'jwt', 'basic', 'api-key'. Defaults to 'app-password' if not provided.",
+        "WORDPRESS_AUTH_METHOD": "app-password",
+
+        "_comment_app_password": "Required for 'app-password' (recommended) and 'basic' authentication.",
+        "WORDPRESS_USERNAME": "your-username",
+        "WORDPRESS_APP_PASSWORD": "your-application-password-here",
+
+        "_comment_jwt": "Required for 'jwt' authentication. You will need a JWT plugin on your WordPress site.",
+        "WORDPRESS_JWT_TOKEN": "your-jwt-token-if-using-jwt-auth",
+
+        "_comment_api_key": "Required for 'api-key' authentication. You will need a plugin that supports API Key in headers.",
+        "WORDPRESS_API_KEY_HEADER": "X-Api-Key",
+        "WORDPRESS_API_KEY": "your-api-key-if-using-key-auth"
+      }
+    },
+    {
+      "id": "staging-site",
+      "name": "My Staging WordPress Site",
+      "config": {
+        "WORDPRESS_SITE_URL": "https://staging.your-wordpress-site.com",
+        "WORDPRESS_AUTH_METHOD": "app-password",
+        "WORDPRESS_USERNAME": "staging-user",
+        "WORDPRESS_APP_PASSWORD": "another-application-password"
+      }
+    }
+  ]
+}

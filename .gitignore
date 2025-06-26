@@ -130,6 +130,7 @@ temp/
 *.tmp
 
 # WordPress MCP Server specific
+mcp-wordpress.config.json
 mcp-server.log
 wordpress-debug.log
 

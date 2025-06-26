@@ -1,279 +1,385 @@
+import { MCPTool, MCPToolResponse } from "@mcp/server";
+import WordPressClient from "../client/api.js";
+import {
+  CategoryQueryParams,
+  CreateCategoryRequest,
+  CreateTagRequest,
+  TagQueryParams,
+  UpdateCategoryRequest,
+  UpdateTagRequest,
+} from "../types/wordpress.js";
+import { getErrorMessage } from "../utils/error.js";
+
 /**
- * WordPress Taxonomies Tools (Categories & Tags)
+ * Provides tools for managing taxonomies (categories and tags) on a WordPress site.
+ * This class encapsulates tool definitions and their corresponding handlers.
  */
+export class TaxonomyTools {
+  /**
+   * Retrieves the list of taxonomy management tools.
+   * @returns An array of MCPTool definitions.
+   */
+  public getTools(): MCPTool[] {
+    return [
+      // Categories
+      {
+        name: "wp_list_categories",
+        description: "Lists categories from a WordPress site.",
+        parameters: [
+          {
+            name: "search",
+            type: "string",
+            description: "Limit results to those matching a search term.",
+          },
+          {
+            name: "hide_empty",
+            type: "boolean",
+            description: "Whether to hide categories with no posts.",
+          },
+        ],
+        handler: this.handleListCategories.bind(this),
+      },
+      {
+        name: "wp_get_category",
+        description: "Retrieves a single category by its ID.",
+        parameters: [
+          {
+            name: "id",
+            type: "number",
+            required: true,
+            description: "The unique identifier for the category.",
+          },
+        ],
+        handler: this.handleGetCategory.bind(this),
+      },
+      {
+        name: "wp_create_category",
+        description: "Creates a new category.",
+        parameters: [
+          {
+            name: "name",
+            type: "string",
+            required: true,
+            description: "The name of the category.",
+          },
+          {
+            name: "description",
+            type: "string",
+            description: "The description for the category.",
+          },
+        ],
+        handler: this.handleCreateCategory.bind(this),
+      },
+      {
+        name: "wp_update_category",
+        description: "Updates an existing category.",
+        parameters: [
+          {
+            name: "id",
+            type: "number",
+            required: true,
+            description: "The ID of the category to update.",
+          },
+          {
+            name: "name",
+            type: "string",
+            description: "The new name for the category.",
+          },
+        ],
+        handler: this.handleUpdateCategory.bind(this),
+      },
+      {
+        name: "wp_delete_category",
+        description: "Deletes a category.",
+        parameters: [
+          {
+            name: "id",
+            type: "number",
+            required: true,
+            description: "The ID of the category to delete.",
+          },
+        ],
+        handler: this.handleDeleteCategory.bind(this),
+      },
+      // Tags
+      {
+        name: "wp_list_tags",
+        description: "Lists tags from a WordPress site.",
+        parameters: [
+          {
+            name: "search",
+            type: "string",
+            description: "Limit results to those matching a search term.",
+          },
+        ],
+        handler: this.handleListTags.bind(this),
+      },
+      {
+        name: "wp_get_tag",
+        description: "Retrieves a single tag by its ID.",
+        parameters: [
+          {
+            name: "id",
+            type: "number",
+            required: true,
+            description: "The unique identifier for the tag.",
+          },
+        ],
+        handler: this.handleGetTag.bind(this),
+      },
+      {
+        name: "wp_create_tag",
+        description: "Creates a new tag.",
+        parameters: [
+          {
+            name: "name",
+            type: "string",
+            required: true,
+            description: "The name of the tag.",
+          },
+        ],
+        handler: this.handleCreateTag.bind(this),
+      },
+      {
+        name: "wp_update_tag",
+        description: "Updates an existing tag.",
+        parameters: [
+          {
+            name: "id",
+            type: "number",
+            required: true,
+            description: "The ID of the tag to update.",
+          },
+          {
+            name: "name",
+            type: "string",
+            description: "The new name for the tag.",
+          },
+        ],
+        handler: this.handleUpdateTag.bind(this),
+      },
+      {
+        name: "wp_delete_tag",
+        description: "Deletes a tag.",
+        parameters: [
+          {
+            name: "id",
+            type: "number",
+            required: true,
+            description: "The ID of the tag to delete.",
+          },
+        ],
+        handler: this.handleDeleteTag.bind(this),
+      },
+    ];
+  }
 
-import type { MCPTool, MCPToolHandlerWithClient } from '../types/mcp.js';
-import type { IWordPressClient, WordPressCategory, WordPressTag, CreateCategoryRequest, CreateTagRequest, UpdateCategoryRequest, UpdateTagRequest } from '../types/index.js';
-import { startTimer } from '../utils/debug.js';
-
-const createSuccessResponse = (text: string) => ({ content: [{ type: 'text' as const, text }], isError: false as const });
-const createErrorResponse = (error: string | Error) => ({ content: [{ type: 'text' as const, text: typeof error === 'string' ? error : error.message }], isError: true as const });
-
-// Categories
-export const listCategories: MCPTool = {
-  name: 'wp_list_categories',
-  description: 'List WordPress categories',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      search: { type: 'string', description: 'Search categories' },
-      parent: { type: 'number', description: 'Parent category ID' },
-      hide_empty: { type: 'boolean', description: 'Hide empty categories' }
+  public async handleListCategories(
+    client: WordPressClient,
+    params: CategoryQueryParams,
+  ): Promise<MCPToolResponse> {
+    try {
+      const categories = await client.getCategories(params);
+      if (categories.length === 0) {
+        return { content: "No categories found." };
+      }
+      const content =
+        `Found ${categories.length} categories:\n\n` +
+        categories
+          .map((c) => `- ID ${c.id}: **${c.name}** (Posts: ${c.count})`)
+          .join("\n");
+      return { content };
+    } catch (error) {
+      return {
+        error: {
+          message: `Failed to list categories: ${getErrorMessage(error)}`,
+          code: "LIST_CATEGORIES_FAILED",
+        },
+      };
     }
   }
-};
 
-export const getCategory: MCPTool = {
-  name: 'wp_get_category',
-  description: 'Get a specific WordPress category by ID',
-  inputSchema: {
-    type: 'object',
-    properties: { id: { type: 'number', description: 'Category ID', minimum: 1 } },
-    required: ['id']
-  }
-};
-
-export const createCategory: MCPTool = {
-  name: 'wp_create_category',
-  description: 'Create a new WordPress category',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      name: { type: 'string', description: 'Category name' },
-      description: { type: 'string', description: 'Category description' },
-      slug: { type: 'string', description: 'Category slug' },
-      parent: { type: 'number', description: 'Parent category ID' }
-    },
-    required: ['name']
-  }
-};
-
-export const updateCategory: MCPTool = {
-  name: 'wp_update_category',
-  description: 'Update an existing WordPress category',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      id: { type: 'number', description: 'Category ID', minimum: 1 },
-      name: { type: 'string', description: 'Category name' },
-      description: { type: 'string', description: 'Category description' },
-      slug: { type: 'string', description: 'Category slug' },
-      parent: { type: 'number', description: 'Parent category ID' }
-    },
-    required: ['id']
-  }
-};
-
-export const deleteCategory: MCPTool = {
-  name: 'wp_delete_category',
-  description: 'Delete a WordPress category',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      id: { type: 'number', description: 'Category ID', minimum: 1 },
-      force: { type: 'boolean', description: 'Force permanent deletion' }
-    },
-    required: ['id']
-  }
-};
-
-// Tags
-export const listTags: MCPTool = {
-  name: 'wp_list_tags',
-  description: 'List WordPress tags',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      search: { type: 'string', description: 'Search tags' },
-      hide_empty: { type: 'boolean', description: 'Hide empty tags' }
+  public async handleGetCategory(
+    client: WordPressClient,
+    params: { id: number },
+  ): Promise<MCPToolResponse> {
+    try {
+      const category = await client.getCategory(params.id);
+      const content =
+        `**Category Details (ID: ${category.id})**\n\n` +
+        `- **Name:** ${category.name}\n` +
+        `- **Slug:** ${category.slug}\n` +
+        `- **Description:** ${category.description || "None"}\n` +
+        `- **Post Count:** ${category.count}`;
+      return { content };
+    } catch (error) {
+      return {
+        error: {
+          message: `Failed to get category: ${getErrorMessage(error)}`,
+          code: "GET_CATEGORY_FAILED",
+        },
+      };
     }
   }
-};
 
-export const getTag: MCPTool = {
-  name: 'wp_get_tag',
-  description: 'Get a specific WordPress tag by ID',
-  inputSchema: {
-    type: 'object',
-    properties: { id: { type: 'number', description: 'Tag ID', minimum: 1 } },
-    required: ['id']
+  public async handleCreateCategory(
+    client: WordPressClient,
+    params: CreateCategoryRequest,
+  ): Promise<MCPToolResponse> {
+    try {
+      const category = await client.createCategory(params);
+      return {
+        content: `✅ Category "${category.name}" created successfully with ID: ${category.id}.`,
+      };
+    } catch (error) {
+      return {
+        error: {
+          message: `Failed to create category: ${getErrorMessage(error)}`,
+          code: "CREATE_CATEGORY_FAILED",
+        },
+      };
+    }
   }
-};
 
-export const createTag: MCPTool = {
-  name: 'wp_create_tag',
-  description: 'Create a new WordPress tag',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      name: { type: 'string', description: 'Tag name' },
-      description: { type: 'string', description: 'Tag description' },
-      slug: { type: 'string', description: 'Tag slug' }
-    },
-    required: ['name']
+  public async handleUpdateCategory(
+    client: WordPressClient,
+    params: UpdateCategoryRequest & { id: number },
+  ): Promise<MCPToolResponse> {
+    try {
+      const { id, ...updateData } = params;
+      const category = await client.updateCategory(id, updateData);
+      return {
+        content: `✅ Category ${category.id} updated successfully.`,
+      };
+    } catch (error) {
+      return {
+        error: {
+          message: `Failed to update category: ${getErrorMessage(error)}`,
+          code: "UPDATE_CATEGORY_FAILED",
+        },
+      };
+    }
   }
-};
 
-export const updateTag: MCPTool = {
-  name: 'wp_update_tag',
-  description: 'Update an existing WordPress tag',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      id: { type: 'number', description: 'Tag ID', minimum: 1 },
-      name: { type: 'string', description: 'Tag name' },
-      description: { type: 'string', description: 'Tag description' },
-      slug: { type: 'string', description: 'Tag slug' }
-    },
-    required: ['id']
+  public async handleDeleteCategory(
+    client: WordPressClient,
+    params: { id: number },
+  ): Promise<MCPToolResponse> {
+    try {
+      await client.deleteCategory(params.id);
+      return { content: `✅ Category ${params.id} has been deleted.` };
+    } catch (error) {
+      return {
+        error: {
+          message: `Failed to delete category: ${getErrorMessage(error)}`,
+          code: "DELETE_CATEGORY_FAILED",
+        },
+      };
+    }
   }
-};
 
-export const deleteTag: MCPTool = {
-  name: 'wp_delete_tag',
-  description: 'Delete a WordPress tag',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      id: { type: 'number', description: 'Tag ID', minimum: 1 },
-      force: { type: 'boolean', description: 'Force permanent deletion' }
-    },
-    required: ['id']
+  public async handleListTags(
+    client: WordPressClient,
+    params: TagQueryParams,
+  ): Promise<MCPToolResponse> {
+    try {
+      const tags = await client.getTags(params);
+      if (tags.length === 0) {
+        return { content: "No tags found." };
+      }
+      const content =
+        `Found ${tags.length} tags:\n\n` +
+        tags
+          .map((t) => `- ID ${t.id}: **${t.name}** (Posts: ${t.count})`)
+          .join("\n");
+      return { content };
+    } catch (error) {
+      return {
+        error: {
+          message: `Failed to list tags: ${getErrorMessage(error)}`,
+          code: "LIST_TAGS_FAILED",
+        },
+      };
+    }
   }
-};
 
-// Category Handlers
-export const handleListCategories: MCPToolHandlerWithClient<IWordPressClient, any> = async (client, args) => {
-  const timer = startTimer('List Categories');
-  try {
-    const categories = await client.getCategories(args);
-    const categoryList = categories.map(cat => 
-      `**${cat.name}** (ID: ${cat.id})\nSlug: ${cat.slug}\nCount: ${cat.count}\nParent: ${cat.parent || 'None'}`
-    ).join('\n\n');
-    timer.endWithLog();
-    return createSuccessResponse(`Found ${categories.length} categories:\n\n${categoryList}`);
-  } catch (error) {
-    timer.end();
-    return createErrorResponse(`Failed to list categories: ${(error as Error).message}`);
+  public async handleGetTag(
+    client: WordPressClient,
+    params: { id: number },
+  ): Promise<MCPToolResponse> {
+    try {
+      const tag = await client.getTag(params.id);
+      const content =
+        `**Tag Details (ID: ${tag.id})**\n\n` +
+        `- **Name:** ${tag.name}\n` +
+        `- **Slug:** ${tag.slug}\n` +
+        `- **Post Count:** ${tag.count}`;
+      return { content };
+    } catch (error) {
+      return {
+        error: {
+          message: `Failed to get tag: ${getErrorMessage(error)}`,
+          code: "GET_TAG_FAILED",
+        },
+      };
+    }
   }
-};
 
-export const handleGetCategory: MCPToolHandlerWithClient<IWordPressClient, {id: number}> = async (client, args) => {
-  const timer = startTimer('Get Category');
-  try {
-    const category = await client.getCategory(args.id);
-    const result = `**${category.name}** (ID: ${category.id})\nSlug: ${category.slug}\nDescription: ${category.description || 'None'}\nCount: ${category.count}`;
-    timer.endWithLog();
-    return createSuccessResponse(result);
-  } catch (error) {
-    timer.end();
-    return createErrorResponse(`Failed to get category: ${(error as Error).message}`);
+  public async handleCreateTag(
+    client: WordPressClient,
+    params: CreateTagRequest,
+  ): Promise<MCPToolResponse> {
+    try {
+      const tag = await client.createTag(params);
+      return {
+        content: `✅ Tag "${tag.name}" created successfully with ID: ${tag.id}.`,
+      };
+    } catch (error) {
+      return {
+        error: {
+          message: `Failed to create tag: ${getErrorMessage(error)}`,
+          code: "CREATE_TAG_FAILED",
+        },
+      };
+    }
   }
-};
 
-export const handleCreateCategory: MCPToolHandlerWithClient<IWordPressClient, CreateCategoryRequest> = async (client, args) => {
-  const timer = startTimer('Create Category');
-  try {
-    const category = await client.createCategory(args);
-    const result = `✅ Category created successfully!\nName: ${category.name}\nID: ${category.id}\nSlug: ${category.slug}`;
-    timer.endWithLog();
-    return createSuccessResponse(result);
-  } catch (error) {
-    timer.end();
-    return createErrorResponse(`Failed to create category: ${(error as Error).message}`);
+  public async handleUpdateTag(
+    client: WordPressClient,
+    params: UpdateTagRequest & { id: number },
+  ): Promise<MCPToolResponse> {
+    try {
+      const { id, ...updateData } = params;
+      const tag = await client.updateTag(id, updateData);
+      return {
+        content: `✅ Tag ${tag.id} updated successfully.`,
+      };
+    } catch (error) {
+      return {
+        error: {
+          message: `Failed to update tag: ${getErrorMessage(error)}`,
+          code: "UPDATE_TAG_FAILED",
+        },
+      };
+    }
   }
-};
 
-export const handleUpdateCategory: MCPToolHandlerWithClient<IWordPressClient, UpdateCategoryRequest> = async (client, args) => {
-  const timer = startTimer('Update Category');
-  try {
-    const category = await client.updateCategory(args);
-    const result = `✅ Category updated successfully!\nName: ${category.name}\nID: ${category.id}`;
-    timer.endWithLog();
-    return createSuccessResponse(result);
-  } catch (error) {
-    timer.end();
-    return createErrorResponse(`Failed to update category: ${(error as Error).message}`);
+  public async handleDeleteTag(
+    client: WordPressClient,
+    params: { id: number },
+  ): Promise<MCPToolResponse> {
+    try {
+      await client.deleteTag(params.id);
+      return { content: `✅ Tag ${params.id} has been deleted.` };
+    } catch (error) {
+      return {
+        error: {
+          message: `Failed to delete tag: ${getErrorMessage(error)}`,
+          code: "DELETE_TAG_FAILED",
+        },
+      };
+    }
   }
-};
+}
 
-export const handleDeleteCategory: MCPToolHandlerWithClient<IWordPressClient, {id: number, force?: boolean}> = async (client, args) => {
-  const timer = startTimer('Delete Category');
-  try {
-    await client.deleteCategory(args.id, args.force);
-    const result = `✅ Category deleted successfully!\nCategory ID: ${args.id}`;
-    timer.endWithLog();
-    return createSuccessResponse(result);
-  } catch (error) {
-    timer.end();
-    return createErrorResponse(`Failed to delete category: ${(error as Error).message}`);
-  }
-};
-
-// Tag Handlers
-export const handleListTags: MCPToolHandlerWithClient<IWordPressClient, any> = async (client, args) => {
-  const timer = startTimer('List Tags');
-  try {
-    const tags = await client.getTags(args);
-    const tagList = tags.map(tag => 
-      `**${tag.name}** (ID: ${tag.id})\nSlug: ${tag.slug}\nCount: ${tag.count}`
-    ).join('\n\n');
-    timer.endWithLog();
-    return createSuccessResponse(`Found ${tags.length} tags:\n\n${tagList}`);
-  } catch (error) {
-    timer.end();
-    return createErrorResponse(`Failed to list tags: ${(error as Error).message}`);
-  }
-};
-
-export const handleGetTag: MCPToolHandlerWithClient<IWordPressClient, {id: number}> = async (client, args) => {
-  const timer = startTimer('Get Tag');
-  try {
-    const tag = await client.getTag(args.id);
-    const result = `**${tag.name}** (ID: ${tag.id})\nSlug: ${tag.slug}\nDescription: ${tag.description || 'None'}\nCount: ${tag.count}`;
-    timer.endWithLog();
-    return createSuccessResponse(result);
-  } catch (error) {
-    timer.end();
-    return createErrorResponse(`Failed to get tag: ${(error as Error).message}`);
-  }
-};
-
-export const handleCreateTag: MCPToolHandlerWithClient<IWordPressClient, CreateTagRequest> = async (client, args) => {
-  const timer = startTimer('Create Tag');
-  try {
-    const tag = await client.createTag(args);
-    const result = `✅ Tag created successfully!\nName: ${tag.name}\nID: ${tag.id}\nSlug: ${tag.slug}`;
-    timer.endWithLog();
-    return createSuccessResponse(result);
-  } catch (error) {
-    timer.end();
-    return createErrorResponse(`Failed to create tag: ${(error as Error).message}`);
-  }
-};
-
-export const handleUpdateTag: MCPToolHandlerWithClient<IWordPressClient, UpdateTagRequest> = async (client, args) => {
-  const timer = startTimer('Update Tag');
-  try {
-    const tag = await client.updateTag(args);
-    const result = `✅ Tag updated successfully!\nName: ${tag.name}\nID: ${tag.id}`;
-    timer.endWithLog();
-    return createSuccessResponse(result);
-  } catch (error) {
-    timer.end();
-    return createErrorResponse(`Failed to update tag: ${(error as Error).message}`);
-  }
-};
-
-export const handleDeleteTag: MCPToolHandlerWithClient<IWordPressClient, {id: number, force?: boolean}> = async (client, args) => {
-  const timer = startTimer('Delete Tag');
-  try {
-    await client.deleteTag(args.id, args.force);
-    const result = `✅ Tag deleted successfully!\nTag ID: ${args.id}`;
-    timer.endWithLog();
-    return createSuccessResponse(result);
-  } catch (error) {
-    timer.end();
-    return createErrorResponse(`Failed to delete tag: ${(error as Error).message}`);
-  }
-};
+export default TaxonomyTools;
