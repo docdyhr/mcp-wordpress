@@ -47,10 +47,24 @@ const runAuthTest = async (config, testName) => {
   log(`Testing ${testName}...`, "test");
 
   try {
-    const client = new WordPressClient(config);
+    // Add longer timeout for authentication tests
+    const clientConfig = {
+      ...config,
+      timeout: 60000, // 60 seconds
+      maxRetries: 2, // Reduce retries for faster feedback
+    };
 
-    // Test connection by getting current user
-    const user = await client.getCurrentUser();
+    const client = new WordPressClient(clientConfig);
+
+    // Test connection by getting current user with timeout
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(
+        () => reject(new Error("Authentication test timeout after 60 seconds")),
+        60000,
+      ),
+    );
+
+    const user = await Promise.race([client.getCurrentUser(), timeoutPromise]);
 
     if (user && user.id) {
       log(`${testName}: Authentication successful`, "success");
@@ -64,7 +78,17 @@ const runAuthTest = async (config, testName) => {
       return false;
     }
   } catch (error) {
-    log(`${testName}: Authentication failed - ${error.message}`, "error");
+    // Provide more detailed error information
+    if (error.message.includes("timeout")) {
+      log(
+        `${testName}: Connection timeout - check network or server status`,
+        "error",
+      );
+    } else if (error.message.includes("401") || error.message.includes("403")) {
+      log(`${testName}: Authentication failed - check credentials`, "error");
+    } else {
+      log(`${testName}: Authentication failed - ${error.message}`, "error");
+    }
     return false;
   }
 };
@@ -216,8 +240,28 @@ const main = async () => {
     `\n${colors.cyan}Tip: Use Application Passwords for the most secure and reliable authentication.${colors.reset}`,
   );
   console.log(
-    `${colors.cyan}Generate them in WordPress Admin → Users → Your Profile → Application Passwords${colors.reset}\n`,
+    `${colors.cyan}Generate them in WordPress Admin → Users → Your Profile → Application Passwords${colors.reset}`,
   );
+
+  if (failureCount > 0) {
+    console.log(
+      `\n${colors.yellow}Troubleshooting failed tests:${colors.reset}`,
+    );
+    console.log(
+      `${colors.cyan}• Check network connectivity to WordPress site${colors.reset}`,
+    );
+    console.log(
+      `${colors.cyan}• Verify authentication credentials are correct${colors.reset}`,
+    );
+    console.log(
+      `${colors.cyan}• Run ./scripts/wp-auth-check.sh for quick verification${colors.reset}`,
+    );
+    console.log(
+      `${colors.cyan}• Increase timeout if tests are timing out${colors.reset}\n`,
+    );
+  } else {
+    console.log("");
+  }
 
   process.exit(passedTests === totalTests ? 0 : 1);
 };

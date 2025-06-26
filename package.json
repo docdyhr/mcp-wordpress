@@ -26,6 +26,7 @@
     "test:mcp": "node scripts/test-mcp.js",
     "test:integration": "node scripts/test-integration.js",
     "test:auth": "node scripts/test-auth.js",
+    "health": "node scripts/health-check.js",
     "lint": "eslint src/ tests/ bin/ scripts/",
     "lint:fix": "eslint src/ tests/ bin/ scripts/ --fix",
     "typecheck": "tsc --noEmit"
