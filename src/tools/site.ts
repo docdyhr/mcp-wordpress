@@ -1,7 +1,5 @@
-import { MCPTool, MCPToolResponse } from "@mcp/server";
-import WordPressClient from "../client/api.js";
+import { WordPressClient } from "../client/api.js";
 import {
-  UpdateSiteSettingsRequest,
   WordPressApplicationPassword,
 } from "../types/wordpress.js";
 import { getErrorMessage } from "../utils/error.js";
@@ -15,7 +13,7 @@ export class SiteTools {
    * Retrieves the list of site management tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): MCPTool[] {
+  public getTools(): any[] {
     return [
       {
         name: "wp_get_site_settings",
@@ -123,7 +121,7 @@ export class SiteTools {
   public async handleGetSiteSettings(
     client: WordPressClient,
     params: any,
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const settings = await client.getSiteSettings();
       const content =
@@ -132,71 +130,52 @@ export class SiteTools {
         `- **Description:** ${settings.description}\n` +
         `- **Timezone:** ${settings.timezone}\n` +
         `- **Language:** ${settings.language}`;
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to get site settings: ${getErrorMessage(error)}`,
-          code: "GET_SETTINGS_FAILED",
-        },
-      };
+      throw new Error(`Failed to get site settings: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleUpdateSiteSettings(
     client: WordPressClient,
-    params: UpdateSiteSettingsRequest,
-  ): Promise<MCPToolResponse> {
+    params: any,
+  ): Promise<any> {
     try {
       const updatedSettings = await client.updateSiteSettings(params);
-      return {
-        content: `✅ Site settings updated successfully. New title: ${updatedSettings.title}`,
-      };
+      return `✅ Site settings updated successfully. New title: ${updatedSettings.title}`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to update site settings: ${getErrorMessage(error)}`,
-          code: "UPDATE_SETTINGS_FAILED",
-        },
-      };
+      throw new Error(`Failed to update site settings: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleSearchSite(
     client: WordPressClient,
     params: { term: string; type?: "posts" | "pages" | "media" },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
-      const results = await client.search(params.term, params.type);
+      const results = await client.search(params.term, params.type ? [params.type] : undefined);
       if (results.length === 0) {
-        return { content: `No results found for "${params.term}".` };
+        return `No results found for "${params.term}".`;
       }
       const content =
         `Found ${results.length} results for "${params.term}":\n\n` +
         results
           .map((r) => `- [${r.type}] **${r.title}**\n  Link: ${r.url}`)
           .join("\n");
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to perform search: ${getErrorMessage(error)}`,
-          code: "SEARCH_FAILED",
-        },
-      };
+      throw new Error(`Failed to perform search: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleGetApplicationPasswords(
     client: WordPressClient,
     params: { user_id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const passwords = await client.getApplicationPasswords(params.user_id);
       if (passwords.length === 0) {
-        return {
-          content: `No application passwords found for user ID ${params.user_id}.`,
-        };
+        return `No application passwords found for user ID ${params.user_id}.`;
       }
       const content =
         `Found ${passwords.length} application passwords for user ID ${params.user_id}:\n\n` +
@@ -206,23 +185,16 @@ export class SiteTools {
               `- **${p.name}** (UUID: ${p.uuid})\n  Created: ${new Date(p.created).toLocaleDateString()}`,
           )
           .join("\n");
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to get application passwords: ${getErrorMessage(
-            error,
-          )}`,
-          code: "GET_APP_PASSWORDS_FAILED",
-        },
-      };
+      throw new Error(`Failed to get application passwords: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleCreateApplicationPassword(
     client: WordPressClient,
     params: { user_id: number; app_name: string },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const result = await client.createApplicationPassword(
         params.user_id,
@@ -233,37 +205,21 @@ export class SiteTools {
         `**Name:** ${result.name}\n` +
         `**Password:** \`${result.password}\`\n\n` +
         `**IMPORTANT:** This password is shown only once. Please save it securely.`;
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to create application password: ${getErrorMessage(
-            error,
-          )}`,
-          code: "CREATE_APP_PASSWORD_FAILED",
-        },
-      };
+      throw new Error(`Failed to create application password: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleDeleteApplicationPassword(
     client: WordPressClient,
     params: { user_id: number; uuid: string },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       await client.deleteApplicationPassword(params.user_id, params.uuid);
-      return {
-        content: `✅ Application password with UUID ${params.uuid} has been revoked.`,
-      };
+      return `✅ Application password with UUID ${params.uuid} has been revoked.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to delete application password: ${getErrorMessage(
-            error,
-          )}`,
-          code: "DELETE_APP_PASSWORD_FAILED",
-        },
-      };
+      throw new Error(`Failed to delete application password: ${getErrorMessage(error)}`);
     }
   }
 }

@@ -438,8 +438,9 @@ export interface CreateCommentRequest {
   meta?: Record<string, any>;
 }
 
-export interface UpdateCommentRequest extends Partial<CreateCommentRequest> {
+export interface UpdateCommentRequest extends Partial<Omit<CreateCommentRequest, 'status'>> {
   id: number;
+  status?: 'approved' | 'unapproved' | 'spam' | 'trash';
 }
 
 export interface CreateCategoryRequest {

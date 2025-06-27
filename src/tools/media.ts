@@ -1,7 +1,6 @@
-import { MCPTool, MCPToolResponse } from "@mcp/server";
 import * as fs from "fs";
 import * as path from "path";
-import WordPressClient from "../client/api.js";
+import { WordPressClient } from "../client/api.js";
 import {
   MediaQueryParams,
   UpdateMediaRequest,
@@ -19,7 +18,7 @@ export class MediaTools {
    * Retrieves the list of media management tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): MCPTool[] {
+  public getTools(): any[] {
     return [
       {
         name: "wp_list_media",
@@ -154,11 +153,11 @@ export class MediaTools {
   public async handleListMedia(
     client: WordPressClient,
     params: MediaQueryParams,
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const media = await client.getMedia(params);
       if (media.length === 0) {
-        return { content: "No media items found matching the criteria." };
+        return "No media items found matching the criteria.";
       }
       const content =
         `Found ${media.length} media items:\n\n` +
@@ -168,21 +167,16 @@ export class MediaTools {
               `- ID ${m.id}: **${m.title.rendered}** (${m.mime_type})\n  Link: ${m.source_url}`,
           )
           .join("\n");
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to list media: ${getErrorMessage(error)}`,
-          code: "LIST_MEDIA_FAILED",
-        },
-      };
+      throw new Error(`Failed to list media: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleGetMedia(
     client: WordPressClient,
     params: { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const media = await client.getMediaItem(params.id);
       const content =
@@ -195,83 +189,50 @@ export class MediaTools {
         (media.caption.rendered
           ? `- **Caption:** ${media.caption.rendered}\n`
           : "");
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to get media item: ${getErrorMessage(error)}`,
-          code: "GET_MEDIA_FAILED",
-        },
-      };
+      throw new Error(`Failed to get media item: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleUploadMedia(
     client: WordPressClient,
     params: UploadMediaRequest & { file_path: string },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       if (!fs.existsSync(params.file_path)) {
-        return {
-          error: {
-            message: `File not found at path: ${params.file_path}`,
-            code: "FILE_NOT_FOUND",
-          },
-        };
+        throw new Error(`File not found at path: ${params.file_path}`);
       }
 
-      const fileBuffer = fs.readFileSync(params.file_path);
-      const fileName = path.basename(params.file_path);
-
-      const media = await client.uploadMedia(fileBuffer, fileName, params);
-      return {
-        content: `✅ Media uploaded successfully!\n- ID: ${media.id}\n- Title: ${media.title.rendered}\n- URL: ${media.source_url}`,
-      };
+      const media = await client.uploadMedia(params);
+      return `✅ Media uploaded successfully!\n- ID: ${media.id}\n- Title: ${media.title.rendered}\n- URL: ${media.source_url}`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to upload media: ${getErrorMessage(error)}`,
-          code: "UPLOAD_MEDIA_FAILED",
-        },
-      };
+      throw new Error(`Failed to upload media: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleUpdateMedia(
     client: WordPressClient,
     params: UpdateMediaRequest & { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
-      const { id, ...updateData } = params;
-      const media = await client.updateMedia(id, updateData);
-      return {
-        content: `✅ Media ${media.id} updated successfully.`,
-      };
+      const media = await client.updateMedia(params);
+      return `✅ Media ${media.id} updated successfully.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to update media: ${getErrorMessage(error)}`,
-          code: "UPDATE_MEDIA_FAILED",
-        },
-      };
+      throw new Error(`Failed to update media: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleDeleteMedia(
     client: WordPressClient,
     params: { id: number; force?: boolean },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       await client.deleteMedia(params.id, params.force);
       const action = params.force ? "permanently deleted" : "moved to trash";
-      return { content: `✅ Media item ${params.id} has been ${action}.` };
+      return `✅ Media item ${params.id} has been ${action}.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to delete media: ${getErrorMessage(error)}`,
-          code: "DELETE_MEDIA_FAILED",
-        },
-      };
+      throw new Error(`Failed to delete media: ${getErrorMessage(error)}`);
     }
   }
 }

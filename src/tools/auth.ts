@@ -1,6 +1,5 @@
-import { MCPTool, MCPToolResponse } from "@mcp/server";
-import WordPressClient from "../client/api.js";
-import { WordPressAuthMethod } from "../types/client.js";
+import { WordPressClient } from "../client/api.js";
+import { AuthMethod } from "../types/client.js";
 import { getErrorMessage } from "../utils/error.js";
 
 /**
@@ -12,7 +11,7 @@ export class AuthTools {
    * Retrieves the list of authentication tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): MCPTool[] {
+  public getTools(): any[] {
     return [
       {
         name: "wp_test_auth",
@@ -38,7 +37,7 @@ export class AuthTools {
             type: "string",
             required: true,
             description: "The new authentication method to use.",
-            enum: Object.values(WordPressAuthMethod),
+            enum: ["app-password", "jwt", "basic", "api-key", "cookie"],
           },
           {
             name: "username",
@@ -73,28 +72,23 @@ export class AuthTools {
   public async handleTestAuth(
     client: WordPressClient,
     params: any,
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
-      await client.testConnection();
+      await client.ping();
       const user = await client.getCurrentUser();
-      const siteConfig = client.getConfig();
+      const siteConfig = client.config;
 
       const content =
         `✅ **Authentication successful!**\n\n` +
-        `**Site:** ${siteConfig.siteUrl}\n` +
+        `**Site:** ${siteConfig.baseUrl}\n` +
         `**Method:** ${siteConfig.auth.method}\n` +
         `**User:** ${user.name} (@${user.slug})\n` +
         `**Roles:** ${user.roles.join(", ")}\n\n` +
         `Your WordPress connection is working properly.`;
 
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Authentication test failed: ${getErrorMessage(error)}`,
-          code: "AUTH_TEST_FAILED",
-        },
-      };
+      throw new Error(`Authentication test failed: ${getErrorMessage(error)}`);
     }
   }
 
@@ -108,12 +102,12 @@ export class AuthTools {
   public async handleGetAuthStatus(
     client: WordPressClient,
     params: any,
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
-      const isAuthenticated = client.isAuthenticated();
-      const config = client.getConfig();
+      const isAuthenticated = client.isAuthenticated;
+      const config = client.config;
       let content =
-        `**Authentication Status for ${config.siteUrl}**\n\n` +
+        `**Authentication Status for ${config.baseUrl}**\n\n` +
         `**Authenticated:** ${isAuthenticated ? "✅ Yes" : "❌ No"}\n` +
         `**Method:** ${config.auth.method}\n`;
 
@@ -124,14 +118,9 @@ export class AuthTools {
         content += `**Status:** Not connected. Use 'wp_test_auth' to connect and verify credentials.`;
       }
 
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to get auth status: ${getErrorMessage(error)}`,
-          code: "STATUS_CHECK_FAILED",
-        },
-      };
+      throw new Error(`Failed to get auth status: ${getErrorMessage(error)}`);
     }
   }
 
@@ -145,40 +134,18 @@ export class AuthTools {
   public async handleSwitchAuthMethod(
     client: WordPressClient,
     params: {
-      method: WordPressAuthMethod;
+      method: AuthMethod;
       username?: string;
       password?: string;
       jwt_token?: string;
     },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
-      const { method, username, password, jwt_token } = params;
-
-      client.updateAuthConfig({
-        method,
-        username,
-        password,
-        jwtToken: jwt_token,
-      });
-
-      await client.testConnection();
-      const user = await client.getCurrentUser();
-
-      const content =
-        `✅ **Authentication method switched successfully!**\n\n` +
-        `**Site:** ${client.getConfig().siteUrl}\n` +
-        `**New Method:** ${method}\n` +
-        `**New User:** ${user.name} (@${user.slug})\n\n` +
-        `You can now use tools with the new authentication method for this site.`;
-
-      return { content };
+      // This functionality is not currently supported as the client
+      // doesn't have an updateAuthConfig method
+      throw new Error("Dynamic authentication method switching is not currently supported. Please update your configuration file and restart the server.");
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to switch auth method: ${getErrorMessage(error)}`,
-          code: "AUTH_SWITCH_FAILED",
-        },
-      };
+      throw new Error(`Failed to switch auth method: ${getErrorMessage(error)}`);
     }
   }
 }

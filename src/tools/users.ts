@@ -1,5 +1,4 @@
-import { MCPTool, MCPToolResponse } from "@mcp/server";
-import WordPressClient from "../client/api.js";
+import { WordPressClient } from "../client/api.js";
 import {
   CreateUserRequest,
   UpdateUserRequest,
@@ -16,7 +15,7 @@ export class UserTools {
    * Retrieves the list of user management tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): MCPTool[] {
+  public getTools(): any[] {
     return [
       {
         name: "wp_list_users",
@@ -134,11 +133,11 @@ export class UserTools {
   public async handleListUsers(
     client: WordPressClient,
     params: UserQueryParams,
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const users = await client.getUsers(params);
       if (users.length === 0) {
-        return { content: "No users found matching the criteria." };
+        return "No users found matching the criteria.";
       }
       const content =
         `Found ${users.length} users:\n\n` +
@@ -148,21 +147,16 @@ export class UserTools {
               `- ID ${u.id}: **${u.name}** (@${u.slug}) - ${u.email}\n  Roles: ${u.roles.join(", ")}`,
           )
           .join("\n");
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to list users: ${getErrorMessage(error)}`,
-          code: "LIST_USERS_FAILED",
-        },
-      };
+      throw new Error(`Failed to list users: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleGetUser(
     client: WordPressClient,
     params: { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const user = await client.getUser(params.id);
       const content =
@@ -171,21 +165,16 @@ export class UserTools {
         `- **Username:** ${user.slug}\n` +
         `- **Email:** ${user.email}\n` +
         `- **Roles:** ${user.roles.join(", ")}`;
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to get user: ${getErrorMessage(error)}`,
-          code: "GET_USER_FAILED",
-        },
-      };
+      throw new Error(`Failed to get user: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleGetCurrentUser(
     client: WordPressClient,
     params: any,
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const user = await client.getCurrentUser();
       const content =
@@ -194,74 +183,49 @@ export class UserTools {
         `- **Username:** ${user.slug}\n` +
         `- **Email:** ${user.email}\n` +
         `- **Roles:** ${user.roles.join(", ")}`;
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to get current user: ${getErrorMessage(error)}`,
-          code: "GET_CURRENT_USER_FAILED",
-        },
-      };
+      throw new Error(`Failed to get current user: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleCreateUser(
     client: WordPressClient,
     params: CreateUserRequest,
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const user = await client.createUser(params);
-      return {
-        content: `✅ User "${user.name}" created successfully with ID: ${user.id}.`,
-      };
+      return `✅ User "${user.name}" created successfully with ID: ${user.id}.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to create user: ${getErrorMessage(error)}`,
-          code: "CREATE_USER_FAILED",
-        },
-      };
+      throw new Error(`Failed to create user: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleUpdateUser(
     client: WordPressClient,
     params: UpdateUserRequest & { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
-      const { id, ...updateData } = params;
-      const user = await client.updateUser(id, updateData);
-      return {
-        content: `✅ User ${user.id} updated successfully.`,
-      };
+      const user = await client.updateUser(params);
+      return `✅ User ${user.id} updated successfully.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to update user: ${getErrorMessage(error)}`,
-          code: "UPDATE_USER_FAILED",
-        },
-      };
+      throw new Error(`Failed to update user: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleDeleteUser(
     client: WordPressClient,
     params: { id: number; reassign?: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       await client.deleteUser(params.id, params.reassign);
       let content = `✅ User ${params.id} has been deleted.`;
       if (params.reassign) {
         content += ` Their content has been reassigned to user ID ${params.reassign}.`;
       }
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to delete user: ${getErrorMessage(error)}`,
-          code: "DELETE_USER_FAILED",
-        },
-      };
+      throw new Error(`Failed to delete user: ${getErrorMessage(error)}`);
     }
   }
 }

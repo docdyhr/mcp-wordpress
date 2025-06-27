@@ -1,5 +1,4 @@
-import { MCPTool, MCPToolResponse } from "@mcp/server";
-import WordPressClient from "../client/api.js";
+import { WordPressClient } from "../client/api.js";
 import {
   CommentQueryParams,
   CreateCommentRequest,
@@ -16,7 +15,7 @@ export class CommentTools {
    * Retrieves the list of comment management tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): MCPTool[] {
+  public getTools(): any[] {
     return [
       {
         name: "wp_list_comments",
@@ -154,11 +153,11 @@ export class CommentTools {
   public async handleListComments(
     client: WordPressClient,
     params: CommentQueryParams,
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const comments = await client.getComments(params);
       if (comments.length === 0) {
-        return { content: "No comments found matching the criteria." };
+        return "No comments found matching the criteria.";
       }
       const content =
         `Found ${comments.length} comments:\n\n` +
@@ -168,21 +167,16 @@ export class CommentTools {
               `- ID ${c.id}: By **${c.author_name}** on Post ${c.post} (${c.status})\n  > ${c.content.rendered.substring(0, 100)}...`,
           )
           .join("\n");
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to list comments: ${getErrorMessage(error)}`,
-          code: "LIST_COMMENTS_FAILED",
-        },
-      };
+      throw new Error(`Failed to list comments: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleGetComment(
     client: WordPressClient,
     params: { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const comment = await client.getComment(params.id);
       const content =
@@ -192,107 +186,76 @@ export class CommentTools {
         `- **Date:** ${new Date(comment.date).toLocaleString()}\n` +
         `- **Status:** ${comment.status}\n` +
         `- **Content:** ${comment.content.rendered}`;
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to get comment: ${getErrorMessage(error)}`,
-          code: "GET_COMMENT_FAILED",
-        },
-      };
+      throw new Error(`Failed to get comment: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleCreateComment(
     client: WordPressClient,
     params: CreateCommentRequest,
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const comment = await client.createComment(params);
-      return {
-        content: `✅ Comment created successfully with ID: ${comment.id}`,
-      };
+      return `✅ Comment created successfully with ID: ${comment.id}`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to create comment: ${getErrorMessage(error)}`,
-          code: "CREATE_COMMENT_FAILED",
-        },
-      };
+      throw new Error(`Failed to create comment: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleUpdateComment(
     client: WordPressClient,
     params: UpdateCommentRequest & { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
-      const { id, ...updateData } = params;
-      const comment = await client.updateComment(id, updateData);
-      return {
-        content: `✅ Comment ${comment.id} updated successfully. New status: ${comment.status}.`,
-      };
+      const comment = await client.updateComment(params);
+      return `✅ Comment ${comment.id} updated successfully. New status: ${comment.status}.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to update comment: ${getErrorMessage(error)}`,
-          code: "UPDATE_COMMENT_FAILED",
-        },
-      };
+      throw new Error(`Failed to update comment: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleDeleteComment(
     client: WordPressClient,
     params: { id: number; force?: boolean },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       await client.deleteComment(params.id, params.force);
       const action = params.force ? "permanently deleted" : "moved to trash";
-      return { content: `✅ Comment ${params.id} has been ${action}.` };
+      return `✅ Comment ${params.id} has been ${action}.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to delete comment: ${getErrorMessage(error)}`,
-          code: "DELETE_COMMENT_FAILED",
-        },
-      };
+      throw new Error(`Failed to delete comment: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleApproveComment(
     client: WordPressClient,
     params: { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
-      const comment = await client.updateComment(params.id, {
+      const comment = await client.updateComment({
+        id: params.id,
         status: "approved",
       });
-      return { content: `✅ Comment ${comment.id} has been approved.` };
+      return `✅ Comment ${comment.id} has been approved.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to approve comment: ${getErrorMessage(error)}`,
-          code: "APPROVE_COMMENT_FAILED",
-        },
-      };
+      throw new Error(`Failed to approve comment: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleSpamComment(
     client: WordPressClient,
     params: { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
-      const comment = await client.updateComment(params.id, { status: "spam" });
-      return { content: `✅ Comment ${comment.id} has been marked as spam.` };
+      const comment = await client.updateComment({
+        id: params.id,
+        status: "spam",
+      });
+      return `✅ Comment ${comment.id} has been marked as spam.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to mark comment as spam: ${getErrorMessage(error)}`,
-          code: "SPAM_COMMENT_FAILED",
-        },
-      };
+      throw new Error(`Failed to mark comment as spam: ${getErrorMessage(error)}`);
     }
   }
 }

@@ -1,5 +1,4 @@
-import { MCPTool, MCPToolResponse } from "@mcp/server";
-import WordPressClient from "../client/api.js";
+import { WordPressClient } from "../client/api.js";
 import {
   CreatePostRequest,
   PostQueryParams,
@@ -16,7 +15,7 @@ export class PageTools {
    * Retrieves the list of page management tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): MCPTool[] {
+  public getTools(): any[] {
     return [
       {
         name: "wp_list_pages",
@@ -145,136 +144,101 @@ export class PageTools {
   public async handleListPages(
     client: WordPressClient,
     params: PostQueryParams,
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const pages = await client.getPages(params);
       if (pages.length === 0) {
-        return { content: "No pages found matching the criteria." };
+        return "No pages found matching the criteria.";
       }
       const content =
-        `Found ${pages.length} pages:\\n\\n` +
+        `Found ${pages.length} pages:\n\n` +
         pages
           .map(
             (p) =>
-              `- ID ${p.id}: **${p.title.rendered}** (${p.status})\\n  Link: ${p.link}`,
+              `- ID ${p.id}: **${p.title.rendered}** (${p.status})\n  Link: ${p.link}`,
           )
-          .join("\\n");
-      return { content };
+          .join("\n");
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to list pages: ${getErrorMessage(error)}`,
-          code: "LIST_PAGES_FAILED",
-        },
-      };
+      throw new Error(`Failed to list pages: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleGetPage(
     client: WordPressClient,
     params: { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const page = await client.getPage(params.id);
       const content =
-        `**Page Details (ID: ${page.id})**\\n\\n` +
-        `- **Title:** ${page.title.rendered}\\n` +
-        `- **Status:** ${page.status}\\n` +
-        `- **Link:** ${page.link}\\n` +
+        `**Page Details (ID: ${page.id})**\n\n` +
+        `- **Title:** ${page.title.rendered}\n` +
+        `- **Status:** ${page.status}\n` +
+        `- **Link:** ${page.link}\n` +
         `- **Date:** ${new Date(page.date).toLocaleString()}`;
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to get page: ${getErrorMessage(error)}`,
-          code: "GET_PAGE_FAILED",
-        },
-      };
+      throw new Error(`Failed to get page: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleCreatePage(
     client: WordPressClient,
     params: CreatePostRequest,
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const page = await client.createPage(params);
-      return {
-        content: `✅ Page created successfully!\\n- ID: ${page.id}\\n- Title: ${page.title.rendered}\\n- Link: ${page.link}`,
-      };
+      return `✅ Page created successfully!\n- ID: ${page.id}\n- Title: ${page.title.rendered}\n- Link: ${page.link}`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to create page: ${getErrorMessage(error)}`,
-          code: "CREATE_PAGE_FAILED",
-        },
-      };
+      throw new Error(`Failed to create page: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleUpdatePage(
     client: WordPressClient,
     params: UpdatePostRequest & { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
-      const { id, ...updateData } = params;
-      const page = await client.updatePage(id, updateData);
-      return {
-        content: `✅ Page ${page.id} updated successfully.`,
-      };
+      const page = await client.updatePage(params);
+      return `✅ Page ${page.id} updated successfully.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to update page: ${getErrorMessage(error)}`,
-          code: "UPDATE_PAGE_FAILED",
-        },
-      };
+      throw new Error(`Failed to update page: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleDeletePage(
     client: WordPressClient,
     params: { id: number; force?: boolean },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       await client.deletePage(params.id, params.force);
       const action = params.force ? "permanently deleted" : "moved to trash";
-      return { content: `✅ Page ${params.id} has been ${action}.` };
+      return `✅ Page ${params.id} has been ${action}.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to delete page: ${getErrorMessage(error)}`,
-          code: "DELETE_PAGE_FAILED",
-        },
-      };
+      throw new Error(`Failed to delete page: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleGetPageRevisions(
     client: WordPressClient,
     params: { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const revisions = await client.getPageRevisions(params.id);
       if (revisions.length === 0) {
-        return { content: `No revisions found for page ${params.id}.` };
+        return `No revisions found for page ${params.id}.`;
       }
       const content =
-        `Found ${revisions.length} revisions for page ${params.id}:\\n\\n` +
+        `Found ${revisions.length} revisions for page ${params.id}:\n\n` +
         revisions
           .map(
             (r) =>
-              `- Revision by **${r.author.name}** at ${new Date(r.modified).toLocaleString()}`,
+              `- Revision by user ID ${r.author} at ${new Date(r.modified).toLocaleString()}`,
           )
-          .join("\\n");
-      return { content };
+          .join("\n");
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to get page revisions: ${getErrorMessage(error)}`,
-          code: "GET_REVISIONS_FAILED",
-        },
-      };
+      throw new Error(`Failed to get page revisions: ${getErrorMessage(error)}`);
     }
   }
 }

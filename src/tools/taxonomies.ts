@@ -1,10 +1,7 @@
-import { MCPTool, MCPToolResponse } from "@mcp/server";
-import WordPressClient from "../client/api.js";
+import { WordPressClient } from "../client/api.js";
 import {
-  CategoryQueryParams,
   CreateCategoryRequest,
   CreateTagRequest,
-  TagQueryParams,
   UpdateCategoryRequest,
   UpdateTagRequest,
 } from "../types/wordpress.js";
@@ -19,7 +16,7 @@ export class TaxonomyTools {
    * Retrieves the list of taxonomy management tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): MCPTool[] {
+  public getTools(): any[] {
     return [
       // Categories
       {
@@ -176,33 +173,28 @@ export class TaxonomyTools {
 
   public async handleListCategories(
     client: WordPressClient,
-    params: CategoryQueryParams,
-  ): Promise<MCPToolResponse> {
+    params: any,
+  ): Promise<any> {
     try {
       const categories = await client.getCategories(params);
       if (categories.length === 0) {
-        return { content: "No categories found." };
+        return "No categories found.";
       }
       const content =
         `Found ${categories.length} categories:\n\n` +
         categories
           .map((c) => `- ID ${c.id}: **${c.name}** (Posts: ${c.count})`)
           .join("\n");
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to list categories: ${getErrorMessage(error)}`,
-          code: "LIST_CATEGORIES_FAILED",
-        },
-      };
+      throw new Error(`Failed to list categories: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleGetCategory(
     client: WordPressClient,
     params: { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const category = await client.getCategory(params.id);
       const content =
@@ -211,102 +203,72 @@ export class TaxonomyTools {
         `- **Slug:** ${category.slug}\n` +
         `- **Description:** ${category.description || "None"}\n` +
         `- **Post Count:** ${category.count}`;
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to get category: ${getErrorMessage(error)}`,
-          code: "GET_CATEGORY_FAILED",
-        },
-      };
+      throw new Error(`Failed to get category: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleCreateCategory(
     client: WordPressClient,
     params: CreateCategoryRequest,
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const category = await client.createCategory(params);
-      return {
-        content: `✅ Category "${category.name}" created successfully with ID: ${category.id}.`,
-      };
+      return `✅ Category "${category.name}" created successfully with ID: ${category.id}.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to create category: ${getErrorMessage(error)}`,
-          code: "CREATE_CATEGORY_FAILED",
-        },
-      };
+      throw new Error(`Failed to create category: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleUpdateCategory(
     client: WordPressClient,
     params: UpdateCategoryRequest & { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
-      const { id, ...updateData } = params;
-      const category = await client.updateCategory(id, updateData);
-      return {
-        content: `✅ Category ${category.id} updated successfully.`,
-      };
+      const category = await client.updateCategory(params);
+      return `✅ Category ${category.id} updated successfully.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to update category: ${getErrorMessage(error)}`,
-          code: "UPDATE_CATEGORY_FAILED",
-        },
-      };
+      throw new Error(`Failed to update category: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleDeleteCategory(
     client: WordPressClient,
     params: { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       await client.deleteCategory(params.id);
-      return { content: `✅ Category ${params.id} has been deleted.` };
+      return `✅ Category ${params.id} has been deleted.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to delete category: ${getErrorMessage(error)}`,
-          code: "DELETE_CATEGORY_FAILED",
-        },
-      };
+      throw new Error(`Failed to delete category: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleListTags(
     client: WordPressClient,
-    params: TagQueryParams,
-  ): Promise<MCPToolResponse> {
+    params: any,
+  ): Promise<any> {
     try {
       const tags = await client.getTags(params);
       if (tags.length === 0) {
-        return { content: "No tags found." };
+        return "No tags found.";
       }
       const content =
         `Found ${tags.length} tags:\n\n` +
         tags
           .map((t) => `- ID ${t.id}: **${t.name}** (Posts: ${t.count})`)
           .join("\n");
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to list tags: ${getErrorMessage(error)}`,
-          code: "LIST_TAGS_FAILED",
-        },
-      };
+      throw new Error(`Failed to list tags: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleGetTag(
     client: WordPressClient,
     params: { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const tag = await client.getTag(params.id);
       const content =
@@ -314,70 +276,45 @@ export class TaxonomyTools {
         `- **Name:** ${tag.name}\n` +
         `- **Slug:** ${tag.slug}\n` +
         `- **Post Count:** ${tag.count}`;
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to get tag: ${getErrorMessage(error)}`,
-          code: "GET_TAG_FAILED",
-        },
-      };
+      throw new Error(`Failed to get tag: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleCreateTag(
     client: WordPressClient,
     params: CreateTagRequest,
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const tag = await client.createTag(params);
-      return {
-        content: `✅ Tag "${tag.name}" created successfully with ID: ${tag.id}.`,
-      };
+      return `✅ Tag "${tag.name}" created successfully with ID: ${tag.id}.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to create tag: ${getErrorMessage(error)}`,
-          code: "CREATE_TAG_FAILED",
-        },
-      };
+      throw new Error(`Failed to create tag: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleUpdateTag(
     client: WordPressClient,
     params: UpdateTagRequest & { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
-      const { id, ...updateData } = params;
-      const tag = await client.updateTag(id, updateData);
-      return {
-        content: `✅ Tag ${tag.id} updated successfully.`,
-      };
+      const tag = await client.updateTag(params);
+      return `✅ Tag ${tag.id} updated successfully.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to update tag: ${getErrorMessage(error)}`,
-          code: "UPDATE_TAG_FAILED",
-        },
-      };
+      throw new Error(`Failed to update tag: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleDeleteTag(
     client: WordPressClient,
     params: { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       await client.deleteTag(params.id);
-      return { content: `✅ Tag ${params.id} has been deleted.` };
+      return `✅ Tag ${params.id} has been deleted.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to delete tag: ${getErrorMessage(error)}`,
-          code: "DELETE_TAG_FAILED",
-        },
-      };
+      throw new Error(`Failed to delete tag: ${getErrorMessage(error)}`);
     }
   }
 }

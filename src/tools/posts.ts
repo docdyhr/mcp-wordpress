@@ -1,5 +1,4 @@
-import { MCPTool, MCPToolResponse } from "@mcp/server";
-import WordPressClient from "../client/api.js";
+import { WordPressClient } from "../client/api.js";
 import {
   CreatePostRequest,
   PostQueryParams,
@@ -16,7 +15,7 @@ export class PostTools {
    * Retrieves the list of post management tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): MCPTool[] {
+  public getTools(): any[] {
     return [
       {
         name: "wp_list_posts",
@@ -174,11 +173,11 @@ export class PostTools {
   public async handleListPosts(
     client: WordPressClient,
     params: PostQueryParams,
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const posts = await client.getPosts(params);
       if (posts.length === 0) {
-        return { content: "No posts found matching the criteria." };
+        return "No posts found matching the criteria.";
       }
       const content =
         `Found ${posts.length} posts:\n\n` +
@@ -188,21 +187,16 @@ export class PostTools {
               `- ID ${p.id}: **${p.title.rendered}** (${p.status})\n  Link: ${p.link}`,
           )
           .join("\n");
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to list posts: ${getErrorMessage(error)}`,
-          code: "LIST_POSTS_FAILED",
-        },
-      };
+      throw new Error(`Failed to list posts: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleGetPost(
     client: WordPressClient,
     params: { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const post = await client.getPost(params.id);
       const content =
@@ -211,101 +205,71 @@ export class PostTools {
         `- **Status:** ${post.status}\n` +
         `- **Link:** ${post.link}\n` +
         `- **Date:** ${new Date(post.date).toLocaleString()}`;
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to get post: ${getErrorMessage(error)}`,
-          code: "GET_POST_FAILED",
-        },
-      };
+      throw new Error(`Failed to get post: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleCreatePost(
     client: WordPressClient,
     params: CreatePostRequest,
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const post = await client.createPost(params);
-      return {
-        content: `✅ Post created successfully!\n- ID: ${post.id}\n- Title: ${post.title.rendered}\n- Link: ${post.link}`,
-      };
+      return `✅ Post created successfully!\n- ID: ${post.id}\n- Title: ${post.title.rendered}\n- Link: ${post.link}`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to create post: ${getErrorMessage(error)}`,
-          code: "CREATE_POST_FAILED",
-        },
-      };
+      throw new Error(`Failed to create post: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleUpdatePost(
     client: WordPressClient,
     params: UpdatePostRequest & { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
-      const { id, ...updateData } = params;
-      const post = await client.updatePost(id, updateData);
-      return {
-        content: `✅ Post ${post.id} updated successfully.`,
-      };
+      const post = await client.updatePost(params);
+      return `✅ Post ${post.id} updated successfully.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to update post: ${getErrorMessage(error)}`,
-          code: "UPDATE_POST_FAILED",
-        },
-      };
+      throw new Error(`Failed to update post: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleDeletePost(
     client: WordPressClient,
     params: { id: number; force?: boolean },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       await client.deletePost(params.id, params.force);
       const action = params.force ? "permanently deleted" : "moved to trash";
-      return { content: `✅ Post ${params.id} has been ${action}.` };
+      return `✅ Post ${params.id} has been ${action}.`;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to delete post: ${getErrorMessage(error)}`,
-          code: "DELETE_POST_FAILED",
-        },
-      };
+      throw new Error(`Failed to delete post: ${getErrorMessage(error)}`);
     }
   }
 
   public async handleGetPostRevisions(
     client: WordPressClient,
     params: { id: number },
-  ): Promise<MCPToolResponse> {
+  ): Promise<any> {
     try {
       const revisions = await client.getPostRevisions(params.id);
       if (revisions.length === 0) {
-        return { content: `No revisions found for post ${params.id}.` };
+        return `No revisions found for post ${params.id}.`;
       }
       const content =
         `Found ${revisions.length} revisions for post ${params.id}:\n\n` +
         revisions
           .map(
             (r) =>
-              `- Revision by **${r.author.name}** at ${new Date(
+              `- Revision by user ID ${r.author} at ${new Date(
                 r.modified,
               ).toLocaleString()}`,
           )
           .join("\n");
-      return { content };
+      return content;
     } catch (error) {
-      return {
-        error: {
-          message: `Failed to get post revisions: ${getErrorMessage(error)}`,
-          code: "GET_REVISIONS_FAILED",
-        },
-      };
+      throw new Error(`Failed to get post revisions: ${getErrorMessage(error)}`);
     }
   }
 }

@@ -1,18 +1,14 @@
-import {
-  MCPServer,
-  MCPTool,
-  MCPToolHandler,
-  MCPToolRequest,
-  MCPToolResponse,
-} from "@mcp/server";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import dotenv from "dotenv";
 import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
-import WordPressClient from "./client/api.js";
-import { WordPressAuthMethod, WordPressClientConfig } from "./types/client.js";
+import { WordPressClient } from "./client/api.js";
+import { AuthMethod, WordPressClientConfig } from "./types/client.js";
 import * as Tools from "./tools/index.js";
 import { getErrorMessage } from "./utils/error.js";
+import { z } from "zod";
 
 // --- Constants ---
 const __filename = fileURLToPath(import.meta.url);
@@ -25,11 +21,9 @@ const SERVER_VERSION = "1.1.0-multi-site"; // Updated version
 
 // --- Main Server Class ---
 class MCPWordPressServer {
-  private server: MCPServer;
+  private server: McpServer;
   // MODIFICATION: Manages multiple WordPress clients, keyed by site ID.
   private wordpressClients: Map<string, WordPressClient> = new Map();
-  private tools: MCPTool[] = [];
-  private handlers: { [key: string]: MCPToolHandler } = {};
   private initialized: boolean = false;
   // MODIFICATION: Stores the configurations for all loaded sites.
   private siteConfigs: any[] = [];
@@ -44,14 +38,12 @@ class MCPWordPressServer {
       process.exit(1);
     }
 
-    this.server = new MCPServer({
+    this.server = new McpServer({
       name: "mcp-wordpress",
       version: SERVER_VERSION,
-      description:
-        "A server for managing WordPress sites using the Model Context Protocol.",
     });
 
-    this.setupServer();
+    this.setupTools();
   }
 
   private loadConfiguration(mcpConfig?: any) {
@@ -83,13 +75,13 @@ class MCPWordPressServer {
       for (const site of this.siteConfigs) {
         if (site.id && site.name && site.config) {
           const clientConfig: WordPressClientConfig = {
-            siteUrl: site.config.WORDPRESS_SITE_URL,
+            baseUrl: site.config.WORDPRESS_SITE_URL,
             auth: {
               method:
-                site.config.WORDPRESS_AUTH_METHOD ||
-                WordPressAuthMethod.AppPassword,
+                (site.config.WORDPRESS_AUTH_METHOD as AuthMethod) ||
+                "app-password",
               username: site.config.WORDPRESS_USERNAME,
-              password: site.config.WORDPRESS_APP_PASSWORD,
+              appPassword: site.config.WORDPRESS_APP_PASSWORD,
             },
           };
           const client = new WordPressClient(clientConfig);
@@ -121,7 +113,7 @@ class MCPWordPressServer {
       mcpConfig?.wordpressAppPassword || process.env.WORDPRESS_APP_PASSWORD;
     const authMethod = (mcpConfig?.wordpressAuthMethod ||
       process.env.WORDPRESS_AUTH_METHOD ||
-      "app-password") as WordPressAuthMethod;
+      "app-password") as AuthMethod;
 
     if (!siteUrl || !username || !password) {
       console.error(
@@ -134,8 +126,8 @@ class MCPWordPressServer {
     }
 
     const singleSiteConfig: WordPressClientConfig = {
-      siteUrl,
-      auth: { method: authMethod, username, password },
+      baseUrl: siteUrl,
+      auth: { method: authMethod, username, appPassword: password },
     };
     const client = new WordPressClient(singleSiteConfig);
     this.wordpressClients.set("default", client);
@@ -149,73 +141,118 @@ class MCPWordPressServer {
     );
   }
 
-  private setupServer() {
+  private setupTools() {
+    // Register all tools from the tools directory
     Object.values(Tools).forEach((ToolClass) => {
       const toolInstance = new ToolClass();
       const tools = toolInstance.getTools();
-      this.tools.push(...tools);
-    });
-
-    // MODIFICATION: Dynamically add a 'site' parameter to all tools.
-    this.tools.forEach((tool) => {
-      tool.parameters = tool.parameters || [];
-      tool.parameters.push({
-        name: "site",
-        type: "string",
-        description:
-          "The ID of the WordPress site to target (from mcp-wordpress.config.json).",
-        required: this.wordpressClients.size > 1,
+      
+      tools.forEach((tool) => {
+        this.registerTool(tool);
       });
     });
-
-    this.tools.forEach((tool) => {
-      this.handlers[tool.name] = this.createToolHandler(tool);
-    });
-
-    this.server.registerTools(this.tools, this.handlers);
   }
 
-  private createToolHandler(tool: MCPTool): MCPToolHandler {
-    return async (request: MCPToolRequest): Promise<MCPToolResponse> => {
-      const { params } = request;
-      const siteId = (params.site as string) || "default";
-
-      const client = this.wordpressClients.get(siteId);
-
-      if (!client) {
-        const availableSites = Array.from(this.wordpressClients.keys()).join(
-          ", ",
-        );
-        return {
-          error: {
-            message: `Site with ID '${siteId}' not found. Available sites: ${availableSites}`,
-            code: "SITE_NOT_FOUND",
-          },
-        };
-      }
-
-      try {
-        if (typeof (tool as any).handler !== "function") {
-          return {
-            error: {
-              message: `Tool '${tool.name}' is not implemented correctly.`,
-            },
-          };
-        }
-        // MODIFICATION: Pass the selected WordPress client to the tool's handler.
-        return await (tool as any).handler(client, params);
-      } catch (error) {
-        if (this.isAuthenticationError(error)) {
-          return {
-            error: {
-              message: `Authentication failed for site '${siteId}'. Please check your credentials.`,
-              code: "AUTH_ERROR",
-            },
-          };
-        }
-        return { error: { message: getErrorMessage(error) } };
-      }
+  private registerTool(tool: any) {
+    // Create base parameter schema with site parameter
+    const baseSchema = {
+      site: z.string()
+        .optional()
+        .describe("The ID of the WordPress site to target (from mcp-wordpress.config.json). Required if multiple sites are configured."),
     };
+
+    // Merge with tool-specific parameters
+    const parameterSchema = tool.parameters?.reduce((schema: any, param: any) => {
+      let zodType;
+      
+      switch (param.type) {
+        case 'string':
+          zodType = z.string();
+          break;
+        case 'number':
+          zodType = z.number();
+          break;
+        case 'boolean':
+          zodType = z.boolean();
+          break;
+        case 'array':
+          zodType = z.array(z.string());
+          break;
+        case 'object':
+          zodType = z.record(z.any());
+          break;
+        default:
+          zodType = z.string();
+      }
+
+      if (param.description) {
+        zodType = zodType.describe(param.description);
+      }
+
+      if (!param.required) {
+        zodType = zodType.optional();
+      }
+
+      schema[param.name] = zodType;
+      return schema;
+    }, { ...baseSchema }) || baseSchema;
+
+    // Make site parameter required if multiple sites are configured
+    if (this.wordpressClients.size > 1) {
+      parameterSchema.site = parameterSchema.site.describe("The ID of the WordPress site to target (from mcp-wordpress.config.json). Required when multiple sites are configured.");
+    }
+
+    this.server.tool(
+      tool.name,
+      tool.description || `WordPress tool: ${tool.name}`,
+      parameterSchema,
+      async (args: any) => {
+        try {
+          const siteId = args.site || "default";
+          const client = this.wordpressClients.get(siteId);
+
+          if (!client) {
+            const availableSites = Array.from(this.wordpressClients.keys()).join(", ");
+            return {
+              content: [{
+                type: "text" as const,
+                text: `Error: Site with ID '${siteId}' not found. Available sites: ${availableSites}`
+              }],
+              isError: true
+            };
+          }
+
+          // Call the tool handler with the client and parameters
+          const result = await tool.handler(client, args);
+          
+          return {
+            content: [{
+              type: "text" as const,
+              text: typeof result === 'string' ? result : JSON.stringify(result, null, 2)
+            }]
+          };
+
+        } catch (error) {
+          if (this.isAuthenticationError(error)) {
+            return {
+              content: [{
+                type: "text" as const,
+                text: `Authentication failed for site '${args.site || "default"}'. Please check your credentials.`
+              }],
+              isError: true
+            };
+          }
+          
+          return {
+            content: [{
+              type: "text" as const,
+              text: `Error: ${getErrorMessage(error)}`
+            }],
+            isError: true
+          };
+        }
+      }
+    );
   }
 
   private async testClientConnections(): Promise<void> {
@@ -225,7 +262,7 @@ class MCPWordPressServer {
     const connectionPromises = Array.from(this.wordpressClients.entries()).map(
       async ([siteId, client]) => {
         try {
-          await client.testConnection();
+          await client.ping();
           console.log(`SUCCESS: Connection to site '${siteId}' successful.`);
         } catch (error) {
           console.error(
@@ -256,15 +293,19 @@ class MCPWordPressServer {
       await this.testClientConnections();
     }
     console.log("INFO: Starting MCP WordPress Server...");
-    await this.server.start();
+    
+    // Connect to stdio transport
+    const transport = new StdioServerTransport();
+    await this.server.connect(transport);
+    
     console.log(
-      `INFO: Server started. ${this.tools.length} tools available for ${this.wordpressClients.size} site(s).`,
+      `INFO: Server started and connected. Tools available for ${this.wordpressClients.size} site(s).`,
     );
   }
 
   async shutdown() {
     console.log("INFO: Shutting down MCP WordPress Server...");
-    await this.server.stop();
+    await this.server.close();
     console.log("INFO: Server stopped.");
   }
 }
@@ -293,3 +334,4 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 }
 
 export default MCPWordPressServer;
+export { MCPWordPressServer };
