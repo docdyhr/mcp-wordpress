@@ -44,11 +44,11 @@ Your Claude Desktop configuration has been updated at:
   "mcpServers": {
     "mcp-wordpress": {
       "command": "node",
-      "args": ["/Users/thomas/Programming/mcp-wordpress/dist/index.js"],
+      "args": ["/path/to/your/mcp-wordpress/dist/index.js"],
       "env": {
-        "WORDPRESS_SITE_URL": "https://dyhr.com",
-        "WORDPRESS_USERNAME": "claude_desktop",
-        "WORDPRESS_APP_PASSWORD": "DNBY g8Y1 0dHi OZVd Kr4o DpsS",
+        "WORDPRESS_SITE_URL": "https://example.com",
+        "WORDPRESS_USERNAME": "your_username",
+        "WORDPRESS_APP_PASSWORD": "xxxx xxxx xxxx xxxx xxxx xxxx",
         "WORDPRESS_AUTH_METHOD": "app-password"
       }
     }
