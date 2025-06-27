@@ -50,12 +50,12 @@ class MCPWordPressServer {
     const configPath = path.resolve(rootDir, "mcp-wordpress.config.json");
 
     if (fs.existsSync(configPath)) {
-      console.log(
+      console.error(
         "INFO: Found mcp-wordpress.config.json, loading multi-site configuration.",
       );
       this.loadMultiSiteConfig(configPath);
     } else {
-      console.log(
+      console.error(
         "INFO: mcp-wordpress.config.json not found, falling back to environment variables for single-site mode.",
       );
       this.loadSingleSiteFromEnv(mcpConfig);
@@ -86,7 +86,7 @@ class MCPWordPressServer {
           };
           const client = new WordPressClient(clientConfig);
           this.wordpressClients.set(site.id, client);
-          console.log(
+          console.error(
             `INFO: Initialized client for site: ${site.name} (ID: ${site.id})`,
           );
         } else {
@@ -136,7 +136,7 @@ class MCPWordPressServer {
       name: "Default Site",
       config: singleSiteConfig,
     });
-    console.log(
+    console.error(
       "INFO: Initialized client for default site in single-site mode.",
     );
   }
@@ -256,14 +256,14 @@ class MCPWordPressServer {
   }
 
   private async testClientConnections(): Promise<void> {
-    console.log(
+    console.error(
       "INFO: Testing connections to all configured WordPress sites...",
     );
     const connectionPromises = Array.from(this.wordpressClients.entries()).map(
       async ([siteId, client]) => {
         try {
           await client.ping();
-          console.log(`SUCCESS: Connection to site '${siteId}' successful.`);
+          console.error(`SUCCESS: Connection to site '${siteId}' successful.`);
         } catch (error) {
           console.error(
             `ERROR: Failed to connect to site '${siteId}': ${getErrorMessage(error)}`,
@@ -278,7 +278,7 @@ class MCPWordPressServer {
     );
     await Promise.all(connectionPromises);
     this.initialized = true;
-    console.log("INFO: Connection tests complete.");
+    console.error("INFO: Connection tests complete.");
   }
 
   private isAuthenticationError(error: any): boolean {
@@ -292,21 +292,21 @@ class MCPWordPressServer {
     if (!this.initialized) {
       await this.testClientConnections();
     }
-    console.log("INFO: Starting MCP WordPress Server...");
+    console.error("INFO: Starting MCP WordPress Server...");
     
     // Connect to stdio transport
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
     
-    console.log(
+    console.error(
       `INFO: Server started and connected. Tools available for ${this.wordpressClients.size} site(s).`,
     );
   }
 
   async shutdown() {
-    console.log("INFO: Shutting down MCP WordPress Server...");
+    console.error("INFO: Shutting down MCP WordPress Server...");
     await this.server.close();
-    console.log("INFO: Server stopped.");
+    console.error("INFO: Server stopped.");
   }
 }
 
