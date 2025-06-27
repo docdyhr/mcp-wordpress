@@ -5,13 +5,14 @@ A comprehensive Model Context Protocol (MCP) server for WordPress management thr
 ## 🚀 Features
 
 - **54 WordPress Management Tools** across 8 categories
+- **Multi-Site Support** - Manage multiple WordPress sites from one configuration
 - **100% TypeScript** - Complete type safety and IntelliSense
-- **Modern ES Modules** - Optimized for performance
-- **Interactive Setup Wizard** - Easy configuration
-- **Comprehensive Testing** - Complete test suite with 93%+ success rate
+- **Class-Based Architecture** - Modern, maintainable code structure
+- **Enhanced Error Handling** - Comprehensive error categorization and recovery
+- **Improved Test Coverage** - Expanded test suite with validation and edge cases
 - **Flexible Authentication** - Supports App Passwords, JWT, Basic Auth, API Key
 - **Debug & Monitoring** - Structured logging and error tracking
-- **Production Ready** - Fully tested and operational
+- **Production Ready** - Security-reviewed and performance-optimized
 
 ## ⚡ Quick Start
 

@@ -52,9 +52,13 @@
     "zod": "^3.25.67"
   },
   "devDependencies": {
+    "@eslint/js": "^9.29.0",
     "@types/jest": "^30.0.0",
     "@types/nock": "^10.0.3",
     "@types/node": "^20.19.1",
+    "eslint": "^9.29.0",
+    "eslint-plugin-jest": "^29.0.1",
+    "eslint-plugin-node": "^11.1.0",
     "nock": "^14.0.5",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",

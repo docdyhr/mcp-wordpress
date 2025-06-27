@@ -5,7 +5,7 @@ import jestPlugin from 'eslint-plugin-jest';
 export default [
   js.configs.recommended,
   {
-    files: ['**/*.js'],
+    files: ['**/*.js', '**/*.ts'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
