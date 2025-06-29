@@ -1,6 +1,6 @@
 /**
  * Cached WordPress API Client
- * Extends the base WordPress client with intelligent caching capabilities
+ * Extends the base WordPress client with intelligent caching capabilities and performance monitoring
  */
 
 import { WordPressClient } from './api.js';
@@ -15,9 +15,7 @@ import type {
 } from '../types/client.js';
 import type {
   WordPressPost,
-  WordPressPage,
   WordPressUser,
-  WordPressComment,
   WordPressCategory,
   WordPressTag,
   WordPressSiteSettings,
@@ -188,46 +186,6 @@ export class CachedWordPressClient extends WordPressClient {
    * Cache management methods
    */
 
-  /**
-   * Clear all cache for this site
-   */
-  clearCache(): number {
-    return this.httpCache.invalidateAll();
-  }
-
-  /**
-   * Clear specific cache pattern
-   */
-  clearCachePattern(pattern: string): number {
-    return this.httpCache.invalidatePattern(pattern);
-  }
-
-  /**
-   * Pre-warm cache with common data
-   */
-  async warmCache(): Promise<void> {
-    try {
-      // Warm essential data
-      await Promise.all([
-        this.getCurrentUser().catch(() => {}), // User might not be authenticated
-        this.getCategories().catch(() => {}),
-        this.getTags().catch(() => {}),
-        this.getSiteSettings().catch(() => {})
-      ]);
-    } catch (error) {
-      console.warn('Cache warming failed:', error);
-    }
-  }
-
-  /**
-   * Get cache statistics
-   */
-  getCacheStats() {
-    return {
-      cache: this.cacheManager.getStats(),
-      invalidation: this.cacheInvalidation.getStats()
-    };
-  }
 
   /**
    * Private helper methods
@@ -286,18 +244,18 @@ export class CachedWordPressClient extends WordPressClient {
     let operationType: 'create' | 'update' | 'delete';
     
     switch (method.toUpperCase()) {
-      case 'POST':
-        operationType = 'create';
-        break;
-      case 'PUT':
-      case 'PATCH':
-        operationType = 'update';
-        break;
-      case 'DELETE':
-        operationType = 'delete';
-        break;
-      default:
-        return;
+    case 'POST':
+      operationType = 'create';
+      break;
+    case 'PUT':
+    case 'PATCH':
+      operationType = 'update';
+      break;
+    case 'DELETE':
+      operationType = 'delete';
+      break;
+    default:
+      return;
     }
 
     await this.cacheInvalidation.invalidateResource(resource, id, operationType);
@@ -341,5 +299,144 @@ export class CachedWordPressClient extends WordPressClient {
   private isSessionEndpoint(endpoint: string): boolean {
     const sessionEndpoints = ['users/me', 'application-passwords'];
     return sessionEndpoints.some(pattern => endpoint.includes(pattern));
+  }
+
+  /**
+   * Performance monitoring and cache management methods
+   */
+
+  /**
+   * Get cache statistics for performance monitoring
+   */
+  getCacheStats(): any {
+    return this.cacheManager.getStats();
+  }
+
+  /**
+   * Get cache manager instance (for performance monitoring integration)
+   */
+  getCacheManager(): CacheManager {
+    return this.cacheManager;
+  }
+
+  /**
+   * Clear cache entries (for cache management tools)
+   */
+  clearCache(): number {
+    const stats = this.cacheManager.getStats();
+    this.cacheManager.clear();
+    return stats.totalSize;
+  }
+
+  /**
+   * Clear cache entries matching pattern
+   */
+  clearCachePattern(pattern: string): number {
+    const regex = new RegExp(pattern, 'i');
+    return this.cacheManager.clearPattern(regex);
+  }
+
+  /**
+   * Warm cache with essential data
+   */
+  async warmCache(): Promise<void> {
+    try {
+      // Pre-load frequently accessed data
+      const warmupOperations = [
+        () => this.getCurrentUser().catch(() => null),
+        () => this.getCategories().catch(() => null),
+        () => this.getTags().catch(() => null),
+        () => this.getSiteSettings().catch(() => null)
+      ];
+
+      // Execute warmup operations in parallel
+      await Promise.allSettled(warmupOperations.map(op => op()));
+    } catch (_error) {
+      // Ignore warmup errors - they shouldn't fail the cache warming
+    }
+  }
+
+  /**
+   * Get cache efficiency metrics
+   */
+  getCacheEfficiency(): {
+    hitRate: number;
+    missRate: number;
+    efficiency: string;
+    memoryUsage: number;
+    totalEntries: number;
+    } {
+    const stats = this.cacheManager.getStats();
+    const total = stats.hits + stats.misses;
+    const hitRate = total > 0 ? stats.hits / total : 0;
+    const missRate = 1 - hitRate;
+    
+    let efficiency = 'Poor';
+    if (hitRate >= 0.9) efficiency = 'Excellent';
+    else if (hitRate >= 0.8) efficiency = 'Good';
+    else if (hitRate >= 0.6) efficiency = 'Fair';
+
+    return {
+      hitRate,
+      missRate,
+      efficiency,
+      memoryUsage: this.estimateMemoryUsage(),
+      totalEntries: stats.totalSize
+    };
+  }
+
+  /**
+   * Get cache configuration info
+   */
+  getCacheInfo(): {
+    enabled: boolean;
+    siteId: string;
+    maxSize: number;
+    defaultTTL: number;
+    currentSize: number;
+    ttlPresets: any;
+    } {
+    const stats = this.cacheManager.getStats();
+    
+    return {
+      enabled: SecurityConfig.cache.enabled,
+      siteId: this.siteId,
+      maxSize: SecurityConfig.cache.maxSize,
+      defaultTTL: SecurityConfig.cache.defaultTTL,
+      currentSize: stats.totalSize,
+      ttlPresets: SecurityConfig.cache.ttlPresets
+    };
+  }
+
+  /**
+   * Estimate memory usage of cache (in MB)
+   */
+  private estimateMemoryUsage(): number {
+    const stats = this.cacheManager.getStats();
+    // Rough estimate: ~1KB per cache entry
+    return (stats.totalSize * 1024) / (1024 * 1024);
+  }
+
+  /**
+   * Get detailed cache performance metrics
+   */
+  getDetailedCacheMetrics(): {
+    statistics: any;
+    efficiency: any;
+    configuration: any;
+    siteInfo: {
+      siteId: string;
+      baseUrl: string;
+    };
+    } {
+    return {
+      statistics: this.getCacheStats(),
+      efficiency: this.getCacheEfficiency(),
+      configuration: this.getCacheInfo(),
+      siteInfo: {
+        siteId: this.siteId,
+        baseUrl: this.config.baseUrl
+      }
+    };
   }
 }

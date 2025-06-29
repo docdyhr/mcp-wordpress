@@ -3,6 +3,7 @@ export { default as CacheTools } from './cache.js';
 export { default as CommentTools } from './comments.js';
 export { default as MediaTools } from './media.js';
 export { default as PageTools } from './pages.js';
+export { default as PerformanceTools } from './performance.js';
 export { default as PostTools } from './posts.js';
 export { default as SiteTools } from './site.js';
 export { default as TaxonomyTools } from './taxonomies.js';

@@ -40,8 +40,8 @@ export class ToolRegistry {
     Object.values(Tools).forEach((ToolClass) => {
       let toolInstance: any;
       
-      // Cache tools need the clients map
-      if (ToolClass.name === 'CacheTools') {
+      // Cache and Performance tools need the clients map
+      if (ToolClass.name === 'CacheTools' || ToolClass.name === 'PerformanceTools') {
         toolInstance = new ToolClass(this.wordpressClients);
       } else {
         toolInstance = new (ToolClass as new () => any)();
