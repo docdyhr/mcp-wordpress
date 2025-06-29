@@ -1,6 +1,6 @@
 {
   "name": "mcp-wordpress",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "Comprehensive Model Context Protocol server for WordPress management with 54 tools, TypeScript support, and production-ready authentication",
   "main": "dist/index.js",
   "type": "module",
@@ -60,7 +60,6 @@
     "@eslint/js": "^9.29.0",
     "@jest/globals": "^30.0.0",
     "@types/jest": "^30.0.0",
-    "@types/nock": "^10.0.3",
     "@types/node": "^20.19.1",
     "@typescript-eslint/parser": "^8.35.0",
     "eslint": "^9.29.0",
@@ -73,8 +72,6 @@
     "nock": "^14.0.5",
     "prettier": "^3.6.2",
     "sort-package-json": "^3.3.1",
-    "ts-jest": "^29.4.0",
-    "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "engines": {

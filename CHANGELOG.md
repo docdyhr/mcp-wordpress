@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.8] - 2025-06-29
+
+### Added
+- **Modular Server Architecture**: Complete refactoring of main server class
+  - `ServerConfiguration` class for centralized configuration management
+  - `ToolRegistry` class for tool registration and parameter validation
+  - `ConnectionTester` class for WordPress client health checks
+- **Enhanced Test Coverage**: Added comprehensive tests for new modular components
+- **Improved Documentation**: Streamlined TODO.md and documentation structure
+
+### Changed
+- **Server Architecture**: Refactored `src/index.ts` from 364 lines to focused, modular design
+- **Separation of Concerns**: Extracted configuration, tool registration, and connection testing logic
+- **Code Maintainability**: Improved readability and testability of core server components
+
+### Removed
+- **Unused Dependencies**: Removed `@types/nock`, `ts-jest`, and `ts-node` (12 packages)
+- **Redundant Code**: Eliminated duplicate configuration and tool registration logic
+
+### Fixed
+- **Technical Debt**: Addressed major architectural concerns identified in codebase analysis
+- **Code Quality**: Standardized module exports and improved error handling patterns
+
 ## [1.1.4] - 2025-06-29
 
 ### Fixed

@@ -117,46 +117,44 @@ describe('TypeScript Build Tests', () => {
   });
 
   describe('Server Instantiation', () => {
-    it('should be able to create MCPWordPressServer instance', async () => {
+    it('should export MCPWordPressServer class', async () => {
       const { MCPWordPressServer } = await import('../dist/index.js');
       
-      // Skip server instantiation in CI if no credentials are available
-      const hasCredentials = process.env.WORDPRESS_SITE_URL && 
-                           process.env.WORDPRESS_USERNAME && 
-                           (process.env.WORDPRESS_APP_PASSWORD || process.env.WORDPRESS_PASSWORD);
-      
-      if (hasCredentials) {
-        const server = new MCPWordPressServer();
-        expect(server).toBeDefined();
-        expect(typeof server.run).toBe('function');
-      } else {
-        // In CI environment without credentials, just verify the class exists
-        expect(MCPWordPressServer).toBeDefined();
-        expect(typeof MCPWordPressServer).toBe('function');
-        console.log('   ✓ Skipped server instantiation - no credentials available (CI environment)');
-      }
+      expect(MCPWordPressServer).toBeDefined();
+      expect(typeof MCPWordPressServer).toBe('function');
     });
 
-    it('should have correct tool and handler counts', async () => {
-      const { MCPWordPressServer } = await import('../dist/index.js');
-      
-      // Skip server instantiation in CI if no credentials are available
+    it('should be able to create MCPWordPressServer instance with credentials', async () => {
       const hasCredentials = process.env.WORDPRESS_SITE_URL && 
                            process.env.WORDPRESS_USERNAME && 
                            (process.env.WORDPRESS_APP_PASSWORD || process.env.WORDPRESS_PASSWORD);
-      
-      if (hasCredentials) {
-        const server = new MCPWordPressServer();
-        
-        // Server should be properly initialized
-        expect(server).toBeDefined();
-        // We can't check private properties, but we know the server has 54 tools
-        // registered based on the tool definitions
-      } else {
-        // In CI environment, just verify tool modules exist
-        expect(MCPWordPressServer).toBeDefined();
-        console.log('   ✓ Skipped tool count verification - no credentials available (CI environment)');
+
+      if (!hasCredentials) {
+        console.log('   ✓ Skipped server instantiation - no credentials available (CI environment)');
+        return;
       }
+
+      const { MCPWordPressServer } = await import('../dist/index.js');
+      const server = new MCPWordPressServer();
+      expect(server).toBeDefined();
+      expect(typeof server.run).toBe('function');
+    });
+
+    it('should have tool registration capabilities', async () => {
+      const hasCredentials = process.env.WORDPRESS_SITE_URL && 
+                           process.env.WORDPRESS_USERNAME && 
+                           (process.env.WORDPRESS_APP_PASSWORD || process.env.WORDPRESS_PASSWORD);
+
+      if (!hasCredentials) {
+        console.log('   ✓ Skipped tool count verification - no credentials available (CI environment)');
+        return;
+      }
+
+      const { MCPWordPressServer } = await import('../dist/index.js');
+      const server = new MCPWordPressServer();
+      expect(server).toBeDefined();
+      // We can't check private properties, but we know the server has 54 tools
+      // registered based on the tool definitions
     });
   });
 
