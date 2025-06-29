@@ -6,13 +6,13 @@ The project includes a pre-configured `.npmrc` file that uses environment variab
 
 1. **Set your NPM token as environment variable:**
    ```bash
-   export NPM_TOKEN="your_npm_token_here"
+   export NPM_TOKEN="npm_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
    ```
 
 2. **Or add to your shell profile:**
    ```bash
    # Add to ~/.bashrc, ~/.zshrc, or ~/.profile
-   echo 'export NPM_TOKEN="your_npm_token_here"' >> ~/.zshrc
+   echo 'export NPM_TOKEN="npm_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"' >> ~/.zshrc
    source ~/.zshrc
    ```
 
@@ -55,7 +55,7 @@ The project includes a pre-configured `.npmrc` file that uses environment variab
 3. **Using environment variable** (more secure):
    ```bash
    # Add to ~/.bashrc or ~/.zshrc
-   export NPM_TOKEN="your_npm_token_here"
+   export NPM_TOKEN="npm_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
    
    # Then in .npmrc:
    //registry.npmjs.org/:_authToken=${NPM_TOKEN}

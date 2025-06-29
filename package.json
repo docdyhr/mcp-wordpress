@@ -33,6 +33,9 @@
     "typecheck": "tsc --noEmit",
     "check:ignore": "node scripts/sync-ignore-files.js",
     "check:npm": "node scripts/test-npm-config.js",
+    "security:check": "node scripts/security-check.js",
+    "security:audit": "npm audit --production",
+    "security:fix": "npm audit fix",
     "prepare": "husky",
     "pre-commit": "lint-staged",
     "prepublishOnly": "npm run build && npm run check:ignore"
