@@ -13,101 +13,100 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = join(__dirname, "..");
 
+// Default site to use for tests (from multi-site config)
+const DEFAULT_SITE = "site1";
+
 // Test cases for all tools
 const testCases = [
   // Authentication Tools
   {
     name: "wp_test_auth",
     description: "Test WordPress authentication",
-    arguments: {},
+    arguments: { site: DEFAULT_SITE },
   },
   {
     name: "wp_get_auth_status",
     description: "Get authentication status",
-    arguments: {},
+    arguments: { site: DEFAULT_SITE },
   },
 
   // Site Management Tools
   {
     name: "wp_get_site_settings",
     description: "Get site settings",
-    arguments: {},
+    arguments: { site: DEFAULT_SITE },
   },
-  {
-    name: "wp_get_site_stats",
-    description: "Get site statistics",
-    arguments: {},
-  },
+  // Removed wp_get_site_info - doesn't exist
 
   // Posts Tools
   {
     name: "wp_list_posts",
     description: "List posts (limited to 2)",
-    arguments: { per_page: 2 },
+    arguments: { site: DEFAULT_SITE, per_page: 2 },
   },
   {
     name: "wp_get_post",
     description: "Get specific post",
-    arguments: { id: 1571 }, // Use valid post ID from site
+    arguments: { site: DEFAULT_SITE, id: 1571 }, // Use valid post ID from site
   },
 
   // Pages Tools
   {
     name: "wp_list_pages",
     description: "List pages (limited to 2)",
-    arguments: { per_page: 2 },
+    arguments: { site: DEFAULT_SITE, per_page: 2 },
   },
 
   // Users Tools
   {
     name: "wp_list_users",
     description: "List users (limited to 2)",
-    arguments: { per_page: 2 },
+    arguments: { site: DEFAULT_SITE, per_page: 2 },
   },
   {
-    name: "wp_get_user",
+    name: "wp_get_current_user",
     description: "Get current user",
-    arguments: { id: "me" },
+    arguments: { site: DEFAULT_SITE },
   },
 
   // Media Tools
   {
     name: "wp_list_media",
     description: "List media files (limited to 2)",
-    arguments: { per_page: 2 },
+    arguments: { site: DEFAULT_SITE, per_page: 2 },
   },
 
   // Comments Tools
   {
     name: "wp_list_comments",
     description: "List comments (limited to 2)",
-    arguments: { per_page: 2 },
+    arguments: { site: DEFAULT_SITE, per_page: 2 },
   },
 
   // Taxonomies Tools
   {
     name: "wp_list_categories",
     description: "List categories",
-    arguments: {},
+    arguments: { site: DEFAULT_SITE },
   },
   {
     name: "wp_list_tags",
     description: "List tags",
-    arguments: {},
+    arguments: { site: DEFAULT_SITE },
   },
 
   // Application Passwords
   {
     name: "wp_get_application_passwords",
     description: "Get application passwords",
-    arguments: {},
+    arguments: { site: DEFAULT_SITE, user_id: 3 }, // Use known user ID
   },
 
   // Search
   {
     name: "wp_search_site",
     description: "Search site content",
-    arguments: { query: "IT" },
+    arguments: { site: DEFAULT_SITE, term: "wordpress" },
   },
 ];
 
@@ -118,7 +117,7 @@ async function getFirstPostId() {
   const listPostsTest = {
     name: "wp_list_posts",
     description: "Get posts to find valid ID",
-    arguments: { per_page: 1 },
+    arguments: { site: DEFAULT_SITE, per_page: 1 },
   };
 
   const result = await executeTest(listPostsTest);

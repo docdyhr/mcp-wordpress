@@ -109,6 +109,7 @@ const main = async () => {
 
   let passedTests = 0;
   let totalTests = 0;
+  let failureCount = 0;
 
   // Test 1: Application Passwords (Primary method)
   if (process.env.WORDPRESS_APP_PASSWORD && username) {
@@ -124,6 +125,8 @@ const main = async () => {
 
     if (await runAuthTest(config, "Application Passwords")) {
       passedTests++;
+    } else {
+      failureCount++;
     }
   } else {
     log(
@@ -151,6 +154,8 @@ const main = async () => {
 
     if (await runAuthTest(config, "JWT Authentication")) {
       passedTests++;
+    } else {
+      failureCount++;
     }
   } else {
     log("JWT Authentication: Skipped (credentials not configured)", "warning");
@@ -170,6 +175,8 @@ const main = async () => {
 
     if (await runAuthTest(config, "Basic Authentication")) {
       passedTests++;
+    } else {
+      failureCount++;
     }
   } else {
     log(
@@ -191,6 +198,8 @@ const main = async () => {
 
     if (await runAuthTest(config, "API Key Authentication")) {
       passedTests++;
+    } else {
+      failureCount++;
     }
   } else {
     log(

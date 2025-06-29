@@ -4,7 +4,6 @@
  */
 
 import { logger, debug } from "../utils/debug.js";
-import open from "open";
 import * as http from "http";
 import { URL } from "url";
 import type {

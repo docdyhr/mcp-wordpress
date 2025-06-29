@@ -83,7 +83,7 @@ export class AuthTools {
         `**Site:** ${siteConfig.baseUrl}\n` +
         `**Method:** ${siteConfig.auth.method}\n` +
         `**User:** ${user.name} (@${user.slug})\n` +
-        `**Roles:** ${user.roles.join(", ")}\n\n` +
+        `**Roles:** ${user.roles?.join(", ") || "N/A"}\n\n` +
         `Your WordPress connection is working properly.`;
 
       return content;

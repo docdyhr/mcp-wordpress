@@ -17,7 +17,7 @@ const rootDir = path.resolve(__dirname, "..");
 const envPath = path.resolve(rootDir, ".env");
 dotenv.config({ path: envPath });
 
-const SERVER_VERSION = "1.1.0-multi-site"; // Updated version
+const SERVER_VERSION = "1.1.1"; // Updated version with test fixes
 
 // --- Main Server Class ---
 class MCPWordPressServer {

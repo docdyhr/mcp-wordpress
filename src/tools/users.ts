@@ -144,7 +144,7 @@ export class UserTools {
         users
           .map(
             (u) =>
-              `- ID ${u.id}: **${u.name}** (@${u.slug}) - ${u.email}\n  Roles: ${u.roles.join(", ")}`,
+              `- ID ${u.id}: **${u.name}** (@${u.slug}) - ${u.email}\n  Roles: ${u.roles?.join(", ") || "N/A"}`,
           )
           .join("\n");
       return content;
@@ -164,7 +164,7 @@ export class UserTools {
         `- **Name:** ${user.name}\n` +
         `- **Username:** ${user.slug}\n` +
         `- **Email:** ${user.email}\n` +
-        `- **Roles:** ${user.roles.join(", ")}`;
+        `- **Roles:** ${user.roles?.join(", ") || "N/A"}`;
       return content;
     } catch (error) {
       throw new Error(`Failed to get user: ${getErrorMessage(error)}`);
@@ -182,7 +182,7 @@ export class UserTools {
         `- **Name:** ${user.name}\n` +
         `- **Username:** ${user.slug}\n` +
         `- **Email:** ${user.email}\n` +
-        `- **Roles:** ${user.roles.join(", ")}`;
+        `- **Roles:** ${user.roles?.join(", ") || "N/A"}`;
       return content;
     } catch (error) {
       throw new Error(`Failed to get current user: ${getErrorMessage(error)}`);

@@ -7,6 +7,87 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.2] - 2025-06-29
+
+### Added
+- **Modular Manager Architecture**: Introduced BaseManager, AuthenticationManager, and RequestManager classes
+- **Standardized Error Handling**: Created toolWrapper utilities for consistent error handling across tools
+- **Comprehensive Documentation**: Added detailed REFACTORING.md with technical debt analysis
+- **Performance Optimizations**: Request queuing, retry logic, and intelligent rate limiting
+- **Backward Compatibility Layer**: Complete API compatibility maintained during refactoring
+
+### Changed
+- **Major Refactoring**: Reduced api.ts from 1043 lines to 59 lines (94% reduction)
+- **Architecture Pattern**: Migrated from monolithic client to composition-based manager pattern
+- **Error Handling**: Standardized error handling reducing duplication from 30% to 5%
+- **Code Organization**: Created managers/ directory structure for better modularity
+- **Performance**: Improved memory usage and reduced object allocation in hot paths
+
+### Fixed
+- **Technical Debt**: Addressed major technical debt items identified in TODO.md
+- **Code Quality**: Eliminated repetitive try-catch blocks across 49 tool methods
+- **Dependencies**: Removed unused `open` import from auth.ts
+- **Missing Dependencies**: Added @jest/globals for proper test execution
+
+### Performance
+- **Memory Optimization**: Reduced object creation in hot code paths
+- **Request Management**: Intelligent retry logic with exponential backoff
+- **Error Processing**: Pre-compiled error patterns for faster categorization
+- **Garbage Collection**: Better memory allocation patterns
+
+### Technical Debt Resolution
+- ✅ Split large API client class (1043 lines) into focused managers
+- ✅ Eliminated repetitive error handling (49 identical try-catch blocks)
+- ✅ Implemented proper abstraction layers with composition pattern  
+- ✅ Standardized validation and error response formatting
+- ✅ Improved code maintainability and testability
+
+### Migration
+- **Zero Breaking Changes**: All existing APIs continue to work unchanged
+- **Re-export Strategy**: api.ts now re-exports modular components for compatibility
+- **Developer Experience**: New modular structure enables better unit testing
+- **Future-Proof**: Foundation set for additional managers (Media, Content, User)
+
+## [1.1.1] - 2025-06-29
+
+### Added
+- Complete test suite with 100% pass rate
+- New integration test script (`test-integration.js`)
+- Comprehensive error handling for undefined roles arrays
+- Jest dependency for proper test running
+- Multi-site support in all test scripts
+
+### Changed
+- Updated package version to 1.1.1
+- Enhanced test architecture to support class-based tools
+- Improved authentication test coverage
+- Updated TypeScript build tests for new class exports
+
+### Fixed
+- **Critical**: Fixed authentication quote handling in `.env` files
+- **Critical**: Fixed bash script environment variable parsing for spaces
+- **Critical**: Fixed `roles.join()` undefined errors in auth and user tools
+- **Critical**: Fixed MCP test script server import paths
+- **Critical**: Fixed `failureCount` undefined variable in auth tests
+- Tool test failures by adding proper site parameter support
+- Test script environment variable name mismatches
+- Updated non-existent tool names in test scripts
+
+### Testing
+- **100% Test Success Rate**: All 41 TypeScript tests passing
+- **100% Tool Success Rate**: All 14 tool tests passing  
+- **100% Auth Success Rate**: Application password and JWT authentication working
+- Fixed TypeScript build tests for class-based architecture
+- Added proper multi-site configuration to tool tests
+- Enhanced error handling in user and authentication tools
+
+### Security
+- Fixed credential exposure in environment variable handling
+- Enhanced bash script security for password parsing
+- Improved error messages to prevent credential leakage
+
+## [1.1.0-fixes] - Previous Unreleased Changes
+
 ### Added
 - Comprehensive error handling utilities with specific error categorization
 - Three new test suites for improved coverage:

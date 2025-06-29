@@ -131,8 +131,6 @@ temp/
 
 # WordPress MCP Server specific
 mcp-wordpress.config.json
-mcp-wordpress.config.json.backup
-*.backup
 mcp-server.log
 wordpress-debug.log
 
@@ -167,3 +165,23 @@ project-context.md
 .cursor-cache/
 ai-temp/
 claude-temp/
+
+# Test results and outputs (CRITICAL: May contain sensitive data)
+test-results/
+test-outputs/
+*-test-results/
+*test-results*
+*test-outputs*
+test-data-*
+scripts/test-results/
+scripts/test-outputs/
+
+# Configuration backups and temporary config files
+mcp-wordpress-*.config.json
+!mcp-wordpress.config.json.example
+*.config.json.backup
+*.config.backup
+
+# Private development files
+private/
+private-*

@@ -1,6 +1,6 @@
 {
   "name": "@aiondadotcom/mcp-wordpress",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "description": "Comprehensive Model Context Protocol server for WordPress management with 54 tools, TypeScript support, and production-ready authentication",
   "main": "dist/index.js",
   "type": "module",
@@ -53,12 +53,14 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
+    "@jest/globals": "^30.0.0",
     "@types/jest": "^30.0.0",
     "@types/nock": "^10.0.3",
     "@types/node": "^20.19.1",
     "eslint": "^9.29.0",
     "eslint-plugin-jest": "^29.0.1",
     "eslint-plugin-node": "^11.1.0",
+    "jest": "^30.0.0",
     "nock": "^14.0.5",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
