@@ -175,7 +175,7 @@ jobs:
           echo "All dependency updates are compatible with the current codebase." >> compatibility-report.md
 
       - name: 📤 Upload Compatibility Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: compatibility-report
           path: compatibility-report.md

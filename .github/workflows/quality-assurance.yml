@@ -59,7 +59,7 @@ jobs:
           fi
 
       - name: 📤 Upload ESLint Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: eslint-results
@@ -120,7 +120,7 @@ jobs:
           fi
 
       - name: 📤 Upload Security Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: security-results
@@ -167,7 +167,7 @@ jobs:
           fi
 
       - name: 📤 Upload Coverage Reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: |
@@ -175,7 +175,7 @@ jobs:
             coverage-summary.md
 
       - name: 📈 Upload to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           file: ./coverage/lcov.info
           flags: unittests
@@ -226,7 +226,7 @@ jobs:
           " >> performance-report.md
 
       - name: 📤 Upload Performance Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: performance-report
           path: performance-report.md
@@ -278,7 +278,7 @@ jobs:
           done
 
       - name: 📤 Upload Documentation Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: documentation-quality
@@ -329,7 +329,7 @@ jobs:
           fi
 
       - name: 📤 Upload Quality Gates Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: quality-gates-report
           path: quality-gates.md

@@ -88,7 +88,7 @@ jobs:
         run: npm run test:coverage
 
       - name: 📈 Upload Coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           file: ./coverage/lcov.info
           flags: unittests
@@ -131,7 +131,7 @@ jobs:
           node bin/status.js --help || echo "Status command test complete"
 
       - name: 📤 Upload Build Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: github.ref == 'refs/heads/main'
         with:
           name: build-artifacts
@@ -217,7 +217,7 @@ jobs:
           output: 'trivy-results.sarif'
 
       - name: 📤 Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
@@ -253,7 +253,7 @@ jobs:
           npx typedoc --out docs-temp src/index.ts
 
       - name: 📤 Upload Documentation
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: documentation
           path: docs-temp/
