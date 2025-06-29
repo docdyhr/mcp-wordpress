@@ -5,7 +5,6 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { ToolRegistry } from '../server/ToolRegistry.js';
 import * as Tools from '../tools/index.js';
 import type { ToolDefinition } from '../server/ToolRegistry.js';
 
@@ -329,7 +328,7 @@ export class DocumentationGenerator {
 
     return {
       title: `Advanced ${category} Configuration`,
-      description: `Comprehensive example using all available parameters`,
+      description: 'Comprehensive example using all available parameters',
       command: toolDef.name,
       parameters: allParams,
       expectedResponse: this.generateExpectedResponse(toolDef.name, category, 'advanced')
@@ -377,7 +376,7 @@ export class DocumentationGenerator {
         ],
         examples: [this.generateWordPressPostExample()],
         wordpressSource: '/wp-json/wp/v2/posts'
-      },
+      }
       // Add more types as needed
     ];
   }
