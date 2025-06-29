@@ -31,6 +31,8 @@
     "docs:generate": "npm run build && node scripts/generate-docs.js",
     "docs:validate": "npm run docs:generate && node scripts/validate-docs.js",
     "docs:serve": "npm run docs:generate && node scripts/serve-docs.js",
+    "docs:watch": "npm run docs:generate && echo 'Watching for changes...' && npm run docs:serve",
+    "docs:check": "node scripts/validate-docs.js",
     "lint": "eslint src/ tests/",
     "lint:fix": "eslint src/ tests/ --fix",
     "typecheck": "tsc --noEmit",
