@@ -1,6 +1,6 @@
 {
   "name": "mcp-wordpress",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Comprehensive Model Context Protocol server for WordPress management with 54 tools, TypeScript support, and production-ready authentication",
   "main": "dist/index.js",
   "type": "module",
