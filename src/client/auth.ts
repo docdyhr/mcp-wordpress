@@ -3,17 +3,16 @@
  * Manages different authentication methods for WordPress REST API
  */
 
-import { logger, debug } from "../utils/debug.js";
-import * as http from "http";
-import { URL } from "url";
+import { logger } from '../utils/debug.js';
+import { URL } from 'url';
 import type {
   IAuthProvider,
   IWordPressClient,
   AuthMethod,
   AuthConfig,
-  AuthenticationError,
-} from "../types/client.js";
-import type { WordPressUser } from "../types/wordpress.js";
+  AuthenticationError as _AuthenticationError
+} from '../types/client.js';
+import type { WordPressUser } from '../types/wordpress.js';
 
 export class WordPressAuth {
   private client: IWordPressClient;
@@ -30,21 +29,21 @@ export class WordPressAuth {
   async authenticate(): Promise<boolean> {
     try {
       switch (this.authType) {
-        case "app-password":
-          return await this.handleAppPasswordAuth();
-        case "jwt":
-          return await this.handleJWTAuth();
-        case "basic":
-          return await this.handleBasicAuth();
-        case "api-key":
-          return await this.handleAPIKeyAuth();
-        case "cookie":
-          return await this.handleCookieAuth();
-        default:
-          throw new Error(`Unsupported authentication type: ${this.authType}`);
+      case 'app-password':
+        return await this.handleAppPasswordAuth();
+      case 'jwt':
+        return await this.handleJWTAuth();
+      case 'basic':
+        return await this.handleBasicAuth();
+      case 'api-key':
+        return await this.handleAPIKeyAuth();
+      case 'cookie':
+        return await this.handleCookieAuth();
+      default:
+        throw new Error(`Unsupported authentication type: ${this.authType}`);
       }
     } catch (error) {
-      logger.error("Authentication failed:", error);
+      logger.error('Authentication failed:', error);
       throw error;
     }
   }
@@ -57,8 +56,8 @@ export class WordPressAuth {
 
     if (!username || !appPassword) {
       throw new Error(
-        "Application Password authentication requires WORDPRESS_USERNAME and WORDPRESS_APP_PASSWORD. " +
-          "Visit your WordPress admin → Users → Profile → Application Passwords to create one.",
+        'Application Password authentication requires WORDPRESS_USERNAME and WORDPRESS_APP_PASSWORD. ' +
+          'Visit your WordPress admin → Users → Profile → Application Passwords to create one.'
       );
     }
 
@@ -66,12 +65,12 @@ export class WordPressAuth {
     try {
       const user = await this.client.getCurrentUser();
       logger.log(
-        `✅ Application Password authentication successful for user: ${user.name} (${user.username})`,
+        `✅ Application Password authentication successful for user: ${user.name} (${user.username})`
       );
       return true;
     } catch (error) {
       const message =
-        "Application Password authentication failed. Please check your credentials and ensure the application password is valid.";
+        'Application Password authentication failed. Please check your credentials and ensure the application password is valid.';
       logger.error(message, error);
       throw new Error(message);
     }
@@ -85,19 +84,19 @@ export class WordPressAuth {
 
     if (!username || !password) {
       throw new Error(
-        "Basic authentication requires WORDPRESS_USERNAME and WORDPRESS_PASSWORD",
+        'Basic authentication requires WORDPRESS_USERNAME and WORDPRESS_PASSWORD'
       );
     }
 
     try {
       const user = await this.client.getCurrentUser();
       logger.log(
-        `✅ Basic authentication successful for user: ${user.name} (${user.username})`,
+        `✅ Basic authentication successful for user: ${user.name} (${user.username})`
       );
       return true;
     } catch (error) {
       const message =
-        "Basic authentication failed. Please check your username and password.";
+        'Basic authentication failed. Please check your username and password.';
       logger.error(message, error);
       throw new Error(message);
     }
@@ -111,8 +110,8 @@ export class WordPressAuth {
 
     if (!username || !password || !secret) {
       throw new Error(
-        "JWT authentication requires WORDPRESS_USERNAME, WORDPRESS_PASSWORD, and WORDPRESS_JWT_SECRET. " +
-          "Install and configure the JWT Authentication plugin first.",
+        'JWT authentication requires WORDPRESS_USERNAME, WORDPRESS_PASSWORD, and WORDPRESS_JWT_SECRET. ' +
+          'Install and configure the JWT Authentication plugin first.'
       );
     }
 
@@ -120,12 +119,12 @@ export class WordPressAuth {
       // The JWT token should be obtained during client authentication
       const user = await this.client.getCurrentUser();
       logger.log(
-        `✅ JWT authentication successful for user: ${user.name} (${user.username})`,
+        `✅ JWT authentication successful for user: ${user.name} (${user.username})`
       );
       return true;
     } catch (error) {
       const message =
-        "JWT authentication failed. Please check your credentials and ensure the JWT plugin is installed and configured.";
+        'JWT authentication failed. Please check your credentials and ensure the JWT plugin is installed and configured.';
       logger.error(message, error);
       throw new Error(message);
     }
@@ -138,17 +137,17 @@ export class WordPressAuth {
     const { apiKey } = this.client.config.auth;
 
     if (!apiKey) {
-      throw new Error("API Key authentication requires WORDPRESS_API_KEY");
+      throw new Error('API Key authentication requires WORDPRESS_API_KEY');
     }
 
     try {
       // Test API key by making a simple request
       await this.client.getSiteInfo();
-      logger.log("✅ API Key authentication successful");
+      logger.log('✅ API Key authentication successful');
       return true;
     } catch (error) {
       const message =
-        "API Key authentication failed. Please check your API key.";
+        'API Key authentication failed. Please check your API key.';
       logger.error(message, error);
       throw new Error(message);
     }
@@ -162,7 +161,7 @@ export class WordPressAuth {
 
     if (!nonce) {
       logger.warn(
-        "Cookie authentication: No nonce provided, authentication may fail for write operations",
+        'Cookie authentication: No nonce provided, authentication may fail for write operations'
       );
     }
 
@@ -170,12 +169,12 @@ export class WordPressAuth {
       // Test with a simple read operation
       await this.client.getSiteInfo();
       logger.log(
-        "✅ Cookie authentication configured (note: write operations may require valid nonce)",
+        '✅ Cookie authentication configured (note: write operations may require valid nonce)'
       );
       return true;
     } catch (error) {
       const message =
-        "Cookie authentication failed. Please ensure you are properly logged into WordPress.";
+        'Cookie authentication failed. Please ensure you are properly logged into WordPress.';
       logger.error(message, error);
       throw new Error(message);
     }
@@ -186,11 +185,11 @@ export class WordPressAuth {
    */
   async refreshAuth(): Promise<boolean> {
     switch (this.authType) {
-      case "jwt":
-        return await this.refreshJWTToken();
-      default:
-        logger.log(`Authentication refresh not supported for ${this.authType}`);
-        return true;
+    case 'jwt':
+      return await this.refreshJWTToken();
+    default:
+      logger.log(`Authentication refresh not supported for ${this.authType}`);
+      return true;
     }
   }
 
@@ -202,7 +201,7 @@ export class WordPressAuth {
       // Re-authenticate to get a new token
       return await this.handleJWTAuth();
     } catch (error) {
-      logger.error("Failed to refresh JWT token:", error);
+      logger.error('Failed to refresh JWT token:', error);
       return false;
     }
   }
@@ -215,7 +214,7 @@ export class WordPressAuth {
       await this.client.getCurrentUser();
       return true;
     } catch (error) {
-      logger.error("Authentication validation failed:", error);
+      logger.error('Authentication validation failed:', error);
       return false;
     }
   }
@@ -234,13 +233,13 @@ export class WordPressAuth {
       return {
         authenticated: true,
         method: this.authType,
-        user,
+        user
       };
     } catch (error) {
       return {
         authenticated: false,
         method: this.authType,
-        error: (error as Error).message,
+        error: (error as Error).message
       };
     }
   }
@@ -264,22 +263,22 @@ export class WordPressAuth {
     const { clientId } = this.client.config.auth;
 
     if (!clientId) {
-      throw new Error("OAuth requires client ID");
+      throw new Error('OAuth requires client ID');
     }
 
     const state = this.generateRandomState();
-    const redirectUri = "http://localhost:8080/oauth/callback";
+    const redirectUri = 'http://localhost:8080/oauth/callback';
 
-    const authUrl = new URL("/oauth/authorize", this.client.config.baseUrl);
-    authUrl.searchParams.append("client_id", clientId);
-    authUrl.searchParams.append("redirect_uri", redirectUri);
-    authUrl.searchParams.append("response_type", "code");
-    authUrl.searchParams.append("state", state);
-    authUrl.searchParams.append("scope", "read write");
+    const authUrl = new URL('/oauth/authorize', this.client.config.baseUrl);
+    authUrl.searchParams.append('client_id', clientId);
+    authUrl.searchParams.append('redirect_uri', redirectUri);
+    authUrl.searchParams.append('response_type', 'code');
+    authUrl.searchParams.append('state', state);
+    authUrl.searchParams.append('scope', 'read write');
 
     return {
       authUrl: authUrl.toString(),
-      state,
+      state
     };
   }
 
@@ -289,7 +288,7 @@ export class WordPressAuth {
   async completeOAuthFlow(code: string, state: string): Promise<boolean> {
     // This would implement the OAuth token exchange
     // For now, this is a placeholder
-    throw new Error("OAuth flow not yet implemented");
+    throw new Error('OAuth flow not yet implemented');
   }
 
   /**
@@ -297,8 +296,8 @@ export class WordPressAuth {
    */
   private generateRandomState(length = 32): string {
     const chars =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
     for (let i = 0; i < length; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
@@ -313,40 +312,40 @@ export class WordPressAuth {
     const auth = this.client.config.auth;
 
     switch (this.authType) {
-      case "app-password":
-        if (auth.username && auth.appPassword) {
-          const credentials = Buffer.from(
-            `${auth.username}:${auth.appPassword}`,
-          ).toString("base64");
-          headers["Authorization"] = `Basic ${credentials}`;
-        }
-        break;
-      case "basic":
-        if (auth.username && auth.password) {
-          const credentials = Buffer.from(
-            `${auth.username}:${auth.password}`,
-          ).toString("base64");
-          headers["Authorization"] = `Basic ${credentials}`;
-        }
-        break;
+    case 'app-password':
+      if (auth.username && auth.appPassword) {
+        const credentials = Buffer.from(
+          `${auth.username}:${auth.appPassword}`
+        ).toString('base64');
+        headers['Authorization'] = `Basic ${credentials}`;
+      }
+      break;
+    case 'basic':
+      if (auth.username && auth.password) {
+        const credentials = Buffer.from(
+          `${auth.username}:${auth.password}`
+        ).toString('base64');
+        headers['Authorization'] = `Basic ${credentials}`;
+      }
+      break;
 
-      case "jwt":
-        if (auth.token) {
-          headers["Authorization"] = `Bearer ${auth.token}`;
-        }
-        break;
+    case 'jwt':
+      if (auth.token) {
+        headers['Authorization'] = `Bearer ${auth.token}`;
+      }
+      break;
 
-      case "api-key":
-        if (auth.apiKey) {
-          headers["X-API-Key"] = auth.apiKey;
-        }
-        break;
+    case 'api-key':
+      if (auth.apiKey) {
+        headers['X-API-Key'] = auth.apiKey;
+      }
+      break;
 
-      case "cookie":
-        if (auth.nonce) {
-          headers["X-WP-Nonce"] = auth.nonce;
-        }
-        break;
+    case 'cookie':
+      if (auth.nonce) {
+        headers['X-WP-Nonce'] = auth.nonce;
+      }
+      break;
     }
 
     return headers;
@@ -357,23 +356,23 @@ export class WordPressAuth {
    */
   requiresSetup(): boolean {
     switch (this.authType) {
-      case "jwt":
-        return !this.client.config.auth.secret;
-      case "api-key":
-        return !this.client.config.auth.apiKey;
-      case "app-password":
-        return (
-          !this.client.config.auth.username ||
+    case 'jwt':
+      return !this.client.config.auth.secret;
+    case 'api-key':
+      return !this.client.config.auth.apiKey;
+    case 'app-password':
+      return (
+        !this.client.config.auth.username ||
           !this.client.config.auth.appPassword
-        );
-      case "basic":
-        return (
-          !this.client.config.auth.username || !this.client.config.auth.password
-        );
-      case "cookie":
-        return false; // Cookie auth can work without additional setup
-      default:
-        return true;
+      );
+    case 'basic':
+      return (
+        !this.client.config.auth.username || !this.client.config.auth.password
+      );
+    case 'cookie':
+      return false; // Cookie auth can work without additional setup
+    default:
+      return true;
     }
   }
 
@@ -382,8 +381,8 @@ export class WordPressAuth {
    */
   getSetupInstructions(): string {
     switch (this.authType) {
-      case "app-password":
-        return `
+    case 'app-password':
+      return `
 To set up Application Password authentication:
 1. Log into your WordPress admin dashboard
 2. Go to Users → Profile (or Users → All Users → Edit your user)
@@ -394,8 +393,8 @@ To set up Application Password authentication:
 7. Set WORDPRESS_USERNAME to your WordPress username
 `;
 
-      case "jwt":
-        return `
+    case 'jwt':
+      return `
 To set up JWT authentication:
 1. Install the "JWT Authentication for WP REST API" plugin
 2. Add JWT_AUTH_SECRET_KEY to your wp-config.php file
@@ -404,30 +403,30 @@ To set up JWT authentication:
 5. Set WORDPRESS_USERNAME and WORDPRESS_PASSWORD
 `;
 
-      case "api-key":
-        return `
+    case 'api-key':
+      return `
 To set up API Key authentication:
 1. Install an API Key plugin (varies by plugin)
 2. Generate an API key in the plugin settings
 3. Set WORDPRESS_API_KEY environment variable
 `;
 
-      case "basic":
-        return `
+    case 'basic':
+      return `
 To set up Basic authentication:
 1. Set WORDPRESS_USERNAME to your WordPress username
 2. Set WORDPRESS_PASSWORD to your WordPress password
 Note: This method is less secure than Application Passwords
 `;
 
-      case "cookie":
-        return `
+    case 'cookie':
+      return `
 Cookie authentication is automatically configured when you're logged into WordPress.
 For write operations, you may need to set WORDPRESS_COOKIE_NONCE.
 `;
 
-      default:
-        return "No setup instructions available for this authentication method.";
+    default:
+      return 'No setup instructions available for this authentication method.';
     }
   }
 }
@@ -437,7 +436,7 @@ For write operations, you may need to set WORDPRESS_COOKIE_NONCE.
  */
 
 export class AppPasswordAuthProvider implements IAuthProvider {
-  readonly method: AuthMethod = "app-password";
+  readonly method: AuthMethod = 'app-password';
 
   async authenticate(client: IWordPressClient): Promise<boolean> {
     const auth = new WordPressAuth(client);
@@ -450,7 +449,7 @@ export class AppPasswordAuthProvider implements IAuthProvider {
 }
 
 export class JWTAuthProvider implements IAuthProvider {
-  readonly method: AuthMethod = "jwt";
+  readonly method: AuthMethod = 'jwt';
 
   async authenticate(client: IWordPressClient): Promise<boolean> {
     const auth = new WordPressAuth(client);
@@ -468,7 +467,7 @@ export class JWTAuthProvider implements IAuthProvider {
 }
 
 export class BasicAuthProvider implements IAuthProvider {
-  readonly method: AuthMethod = "basic";
+  readonly method: AuthMethod = 'basic';
 
   async authenticate(client: IWordPressClient): Promise<boolean> {
     const auth = new WordPressAuth(client);
@@ -481,7 +480,7 @@ export class BasicAuthProvider implements IAuthProvider {
 }
 
 export class APIKeyAuthProvider implements IAuthProvider {
-  readonly method: AuthMethod = "api-key";
+  readonly method: AuthMethod = 'api-key';
 
   async authenticate(client: IWordPressClient): Promise<boolean> {
     const auth = new WordPressAuth(client);
@@ -494,7 +493,7 @@ export class APIKeyAuthProvider implements IAuthProvider {
 }
 
 export class CookieAuthProvider implements IAuthProvider {
-  readonly method: AuthMethod = "cookie";
+  readonly method: AuthMethod = 'cookie';
 
   async authenticate(client: IWordPressClient): Promise<boolean> {
     const auth = new WordPressAuth(client);
@@ -511,17 +510,17 @@ export class CookieAuthProvider implements IAuthProvider {
  */
 export function createAuthProvider(method: AuthMethod): IAuthProvider {
   switch (method) {
-    case "app-password":
-      return new AppPasswordAuthProvider();
-    case "jwt":
-      return new JWTAuthProvider();
-    case "basic":
-      return new BasicAuthProvider();
-    case "api-key":
-      return new APIKeyAuthProvider();
-    case "cookie":
-      return new CookieAuthProvider();
-    default:
-      throw new Error(`Unsupported authentication method: ${method}`);
+  case 'app-password':
+    return new AppPasswordAuthProvider();
+  case 'jwt':
+    return new JWTAuthProvider();
+  case 'basic':
+    return new BasicAuthProvider();
+  case 'api-key':
+    return new APIKeyAuthProvider();
+  case 'cookie':
+    return new CookieAuthProvider();
+  default:
+    throw new Error(`Unsupported authentication method: ${method}`);
   }
 }

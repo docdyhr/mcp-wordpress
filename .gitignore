@@ -48,6 +48,10 @@ jspm_packages/
 # Optional npm cache directory
 .npm
 
+# NPM authentication file (contains tokens)
+.npmrc
+!.npmrc.example
+
 # Optional eslint cache
 .eslintcache
 

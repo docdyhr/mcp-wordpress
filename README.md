@@ -2,7 +2,7 @@
 
 A comprehensive Model Context Protocol (MCP) server for WordPress management through the WordPress REST API v2. Completely written in TypeScript with modular architecture and 95%+ test coverage.
 
-[![NPM Version](https://img.shields.io/npm/v/@aiondadotcom/mcp-wordpress)](https://www.npmjs.com/package/@aiondadotcom/mcp-wordpress)
+[![NPM Version](https://img.shields.io/npm/v/mcp-wordpress)](https://www.npmjs.com/package/mcp-wordpress)
 [![Test Coverage](https://img.shields.io/badge/test%20coverage-95%25%2B-brightgreen)](https://github.com/AiondaDotCom/mcp-wordpress)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://github.com/AiondaDotCom/mcp-wordpress)
 [![Architecture](https://img.shields.io/badge/architecture-modular-orange)](https://github.com/AiondaDotCom/mcp-wordpress/blob/main/REFACTORING.md)
@@ -28,10 +28,10 @@ The easiest way to get started - no installation required:
 
 ```bash
 # Run directly with NPX
-npx @aiondadotcom/mcp-wordpress
+npx mcp-wordpress
 
 # Or install globally
-npm install -g @aiondadotcom/mcp-wordpress
+npm install -g mcp-wordpress
 mcp-wordpress
 ```
 
@@ -49,7 +49,7 @@ npm start
 
 ```bash
 # For NPX users
-npx @aiondadotcom/mcp-wordpress setup
+npx mcp-wordpress setup
 
 # For local installation
 npm run setup
@@ -108,7 +108,7 @@ Please:
 3. Test the connection to make sure everything works
 4. Show me how to use the WordPress tools
 
-I want to use the NPX version (@aiondadotcom/mcp-wordpress) so I don't need to install anything locally.
+I want to use the NPX version (mcp-wordpress) so I don't need to install anything locally.
 ```
 
 ### Full Local Development Setup
@@ -156,7 +156,7 @@ Configure MCP WordPress Server in your Claude Desktop `mcp.json` configuration f
   "mcpServers": {
     "mcp-wordpress": {
       "command": "npx",
-      "args": ["@aiondadotcom/mcp-wordpress"],
+      "args": ["mcp-wordpress"],
       "env": {
         "WORDPRESS_SITE_URL": "https://your-site.com",
         "WORDPRESS_USERNAME": "your-username", 
@@ -211,7 +211,7 @@ If you prefer to use a `.env` file instead of environment variables in the confi
   "mcpServers": {
     "mcp-wordpress": {
       "command": "npx",
-      "args": ["@aiondadotcom/mcp-wordpress"],
+      "args": ["mcp-wordpress"],
       "env": {
         "NODE_ENV": "production"
       }
@@ -242,7 +242,7 @@ Here's a complete `claude_desktop_config.json` file with MCP WordPress:
   "mcpServers": {
     "mcp-wordpress": {
       "command": "npx",
-      "args": ["@aiondadotcom/mcp-wordpress"],
+      "args": ["mcp-wordpress"],
       "env": {
         "WORDPRESS_SITE_URL": "https://your-site.com",
         "WORDPRESS_USERNAME": "your-username",

@@ -3,10 +3,10 @@
  * Provides common functionality and error handling
  */
 
-import type { WordPressClientConfig, RequestOptions } from "../../types/client.js";
-import { WordPressAPIError, AuthenticationError, RateLimitError } from "../../types/client.js";
-import { debug, logError } from "../../utils/debug.js";
-import { getErrorMessage } from "../../utils/error.js";
+import type { WordPressClientConfig } from '../../types/client.js';
+import { WordPressAPIError } from '../../types/client.js';
+import { debug, logError } from '../../utils/debug.js';
+import { getErrorMessage } from '../../utils/error.js';
 
 export abstract class BaseManager {
   protected config: WordPressClientConfig;
@@ -25,19 +25,19 @@ export abstract class BaseManager {
       throw error;
     }
 
-    if (error.name === "AbortError" || error.code === "ABORT_ERR") {
+    if (error.name === 'AbortError' || error.code === 'ABORT_ERR') {
       throw new WordPressAPIError(
         `Request timeout after ${this.config.timeout}ms`,
         408,
-        "timeout"
+        'timeout'
       );
     }
 
-    if (error.code === "ECONNREFUSED" || error.code === "ENOTFOUND") {
+    if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
       throw new WordPressAPIError(
         `Cannot connect to WordPress site: ${this.config.baseUrl}`,
         503,
-        "connection_failed"
+        'connection_failed'
       );
     }
 
@@ -45,7 +45,7 @@ export abstract class BaseManager {
     throw new WordPressAPIError(
       `${operation} failed: ${message}`,
       500,
-      "unknown_error"
+      'unknown_error'
     );
   }
 
@@ -59,13 +59,16 @@ export abstract class BaseManager {
   /**
    * Validate required parameters
    */
-  protected validateRequired(params: Record<string, any>, requiredFields: string[]): void {
+  protected validateRequired(
+    params: Record<string, any>,
+    requiredFields: string[]
+  ): void {
     for (const field of requiredFields) {
       if (params[field] === undefined || params[field] === null) {
         throw new WordPressAPIError(
           `Missing required parameter: ${field}`,
           400,
-          "missing_parameter"
+          'missing_parameter'
         );
       }
     }

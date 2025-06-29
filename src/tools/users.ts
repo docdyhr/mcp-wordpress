@@ -1,10 +1,10 @@
-import { WordPressClient } from "../client/api.js";
+import { WordPressClient } from '../client/api.js';
 import {
   CreateUserRequest,
   UpdateUserRequest,
-  UserQueryParams,
-} from "../types/wordpress.js";
-import { getErrorMessage } from "../utils/error.js";
+  UserQueryParams
+} from '../types/wordpress.js';
+import { getErrorMessage } from '../utils/error.js';
 
 /**
  * Provides tools for managing users on a WordPress site.
@@ -18,135 +18,135 @@ export class UserTools {
   public getTools(): any[] {
     return [
       {
-        name: "wp_list_users",
-        description: "Lists users from a WordPress site, with filters.",
+        name: 'wp_list_users',
+        description: 'Lists users from a WordPress site, with filters.',
         parameters: [
           {
-            name: "search",
-            type: "string",
-            description: "Limit results to those matching a search term.",
+            name: 'search',
+            type: 'string',
+            description: 'Limit results to those matching a search term.'
           },
           {
-            name: "roles",
-            type: "array",
-            items: { type: "string" },
-            description: "Limit results to users with specific roles.",
-          },
+            name: 'roles',
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Limit results to users with specific roles.'
+          }
         ],
-        handler: this.handleListUsers.bind(this),
+        handler: this.handleListUsers.bind(this)
       },
       {
-        name: "wp_get_user",
-        description: "Retrieves a single user by their ID.",
+        name: 'wp_get_user',
+        description: 'Retrieves a single user by their ID.',
         parameters: [
           {
-            name: "id",
-            type: "number",
+            name: 'id',
+            type: 'number',
             required: true,
-            description: "The unique identifier for the user.",
-          },
+            description: 'The unique identifier for the user.'
+          }
         ],
-        handler: this.handleGetUser.bind(this),
+        handler: this.handleGetUser.bind(this)
       },
       {
-        name: "wp_get_current_user",
-        description: "Retrieves the currently authenticated user.",
+        name: 'wp_get_current_user',
+        description: 'Retrieves the currently authenticated user.',
         parameters: [],
-        handler: this.handleGetCurrentUser.bind(this),
+        handler: this.handleGetCurrentUser.bind(this)
       },
       {
-        name: "wp_create_user",
-        description: "Creates a new user.",
+        name: 'wp_create_user',
+        description: 'Creates a new user.',
         parameters: [
           {
-            name: "username",
-            type: "string",
+            name: 'username',
+            type: 'string',
             required: true,
-            description: "The username for the new user.",
+            description: 'The username for the new user.'
           },
           {
-            name: "email",
-            type: "string",
+            name: 'email',
+            type: 'string',
             required: true,
-            description: "The email address for the new user.",
+            description: 'The email address for the new user.'
           },
           {
-            name: "password",
-            type: "string",
+            name: 'password',
+            type: 'string',
             required: true,
-            description: "The password for the new user.",
+            description: 'The password for the new user.'
           },
           {
-            name: "roles",
-            type: "array",
-            items: { type: "string" },
-            description: "An array of roles to assign to the user.",
-          },
+            name: 'roles',
+            type: 'array',
+            items: { type: 'string' },
+            description: 'An array of roles to assign to the user.'
+          }
         ],
-        handler: this.handleCreateUser.bind(this),
+        handler: this.handleCreateUser.bind(this)
       },
       {
-        name: "wp_update_user",
-        description: "Updates an existing user.",
+        name: 'wp_update_user',
+        description: 'Updates an existing user.',
         parameters: [
           {
-            name: "id",
-            type: "number",
+            name: 'id',
+            type: 'number',
             required: true,
-            description: "The ID of the user to update.",
+            description: 'The ID of the user to update.'
           },
           {
-            name: "email",
-            type: "string",
-            description: "The new email address for the user.",
+            name: 'email',
+            type: 'string',
+            description: 'The new email address for the user.'
           },
           {
-            name: "name",
-            type: "string",
-            description: "The new display name for the user.",
-          },
+            name: 'name',
+            type: 'string',
+            description: 'The new display name for the user.'
+          }
         ],
-        handler: this.handleUpdateUser.bind(this),
+        handler: this.handleUpdateUser.bind(this)
       },
       {
-        name: "wp_delete_user",
-        description: "Deletes a user.",
+        name: 'wp_delete_user',
+        description: 'Deletes a user.',
         parameters: [
           {
-            name: "id",
-            type: "number",
+            name: 'id',
+            type: 'number',
             required: true,
-            description: "The ID of the user to delete.",
+            description: 'The ID of the user to delete.'
           },
           {
-            name: "reassign",
-            type: "number",
+            name: 'reassign',
+            type: 'number',
             description:
-              "The ID of a user to reassign the deleted user's content to.",
-          },
+              'The ID of a user to reassign the deleted user\'s content to.'
+          }
         ],
-        handler: this.handleDeleteUser.bind(this),
-      },
+        handler: this.handleDeleteUser.bind(this)
+      }
     ];
   }
 
   public async handleListUsers(
     client: WordPressClient,
-    params: UserQueryParams,
+    params: UserQueryParams
   ): Promise<any> {
     try {
       const users = await client.getUsers(params);
       if (users.length === 0) {
-        return "No users found matching the criteria.";
+        return 'No users found matching the criteria.';
       }
       const content =
         `Found ${users.length} users:\n\n` +
         users
           .map(
             (u) =>
-              `- ID ${u.id}: **${u.name}** (@${u.slug}) - ${u.email}\n  Roles: ${u.roles?.join(", ") || "N/A"}`,
+              `- ID ${u.id}: **${u.name}** (@${u.slug}) - ${u.email}\n  Roles: ${u.roles?.join(', ') || 'N/A'}`
           )
-          .join("\n");
+          .join('\n');
       return content;
     } catch (error) {
       throw new Error(`Failed to list users: ${getErrorMessage(error)}`);
@@ -155,7 +155,7 @@ export class UserTools {
 
   public async handleGetUser(
     client: WordPressClient,
-    params: { id: number },
+    params: { id: number }
   ): Promise<any> {
     try {
       const user = await client.getUser(params.id);
@@ -164,7 +164,7 @@ export class UserTools {
         `- **Name:** ${user.name}\n` +
         `- **Username:** ${user.slug}\n` +
         `- **Email:** ${user.email}\n` +
-        `- **Roles:** ${user.roles?.join(", ") || "N/A"}`;
+        `- **Roles:** ${user.roles?.join(', ') || 'N/A'}`;
       return content;
     } catch (error) {
       throw new Error(`Failed to get user: ${getErrorMessage(error)}`);
@@ -173,7 +173,7 @@ export class UserTools {
 
   public async handleGetCurrentUser(
     client: WordPressClient,
-    params: any,
+    params: any
   ): Promise<any> {
     try {
       const user = await client.getCurrentUser();
@@ -182,7 +182,7 @@ export class UserTools {
         `- **Name:** ${user.name}\n` +
         `- **Username:** ${user.slug}\n` +
         `- **Email:** ${user.email}\n` +
-        `- **Roles:** ${user.roles?.join(", ") || "N/A"}`;
+        `- **Roles:** ${user.roles?.join(', ') || 'N/A'}`;
       return content;
     } catch (error) {
       throw new Error(`Failed to get current user: ${getErrorMessage(error)}`);
@@ -191,7 +191,7 @@ export class UserTools {
 
   public async handleCreateUser(
     client: WordPressClient,
-    params: CreateUserRequest,
+    params: CreateUserRequest
   ): Promise<any> {
     try {
       const user = await client.createUser(params);
@@ -203,7 +203,7 @@ export class UserTools {
 
   public async handleUpdateUser(
     client: WordPressClient,
-    params: UpdateUserRequest & { id: number },
+    params: UpdateUserRequest & { id: number }
   ): Promise<any> {
     try {
       const user = await client.updateUser(params);
@@ -215,7 +215,7 @@ export class UserTools {
 
   public async handleDeleteUser(
     client: WordPressClient,
-    params: { id: number; reassign?: number },
+    params: { id: number; reassign?: number }
   ): Promise<any> {
     try {
       await client.deleteUser(params.id, params.reassign);

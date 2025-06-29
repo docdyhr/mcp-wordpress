@@ -3,16 +3,16 @@
  * Handles all HTTP operations, rate limiting, and retries
  */
 
-import fetch from "node-fetch";
+import fetch from 'node-fetch';
 import type { 
   HTTPMethod, 
   RequestOptions, 
   ClientStats,
   WordPressClientConfig 
-} from "../../types/client.js";
-import { WordPressAPIError, RateLimitError } from "../../types/client.js";
-import { BaseManager } from "./BaseManager.js";
-import { debug, startTimer } from "../../utils/debug.js";
+} from '../../types/client.js';
+import { WordPressAPIError, RateLimitError } from '../../types/client.js';
+import { BaseManager } from './BaseManager.js';
+import { debug, startTimer } from '../../utils/debug.js';
 
 export class RequestManager extends BaseManager {
   private stats: ClientStats;
@@ -22,14 +22,14 @@ export class RequestManager extends BaseManager {
   constructor(config: WordPressClientConfig) {
     super(config);
     
-    this.requestInterval = 60000 / parseInt(process.env.RATE_LIMIT || "60");
+    this.requestInterval = 60000 / parseInt(process.env.RATE_LIMIT || '60');
     this.stats = {
       totalRequests: 0,
       successfulRequests: 0,
       failedRequests: 0,
       averageResponseTime: 0,
       rateLimitHits: 0,
-      authFailures: 0,
+      authFailures: 0
     };
   }
 
@@ -114,14 +114,14 @@ export class RequestManager extends BaseManager {
       const fetchOptions: any = {
         method,
         headers: {
-          "Content-Type": "application/json",
-          "User-Agent": "MCP-WordPress/1.1.1",
-          ...options.headers,
+          'Content-Type': 'application/json',
+          'User-Agent': 'MCP-WordPress/1.1.1',
+          ...options.headers
         },
-        signal: controller.signal,
+        signal: controller.signal
       };
 
-      if (data && method !== "GET") {
+      if (data && method !== 'GET') {
         fetchOptions.body = JSON.stringify(data);
       }
 
@@ -154,7 +154,7 @@ export class RequestManager extends BaseManager {
     }
 
     const message = errorData.message || `HTTP ${response.status}: ${response.statusText}`;
-    const code = errorData.code || "http_error";
+    const code = errorData.code || 'http_error';
 
     if (response.status === 429) {
       this.stats.rateLimitHits++;
@@ -172,9 +172,9 @@ export class RequestManager extends BaseManager {
    * Build full URL from endpoint
    */
   private buildUrl(endpoint: string): string {
-    const baseUrl = this.config.baseUrl.replace(/\/$/, "");
-    const apiBase = "/wp-json/wp/v2";
-    const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+    const baseUrl = this.config.baseUrl.replace(/\/$/, '');
+    const apiBase = '/wp-json/wp/v2';
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     
     return `${baseUrl}${apiBase}${cleanEndpoint}`;
   }

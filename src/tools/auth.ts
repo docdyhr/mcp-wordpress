@@ -1,6 +1,6 @@
-import { WordPressClient } from "../client/api.js";
-import { AuthMethod } from "../types/client.js";
-import { getErrorMessage } from "../utils/error.js";
+import { WordPressClient } from '../client/api.js';
+import { AuthMethod } from '../types/client.js';
+import { getErrorMessage } from '../utils/error.js';
 
 /**
  * Provides authentication-related tools for WordPress sites.
@@ -14,51 +14,51 @@ export class AuthTools {
   public getTools(): any[] {
     return [
       {
-        name: "wp_test_auth",
+        name: 'wp_test_auth',
         description:
-          "Tests the authentication and connectivity for a configured WordPress site.",
+          'Tests the authentication and connectivity for a configured WordPress site.',
         parameters: [], // The 'site' parameter is added dynamically by the server
-        handler: this.handleTestAuth.bind(this),
+        handler: this.handleTestAuth.bind(this)
       },
       {
-        name: "wp_get_auth_status",
+        name: 'wp_get_auth_status',
         description:
-          "Gets the current authentication status for a configured WordPress site.",
+          'Gets the current authentication status for a configured WordPress site.',
         parameters: [],
-        handler: this.handleGetAuthStatus.bind(this),
+        handler: this.handleGetAuthStatus.bind(this)
       },
       {
-        name: "wp_switch_auth_method",
+        name: 'wp_switch_auth_method',
         description:
-          "Switches the authentication method for a site for the current session.",
+          'Switches the authentication method for a site for the current session.',
         parameters: [
           {
-            name: "method",
-            type: "string",
+            name: 'method',
+            type: 'string',
             required: true,
-            description: "The new authentication method to use.",
-            enum: ["app-password", "jwt", "basic", "api-key", "cookie"],
+            description: 'The new authentication method to use.',
+            enum: ['app-password', 'jwt', 'basic', 'api-key', 'cookie']
           },
           {
-            name: "username",
-            type: "string",
+            name: 'username',
+            type: 'string',
             description:
-              "The username for 'app-password' or 'basic' authentication.",
+              'The username for \'app-password\' or \'basic\' authentication.'
           },
           {
-            name: "password",
-            type: "string",
+            name: 'password',
+            type: 'string',
             description:
-              "The Application Password for 'app-password' or password for 'basic' auth.",
+              'The Application Password for \'app-password\' or password for \'basic\' auth.'
           },
           {
-            name: "jwt_token",
-            type: "string",
-            description: "The token for 'jwt' authentication.",
-          },
+            name: 'jwt_token',
+            type: 'string',
+            description: 'The token for \'jwt\' authentication.'
+          }
         ],
-        handler: this.handleSwitchAuthMethod.bind(this),
-      },
+        handler: this.handleSwitchAuthMethod.bind(this)
+      }
     ];
   }
 
@@ -71,7 +71,7 @@ export class AuthTools {
    */
   public async handleTestAuth(
     client: WordPressClient,
-    params: any,
+    params: any
   ): Promise<any> {
     try {
       await client.ping();
@@ -79,12 +79,12 @@ export class AuthTools {
       const siteConfig = client.config;
 
       const content =
-        `✅ **Authentication successful!**\n\n` +
+        '✅ **Authentication successful!**\n\n' +
         `**Site:** ${siteConfig.baseUrl}\n` +
         `**Method:** ${siteConfig.auth.method}\n` +
         `**User:** ${user.name} (@${user.slug})\n` +
-        `**Roles:** ${user.roles?.join(", ") || "N/A"}\n\n` +
-        `Your WordPress connection is working properly.`;
+        `**Roles:** ${user.roles?.join(', ') || 'N/A'}\n\n` +
+        'Your WordPress connection is working properly.';
 
       return content;
     } catch (error) {
@@ -101,21 +101,21 @@ export class AuthTools {
    */
   public async handleGetAuthStatus(
     client: WordPressClient,
-    params: any,
+    params: any
   ): Promise<any> {
     try {
       const isAuthenticated = client.isAuthenticated;
       const config = client.config;
       let content =
         `**Authentication Status for ${config.baseUrl}**\n\n` +
-        `**Authenticated:** ${isAuthenticated ? "✅ Yes" : "❌ No"}\n` +
+        `**Authenticated:** ${isAuthenticated ? '✅ Yes' : '❌ No'}\n` +
         `**Method:** ${config.auth.method}\n`;
 
       if (isAuthenticated) {
         const user = await client.getCurrentUser();
         content += `**User:** ${user.name} (@${user.slug})\n`;
       } else {
-        content += `**Status:** Not connected. Use 'wp_test_auth' to connect and verify credentials.`;
+        content += '**Status:** Not connected. Use \'wp_test_auth\' to connect and verify credentials.';
       }
 
       return content;
@@ -138,12 +138,12 @@ export class AuthTools {
       username?: string;
       password?: string;
       jwt_token?: string;
-    },
+    }
   ): Promise<any> {
     try {
       // This functionality is not currently supported as the client
       // doesn't have an updateAuthConfig method
-      throw new Error("Dynamic authentication method switching is not currently supported. Please update your configuration file and restart the server.");
+      throw new Error('Dynamic authentication method switching is not currently supported. Please update your configuration file and restart the server.');
     } catch (error) {
       throw new Error(`Failed to switch auth method: ${getErrorMessage(error)}`);
     }

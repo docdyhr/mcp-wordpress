@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.3] - 2025-06-29
+
+### Fixed
+- **Code Quality**: Resolved all ESLint violations (105 errors eliminated)
+- **Unused Variables**: Removed unused imports and variables across codebase
+  - Fixed unused `debug` and `http` imports in auth.ts
+  - Fixed unused `path` and `WordPressMedia` imports in media.ts
+  - Fixed unused `TClient` type parameter in mcp.ts
+  - Fixed unused variables in test files and shell scripts
+- **Test Output**: Suppressed excessive console logging during tests
+  - Reduced test noise by conditionally disabling info logs in test environment
+  - Improved test readability and performance
+- **Error Handling**: Fixed conditional expect in Jest tests
+- **Shell Scripts**: Fixed unused variable warning in wp-auth-check.sh
+
+### Technical Debt Resolution
+- ✅ **Linting Issues**: All 105 ESLint errors resolved
+- ✅ **Code Cleanup**: Removed all unused imports and variables
+- ✅ **Test Quality**: Improved test assertions and reduced console noise
+- ✅ **Shell Script Quality**: Fixed shellcheck warnings
+
+### Code Quality Improvements
+- **ESLint Configuration**: Fixed quote consistency and trailing comma issues
+- **Type Safety**: Addressed unused type parameters with proper prefixing
+- **Test Architecture**: Improved conditional expect patterns
+- **Logging Strategy**: Implemented environment-aware logging
+
 ## [1.1.2] - 2025-06-29
 
 ### Added

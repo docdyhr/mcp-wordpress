@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 import { jest } from '@jest/globals';
 
 // Mock fs module
@@ -52,7 +51,7 @@ describe('Configuration Loading', () => {
 
     test('should handle missing config file gracefully', () => {
       mockFs.existsSync.mockReturnValue(false);
-      
+
       // Should fall back to environment variables
       process.env.WORDPRESS_SITE_URL = 'https://example.com';
       process.env.WORDPRESS_USERNAME = 'testuser';
@@ -85,7 +84,7 @@ describe('Configuration Loading', () => {
   describe('Environment variable fallback', () => {
     test('should use environment variables when config file absent', () => {
       mockFs.existsSync.mockReturnValue(false);
-      
+
       process.env.WORDPRESS_SITE_URL = 'https://env-example.com';
       process.env.WORDPRESS_USERNAME = 'env-user';
       process.env.WORDPRESS_APP_PASSWORD = 'env-pass';
@@ -99,7 +98,7 @@ describe('Configuration Loading', () => {
 
     test('should handle missing required environment variables', () => {
       mockFs.existsSync.mockReturnValue(false);
-      
+
       // Missing required variables
       expect(process.env.WORDPRESS_SITE_URL).toBeUndefined();
       expect(process.env.WORDPRESS_USERNAME).toBeUndefined();

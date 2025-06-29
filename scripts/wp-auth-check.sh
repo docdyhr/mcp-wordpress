@@ -89,7 +89,7 @@ if [[ -f .env ]]; then
         key=$(echo "$key" | xargs)
         # Export the variable
         export "$key"="$value"
-    done < .env
+    done <.env
 fi
 
 # Defaults from env or .env
@@ -148,17 +148,17 @@ generate_jwt_token() {
     local username="$1"
     local password="$2"
     local site_url="$3"
-    local jwt_secret="$4"
-    
+    local _jwt_secret="$4"
+
     # Get JWT token from WordPress
     local jwt_response
     jwt_response=$(curl -s -w "%{http_code}" -o /tmp/jwt_token_response.json \
         -X POST "$site_url/wp-json/jwt-auth/v1/token" \
         -H "Content-Type: application/json" \
         -d "{\"username\":\"$username\",\"password\":\"$password\"}")
-    
+
     local jwt_http_code="${jwt_response: -3}"
-    
+
     if [[ "$jwt_http_code" == "200" ]]; then
         # Extract token from response
         local token
@@ -184,7 +184,7 @@ echo "🔐 Testing $WP_AUTH_METHOD authentication for $WP_USER at $WP_SITE_URL"
 if [[ "$WP_AUTH_METHOD" == "app-password" ]]; then
     # Application Password authentication
     AUTH_HEADER=$(echo -n "$WP_USER:$WP_APP_PASSWORD" | base64)
-    
+
     response=$(curl -s -w "%{http_code}" -o /tmp/wp_api_response.json \
         -X GET "$WP_SITE_URL/wp-json/wp/v2/users/me" \
         -H "Authorization: Basic $AUTH_HEADER" \
@@ -194,14 +194,14 @@ elif [[ "$WP_AUTH_METHOD" == "jwt" ]]; then
     # JWT authentication
     echo "🔑 Generating JWT token..."
     JWT_TOKEN=$(generate_jwt_token "$WP_USER" "$WP_USER_PASSWORD" "$WP_SITE_URL" "$WP_JWT_SECRET")
-    
+
     if [[ $? -ne 0 ]]; then
         exit 1
     fi
-    
+
     echo "✅ JWT token generated successfully"
     echo "🧪 Testing authenticated API call..."
-    
+
     response=$(curl -s -w "%{http_code}" -o /tmp/wp_api_response.json \
         -X GET "$WP_SITE_URL/wp-json/wp/v2/users/me" \
         -H "Authorization: Bearer $JWT_TOKEN" \

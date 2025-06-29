@@ -1,13 +1,11 @@
-import * as fs from "fs";
-import * as path from "path";
-import { WordPressClient } from "../client/api.js";
+import * as fs from 'fs';
+import { WordPressClient } from '../client/api.js';
 import {
   MediaQueryParams,
   UpdateMediaRequest,
-  UploadMediaRequest,
-  WordPressMedia,
-} from "../types/wordpress.js";
-import { getErrorMessage } from "../utils/error.js";
+  UploadMediaRequest
+} from '../types/wordpress.js';
+import { getErrorMessage } from '../utils/error.js';
 
 /**
  * Provides tools for managing media on a WordPress site.
@@ -21,152 +19,152 @@ export class MediaTools {
   public getTools(): any[] {
     return [
       {
-        name: "wp_list_media",
-        description: "Lists media items from a WordPress site, with filters.",
+        name: 'wp_list_media',
+        description: 'Lists media items from a WordPress site, with filters.',
         parameters: [
           {
-            name: "per_page",
-            type: "number",
-            description: "Number of items to return per page (max 100).",
+            name: 'per_page',
+            type: 'number',
+            description: 'Number of items to return per page (max 100).'
           },
           {
-            name: "search",
-            type: "string",
-            description: "Limit results to those matching a search term.",
+            name: 'search',
+            type: 'string',
+            description: 'Limit results to those matching a search term.'
           },
           {
-            name: "media_type",
-            type: "string",
-            description: "Limit results to a specific media type.",
-            enum: ["image", "video", "audio", "application"],
-          },
+            name: 'media_type',
+            type: 'string',
+            description: 'Limit results to a specific media type.',
+            enum: ['image', 'video', 'audio', 'application']
+          }
         ],
-        handler: this.handleListMedia.bind(this),
+        handler: this.handleListMedia.bind(this)
       },
       {
-        name: "wp_get_media",
-        description: "Retrieves a single media item by its ID.",
+        name: 'wp_get_media',
+        description: 'Retrieves a single media item by its ID.',
         parameters: [
           {
-            name: "id",
-            type: "number",
+            name: 'id',
+            type: 'number',
             required: true,
-            description: "The unique identifier for the media item.",
-          },
+            description: 'The unique identifier for the media item.'
+          }
         ],
-        handler: this.handleGetMedia.bind(this),
+        handler: this.handleGetMedia.bind(this)
       },
       {
-        name: "wp_upload_media",
-        description: "Uploads a file to the WordPress media library.",
+        name: 'wp_upload_media',
+        description: 'Uploads a file to the WordPress media library.',
         parameters: [
           {
-            name: "file_path",
-            type: "string",
+            name: 'file_path',
+            type: 'string',
             required: true,
-            description: "The local, absolute path to the file to upload.",
+            description: 'The local, absolute path to the file to upload.'
           },
           {
-            name: "title",
-            type: "string",
-            description: "The title for the media item.",
+            name: 'title',
+            type: 'string',
+            description: 'The title for the media item.'
           },
           {
-            name: "alt_text",
-            type: "string",
+            name: 'alt_text',
+            type: 'string',
             description:
-              "Alternative text for the media item (for accessibility).",
+              'Alternative text for the media item (for accessibility).'
           },
           {
-            name: "caption",
-            type: "string",
-            description: "The caption for the media item.",
+            name: 'caption',
+            type: 'string',
+            description: 'The caption for the media item.'
           },
           {
-            name: "description",
-            type: "string",
-            description: "The description for the media item.",
+            name: 'description',
+            type: 'string',
+            description: 'The description for the media item.'
           },
           {
-            name: "post",
-            type: "number",
-            description: "The ID of a post to attach this media to.",
-          },
+            name: 'post',
+            type: 'number',
+            description: 'The ID of a post to attach this media to.'
+          }
         ],
-        handler: this.handleUploadMedia.bind(this),
+        handler: this.handleUploadMedia.bind(this)
       },
       {
-        name: "wp_update_media",
-        description: "Updates the metadata of an existing media item.",
+        name: 'wp_update_media',
+        description: 'Updates the metadata of an existing media item.',
         parameters: [
           {
-            name: "id",
-            type: "number",
+            name: 'id',
+            type: 'number',
             required: true,
-            description: "The ID of the media item to update.",
+            description: 'The ID of the media item to update.'
           },
           {
-            name: "title",
-            type: "string",
-            description: "The new title for the media item.",
+            name: 'title',
+            type: 'string',
+            description: 'The new title for the media item.'
           },
           {
-            name: "alt_text",
-            type: "string",
-            description: "The new alternative text.",
+            name: 'alt_text',
+            type: 'string',
+            description: 'The new alternative text.'
           },
           {
-            name: "caption",
-            type: "string",
-            description: "The new caption.",
+            name: 'caption',
+            type: 'string',
+            description: 'The new caption.'
           },
           {
-            name: "description",
-            type: "string",
-            description: "The new description.",
-          },
+            name: 'description',
+            type: 'string',
+            description: 'The new description.'
+          }
         ],
-        handler: this.handleUpdateMedia.bind(this),
+        handler: this.handleUpdateMedia.bind(this)
       },
       {
-        name: "wp_delete_media",
-        description: "Deletes a media item.",
+        name: 'wp_delete_media',
+        description: 'Deletes a media item.',
         parameters: [
           {
-            name: "id",
-            type: "number",
+            name: 'id',
+            type: 'number',
             required: true,
-            description: "The ID of the media item to delete.",
+            description: 'The ID of the media item to delete.'
           },
           {
-            name: "force",
-            type: "boolean",
+            name: 'force',
+            type: 'boolean',
             description:
-              "If true, permanently delete. If false, move to trash. Defaults to false.",
-          },
+              'If true, permanently delete. If false, move to trash. Defaults to false.'
+          }
         ],
-        handler: this.handleDeleteMedia.bind(this),
-      },
+        handler: this.handleDeleteMedia.bind(this)
+      }
     ];
   }
 
   public async handleListMedia(
     client: WordPressClient,
-    params: MediaQueryParams,
+    params: MediaQueryParams
   ): Promise<any> {
     try {
       const media = await client.getMedia(params);
       if (media.length === 0) {
-        return "No media items found matching the criteria.";
+        return 'No media items found matching the criteria.';
       }
       const content =
         `Found ${media.length} media items:\n\n` +
         media
           .map(
             (m) =>
-              `- ID ${m.id}: **${m.title.rendered}** (${m.mime_type})\n  Link: ${m.source_url}`,
+              `- ID ${m.id}: **${m.title.rendered}** (${m.mime_type})\n  Link: ${m.source_url}`
           )
-          .join("\n");
+          .join('\n');
       return content;
     } catch (error) {
       throw new Error(`Failed to list media: ${getErrorMessage(error)}`);
@@ -175,7 +173,7 @@ export class MediaTools {
 
   public async handleGetMedia(
     client: WordPressClient,
-    params: { id: number },
+    params: { id: number }
   ): Promise<any> {
     try {
       const media = await client.getMediaItem(params.id);
@@ -185,10 +183,10 @@ export class MediaTools {
         `- **URL:** ${media.source_url}\n` +
         `- **Type:** ${media.media_type} (${media.mime_type})\n` +
         `- **Date:** ${new Date(media.date).toLocaleString()}\n` +
-        (media.alt_text ? `- **Alt Text:** ${media.alt_text}\n` : "") +
+        (media.alt_text ? `- **Alt Text:** ${media.alt_text}\n` : '') +
         (media.caption.rendered
           ? `- **Caption:** ${media.caption.rendered}\n`
-          : "");
+          : '');
       return content;
     } catch (error) {
       throw new Error(`Failed to get media item: ${getErrorMessage(error)}`);
@@ -197,7 +195,7 @@ export class MediaTools {
 
   public async handleUploadMedia(
     client: WordPressClient,
-    params: UploadMediaRequest & { file_path: string },
+    params: UploadMediaRequest & { file_path: string }
   ): Promise<any> {
     try {
       if (!fs.existsSync(params.file_path)) {
@@ -213,7 +211,7 @@ export class MediaTools {
 
   public async handleUpdateMedia(
     client: WordPressClient,
-    params: UpdateMediaRequest & { id: number },
+    params: UpdateMediaRequest & { id: number }
   ): Promise<any> {
     try {
       const media = await client.updateMedia(params);
@@ -225,11 +223,11 @@ export class MediaTools {
 
   public async handleDeleteMedia(
     client: WordPressClient,
-    params: { id: number; force?: boolean },
+    params: { id: number; force?: boolean }
   ): Promise<any> {
     try {
       await client.deleteMedia(params.id, params.force);
-      const action = params.force ? "permanently deleted" : "moved to trash";
+      const action = params.force ? 'permanently deleted' : 'moved to trash';
       return `✅ Media item ${params.id} has been ${action}.`;
     } catch (error) {
       throw new Error(`Failed to delete media: ${getErrorMessage(error)}`);

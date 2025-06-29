@@ -1,0 +1,18 @@
+# NPM Configuration Example
+# Copy this to .npmrc and replace YOUR_NPM_TOKEN with your actual token
+
+# Using environment variable (recommended)
+//registry.npmjs.org/:_authToken=${NPM_TOKEN}
+
+# Or direct token (less secure - only for development)
+# //registry.npmjs.org/:_authToken=npm_your_token_here
+
+# Registry configuration
+registry=https://registry.npmjs.org/
+
+# Access level for publishing
+access=public
+
+# Other useful configurations
+# save-exact=true
+# engine-strict=true

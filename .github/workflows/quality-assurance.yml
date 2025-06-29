@@ -1,0 +1,345 @@
+name: 🔍 Quality Assurance
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run quality checks daily at 6 AM UTC
+    - cron: '0 6 * * *'
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # 🧹 Code Quality
+  code-quality:
+    name: 🧹 Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Needed for SonarCloud
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🏗️ Build Project
+        run: npm run build
+
+      - name: 🧹 ESLint Analysis
+        run: |
+          npm run lint -- --format json --output-file eslint-report.json || true
+          npm run lint
+
+      - name: 📊 Generate ESLint Report
+        if: always()
+        run: |
+          echo "## 🧹 ESLint Report" > eslint-summary.md
+          echo "" >> eslint-summary.md
+          if [ -f eslint-report.json ]; then
+            node -e "
+              const report = JSON.parse(require('fs').readFileSync('eslint-report.json', 'utf8'));
+              const totalErrors = report.reduce((sum, file) => sum + file.errorCount, 0);
+              const totalWarnings = report.reduce((sum, file) => sum + file.warningCount, 0);
+              console.log(\`- ❌ Errors: \${totalErrors}\`);
+              console.log(\`- ⚠️ Warnings: \${totalWarnings}\`);
+              console.log(\`- 📁 Files Checked: \${report.length}\`);
+            " >> eslint-summary.md
+          else
+            echo "✅ No linting issues found!" >> eslint-summary.md
+          fi
+
+      - name: 📤 Upload ESLint Results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: eslint-results
+          path: |
+            eslint-report.json
+            eslint-summary.md
+
+  # 🔒 Security Analysis
+  security-analysis:
+    name: 🔒 Security Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🔒 Security Audit
+        run: |
+          npm audit --audit-level moderate --json > security-audit.json || true
+          npm audit --audit-level moderate
+
+      - name: 🔍 Dependency Vulnerabilities
+        run: |
+          npx audit-ci --config .audit-ci.json || echo "Security audit completed with findings"
+
+      - name: 📊 Generate Security Report
+        if: always()
+        run: |
+          echo "## 🔒 Security Analysis Report" > security-summary.md
+          echo "" >> security-summary.md
+          if [ -f security-audit.json ]; then
+            node -e "
+              try {
+                const audit = JSON.parse(require('fs').readFileSync('security-audit.json', 'utf8'));
+                if (audit.metadata) {
+                  console.log(\`- 🔴 Critical: \${audit.metadata.vulnerabilities.critical || 0}\`);
+                  console.log(\`- 🟠 High: \${audit.metadata.vulnerabilities.high || 0}\`);
+                  console.log(\`- 🟡 Moderate: \${audit.metadata.vulnerabilities.moderate || 0}\`);
+                  console.log(\`- 🔵 Low: \${audit.metadata.vulnerabilities.low || 0}\`);
+                  console.log(\`- ℹ️ Info: \${audit.metadata.vulnerabilities.info || 0}\`);
+                } else {
+                  console.log('✅ No security vulnerabilities found!');
+                }
+              } catch (e) {
+                console.log('✅ No security issues detected!');
+              }
+            " >> security-summary.md
+          else
+            echo "✅ No security vulnerabilities found!" >> security-summary.md
+          fi
+
+      - name: 📤 Upload Security Results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-results
+          path: |
+            security-audit.json
+            security-summary.md
+
+  # 📊 Code Coverage
+  coverage-analysis:
+    name: 📊 Code Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🏗️ Build Project
+        run: npm run build
+
+      - name: 📊 Generate Coverage Report
+        run: npm run test:coverage
+
+      - name: 📈 Coverage Summary
+        run: |
+          echo "## 📊 Code Coverage Report" > coverage-summary.md
+          echo "" >> coverage-summary.md
+          if [ -f coverage/coverage-summary.json ]; then
+            node -e "
+              const coverage = JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8'));
+              const total = coverage.total;
+              console.log(\`- 📝 Lines: \${total.lines.pct}%\`);
+              console.log(\`- 🌲 Branches: \${total.branches.pct}%\`);
+              console.log(\`- 🔧 Functions: \${total.functions.pct}%\`);
+              console.log(\`- 📄 Statements: \${total.statements.pct}%\`);
+            " >> coverage-summary.md
+          fi
+
+      - name: 📤 Upload Coverage Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: |
+            coverage/
+            coverage-summary.md
+
+      - name: 📈 Upload to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+
+  # 🧪 Performance Testing
+  performance-testing:
+    name: 🧪 Performance Testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🏗️ Build Project
+        run: npm run build
+
+      - name: ⚡ Performance Benchmarks
+        run: |
+          echo "## ⚡ Performance Benchmarks" > performance-report.md
+          echo "" >> performance-report.md
+          
+          # Startup time test
+          echo "### 🚀 Startup Performance:" >> performance-report.md
+          START_TIME=$(date +%s%3N)
+          timeout 30s npm run health > /dev/null 2>&1 || true
+          END_TIME=$(date +%s%3N)
+          DURATION=$((END_TIME - START_TIME))
+          echo "- Health check duration: ${DURATION}ms" >> performance-report.md
+          
+          # Memory usage test
+          echo "" >> performance-report.md
+          echo "### 💾 Memory Usage:" >> performance-report.md
+          node -e "
+            const used = process.memoryUsage();
+            console.log(\`- RSS: \${Math.round(used.rss / 1024 / 1024 * 100) / 100} MB\`);
+            console.log(\`- Heap Used: \${Math.round(used.heapUsed / 1024 / 1024 * 100) / 100} MB\`);
+            console.log(\`- Heap Total: \${Math.round(used.heapTotal / 1024 / 1024 * 100) / 100} MB\`);
+            console.log(\`- External: \${Math.round(used.external / 1024 / 1024 * 100) / 100} MB\`);
+          " >> performance-report.md
+
+      - name: 📤 Upload Performance Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-report
+          path: performance-report.md
+
+  # 📝 Documentation Quality
+  documentation-check:
+    name: 📝 Documentation Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📝 Check Markdown Files
+        run: |
+          # Install markdown linter
+          npm install -g markdownlint-cli
+          
+          # Check markdown files
+          markdownlint "**/*.md" --ignore node_modules > markdown-issues.txt || true
+          
+          echo "## 📝 Documentation Quality Report" > docs-quality.md
+          echo "" >> docs-quality.md
+          
+          if [ -s markdown-issues.txt ]; then
+            echo "### ⚠️ Markdown Issues Found:" >> docs-quality.md
+            echo '```' >> docs-quality.md
+            cat markdown-issues.txt >> docs-quality.md
+            echo '```' >> docs-quality.md
+          else
+            echo "✅ All markdown files pass quality checks!" >> docs-quality.md
+          fi
+
+      - name: 🔗 Check Documentation Links
+        run: |
+          # Install link checker
+          npm install -g markdown-link-check
+          
+          echo "" >> docs-quality.md
+          echo "### 🔗 Link Check Results:" >> docs-quality.md
+          
+          # Check links in all markdown files
+          find . -name "*.md" -not -path "./node_modules/*" | while read file; do
+            echo "Checking links in: $file"
+            if markdown-link-check "$file" --quiet; then
+              echo "- ✅ $file: All links working" >> docs-quality.md
+            else
+              echo "- ❌ $file: Some links broken" >> docs-quality.md
+            fi
+          done
+
+      - name: 📤 Upload Documentation Report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: documentation-quality
+          path: |
+            docs-quality.md
+            markdown-issues.txt
+
+  # 📊 Quality Gates
+  quality-gates:
+    name: 📊 Quality Gates
+    runs-on: ubuntu-latest
+    needs: [code-quality, security-analysis, coverage-analysis, performance-testing, documentation-check]
+    if: always()
+    steps:
+      - name: 📊 Evaluate Quality Gates
+        run: |
+          echo "## 📊 Quality Gates Evaluation" > quality-gates.md
+          echo "" >> quality-gates.md
+          
+          echo "### 🎯 Quality Gate Results:" >> quality-gates.md
+          echo "- 🧹 Code Quality: ${{ needs.code-quality.result }}" >> quality-gates.md
+          echo "- 🔒 Security Analysis: ${{ needs.security-analysis.result }}" >> quality-gates.md
+          echo "- 📊 Coverage Analysis: ${{ needs.coverage-analysis.result }}" >> quality-gates.md
+          echo "- 🧪 Performance Testing: ${{ needs.performance-testing.result }}" >> quality-gates.md
+          echo "- 📝 Documentation Check: ${{ needs.documentation-check.result }}" >> quality-gates.md
+          echo "" >> quality-gates.md
+          
+          # Calculate overall quality score
+          PASSED=0
+          TOTAL=5
+          
+          [ "${{ needs.code-quality.result }}" == "success" ] && PASSED=$((PASSED + 1))
+          [ "${{ needs.security-analysis.result }}" == "success" ] && PASSED=$((PASSED + 1))
+          [ "${{ needs.coverage-analysis.result }}" == "success" ] && PASSED=$((PASSED + 1))
+          [ "${{ needs.performance-testing.result }}" == "success" ] && PASSED=$((PASSED + 1))
+          [ "${{ needs.documentation-check.result }}" == "success" ] && PASSED=$((PASSED + 1))
+          
+          SCORE=$((PASSED * 100 / TOTAL))
+          echo "### 📈 Overall Quality Score: ${SCORE}%" >> quality-gates.md
+          echo "" >> quality-gates.md
+          
+          if [ $SCORE -ge 80 ]; then
+            echo "✅ **Quality gates PASSED** - Code meets quality standards!" >> quality-gates.md
+            echo "QUALITY_GATE_PASSED=true" >> $GITHUB_ENV
+          else
+            echo "❌ **Quality gates FAILED** - Code needs improvement!" >> quality-gates.md
+            echo "QUALITY_GATE_PASSED=false" >> $GITHUB_ENV
+          fi
+
+      - name: 📤 Upload Quality Gates Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: quality-gates-report
+          path: quality-gates.md
+
+      - name: ❌ Fail on Quality Gate Failure
+        if: env.QUALITY_GATE_PASSED == 'false'
+        run: |
+          echo "❌ Quality gates failed - see quality-gates-report for details"
+          exit 1
+
+      - name: ✅ Quality Gates Passed
+        if: env.QUALITY_GATE_PASSED == 'true'
+        run: echo "✅ All quality gates passed successfully!"

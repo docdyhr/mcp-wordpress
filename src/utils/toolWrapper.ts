@@ -3,7 +3,7 @@
  * Standardizes error handling and reduces repetitive try-catch blocks
  */
 
-import { getErrorMessage } from "./error.js";
+import { getErrorMessage } from './error.js';
 
 /**
  * Wrapper for tool methods that standardizes error handling
@@ -45,13 +45,13 @@ export function withValidation<T extends any[], R>(
 export const validators = {
   requireSite: (client: any, params: any) => {
     if (!client) {
-      throw new Error("WordPress client is required");
+      throw new Error('WordPress client is required');
     }
   },
 
   requireId: (params: { id?: number | string }) => {
     if (!params.id) {
-      throw new Error("ID parameter is required");
+      throw new Error('ID parameter is required');
     }
   },
 

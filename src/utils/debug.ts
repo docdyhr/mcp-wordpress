@@ -1,6 +1,6 @@
 /**
  * Debug Utility for MCP Server
- * 
+ *
  * This module provides debug logging that only outputs when DEBUG mode is enabled.
  * This prevents console.log from interfering with MCP STDIO communication.
  */
@@ -25,9 +25,9 @@ export interface StructuredLogger extends Logger {
 }
 
 // Check if debug mode is enabled
-const isDebugMode = (): boolean => 
-  process.env.DEBUG === 'true' || 
-  process.env.NODE_ENV === 'development';
+const isDebugMode = (): boolean =>
+  (process.env.DEBUG === 'true' || process.env.NODE_ENV === 'development') &&
+  process.env.NODE_ENV !== 'test';
 
 // Get current timestamp
 const getTimestamp = (): string => new Date().toISOString();
@@ -36,25 +36,31 @@ const getTimestamp = (): string => new Date().toISOString();
 const formatMessage = (level: LogLevel, args: any[]): string => {
   const timestamp = getTimestamp();
   const prefix = `[${timestamp}] [${level.toUpperCase()}]`;
-  return `${prefix} ${args.map(arg => 
-    typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-  ).join(' ')}`;
+  return `${prefix} ${args
+    .map((arg) =>
+      typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+    )
+    .join(' ')}`;
 };
 
 // Handle circular references in objects
 const safeStringify = (obj: any): string => {
   try {
-    return JSON.stringify(obj, (key, value) => {
-      if (value instanceof Error) {
-        return {
-          name: value.name,
-          message: value.message,
-          stack: value.stack
-        };
-      }
-      return value;
-    }, 2);
-  } catch (error) {
+    return JSON.stringify(
+      obj,
+      (key, value) => {
+        if (value instanceof Error) {
+          return {
+            name: value.name,
+            message: value.message,
+            stack: value.stack
+          };
+        }
+        return value;
+      },
+      2
+    );
+  } catch (_error) {
     return '[Object with circular reference]';
   }
 };
@@ -68,19 +74,19 @@ export const debug: Logger = {
       console.error(formatMessage('debug', args)); // Use stderr for debug to avoid STDIO interference
     }
   },
-  
+
   info: (...args: any[]): void => {
     if (isDebugMode()) {
       console.error(formatMessage('info', args));
     }
   },
-  
+
   warn: (...args: any[]): void => {
     if (isDebugMode()) {
       console.error(formatMessage('warn', args));
     }
   },
-  
+
   error: (...args: any[]): void => {
     if (isDebugMode()) {
       console.error(formatMessage('error', args));
@@ -116,9 +122,11 @@ class StructuredLoggerImpl implements StructuredLogger {
     const debugInfo: DebugInfo = {
       timestamp: Date.now(),
       level,
-      message: args.map(arg => 
-        typeof arg === 'object' ? safeStringify(arg) : String(arg)
-      ).join(' '),
+      message: args
+        .map((arg) =>
+          typeof arg === 'object' ? safeStringify(arg) : String(arg)
+        )
+        .join(' '),
       ...(Object.keys(this.context).length > 0 && { context: this.context })
     };
 
@@ -143,12 +151,12 @@ class StructuredLoggerImpl implements StructuredLogger {
 
   logStructured(info: DebugInfo): void {
     if (!this.enabled) return;
-    
+
     const enhancedInfo: DebugInfo = {
       ...info,
       context: { ...this.context, ...info.context }
     };
-    
+
     console.error(safeStringify(enhancedInfo));
   }
 
@@ -163,7 +171,9 @@ class StructuredLoggerImpl implements StructuredLogger {
 /**
  * Create a structured logger instance
  */
-export const createStructuredLogger = (context: Record<string, any> = {}): StructuredLogger => {
+export const createStructuredLogger = (
+  context: Record<string, any> = {}
+): StructuredLogger => {
   return new StructuredLoggerImpl(context);
 };
 
@@ -175,7 +185,9 @@ export const logger: Logger = debug;
 /**
  * Create a logger with context
  */
-export const createLogger = (context: Record<string, any> = {}): StructuredLogger => {
+export const createLogger = (
+  context: Record<string, any> = {}
+): StructuredLogger => {
   return createStructuredLogger(context);
 };
 
@@ -189,15 +201,17 @@ export interface PerformanceTimer {
 
 export const startTimer = (label?: string): PerformanceTimer => {
   const start = Date.now();
-  
+
   return {
     end(): number {
       return Date.now() - start;
     },
-    
+
     endWithLog(message = 'Operation'): number {
       const duration = Date.now() - start;
-      debug.info(`${message} completed in ${duration}ms${label ? ` [${label}]` : ''}`);
+      debug.info(
+        `${message} completed in ${duration}ms${label ? ` [${label}]` : ''}`
+      );
       return duration;
     }
   };
@@ -206,7 +220,10 @@ export const startTimer = (label?: string): PerformanceTimer => {
 /**
  * Log error with stack trace
  */
-export const logError = (error: Error | string, context?: Record<string, any>): void => {
+export const logError = (
+  error: Error | string,
+  context?: Record<string, any>
+): void => {
   if (typeof error === 'string') {
     debug.error(error, context);
   } else {
@@ -222,24 +239,29 @@ export const logError = (error: Error | string, context?: Record<string, any>): 
  */
 export const logIf = (condition: boolean, level: LogLevel = 'debug') => {
   if (!condition) return silent;
-  
+
   const loggers = {
     log: debug.log,
     info: debug.info,
     warn: debug.warn,
     error: debug.error
   };
-  
+
   return loggers[level as keyof typeof loggers] || debug.log;
 };
 
 /**
  * Type-safe environment variable getter
  */
-export const getEnvVar = (key: string, defaultValue?: string): string | undefined => {
+export const getEnvVar = (
+  key: string,
+  defaultValue?: string
+): string | undefined => {
   const value = process.env[key];
   if (value === undefined && defaultValue !== undefined) {
-    debug.warn(`Environment variable ${key} not found, using default: ${defaultValue}`);
+    debug.warn(
+      `Environment variable ${key} not found, using default: ${defaultValue}`
+    );
     return defaultValue;
   }
   return value;
@@ -249,9 +271,11 @@ export const getEnvVar = (key: string, defaultValue?: string): string | undefine
  * Validate required environment variables
  */
 export const validateEnvVars = (required: string[]): void => {
-  const missing = required.filter(key => !process.env[key]);
+  const missing = required.filter((key) => !process.env[key]);
   if (missing.length > 0) {
-    const error = new Error(`Missing required environment variables: ${missing.join(', ')}`);
+    const error = new Error(
+      `Missing required environment variables: ${missing.join(', ')}`
+    );
     logError(error);
     throw error;
   }

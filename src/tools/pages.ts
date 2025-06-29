@@ -1,10 +1,10 @@
-import { WordPressClient } from "../client/api.js";
+import { WordPressClient } from '../client/api.js';
 import {
   CreatePostRequest,
   PostQueryParams,
-  UpdatePostRequest,
-} from "../types/wordpress.js";
-import { getErrorMessage } from "../utils/error.js";
+  UpdatePostRequest
+} from '../types/wordpress.js';
+import { getErrorMessage } from '../utils/error.js';
 
 /**
  * Provides tools for managing pages on a WordPress site.
@@ -18,146 +18,146 @@ export class PageTools {
   public getTools(): any[] {
     return [
       {
-        name: "wp_list_pages",
-        description: "Lists pages from a WordPress site, with filters.",
+        name: 'wp_list_pages',
+        description: 'Lists pages from a WordPress site, with filters.',
         parameters: [
           {
-            name: "per_page",
-            type: "number",
-            description: "Number of items to return per page (max 100).",
+            name: 'per_page',
+            type: 'number',
+            description: 'Number of items to return per page (max 100).'
           },
           {
-            name: "search",
-            type: "string",
-            description: "Limit results to those matching a search term.",
+            name: 'search',
+            type: 'string',
+            description: 'Limit results to those matching a search term.'
           },
           {
-            name: "status",
-            type: "string",
-            description: "Filter by page status.",
-            enum: ["publish", "future", "draft", "pending", "private"],
-          },
+            name: 'status',
+            type: 'string',
+            description: 'Filter by page status.',
+            enum: ['publish', 'future', 'draft', 'pending', 'private']
+          }
         ],
-        handler: this.handleListPages.bind(this),
+        handler: this.handleListPages.bind(this)
       },
       {
-        name: "wp_get_page",
-        description: "Retrieves a single page by its ID.",
+        name: 'wp_get_page',
+        description: 'Retrieves a single page by its ID.',
         parameters: [
           {
-            name: "id",
-            type: "number",
+            name: 'id',
+            type: 'number',
             required: true,
-            description: "The unique identifier for the page.",
-          },
+            description: 'The unique identifier for the page.'
+          }
         ],
-        handler: this.handleGetPage.bind(this),
+        handler: this.handleGetPage.bind(this)
       },
       {
-        name: "wp_create_page",
-        description: "Creates a new page.",
+        name: 'wp_create_page',
+        description: 'Creates a new page.',
         parameters: [
           {
-            name: "title",
-            type: "string",
+            name: 'title',
+            type: 'string',
             required: true,
-            description: "The title for the page.",
+            description: 'The title for the page.'
           },
           {
-            name: "content",
-            type: "string",
-            description: "The content for the page, in HTML format.",
+            name: 'content',
+            type: 'string',
+            description: 'The content for the page, in HTML format.'
           },
           {
-            name: "status",
-            type: "string",
-            description: "The publishing status for the page.",
-            enum: ["publish", "draft", "pending", "private"],
-          },
+            name: 'status',
+            type: 'string',
+            description: 'The publishing status for the page.',
+            enum: ['publish', 'draft', 'pending', 'private']
+          }
         ],
-        handler: this.handleCreatePage.bind(this),
+        handler: this.handleCreatePage.bind(this)
       },
       {
-        name: "wp_update_page",
-        description: "Updates an existing page.",
+        name: 'wp_update_page',
+        description: 'Updates an existing page.',
         parameters: [
           {
-            name: "id",
-            type: "number",
+            name: 'id',
+            type: 'number',
             required: true,
-            description: "The ID of the page to update.",
+            description: 'The ID of the page to update.'
           },
           {
-            name: "title",
-            type: "string",
-            description: "The new title for the page.",
+            name: 'title',
+            type: 'string',
+            description: 'The new title for the page.'
           },
           {
-            name: "content",
-            type: "string",
-            description: "The new content for the page, in HTML format.",
+            name: 'content',
+            type: 'string',
+            description: 'The new content for the page, in HTML format.'
           },
           {
-            name: "status",
-            type: "string",
-            description: "The new status for the page.",
-            enum: ["publish", "draft", "pending", "private"],
-          },
+            name: 'status',
+            type: 'string',
+            description: 'The new status for the page.',
+            enum: ['publish', 'draft', 'pending', 'private']
+          }
         ],
-        handler: this.handleUpdatePage.bind(this),
+        handler: this.handleUpdatePage.bind(this)
       },
       {
-        name: "wp_delete_page",
-        description: "Deletes a page.",
+        name: 'wp_delete_page',
+        description: 'Deletes a page.',
         parameters: [
           {
-            name: "id",
-            type: "number",
+            name: 'id',
+            type: 'number',
             required: true,
-            description: "The ID of the page to delete.",
+            description: 'The ID of the page to delete.'
           },
           {
-            name: "force",
-            type: "boolean",
+            name: 'force',
+            type: 'boolean',
             description:
-              "If true, permanently delete. If false, move to trash. Defaults to false.",
-          },
+              'If true, permanently delete. If false, move to trash. Defaults to false.'
+          }
         ],
-        handler: this.handleDeletePage.bind(this),
+        handler: this.handleDeletePage.bind(this)
       },
       {
-        name: "wp_get_page_revisions",
-        description: "Retrieves revisions for a specific page.",
+        name: 'wp_get_page_revisions',
+        description: 'Retrieves revisions for a specific page.',
         parameters: [
           {
-            name: "id",
-            type: "number",
+            name: 'id',
+            type: 'number',
             required: true,
-            description: "The ID of the page to get revisions for.",
-          },
+            description: 'The ID of the page to get revisions for.'
+          }
         ],
-        handler: this.handleGetPageRevisions.bind(this),
-      },
+        handler: this.handleGetPageRevisions.bind(this)
+      }
     ];
   }
 
   public async handleListPages(
     client: WordPressClient,
-    params: PostQueryParams,
+    params: PostQueryParams
   ): Promise<any> {
     try {
       const pages = await client.getPages(params);
       if (pages.length === 0) {
-        return "No pages found matching the criteria.";
+        return 'No pages found matching the criteria.';
       }
       const content =
         `Found ${pages.length} pages:\n\n` +
         pages
           .map(
             (p) =>
-              `- ID ${p.id}: **${p.title.rendered}** (${p.status})\n  Link: ${p.link}`,
+              `- ID ${p.id}: **${p.title.rendered}** (${p.status})\n  Link: ${p.link}`
           )
-          .join("\n");
+          .join('\n');
       return content;
     } catch (error) {
       throw new Error(`Failed to list pages: ${getErrorMessage(error)}`);
@@ -166,7 +166,7 @@ export class PageTools {
 
   public async handleGetPage(
     client: WordPressClient,
-    params: { id: number },
+    params: { id: number }
   ): Promise<any> {
     try {
       const page = await client.getPage(params.id);
@@ -184,7 +184,7 @@ export class PageTools {
 
   public async handleCreatePage(
     client: WordPressClient,
-    params: CreatePostRequest,
+    params: CreatePostRequest
   ): Promise<any> {
     try {
       const page = await client.createPage(params);
@@ -196,7 +196,7 @@ export class PageTools {
 
   public async handleUpdatePage(
     client: WordPressClient,
-    params: UpdatePostRequest & { id: number },
+    params: UpdatePostRequest & { id: number }
   ): Promise<any> {
     try {
       const page = await client.updatePage(params);
@@ -208,11 +208,11 @@ export class PageTools {
 
   public async handleDeletePage(
     client: WordPressClient,
-    params: { id: number; force?: boolean },
+    params: { id: number; force?: boolean }
   ): Promise<any> {
     try {
       await client.deletePage(params.id, params.force);
-      const action = params.force ? "permanently deleted" : "moved to trash";
+      const action = params.force ? 'permanently deleted' : 'moved to trash';
       return `✅ Page ${params.id} has been ${action}.`;
     } catch (error) {
       throw new Error(`Failed to delete page: ${getErrorMessage(error)}`);
@@ -221,7 +221,7 @@ export class PageTools {
 
   public async handleGetPageRevisions(
     client: WordPressClient,
-    params: { id: number },
+    params: { id: number }
   ): Promise<any> {
     try {
       const revisions = await client.getPageRevisions(params.id);
@@ -233,9 +233,9 @@ export class PageTools {
         revisions
           .map(
             (r) =>
-              `- Revision by user ID ${r.author} at ${new Date(r.modified).toLocaleString()}`,
+              `- Revision by user ID ${r.author} at ${new Date(r.modified).toLocaleString()}`
           )
-          .join("\n");
+          .join('\n');
       return content;
     } catch (error) {
       throw new Error(`Failed to get page revisions: ${getErrorMessage(error)}`);

@@ -244,3 +244,28 @@ Supports 4 authentication methods with comprehensive testing:
 - **Tool Documentation**: Document new tools with usage examples and parameter descriptions.
 - **Security Notes**: Document any security considerations or credential handling changes.
 - **Dummy Data**: Always use placeholder data (like example.com, your_username) in documentation and examples to prevent accidental credential exposure.
+
+#### Repository Maintenance Guidelines
+
+**Keep Repository Clean and Concise**
+- **Markdown Files**: Limit root-level markdown files to essential documents only (README.md, CHANGELOG.md, CLAUDE.md, TODO.md)
+- **Documentation Organization**: Use `docs/` folder for detailed documentation, organized by category
+- **Archive Management**: Remove outdated files rather than keeping archive folders - use git history for reference
+- **TODO Management**: Keep TODO.md concise and actionable - remove completed items and consolidate verbose descriptions
+
+**File Organization Best Practices**
+- **Single Responsibility**: Each markdown file should serve a clear, specific purpose
+- **No Duplication**: Remove duplicate content across files - maintain single source of truth
+- **Consistent Structure**: Follow established patterns for file organization and naming
+- **Regular Cleanup**: Periodically review and remove obsolete documentation
+
+**Quality Standards**
+- **Concise Communication**: Write clear, actionable content without unnecessary verbosity
+- **Current Information**: Ensure all documentation reflects the current state of the project
+- **User Focus**: Prioritize documentation that helps users and contributors
+- **Professional Presentation**: Maintain clean, professional appearance following GitHub best practices
+
+**Maintenance Schedule**
+- **Monthly**: Review and clean up documentation files
+- **Per Release**: Update version-specific documentation and remove outdated content
+- **Continuous**: Remove completed TODO items and archive obsolete files

@@ -138,7 +138,7 @@ async function testClientConnections() {
     const config = JSON.parse(configContent);
 
     let successCount = 0;
-    let totalSites = config.sites.length;
+    const totalSites = config.sites.length;
 
     for (const site of config.sites) {
       info(`Testing connection to ${site.name} (${site.id})...`);
@@ -149,8 +149,8 @@ async function testClientConnections() {
           auth: {
             method: site.config.WORDPRESS_AUTH_METHOD || 'app-password',
             username: site.config.WORDPRESS_USERNAME,
-            appPassword: site.config.WORDPRESS_APP_PASSWORD,
-          },
+            appPassword: site.config.WORDPRESS_APP_PASSWORD
+          }
         };
 
         const client = new WordPressClient(clientConfig);
@@ -194,7 +194,7 @@ async function main() {
   ];
 
   let passedTests = 0;
-  let totalTests = tests.length;
+  const totalTests = tests.length;
 
   for (const test of tests) {
     const passed = await test.fn();

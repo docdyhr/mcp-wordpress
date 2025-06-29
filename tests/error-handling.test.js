@@ -96,7 +96,7 @@ describe('Error Handling Utilities', () => {
 
     test('should throw error when invalid site specified', () => {
       expect(() => validateSite('invalid', ['site1', 'site2'])).toThrow(
-        "Site 'invalid' not found. Available sites: site1, site2"
+        'Site \'invalid\' not found. Available sites: site1, site2'
       );
     });
   });

@@ -1,0 +1,76 @@
+name: ❓ Question
+description: Ask a question about usage, setup, or configuration
+title: "[QUESTION] "
+labels: ["question", "help wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? We're here to help! Please provide as much detail as possible.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm you have completed the following
+      options:
+        - label: I have searched the existing issues and discussions
+          required: true
+        - label: I have read the documentation
+          required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Question Category
+      description: What is your question about?
+      options:
+        - Setup & Installation
+        - Configuration
+        - WordPress Authentication
+        - Multi-site Management
+        - Claude Desktop Integration
+        - Tool Usage
+        - Troubleshooting
+        - Development
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+      placeholder: Please describe your question in detail...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What are you trying to accomplish?
+      placeholder: |
+        - What is your goal?
+        - What have you already tried?
+        - What specific challenge are you facing?
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment (if relevant)
+      description: Your setup details
+      value: |
+        - OS: [e.g. macOS 13.0, Windows 11, Ubuntu 22.04]
+        - Node.js version: [e.g. 18.17.0]
+        - MCP WordPress version: [e.g. 1.1.2]
+        - WordPress version: [e.g. 6.4.2]
+        - Setup type: [e.g. Single site, Multi-site, NPX, Local installation]
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Information
+      description: Any other relevant details
+      placeholder: Configuration snippets, error messages, etc. (remove sensitive information)
