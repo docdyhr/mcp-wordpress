@@ -29,6 +29,11 @@ jobs:
           npm test
           npm run test:tools
           npm run health
+        env:
+          # Test credentials for CI - tests will skip server instantiation if not available
+          WORDPRESS_SITE_URL: https://test.example.com
+          WORDPRESS_USERNAME: test_user
+          WORDPRESS_APP_PASSWORD: test_password
 
       - name: Check ignore files
         run: npm run check:ignore
