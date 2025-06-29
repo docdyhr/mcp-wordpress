@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+
+# Build outputs
+dist/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+mcp-wordpress.config.json
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Test files
+tests/
+coverage/
+jest.config.js
+jest.typescript.config.json
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# CI/CD
+.github/
+.husky/
+
+# Cache directories
+.cache/
+cache/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Log files
+logs/
+*.log
+
+# Package manager files
+yarn.lock
+
+# TypeScript development configs (keep main tsconfig files)
+# tsconfig.json - keep for build
+# tsconfig.build.json - keep for build
+
+# Linting
+.eslintrc.*
+.prettierrc
+.markdownlint.json
+
+# Development scripts
+scripts/test-*.js
+scripts/health-check.js
+scripts/verify-*.js

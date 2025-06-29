@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  mcp-wordpress:
+    image: docdyhr/mcp-wordpress:latest
+    container_name: mcp-wordpress
+    restart: unless-stopped
+    volumes:
+      # Mount configuration file
+      - ./mcp-wordpress.config.json:/app/config/mcp-wordpress.config.json:ro
+      # Optional: Mount .env file for single-site mode
+      - ./.env:/app/.env:ro
+    environment:
+      # Environment variables can also be set here
+      - NODE_ENV=production
+      - NODE_OPTIONS=--experimental-vm-modules
+    # Expose port if running in HTTP mode (uncomment if needed)
+    # ports:
+    #   - "3000:3000"
+    # Health check
+    healthcheck:
+      test: ["CMD", "node", "dist/index.js", "--health-check"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Example WordPress service (optional - for local development)
+  wordpress:
+    image: wordpress:latest
+    container_name: wordpress-dev
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wordpress_data:/var/www/html
+    depends_on:
+      - db
+    profiles:
+      - dev
+
+  # Example database service (optional - for local development)
+  db:
+    image: mysql:8.0
+    container_name: wordpress-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - db_data:/var/lib/mysql
+    profiles:
+      - dev
+
+volumes:
+  wordpress_data:
+  db_data:
