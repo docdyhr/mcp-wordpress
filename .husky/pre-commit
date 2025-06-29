@@ -1,0 +1,14 @@
+# Run lint-staged for code formatting and basic checks
+echo "🧹 Running lint-staged..."
+npx lint-staged
+
+# Run security checks
+echo "🔒 Running security checks..."
+npm run lint
+npm run typecheck
+
+# Run security validation tests (quick subset)
+echo "🧪 Running security validation tests..."
+npm run test:security:validation
+
+echo "✅ Pre-commit checks passed!"

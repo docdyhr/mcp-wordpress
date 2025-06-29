@@ -27,6 +27,7 @@ jobs:
           - mcp
           - auth
           - integration
+          - security
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
@@ -51,6 +52,7 @@ jobs:
             "mcp") npm run test:mcp ;;
             "auth") npm run test:auth ;;
             "integration") npm run test:integration ;;
+            "security") npm run test:security ;;
           esac
         env:
           # Mock credentials for testing

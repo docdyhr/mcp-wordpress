@@ -1,0 +1,19 @@
+echo "🚀 Running pre-push checks..."
+
+# Run full build
+echo "🏗️ Building project..."
+npm run build
+
+# Run comprehensive tests
+echo "🧪 Running full test suite..."
+npm test
+
+# Run all security tests
+echo "🔒 Running comprehensive security tests..."
+npm run test:security
+
+# Run dependency audit
+echo "🔍 Running security audit..."
+npm audit --audit-level moderate
+
+echo "✅ All pre-push checks passed! Ready to push."
