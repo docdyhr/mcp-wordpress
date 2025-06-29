@@ -17,7 +17,7 @@ const rootDir = path.resolve(__dirname, '..');
 const envPath = path.resolve(rootDir, '.env');
 dotenv.config({ path: envPath });
 
-const SERVER_VERSION = '1.1.5'; // CI test fixes for automatic NPM publishing
+const SERVER_VERSION = '1.1.7'; // Docker containerization and automated publishing
 
 // --- Main Server Class ---
 class MCPWordPressServer {
