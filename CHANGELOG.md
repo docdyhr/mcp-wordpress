@@ -7,35 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.2.0] - 2025-06-29
+## [1.2.0] - 2025-06-29 - Performance & Documentation Revolution
 
 ### Added
-- **Intelligent Caching System**: Complete implementation of multi-layer response caching
-  - `CacheManager` class with TTL-based expiration and LRU eviction
-  - `HttpCacheWrapper` for HTTP-level caching with ETags and Cache-Control headers
-  - `CacheInvalidation` system for smart, event-based cache clearing
-  - `CachedWordPressClient` extending base client with caching capabilities
-- **Cache Management Tools**: 4 new MCP tools for cache control
-  - `wp_cache_stats` - Real-time cache performance monitoring
-  - `wp_cache_clear` - Clear cache with optional pattern matching
-  - `wp_cache_warm` - Pre-populate cache with essential data
-  - `wp_cache_info` - Detailed cache configuration and status
-- **Performance Improvements**: 
-  - 50-70% reduction in API calls for taxonomy operations
-  - 40-60% reduction in authentication requests
-  - Sub-millisecond response times for cached data
-- **Multi-Site Cache Support**: Complete cache isolation between WordPress sites
-- **Comprehensive Testing**: 
-  - Cache infrastructure tests
-  - Single-site and multi-site configuration tests
-  - Performance benchmarking scripts
-  - Live WordPress testing framework
-- **Documentation**: Complete caching guide at `docs/CACHING.md`
+
+#### 🚀 Real-Time Performance Monitoring System
+- **PerformanceMonitor**: Core monitoring engine with metrics collection and historical data storage
+- **MetricsCollector**: Central hub for collecting metrics from clients and cache managers
+- **PerformanceAnalytics**: Advanced analytics with trend analysis, anomaly detection, and predictions
+- **6 Performance Tools**: Complete performance management toolkit
+  - `wp_performance_stats` - Real-time performance statistics and metrics
+  - `wp_performance_history` - Historical performance data and trends
+  - `wp_performance_benchmark` - Industry benchmark comparisons with recommendations
+  - `wp_performance_alerts` - Performance alerts and anomaly detection
+  - `wp_performance_optimize` - Optimization recommendations and insights
+  - `wp_performance_export` - Comprehensive performance report export
+
+#### 📚 Auto-Generated API Documentation System
+- **DocumentationGenerator**: Automatic extraction of tool documentation from TypeScript classes
+- **MarkdownFormatter**: Multi-format documentation output (Markdown, JSON, OpenAPI)
+- **Complete Tool Documentation**: All 59 tools with examples, parameters, and usage guides
+- **OpenAPI Specification**: Machine-readable API specification for integration
+- **CI/CD Documentation Pipeline**: Automated documentation updates via GitHub Actions
+- **Quality Validation**: Comprehensive documentation structure and cross-reference checking
+
+#### 🐳 Docker Containerization
+- **Production-Ready Docker Images**: Optimized multi-stage builds with security best practices
+- **Docker Compose**: Complete development environment setup
+- **Environment Configuration**: Flexible configuration via environment variables and volume mounts
+- **Health Checks**: Built-in container health monitoring
+- **Security**: Non-root user execution and minimal attack surface
+
+#### ⚡ Enhanced Intelligent Caching System
+- **Multi-Layer Architecture**: HTTP response caching + in-memory application cache
+- **Performance Gains**: 50-70% reduction in API calls for taxonomy and authentication operations
+- **Site-Specific Isolation**: Complete cache separation for multi-site WordPress installations
+- **4 Cache Management Tools**: Real-time monitoring and intelligent cache control
+- **Event-Based Invalidation**: Smart cache clearing with cascading rules
 
 ### Changed
-- **Default Client Behavior**: Server now uses `CachedWordPressClient` by default
-  - Can be disabled with `DISABLE_CACHE=true` environment variable
-- **Tool Count**: Increased from 54 to 58 tools with new cache management commands
+- **Tool Count**: Increased from 54 to 59 tools (added 6 performance monitoring + updated cache tools)
+- **Architecture**: Integrated performance monitoring throughout the entire system
+- **Documentation**: Complete overhaul with auto-generated, always up-to-date API documentation
+- **Deployment**: Added containerized deployment options for production environments
+- **Default Behavior**: Performance monitoring enabled by default with comprehensive metrics collection
 
 ### Security
 - **Cache Security**: Site-specific cache isolation prevents cross-site data leakage

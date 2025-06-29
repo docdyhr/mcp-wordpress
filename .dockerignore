@@ -65,7 +65,13 @@ yarn.lock
 .prettierrc
 .markdownlint.json
 
-# Development scripts
+# Development scripts  
 scripts/test-*.js
 scripts/health-check.js
 scripts/verify-*.js
+scripts/generate-docs.js
+scripts/validate-docs.js
+scripts/serve-docs.js
+
+# Performance audit reports
+PERFORMANCE_AUDIT_REPORT.md

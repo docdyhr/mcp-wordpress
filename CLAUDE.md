@@ -13,7 +13,7 @@ npm run typecheck          # Type checking without output
 
 ### Testing & Diagnostics (100% Pass Rate)
 ```bash
-npm test                   # Run main test suite (41/41 tests passing)
+npm test                   # Run main test suite (42/42 tests passing)
 npm run test:typescript    # Run TypeScript build tests
 npm run test:tools         # Test all MCP tools functionality (14/14 tools working)
 npm run test:mcp           # Test MCP protocol integration
@@ -25,13 +25,37 @@ npm run test:fast          # Quick test run
 npm run health             # Comprehensive system health check (100% healthy)
 ```
 
+### Documentation Commands (v1.2.0)
+```bash
+npm run docs:generate      # Generate API documentation for all tools
+npm run docs:validate      # Validate documentation completeness and quality
+npm run docs:serve         # Start local documentation server
+npm run docs:watch         # Watch mode for documentation development
+npm run docs:check         # Quick documentation validation
+```
+
+### Docker Commands (v1.2.0)
+```bash
+# Build and run locally
+docker build -t mcp-wordpress .
+docker run -d --name mcp-wordpress mcp-wordpress
+
+# Using Docker Compose
+docker-compose up -d                    # Start all services
+docker-compose up --profile dev         # Include WordPress and database for development
+docker-compose logs -f mcp-wordpress    # View logs
+docker-compose down                     # Stop all services
+```
+
 **Test Status Summary:**
-- ✅ **TypeScript Tests**: 41/41 passing (100%)
+- ✅ **TypeScript Tests**: 42/42 passing (100%)
 - ✅ **Tool Tests**: 14/14 working (100%)
 - ✅ **MCP Protocol Tests**: 11/11 passing (100%) - Fixed in v1.1.4
 - ✅ **Authentication**: App passwords & JWT working (100%)
 - ✅ **Health Check**: All systems operational (100%)
 - ✅ **Integration**: Multi-site support verified
+- ✅ **Performance Monitoring**: All 6 tools operational
+- ✅ **Documentation**: 59/59 tools documented with examples
 - ✅ **CI/CD Pipeline**: All GitHub Actions updated and working
 
 ### Development & Debugging
@@ -61,7 +85,7 @@ node scripts/health-check.js    # Full system diagnostics
 
 **MCP Server** (`src/index.ts`): Main server class implementing Model Context Protocol.
 - **Multi-Site Support**: Can manage multiple WordPress sites through a single configuration file.
-- Handles 54 WordPress management tools across 8 categories.
+- Handles 59 WordPress management tools across 10 categories.
 - Manages tool registration and request routing for each configured site.
 - Implements graceful error handling with authentication-aware responses.
 
@@ -85,15 +109,17 @@ node scripts/health-check.js    # Full system diagnostics
   - Reduced repetitive try-catch blocks from 49 to 3 standardized patterns
   - Consistent validation and error formatting across all tools
 
-**Tool Categories (54 total tools):**
-  - **Posts** (`posts.ts` - PostTools): Create, read, update, delete blog posts (12 tools)
-  - **Pages** (`pages.ts` - PageTools): Static page management (8 tools)
-  - **Media** (`media.ts` - MediaTools): File upload and media library management (6 tools)
-  - **Users** (`users.ts` - UserTools): User account management (8 tools)
-  - **Comments** (`comments.ts` - CommentTools): Comment moderation and management (6 tools)
-  - **Taxonomies** (`taxonomies.ts` - TaxonomyTools): Categories and tags (8 tools)
-  - **Site** (`site.ts` - SiteTools): Site settings and statistics (4 tools)
-  - **Auth** (`auth.ts` - AuthTools): Authentication testing and management (2 tools)
+**Tool Categories (59 total tools):**
+  - **Posts** (`posts.ts` - PostTools): Create, read, update, delete blog posts (6 tools)
+  - **Pages** (`pages.ts` - PageTools): Static page management (6 tools)
+  - **Media** (`media.ts` - MediaTools): File upload and media library management (5 tools)
+  - **Users** (`users.ts` - UserTools): User account management (6 tools)
+  - **Comments** (`comments.ts` - CommentTools): Comment moderation and management (7 tools)
+  - **Taxonomies** (`taxonomies.ts` - TaxonomyTools): Categories and tags (10 tools)
+  - **Site** (`site.ts` - SiteTools): Site settings and statistics (6 tools)
+  - **Auth** (`auth.ts` - AuthTools): Authentication testing and management (3 tools)
+  - **Cache** (`cache.ts` - CacheTools): Performance caching and optimization (4 tools)
+  - **Performance** (`performance.ts` - PerformanceTools): Real-time monitoring and analytics (6 tools)
 
 **Tool Class Structure:**
 Each tool class follows a consistent pattern:
@@ -109,6 +135,32 @@ export class ToolCategoryTools {
     // Response formatting
   }
 }
+```
+
+### New Architecture Components (v1.2.0)
+
+**Performance Monitoring System** (`src/performance/`): Real-time performance tracking and analytics.
+- **PerformanceMonitor** (`PerformanceMonitor.ts`): Core monitoring engine with metrics collection, historical data storage, and alert generation
+- **MetricsCollector** (`MetricsCollector.ts`): Central hub for collecting metrics from clients and cache managers with real-time aggregation
+- **PerformanceAnalytics** (`PerformanceAnalytics.ts`): Advanced analytics with trend analysis, anomaly detection, linear regression, and predictive insights
+- **6 Performance Tools**: Complete performance management toolkit for monitoring, benchmarking, and optimization
+
+**Documentation Generation System** (`src/docs/`): Auto-generated API documentation.
+- **DocumentationGenerator** (`DocumentationGenerator.ts`): Automatic extraction of tool documentation from TypeScript classes and type definitions
+- **MarkdownFormatter** (`MarkdownFormatter.ts`): Multi-format documentation output (Markdown, JSON, OpenAPI specification)
+- **CI/CD Integration**: GitHub Actions workflow for automatic documentation updates on code changes
+- **Quality Validation**: Comprehensive structure checks, cross-reference validation, and completeness verification
+
+**Docker Containerization**: Production-ready container deployment.
+- **Multi-Stage Dockerfile**: Optimized build process with security best practices and minimal attack surface
+- **Docker Compose**: Complete development environment with optional WordPress and database services
+- **Environment Configuration**: Flexible configuration via environment variables and volume mounts
+- **Health Checks**: Built-in container health monitoring and status reporting
+
+**Enhanced Cache System** (`src/cache/`): Intelligent multi-layer caching with performance monitoring integration.
+- **Cache Metrics Integration**: Performance monitoring system tracks cache hit rates, memory usage, and efficiency
+- **Site-Specific Isolation**: Complete cache separation for multi-site WordPress installations
+- **Real-Time Monitoring**: Cache performance metrics integrated into the broader performance monitoring system
 ```
 
 ### Type System (`src/types/`)
