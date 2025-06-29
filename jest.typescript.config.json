@@ -5,7 +5,8 @@
     "**/typescript-build.test.js",
     "**/server.test.js",
     "**/env-loading.test.js",
-    "**/api-upload-timeout.test.js"
+    "**/api-upload-timeout.test.js",
+    "**/security/**/*.test.js"
   ],
   "collectCoverage": false,
   "testTimeout": 10000,

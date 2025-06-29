@@ -13,12 +13,13 @@ npm run typecheck          # Type checking without output
 
 ### Testing & Diagnostics (100% Pass Rate)
 ```bash
-npm test                   # Run main test suite (42/42 tests passing)
+npm test                   # Run main test suite (82/82 tests passing)
 npm run test:typescript    # Run TypeScript build tests
 npm run test:tools         # Test all MCP tools functionality (14/14 tools working)
 npm run test:mcp           # Test MCP protocol integration
 npm run test:integration   # Integration tests with WordPress (new!)
 npm run test:auth          # Authentication system tests (100% success)
+npm run test:security      # Security validation and penetration tests (40/40 passing)
 npm run test:watch         # Watch mode for tests
 npm run test:coverage      # Generate coverage report (50% threshold)
 npm run test:fast          # Quick test run
@@ -48,7 +49,8 @@ docker-compose down                     # Stop all services
 ```
 
 **Test Status Summary:**
-- ✅ **TypeScript Tests**: 42/42 passing (100%)
+- ✅ **TypeScript Tests**: 82/82 passing (100%)
+- ✅ **Security Tests**: 40/40 passing (100%) - Comprehensive vulnerability testing
 - ✅ **Tool Tests**: 14/14 working (100%)
 - ✅ **MCP Protocol Tests**: 11/11 passing (100%) - Fixed in v1.1.4
 - ✅ **Authentication**: App passwords & JWT working (100%)
