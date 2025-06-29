@@ -38,7 +38,15 @@ export class ToolRegistry {
   public registerAllTools(): void {
     // Register all tools from the tools directory
     Object.values(Tools).forEach((ToolClass) => {
-      const toolInstance = new ToolClass();
+      let toolInstance: any;
+      
+      // Cache tools need the clients map
+      if (ToolClass.name === 'CacheTools') {
+        toolInstance = new ToolClass(this.wordpressClients);
+      } else {
+        toolInstance = new (ToolClass as new () => any)();
+      }
+      
       const tools = toolInstance.getTools();
 
       tools.forEach((tool: ToolDefinition) => {

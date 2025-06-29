@@ -103,3 +103,14 @@ export function formatErrorResponse(operation: string, error: any): never {
   const message = getErrorMessage(error);
   throw new Error(`${operation}: ${message}`);
 }
+
+/**
+ * Simple tool wrapper for standalone async functions
+ */
+export async function toolWrapper<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+}

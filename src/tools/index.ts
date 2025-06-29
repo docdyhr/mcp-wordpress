@@ -1,4 +1,5 @@
 export { default as AuthTools } from './auth.js';
+export { default as CacheTools } from './cache.js';
 export { default as CommentTools } from './comments.js';
 export { default as MediaTools } from './media.js';
 export { default as PageTools } from './pages.js';

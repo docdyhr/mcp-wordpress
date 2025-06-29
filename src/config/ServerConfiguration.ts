@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { WordPressClient } from '../client/api.js';
+import { CachedWordPressClient } from '../client/CachedWordPressClient.js';
 import { AuthMethod, WordPressClientConfig } from '../types/client.js';
 import { getErrorMessage } from '../utils/error.js';
 
@@ -108,7 +109,10 @@ export class ServerConfiguration {
             }
           };
           
-          const client = new WordPressClient(clientConfig);
+          // Use cached client for better performance
+          const client = process.env.DISABLE_CACHE === 'true' 
+            ? new WordPressClient(clientConfig)
+            : new CachedWordPressClient(clientConfig, site.id);
           clients.set(site.id, client);
           validConfigs.push(site);
           
@@ -152,7 +156,10 @@ export class ServerConfiguration {
       auth: { method: authMethod, username, appPassword: password }
     };
     
-    const client = new WordPressClient(clientConfig);
+    // Use cached client for better performance
+    const client = process.env.DISABLE_CACHE === 'true'
+      ? new WordPressClient(clientConfig)
+      : new CachedWordPressClient(clientConfig, 'default');
     const clients = new Map<string, WordPressClient>();
     clients.set('default', client);
 

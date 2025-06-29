@@ -72,6 +72,7 @@ export interface RequestOptions {
   timeout?: number;
   retries?: number;
   signal?: AbortSignal;
+  params?: any;
 }
 
 // API Response Wrapper

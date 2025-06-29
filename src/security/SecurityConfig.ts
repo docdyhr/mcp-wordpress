@@ -107,6 +107,49 @@ export const SecurityConfig = {
       /secret["\s:=]+["']?([^"'\s]+)["']?/gi,
       /key["\s:=]+["']?([^"'\s]+)["']?/gi
     ]
+  },
+
+  // Cache configuration
+  cache: {
+    // Default cache settings
+    enabled: true,
+    maxSize: 1000,  // Maximum number of cached entries
+    defaultTTL: 15 * 60 * 1000, // 15 minutes default TTL
+    enableLRU: true,
+    enableStats: true,
+    
+    // TTL presets by data type (milliseconds)
+    ttlPresets: {
+      static: 4 * 60 * 60 * 1000,      // 4 hours - site settings, user roles
+      semiStatic: 2 * 60 * 60 * 1000,  // 2 hours - categories, tags, user profiles  
+      dynamic: 15 * 60 * 1000,         // 15 minutes - posts, pages, comments
+      session: 30 * 60 * 1000,         // 30 minutes - authentication, current user
+      realtime: 60 * 1000              // 1 minute - real-time data
+    },
+
+    // Cache-Control headers by data type
+    cacheHeaders: {
+      static: 'public, max-age=14400',     // 4 hours
+      semiStatic: 'public, max-age=7200',  // 2 hours
+      dynamic: 'public, max-age=900',      // 15 minutes
+      session: 'private, max-age=1800',    // 30 minutes
+      realtime: 'public, max-age=60'       // 1 minute
+    },
+
+    // Invalidation settings
+    invalidation: {
+      enabled: true,
+      batchSize: 100,        // Max events to process in one batch
+      queueTimeout: 5000,    // Max time to wait before processing queue (ms)
+      enableCascading: true  // Allow cascading invalidations
+    },
+
+    // Memory management
+    cleanup: {
+      interval: 60 * 1000,   // Cleanup interval in milliseconds (1 minute)
+      maxMemoryMB: 50,       // Maximum memory usage for cache
+      evictionThreshold: 0.8 // Start evicting when 80% full
+    }
   }
 };
 
