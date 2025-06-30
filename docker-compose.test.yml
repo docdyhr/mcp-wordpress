@@ -52,6 +52,7 @@ services:
     image: wordpress:cli
     container_name: wordpress-test-cli
     restart: "no"
+    user: root
     depends_on:
       wordpress-test:
         condition: service_healthy

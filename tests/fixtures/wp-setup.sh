@@ -64,16 +64,25 @@ wp post create \
     --path=/var/www/html \
     --allow-root
 
-# Create test media directory
+# Create test media directory with proper permissions
+echo "🖼️ Creating test media directory..."
+# First ensure the uploads directory exists and has correct ownership
+mkdir -p /var/www/html/wp-content/uploads/
+chown -R www-data:www-data /var/www/html/wp-content/
+chmod -R 755 /var/www/html/wp-content/uploads/
+
+# Create test media subdirectory
 mkdir -p /var/www/html/wp-content/uploads/test-media
+chown -R www-data:www-data /var/www/html/wp-content/uploads/
 
 # Create a small test image
-echo "🖼️ Creating test media..."
+echo "📁 Creating test image..."
 # Create a simple 1x1 pixel PNG for testing
 echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > /var/www/html/wp-content/uploads/test-media/test-image.png
 
-# Set proper permissions
-chown -R www-data:www-data /var/www/html/wp-content/uploads
+# Set final permissions
+chown -R www-data:www-data /var/www/html/wp-content/uploads/
+chmod -R 755 /var/www/html/wp-content/uploads/
 
 # Enable REST API (should be enabled by default, but just to be sure)
 echo "🔌 Ensuring REST API is enabled..."
