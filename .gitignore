@@ -180,6 +180,20 @@ test-data-*
 scripts/test-results/
 scripts/test-outputs/
 
+# Phase 2 Testing Infrastructure - Results and Generated Data
+tests/results/
+tests/baseline/
+tests/logs/
+tests/pacts/
+tests/reports/
+performance-*.json
+baseline-*.json
+contract-*.json
+pact-*.json
+*-performance-results.json
+*-baseline.json
+*-contract-results.json
+
 # Configuration backups and temporary config files
 mcp-wordpress-*.config.json
 !mcp-wordpress.config.json.example

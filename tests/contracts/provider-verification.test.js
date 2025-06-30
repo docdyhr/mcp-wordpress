@@ -14,104 +14,113 @@ describe("WordPress Provider Verification", () => {
   // Skip in CI unless we have a test WordPress instance
   const skipInCI = process.env.CI && !process.env.WORDPRESS_TEST_URL;
 
-  (skipInCI ? describe.skip : describe)("Real WordPress API Verification", () => {
-    it("should verify WordPress REST API satisfies our contracts", async () => {
-      const opts = {
-        logLevel: "info",
-        providerBaseUrl: process.env.WORDPRESS_TEST_URL || "http://localhost:8080",
-        provider: "wordpress-rest-api",
-        providerVersion: "1.0.0",
-        pactUrls: [path.resolve(__dirname, "../pacts")],
-        publishVerificationResult: false,
-        
-        // Provider states setup
-        stateHandlers: {
-          "WordPress site exists with authenticated user": () => {
-            // Setup: Ensure test user exists with proper permissions
-            return Promise.resolve("User authenticated");
-          },
-          "WordPress site has published posts": () => {
-            // Setup: Ensure test posts exist
-            return Promise.resolve("Posts available");
-          },
-          "post with ID 999 does not exist": () => {
-            // Setup: Ensure post 999 doesn't exist
-            return Promise.resolve("Post 999 removed");
-          },
-          "WordPress site accepts media uploads": () => {
-            // Setup: Ensure media uploads are enabled
-            return Promise.resolve("Media uploads enabled");
-          },
-          "user with ID 1 exists": () => {
-            // Setup: Ensure admin user exists
-            return Promise.resolve("Admin user available");
-          },
-          "invalid credentials provided": () => {
-            // Setup: No special setup needed for auth failure test
-            return Promise.resolve("Invalid auth test ready");
-          },
-          "rate limit exceeded for user": () => {
-            // Setup: Configure rate limiting (may require plugin)
-            return Promise.resolve("Rate limiting configured");
-          },
-          "WordPress site is operational": () => {
-            // Setup: Basic operational state
-            return Promise.resolve("Site operational");
-          },
-          "WordPress site is experiencing server issues": () => {
-            // Setup: This would typically be simulated
-            return Promise.resolve("Server issues simulated");
-          },
-        },
-
-        // Custom headers for authentication
-        customProviderHeaders: [
-          "Authorization: Basic " + 
-          Buffer.from(`${process.env.WORDPRESS_USERNAME || 'admin'}:${process.env.WORDPRESS_APP_PASSWORD || 'password'}`).toString('base64')
-        ],
-
-        // Timeout for verification
-        timeout: 30000,
-      };
-
-      const verifier = new Verifier(opts);
-      
-      // This will verify all pact files against the real WordPress API
-      await verifier.verifyProvider();
-    }, 60000); // 60 second timeout for provider verification
-
-    it("should verify multi-site WordPress compatibility", async () => {
-      // Skip if no multi-site test URLs provided
-      const multiSiteUrls = process.env.WORDPRESS_MULTISITE_URLS?.split(',') || [];
-      
-      if (multiSiteUrls.length === 0) {
-        console.log("Skipping multi-site verification - no test URLs provided");
-        return;
-      }
-
-      // Verify each site in the multi-site configuration
-      for (const [index, siteUrl] of multiSiteUrls.entries()) {
+  (skipInCI ? describe.skip : describe)(
+    "Real WordPress API Verification",
+    () => {
+      it("should verify WordPress REST API satisfies our contracts", async () => {
         const opts = {
           logLevel: "info",
-          providerBaseUrl: siteUrl.trim(),
-          provider: `wordpress-rest-api-site-${index + 1}`,
+          providerBaseUrl:
+            process.env.WORDPRESS_TEST_URL || "http://localhost:8080",
+          provider: "wordpress-rest-api",
           providerVersion: "1.0.0",
           pactUrls: [path.resolve(__dirname, "../pacts")],
           publishVerificationResult: false,
+
+          // Provider states setup
+          stateHandlers: {
+            "WordPress site exists with authenticated user": () => {
+              // Setup: Ensure test user exists with proper permissions
+              return Promise.resolve("User authenticated");
+            },
+            "WordPress site has published posts": () => {
+              // Setup: Ensure test posts exist
+              return Promise.resolve("Posts available");
+            },
+            "post with ID 999 does not exist": () => {
+              // Setup: Ensure post 999 doesn't exist
+              return Promise.resolve("Post 999 removed");
+            },
+            "WordPress site accepts media uploads": () => {
+              // Setup: Ensure media uploads are enabled
+              return Promise.resolve("Media uploads enabled");
+            },
+            "user with ID 1 exists": () => {
+              // Setup: Ensure admin user exists
+              return Promise.resolve("Admin user available");
+            },
+            "invalid credentials provided": () => {
+              // Setup: No special setup needed for auth failure test
+              return Promise.resolve("Invalid auth test ready");
+            },
+            "rate limit exceeded for user": () => {
+              // Setup: Configure rate limiting (may require plugin)
+              return Promise.resolve("Rate limiting configured");
+            },
+            "WordPress site is operational": () => {
+              // Setup: Basic operational state
+              return Promise.resolve("Site operational");
+            },
+            "WordPress site is experiencing server issues": () => {
+              // Setup: This would typically be simulated
+              return Promise.resolve("Server issues simulated");
+            },
+          },
+
+          // Custom headers for authentication
+          customProviderHeaders: [
+            "Authorization: Basic " +
+              Buffer.from(
+                `${process.env.WORDPRESS_USERNAME || "admin"}:${process.env.WORDPRESS_APP_PASSWORD || "password"}`,
+              ).toString("base64"),
+          ],
+
+          // Timeout for verification
           timeout: 30000,
         };
 
         const verifier = new Verifier(opts);
+
+        // This will verify all pact files against the real WordPress API
         await verifier.verifyProvider();
-      }
-    }, 120000); // 2 minute timeout for multi-site verification
-  });
+      }, 60000); // 60 second timeout for provider verification
+
+      it("should verify multi-site WordPress compatibility", async () => {
+        // Skip if no multi-site test URLs provided
+        const multiSiteUrls =
+          process.env.WORDPRESS_MULTISITE_URLS?.split(",") || [];
+
+        if (multiSiteUrls.length === 0) {
+          console.log(
+            "Skipping multi-site verification - no test URLs provided",
+          );
+          return;
+        }
+
+        // Verify each site in the multi-site configuration
+        for (const [index, siteUrl] of multiSiteUrls.entries()) {
+          const opts = {
+            logLevel: "info",
+            providerBaseUrl: siteUrl.trim(),
+            provider: `wordpress-rest-api-site-${index + 1}`,
+            providerVersion: "1.0.0",
+            pactUrls: [path.resolve(__dirname, "../pacts")],
+            publishVerificationResult: false,
+            timeout: 30000,
+          };
+
+          const verifier = new Verifier(opts);
+          await verifier.verifyProvider();
+        }
+      }, 120000); // 2 minute timeout for multi-site verification
+    },
+  );
 
   describe("Contract Monitoring", () => {
-    it("should detect WordPress API changes", async () => {
+    it("should detect WordPress API changes", () => {
       // This test would run against a known WordPress version
       // and detect if the API contract has changed unexpectedly
-      
+
       const referenceContract = {
         posts: {
           createEndpoint: "/wp-json/wp/v2/posts",
@@ -129,22 +138,24 @@ describe("WordPress Provider Verification", () => {
       // 1. Make requests to WordPress API
       // 2. Compare response structure with reference contract
       // 3. Alert if breaking changes detected
-      
+
       console.log("Contract monitoring baseline established");
       expect(referenceContract).toBeDefined();
     });
 
-    it("should validate WordPress version compatibility", async () => {
+    it("should validate WordPress version compatibility", () => {
       // Test against different WordPress versions to ensure compatibility
       const supportedVersions = ["6.0", "6.1", "6.2", "6.3", "6.4"];
-      
+
       // This would test our contracts against different WordPress versions
       // Currently just validating the test structure
-      supportedVersions.forEach(version => {
+      supportedVersions.forEach((version) => {
         expect(version).toMatch(/^\d+\.\d+$/);
       });
-      
-      console.log(`Verified compatibility matrix for ${supportedVersions.length} WordPress versions`);
+
+      console.log(
+        `Verified compatibility matrix for ${supportedVersions.length} WordPress versions`,
+      );
     });
   });
 

@@ -247,7 +247,8 @@ describe("WordPress API Contract Tests", () => {
           path: "/wp-json/wp/v2/media",
           headers: {
             Authorization: "Basic dGVzdHVzZXI6dGVzdC1wYXNzd29yZC0xMjM=",
-            "Content-Type": "multipart/form-data; boundary=----WebKitFormBoundary",
+            "Content-Type":
+              "multipart/form-data; boundary=----WebKitFormBoundary",
           },
           body: expect.any(Object), // FormData is complex to match exactly
         },
