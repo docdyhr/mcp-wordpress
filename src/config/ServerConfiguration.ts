@@ -6,27 +6,15 @@ import { WordPressClient } from '../client/api.js';
 import { CachedWordPressClient } from '../client/CachedWordPressClient.js';
 import { AuthMethod, WordPressClientConfig } from '../types/client.js';
 import { getErrorMessage } from '../utils/error.js';
+import { 
+  ConfigurationValidator, 
+  type SiteType as SiteConfig, 
+  type MultiSiteConfigType as MultiSiteConfig,
+  type McpConfigType
+} from './ConfigurationSchema.js';
 
-/**
- * Interface for site configuration
- */
-export interface SiteConfig {
-  id: string;
-  name: string;
-  config: {
-    WORDPRESS_SITE_URL: string;
-    WORDPRESS_USERNAME: string;
-    WORDPRESS_APP_PASSWORD: string;
-    WORDPRESS_AUTH_METHOD?: AuthMethod;
-  };
-}
-
-/**
- * Interface for multi-site configuration file
- */
-export interface MultiSiteConfig {
-  sites: SiteConfig[];
-}
+// Re-export types from schema for backward compatibility
+export type { SiteConfig, MultiSiteConfig };
 
 /**
  * Configuration loader for MCP WordPress Server
@@ -61,7 +49,7 @@ export class ServerConfiguration {
    * Load WordPress client configurations
    * Returns a Map of site ID to WordPressClient instances
    */
-  public loadClientConfigurations(mcpConfig?: any): {
+  public loadClientConfigurations(mcpConfig?: McpConfigType): {
     clients: Map<string, WordPressClient>;
     configs: SiteConfig[];
   } {
@@ -89,38 +77,33 @@ export class ServerConfiguration {
   } {
     try {
       const configFile = fs.readFileSync(configPath, 'utf-8');
-      const config: MultiSiteConfig = JSON.parse(configFile);
+      const rawConfig = JSON.parse(configFile);
 
-      if (!config.sites || !Array.isArray(config.sites)) {
-        throw new Error('Configuration file must have a "sites" array.');
-      }
+      // Validate configuration using Zod schema
+      const config = ConfigurationValidator.validateMultiSiteConfig(rawConfig);
 
       const clients = new Map<string, WordPressClient>();
       const validConfigs: SiteConfig[] = [];
 
       for (const site of config.sites) {
-        if (this.isValidSiteConfig(site)) {
-          const clientConfig: WordPressClientConfig = {
-            baseUrl: site.config.WORDPRESS_SITE_URL,
-            auth: {
-              method: site.config.WORDPRESS_AUTH_METHOD || 'app-password',
-              username: site.config.WORDPRESS_USERNAME,
-              appPassword: site.config.WORDPRESS_APP_PASSWORD
-            }
-          };
-          
-          // Use cached client for better performance
-          const client = process.env.DISABLE_CACHE === 'true' 
-            ? new WordPressClient(clientConfig)
-            : new CachedWordPressClient(clientConfig, site.id);
-          clients.set(site.id, client);
-          validConfigs.push(site);
-          
-          if (process.env.NODE_ENV !== 'test') {
-            console.error(`INFO: Initialized client for site: ${site.name} (ID: ${site.id})`);
+        const clientConfig: WordPressClientConfig = {
+          baseUrl: site.config.WORDPRESS_SITE_URL,
+          auth: {
+            method: site.config.WORDPRESS_AUTH_METHOD || 'app-password',
+            username: site.config.WORDPRESS_USERNAME,
+            appPassword: site.config.WORDPRESS_APP_PASSWORD
           }
-        } else {
-          console.warn('WARN: Skipping invalid site entry in config. Must have id, name, and config.', site);
+        };
+        
+        // Use cached client for better performance
+        const client = process.env.DISABLE_CACHE === 'true' 
+          ? new WordPressClient(clientConfig)
+          : new CachedWordPressClient(clientConfig, site.id);
+        clients.set(site.id, client);
+        validConfigs.push(site);
+        
+        if (process.env.NODE_ENV !== 'test') {
+          console.error(`INFO: Initialized client for site: ${site.name} (ID: ${site.id})`);
         }
       }
 
@@ -134,62 +117,67 @@ export class ServerConfiguration {
   /**
    * Load single-site configuration from environment variables
    */
-  private loadSingleSiteFromEnv(mcpConfig?: any): {
+  private loadSingleSiteFromEnv(mcpConfig?: McpConfigType): {
     clients: Map<string, WordPressClient>;
     configs: SiteConfig[];
   } {
-    const siteUrl = mcpConfig?.wordpressSiteUrl || process.env.WORDPRESS_SITE_URL;
-    const username = mcpConfig?.wordpressUsername || process.env.WORDPRESS_USERNAME;
-    const password = mcpConfig?.wordpressAppPassword || process.env.WORDPRESS_APP_PASSWORD;
-    const authMethod = (mcpConfig?.wordpressAuthMethod || 
-      process.env.WORDPRESS_AUTH_METHOD || 
-      'app-password') as AuthMethod;
+    try {
+      // Validate MCP config if provided
+      const validatedMcpConfig = mcpConfig ? ConfigurationValidator.validateMcpConfig(mcpConfig) : undefined;
 
-    if (!siteUrl || !username || !password) {
-      console.error('ERROR: Missing required credentials for single-site mode.');
-      console.error('Please set WORDPRESS_SITE_URL, WORDPRESS_USERNAME, and WORDPRESS_APP_PASSWORD environment variables.');
+      // Prepare environment configuration for validation
+      const envConfig = {
+        WORDPRESS_SITE_URL: validatedMcpConfig?.wordpressSiteUrl || process.env.WORDPRESS_SITE_URL,
+        WORDPRESS_USERNAME: validatedMcpConfig?.wordpressUsername || process.env.WORDPRESS_USERNAME,
+        WORDPRESS_APP_PASSWORD: validatedMcpConfig?.wordpressAppPassword || process.env.WORDPRESS_APP_PASSWORD,
+        WORDPRESS_AUTH_METHOD: validatedMcpConfig?.wordpressAuthMethod || 
+          process.env.WORDPRESS_AUTH_METHOD || 
+          'app-password',
+        NODE_ENV: process.env.NODE_ENV,
+        DEBUG: process.env.DEBUG,
+        DISABLE_CACHE: process.env.DISABLE_CACHE,
+        LOG_LEVEL: process.env.LOG_LEVEL
+      };
+
+      // Validate environment configuration using Zod schema
+      const validatedConfig = ConfigurationValidator.validateEnvironmentConfig(envConfig);
+
+      const clientConfig: WordPressClientConfig = {
+        baseUrl: validatedConfig.WORDPRESS_SITE_URL,
+        auth: { 
+          method: validatedConfig.WORDPRESS_AUTH_METHOD, 
+          username: validatedConfig.WORDPRESS_USERNAME, 
+          appPassword: validatedConfig.WORDPRESS_APP_PASSWORD 
+        }
+      };
+      
+      // Use cached client for better performance
+      const client = process.env.DISABLE_CACHE === 'true'
+        ? new WordPressClient(clientConfig)
+        : new CachedWordPressClient(clientConfig, 'default');
+      const clients = new Map<string, WordPressClient>();
+      clients.set('default', client);
+
+      const siteConfig: SiteConfig = {
+        id: 'default',
+        name: 'Default Site',
+        config: {
+          WORDPRESS_SITE_URL: validatedConfig.WORDPRESS_SITE_URL,
+          WORDPRESS_USERNAME: validatedConfig.WORDPRESS_USERNAME,
+          WORDPRESS_APP_PASSWORD: validatedConfig.WORDPRESS_APP_PASSWORD,
+          WORDPRESS_AUTH_METHOD: validatedConfig.WORDPRESS_AUTH_METHOD
+        }
+      };
+
+      console.error('INFO: Initialized client for default site in single-site mode.');
+      
+      return { clients, configs: [siteConfig] };
+    } catch (error) {
+      console.error('ERROR: Configuration validation failed for single-site mode.');
+      console.error(`Details: ${getErrorMessage(error)}`);
+      console.error('Please check your environment variables or MCP configuration.');
       return { clients: new Map(), configs: [] };
     }
-
-    const clientConfig: WordPressClientConfig = {
-      baseUrl: siteUrl,
-      auth: { method: authMethod, username, appPassword: password }
-    };
-    
-    // Use cached client for better performance
-    const client = process.env.DISABLE_CACHE === 'true'
-      ? new WordPressClient(clientConfig)
-      : new CachedWordPressClient(clientConfig, 'default');
-    const clients = new Map<string, WordPressClient>();
-    clients.set('default', client);
-
-    const siteConfig: SiteConfig = {
-      id: 'default',
-      name: 'Default Site',
-      config: {
-        WORDPRESS_SITE_URL: siteUrl,
-        WORDPRESS_USERNAME: username,
-        WORDPRESS_APP_PASSWORD: password,
-        WORDPRESS_AUTH_METHOD: authMethod
-      }
-    };
-
-    console.error('INFO: Initialized client for default site in single-site mode.');
-    
-    return { clients, configs: [siteConfig] };
-  }
-
-  /**
-   * Validate site configuration structure
-   */
-  private isValidSiteConfig(site: any): site is SiteConfig {
-    return site && 
-           typeof site.id === 'string' && 
-           typeof site.name === 'string' && 
-           site.config && 
-           typeof site.config.WORDPRESS_SITE_URL === 'string' &&
-           typeof site.config.WORDPRESS_USERNAME === 'string' &&
-           typeof site.config.WORDPRESS_APP_PASSWORD === 'string';
   }
 
   /**

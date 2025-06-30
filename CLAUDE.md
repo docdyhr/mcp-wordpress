@@ -20,6 +20,8 @@ npm run test:mcp           # Test MCP protocol integration
 npm run test:integration   # Integration tests with WordPress (new!)
 npm run test:auth          # Authentication system tests (100% success)
 npm run test:security      # Security validation and penetration tests (40/40 passing)
+npm run test:config        # Configuration validation tests (27/27 passing) 
+npm run test:property      # Property-based testing (12/12 passing)
 npm run test:watch         # Watch mode for tests
 npm run test:coverage      # Generate coverage report (50% threshold)
 npm run test:fast          # Quick test run
@@ -51,6 +53,8 @@ docker-compose down                     # Stop all services
 **Test Status Summary:**
 - ✅ **TypeScript Tests**: 82/82 passing (100%)
 - ✅ **Security Tests**: 40/40 passing (100%) - Comprehensive vulnerability testing
+- ✅ **Configuration Tests**: 27/27 passing (100%) - Zod schema validation
+- ✅ **Property-Based Tests**: 12/12 passing (100%) - Generative testing with fast-check
 - ✅ **Tool Tests**: 14/14 working (100%)
 - ✅ **MCP Protocol Tests**: 11/11 passing (100%) - Fixed in v1.1.4
 - ✅ **Authentication**: App passwords & JWT working (100%)
@@ -189,6 +193,13 @@ The server can be configured in two ways:
 
 If `mcp-wordpress.config.json` is present, it will be used. Otherwise, the server will fall back to environment variables.
 
+**Enhanced Validation (v1.2.1+)**:
+- All configuration is validated using comprehensive Zod schemas
+- Automatic validation of URLs, emails, usernames, and authentication methods
+- Uniqueness checks for site IDs, names, and URLs in multi-site configurations
+- Type-safe configuration interfaces with detailed error messages
+- Support for all authentication methods: app-password, jwt, basic, api-key, cookie
+
 #### Multi-Site Configuration (`mcp-wordpress.config.json`)
 
 To manage multiple WordPress sites, create a `mcp-wordpress.config.json` file in the root of the project. This file allows you to define connection details for each site.
@@ -274,6 +285,9 @@ Supports 4 authentication methods with comprehensive testing:
 - **Tool Tests**: Individual tool functionality with dynamic test data.
 - **Integration Tests**: WordPress API connectivity for single and multi-site setups.
 - **Authentication Tests**: All auth methods with timeout handling.
+- **Configuration Tests**: Comprehensive Zod schema validation for all configuration scenarios.
+- **Property-Based Tests**: Generative testing using fast-check for edge case discovery and data structure validation.
+- **Security Tests**: Input validation, XSS protection, SQL injection prevention, and penetration testing.
 
 ### Development Guidelines
 
