@@ -6,7 +6,9 @@
     "**/server.test.js",
     "**/env-loading.test.js",
     "**/api-upload-timeout.test.js",
-    "**/security/**/*.test.js"
+    "**/security/**/*.test.js",
+    "**/config/**/*.test.js",
+    "**/property/**/*.test.js"
   ],
   "collectCoverage": false,
   "testTimeout": 10000,
