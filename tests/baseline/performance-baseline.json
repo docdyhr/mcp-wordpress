@@ -1,0 +1,41 @@
+{
+  "version": "1.0.0",
+  "timestamp": "2025-06-30T14:32:33.029Z",
+  "metrics": {
+    "apiResponseTime": {
+      "getPosts": {
+        "p50": 500,
+        "p95": 1000,
+        "p99": 2000
+      },
+      "createPost": {
+        "p50": 800,
+        "p95": 1500,
+        "p99": 3000
+      },
+      "uploadMedia": {
+        "p50": 2000,
+        "p95": 5000,
+        "p99": 10000
+      },
+      "getUser": {
+        "p50": 300,
+        "p95": 600,
+        "p99": 1000
+      }
+    },
+    "memoryUsage": {
+      "baseline": 52428800,
+      "peak": 104857600
+    },
+    "throughput": {
+      "requestsPerSecond": 100,
+      "concurrentConnections": 10
+    }
+  },
+  "thresholds": {
+    "regressionThreshold": 0.2,
+    "memoryThreshold": 0.15,
+    "throughputThreshold": 0.1
+  }
+}

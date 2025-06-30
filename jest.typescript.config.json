@@ -8,7 +8,9 @@
     "**/api-upload-timeout.test.js",
     "**/security/**/*.test.js",
     "**/config/**/*.test.js",
-    "**/property/**/*.test.js"
+    "**/property/**/*.test.js",
+    "**/contracts/**/*.test.js",
+    "**/performance/**/*.test.js"
   ],
   "collectCoverage": false,
   "testTimeout": 10000,

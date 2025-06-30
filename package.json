@@ -31,6 +31,8 @@
     "test:security:penetration": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/penetration-tests.test.js --config=jest.typescript.config.json",
     "test:config": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/config/ --config=jest.typescript.config.json",
     "test:property": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/property/ --config=jest.typescript.config.json",
+    "test:contracts": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/contracts/ --config=jest.typescript.config.json",
+    "test:performance": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/performance/ --config=jest.typescript.config.json",
     "health": "node scripts/health-check.js",
     "verify-claude": "node scripts/verify-claude-integration.js",
     "docs:generate": "npm run build && node scripts/generate-docs.js",
@@ -73,6 +75,8 @@
   "devDependencies": {
     "@eslint/js": "^9.29.0",
     "@jest/globals": "^30.0.0",
+    "@pact-foundation/pact": "^15.0.1",
+    "@pact-foundation/pact-node": "^10.18.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^20.19.1",
     "@typescript-eslint/parser": "^8.35.0",

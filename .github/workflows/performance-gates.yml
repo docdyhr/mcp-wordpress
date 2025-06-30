@@ -1,0 +1,350 @@
+name: Performance Gates
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  schedule:
+    # Run performance tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  performance-regression-detection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Need full history for performance baseline comparison
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build project
+      run: npm run build
+    
+    - name: Download performance baseline
+      uses: actions/cache@v3
+      with:
+        path: tests/baseline/performance-baseline.json
+        key: performance-baseline-${{ github.repository }}
+        restore-keys: |
+          performance-baseline-
+    
+    - name: Run performance regression tests
+      run: npm run test:performance
+      env:
+        NODE_ENV: test
+        CI: true
+    
+    - name: Upload performance results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: performance-results
+        path: |
+          tests/results/performance-results.json
+          tests/baseline/performance-baseline.json
+    
+    - name: Performance gate check
+      run: |
+        # Check if performance results indicate regression
+        if [ -f "tests/results/performance-results.json" ]; then
+          echo "Performance results generated successfully"
+          
+          # Extract key metrics for reporting
+          node -e "
+            const fs = require('fs');
+            try {
+              const results = JSON.parse(fs.readFileSync('tests/results/performance-results.json', 'utf8'));
+              const baseline = JSON.parse(fs.readFileSync('tests/baseline/performance-baseline.json', 'utf8'));
+              
+              console.log('## Performance Report');
+              console.log('');
+              
+              if (results.metrics.apiResponseTime) {
+                console.log('### API Response Times');
+                Object.entries(results.metrics.apiResponseTime).forEach(([endpoint, metrics]) => {
+                  const baselineMetrics = baseline.metrics.apiResponseTime[endpoint] || {};
+                  console.log(\`- \${endpoint}: P95=\${metrics.p95?.toFixed(0)}ms (baseline: \${baselineMetrics.p95 || 'N/A'}ms)\`);
+                });
+                console.log('');
+              }
+              
+              if (results.metrics.throughput) {
+                console.log('### Throughput');
+                const throughput = results.metrics.throughput.requestsPerSecond?.toFixed(2) || 'N/A';
+                const baselineThroughput = baseline.metrics.throughput?.requestsPerSecond?.toFixed(2) || 'N/A';
+                console.log(\`- Requests per second: \${throughput} (baseline: \${baselineThroughput})\`);
+                console.log('');
+              }
+              
+              if (results.metrics.memoryUsage) {
+                console.log('### Memory Usage');
+                const memoryMB = (results.metrics.memoryUsage.peak / 1024 / 1024).toFixed(2);
+                const baselineMemoryMB = (baseline.metrics.memoryUsage?.peak / 1024 / 1024).toFixed(2) || 'N/A';
+                console.log(\`- Peak memory: \${memoryMB}MB (baseline: \${baselineMemoryMB}MB)\`);
+              }
+            } catch (error) {
+              console.log('Could not parse performance results:', error.message);
+            }
+          "
+        else
+          echo "Performance results file not found"
+          exit 1
+        fi
+    
+    - name: Comment performance results on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          
+          try {
+            const results = JSON.parse(fs.readFileSync('tests/results/performance-results.json', 'utf8'));
+            const baseline = JSON.parse(fs.readFileSync('tests/baseline/performance-baseline.json', 'utf8'));
+            
+            let comment = '## 🚀 Performance Test Results\n\n';
+            
+            // API Response Times
+            if (results.metrics.apiResponseTime) {
+              comment += '### API Response Times\n';
+              comment += '| Endpoint | P95 (ms) | Baseline (ms) | Change |\n';
+              comment += '|----------|----------|---------------|--------|\n';
+              
+              Object.entries(results.metrics.apiResponseTime).forEach(([endpoint, metrics]) => {
+                const baselineMetrics = baseline.metrics.apiResponseTime[endpoint] || {};
+                const p95 = metrics.p95?.toFixed(0) || 'N/A';
+                const baselineP95 = baselineMetrics.p95?.toFixed(0) || 'N/A';
+                
+                let change = 'N/A';
+                let changeIcon = '➖';
+                
+                if (metrics.p95 && baselineMetrics.p95) {
+                  const pctChange = ((metrics.p95 - baselineMetrics.p95) / baselineMetrics.p95 * 100);
+                  change = `${pctChange >= 0 ? '+' : ''}${pctChange.toFixed(1)}%`;
+                  changeIcon = pctChange > 20 ? '🔴' : pctChange > 10 ? '🟡' : '🟢';
+                }
+                
+                comment += `| ${endpoint} | ${p95} | ${baselineP95} | ${changeIcon} ${change} |\n`;
+              });
+              comment += '\n';
+            }
+            
+            // Throughput
+            if (results.metrics.throughput) {
+              const throughput = results.metrics.throughput.requestsPerSecond?.toFixed(2) || 'N/A';
+              const baselineThroughput = baseline.metrics.throughput?.requestsPerSecond?.toFixed(2) || 'N/A';
+              
+              comment += '### Throughput\n';
+              comment += `- **Current**: ${throughput} req/s\n`;
+              comment += `- **Baseline**: ${baselineThroughput} req/s\n\n`;
+            }
+            
+            // Memory Usage
+            if (results.metrics.memoryUsage) {
+              const memoryMB = (results.metrics.memoryUsage.peak / 1024 / 1024).toFixed(2);
+              const baselineMemoryMB = baseline.metrics.memoryUsage?.peak ? 
+                (baseline.metrics.memoryUsage.peak / 1024 / 1024).toFixed(2) : 'N/A';
+              
+              comment += '### Memory Usage\n';
+              comment += `- **Peak**: ${memoryMB}MB\n`;
+              comment += `- **Baseline**: ${baselineMemoryMB}MB\n\n`;
+            }
+            
+            comment += '---\n*Performance tests run on every PR to detect regressions*';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          } catch (error) {
+            console.log('Could not create performance comment:', error.message);
+          }
+    
+    - name: Update performance baseline
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        # Update baseline on main branch pushes
+        if [ -f "tests/results/performance-results.json" ]; then
+          cp tests/results/performance-results.json tests/baseline/performance-baseline.json
+          echo "Performance baseline updated"
+        fi
+    
+    - name: Cache updated baseline
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: actions/cache@v3
+      with:
+        path: tests/baseline/performance-baseline.json
+        key: performance-baseline-${{ github.repository }}-${{ github.sha }}
+
+  contract-testing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    services:
+      wordpress:
+        image: wordpress:latest
+        env:
+          WORDPRESS_DB_HOST: mysql
+          WORDPRESS_DB_USER: wordpress
+          WORDPRESS_DB_PASSWORD: wordpress
+          WORDPRESS_DB_NAME: wordpress
+        ports:
+          - 8080:80
+        options: --health-cmd "curl -f http://localhost:80" --health-interval 30s --health-timeout 10s --health-retries 5
+      
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: wordpress
+          MYSQL_USER: wordpress
+          MYSQL_PASSWORD: wordpress
+        ports:
+          - 3306:3306
+        options: --health-cmd "mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 3
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build project
+      run: npm run build
+    
+    - name: Wait for WordPress to be ready
+      run: |
+        echo "Waiting for WordPress to be ready..."
+        timeout 300 bash -c 'until curl -f http://localhost:8080; do sleep 5; done'
+        echo "WordPress is ready"
+    
+    - name: Setup WordPress for testing
+      run: |
+        # Install WordPress CLI
+        curl -O https://raw.githubusercontent.com/wp-cli/wp-cli/v2.8.1/phar/wp-cli.phar
+        chmod +x wp-cli.phar
+        
+        # Configure WordPress
+        ./wp-cli.phar core install \
+          --url=http://localhost:8080 \
+          --title="Test Site" \
+          --admin_user=admin \
+          --admin_password=password \
+          --admin_email=admin@example.com \
+          --path=/var/www/html \
+          --allow-root || true
+        
+        # Create application password for testing
+        ./wp-cli.phar user create testuser test@example.com \
+          --user_pass=password \
+          --role=administrator \
+          --path=/var/www/html \
+          --allow-root || true
+    
+    - name: Run contract tests
+      run: npm run test:contracts
+      env:
+        WORDPRESS_TEST_URL: http://localhost:8080
+        WORDPRESS_USERNAME: admin
+        WORDPRESS_APP_PASSWORD: password
+        CI: true
+    
+    - name: Upload contract test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: contract-test-results
+        path: |
+          tests/pacts/
+          tests/logs/
+
+  deployment-readiness-gate:
+    runs-on: ubuntu-latest
+    needs: [performance-regression-detection, contract-testing]
+    if: always()
+    
+    steps:
+    - name: Check performance gate
+      run: |
+        if [ "${{ needs.performance-regression-detection.result }}" != "success" ]; then
+          echo "❌ Performance regression detected - blocking deployment"
+          exit 1
+        else
+          echo "✅ Performance gate passed"
+        fi
+    
+    - name: Check contract gate
+      run: |
+        if [ "${{ needs.contract-testing.result }}" != "success" ]; then
+          echo "❌ Contract tests failed - blocking deployment"
+          exit 1
+        else
+          echo "✅ Contract gate passed"
+        fi
+    
+    - name: Deployment approved
+      run: |
+        echo "🚀 All gates passed - deployment approved"
+        echo "deployment-approved=true" >> $GITHUB_OUTPUT
+      id: gates
+    
+    outputs:
+      deployment-approved: ${{ steps.gates.outputs.deployment-approved }}
+
+  automated-rollback-test:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' # Only run on scheduled builds
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Test rollback mechanisms
+      run: |
+        # Test rollback script functionality
+        ./scripts/rollback-deployment.sh help
+        
+        # Test validation functions
+        echo "Testing validation functions..."
+        
+        # Mock health check endpoint
+        echo '{"status":"healthy","version":"1.2.0"}' > /tmp/health-response.json
+        python3 -m http.server 3000 --directory /tmp &
+        SERVER_PID=$!
+        
+        sleep 5
+        
+        # Test health check
+        export HEALTH_CHECK_URL="http://localhost:3000/health-response.json"
+        if ./scripts/rollback-deployment.sh health; then
+          echo "✅ Health check test passed"
+        else
+          echo "❌ Health check test failed"
+          exit 1
+        fi
+        
+        # Clean up
+        kill $SERVER_PID || true
+        
+        echo "✅ Rollback mechanism tests passed"
