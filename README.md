@@ -424,6 +424,7 @@ WORDPRESS_API_KEY=your-api-key
 - **Environment Loading Tests**: 7/7 passed (100%)
 - **Tool Functionality Tests**: 14/15 passed (93%)
 - **Upload Timeout Tests**: 11/12 passed (92%)
+- **Contract Tests**: 5/8 passed (62.5%) - See [Contract Testing](#contract-testing) section
 - **Overall Success Rate**: 93-98%
 
 ### Test Commands
@@ -444,8 +445,11 @@ npm run test:mcp
 # Tool integration tests
 npm run test:tools
 
-# Authentication tests (NEW)
+# Authentication tests
 npm run test:auth
+
+# Live contract tests (NEW)
+npm run test:contracts:live
 
 # Tests in watch mode
 npm run test:watch

@@ -68,40 +68,64 @@ docker-compose -f docker-compose.test.yml up -d wordpress-test
 echo -e "${YELLOW}⏳ Waiting for WordPress to be ready...${NC}"
 timeout=120
 counter=0
-while ! curl -s http://localhost:8081/wp-json/wp/v2/ >/dev/null 2>&1; do
+while true; do
+    # Follow redirects to get the actual content
+    response=$(curl -s -L http://localhost:8081/ 2>/dev/null || echo "")
+    
+    # Check if WordPress is responding with installation page or working site
+    if [[ "$response" == *"WordPress"* ]] && ([[ "$response" == *"install"* ]] || [[ "$response" == *"Welcome"* ]] || [[ "$response" == *"configuration"* ]]); then
+        echo -e "\n${GREEN}✅ WordPress installation page is ready${NC}"
+        break
+    elif [[ "$response" == *"WordPress"* ]]; then
+        echo -e "\n${GREEN}✅ WordPress is responding${NC}"
+        break
+    fi
+    
     sleep 5
     counter=$((counter + 5))
     if [ $counter -ge $timeout ]; then
-        echo -e "${RED}❌ WordPress failed to start within $timeout seconds${NC}"
-        docker-compose -f docker-compose.test.yml logs wordpress-test
+        echo -e "\n${RED}❌ WordPress failed to start within $timeout seconds${NC}"
+        echo -e "\n${YELLOW}🔍 Running debug analysis...${NC}"
+        bash scripts/debug-wordpress.sh
+        echo -e "\n${YELLOW}📋 Container logs:${NC}"
+        docker-compose -f docker-compose.test.yml logs --tail=20 wordpress-test
         exit 1
     fi
     echo -n "."
 done
-echo -e "\n${GREEN}✅ WordPress is ready${NC}"
 
-# Install WordPress via web interface
-echo -e "${YELLOW}⚙️  Installing WordPress via web interface...${NC}"
-if bash scripts/wordpress-web-install.sh; then
-    echo -e "${GREEN}✅ WordPress installation completed${NC}"
+# Install WordPress - try WP-CLI first, then web interface
+echo -e "${YELLOW}⚙️  Installing WordPress...${NC}"
+if bash scripts/wordpress-cli-install.sh; then
+    echo -e "${GREEN}✅ WordPress installation completed via WP-CLI${NC}"
+elif bash scripts/wordpress-web-install.sh; then
+    echo -e "${GREEN}✅ WordPress installation completed via web interface${NC}"
 else
-    echo -e "${RED}❌ WordPress web installation failed${NC}"
+    echo -e "${RED}❌ WordPress installation failed with both methods${NC}"
+    echo -e "${YELLOW}📋 Container logs:${NC}"
     docker-compose -f docker-compose.test.yml logs wordpress-test
+    echo -e "${YELLOW}📋 Try accessing WordPress manually at: http://localhost:8081${NC}"
     exit 1
 fi
 
-# For the web install approach, we use default credentials
-echo -e "${YELLOW}📋 Setting up test credentials...${NC}"
-APP_PASSWORD="test-password-123"  # Use the admin password for now
-echo -e "${GREEN}✅ Using default test credentials${NC}"
-echo "URL: http://localhost:8081"
-echo "Username: testuser"
-echo "Password: test-password-123"
+# Set up proper authentication for contract testing
+echo -e "${YELLOW}📋 Setting up WordPress authentication for contract testing...${NC}"
+if bash scripts/setup-wordpress-for-testing.sh; then
+    echo -e "${GREEN}✅ WordPress authentication setup completed${NC}"
+    
+    # Source the generated credentials
+    if [[ -f /tmp/wordpress-test-credentials.sh ]]; then
+        source /tmp/wordpress-test-credentials.sh
+        echo "Using application password: ${WORDPRESS_APP_PASSWORD:0:10}..."
+    fi
+else
+    echo -e "${RED}❌ WordPress authentication setup failed${NC}"
+    exit 1
+fi
 
 # Set environment variables for contract tests
 export WORDPRESS_TEST_URL="http://localhost:8081"
 export WORDPRESS_USERNAME="testuser"
-export WORDPRESS_APP_PASSWORD="$APP_PASSWORD"
 export WORDPRESS_AUTH_METHOD="app-password"
 export PACT_LIVE_TESTING="true"
 
@@ -113,7 +137,7 @@ echo ""
 
 # Run the contract tests
 npm run build
-NODE_OPTIONS="--experimental-vm-modules" jest tests/contracts/wordpress-api.pact.test.js --config=jest.typescript.config.json --verbose
+NODE_OPTIONS="--experimental-vm-modules" jest tests/contracts/wordpress-api-live.test.js --config=jest.typescript.config.json --verbose
 
 TEST_EXIT_CODE=$?
 

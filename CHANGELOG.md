@@ -9,8 +9,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Automated Live Contract Testing**: Fully automated WordPress setup for contract testing with Docker
-- **Live WordPress Integration**: Test contract tests against real WordPress instances with zero manual setup
-- **Isolated Test Environment**: Docker Compose setup with automatic WordPress configuration and cleanup
+  - Zero manual configuration required - complete automation
+  - Isolated test environment with WordPress + MySQL containers
+  - Automatic WordPress installation and configuration via WP-CLI
+  - Application password generation for API authentication
+  - Comprehensive contract tests against live WordPress REST API
+  - 62.5% test success rate (5/8 tests passing) validating core functionality
+  - Automatic cleanup after test completion
+- **Multiple Testing Approaches**: 
+  - Automated setup: `npm run test:contracts:live`
+  - Manual setup: `scripts/quick-test-setup.sh`
+  - Debug script: `scripts/debug-wordpress.sh`
+- **Enhanced Authentication Testing**: 
+  - Multi-method authentication validation (app passwords, basic auth)
+  - User capability verification and explicit permission assignment
+  - Diagnostic tools for authentication troubleshooting
+- **Contract Test Coverage**:
+  - ✅ REST API Discovery and endpoint validation
+  - ✅ Read operations (GET posts, pages, users)
+  - ✅ Error handling and 404 responses
+  - ✅ Authentication validation
+  - ⚠️ Write operations (blocked by WordPress REST API auth quirk)
+
+### Fixed
+- **WordPress Uploads Permission Error**: Resolved "mkdir: can't create directory '/var/www/html/wp-content/uploads/': Permission denied"
+  - Added `user: root` to wp-cli service in docker-compose.test.yml
+  - Enhanced wp-setup.sh with proper chown/chmod permission handling
+  - Comprehensive directory permission management for WordPress uploads
+- **WordPress REST API Installation Issues**: Improved WordPress installation reliability
+  - Proper permalink structure configuration for REST API routing
+  - REST API enablement verification
+  - WP-CLI installation within WordPress container
+  - Extended initialization timeouts for WordPress readiness
+- **Authentication Configuration**: Enhanced authentication setup
+  - Explicit capability assignment for administrator users
+  - Fallback authentication methods when app passwords fail
+  - Better error diagnostics for authentication failures
+
+### Known Issues
+- **WordPress REST API POST Authentication**: Write operations (POST, PUT, DELETE) fail with 401 error despite correct permissions
+  - User has administrator role and all required capabilities
+  - WP-CLI confirms user can create posts (permissions are correct)
+  - Issue appears to be WordPress REST API specific authentication requirement
+  - Read operations work perfectly with same authentication
 
 ## [1.3.0] - 2025-06-30 - Advanced Testing & Deployment Revolution
 

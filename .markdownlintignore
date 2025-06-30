@@ -1,0 +1,4 @@
+# Ignore specific files with long lines
+CHANGELOG.md
+README.md
+TODO.md
