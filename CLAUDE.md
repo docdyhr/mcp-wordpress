@@ -22,7 +22,8 @@ npm run test:auth          # Authentication system tests (100% success)
 npm run test:security      # Security validation and penetration tests (40/40 passing)
 npm run test:config        # Configuration validation tests (27/27 passing) 
 npm run test:property      # Property-based testing (12/12 passing)
-npm run test:contracts     # Contract testing with Pact framework
+npm run test:contracts     # Contract testing with Pact framework (mock)
+npm run test:contracts:live # Contract tests with live WordPress (automated setup)
 npm run test:performance   # Performance regression detection
 npm run test:watch         # Watch mode for tests
 npm run test:coverage      # Generate coverage report (50% threshold)

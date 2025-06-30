@@ -604,6 +604,42 @@ services:
 
 **📖 Full Docker Documentation**: [docs/DOCKER.md](./docs/DOCKER.md)
 
+## 🧪 Contract Testing with Live WordPress
+
+Test the MCP server against a real WordPress instance using our automated testing setup:
+
+```bash
+# Automated live contract testing (recommended)
+npm run test:contracts:live
+```
+
+This command will:
+- 🐳 Start isolated WordPress + MySQL containers (port 8081)
+- ⚙️ Auto-configure WordPress with test data and authentication
+- 🧪 Run contract tests against the live WordPress API
+- 🧹 Clean up automatically when done
+
+**Features:**
+- **Zero Conflicts**: Uses isolated containers with separate ports
+- **Fully Automated**: WordPress installation, user creation, and app password generation
+- **Real API Testing**: Validates actual WordPress REST API behavior
+- **CI/CD Ready**: Works in continuous integration environments
+
+**Manual Setup Alternative:**
+```bash
+# Test setup phase only
+bash scripts/test-setup-only.sh
+
+# Use existing WordPress instance
+export WORDPRESS_TEST_URL="https://your-wordpress-site.com"
+export WORDPRESS_USERNAME="your-username"  
+export WORDPRESS_APP_PASSWORD="your-app-password"
+export PACT_LIVE_TESTING="true"
+npm run test:contracts
+```
+
+**📖 Full Contract Testing Guide**: [docs/contract-testing.md](./docs/contract-testing.md)
+
 ## 📝 Recent Updates
 
 ### v1.2.0 - Performance & Documentation Revolution

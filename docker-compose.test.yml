@@ -1,0 +1,74 @@
+# Isolated test environment for contract testing
+# Uses different ports to avoid conflicts with existing services
+
+services:
+  # Test WordPress instance
+  wordpress-test:
+    image: wordpress:latest
+    container_name: wordpress-test-instance
+    restart: "no"
+    ports:
+      - "8081:80"  # Different port to avoid conflicts
+    environment:
+      WORDPRESS_DB_HOST: db-test
+      WORDPRESS_DB_USER: testuser
+      WORDPRESS_DB_PASSWORD: testpass123
+      WORDPRESS_DB_NAME: wordpress_test
+      WORDPRESS_TABLE_PREFIX: wp_test_
+    volumes:
+      - wordpress_test_data:/var/www/html
+    depends_on:
+      db-test:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # Test database
+  db-test:
+    image: mysql:8.0
+    container_name: wordpress-test-db
+    restart: "no"
+    environment:
+      MYSQL_DATABASE: wordpress_test
+      MYSQL_USER: testuser
+      MYSQL_PASSWORD: testpass123
+      MYSQL_ROOT_PASSWORD: rootpass123
+    volumes:
+      - db_test_data:/var/lib/mysql
+      - ./tests/fixtures/wordpress-init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # WordPress CLI for automated setup
+  wp-cli:
+    image: wordpress:cli
+    container_name: wordpress-test-cli
+    restart: "no"
+    depends_on:
+      wordpress-test:
+        condition: service_healthy
+    volumes:
+      - wordpress_test_data:/var/www/html
+      - ./tests/fixtures/wp-setup.sh:/setup.sh
+    environment:
+      WORDPRESS_DB_HOST: db-test
+      WORDPRESS_DB_USER: testuser
+      WORDPRESS_DB_PASSWORD: testpass123
+      WORDPRESS_DB_NAME: wordpress_test
+    command: /setup.sh
+
+volumes:
+  wordpress_test_data:
+  db_test_data:
+
+networks:
+  default:
+    name: wordpress-test-network

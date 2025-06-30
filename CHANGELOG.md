@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Automated Live Contract Testing**: Fully automated WordPress setup for contract testing with Docker
+- **Live WordPress Integration**: Test contract tests against real WordPress instances with zero manual setup
+- **Isolated Test Environment**: Docker Compose setup with automatic WordPress configuration and cleanup
+
 ## [1.3.0] - 2025-06-30 - Advanced Testing & Deployment Revolution
 
 ### Added
