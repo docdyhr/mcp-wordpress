@@ -80,40 +80,23 @@ while ! curl -s http://localhost:8081/wp-json/wp/v2/ >/dev/null 2>&1; do
 done
 echo -e "\n${GREEN}✅ WordPress is ready${NC}"
 
-# Run WordPress setup
-echo -e "${YELLOW}⚙️  Configuring WordPress for testing...${NC}"
-docker-compose -f docker-compose.test.yml run --rm wp-cli
-
-# Wait a bit for setup to complete
-sleep 10
-
-# Verify WordPress is properly configured
-echo -e "${YELLOW}🔍 Verifying WordPress configuration...${NC}"
-if curl -s http://localhost:8081/wp-json/wp/v2/ | grep -q "wordpress_test"; then
-    echo -e "${GREEN}✅ WordPress REST API is accessible${NC}"
+# Install WordPress via web interface
+echo -e "${YELLOW}⚙️  Installing WordPress via web interface...${NC}"
+if bash scripts/wordpress-web-install.sh; then
+    echo -e "${GREEN}✅ WordPress installation completed${NC}"
 else
-    echo -e "${RED}❌ WordPress REST API not accessible${NC}"
+    echo -e "${RED}❌ WordPress web installation failed${NC}"
     docker-compose -f docker-compose.test.yml logs wordpress-test
     exit 1
 fi
 
-# Get the test configuration
-echo -e "${YELLOW}📋 Reading test configuration...${NC}"
-if docker-compose -f docker-compose.test.yml exec -T wordpress-test test -f /var/www/html/test-config.json; then
-    CONFIG=$(docker-compose -f docker-compose.test.yml exec -T wordpress-test cat /var/www/html/test-config.json)
-    echo -e "${GREEN}✅ Test configuration ready${NC}"
-    echo "$CONFIG" | jq '.' 2>/dev/null || echo "$CONFIG"
-else
-    echo -e "${RED}❌ Test configuration not found${NC}"
-    exit 1
-fi
-
-# Extract credentials for testing
-APP_PASSWORD=$(echo "$CONFIG" | jq -r '.app_password' 2>/dev/null || echo "")
-if [ -z "$APP_PASSWORD" ] || [ "$APP_PASSWORD" = "null" ]; then
-    echo -e "${RED}❌ Failed to get app password from configuration${NC}"
-    exit 1
-fi
+# For the web install approach, we use default credentials
+echo -e "${YELLOW}📋 Setting up test credentials...${NC}"
+APP_PASSWORD="test-password-123"  # Use the admin password for now
+echo -e "${GREEN}✅ Using default test credentials${NC}"
+echo "URL: http://localhost:8081"
+echo "Username: testuser"
+echo "Password: test-password-123"
 
 # Set environment variables for contract tests
 export WORDPRESS_TEST_URL="http://localhost:8081"

@@ -47,24 +47,7 @@ services:
       retries: 5
       start_period: 30s
 
-  # WordPress CLI for automated setup
-  wp-cli:
-    image: wordpress:cli
-    container_name: wordpress-test-cli
-    restart: "no"
-    user: root
-    depends_on:
-      wordpress-test:
-        condition: service_healthy
-    volumes:
-      - wordpress_test_data:/var/www/html
-      - ./tests/fixtures/wp-setup.sh:/setup.sh
-    environment:
-      WORDPRESS_DB_HOST: db-test
-      WORDPRESS_DB_USER: testuser
-      WORDPRESS_DB_PASSWORD: testpass123
-      WORDPRESS_DB_NAME: wordpress_test
-    command: /setup.sh
+# WordPress CLI setup is now integrated into the WordPress container
 
 volumes:
   wordpress_test_data:
