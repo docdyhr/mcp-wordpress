@@ -29,6 +29,7 @@ npm run test:watch         # Watch mode for tests
 npm run test:coverage      # Generate coverage report (50% threshold)
 npm run test:fast          # Quick test run
 npm run health             # Comprehensive system health check (100% healthy)
+npm run fix:rest-auth      # Fix WordPress REST API POST authentication issues
 ```
 
 ### Documentation Commands (v1.2.0)
@@ -76,6 +77,36 @@ npm run dev                # Development mode with debug output
 npm run setup              # Interactive setup wizard
 npm run status             # Check connection status
 DEBUG=true npm run dev     # Enable debug logging
+```
+
+### WordPress REST API Authentication Issues
+
+**Known Issue Resolution**: WordPress REST API POST authentication failures (v1.2.0+)
+
+```bash
+npm run fix:rest-auth      # Automated fix for REST API POST authentication
+```
+
+**Issue**: POST/PUT/DELETE requests return 401 Unauthorized even with valid application passwords, while GET requests work fine.
+
+**Root Cause**: Apache strips Authorization headers by default, particularly affecting write operations.
+
+**Automated Solution**: The `fix:rest-auth` script applies these fixes:
+1. Updates `.htaccess` to preserve Authorization headers
+2. Sets WordPress environment to 'local' for development
+3. Fixes file permissions and restarts services
+4. Tests authentication to verify the fix
+
+**Manual Fix** (if needed):
+```apache
+# Add to WordPress .htaccess
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+```
+
+```php
+// Add to wp-config.php for Docker development
+define('WP_ENVIRONMENT_TYPE', 'local');
 ```
 
 ### Code Quality
