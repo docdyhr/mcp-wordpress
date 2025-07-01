@@ -3,9 +3,9 @@
 A comprehensive Model Context Protocol (MCP) server for WordPress management through the WordPress REST API v2. Completely written in TypeScript with modular architecture and 95%+ test coverage.
 
 [![NPM Version](https://img.shields.io/npm/v/mcp-wordpress)](https://www.npmjs.com/package/mcp-wordpress)
-[![Test Coverage](https://img.shields.io/badge/test%20coverage-95%25%2B-brightgreen)](https://github.com/AiondaDotCom/mcp-wordpress)
-[![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://github.com/AiondaDotCom/mcp-wordpress)
-[![Architecture](https://img.shields.io/badge/architecture-modular-orange)](https://github.com/AiondaDotCom/mcp-wordpress/blob/main/REFACTORING.md)
+[![Test Coverage](https://img.shields.io/badge/test%20coverage-95%25%2B-brightgreen)](https://github.com/thomasdyhr/mcp-wordpress)
+[![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://github.com/thomasdyhr/mcp-wordpress)
+[![Architecture](https://img.shields.io/badge/architecture-modular-orange)](https://github.com/thomasdyhr/mcp-wordpress/blob/main/REFACTORING.md)
 
 ## 🚀 Features
 
@@ -14,14 +14,14 @@ A comprehensive Model Context Protocol (MCP) server for WordPress management thr
 - **📊 Real-Time Performance Monitoring** - Comprehensive metrics, analytics, and optimization insights
 - **📚 Auto-Generated API Documentation** - Complete tool documentation with OpenAPI specification
 - **🐳 Docker Support** - Containerized deployment for production environments
-- **🏗️ Modular Architecture** - Manager-based composition pattern (94% code reduction)
+- **🏗 Modular Architecture** - Manager-based composition pattern (94% code reduction)
 - **Multi-Site Support** - Manage multiple WordPress sites from one configuration
 - **100% TypeScript** - Complete type safety and IntelliSense
 - **🎯 95%+ Test Coverage** - All critical functionality verified and tested
 - **⚡ Performance Optimized** - Intelligent rate limiting and memory management
-- **🔐 Flexible Authentication** - Supports App Passwords, JWT, Basic Auth, API Key
+- **🔒 Flexible Authentication** - Supports App Passwords, JWT, Basic Auth, API Key
 - **📊 Comprehensive Monitoring** - Structured logging and error tracking
-- **🛡️ Production Ready** - Security-reviewed and battle-tested
+- **🛠 Production Ready** - Security-reviewed and battle-tested
 - **🔄 100% Backward Compatible** - Zero breaking changes during refactoring
 
 ## ⚡ Quick Start
@@ -42,7 +42,7 @@ mcp-wordpress
 ### Option 2: Local Development
 
 ```bash
-git clone https://github.com/AiondaDotCom/mcp-wordpress.git
+git clone https://github.com/thomasdyhr/mcp-wordpress.git
 cd mcp-wordpress
 npm install
 npm run setup
@@ -139,7 +139,7 @@ I want to use the NPX version (mcp-wordpress) so I don't need to install anythin
 For local development and customization:
 
 ```
-Build and configure the MCP WordPress server project from https://github.com/AiondaDotCom/mcp-wordpress locally on my computer. 
+Build and configure the MCP WordPress server project from https://github.com/thomasdyhr/mcp-wordpress locally on my computer. 
 
 Please:
 1. Clone the repository to an appropriate directory
@@ -582,7 +582,7 @@ docker run -d \
   aiondadotcom/mcp-wordpress:latest
 
 # Using Docker Compose
-curl -O https://raw.githubusercontent.com/AiondaDotCom/mcp-wordpress/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/thomasdyhr/mcp-wordpress/main/docker-compose.yml
 docker-compose up -d
 ```
 
@@ -653,46 +653,24 @@ npm run test:contracts
   - Historical performance analysis with trend detection
   - Industry benchmark comparisons with optimization recommendations
   - Smart alerts and anomaly detection
-  - 6 new performance monitoring MCP tools
+  - Comprehensive performance reports with export options
+  - AI-powered optimization engine for performance improvements
+- ⚡ **Intelligent Caching System**
+  - 50-70% performance improvement with reduced API calls
+  - Multi-layer caching architecture with intelligent invalidation
+  - Site-specific cache isolation for multi-site installations
+  - New MCP tools for cache performance monitoring and management
+  - Sub-millisecond response times for cache hits
+- 📚 **Auto-Generated Documentation**
+  - Complete API documentation for all 59 tools with examples and usage guides
+  - Machine-readable OpenAPI specification for integration
+  - Automated CI/CD pipeline for documentation updates
+  - Comprehensive documentation quality validation
+  - Multi-format output including Markdown, JSON, and OpenAPI
+- 🐳 **Docker Containerization**
+  - Production-ready Docker images for easy deployment
+  - Docker Compose setup for local development
+  - Flexible environment configuration via variables
+  - One-command deployment to any Docker environment
 
-- ✅ **Auto-Generated API Documentation**
-  - Complete documentation for all 59 tools with examples
-  - OpenAPI specification generation
-  - Automated CI/CD documentation pipeline
-  - Quality validation and cross-reference checking
-  - Multi-format output (Markdown, JSON, OpenAPI)
-
-- ✅ **Docker Containerization**
-  - Production-ready Docker images
-  - Docker Compose for development environments
-  - Flexible environment configuration
-  - Optimized build process with multi-stage builds
-
-- ✅ **Intelligent Caching System**
-  - Multi-layer caching architecture (HTTP + in-memory)
-  - 50-70% performance improvement
-  - Site-specific cache isolation
-  - Event-based intelligent invalidation
-  - 4 new cache management MCP tools
-
-- ✅ **Production-Ready Implementation**
-  - 100% test coverage maintained (42/42 tests passing)
-  - Zero breaking changes - complete backward compatibility
-  - Enhanced error handling and monitoring
-  - Security-reviewed and battle-tested
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/new-feature`
-3. Commit changes: `git commit -m 'Add new feature'`
-4. Push branch: `git push origin feature/new-feature`
-5. Create pull request
-
-## 📄 License
-
-MIT License - see LICENSE file for details
-
----
-
-**🚀 Powered by TypeScript for better development experience and type safety!**
+**📚 Read the full release notes for all details!**

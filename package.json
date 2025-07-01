@@ -2,59 +2,6 @@
   "name": "mcp-wordpress",
   "version": "1.2.0",
   "description": "Comprehensive Model Context Protocol server for WordPress management with 59 tools, performance monitoring, intelligent caching, auto-generated documentation, Docker support, TypeScript, and production-ready authentication",
-  "main": "dist/index.js",
-  "type": "module",
-  "bin": {
-    "mcp-wordpress": "bin/mcp-wordpress.js",
-    "wordpress-setup": "bin/setup.js",
-    "wordpress-status": "bin/status.js"
-  },
-  "scripts": {
-    "build": "tsc",
-    "build:watch": "tsc --watch",
-    "start": "npm run build && node dist/index.js",
-    "dev": "npm run build && DEBUG=true node dist/index.js",
-    "setup": "node bin/setup.js",
-    "status": "node bin/status.js",
-    "test": "npm run test:typescript",
-    "test:typescript": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest --config=jest.typescript.config.json",
-    "test:tools": "node scripts/test-all-tools.js",
-    "test:legacy": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest",
-    "test:watch": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --watch --config=jest.typescript.config.json",
-    "test:coverage": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest --coverage --collectCoverageFrom='dist/**/*.js' --coverageThreshold='{\"global\":{\"branches\":50,\"functions\":50,\"lines\":50,\"statements\":50}}' --config=jest.typescript.config.json",
-    "test:fast": "npm run test:typescript",
-    "test:mcp": "node scripts/test-mcp.js",
-    "test:integration": "node scripts/test-integration.js",
-    "test:auth": "node scripts/test-auth.js",
-    "test:security": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/ --config=jest.typescript.config.json",
-    "test:security:validation": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/security-validation.test.js --config=jest.typescript.config.json",
-    "test:security:penetration": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/penetration-tests.test.js --config=jest.typescript.config.json",
-    "test:config": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/config/ --config=jest.typescript.config.json",
-    "test:property": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/property/ --config=jest.typescript.config.json",
-    "test:contracts": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/contracts/ --config=jest.typescript.config.json",
-    "test:contracts:live": "bash scripts/test-contracts-live.sh",
-    "fix:rest-auth": "bash scripts/fix-rest-api-auth.sh",
-    "test:performance": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/performance/ --config=jest.typescript.config.json",
-    "health": "node scripts/health-check.js",
-    "verify-claude": "node scripts/verify-claude-integration.js",
-    "docs:generate": "npm run build && node scripts/generate-docs.js",
-    "docs:validate": "npm run docs:generate && node scripts/validate-docs.js",
-    "docs:serve": "npm run docs:generate && node scripts/serve-docs.js",
-    "docs:watch": "npm run docs:generate && echo 'Watching for changes...' && npm run docs:serve",
-    "docs:check": "node scripts/validate-docs.js",
-    "lint": "eslint src/ tests/",
-    "lint:fix": "eslint src/ tests/ --fix",
-    "typecheck": "tsc --noEmit",
-    "check:ignore": "node scripts/sync-ignore-files.js",
-    "check:npm": "node scripts/test-npm-config.js",
-    "security:check": "node scripts/security-check.js",
-    "security:test": "node scripts/security-test.js",
-    "security:audit": "npm audit --production",
-    "security:fix": "npm audit fix",
-    "prepare": "husky",
-    "pre-commit": "lint-staged",
-    "prepublishOnly": "npm run build && npm run check:ignore"
-  },
   "keywords": [
     "mcp",
     "model-context-protocol",
@@ -64,8 +11,91 @@
     "ai",
     "assistant"
   ],
-  "author": "AiondaDotCom",
+  "homepage": "https://github.com/thomasdyhr/mcp-wordpress#readme",
+  "bugs": {
+    "url": "https://github.com/thomasdyhr/mcp-wordpress/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thomasdyhr/mcp-wordpress.git"
+  },
   "license": "MIT",
+  "author": "Thomas Dyhr",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "mcp-wordpress": "bin/mcp-wordpress.js",
+    "wordpress-setup": "bin/setup.js",
+    "wordpress-status": "bin/status.js"
+  },
+  "files": [
+    "dist/",
+    "src/",
+    "bin/",
+    "docs/",
+    "examples/",
+    "cache/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "check:ignore": "node scripts/sync-ignore-files.js",
+    "check:npm": "node scripts/test-npm-config.js",
+    "dev": "npm run build && DEBUG=true node dist/index.js",
+    "docs:check": "node scripts/validate-docs.js",
+    "docs:generate": "npm run build && node scripts/generate-docs.js",
+    "docs:serve": "npm run docs:generate && node scripts/serve-docs.js",
+    "docs:validate": "npm run docs:generate && node scripts/validate-docs.js",
+    "docs:watch": "npm run docs:generate && echo 'Watching for changes...' && npm run docs:serve",
+    "fix:rest-auth": "bash scripts/fix-rest-api-auth.sh",
+    "health": "node scripts/health-check.js",
+    "lint": "eslint src/ tests/",
+    "lint:fix": "eslint src/ tests/ --fix",
+    "pre-commit": "lint-staged",
+    "prepare": "husky",
+    "prepublishOnly": "npm run build && npm run check:ignore",
+    "security:audit": "npm audit --production",
+    "security:check": "node scripts/security-check.js",
+    "security:fix": "npm audit fix",
+    "security:test": "node scripts/security-test.js",
+    "setup": "node bin/setup.js",
+    "start": "npm run build && node dist/index.js",
+    "status": "node bin/status.js",
+    "test": "npm run test:typescript",
+    "test:auth": "node scripts/test-auth.js",
+    "test:config": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/config/ --config=jest.typescript.config.json",
+    "test:contracts": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/contracts/ --config=jest.typescript.config.json",
+    "test:contracts:live": "bash scripts/test-contracts-live.sh",
+    "test:coverage": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest --coverage --collectCoverageFrom='dist/**/*.js' --coverageThreshold='{\"global\":{\"branches\":50,\"functions\":50,\"lines\":50,\"statements\":50}}' --config=jest.typescript.config.json",
+    "test:fast": "npm run test:typescript",
+    "test:integration": "node scripts/test-integration.js",
+    "test:legacy": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest",
+    "test:mcp": "node scripts/test-mcp.js",
+    "test:performance": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/performance/ --config=jest.typescript.config.json",
+    "test:property": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/property/ --config=jest.typescript.config.json",
+    "test:security": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/ --config=jest.typescript.config.json",
+    "test:security:penetration": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/penetration-tests.test.js --config=jest.typescript.config.json",
+    "test:security:validation": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/security-validation.test.js --config=jest.typescript.config.json",
+    "test:tools": "node scripts/test-all-tools.js",
+    "test:typescript": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest --config=jest.typescript.config.json",
+    "test:watch": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --watch --config=jest.typescript.config.json",
+    "typecheck": "tsc --noEmit",
+    "verify-claude": "node scripts/verify-claude-integration.js"
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.md": [
+      "markdownlint --fix"
+    ],
+    "package.json": [
+      "sort-package-json"
+    ]
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
     "dotenv": "^16.3.1",
@@ -98,37 +128,7 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "files": [
-    "dist/",
-    "src/",
-    "bin/",
-    "docs/",
-    "examples/",
-    "cache/",
-    "README.md",
-    "LICENSE"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AiondaDotCom/mcp-wordpress.git"
-  },
-  "bugs": {
-    "url": "https://github.com/AiondaDotCom/mcp-wordpress/issues"
-  },
-  "homepage": "https://github.com/AiondaDotCom/mcp-wordpress#readme",
   "publishConfig": {
     "access": "public"
-  },
-  "lint-staged": {
-    "*.{ts,js}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.md": [
-      "markdownlint --fix"
-    ],
-    "package.json": [
-      "sort-package-json"
-    ]
   }
 }

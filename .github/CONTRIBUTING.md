@@ -1,6 +1,7 @@
 # Contributing to MCP WordPress
 
-Thank you for your interest in contributing to MCP WordPress! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to MCP WordPress! This document
+provides guidelines and information for contributors.
 
 ## 🚀 Quick Start
 
@@ -51,7 +52,7 @@ Thank you for your interest in contributing to MCP WordPress! This document prov
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - NPM 8+
 - WordPress site for testing (optional)
 
@@ -94,6 +95,7 @@ npm run dev
 4. **Update documentation**
 
 Example tool structure:
+
 ```typescript
 export class NewTool {
   constructor(private client: WordPressClient) {}
@@ -134,7 +136,7 @@ npm run health            # System health
 
 ### Commit Message Format
 
-```
+```text
 type(scope): description
 
 [optional body]
@@ -154,7 +156,7 @@ type(scope): description
 
 ### Examples
 
-```
+```text
 feat(tools): add new wp_backup_site tool
 fix(auth): resolve JWT token expiration issue
 docs(readme): update installation instructions
@@ -204,6 +206,7 @@ docs(readme): update installation instructions
 ### Vulnerability Reporting
 
 For security vulnerabilities:
+
 1. **Do NOT** create public issues
 2. Email maintainer directly
 3. Provide detailed reproduction steps
@@ -211,7 +214,7 @@ For security vulnerabilities:
 
 ## 📚 Resources
 
-### Documentation
+### Project Documentation
 
 - [README.md](../README.md) - Main documentation
 - [CLAUDE.md](../CLAUDE.md) - Architecture and development guide
@@ -225,24 +228,30 @@ For security vulnerabilities:
 
 ### Community
 
-- [GitHub Issues](https://github.com/AiondaDotCom/mcp-wordpress/issues) - Bug reports and features
-- [GitHub Discussions](https://github.com/AiondaDotCom/mcp-wordpress/discussions) - Questions and ideas
+- [GitHub Issues](https://github.com/thomasdyhr/mcp-wordpress/issues) -
+  Bug reports and features
+- [GitHub Discussions](https://github.com/thomasdyhr/mcp-wordpress/discussions) -
+  Questions and ideas
 
 ## 🙏 Recognition
 
 Contributors are recognized in:
+
 - `CHANGELOG.md` for significant contributions
 - GitHub contributor graph
 - Release notes for feature contributions
 
 ## 📄 License
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+By contributing, you agree that your contributions will be licensed under the
+MIT License.
 
 ## ❓ Questions?
 
 - Check existing [documentation](../docs/)
-- Search [issues and discussions](https://github.com/AiondaDotCom/mcp-wordpress/issues)
-- Create a [question issue](https://github.com/AiondaDotCom/mcp-wordpress/issues/new/choose)
+- Search
+  [issues and discussions](https://github.com/thomasdyhr/mcp-wordpress/issues)
+- Create a
+  [question issue](https://github.com/thomasdyhr/mcp-wordpress/issues/new/choose)
 
 Thank you for contributing to MCP WordPress! 🎉
