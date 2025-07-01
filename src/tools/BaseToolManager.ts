@@ -2,8 +2,7 @@
  * Base utility class for tool managers to reduce code duplication
  */
 
-import { WordPressClient } from '../client/api.js';
-import { getErrorMessage } from '../utils/error.js';
+import { getErrorMessage } from "../utils/error.js";
 
 export class BaseToolUtils {
   /**
@@ -24,7 +23,7 @@ export class BaseToolUtils {
   /**
    * Validate ID parameter
    */
-  static validateId(id: unknown, name = 'id'): number {
+  static validateId(id: unknown, name = "id"): number {
     const numId = Number(id);
     if (!Number.isInteger(numId) || numId <= 0) {
       throw new Error(`Invalid ${name}: must be a positive integer`);
@@ -45,14 +44,14 @@ export class BaseToolUtils {
    */
   static generateCacheKey(
     operation: string,
-    params: Record<string, unknown>
+    params: Record<string, unknown>,
   ): string {
-    const site = params.site || 'default';
+    const site = params.site || "default";
     const paramStr = Object.entries(params)
-      .filter(([key]) => key !== 'site')
+      .filter(([key]) => key !== "site")
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([key, value]) => `${key}:${value}`)
-      .join('|');
+      .join("|");
     return `${site}:${operation}:${paramStr}`;
   }
 
@@ -60,6 +59,8 @@ export class BaseToolUtils {
    * Format consistent response messages
    */
   static formatSuccessMessage(operation: string, details?: string): string {
-    return details ? `${operation}: ${details}` : `${operation} completed successfully`;
+    return details
+      ? `${operation}: ${details}`
+      : `${operation} completed successfully`;
   }
 }

@@ -305,9 +305,8 @@ describe("WordPress API Contract Tests", () => {
       });
 
       // Mock file data - create a temporary file for testing
-      /* eslint-env node */
-      const fs = require("fs");
-      const path = require("path");
+      const fs = await import("fs");
+      const path = await import("path");
       const tempFile = path.join(__dirname, "test-image.jpg");
       fs.writeFileSync(tempFile, Buffer.from("fake image data"));
 
