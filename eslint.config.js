@@ -84,6 +84,11 @@ export default [
       globals: {
         ...jestPlugin.environments.globals.globals,
         jest: "readonly",
+        require: "readonly",
+        module: "readonly",
+        exports: "writable",
+        __dirname: "readonly",
+        __filename: "readonly",
       },
     },
     rules: {

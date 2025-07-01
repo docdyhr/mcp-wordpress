@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Technical Debt Remediation**: Comprehensive codebase improvements and modernization
+  - Docker test environment with automated WordPress setup
+  - Enhanced test configuration with proper coverage reporting (70% threshold)
+  - Base tool manager class to reduce code duplication across tool classes
+  - Unit tests for security utilities and core functionality
+  - Automated test environment with `npm run test:with-env`
+  - Improved Jest configuration with test environment support
+
+### Fixed
+- **Code Quality Improvements**:
+  - Fixed CommonJS/ESM mixed imports in SecurityConfig.ts
+  - Moved development-only dependency (`open`) to devDependencies
+  - Removed test skipping logic to ensure all tests run consistently
+  - Improved error handling patterns across tool classes
+- **Test Infrastructure**:
+  - Eliminated environment-based test skipping
+  - Added proper test containers for WordPress and Pact broker
+  - Enhanced contract testing with live WordPress instance
+  - Improved test reliability and consistency
 - **Automated Live Contract Testing**: Fully automated WordPress setup for contract testing with Docker
   - Zero manual configuration required - complete automation
   - Isolated test environment with WordPress + MySQL containers

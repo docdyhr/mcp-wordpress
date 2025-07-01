@@ -1,27 +1,31 @@
-# Isolated test environment for contract testing
-# Uses different ports to avoid conflicts with existing services
+version: '3.8'
 
 services:
-  # Test WordPress instance
+  # Test WordPress instance with pre-configured application password
   wordpress-test:
     image: wordpress:latest
-    container_name: wordpress-test-instance
-    restart: "no"
+    container_name: wordpress-test
     ports:
-      - "8081:80"  # Different port to avoid conflicts
+      - "8081:80"
     environment:
-      WORDPRESS_DB_HOST: db-test
-      WORDPRESS_DB_USER: testuser
-      WORDPRESS_DB_PASSWORD: testpass123
+      WORDPRESS_DB_HOST: db-test:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
       WORDPRESS_DB_NAME: wordpress_test
-      WORDPRESS_TABLE_PREFIX: wp_test_
+      WORDPRESS_DEBUG: "true"
+      # Enable REST API and application passwords
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_DEBUG', true);
+        define('WP_DEBUG_LOG', true);
+        define('WP_DEBUG_DISPLAY', false);
+        define('WP_ENVIRONMENT_TYPE', 'local');
+        define('REST_API_ENABLED', true);
     volumes:
-      - wordpress_test_data:/var/www/html
+      - ./scripts/wordpress-test-init.php:/var/www/html/wp-content/mu-plugins/test-init.php
     depends_on:
-      db-test:
-        condition: service_healthy
+      - db-test
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/"]
+      test: ["CMD", "curl", "-f", "http://localhost/wp-json/wp/v2/"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -30,29 +34,26 @@ services:
   # Test database
   db-test:
     image: mysql:8.0
-    container_name: wordpress-test-db
-    restart: "no"
+    container_name: wordpress-db-test
     environment:
       MYSQL_DATABASE: wordpress_test
-      MYSQL_USER: testuser
-      MYSQL_PASSWORD: testpass123
-      MYSQL_ROOT_PASSWORD: rootpass123
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD: rootpassword
     volumes:
-      - db_test_data:/var/lib/mysql
-      - ./tests/fixtures/wordpress-init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      - test_db_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
 
-# WordPress CLI setup is now integrated into the WordPress container
+  # Pact mock server for contract testing
+  pact-broker:
+    image: pactfoundation/pact-broker:latest
+    container_name: pact-broker-test
+    environment:
+      PACT_BROKER_DATABASE_URL: "sqlite:////tmp/pact_broker.sqlite3"
+      PACT_BROKER_LOG_LEVEL: INFO
+      PACT_BROKER_SQL_LOG_LEVEL: DEBUG
+    ports:
+      - "9292:9292"
 
 volumes:
-  wordpress_test_data:
-  db_test_data:
-
-networks:
-  default:
-    name: wordpress-test-network
+  test_db_data:

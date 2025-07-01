@@ -81,6 +81,7 @@
     "test:tools": "node scripts/test-all-tools.js",
     "test:typescript": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest --config=jest.typescript.config.json",
     "test:watch": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --watch --config=jest.typescript.config.json",
+    "test:with-env": "bash scripts/start-test-env.sh && npm run test:typescript",
     "typecheck": "tsc --noEmit",
     "verify-claude": "node scripts/verify-claude-integration.js"
   },
@@ -101,7 +102,6 @@
     "dotenv": "^16.3.1",
     "form-data": "^4.0.0",
     "node-fetch": "^3.3.2",
-    "open": "^9.1.0",
     "zod": "^3.25.67"
   },
   "devDependencies": {
@@ -121,6 +121,7 @@
     "lint-staged": "^16.1.2",
     "markdownlint-cli": "^0.45.0",
     "nock": "^14.0.5",
+    "open": "^9.1.0",
     "prettier": "^3.6.2",
     "sort-package-json": "^3.3.1",
     "typescript": "^5.8.3"

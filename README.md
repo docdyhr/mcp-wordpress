@@ -430,25 +430,31 @@ WORDPRESS_API_KEY=your-api-key
 ### Test Commands
 
 ```bash
-# Run all tests
+# Run all tests (improved)
 npm test
 
-# Tests with coverage
+# Run tests with Docker test environment (recommended)
+npm run test:with-env
+
+# Tests with coverage (70% threshold)
 npm run test:coverage
 
 # Quick tests
 npm run test:fast
 
-# MCP integration tests
-npm run test:mcp
+# Individual test suites
+npm run test:security        # Security tests
+npm run test:config          # Configuration tests
+npm run test:property        # Property-based tests
+npm run test:contracts       # Contract tests
+npm run test:performance     # Performance regression tests
 
-# Tool integration tests
-npm run test:tools
+# Integration tests
+npm run test:mcp             # MCP protocol tests
+npm run test:tools           # Tool functionality tests
+npm run test:auth            # Authentication tests
 
-# Authentication tests
-npm run test:auth
-
-# Live contract tests (NEW)
+# Live contract tests with automated setup
 npm run test:contracts:live
 
 # Tests in watch mode
@@ -457,6 +463,28 @@ npm run test:watch
 # Manual authentication check
 ./scripts/wp-auth-check.sh
 ```
+
+### Docker Test Environment
+
+The project now includes a complete Docker test environment for reliable testing:
+
+```bash
+# Start test environment
+./scripts/start-test-env.sh
+
+# Run tests with test environment
+npm run test:with-env
+
+# Stop test environment
+docker-compose -f docker-compose.test.yml down
+```
+
+The test environment includes:
+
+- WordPress with pre-configured test user and application password
+- MySQL database
+- Pact broker for contract testing
+- Automated WordPress configuration for API testing
 
 ## 📊 Status & Monitoring
 
