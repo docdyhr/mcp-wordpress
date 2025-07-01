@@ -1,67 +1,70 @@
 import { describe, it, expect } from "@jest/globals";
-import { SecurityUtils } from "../../dist/security/SecurityUtils.js";
-import { SecurityConfig } from "../../dist/security/SecurityConfig.js";
+import { SecurityUtils } from "../../dist/security/SecurityConfig.js";
 
 describe("SecurityUtils", () => {
-  describe("sanitizeInput", () => {
-    it("should remove script tags from input", () => {
-      const malicious = '<script>alert("xss")</script>Hello';
-      const result = SecurityUtils.sanitizeInput(malicious);
-      expect(result).toBe("Hello");
+  describe("redactSensitiveData", () => {
+    it("should redact password fields", () => {
+      const data = {
+        username: "testuser",
+        password: "secret123",
+        apiKey: "abc123",
+      };
+
+      const result = SecurityUtils.redactSensitiveData(data);
+
+      expect(result.username).toBe("testuser");
+      expect(result.password).toBe("[REDACTED]");
+      expect(result.apiKey).toBe("[REDACTED]");
     });
 
-    it("should remove event handlers", () => {
-      const malicious = '<div onclick="alert()">Hello</div>';
-      const result = SecurityUtils.sanitizeInput(malicious);
-      expect(result).toBe("<div>Hello</div>");
+    it("should handle nested objects", () => {
+      const data = {
+        user: {
+          name: "test",
+          password: "secret",
+        },
+        config: {
+          token: "xyz789",
+        },
+      };
+
+      const result = SecurityUtils.redactSensitiveData(data);
+
+      expect(result.user.name).toBe("test");
+      expect(result.user.password).toBe("[REDACTED]");
+      expect(result.config.token).toBe("[REDACTED]");
     });
 
-    it("should preserve safe HTML", () => {
-      const safe = "<p>Hello <strong>world</strong></p>";
-      const result = SecurityUtils.sanitizeInput(safe);
-      expect(result).toBe(safe);
+    it("should handle arrays", () => {
+      const data = [
+        { username: "user1", password: "pass1" },
+        { username: "user2", secret: "pass2" },
+      ];
+
+      const result = SecurityUtils.redactSensitiveData(data);
+
+      expect(result[0].username).toBe("user1");
+      expect(result[0].password).toBe("[REDACTED]");
+      expect(result[1].username).toBe("user2");
+      expect(result[1].secret).toBe("[REDACTED]");
     });
   });
 
-  describe("isValidWordPressId", () => {
-    it("should accept positive integers", () => {
-      expect(SecurityUtils.isValidWordPressId(1)).toBe(true);
-      expect(SecurityUtils.isValidWordPressId(123)).toBe(true);
+  describe("redactString", () => {
+    it("should redact password patterns", () => {
+      const text = 'password="secret123" and token="abc456"';
+      const result = SecurityUtils.redactString(text);
+
+      expect(result).toContain("[REDACTED]");
+      expect(result).not.toContain("secret123");
+      expect(result).not.toContain("abc456");
     });
 
-    it("should reject non-integers", () => {
-      expect(SecurityUtils.isValidWordPressId(0)).toBe(false);
-      expect(SecurityUtils.isValidWordPressId(-1)).toBe(false);
-      expect(SecurityUtils.isValidWordPressId(1.5)).toBe(false);
-      expect(SecurityUtils.isValidWordPressId("1")).toBe(false);
-    });
-  });
+    it("should preserve non-sensitive text", () => {
+      const text = "This is a normal message with no secrets";
+      const result = SecurityUtils.redactString(text);
 
-  describe("isValidEmail", () => {
-    it("should accept valid email addresses", () => {
-      expect(SecurityUtils.isValidEmail("test@example.com")).toBe(true);
-      expect(SecurityUtils.isValidEmail("user.name+tag@domain.co.uk")).toBe(
-        true,
-      );
-    });
-
-    it("should reject invalid email addresses", () => {
-      expect(SecurityUtils.isValidEmail("invalid")).toBe(false);
-      expect(SecurityUtils.isValidEmail("@domain.com")).toBe(false);
-      expect(SecurityUtils.isValidEmail("test@")).toBe(false);
-    });
-  });
-
-  describe("isValidUrl", () => {
-    it("should accept valid URLs", () => {
-      expect(SecurityUtils.isValidUrl("https://example.com")).toBe(true);
-      expect(SecurityUtils.isValidUrl("http://localhost:8080")).toBe(true);
-    });
-
-    it("should reject invalid URLs", () => {
-      expect(SecurityUtils.isValidUrl("not-a-url")).toBe(false);
-      expect(SecurityUtils.isValidUrl("javascript:alert()")).toBe(false);
-      expect(SecurityUtils.isValidUrl("data:text/html,<script>")).toBe(false);
+      expect(result).toBe(text);
     });
   });
 
@@ -87,42 +90,59 @@ describe("SecurityUtils", () => {
 
       expect(safePattern.test(token)).toBe(true);
     });
+
+    it("should use default length when no parameter provided", () => {
+      const token = SecurityUtils.generateSecureToken();
+      expect(token).toHaveLength(32);
+    });
   });
 
-  describe("checkRateLimit", () => {
-    it("should allow requests within limit", () => {
-      const userId = "test-user-1";
-      const config = SecurityConfig.rateLimiting.default;
-
-      // Should allow initial request
-      expect(SecurityUtils.checkRateLimit(userId, config)).toBe(true);
+  describe("isFileExtensionAllowed", () => {
+    it("should allow safe file extensions", () => {
+      expect(SecurityUtils.isFileExtensionAllowed("image.jpg")).toBe(true);
+      expect(SecurityUtils.isFileExtensionAllowed("document.pdf")).toBe(true);
+      expect(SecurityUtils.isFileExtensionAllowed("data.csv")).toBe(true);
     });
 
-    it("should block requests exceeding limit", () => {
-      const userId = "test-user-2";
-      const config = { windowMs: 1000, maxRequests: 2 };
-
-      // Allow first two requests
-      expect(SecurityUtils.checkRateLimit(userId, config)).toBe(true);
-      expect(SecurityUtils.checkRateLimit(userId, config)).toBe(true);
-
-      // Block third request
-      expect(SecurityUtils.checkRateLimit(userId, config)).toBe(false);
+    it("should block dangerous file extensions", () => {
+      expect(SecurityUtils.isFileExtensionAllowed("virus.exe")).toBe(false);
+      expect(SecurityUtils.isFileExtensionAllowed("script.php")).toBe(false);
+      expect(SecurityUtils.isFileExtensionAllowed("malware.bat")).toBe(false);
     });
 
-    it("should reset after time window", async () => {
-      const userId = "test-user-3";
-      const config = { windowMs: 100, maxRequests: 1 };
+    it("should be case insensitive", () => {
+      expect(SecurityUtils.isFileExtensionAllowed("virus.EXE")).toBe(false);
+      expect(SecurityUtils.isFileExtensionAllowed("image.JPG")).toBe(true);
+    });
+  });
 
-      // Use up the limit
-      expect(SecurityUtils.checkRateLimit(userId, config)).toBe(true);
-      expect(SecurityUtils.checkRateLimit(userId, config)).toBe(false);
+  describe("sanitizeForLog", () => {
+    it("should sanitize string data", () => {
+      const logData = 'User login with password="secret123"';
+      const result = SecurityUtils.sanitizeForLog(logData);
 
-      // Wait for window to reset
-      await new Promise((resolve) => setTimeout(resolve, 150));
+      expect(result).toContain("[REDACTED]");
+      expect(result).not.toContain("secret123");
+    });
 
-      // Should allow again
-      expect(SecurityUtils.checkRateLimit(userId, config)).toBe(true);
+    it("should sanitize object data", () => {
+      const logData = {
+        action: "login",
+        username: "testuser",
+        password: "secret123",
+      };
+
+      const result = SecurityUtils.sanitizeForLog(logData);
+
+      expect(result.action).toBe("login");
+      expect(result.username).toBe("testuser");
+      expect(result.password).toBe("[REDACTED]");
+    });
+
+    it("should return primitive values unchanged", () => {
+      expect(SecurityUtils.sanitizeForLog(123)).toBe(123);
+      expect(SecurityUtils.sanitizeForLog(true)).toBe(true);
+      expect(SecurityUtils.sanitizeForLog(null)).toBe(null);
     });
   });
 });

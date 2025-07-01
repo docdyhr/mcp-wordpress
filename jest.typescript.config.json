@@ -9,8 +9,9 @@
     "**/security/**/*.test.js",
     "**/config/**/*.test.js",
     "**/property/**/*.test.js",
-    "**/contracts/**/*.test.js",
-    "**/performance/**/*.test.js"
+    "**/performance/**/*.test.js",
+    "**/unit/**/*.test.js",
+    "**/contracts/**/*.test.js"
   ],
   "collectCoverage": false,
   "testTimeout": 10000,
