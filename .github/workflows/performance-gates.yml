@@ -66,7 +66,23 @@ jobs:
             const fs = require('fs');
             try {
               const results = JSON.parse(fs.readFileSync('tests/results/performance-results.json', 'utf8'));
-              const baseline = JSON.parse(fs.readFileSync('tests/baseline/performance-baseline.json', 'utf8'));
+              let baseline;
+              try {
+                baseline = JSON.parse(fs.readFileSync('tests/baseline/performance-baseline.json', 'utf8'));
+              } catch (e) {
+                console.log('No baseline found, using default values');
+                baseline = {
+                  metrics: {
+                    apiResponseTime: {
+                      getPosts: { p95: 1000 },
+                      createPost: { p95: 1500 },
+                      uploadMedia: { p95: 5000 }
+                    },
+                    throughput: { requestsPerSecond: 100 },
+                    memoryUsage: { peak: 100 * 1024 * 1024 }
+                  }
+                };
+              }
               
               console.log('## Performance Report');
               console.log('');
@@ -112,7 +128,22 @@ jobs:
           
           try {
             const results = JSON.parse(fs.readFileSync('tests/results/performance-results.json', 'utf8'));
-            const baseline = JSON.parse(fs.readFileSync('tests/baseline/performance-baseline.json', 'utf8'));
+            let baseline;
+            try {
+              baseline = JSON.parse(fs.readFileSync('tests/baseline/performance-baseline.json', 'utf8'));
+            } catch (e) {
+              baseline = {
+                metrics: {
+                  apiResponseTime: {
+                    getPosts: { p95: 1000 },
+                    createPost: { p95: 1500 },
+                    uploadMedia: { p95: 5000 }
+                  },
+                  throughput: { requestsPerSecond: 100 },
+                  memoryUsage: { peak: 100 * 1024 * 1024 }
+                }
+              };
+            }
             
             let comment = '## 🚀 Performance Test Results\n\n';
             
