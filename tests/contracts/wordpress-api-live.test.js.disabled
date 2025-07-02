@@ -10,6 +10,12 @@ describe('WordPress API Live Contract Tests', () => {
   let wordpressClient;
 
   beforeAll(async () => {
+    // Skip tests if no WordPress test environment is configured
+    if (!process.env.WORDPRESS_TEST_URL && !process.env.WORDPRESS_SITE_URL) {
+      console.log('⏭️ Skipping live contract tests - no WordPress test environment configured');
+      return;
+    }
+
     console.log('🌐 Running live contract tests against WordPress instance');
 
     // Use live WordPress configuration with flexible auth
@@ -46,6 +52,10 @@ describe('WordPress API Live Contract Tests', () => {
 
   describe('Posts API Contract', () => {
     it('should create a post with valid response format', async () => {
+      if (!process.env.WORDPRESS_TEST_URL && !process.env.WORDPRESS_SITE_URL) {
+        console.log('⏭️ Skipping test - no WordPress environment configured');
+        return;
+      }
       const postData = {
         title: 'Contract Test Post',
         content: 'This is a test post for contract validation',

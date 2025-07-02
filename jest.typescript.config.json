@@ -10,8 +10,7 @@
     "**/config/**/*.test.js",
     "**/property/**/*.test.js",
     "**/performance/**/*.test.js",
-    "**/unit/**/*.test.js",
-    "**/contracts/**/*.test.js"
+    "**/unit/**/*.test.js"
   ],
   "collectCoverage": false,
   "collectCoverageFrom": [
