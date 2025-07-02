@@ -1,8 +1,14 @@
-name: Publish to NPM
+name: Legacy NPM Publish (Manual Release)
 
 on:
   release:
     types: [created]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish'
+        required: true
+        type: string
 
 jobs:
   publish:

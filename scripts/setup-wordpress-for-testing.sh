@@ -5,17 +5,17 @@ echo "🔧 Setting up WordPress for contract testing..."
 
 # Check WordPress version and capabilities
 echo "📋 Checking WordPress setup..."
-wp_version=$(docker exec wordpress-test-instance bash -c "cd /var/www/html && wp core version --allow-root" 2>/dev/null || echo "unknown")
+wp_version=$(docker exec wordpress-test bash -c "cd /var/www/html && wp core version --allow-root" 2>/dev/null || echo "unknown")
 echo "WordPress version: $wp_version"
 
 # Check user capabilities
 echo "📋 Checking user capabilities..."
-user_caps=$(docker exec wordpress-test-instance bash -c "cd /var/www/html && wp user list-caps testuser --allow-root | grep -E '(edit_posts|publish_posts|administrator)'" 2>/dev/null || echo "unknown")
+user_caps=$(docker exec wordpress-test bash -c "cd /var/www/html && wp user list-caps testuser --allow-root | grep -E '(edit_posts|publish_posts|administrator)'" 2>/dev/null || echo "unknown")
 echo "User capabilities: $user_caps"
 
 # Check if Application Passwords are supported (WordPress 5.6+)
 echo "📋 Creating application password for testuser..."
-app_password_result=$(docker exec wordpress-test-instance bash -c "
+app_password_result=$(docker exec wordpress-test bash -c "
     cd /var/www/html &&
     wp user application-password create testuser 'Contract Testing' --porcelain --allow-root 2>&1
 " || echo "FAILED")
@@ -109,7 +109,7 @@ echo "Testing authentication with post creation..."
 
 # Debug: Check what application passwords exist
 echo "📋 Checking application passwords..."
-app_passwords_list=$(docker exec wordpress-test-instance bash -c "cd /var/www/html && wp user application-password list testuser --allow-root" 2>/dev/null || echo "unknown")
+app_passwords_list=$(docker exec wordpress-test bash -c "cd /var/www/html && wp user application-password list testuser --allow-root" 2>/dev/null || echo "unknown")
 echo "Application passwords: $app_passwords_list"
 
 # Test with both the generated password and try basic auth
@@ -164,7 +164,7 @@ if [[ "$create_status" != "201" ]]; then
     
     # Test if the user can create posts via WP-CLI (this should work if permissions are correct)
     echo "Testing post creation via WP-CLI..."
-    cli_post_result=$(docker exec wordpress-test-instance bash -c "
+    cli_post_result=$(docker exec wordpress-test bash -c "
         cd /var/www/html &&
         wp post create --post_title='CLI Test Post' --post_content='Testing via CLI' --post_status=draft --post_author=1 --allow-root --porcelain
     " 2>/dev/null || echo "FAILED")
@@ -175,7 +175,7 @@ if [[ "$create_status" != "201" ]]; then
         
         # Try to check if there are any REST API restrictions
         echo "Checking REST API settings..."
-        rest_settings=$(docker exec wordpress-test-instance bash -c "
+        rest_settings=$(docker exec wordpress-test bash -c "
             cd /var/www/html &&
             wp option get rest_api_enabled --allow-root 2>/dev/null || echo 'not set'
         ")

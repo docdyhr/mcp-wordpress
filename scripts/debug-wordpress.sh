@@ -24,4 +24,4 @@ curl -s http://localhost:8081/wp-json/wp/v2/ 2>/dev/null | head -c 200 || echo "
 
 echo ""
 echo "5. Container status:"
-docker ps --filter "name=wordpress-test-instance" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+docker ps --filter "name=wordpress-test" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"

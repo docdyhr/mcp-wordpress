@@ -61,11 +61,10 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # Default command
 CMD ["node", "dist/index.js"]
 
-# Metadata
+# Metadata (labels will be set dynamically by build process)
 LABEL org.opencontainers.image.title="MCP WordPress Server"
 LABEL org.opencontainers.image.description="Model Context Protocol server for WordPress management with 59 tools, performance monitoring, intelligent caching, and auto-generated documentation"
-LABEL org.opencontainers.image.url="https://github.com/AiondaDotCom/mcp-wordpress"
-LABEL org.opencontainers.image.source="https://github.com/AiondaDotCom/mcp-wordpress"
-LABEL org.opencontainers.image.version="1.2.0"
-LABEL org.opencontainers.image.authors="AiondaDotCom"
+LABEL org.opencontainers.image.url="https://github.com/docdyhr/mcp-wordpress"
+LABEL org.opencontainers.image.source="https://github.com/docdyhr/mcp-wordpress"
+LABEL org.opencontainers.image.authors="Thomas Dyhr"
 LABEL org.opencontainers.image.licenses="MIT"

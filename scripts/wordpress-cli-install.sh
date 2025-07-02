@@ -7,7 +7,7 @@ echo "🔧 Installing WordPress via WP-CLI within container..."
 echo "⏳ Waiting for WordPress container..."
 timeout=60
 counter=0
-while ! docker exec wordpress-test-instance php -v >/dev/null 2>&1; do
+while ! docker exec wordpress-test php -v >/dev/null 2>&1; do
     sleep 2
     counter=$((counter + 2))
     if [ $counter -ge $timeout ]; then
@@ -20,7 +20,7 @@ echo -e "\n✅ WordPress container is ready"
 
 # Install WP-CLI in the WordPress container
 echo "📦 Installing WP-CLI in container..."
-docker exec wordpress-test-instance bash -c "
+docker exec wordpress-test bash -c "
     cd /tmp && 
     curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar &&
     chmod +x wp-cli.phar &&
@@ -29,7 +29,7 @@ docker exec wordpress-test-instance bash -c "
 
 # Install WordPress using WP-CLI
 echo "🌐 Installing WordPress with WP-CLI..."
-docker exec wordpress-test-instance bash -c "
+docker exec wordpress-test bash -c "
     cd /var/www/html &&
     wp core install \
         --url='http://localhost:8081' \
@@ -44,7 +44,7 @@ echo "✅ WordPress installed via WP-CLI"
 
 # Ensure the test user has proper capabilities for API testing
 echo "🔧 Setting up user permissions for API testing..."
-docker exec wordpress-test-instance bash -c "
+docker exec wordpress-test bash -c "
     cd /var/www/html &&
     # Make sure testuser is an administrator with full capabilities
     wp user update testuser --role=administrator --allow-root &&
@@ -71,7 +71,7 @@ echo "✅ User permissions configured"
 
 # Configure WordPress for REST API access
 echo "🔧 Configuring WordPress for REST API access..."
-docker exec wordpress-test-instance bash -c "
+docker exec wordpress-test bash -c "
     cd /var/www/html &&
     # Set permalink structure to ensure REST API works
     wp rewrite structure '/%postname%/' --allow-root &&

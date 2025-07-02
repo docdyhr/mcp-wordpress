@@ -1,13 +1,14 @@
-name: Build and Publish Docker Image
+name: Legacy Docker Publish (Manual Release)
 
 on:
   release:
     types: [created]
-  push:
-    branches:
-      - main
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Docker tag to build'
+        required: true
+        type: string
 
 env:
   REGISTRY: docker.io

@@ -18,14 +18,14 @@ docker run -d \
   -e WORDPRESS_SITE_URL=https://your-site.com \
   -e WORDPRESS_USERNAME=your-username \
   -e WORDPRESS_APP_PASSWORD=your-app-password \
-  aiondadotcom/mcp-wordpress:latest
+  docdyhr/mcp-wordpress:latest
 ```
 
 ### Option 2: Docker Compose
 
 ```bash
 # Download the compose file
-curl -O https://raw.githubusercontent.com/AiondaDotCom/mcp-wordpress/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/docdyhr/mcp-wordpress/main/docker-compose.yml
 
 # Configure environment variables (see below)
 # Start the service
@@ -36,7 +36,7 @@ docker-compose up -d
 
 ```bash
 # Clone the repository
-git clone https://github.com/AiondaDotCom/mcp-wordpress.git
+git clone https://github.com/docdyhr/mcp-wordpress.git
 cd mcp-wordpress
 
 # Build the image
@@ -68,7 +68,7 @@ For multi-site setups, mount a configuration file:
 docker run -d \
   --name mcp-wordpress \
   -v ./mcp-wordpress.config.json:/app/config/mcp-wordpress.config.json:ro \
-  aiondadotcom/mcp-wordpress:latest
+  docdyhr/mcp-wordpress:latest
 ```
 
 **Example `mcp-wordpress.config.json`:**
@@ -107,7 +107,7 @@ version: '3.8'
 
 services:
   mcp-wordpress:
-    image: aiondadotcom/mcp-wordpress:latest
+    image: docdyhr/mcp-wordpress:latest
     container_name: mcp-wordpress
     restart: unless-stopped
     environment:
@@ -153,7 +153,7 @@ version: '3.8'
 
 services:
   mcp-wordpress:
-    image: aiondadotcom/mcp-wordpress:latest
+    image: docdyhr/mcp-wordpress:latest
     deploy:
       replicas: 2
       restart_policy:
@@ -201,7 +201,7 @@ spec:
     spec:
       containers:
       - name: mcp-wordpress
-        image: aiondadotcom/mcp-wordpress:latest
+        image: docdyhr/mcp-wordpress:latest
         ports:
         - containerPort: 3000
         env:
@@ -262,7 +262,7 @@ docker inspect --format='{{.State.Health.Status}}' mcp-wordpress
 docker exec -it mcp-wordpress /bin/sh
 
 # Update to latest version
-docker pull aiondadotcom/mcp-wordpress:latest
+docker pull docdyhr/mcp-wordpress:latest
 docker stop mcp-wordpress
 docker rm mcp-wordpress
 # Run with new image...
@@ -354,7 +354,7 @@ echo \"your-app-password\" | docker secret create wordpress_password -
 version: '3.8'
 services:
   mcp-wordpress:
-    image: aiondadotcom/mcp-wordpress:latest
+    image: docdyhr/mcp-wordpress:latest
     secrets:
       - wordpress_url
       - wordpress_user
@@ -424,7 +424,7 @@ docker exec mcp-wordpress node -e \"
 
 ```bash
 # Run with debug logging
-docker run -e DEBUG=true aiondadotcom/mcp-wordpress:latest
+docker run -e DEBUG=true docdyhr/mcp-wordpress:latest
 
 # Or with compose
 environment:
@@ -442,9 +442,9 @@ environment:
 
 ## 🤝 Support
 
-- **GitHub Issues**: [Report problems](https://github.com/AiondaDotCom/mcp-wordpress/issues)
-- **Discussions**: [Ask questions](https://github.com/AiondaDotCom/mcp-wordpress/discussions)
-- **Documentation**: [Browse guides](https://github.com/AiondaDotCom/mcp-wordpress/tree/main/docs)
+- **GitHub Issues**: [Report problems](https://github.com/docdyhr/mcp-wordpress/issues)
+- **Discussions**: [Ask questions](https://github.com/docdyhr/mcp-wordpress/discussions)
+- **Documentation**: [Browse guides](https://github.com/docdyhr/mcp-wordpress/tree/main/docs)
 
 ---
 

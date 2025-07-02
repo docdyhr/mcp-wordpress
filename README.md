@@ -7,9 +7,9 @@
 A comprehensive Model Context Protocol (MCP) server for WordPress management through the WordPress REST API v2. Completely written in TypeScript with modular architecture and 95%+ test coverage.
 
 [![NPM Version](https://img.shields.io/npm/v/mcp-wordpress)](https://www.npmjs.com/package/mcp-wordpress)
-[![Test Coverage](https://img.shields.io/badge/test%20coverage-95%25%2B-brightgreen)](https://github.com/thomasdyhr/mcp-wordpress)
-[![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://github.com/thomasdyhr/mcp-wordpress)
-[![Architecture](https://img.shields.io/badge/architecture-modular-orange)](https://github.com/thomasdyhr/mcp-wordpress/blob/main/REFACTORING.md)
+[![Test Coverage](https://img.shields.io/badge/test%20coverage-95%25%2B-brightgreen)](https://github.com/docdyhr/mcp-wordpress)
+[![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://github.com/docdyhr/mcp-wordpress)
+[![Architecture](https://img.shields.io/badge/architecture-modular-orange)](https://github.com/docdyhr/mcp-wordpress/blob/main/REFACTORING.md)
 
 ## 🚀 Features
 
@@ -46,7 +46,7 @@ mcp-wordpress
 ### Option 2: Local Development
 
 ```bash
-git clone https://github.com/thomasdyhr/mcp-wordpress.git
+git clone https://github.com/docdyhr/mcp-wordpress.git
 cd mcp-wordpress
 npm install
 npm run setup
@@ -174,7 +174,7 @@ I want to use the NPX version (mcp-wordpress) so I don't need to install anythin
 For local development and customization:
 
 ```text
-Build and configure the MCP WordPress server project from https://github.com/thomasdyhr/mcp-wordpress locally on my computer. 
+Build and configure the MCP WordPress server project from https://github.com/docdyhr/mcp-wordpress locally on my computer. 
 
 Please:
 1. Clone the repository to an appropriate directory
@@ -790,10 +790,10 @@ docker run -d \
   -e WORDPRESS_SITE_URL=https://your-site.com \
   -e WORDPRESS_USERNAME=your-username \
   -e WORDPRESS_APP_PASSWORD=your-app-password \
-  aiondadotcom/mcp-wordpress:latest
+  docdyhr/mcp-wordpress:latest
 
 # Using Docker Compose
-curl -O https://raw.githubusercontent.com/thomasdyhr/mcp-wordpress/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/docdyhr/mcp-wordpress/main/docker-compose.yml
 docker-compose up -d
 ```
 
@@ -803,7 +803,7 @@ docker-compose up -d
 version: '3.8'
 services:
   mcp-wordpress:
-    image: aiondadotcom/mcp-wordpress:latest
+    image: docdyhr/mcp-wordpress:latest
     restart: unless-stopped
     environment:
       - WORDPRESS_SITE_URL=https://your-site.com
@@ -888,3 +888,99 @@ npm run test:contracts
   - One-command deployment to any Docker environment
 
 **📚 Read the full release notes for all details!**
+
+## 🚀 Release & Publishing
+
+This project uses automated semantic versioning and publishing to NPM and Docker Hub.
+
+### 📦 Installation Options
+
+**NPM Package:**
+
+```bash
+# Latest stable version
+npm install -g mcp-wordpress
+
+# Specific version
+npm install -g mcp-wordpress@1.2.2
+
+# Use with npx (no installation)
+npx mcp-wordpress
+```
+
+**Docker Images:**
+
+```bash
+# Latest stable version
+docker pull docdyhr/mcp-wordpress:latest
+
+# Specific version
+docker pull docdyhr/mcp-wordpress:1.2.2
+
+# Run directly
+docker run -d docdyhr/mcp-wordpress:latest
+```
+
+### 🏷️ Release Process
+
+**Automated Releases:**
+
+- Releases are automatically created when conventional commits are pushed to the `main` branch
+- Semantic versioning determines the version bump automatically
+- NPM and Docker Hub publishing happens automatically on release
+
+**Conventional Commit Format:**
+
+```bash
+# Patch release (1.2.2 → 1.2.3)
+fix: resolve authentication timeout issue
+
+# Minor release (1.2.2 → 1.3.0)  
+feat: add new performance monitoring tools
+
+# Major release (1.2.2 → 2.0.0)
+feat!: redesign MCP tool interface
+BREAKING CHANGE: tool parameter structure has changed
+```
+
+**Manual Release (if needed):**
+
+```bash
+# Test release locally
+npm run release:dry
+
+# Create release manually (requires proper permissions)
+npm run release
+```
+
+### 📋 Release Checklist
+
+For contributors planning releases:
+
+1. **Pre-Release Validation:**
+   - ✅ All tests passing (`npm test`)
+   - ✅ Documentation updated
+   - ✅ Performance benchmarks within acceptable range
+   - ✅ Security audit clean (`npm audit`)
+
+2. **Commit with Conventional Format:**
+
+   ```bash
+   git add .
+   git commit -m "feat: add new functionality"
+   git push origin main
+   ```
+
+3. **Automated Process Handles:**
+   - 📝 Generate release notes
+   - 🏷️ Create GitHub release  
+   - 📦 Publish to NPM with provenance
+   - 🐳 Build and push Docker images (multi-arch)
+   - 📚 Update CHANGELOG.md
+   - 🔗 Update Docker Hub description
+
+### 🌍 Distribution Channels
+
+- **NPM:** [`mcp-wordpress`](https://www.npmjs.com/package/mcp-wordpress)
+- **Docker Hub:** [`docdyhr/mcp-wordpress`](https://hub.docker.com/r/docdyhr/mcp-wordpress)
+- **GitHub Releases:** [Latest releases](https://github.com/docdyhr/mcp-wordpress/releases)

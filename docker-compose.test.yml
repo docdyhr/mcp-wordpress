@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Test WordPress instance with pre-configured application password
   wordpress-test:

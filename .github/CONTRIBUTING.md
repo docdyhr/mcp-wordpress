@@ -228,9 +228,9 @@ For security vulnerabilities:
 
 ### Community
 
-- [GitHub Issues](https://github.com/thomasdyhr/mcp-wordpress/issues) -
+- [GitHub Issues](https://github.com/docdyhr/mcp-wordpress/issues) -
   Bug reports and features
-- [GitHub Discussions](https://github.com/thomasdyhr/mcp-wordpress/discussions) -
+- [GitHub Discussions](https://github.com/docdyhr/mcp-wordpress/discussions) -
   Questions and ideas
 
 ## 🙏 Recognition
@@ -250,8 +250,8 @@ MIT License.
 
 - Check existing [documentation](../docs/)
 - Search
-  [issues and discussions](https://github.com/thomasdyhr/mcp-wordpress/issues)
+  [issues and discussions](https://github.com/docdyhr/mcp-wordpress/issues)
 - Create a
-  [question issue](https://github.com/thomasdyhr/mcp-wordpress/issues/new/choose)
+  [question issue](https://github.com/docdyhr/mcp-wordpress/issues/new/choose)
 
 Thank you for contributing to MCP WordPress! 🎉

@@ -154,13 +154,13 @@ class ClaudeIntegrationVerifier {
       const serverPath = join(rootDir, 'dist/index.js');
       if (wpServer.command === 'node' && wpServer.args && wpServer.args[0] === serverPath) {
         console.log('✅ Server path correctly configured');
-      } else if (wpServer.command === 'npx' && wpServer.args && wpServer.args[0] === '@aiondadotcom/mcp-wordpress') {
+      } else if (wpServer.command === 'npx' && wpServer.args && wpServer.args[0] === 'mcp-wordpress') {
         console.log('✅ NPX command correctly configured');
       } else {
         console.log('⚠️  Server configuration may need adjustment');
         console.log(`   Current: ${wpServer.command} ${wpServer.args ? wpServer.args.join(' ') : ''}`);
         console.log(`   Expected: node ${serverPath}`);
-        console.log('   Or: npx @aiondadotcom/mcp-wordpress');
+        console.log('   Or: npx mcp-wordpress');
       }
 
       return true;

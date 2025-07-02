@@ -93,7 +93,7 @@ RewriteRule . /index.php [L]
 EOF
 
     # Copy the .htaccess file into the WordPress container
-    docker cp /tmp/wordpress-htaccess wordpress-test-instance:/var/www/html/.htaccess
+    docker cp /tmp/wordpress-htaccess wordpress-test:/var/www/html/.htaccess
     echo -e "${GREEN}✅ .htaccess file updated with authorization header fix${NC}"
 }
 
@@ -101,7 +101,7 @@ EOF
 set_local_environment() {
     echo -e "${YELLOW}⚙️  Setting WordPress environment type to 'local' for application password support...${NC}"
     
-    docker exec wordpress-test-instance bash -c "
+    docker exec wordpress-test bash -c "
         cd /var/www/html &&
         if ! grep -q \"WP_ENVIRONMENT_TYPE\" wp-config.php; then
             # Add the environment type definition before the 'stop editing' line
@@ -118,7 +118,7 @@ set_local_environment() {
 fix_permissions() {
     echo -e "${YELLOW}🔐 Fixing file permissions...${NC}"
     
-    docker exec wordpress-test-instance bash -c "
+    docker exec wordpress-test bash -c "
         cd /var/www/html &&
         chown -R www-data:www-data . &&
         chmod -R 755 . &&

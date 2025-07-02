@@ -1,6 +1,6 @@
 {
   "name": "mcp-wordpress",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Comprehensive Model Context Protocol server for WordPress management with 59 tools, performance monitoring, intelligent caching, auto-generated documentation, Docker support, TypeScript, and production-ready authentication",
   "keywords": [
     "mcp",
@@ -11,13 +11,13 @@
     "ai",
     "assistant"
   ],
-  "homepage": "https://github.com/thomasdyhr/mcp-wordpress#readme",
+  "homepage": "https://github.com/docdyhr/mcp-wordpress#readme",
   "bugs": {
-    "url": "https://github.com/thomasdyhr/mcp-wordpress/issues"
+    "url": "https://github.com/docdyhr/mcp-wordpress/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thomasdyhr/mcp-wordpress.git"
+    "url": "git+https://github.com/docdyhr/mcp-wordpress.git"
   },
   "license": "MIT",
   "author": "Thomas Dyhr",
@@ -56,6 +56,8 @@
     "pre-commit": "lint-staged",
     "prepare": "husky",
     "prepublishOnly": "npm run build && npm run check:ignore",
+    "release": "semantic-release",
+    "release:dry": "semantic-release --dry-run",
     "security:audit": "npm audit --production",
     "security:check": "node scripts/security-check.js",
     "security:fix": "npm audit fix",
@@ -110,6 +112,8 @@
     "@jest/globals": "^30.0.0",
     "@pact-foundation/pact": "^15.0.1",
     "@pact-foundation/pact-node": "^10.18.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^20.19.1",
     "@typescript-eslint/parser": "^8.35.0",
@@ -124,6 +128,7 @@
     "nock": "^14.0.5",
     "open": "^9.1.0",
     "prettier": "^3.6.2",
+    "semantic-release": "^24.8.0",
     "sort-package-json": "^3.3.1",
     "typescript": "^5.8.3"
   },

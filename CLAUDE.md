@@ -87,6 +87,23 @@ docker-compose up -d                    # Start all services
 docker-compose up --profile dev         # Include WordPress and database for development
 docker-compose logs -f mcp-wordpress    # View logs
 docker-compose down                     # Stop all services
+
+# Pull from Docker Hub
+docker pull docdyhr/mcp-wordpress:latest
+docker run -d docdyhr/mcp-wordpress:latest
+```
+
+### Release & Publishing Commands (v1.2.3)
+
+```bash
+npm run release:dry                     # Test semantic release locally
+npm run release                         # Manual release (if needed)
+
+# Automated via CI/CD:
+# - Push conventional commits to main branch
+# - Semantic versioning determines version bump
+# - Auto-publishes to NPM and Docker Hub
+# - Creates GitHub releases with generated notes
 ```
 
 **Test Status Summary (Updated v1.2.1):**
@@ -438,3 +455,39 @@ Supports 4 authentication methods with comprehensive testing:
 - **Monthly**: Review and clean up documentation files
 - **Per Release**: Update version-specific documentation and remove outdated content
 - **Continuous**: Remove completed TODO items and archive obsolete files
+
+## CI/CD Pipeline & Automation (v1.2.3)
+
+### Automated Release Pipeline
+
+**Semantic Release System:**
+- **Trigger**: Conventional commits pushed to `main` branch
+- **Versioning**: Automatic semantic versioning based on commit types
+- **Publishing**: Simultaneous NPM and Docker Hub publishing
+- **Documentation**: Auto-generated release notes and CHANGELOG updates
+
+**Workflow Components:**
+```bash
+.github/workflows/
+├── release.yml              # Main automated release pipeline
+├── ci.yml                   # Comprehensive CI/CD with testing matrix
+├── docker-publish.yml       # Legacy Docker publishing (manual)
+├── npm-publish.yml          # Legacy NPM publishing (manual)
+├── performance-gates.yml    # Performance regression detection
+└── quality-assurance.yml    # Code quality and security scans
+```
+
+**Release Automation Features:**
+- ✅ **Multi-Architecture Docker Builds**: linux/amd64, linux/arm64
+- ✅ **NPM Provenance**: Cryptographic signatures for package integrity
+- ✅ **Conventional Commits**: Automatic version bump detection
+- ✅ **Release Notes Generation**: AI-powered changelog creation
+- ✅ **Multi-Registry Publishing**: NPM, Docker Hub, GitHub Packages
+- ✅ **Rollback Capabilities**: Automated rollback on failure detection
+
+**Quality Gates:**
+- **Pre-Release**: All tests must pass (82+ tests, 100% success rate)
+- **Security**: Clean security audit and vulnerability scan
+- **Performance**: Performance regression detection (< 20% degradation)
+- **Documentation**: Automated validation and completeness checks
+- **Build Verification**: Multi-platform build testing

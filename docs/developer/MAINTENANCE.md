@@ -220,9 +220,9 @@ node_modules/
 
 1. **Immediate Response:**
    ```bash
-   npm unpublish @aiondadotcom/mcp-wordpress@version
+   npm unpublish mcp-wordpress@version
    # Or deprecate if unpublish is not allowed
-   npm deprecate @aiondadotcom/mcp-wordpress@version "Security issue - use newer version"
+   npm deprecate mcp-wordpress@version "Security issue - use newer version"
    ```
 
 2. **Credential Rotation:**
