@@ -14,6 +14,17 @@ describe('Cache Performance Benchmarks', () => {
     });
   });
   
+  afterEach(async () => {
+    // Cleanup to prevent worker process issues
+    if (cacheManager?.stopCleanup) {
+      cacheManager.stopCleanup();
+    }
+    if (cacheManager?.cleanupTimer) {
+      clearInterval(cacheManager.cleanupTimer);
+    }
+    await new Promise(resolve => setTimeout(resolve, 5));
+  });
+  
   describe('Throughput Benchmarks', () => {
     it('should achieve high cache write throughput', () => {
       const iterations = 10000;
@@ -411,7 +422,7 @@ describe('Cache Performance Benchmarks', () => {
         });
         
         console.log(`Concurrency ${concurrency}: ${throughput.toFixed(0)} ops/sec, Cache size: ${cache.cache.size}`);
-      });
+      }
       
       // Verify concurrency handling
       results.forEach((result, index) => {

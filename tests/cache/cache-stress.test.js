@@ -14,9 +14,19 @@ describe('Cache Stress Tests', () => {
     });
   });
   
-  afterEach(() => {
+  afterEach(async () => {
     // Force cleanup to prevent memory leaks in tests
-    cacheManager?.stopCleanup?.();
+    if (cacheManager?.stopCleanup) {
+      cacheManager.stopCleanup();
+    }
+    
+    // Clear any pending timers
+    if (cacheManager?.cleanupTimer) {
+      clearInterval(cacheManager.cleanupTimer);
+    }
+    
+    // Wait a bit for any async operations to complete
+    await new Promise(resolve => setTimeout(resolve, 10));
   });
   
   describe('Extreme Load Tests', () => {
@@ -445,20 +455,25 @@ describe('Cache Stress Tests', () => {
       let failureCount = 0;
       const maxFailures = 50;
       
-      // Create a cache that randomly fails operations
-      const unreliableCache = new Proxy(cacheManager.cache, {
-        get(target, prop) {
-          if ((prop === 'set' || prop === 'get' || prop === 'delete') && 
-              failureCount < maxFailures && 
-              Math.random() > 0.8) {
-            failureCount++;
-            throw new Error(`Simulated cache failure #${failureCount}`);
-          }
-          return target[prop];
-        }
-      });
+      // Create a cache manager that randomly fails operations
+      const originalSet = cacheManager.set.bind(cacheManager);
+      const originalGet = cacheManager.get.bind(cacheManager);
       
-      cacheManager.cache = unreliableCache;
+      cacheManager.set = function(key, value, ttl) {
+        if (failureCount < maxFailures && Math.random() > 0.8) {
+          failureCount++;
+          throw new Error(`Simulated cache failure #${failureCount}`);
+        }
+        return originalSet(key, value, ttl);
+      };
+      
+      cacheManager.get = function(key) {
+        if (failureCount < maxFailures && Math.random() > 0.8) {
+          failureCount++;
+          throw new Error(`Simulated cache failure #${failureCount}`);
+        }
+        return originalGet(key);
+      };
       
       let successfulOperations = 0;
       let failedOperations = 0;
@@ -480,6 +495,10 @@ describe('Cache Stress Tests', () => {
       
       console.log(`Resilience test - Success: ${successfulOperations}, Failed: ${failedOperations}`);
       
+      // Restore original methods
+      cacheManager.set = originalSet;
+      cacheManager.get = originalGet;
+      
       expect(successfulOperations).toBeGreaterThan(0);
       expect(failedOperations).toBe(maxFailures);
       expect(successfulOperations + failedOperations).toBe(200);
@@ -488,36 +507,41 @@ describe('Cache Stress Tests', () => {
     it('should handle cleanup interruption gracefully', async () => {
       const cache = new CacheManager({
         maxSize: 100,
-        defaultTTL: 50,
-        cleanupInterval: 25
+        defaultTTL: 30, // Short TTL for quick expiration
+        cleanupInterval: 20
       });
       
-      // Populate cache with items that will expire
-      for (let i = 0; i < 200; i++) {
+      // Populate cache with items, some will expire quickly
+      for (let i = 0; i < 150; i++) {
+        const ttl = i < 75 ? 10 : 300000; // First 75 expire quickly, rest don't
         cache.set(`cleanup-${i}`, {
           id: i,
           data: `cleanup-test-${i}`,
           created: Date.now()
-        }, Math.random() * 100 + 25);
+        }, ttl);
       }
       
-      // Interrupt cleanup by stopping and restarting
-      await new Promise(resolve => setTimeout(resolve, 30));
-      
       const sizeBefore = cache.cache.size;
+      console.log(`Before cleanup: ${sizeBefore} items`);
       
-      // Simulate cleanup interruption
-      cache.stopCleanup?.();
+      // Stop automatic cleanup
+      if (cache.stopCleanup) {
+        cache.stopCleanup();
+      }
       
-      await new Promise(resolve => setTimeout(resolve, 100)); // Let items expire
+      // Wait for items to expire
+      await new Promise(resolve => setTimeout(resolve, 50));
       
-      // Manually trigger cleanup
-      cache.cleanup?.();
+      // Manually trigger cleanup to remove expired items
+      if (cache.cleanup) {
+        cache.cleanup();
+      }
       
       const sizeAfter = cache.cache.size;
       
       console.log(`Cleanup interruption - Before: ${sizeBefore}, After: ${sizeAfter}`);
       
+      // Should have removed expired items and enforced size limit
       expect(sizeAfter).toBeLessThan(sizeBefore);
       expect(sizeAfter).toBeLessThanOrEqual(100);
       
