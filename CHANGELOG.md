@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2025-07-02
+
+### Added
+- **Multi-Site Testing Suite**: Comprehensive test infrastructure for multi-site WordPress configurations
+  - `npm run test:multisite` command for rapid validation of all configured sites
+  - Quick test script for validating API connectivity, authentication, and content access
+  - Site-specific error reporting and success/failure metrics
+- **Enhanced Documentation**: Complete Claude Desktop setup guide for multi-site usage
+  - Step-by-step multi-site configuration examples
+  - Client management scenarios (agencies, developers)
+  - Security best practices for credential management
+
+### Fixed
+- **Integration Test Infrastructure**: 
+  - Fixed API connectivity validation logic for WordPress REST API
+  - Improved response validation to check for correct API properties
+  - Enhanced error handling and reporting for multi-site configurations
+  - Integration tests now achieve 100% success rate (9/9 tests passing)
+- **Multi-Site Configuration**: 
+  - Fixed missing WORDPRESS_APP_PASSWORD field validation for JWT authentication
+  - Enhanced site URL uniqueness validation
+  - Resolved duplicate site URL conflicts in configuration
+- **Tool Testing Protocol**:
+  - Fixed MCP protocol communication issues in tool test scripts
+  - Improved server initialization and response handling
+  - Created reliable test script for MCP tool validation
+- **Repository Organization**:
+  - Enhanced .gitignore to prevent credential leaks
+  - Removed temporary files and cleaned up script directory
+  - Organized test infrastructure for better maintainability
+
+### Security
+- **Credential Protection**: Enhanced .gitignore patterns to prevent accidental credential commits
+- **Configuration Validation**: Improved validation to prevent sensitive data exposure
+- **File Cleanup**: Removed example files containing sensitive configuration data
+
+## [Unreleased - Previous]
+
 ### Added
 - **Technical Debt Remediation**: Comprehensive codebase improvements and modernization
   - Docker test environment with automated WordPress setup

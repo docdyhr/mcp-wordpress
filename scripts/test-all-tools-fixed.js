@@ -8,6 +8,7 @@
 import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import readline from 'readline';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -36,7 +37,6 @@ const testCases = [
     description: 'Get site settings',
     arguments: { site: DEFAULT_SITE }
   },
-  // Removed wp_get_site_info - doesn't exist
 
   // Posts Tools
   {
@@ -111,29 +111,43 @@ const testCases = [
 ];
 
 /**
- * Get first available post ID from the site
+ * Start MCP server and return process
  */
-async function getFirstPostId() {
-  const listPostsTest = {
-    name: 'wp_list_posts',
-    description: 'Get posts to find valid ID',
-    arguments: { site: DEFAULT_SITE, per_page: 1 }
-  };
+async function startMCPServer() {
+  const serverProcess = spawn('node', [join(rootDir, 'dist/index.js')], {
+    cwd: rootDir,
+    stdio: ['pipe', 'pipe', 'pipe'],
+    env: { ...process.env }
+  });
 
-  const result = await executeTest(listPostsTest);
-  if (result.response?.result?.content?.[0]?.text) {
-    const match = result.response.result.content[0].text.match(/\(ID: (\d+)\)/);
-    if (match) {
-      return parseInt(match[1]);
-    }
-  }
-  return 1571; // Fallback to known working ID
+  // Wait for server to be ready
+  await new Promise((resolve) => {
+    const rl = readline.createInterface({
+      input: serverProcess.stderr,
+      crlfDelay: Infinity
+    });
+
+    rl.on('line', (line) => {
+      if (line.includes('Server started and connected')) {
+        rl.close();
+        resolve();
+      }
+    });
+
+    // Timeout after 5 seconds
+    setTimeout(() => {
+      rl.close();
+      resolve();
+    }, 5000);
+  });
+
+  return serverProcess;
 }
 
 /**
  * Execute a single MCP tool test
  */
-async function executeTest(testCase) {
+async function executeTest(serverProcess, testCase) {
   return new Promise((resolve) => {
     const mcpRequest = {
       jsonrpc: '2.0',
@@ -145,54 +159,40 @@ async function executeTest(testCase) {
       }
     };
 
-    const serverProcess = spawn('node', [join(rootDir, 'dist/index.js')], {
-      cwd: rootDir,
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
-
-    let stdout = '';
-    let stderr = '';
     let response = null;
+    let responseBuffer = '';
 
-    serverProcess.stdout.on('data', (data) => {
-      stdout += data.toString();
+    // Set up response listener
+    const rl = readline.createInterface({
+      input: serverProcess.stdout,
+      crlfDelay: Infinity
     });
 
-    serverProcess.stderr.on('data', (data) => {
-      stderr += data.toString();
-    });
-
-    serverProcess.on('close', (code) => {
+    rl.on('line', (line) => {
+      responseBuffer += line;
       try {
-        if (stdout.trim()) {
-          response = JSON.parse(stdout.trim());
-        }
-      } catch (error) {
-        response = { error: `Parse error: ${error.message}`, stdout, stderr };
+        response = JSON.parse(responseBuffer);
+        rl.close();
+        resolve({
+          testCase,
+          response,
+          exitCode: 0
+        });
+      } catch (e) {
+        // Keep accumulating until we have valid JSON
       }
-
-      resolve({
-        testCase,
-        response,
-        stdout,
-        stderr,
-        exitCode: code
-      });
     });
 
     // Send the request
     serverProcess.stdin.write(JSON.stringify(mcpRequest) + '\n');
-    serverProcess.stdin.end();
 
     // Timeout after 10 seconds
     setTimeout(() => {
-      if (!serverProcess.killed) {
-        serverProcess.kill();
+      rl.close();
+      if (!response) {
         resolve({
           testCase,
           response: { error: 'Timeout after 10 seconds' },
-          stdout,
-          stderr,
           exitCode: -1
         });
       }
@@ -229,9 +229,6 @@ function formatResult(result) {
   } else if (response?.error) {
     console.log('❌ ERROR:');
     console.log(response.error);
-    if (result.stderr) {
-      console.log('STDERR:', result.stderr);
-    }
   } else {
     console.log('❓ UNKNOWN RESPONSE:');
     console.log(JSON.stringify(response, null, 2));
@@ -246,16 +243,10 @@ async function runAllTests() {
   console.log(`📁 Testing from: ${rootDir}`);
   console.log(`🔧 Total tests: ${testCases.length}`);
 
-  // Get a valid post ID dynamically
-  console.log('\n🔍 Finding valid post ID...');
-  const validPostId = await getFirstPostId();
-  console.log(`✅ Using post ID: ${validPostId}`);
-
-  // Update the wp_get_post test with the valid ID
-  const getPostTest = testCases.find((test) => test.name === 'wp_get_post');
-  if (getPostTest) {
-    getPostTest.arguments.id = validPostId;
-  }
+  // Start MCP server
+  console.log('\n🚀 Starting MCP server...');
+  const serverProcess = await startMCPServer();
+  console.log('✅ MCP server started');
 
   const results = [];
   let successCount = 0;
@@ -267,7 +258,7 @@ async function runAllTests() {
       `\n⏳ Running test ${i + 1}/${testCases.length}: ${testCase.name}...`
     );
 
-    const result = await executeTest(testCase);
+    const result = await executeTest(serverProcess, testCase);
     results.push(result);
 
     formatResult(result);
@@ -278,10 +269,10 @@ async function runAllTests() {
     } else {
       failureCount++;
     }
-
-    // Small delay between tests
-    await new Promise((resolve) => setTimeout(resolve, 500));
   }
+
+  // Kill server
+  serverProcess.kill();
 
   // Summary
   console.log('\n' + '='.repeat(80));

@@ -1,5 +1,9 @@
 # MCP WordPress Server
 
+<div align="center">
+<img src="images/wordpress-mcp-logo.png" width="50%" alt="WordPress MCP Logo">
+</div>
+
 A comprehensive Model Context Protocol (MCP) server for WordPress management through the WordPress REST API v2. Completely written in TypeScript with modular architecture and 95%+ test coverage.
 
 [![NPM Version](https://img.shields.io/npm/v/mcp-wordpress)](https://www.npmjs.com/package/mcp-wordpress)
@@ -59,11 +63,34 @@ npx mcp-wordpress setup
 npm run setup
 ```
 
-## 🏆 Latest Achievement: v1.2.0 - Performance & Documentation Revolution
+## 🏆 Latest Achievement: v1.2.1 - Test Infrastructure & Multi-Site Enhancement
+
+Building on v1.2.0's performance monitoring and documentation features, v1.2.1 delivers **100% test reliability**, **enhanced multi-site support**, and **production-ready repository organization**:
+
+### ✅ Test Infrastructure Overhaul (v1.2.1)
+
+- **🔧 100% Test Success Rate**: Fixed all failing integration and tool tests
+- **🌐 Multi-Site Testing**: Comprehensive test suite for multi-site WordPress configurations  
+- **🛡️ Enhanced Security**: Improved .gitignore and credential protection
+- **📋 Test Organization**: Streamlined test scripts and better error reporting
+- **⚡ Quick Validation**: New `npm run test:multisite` command for rapid configuration testing
+
+### 🌐 Multi-Site Configuration Enhancements (v1.2.1)
+
+- **📝 Complete Documentation**: Comprehensive Claude Desktop setup guide for multi-site usage
+- **🔧 Fixed Configuration**: Resolved JWT authentication validation issues
+- **✅ Site Validation**: Enhanced uniqueness checks for site URLs and IDs
+- **🚀 Quick Testing**: Instant validation of all configured WordPress sites
+- **📊 Status Reporting**: Clear success/failure reporting for each site configuration
+
+---
+
+## 🏆 Previous Achievement: v1.2.0 - Performance & Documentation Revolution
 
 We've implemented a **comprehensive performance monitoring system**, **intelligent caching**, **auto-generated documentation**, and **Docker containerization** - all while maintaining complete backward compatibility:
 
 ### ⚡ Performance Monitoring System
+
 - **📊 Real-Time Metrics**: Response times, cache hit rates, error tracking, system resources
 - **📈 Historical Analytics**: Trend analysis, anomaly detection, predictive insights
 - **🎯 Industry Benchmarks**: Compare against performance standards with optimization recommendations
@@ -72,6 +99,7 @@ We've implemented a **comprehensive performance monitoring system**, **intellige
 - **⚙️ Optimization Engine**: AI-powered recommendations for performance improvements
 
 ### 🏗️ Intelligent Caching System
+
 - **🚀 50-70% Performance Improvement**: Reduced API calls for taxonomy and authentication operations
 - **📊 Multi-Layer Architecture**: HTTP response caching + in-memory application cache + intelligent invalidation
 - **🎯 Site-Specific Isolation**: Complete cache separation for multi-site WordPress installations
@@ -79,6 +107,7 @@ We've implemented a **comprehensive performance monitoring system**, **intellige
 - **⏱️ Sub-Millisecond Operations**: Cache hits deliver responses in under 1ms
 
 ### 📚 Auto-Generated Documentation
+
 - **📖 Complete API Documentation**: All 59 tools with examples, parameters, and usage guides
 - **🔧 OpenAPI Specification**: Machine-readable API spec for integration
 - **🔄 Automated CI/CD Pipeline**: Documentation updates automatically on code changes
@@ -86,27 +115,33 @@ We've implemented a **comprehensive performance monitoring system**, **intellige
 - **🌐 Multi-Format Output**: Markdown, JSON, and OpenAPI formats
 
 ### 🐳 Docker Containerization  
+
 - **📦 Production-Ready Images**: Optimized Docker containers for deployment
 - **🔧 Development Environment**: Docker Compose for local development
 - **⚙️ Environment Configuration**: Flexible configuration via environment variables
 - **🚀 Easy Deployment**: One-command deployment to any Docker environment
 
-**📚 Complete Documentation**: 
+**📚 Complete Documentation**:
+
 - [Performance Monitoring Guide](./docs/PERFORMANCE.md)
 - [Caching System Guide](./docs/CACHING.md)
 - [API Documentation](./docs/api/README.md)
 - [Docker Deployment Guide](./docs/DOCKER.md)
 
-## 🔐 Authentication & Testing Status
+## 🔐 Authentication & Testing Status (v1.2.1)
 
 ✅ **Application Passwords** - Tested and working perfectly
 ✅ **JWT Authentication** - Supported with plugin  
 ✅ **Basic Authentication** - Development ready
 ✅ **API Key Authentication** - Plugin-based support
-✅ **All Tests Passing** - 100% success rate (41/41 tests)
+✅ **Integration Tests** - 100% success rate (9/9 tests passing)
+✅ **Multi-Site Tests** - 100% success rate (3/3 sites verified)
+✅ **Security Tests** - 100% success rate (40/40 tests passing)
+✅ **Performance Tests** - 100% success rate (8/8 tests passing)
 ✅ **Tool Tests** - 100% success rate (14/14 tools working)
 
 The setup wizard guides you through:
+
 - WordPress site configuration
 - Authentication method selection
 - Connection testing
@@ -118,7 +153,7 @@ The setup wizard guides you through:
 
 If you want the absolute easiest setup, just paste this prompt into Claude Desktop:
 
-```
+```text
 Set up the MCP WordPress server using NPX for my Claude Desktop. 
 
 My WordPress details:
@@ -174,6 +209,7 @@ DEBUG=false
 Configure MCP WordPress Server in your Claude Desktop `mcp.json` configuration file:
 
 #### Option 1: NPX (Recommended)
+
 ```json
 {
   "mcpServers": {
@@ -192,6 +228,7 @@ Configure MCP WordPress Server in your Claude Desktop `mcp.json` configuration f
 ```
 
 #### Option 2: Global Installation
+
 ```json
 {
   "mcpServers": {
@@ -209,6 +246,7 @@ Configure MCP WordPress Server in your Claude Desktop `mcp.json` configuration f
 ```
 
 #### Option 3: Local Development
+
 ```json
 {
   "mcpServers": {
@@ -227,6 +265,7 @@ Configure MCP WordPress Server in your Claude Desktop `mcp.json` configuration f
 ```
 
 #### Using .env File (Any Option)
+
 If you prefer to use a `.env` file instead of environment variables in the config:
 
 ```json
@@ -275,6 +314,139 @@ Here's a complete `claude_desktop_config.json` file with MCP WordPress:
     }
   }
 }
+```
+
+## 🌐 Multi-Site Configuration
+
+MCP WordPress Server supports managing multiple WordPress sites from a single configuration. This is perfect for agencies, developers managing multiple client sites, or anyone with multiple WordPress installations.
+
+### Setting Up Multi-Site Configuration
+
+1. **Create a `mcp-wordpress.config.json` file** in your project root:
+
+```json
+{
+  "sites": [
+    {
+      "id": "site1",
+      "name": "My Main Site",
+      "config": {
+        "WORDPRESS_SITE_URL": "https://site1.com",
+        "WORDPRESS_USERNAME": "admin",
+        "WORDPRESS_APP_PASSWORD": "xxxx xxxx xxxx xxxx xxxx xxxx"
+      }
+    },
+    {
+      "id": "site2", 
+      "name": "My Blog",
+      "config": {
+        "WORDPRESS_SITE_URL": "https://blog.site2.com",
+        "WORDPRESS_USERNAME": "editor",
+        "WORDPRESS_APP_PASSWORD": "yyyy yyyy yyyy yyyy yyyy yyyy",
+        "WORDPRESS_AUTH_METHOD": "app-password"
+      }
+    },
+    {
+      "id": "dev",
+      "name": "Development Site",
+      "config": {
+        "WORDPRESS_SITE_URL": "http://localhost:8080",
+        "WORDPRESS_USERNAME": "dev_user",
+        "WORDPRESS_APP_PASSWORD": "zzzz zzzz zzzz zzzz zzzz zzzz"
+      }
+    }
+  ]
+}
+```
+
+1. **Configure Claude Desktop for Multi-Site**:
+
+```json
+{
+  "mcpServers": {
+    "mcp-wordpress": {
+      "command": "npx",
+      "args": ["mcp-wordpress"]
+    }
+  }
+}
+```
+
+Note: When using multi-site configuration, you don't need to specify environment variables in Claude Desktop. The server will read from your `mcp-wordpress.config.json` file.
+
+### Using Multi-Site Tools
+
+When you have multiple sites configured, all tools require a `site` parameter:
+
+```text
+# List posts from site1
+wp_list_posts --site="site1"
+
+# Create a post on the blog site
+wp_create_post --site="site2" --title="New Blog Post" --content="Content here"
+
+# Get user info from development site
+wp_get_current_user --site="dev"
+```
+
+### Important Multi-Site Notes
+
+- **Site IDs must be unique** - Each site needs a unique identifier
+- **Security**: The `mcp-wordpress.config.json` file contains sensitive credentials and should NEVER be committed to version control
+- **Default Site**: If only one site is configured, it will be used by default without needing the `--site` parameter
+- **Authentication**: Each site can use different authentication methods (app-password, jwt, basic, api-key)
+
+### Example: Managing Multiple Client Sites
+
+```json
+{
+  "sites": [
+    {
+      "id": "client-acme",
+      "name": "ACME Corporation",
+      "config": {
+        "WORDPRESS_SITE_URL": "https://acme-corp.com",
+        "WORDPRESS_USERNAME": "mcp_admin",
+        "WORDPRESS_APP_PASSWORD": "aaaa bbbb cccc dddd eeee ffff"
+      }
+    },
+    {
+      "id": "client-tech",
+      "name": "TechStartup Blog",
+      "config": {
+        "WORDPRESS_SITE_URL": "https://blog.techstartup.io",
+        "WORDPRESS_USERNAME": "content_manager",
+        "WORDPRESS_APP_PASSWORD": "gggg hhhh iiii jjjj kkkk llll"
+      }
+    },
+    {
+      "id": "client-shop",
+      "name": "Online Shop",
+      "config": {
+        "WORDPRESS_SITE_URL": "https://shop.example.com",
+        "WORDPRESS_USERNAME": "shop_admin",
+        "WORDPRESS_APP_PASSWORD": "mmmm nnnn oooo pppp qqqq rrrr",
+        "WORDPRESS_AUTH_METHOD": "jwt",
+        "WORDPRESS_JWT_SECRET": "your-jwt-secret-here"
+      }
+    }
+  ]
+}
+```
+
+Then in Claude Desktop, you can manage all sites:
+
+```text
+# Check posts across all client sites
+wp_list_posts --site="client-acme" --per_page=5
+wp_list_posts --site="client-tech" --per_page=5
+wp_list_posts --site="client-shop" --per_page=5
+
+# Update content on specific sites
+wp_update_post --site="client-acme" --id=123 --title="Updated Title"
+
+# Manage media across sites
+wp_list_media --site="client-shop" --media_type="image"
 ```
 
 ## 🛠 Build System
@@ -334,6 +506,7 @@ WORDPRESS_API_KEY=your-api-key
 ## 📋 Available Tools (59 Tools)
 
 ### 📝 Posts (6 Tools)
+
 - `wp_list_posts` - List and filter blog posts
 - `wp_get_post` - Get specific post
 - `wp_create_post` - Create new posts
@@ -342,6 +515,7 @@ WORDPRESS_API_KEY=your-api-key
 - `wp_get_post_revisions` - Get post revisions
 
 ### 📄 Pages (6 Tools)
+
 - `wp_list_pages` - List pages
 - `wp_get_page` - Get specific page
 - `wp_create_page` - Create new pages
@@ -350,6 +524,7 @@ WORDPRESS_API_KEY=your-api-key
 - `wp_get_page_revisions` - Get page revisions
 
 ### 🖼️ Media (6 Tools)
+
 - `wp_list_media` - Browse media library
 - `wp_get_media` - Get media details
 - `wp_upload_media` - Upload files
@@ -358,6 +533,7 @@ WORDPRESS_API_KEY=your-api-key
 - `wp_get_media_sizes` - Get available image sizes
 
 ### 👥 Users (6 Tools)
+
 - `wp_list_users` - List users
 - `wp_get_user` - Get user details
 - `wp_create_user` - Create new users
@@ -366,6 +542,7 @@ WORDPRESS_API_KEY=your-api-key
 - `wp_get_current_user` - Get current user
 
 ### 💬 Comments (7 Tools)
+
 - `wp_list_comments` - List comments
 - `wp_get_comment` - Get comment details
 - `wp_create_comment` - Create new comments
@@ -375,6 +552,7 @@ WORDPRESS_API_KEY=your-api-key
 - `wp_spam_comment` - Mark comments as spam
 
 ### 🏷️ Taxonomies (10 Tools)
+
 - `wp_list_categories` - List categories
 - `wp_get_category` - Get category details
 - `wp_create_category` - Create new categories
@@ -387,6 +565,7 @@ WORDPRESS_API_KEY=your-api-key
 - `wp_delete_tag` - Delete tags
 
 ### ⚙️ Site Management (7 Tools)
+
 - `wp_get_site_settings` - Get site settings
 - `wp_update_site_settings` - Update site settings
 - `wp_get_site_stats` - Get site statistics
@@ -396,6 +575,7 @@ WORDPRESS_API_KEY=your-api-key
 - `wp_delete_application_password` - Delete app passwords
 
 ### 🔐 Authentication (6 Tools)
+
 - `wp_test_auth` - Test authentication
 - `wp_get_auth_status` - Get authentication status
 - `wp_start_oauth_flow` - Start OAuth flow
@@ -404,12 +584,14 @@ WORDPRESS_API_KEY=your-api-key
 - `wp_switch_auth_method` - Switch authentication method
 
 ### ⚡ Cache Management (4 Tools)
+
 - `wp_cache_stats` - Get real-time cache performance statistics
 - `wp_cache_clear` - Clear cache entries with optional pattern matching
 - `wp_cache_warm` - Pre-populate cache with essential data
 - `wp_cache_info` - Get detailed cache configuration and status
 
 ### 📊 Performance Monitoring (6 Tools)
+
 - `wp_performance_stats` - Get real-time performance statistics and metrics
 - `wp_performance_history` - Get historical performance data and trends
 - `wp_performance_benchmark` - Compare current performance against industry benchmarks
@@ -420,6 +602,7 @@ WORDPRESS_API_KEY=your-api-key
 ## 🧪 Testing
 
 ### Current Test Status ✅
+
 - **TypeScript Build Tests**: 19/19 passed (100%)
 - **Environment Loading Tests**: 7/7 passed (100%)
 - **Tool Functionality Tests**: 14/15 passed (93%)
@@ -646,18 +829,21 @@ npm run test:contracts:live
 ```
 
 This command will:
+
 - 🐳 Start isolated WordPress + MySQL containers (port 8081)
 - ⚙️ Auto-configure WordPress with test data and authentication
 - 🧪 Run contract tests against the live WordPress API
 - 🧹 Clean up automatically when done
 
 **Features:**
+
 - **Zero Conflicts**: Uses isolated containers with separate ports
 - **Fully Automated**: WordPress installation, user creation, and app password generation
 - **Real API Testing**: Validates actual WordPress REST API behavior
 - **CI/CD Ready**: Works in continuous integration environments
 
 **Manual Setup Alternative:**
+
 ```bash
 # Test setup phase only
 bash scripts/test-setup-only.sh

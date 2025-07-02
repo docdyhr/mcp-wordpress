@@ -135,6 +135,7 @@ temp/
 
 # WordPress MCP Server specific
 mcp-wordpress.config.json
+example-multisite-config.json
 mcp-server.log
 wordpress-debug.log
 

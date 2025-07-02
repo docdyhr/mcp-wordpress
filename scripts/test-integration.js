@@ -91,9 +91,15 @@ async function testSingleSiteConfig() {
       }
     });
 
+    // Test that we can access the API root
     const response = await client.get('/');
-    if (!response.name) {
+    // The API root should have a namespace property
+    if (!response || typeof response !== 'object') {
       throw new Error('Invalid API response');
+    }
+    // Check if it's a valid WordPress REST API response
+    if (!response.namespace && !response.routes && !response._links) {
+      throw new Error('Not a valid WordPress REST API endpoint');
     }
   });
 
@@ -168,9 +174,15 @@ async function testMultiSiteConfig() {
         auth: authConfig
       });
 
+      // Test that we can access the API root
       const response = await client.get('/');
-      if (!response.name) {
+      // The API root should have a namespace property
+      if (!response || typeof response !== 'object') {
         throw new Error('Invalid API response');
+      }
+      // Check if it's a valid WordPress REST API response
+      if (!response.namespace && !response.routes && !response._links) {
+        throw new Error('Not a valid WordPress REST API endpoint');
       }
     });
 

@@ -1,6 +1,6 @@
 {
   "name": "mcp-wordpress",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Comprehensive Model Context Protocol server for WordPress management with 59 tools, performance monitoring, intelligent caching, auto-generated documentation, Docker support, TypeScript, and production-ready authentication",
   "keywords": [
     "mcp",
@@ -78,7 +78,8 @@
     "test:security": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/ --config=jest.typescript.config.json",
     "test:security:penetration": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/penetration-tests.test.js --config=jest.typescript.config.json",
     "test:security:validation": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/security-validation.test.js --config=jest.typescript.config.json",
-    "test:tools": "node scripts/test-all-tools.js",
+    "test:tools": "node scripts/test-all-tools-fixed.js",
+    "test:multisite": "node scripts/test-multisite-quick.js",
     "test:typescript": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest --config=jest.typescript.config.json",
     "test:watch": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --watch --config=jest.typescript.config.json",
     "test:with-env": "bash scripts/start-test-env.sh && npm run test:typescript",
