@@ -145,12 +145,12 @@ This refactoring represents months of careful planning and implementation, ensur
 
 ### **New Installations**
 ```bash
-npm install -g @aiondadotcom/mcp-wordpress@1.1.2
+npm install -g mcp-wordpress@1.1.2
 ```
 
 ### **Existing Users**
 ```bash
-npm update -g @aiondadotcom/mcp-wordpress
+npm update -g mcp-wordpress
 ```
 
 **No configuration changes required** - your existing setup will continue working seamlessly.
@@ -159,8 +159,8 @@ npm update -g @aiondadotcom/mcp-wordpress
 
 ## 🔗 Resources
 
-- **GitHub Repository**: [https://github.com/AiondaDotCom/mcp-wordpress](https://github.com/AiondaDotCom/mcp-wordpress)
-- **NPM Package**: [@aiondadotcom/mcp-wordpress](https://www.npmjs.com/package/@aiondadotcom/mcp-wordpress)
+- **GitHub Repository**: [https://github.com/docdyhr/mcp-wordpress](https://github.com/docdyhr/mcp-wordpress)
+- **NPM Package**: [mcp-wordpress](https://www.npmjs.com/package/mcp-wordpress)
 - **Documentation**: See CLAUDE.md for comprehensive architecture overview
 - **Technical Details**: See REFACTORING.md for in-depth refactoring analysis
 

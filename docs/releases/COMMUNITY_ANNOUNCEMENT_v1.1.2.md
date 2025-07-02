@@ -22,7 +22,7 @@ It's a Model Context Protocol server that provides 54 tools for managing WordPre
 npx mcp-wordpress
 ```
 
-**GitHub**: https://github.com/AiondaDotCom/mcp-wordpress
+**GitHub**: https://github.com/docdyhr/mcp-wordpress
 **NPM**: https://www.npmjs.com/package/mcp-wordpress
 
 Would love your feedback and contributions! 🚀
@@ -123,4 +123,4 @@ npx mcp-wordpress
 
 Check out the modular architecture that makes it easy to extend and maintain. Would love feedback from the Claude community on how you're using it!
 
-GitHub: https://github.com/AiondaDotCom/mcp-wordpress
+GitHub: https://github.com/docdyhr/mcp-wordpress
