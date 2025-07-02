@@ -1,6 +1,4 @@
-import { jest } from '@jest/globals';
 import { CacheManager } from '../../dist/cache/CacheManager.js';
-import { CachedWordPressClient } from '../../dist/client/CachedWordPressClient.js';
 import { performance } from 'perf_hooks';
 
 describe('Cache Stress Tests', () => {
@@ -69,42 +67,6 @@ describe('Cache Stress Tests', () => {
       // Skip this test since it requires CachedWordPressClient with proper config
       console.log('Skipping cache stampede test - requires WordPress client integration');
       expect(true).toBe(true); // Mark as passing
-      return;
-      
-      // Launch 1000 concurrent requests for the same resource
-      const concurrentRequests = 1000;
-      const startTime = performance.now();
-      
-      const promises = Array(concurrentRequests).fill(null).map(async (_, index) => {
-        try {
-          const result = await cachedClient.getPosts({ per_page: 10 });
-          return { index, success: true, result };
-        } catch (error) {
-          return { index, success: false, error: error.message };
-        }
-      });
-      
-      const results = await Promise.all(promises);
-      const endTime = performance.now();
-      
-      // Analyze results
-      const successful = results.filter(r => r.success);
-      const failed = results.filter(r => !r.success);
-      
-      console.log(`Stampede test - ${successful.length} successful, ${failed.length} failed, Duration: ${(endTime - startTime).toFixed(0)}ms`);
-      
-      // All requests should succeed
-      expect(successful.length).toBe(concurrentRequests);
-      expect(failed.length).toBe(0);
-      
-      // API should only be called once despite 1000 requests
-      expect(mockClient.getPosts).toHaveBeenCalledTimes(1);
-      
-      // All results should be identical
-      const firstResult = successful[0].result;
-      successful.forEach(({ result }) => {
-        expect(result).toEqual(firstResult);
-      });
     });
     
     it('should handle rapid cache churn without memory leaks', async () => {
@@ -160,7 +122,7 @@ describe('Cache Stress Tests', () => {
     it('should handle extremely large cached objects gracefully', () => {
       const sizes = [
         { name: 'huge', size: 1000000 }, // 1M elements
-        { name: 'massive', size: 5000000 }, // 5M elements
+        { name: 'massive', size: 5000000 } // 5M elements
       ];
       
       sizes.forEach(({ name, size }) => {
@@ -168,6 +130,9 @@ describe('Cache Stress Tests', () => {
           maxSize: 10,
           defaultTTL: 300000
         });
+        
+        let testSucceeded = false;
+        let testError = null;
         
         try {
           const largeObject = {
@@ -191,14 +156,21 @@ describe('Cache Stress Tests', () => {
           console.log(`${name} object - Set: ${setTime.toFixed(2)}ms, Get: ${getTime.toFixed(2)}ms`);
           
           expect(retrieved).toBeDefined();
-          expect(retrieved.data.length).toBe(size);
+          expect(retrieved.data).toHaveLength(size);
           expect(setTime).toBeLessThan(1000); // Should cache within 1 second
           expect(getTime).toBeLessThan(100); // Should retrieve within 100ms
           
+          testSucceeded = true;
         } catch (error) {
+          testError = error;
+        }
+        
+        // Either the test succeeded or we got an expected error
+        expect(testSucceeded || testError instanceof Error).toBe(true);
+        
+        if (testError) {
           // If we run out of memory, that's also a valid outcome to test
-          console.log(`${name} object failed (expected): ${error.message}`);
-          expect(error).toBeInstanceOf(Error);
+          console.log(`${name} object failed (expected): ${testError.message}`);
         }
       });
     });
@@ -442,7 +414,7 @@ describe('Cache Stress Tests', () => {
       // All remaining entries should be valid (relaxed check)
       let validEntries = 0;
       let totalEntries = 0;
-      cache.cache.forEach((entry, key) => {
+      cache.cache.forEach((entry) => {
         totalEntries++;
         if (entry && entry.value !== undefined) {
           validEntries++;
@@ -485,6 +457,7 @@ describe('Cache Stress Tests', () => {
       let failedOperations = 0;
       
       // Perform operations with random failures
+      const errors = [];
       for (let i = 0; i < 200; i++) {
         try {
           if (i % 3 === 0) {
@@ -495,9 +468,14 @@ describe('Cache Stress Tests', () => {
           successfulOperations++;
         } catch (error) {
           failedOperations++;
-          expect(error.message).toMatch(/Simulated cache failure/);
+          errors.push(error);
         }
       }
+      
+      // Validate errors outside the loop
+      errors.forEach(error => {
+        expect(error.message).toMatch(/Simulated cache failure/);
+      });
       
       console.log(`Resilience test - Success: ${successfulOperations}, Failed: ${failedOperations}`);
       
@@ -557,7 +535,8 @@ describe('Cache Stress Tests', () => {
       cache.set('post-cleanup-test', { test: true }, 1000);
       expect(cache.get('post-cleanup-test')).toEqual({ test: true });
       
-      console.log(`Cache functional after cleanup test completed`);
+      console.log('Cache functional after cleanup test completed');
     });
   });
 });
+

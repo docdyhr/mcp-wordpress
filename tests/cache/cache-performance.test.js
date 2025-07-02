@@ -1,6 +1,4 @@
-import { jest } from '@jest/globals';
 import { CacheManager } from '../../dist/cache/CacheManager.js';
-import { HttpCacheWrapper } from '../../dist/cache/HttpCacheWrapper.js';
 import { performance } from 'perf_hooks';
 
 describe('Cache Performance Benchmarks', () => {
@@ -243,13 +241,8 @@ describe('Cache Performance Benchmarks', () => {
         
         // Memory per item should scale reasonably with object size
         // More lenient thresholds for CI environments
-        if (name === 'small') {
-          expect(memoryPerItem).toBeLessThan(5000); // Increased from 1000
-        } else if (name === 'medium') {
-          expect(memoryPerItem).toBeLessThan(10000); // Increased from 5000
-        } else {
-          expect(memoryPerItem).toBeLessThan(100000); // Increased from 50000
-        }
+        const expectedThreshold = name === 'small' ? 5000 : name === 'medium' ? 10000 : 100000;
+        expect(memoryPerItem).toBeLessThan(expectedThreshold);
       });
     });
     
@@ -365,15 +358,17 @@ describe('Cache Performance Benchmarks', () => {
       });
       
       // Verify scalability characteristics
-      results.forEach((result, index) => {
-        if (index > 0) {
-          const previous = results[index - 1];
-          
-          // Performance shouldn't degrade dramatically with size
-          expect(result.accessThroughput).toBeGreaterThan(previous.accessThroughput * 0.5);
-          expect(result.hitRate).toBe(1.0); // Should maintain 100% hit rate
-        }
+      results.forEach((result) => {
+        expect(result.hitRate).toBe(1.0); // Should maintain 100% hit rate
       });
+      
+      // Check performance scaling between consecutive results
+      for (let index = 1; index < results.length; index++) {
+        const result = results[index];
+        const previous = results[index - 1];
+        // Performance shouldn't degrade dramatically with size
+        expect(result.accessThroughput).toBeGreaterThan(previous.accessThroughput * 0.5);
+      }
     });
     
     it('should handle high concurrency efficiently', async () => {
@@ -426,16 +421,18 @@ describe('Cache Performance Benchmarks', () => {
       }
       
       // Verify concurrency handling
-      results.forEach((result, index) => {
-        if (index > 0) {
-          const previous = results[index - 1];
-          
-          // Throughput should scale with concurrency (at least to some degree)
-          expect(result.throughput).toBeGreaterThan(previous.throughput * 0.8);
-        }
-        
+      results.forEach((result) => {
         expect(result.cacheSize).toBeLessThanOrEqual(1000);
       });
+      
+      // Check throughput scaling between consecutive results
+      for (let index = 1; index < results.length; index++) {
+        const result = results[index];
+        const previous = results[index - 1];
+        // Throughput should scale with concurrency (at least to some degree)
+        expect(result.throughput).toBeGreaterThan(previous.throughput * 0.8);
+      }
     });
   });
 });
+
