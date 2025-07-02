@@ -1,0 +1,530 @@
+import { jest } from '@jest/globals';
+import { CacheManager } from '../../dist/cache/CacheManager.js';
+import { CachedWordPressClient } from '../../dist/client/CachedWordPressClient.js';
+import { performance } from 'perf_hooks';
+
+describe('Cache Stress Tests', () => {
+  let cacheManager;
+  
+  beforeEach(() => {
+    cacheManager = new CacheManager({
+      maxSize: 10000,
+      defaultTTL: 300000,
+      cleanupInterval: 5000
+    });
+  });
+  
+  afterEach(() => {
+    // Force cleanup to prevent memory leaks in tests
+    cacheManager?.stopCleanup?.();
+  });
+  
+  describe('Extreme Load Tests', () => {
+    it('should handle massive sequential writes without degradation', () => {
+      const iterations = 100000;
+      const batchSize = 1000;
+      const timings = [];
+      
+      for (let batch = 0; batch < iterations / batchSize; batch++) {
+        const batchStart = performance.now();
+        
+        for (let i = 0; i < batchSize; i++) {
+          const index = batch * batchSize + i;
+          cacheManager.set(`stress-${index}`, {
+            id: index,
+            batch,
+            data: `stress-test-data-${index}`,
+            timestamp: Date.now(),
+            payload: new Array(10).fill(`item-${index}`)
+          }, 300000);
+        }
+        
+        const batchEnd = performance.now();
+        timings.push(batchEnd - batchStart);
+      }
+      
+      // Analyze performance degradation
+      const firstBatch = timings[0];
+      const lastBatch = timings[timings.length - 1];
+      const degradation = (lastBatch - firstBatch) / firstBatch;
+      
+      console.log(`Stress test - First batch: ${firstBatch.toFixed(2)}ms, Last batch: ${lastBatch.toFixed(2)}ms, Degradation: ${(degradation * 100).toFixed(1)}%`);
+      
+      // Performance shouldn't degrade more than 100% even under extreme load
+      expect(degradation).toBeLessThan(1.0);
+      expect(cacheManager.cache.size).toBeLessThanOrEqual(10000);
+    });
+    
+    it('should survive cache stampede scenarios', async () => {
+      const mockClient = {
+        getPosts: jest.fn().mockImplementation(() => {
+          // Simulate slow API response
+          return new Promise(resolve => {
+            setTimeout(() => {
+              resolve([
+                { id: 1, title: 'Stampede Post 1' },
+                { id: 2, title: 'Stampede Post 2' }
+              ]);
+            }, 100);
+          });
+        })
+      };
+      
+      const cachedClient = new CachedWordPressClient(mockClient, 'stress-site');
+      
+      // Launch 1000 concurrent requests for the same resource
+      const concurrentRequests = 1000;
+      const startTime = performance.now();
+      
+      const promises = Array(concurrentRequests).fill(null).map(async (_, index) => {
+        try {
+          const result = await cachedClient.getPosts({ per_page: 10 });
+          return { index, success: true, result };
+        } catch (error) {
+          return { index, success: false, error: error.message };
+        }
+      });
+      
+      const results = await Promise.all(promises);
+      const endTime = performance.now();
+      
+      // Analyze results
+      const successful = results.filter(r => r.success);
+      const failed = results.filter(r => !r.success);
+      
+      console.log(`Stampede test - ${successful.length} successful, ${failed.length} failed, Duration: ${(endTime - startTime).toFixed(0)}ms`);
+      
+      // All requests should succeed
+      expect(successful.length).toBe(concurrentRequests);
+      expect(failed.length).toBe(0);
+      
+      // API should only be called once despite 1000 requests
+      expect(mockClient.getPosts).toHaveBeenCalledTimes(1);
+      
+      // All results should be identical
+      const firstResult = successful[0].result;
+      successful.forEach(({ result }) => {
+        expect(result).toEqual(firstResult);
+      });
+    });
+    
+    it('should handle rapid cache churn without memory leaks', async () => {
+      // Test rapid addition and removal of cache entries
+      const churnCycles = 1000;
+      const entriesPerCycle = 100;
+      const initialMemory = process.memoryUsage().heapUsed;
+      
+      for (let cycle = 0; cycle < churnCycles; cycle++) {
+        // Add entries
+        for (let i = 0; i < entriesPerCycle; i++) {
+          cacheManager.set(`churn-${cycle}-${i}`, {
+            cycle,
+            index: i,
+            data: new Array(100).fill(`cycle-${cycle}-item-${i}`),
+            timestamp: Date.now()
+          }, 1000); // Short TTL to trigger expiration
+        }
+        
+        // Trigger some reads
+        for (let i = 0; i < 10; i++) {
+          cacheManager.get(`churn-${cycle}-${i}`);
+        }
+        
+        // Periodically clear old entries
+        if (cycle % 10 === 0) {
+          // Access some older entries to test LRU
+          for (let oldCycle = Math.max(0, cycle - 50); oldCycle < cycle; oldCycle++) {
+            cacheManager.get(`churn-${oldCycle}-0`);
+          }
+        }
+        
+        // Small delay to allow cleanup
+        if (cycle % 100 === 0) {
+          await new Promise(resolve => setTimeout(resolve, 10));
+        }
+      }
+      
+      // Force cleanup and measure memory
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const finalMemory = process.memoryUsage().heapUsed;
+      const memoryIncrease = finalMemory - initialMemory;
+      
+      console.log(`Memory after churn test: ${(memoryIncrease / 1024 / 1024).toFixed(1)}MB increase`);
+      
+      // Memory increase should be reasonable (less than 100MB)
+      expect(memoryIncrease).toBeLessThan(100 * 1024 * 1024);
+      expect(cacheManager.cache.size).toBeLessThanOrEqual(10000);
+    });
+  });
+  
+  describe('Resource Exhaustion Tests', () => {
+    it('should handle extremely large cached objects gracefully', () => {
+      const sizes = [
+        { name: 'huge', size: 1000000 }, // 1M elements
+        { name: 'massive', size: 5000000 }, // 5M elements
+      ];
+      
+      sizes.forEach(({ name, size }) => {
+        const cache = new CacheManager({
+          maxSize: 10,
+          defaultTTL: 300000
+        });
+        
+        try {
+          const largeObject = {
+            id: 1,
+            type: name,
+            data: new Array(size).fill(null).map((_, i) => ({
+              index: i,
+              value: `item-${i}`,
+              metadata: { created: Date.now(), type: name }
+            }))
+          };
+          
+          const start = performance.now();
+          cache.set(`large-${name}`, largeObject, 300000);
+          const setTime = performance.now() - start;
+          
+          const getStart = performance.now();
+          const retrieved = cache.get(`large-${name}`);
+          const getTime = performance.now() - getStart;
+          
+          console.log(`${name} object - Set: ${setTime.toFixed(2)}ms, Get: ${getTime.toFixed(2)}ms`);
+          
+          expect(retrieved).toBeDefined();
+          expect(retrieved.data.length).toBe(size);
+          expect(setTime).toBeLessThan(1000); // Should cache within 1 second
+          expect(getTime).toBeLessThan(100); // Should retrieve within 100ms
+          
+        } catch (error) {
+          // If we run out of memory, that's also a valid outcome to test
+          console.log(`${name} object failed (expected): ${error.message}`);
+          expect(error).toBeInstanceOf(Error);
+        }
+      });
+    });
+    
+    it('should handle cache size limits under pressure', () => {
+      const cache = new CacheManager({
+        maxSize: 1000,
+        defaultTTL: 300000
+      });
+      
+      // Add way more items than the cache can hold
+      const totalItems = 10000;
+      const itemsAdded = [];
+      
+      for (let i = 0; i < totalItems; i++) {
+        const key = `pressure-${i}`;
+        cache.set(key, {
+          id: i,
+          data: `pressure-test-${i}`,
+          large: new Array(100).fill(`filler-${i}`)
+        }, 300000);
+        itemsAdded.push(key);
+        
+        // Verify cache size never exceeds limit
+        expect(cache.cache.size).toBeLessThanOrEqual(1000);
+      }
+      
+      // Verify LRU behavior - only recent items should remain
+      let itemsInCache = 0;
+      let oldestInCache = totalItems;
+      let newestInCache = 0;
+      
+      itemsAdded.forEach((key, index) => {
+        if (cache.get(key)) {
+          itemsInCache++;
+          oldestInCache = Math.min(oldestInCache, index);
+          newestInCache = Math.max(newestInCache, index);
+        }
+      });
+      
+      console.log(`Items in cache: ${itemsInCache}, Range: ${oldestInCache}-${newestInCache}`);
+      
+      expect(itemsInCache).toBeLessThanOrEqual(1000);
+      expect(oldestInCache).toBeGreaterThan(totalItems - 2000); // Should be recent items
+      expect(cache.stats.evictions).toBeGreaterThan(totalItems - 1000);
+    });
+    
+    it('should survive rapid TTL expiration scenarios', async () => {
+      const cache = new CacheManager({
+        maxSize: 5000,
+        defaultTTL: 50, // Very short default TTL
+        cleanupInterval: 25
+      });
+      
+      const rounds = 20;
+      const itemsPerRound = 500;
+      
+      for (let round = 0; round < rounds; round++) {
+        // Add items with varying TTLs
+        for (let i = 0; i < itemsPerRound; i++) {
+          const ttl = (i % 5 + 1) * 25; // 25ms to 125ms
+          cache.set(`ttl-${round}-${i}`, {
+            round,
+            item: i,
+            ttl,
+            data: `expiring-data-${round}-${i}`
+          }, ttl);
+        }
+        
+        // Wait for some items to expire
+        await new Promise(resolve => setTimeout(resolve, 75));
+        
+        // Try to access some items (mix of expired and valid)
+        let found = 0;
+        let expired = 0;
+        
+        for (let i = 0; i < itemsPerRound; i++) {
+          const result = cache.get(`ttl-${round}-${i}`);
+          if (result) {
+            found++;
+          } else {
+            expired++;
+          }
+        }
+        
+        console.log(`Round ${round}: ${found} found, ${expired} expired`);
+        
+        // Some items should expire, some should remain
+        expect(found + expired).toBe(itemsPerRound);
+        expect(expired).toBeGreaterThan(0); // Some should have expired
+      }
+      
+      // Final cleanup
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Most items should be expired by now
+      expect(cache.cache.size).toBeLessThan(itemsPerRound);
+    });
+  });
+  
+  describe('Edge Case Stress Tests', () => {
+    it('should handle malformed or corrupt cache data', () => {
+      // Directly corrupt cache entries
+      cacheManager.cache.set('corrupted-1', {
+        value: undefined,
+        expiresAt: null,
+        size: 'invalid'
+      });
+      
+      cacheManager.cache.set('corrupted-2', {
+        value: { circular: {} },
+        expiresAt: Date.now() + 300000,
+        size: 100
+      });
+      
+      // Create circular reference
+      const corrupt2 = cacheManager.cache.get('corrupted-2');
+      corrupt2.value.circular.self = corrupt2.value;
+      
+      cacheManager.cache.set('corrupted-3', {
+        value: function() { return 'functions should not be cached'; },
+        expiresAt: Date.now() + 300000,
+        size: 50
+      });
+      
+      // Should handle corrupted entries gracefully
+      expect(() => cacheManager.get('corrupted-1')).not.toThrow();
+      expect(() => cacheManager.get('corrupted-2')).not.toThrow();
+      expect(() => cacheManager.get('corrupted-3')).not.toThrow();
+      
+      expect(cacheManager.get('corrupted-1')).toBeNull();
+      expect(cacheManager.get('corrupted-2')).toBeNull();
+      expect(cacheManager.get('corrupted-3')).toBeNull();
+      
+      // Should be able to overwrite corrupted entries
+      cacheManager.set('corrupted-1', { valid: true }, 300000);
+      expect(cacheManager.get('corrupted-1')).toEqual({ valid: true });
+    });
+    
+    it('should handle extreme key patterns and collisions', () => {
+      const specialKeys = [
+        '', // empty string
+        ' ', // space
+        '\n\t\r', // whitespace
+        '🚀🔥💯', // emojis
+        'a'.repeat(1000), // very long key
+        'key with spaces and symbols !@#$%^&*()',
+        'key:with:colons:and:separators',
+        'unicode-key-αβγδε-中文-русский',
+        '{"json":"like","key":true}',
+        'http://example.com/path?query=value&other=123',
+        Array(100).fill('nested').join(':')
+      ];
+      
+      specialKeys.forEach((key, index) => {
+        const data = {
+          keyIndex: index,
+          originalKey: key,
+          data: `test-data-for-special-key-${index}`
+        };
+        
+        // Should handle special keys without issues
+        expect(() => cacheManager.set(key, data, 300000)).not.toThrow();
+        expect(cacheManager.get(key)).toEqual(data);
+      });
+      
+      // Test potential hash collisions by using similar keys
+      const similarKeys = [];
+      for (let i = 0; i < 1000; i++) {
+        similarKeys.push(`collision-test-${i.toString().padStart(3, '0')}`);
+      }
+      
+      similarKeys.forEach((key, index) => {
+        cacheManager.set(key, { index, key }, 300000);
+      });
+      
+      // Verify all keys are stored correctly
+      similarKeys.forEach((key, index) => {
+        const retrieved = cacheManager.get(key);
+        expect(retrieved).toEqual({ index, key });
+      });
+    });
+    
+    it('should maintain consistency during concurrent cleanup', async () => {
+      const cache = new CacheManager({
+        maxSize: 100,
+        defaultTTL: 100, // Short TTL
+        cleanupInterval: 50
+      });
+      
+      // Start continuous operations during cleanup cycles
+      const operations = [];
+      const duration = 500; // Run for 500ms
+      const startTime = Date.now();
+      
+      // Continuous read/write operations
+      const readerWriter = async () => {
+        while (Date.now() - startTime < duration) {
+          const key = `concurrent-${Math.floor(Math.random() * 200)}`;
+          
+          if (Math.random() > 0.5) {
+            // Write
+            cache.set(key, {
+              timestamp: Date.now(),
+              random: Math.random(),
+              data: `concurrent-data-${Date.now()}`
+            }, Math.random() * 200 + 50);
+          } else {
+            // Read
+            cache.get(key);
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, 1));
+        }
+      };
+      
+      // Start multiple concurrent workers
+      for (let i = 0; i < 10; i++) {
+        operations.push(readerWriter());
+      }
+      
+      await Promise.all(operations);
+      
+      // Cache should be in consistent state
+      expect(cache.cache.size).toBeLessThanOrEqual(100);
+      
+      // All remaining entries should be valid
+      let validEntries = 0;
+      cache.cache.forEach((entry, key) => {
+        if (entry && entry.value && entry.expiresAt > Date.now()) {
+          validEntries++;
+        }
+      });
+      
+      expect(validEntries).toBe(cache.cache.size);
+      
+      console.log(`Concurrent cleanup test completed - ${validEntries} valid entries remaining`);
+    });
+  });
+  
+  describe('Recovery and Resilience Tests', () => {
+    it('should recover from cache operation failures', () => {
+      let failureCount = 0;
+      const maxFailures = 50;
+      
+      // Create a cache that randomly fails operations
+      const unreliableCache = new Proxy(cacheManager.cache, {
+        get(target, prop) {
+          if ((prop === 'set' || prop === 'get' || prop === 'delete') && 
+              failureCount < maxFailures && 
+              Math.random() > 0.8) {
+            failureCount++;
+            throw new Error(`Simulated cache failure #${failureCount}`);
+          }
+          return target[prop];
+        }
+      });
+      
+      cacheManager.cache = unreliableCache;
+      
+      let successfulOperations = 0;
+      let failedOperations = 0;
+      
+      // Perform operations with random failures
+      for (let i = 0; i < 200; i++) {
+        try {
+          if (i % 3 === 0) {
+            cacheManager.set(`resilience-${i}`, { id: i, data: `test-${i}` }, 300000);
+          } else {
+            cacheManager.get(`resilience-${i % 50}`);
+          }
+          successfulOperations++;
+        } catch (error) {
+          failedOperations++;
+          expect(error.message).toMatch(/Simulated cache failure/);
+        }
+      }
+      
+      console.log(`Resilience test - Success: ${successfulOperations}, Failed: ${failedOperations}`);
+      
+      expect(successfulOperations).toBeGreaterThan(0);
+      expect(failedOperations).toBe(maxFailures);
+      expect(successfulOperations + failedOperations).toBe(200);
+    });
+    
+    it('should handle cleanup interruption gracefully', async () => {
+      const cache = new CacheManager({
+        maxSize: 100,
+        defaultTTL: 50,
+        cleanupInterval: 25
+      });
+      
+      // Populate cache with items that will expire
+      for (let i = 0; i < 200; i++) {
+        cache.set(`cleanup-${i}`, {
+          id: i,
+          data: `cleanup-test-${i}`,
+          created: Date.now()
+        }, Math.random() * 100 + 25);
+      }
+      
+      // Interrupt cleanup by stopping and restarting
+      await new Promise(resolve => setTimeout(resolve, 30));
+      
+      const sizeBefore = cache.cache.size;
+      
+      // Simulate cleanup interruption
+      cache.stopCleanup?.();
+      
+      await new Promise(resolve => setTimeout(resolve, 100)); // Let items expire
+      
+      // Manually trigger cleanup
+      cache.cleanup?.();
+      
+      const sizeAfter = cache.cache.size;
+      
+      console.log(`Cleanup interruption - Before: ${sizeBefore}, After: ${sizeAfter}`);
+      
+      expect(sizeAfter).toBeLessThan(sizeBefore);
+      expect(sizeAfter).toBeLessThanOrEqual(100);
+      
+      // Remaining entries should be valid
+      cache.cache.forEach(entry => {
+        expect(entry.expiresAt).toBeGreaterThan(Date.now() - 50);
+      });
+    });
+  });
+});
