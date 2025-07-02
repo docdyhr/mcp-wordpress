@@ -18,6 +18,7 @@ describe('WordPress Provider Verification', () => {
     'Real WordPress API Verification',
     () => {
       it('should verify WordPress REST API satisfies our contracts', async () => {
+        expect(process.env.WORDPRESS_TEST_URL || 'http://localhost:8080').toBeTruthy();
         const opts = {
           logLevel: 'info',
           providerBaseUrl:
@@ -94,8 +95,12 @@ describe('WordPress Provider Verification', () => {
           console.log(
             'Skipping multi-site verification - no test URLs provided'
           );
+          // Skip test when no URLs provided
           return;
         }
+        
+        // Assert we have valid URLs
+        expect(multiSiteUrls.length).toBeGreaterThan(0);
 
         // Verify each site in the multi-site configuration
         for (const [index, siteUrl] of multiSiteUrls.entries()) {

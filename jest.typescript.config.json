@@ -14,6 +14,14 @@
     "**/contracts/**/*.test.js"
   ],
   "collectCoverage": false,
+  "collectCoverageFrom": [
+    "dist/**/*.js",
+    "!dist/**/*.test.js",
+    "!dist/**/node_modules/**",
+    "!dist/coverage/**"
+  ],
+  "coverageReporters": ["text", "lcov", "html"],
+  "coverageDirectory": "coverage",
   "testTimeout": 10000,
   "verbose": true,
   "maxWorkers": 2,

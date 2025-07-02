@@ -173,7 +173,7 @@ I want to use the NPX version (mcp-wordpress) so I don't need to install anythin
 
 For local development and customization:
 
-```
+```text
 Build and configure the MCP WordPress server project from https://github.com/thomasdyhr/mcp-wordpress locally on my computer. 
 
 Please:
@@ -687,7 +687,7 @@ npm run lint:fix
 
 ## 🏗 Project Structure
 
-```
+```diagram
 mcp-wordpress/
 ├── src/                     # TypeScript source code
 │   ├── index.ts            # Main MCP server
@@ -823,7 +823,7 @@ services:
 
 Test the MCP server against a real WordPress instance using our automated testing setup:
 
-```bash
+```bash copy
 # Automated live contract testing (recommended)
 npm run test:contracts:live
 ```

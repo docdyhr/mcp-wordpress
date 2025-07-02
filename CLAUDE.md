@@ -5,24 +5,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Recent Improvements (v1.2.1)
 
 ### Test Infrastructure Fixes ✅
+
 - **Integration Tests**: Fixed API connectivity validation logic (100% passing)
 - **Multi-Site Testing**: Created dedicated test suite for multi-site configurations
 - **Tool Testing**: Fixed MCP protocol communication issues
 - **Test Coverage**: All critical test suites now passing at 100%
 
 ### Multi-Site Configuration Enhancements ✅
+
 - **Configuration Validation**: Fixed missing required fields for JWT authentication
 - **Site Management**: Proper validation of unique site URLs and IDs
 - **Claude Desktop Documentation**: Comprehensive setup guide for multi-site usage
 - **Quick Testing**: Added `npm run test:multisite` command for rapid validation
 
 ### Repository Organization ✅
+
 - **Security**: Enhanced .gitignore to prevent credential leaks
 - **File Cleanup**: Removed temporary files and organized script directory
 - **Documentation**: Updated all documentation to reflect current status
 - **GitHub Best Practices**: Repository now follows standard GitHub conventions
 
 ### Code Quality Improvements ✅
+
 - **Error Handling**: Improved validation for WordPress REST API responses
 - **Type Safety**: Enhanced configuration schema validation with detailed error messages
 - **Test Reliability**: All tests now provide consistent and reliable results
@@ -31,6 +35,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ### Build System
+
 ```bash
 npm run build              # Compile TypeScript to JavaScript
 npm run build:watch        # Watch mode compilation
@@ -38,6 +43,7 @@ npm run typecheck          # Type checking without output
 ```
 
 ### Testing & Diagnostics (Comprehensive Coverage)
+
 ```bash
 npm test                   # Run main test suite (121+ tests passing)
 npm run test:typescript    # Run TypeScript build tests
@@ -60,6 +66,7 @@ npm run fix:rest-auth      # Fix WordPress REST API POST authentication issues
 ```
 
 ### Documentation Commands (v1.2.0)
+
 ```bash
 npm run docs:generate      # Generate API documentation for all tools
 npm run docs:validate      # Validate documentation completeness and quality
@@ -69,6 +76,7 @@ npm run docs:check         # Quick documentation validation
 ```
 
 ### Docker Commands (v1.2.0)
+
 ```bash
 # Build and run locally
 docker build -t mcp-wordpress .
@@ -82,6 +90,7 @@ docker-compose down                     # Stop all services
 ```
 
 **Test Status Summary (Updated v1.2.1):**
+
 - ✅ **TypeScript Tests**: 82/82 passing (100%)
 - ✅ **Security Tests**: 40/40 passing (100%) - Comprehensive vulnerability testing
 - ✅ **Configuration Tests**: 27/27 passing (100%) - Zod schema validation with multi-site support
@@ -99,6 +108,7 @@ docker-compose down                     # Stop all services
 - ✅ **Repository**: Clean structure following GitHub best practices
 
 ### Development & Debugging
+
 ```bash
 npm run dev                # Development mode with debug output
 npm run setup              # Interactive setup wizard
@@ -119,12 +129,14 @@ npm run fix:rest-auth      # Automated fix for REST API POST authentication
 **Root Cause**: Apache strips Authorization headers by default, particularly affecting write operations.
 
 **Automated Solution**: The `fix:rest-auth` script applies these fixes:
+
 1. Updates `.htaccess` to preserve Authorization headers
 2. Sets WordPress environment to 'local' for development
 3. Fixes file permissions and restarts services
 4. Tests authentication to verify the fix
 
 **Manual Fix** (if needed):
+
 ```apache
 # Add to WordPress .htaccess
 RewriteCond %{HTTP:Authorization} ^(.*)
@@ -137,12 +149,14 @@ define('WP_ENVIRONMENT_TYPE', 'local');
 ```
 
 ### Code Quality
+
 ```bash
 npm run lint               # ESLint check
 npm run lint:fix           # Auto-fix ESLint errors
 ```
 
 ### Authentication & Security Scripts
+
 ```bash
 ./scripts/wp-auth-check.sh      # WordPress authentication verification
 node scripts/test-auth.js       # Comprehensive auth testing
@@ -154,12 +168,14 @@ node scripts/health-check.js    # Full system diagnostics
 ### Core Components
 
 **MCP Server** (`src/index.ts`): Main server class implementing Model Context Protocol.
+
 - **Multi-Site Support**: Can manage multiple WordPress sites through a single configuration file.
 - Handles 59 WordPress management tools across 10 categories.
 - Manages tool registration and request routing for each configured site.
 - Implements graceful error handling with authentication-aware responses.
 
 **WordPress Client** (`src/client/`): Modular HTTP client for WordPress REST API v2.
+
 - **Refactored Architecture** (v1.1.2): Migrated from monolithic 1043-line class to modular manager pattern
 - **Manager Components**:
   - `WordPressClient.ts`: Main orchestrator using composition pattern (~400 lines)
@@ -172,6 +188,7 @@ node scripts/health-check.js    # Full system diagnostics
 - Implements intelligent request management with comprehensive error handling.
 
 **Tool System** (`src/tools/`): Modular, class-based tool implementations.
+
 - **Architecture**: All tools are refactored from functions to classes for better organization and maintainability.
 - **Registration**: An `index.ts` file exports all tool classes for centralized registration.
 - **Multi-Site Support**: All tools accept a `site` parameter to target specific WordPress sites.
@@ -180,19 +197,21 @@ node scripts/health-check.js    # Full system diagnostics
   - Consistent validation and error formatting across all tools
 
 **Tool Categories (59 total tools):**
-  - **Posts** (`posts.ts` - PostTools): Create, read, update, delete blog posts (6 tools)
-  - **Pages** (`pages.ts` - PageTools): Static page management (6 tools)
-  - **Media** (`media.ts` - MediaTools): File upload and media library management (5 tools)
-  - **Users** (`users.ts` - UserTools): User account management (6 tools)
-  - **Comments** (`comments.ts` - CommentTools): Comment moderation and management (7 tools)
-  - **Taxonomies** (`taxonomies.ts` - TaxonomyTools): Categories and tags (10 tools)
-  - **Site** (`site.ts` - SiteTools): Site settings and statistics (6 tools)
-  - **Auth** (`auth.ts` - AuthTools): Authentication testing and management (3 tools)
-  - **Cache** (`cache.ts` - CacheTools): Performance caching and optimization (4 tools)
-  - **Performance** (`performance.ts` - PerformanceTools): Real-time monitoring and analytics (6 tools)
+
+- **Posts** (`posts.ts` - PostTools): Create, read, update, delete blog posts (6 tools)
+- **Pages** (`pages.ts` - PageTools): Static page management (6 tools)
+- **Media** (`media.ts` - MediaTools): File upload and media library management (5 tools)
+- **Users** (`users.ts` - UserTools): User account management (6 tools)
+- **Comments** (`comments.ts` - CommentTools): Comment moderation and management (7 tools)
+- **Taxonomies** (`taxonomies.ts` - TaxonomyTools): Categories and tags (10 tools)
+- **Site** (`site.ts` - SiteTools): Site settings and statistics (6 tools)
+- **Auth** (`auth.ts` - AuthTools): Authentication testing and management (3 tools)
+- **Cache** (`cache.ts` - CacheTools): Performance caching and optimization (4 tools)
+- **Performance** (`performance.ts` - PerformanceTools): Real-time monitoring and analytics (6 tools)
 
 **Tool Class Structure:**
 Each tool class follows a consistent pattern:
+
 ```typescript
 export class ToolCategoryTools {
   constructor(private client: WordPressClient) {}
@@ -210,28 +229,33 @@ export class ToolCategoryTools {
 ### New Architecture Components (v1.2.0)
 
 **Performance Monitoring System** (`src/performance/`): Real-time performance tracking and analytics.
+
 - **PerformanceMonitor** (`PerformanceMonitor.ts`): Core monitoring engine with metrics collection, historical data storage, and alert generation
 - **MetricsCollector** (`MetricsCollector.ts`): Central hub for collecting metrics from clients and cache managers with real-time aggregation
 - **PerformanceAnalytics** (`PerformanceAnalytics.ts`): Advanced analytics with trend analysis, anomaly detection, linear regression, and predictive insights
 - **6 Performance Tools**: Complete performance management toolkit for monitoring, benchmarking, and optimization
 
 **Documentation Generation System** (`src/docs/`): Auto-generated API documentation.
+
 - **DocumentationGenerator** (`DocumentationGenerator.ts`): Automatic extraction of tool documentation from TypeScript classes and type definitions
 - **MarkdownFormatter** (`MarkdownFormatter.ts`): Multi-format documentation output (Markdown, JSON, OpenAPI specification)
 - **CI/CD Integration**: GitHub Actions workflow for automatic documentation updates on code changes
 - **Quality Validation**: Comprehensive structure checks, cross-reference validation, and completeness verification
 
 **Docker Containerization**: Production-ready container deployment.
+
 - **Multi-Stage Dockerfile**: Optimized build process with security best practices and minimal attack surface
 - **Docker Compose**: Complete development environment with optional WordPress and database services
 - **Environment Configuration**: Flexible configuration via environment variables and volume mounts
 - **Health Checks**: Built-in container health monitoring and status reporting
 
 **Enhanced Cache System** (`src/cache/`): Intelligent multi-layer caching with performance monitoring integration.
+
 - **Cache Metrics Integration**: Performance monitoring system tracks cache hit rates, memory usage, and efficiency
 - **Site-Specific Isolation**: Complete cache separation for multi-site WordPress installations
 - **Real-Time Monitoring**: Cache performance metrics integrated into the broader performance monitoring system
-```
+
+```text
 
 ### Type System (`src/types/`)
 
@@ -302,12 +326,14 @@ To manage multiple WordPress sites, create a `mcp-wordpress.config.json` file in
 ```
 
 **Security Notes:**
+
 - This file contains sensitive credentials and should **NEVER** be committed to version control
 - The file is automatically excluded by `.gitignore`
 - Use the provided `mcp-wordpress.config.json.example` as a template
 - Each site can use different authentication methods within the same configuration
 
 **⚠️ CRITICAL: Password Format & Secret Management**
+
 - **Password Format**: Do NOT use quotes around passwords in `.env` or JSON files
   - ✅ Correct: `WORDPRESS_APP_PASSWORD=xxxx xxxx xxxx xxxx xxxx xxxx`
   - ❌ Wrong: `WORDPRESS_APP_PASSWORD='xxxx xxxx xxxx xxxx xxxx xxxx'`
@@ -331,18 +357,19 @@ If the `site` parameter is omitted and more than one site is configured, the too
 
 If `mcp-wordpress.config.json` is not found, the server will use the following environment variables (loaded from `.env` or passed via MCP config):
 
--   `WORDPRESS_SITE_URL` - WordPress site URL (required)
--   `WORDPRESS_USERNAME` - WordPress username (required)
--   `WORDPRESS_APP_PASSWORD` - Application password (recommended)
--   `WORDPRESS_AUTH_METHOD` - Authentication method (optional, defaults to `app-password`)
+- `WORDPRESS_SITE_URL` - WordPress site URL (required)
+- `WORDPRESS_USERNAME` - WordPress username (required)
+- `WORDPRESS_APP_PASSWORD` - Application password (recommended)
+- `WORDPRESS_AUTH_METHOD` - Authentication method (optional, defaults to `app-password`)
 
 ### Authentication System
 
 Supports 4 authentication methods with comprehensive testing:
-1.  **Application Passwords** (recommended) - WordPress 5.6+ built-in
-2.  **JWT Authentication** - requires plugin
-3.  **Basic Authentication** - development only
-4.  **API Key Authentication** - requires plugin
+
+1. **Application Passwords** (recommended) - WordPress 5.6+ built-in
+2. **JWT Authentication** - requires plugin
+3. **Basic Authentication** - development only
+4. **API Key Authentication** - requires plugin
 
 ### Testing Architecture
 
@@ -356,23 +383,27 @@ Supports 4 authentication methods with comprehensive testing:
 ### Development Guidelines
 
 #### Code Quality
+
 - **TypeScript**: Adhere to strict mode and maintain comprehensive type safety.
 - **ESLint**: Follow established linting rules for consistent code style.
 - **Class-Based Architecture**: All new tools must be implemented as classes following the established pattern.
 
 #### Tool Development
+
 - **Multi-Site Support**: All tools must accept and handle the `site` parameter.
 - **Error Handling**: Implement comprehensive error handling with user-friendly messages.
 - **Parameter Validation**: Validate all input parameters before API calls.
 - **Response Formatting**: Return consistent, well-structured responses.
 
 #### Testing Requirements
+
 - **Unit Tests**: Add tests for all new tool methods and classes.
 - **Integration Tests**: Test multi-site functionality with real WordPress connections.
 - **Authentication Tests**: Verify all authentication methods work correctly.
 - **Coverage**: Maintain minimum 50% code coverage threshold.
 
 #### Documentation Standards
+
 - **CLAUDE.md**: Update this file for architecture changes, new tools, or configuration updates.
 - **Migration Guides**: Create migration documentation for breaking changes.
 - **Tool Documentation**: Document new tools with usage examples and parameter descriptions.
@@ -382,24 +413,28 @@ Supports 4 authentication methods with comprehensive testing:
 #### Repository Maintenance Guidelines
 
 **Keep Repository Clean and Concise**
+
 - **Markdown Files**: Limit root-level markdown files to essential documents only (README.md, CHANGELOG.md, CLAUDE.md, TODO.md)
 - **Documentation Organization**: Use `docs/` folder for detailed documentation, organized by category
 - **Archive Management**: Remove outdated files rather than keeping archive folders - use git history for reference
 - **TODO Management**: Keep TODO.md concise and actionable - remove completed items and consolidate verbose descriptions
 
 **File Organization Best Practices**
+
 - **Single Responsibility**: Each markdown file should serve a clear, specific purpose
 - **No Duplication**: Remove duplicate content across files - maintain single source of truth
 - **Consistent Structure**: Follow established patterns for file organization and naming
 - **Regular Cleanup**: Periodically review and remove obsolete documentation
 
 **Quality Standards**
+
 - **Concise Communication**: Write clear, actionable content without unnecessary verbosity
 - **Current Information**: Ensure all documentation reflects the current state of the project
 - **User Focus**: Prioritize documentation that helps users and contributors
 - **Professional Presentation**: Maintain clean, professional appearance following GitHub best practices
 
 **Maintenance Schedule**
+
 - **Monthly**: Review and clean up documentation files
 - **Per Release**: Update version-specific documentation and remove outdated content
 - **Continuous**: Remove completed TODO items and archive obsolete files

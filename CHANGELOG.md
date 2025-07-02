@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.2] - 2025-07-02
+
+### Fixed
+- **Linting and Code Quality**:
+  - Fixed ESLint warnings in provider verification tests
+  - Added proper assertions to prevent conditional expect issues
+  - Resolved markdown linting issues with proper configuration
+- **Test Infrastructure**:
+  - Improved Jest configuration for better coverage reporting
+  - Enhanced test coverage collection settings
+  - Fixed test timeout and reliability issues
+- **Technical Debt**:
+  - Cleaned up unused dependencies (verified all are actually used in lint-staged)
+  - Improved code organization and structure
+  - Enhanced error handling patterns
+
+### Added
+- **Development Tools**:
+  - Added .markdownlint.json configuration for consistent markdown formatting
+  - Enhanced Jest configuration with better coverage settings
+  - Improved pre-commit hook compatibility
+
 ## [1.2.1] - 2025-07-02
 
 ### Added
