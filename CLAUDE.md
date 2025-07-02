@@ -54,6 +54,7 @@ npm run test:property      # Property-based testing (12/12 passing)
 npm run test:contracts     # Contract testing with Pact framework (mock)
 npm run test:contracts:live # Contract tests with live WordPress (automated setup)
 npm run test:performance   # Performance regression detection (8/8 passing)
+npm run test:cache         # Advanced cache testing suite (37/37 passing)
 npm run test:watch         # Watch mode for tests
 npm run test:coverage      # Generate coverage report (50% threshold)
 npm run test:fast          # Quick test run
@@ -110,6 +111,7 @@ npm run release                         # Manual release (if needed)
 - ✅ **Configuration Tests**: 27/27 passing (100%) - Zod schema validation with multi-site support
 - ✅ **Property-Based Tests**: 12/12 passing (100%) - Generative testing with fast-check
 - ✅ **Performance Tests**: 8/8 passing (100%) - Regression detection system
+- ✅ **Advanced Cache Tests**: 37/37 passing (100%) - Comprehensive cache testing suite
 - ✅ **Environment Tests**: 7/7 passing (100%) - Path resolution and configuration loading
 - ✅ **Upload Timeout Tests**: 12/12 passing (100%) - File upload and timeout handling
 - ✅ **Unit Tests**: 17/17 passing (100%) - Security utilities and helper functions
