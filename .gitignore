@@ -187,7 +187,8 @@ scripts/test-outputs/
 
 # Phase 2 Testing Infrastructure - Results and Generated Data
 tests/results/
-tests/baseline/
+tests/baseline/*
+!tests/baseline/performance-baseline.json
 tests/logs/
 tests/pacts/
 tests/reports/
