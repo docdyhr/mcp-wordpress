@@ -22,7 +22,8 @@
 - [x] Implement DXT packaging and build pipeline  
 - [x] Add DXT-specific documentation and user guides
 - [x] Set up automated DXT testing and validation
-- [ ] Create DXT release and distribution pipeline
+- [x] Create DXT release and distribution pipeline
+- [x] Fix VS Code Testing panel integration for Jest tests
 
 #### Advanced Features
 

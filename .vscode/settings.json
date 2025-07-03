@@ -1,0 +1,14 @@
+{
+  "jest.jestCommandLine": "npm run test:typescript",
+  "jest.rootPath": "./",
+  "jest.configPath": "jest.config.cjs",
+  "jest.nodeEnv": {
+    "NODE_OPTIONS": "--experimental-vm-modules"
+  },
+  "jest.runMode": "on-demand",
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  "testing.automaticallyOpenPeekView": "never",
+  "testing.defaultGutterClickAction": "run",
+  "testing.gutterEnabled": true,
+  "testing.openTesting": "neverOpen"
+}
