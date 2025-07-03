@@ -112,7 +112,7 @@ Thumbs.db
 # WordPress specific
 wp-config.php
 uploads/
-cache/
+# cache/ - Comment out to allow src/cache directory with code
 
 # Test files (keep test configurations but exclude temporary test data)
 .env.test
