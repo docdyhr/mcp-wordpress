@@ -4,9 +4,7 @@
  */
 
 import { WordPressClient } from './api.js';
-import { CacheManager } from '../cache/CacheManager.js';
-import { HttpCacheWrapper } from '../cache/HttpCacheWrapper.js';
-import { CacheInvalidation } from '../cache/CacheInvalidation.js';
+import { CacheManager, HttpCacheWrapper, CacheInvalidation } from '../cache/index.js';
 import { SecurityConfig } from '../security/SecurityConfig.js';
 import type {
   WordPressClientConfig,
