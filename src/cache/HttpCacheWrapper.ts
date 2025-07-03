@@ -3,8 +3,8 @@
  * Implements WordPress REST API caching best practices
  */
 
-import { CacheManager, CachePresets } from './CacheManager.js';
-import * as crypto from 'crypto';
+import { CacheManager, CachePresets } from "./CacheManager.js";
+import * as crypto from "crypto";
 
 export interface HttpCacheOptions {
   ttl?: number;
@@ -37,19 +37,28 @@ export interface RequestOptions {
 export class HttpCacheWrapper {
   constructor(
     private cacheManager: CacheManager,
-    private siteId: string
+    private siteId: string,
   ) {}
 
   /**
    * Execute request with intelligent caching
    */
   async request<T = any>(
-    requestFn: () => Promise<{ data: T; status: number; headers: Record<string, string> }>,
+    requestFn: () => Promise<{
+      data: T;
+      status: number;
+      headers: Record<string, string>;
+    }>,
     options: RequestOptions,
-    cacheOptions?: HttpCacheOptions
-  ): Promise<{ data: T; status: number; headers: Record<string, string>; cached?: boolean }> {
+    cacheOptions?: HttpCacheOptions,
+  ): Promise<{
+    data: T;
+    status: number;
+    headers: Record<string, string>;
+    cached?: boolean;
+  }> {
     // Only cache GET requests
-    if (options.method.toUpperCase() !== 'GET') {
+    if (options.method.toUpperCase() !== "GET") {
       return await requestFn();
     }
 
@@ -58,36 +67,42 @@ export class HttpCacheWrapper {
 
     // Check for conditional request support
     if (cachedEntry && this.cacheManager.supportsConditionalRequest(cacheKey)) {
-      const conditionalHeaders = this.cacheManager.getConditionalHeaders(cacheKey);
-      
+      const conditionalHeaders =
+        this.cacheManager.getConditionalHeaders(cacheKey);
+
       // Add conditional headers to request
       const requestWithHeaders = {
         ...options,
         headers: {
           ...options.headers,
-          ...conditionalHeaders
-        }
+          ...conditionalHeaders,
+        },
       };
 
       try {
-        const response = await this.executeRequestWithHeaders(requestFn, requestWithHeaders);
-        
+        const response = await this.executeRequestWithHeaders(
+          requestFn,
+          requestWithHeaders,
+        );
+
         // 304 Not Modified - return cached data
         if (response.status === 304) {
           return {
             data: cachedEntry.value.data,
             status: 200,
             headers: cachedEntry.value.headers,
-            cached: true
+            cached: true,
           };
         }
 
         // Content changed - update cache
         return await this.cacheAndReturn(response, cacheKey, cacheOptions);
-        
       } catch (error) {
         // If conditional request fails, try without conditions
-        console.warn('Conditional request failed, falling back to regular request:', error);
+        console.warn(
+          "Conditional request failed, falling back to regular request:",
+          error,
+        );
       }
     }
 
@@ -98,7 +113,7 @@ export class HttpCacheWrapper {
         data: cached.data,
         status: cached.status,
         headers: cached.headers,
-        cached: true
+        cached: true,
       };
     }
 
@@ -111,7 +126,11 @@ export class HttpCacheWrapper {
    * Invalidate cache for specific endpoint
    */
   invalidate(endpoint: string, params?: any): void {
-    const cacheKey = this.cacheManager.generateKey(this.siteId, endpoint, params);
+    const cacheKey = this.cacheManager.generateKey(
+      this.siteId,
+      endpoint,
+      params,
+    );
     this.cacheManager.delete(cacheKey);
   }
 
@@ -133,17 +152,27 @@ export class HttpCacheWrapper {
   /**
    * Pre-warm cache with data
    */
-  warm<T>(endpoint: string, data: T, params?: any, cacheOptions?: HttpCacheOptions): void {
-    const cacheKey = this.cacheManager.generateKey(this.siteId, endpoint, params);
+  warm<T>(
+    endpoint: string,
+    data: T,
+    params?: any,
+    cacheOptions?: HttpCacheOptions,
+  ): void {
+    const cacheKey = this.cacheManager.generateKey(
+      this.siteId,
+      endpoint,
+      params,
+    );
     const ttl = cacheOptions?.ttl || this.getDefaultTTL(endpoint);
-    
+
     const cachedResponse: CachedResponse = {
       data,
       status: 200,
       headers: this.generateCacheHeaders(cacheOptions, endpoint),
       etag: this.generateETag(data),
       lastModified: new Date().toUTCString(),
-      cacheControl: cacheOptions?.cacheControl || this.getDefaultCacheControl(endpoint)
+      cacheControl:
+        cacheOptions?.cacheControl || this.getDefaultCacheControl(endpoint),
     };
 
     this.cacheManager.set(
@@ -151,7 +180,7 @@ export class HttpCacheWrapper {
       cachedResponse,
       ttl,
       cachedResponse.etag,
-      cachedResponse.lastModified
+      cachedResponse.lastModified,
     );
   }
 
@@ -170,7 +199,7 @@ export class HttpCacheWrapper {
     return this.cacheManager.generateKey(this.siteId, endpoint, {
       ...options.params,
       // Include relevant headers that affect response
-      ...this.extractCacheableHeaders(options.headers)
+      ...this.extractCacheableHeaders(options.headers),
     });
   }
 
@@ -186,11 +215,13 @@ export class HttpCacheWrapper {
   /**
    * Extract headers that affect caching
    */
-  private extractCacheableHeaders(headers?: Record<string, string>): Record<string, string> {
+  private extractCacheableHeaders(
+    headers?: Record<string, string>,
+  ): Record<string, string> {
     if (!headers) return {};
 
     const cacheableHeaders: Record<string, string> = {};
-    const relevantHeaders = ['accept', 'accept-language', 'authorization'];
+    const relevantHeaders = ["accept", "accept-language", "authorization"];
 
     for (const header of relevantHeaders) {
       if (headers[header]) {
@@ -205,8 +236,12 @@ export class HttpCacheWrapper {
    * Execute request with modified headers
    */
   private async executeRequestWithHeaders(
-    requestFn: () => Promise<{ data: any; status: number; headers: Record<string, string> }>,
-    options: RequestOptions
+    requestFn: () => Promise<{
+      data: any;
+      status: number;
+      headers: Record<string, string>;
+    }>,
+    options: RequestOptions,
   ) {
     // This is a simplified approach - in practice, you'd need to modify the actual request
     // The actual implementation would depend on your HTTP client (axios, fetch, etc.)
@@ -219,9 +254,13 @@ export class HttpCacheWrapper {
   private async cacheAndReturn<T>(
     response: { data: T; status: number; headers: Record<string, string> },
     cacheKey: string,
-    cacheOptions?: HttpCacheOptions
-  ): Promise<{ data: T; status: number; headers: Record<string, string>; cached?: boolean }> {
-    
+    cacheOptions?: HttpCacheOptions,
+  ): Promise<{
+    data: T;
+    status: number;
+    headers: Record<string, string>;
+    cached?: boolean;
+  }> {
     // Don't cache error responses (unless specifically configured)
     if (response.status >= 400) {
       return response;
@@ -229,40 +268,35 @@ export class HttpCacheWrapper {
 
     const endpoint = this.extractEndpointFromKey(cacheKey);
     const ttl = cacheOptions?.ttl || this.getDefaultTTL(endpoint);
-    
+
     // Generate ETags and cache headers
     const etag = this.generateETag(response.data);
     const lastModified = new Date().toUTCString();
-    const cacheControl = cacheOptions?.cacheControl || this.getDefaultCacheControl(endpoint);
+    const cacheControl =
+      cacheOptions?.cacheControl || this.getDefaultCacheControl(endpoint);
 
     const cachedResponse: CachedResponse = {
       data: response.data,
       status: response.status,
       headers: {
         ...response.headers,
-        'etag': etag,
-        'last-modified': lastModified,
-        'cache-control': cacheControl
+        etag: etag,
+        "last-modified": lastModified,
+        "cache-control": cacheControl,
       },
       etag,
       lastModified,
-      cacheControl
+      cacheControl,
     };
 
     // Store in cache
-    this.cacheManager.set(
-      cacheKey,
-      cachedResponse,
-      ttl,
-      etag,
-      lastModified
-    );
+    this.cacheManager.set(cacheKey, cachedResponse, ttl, etag, lastModified);
 
     return {
       data: response.data,
       status: response.status,
       headers: cachedResponse.headers,
-      cached: false
+      cached: false,
     };
   }
 
@@ -271,9 +305,9 @@ export class HttpCacheWrapper {
    */
   private generateETag(data: any): string {
     const hash = crypto
-      .createHash('md5')
+      .createHash("md5")
       .update(JSON.stringify(data))
-      .digest('hex');
+      .digest("hex");
     return `"${hash}"`;
   }
 
@@ -285,17 +319,17 @@ export class HttpCacheWrapper {
     if (this.isStaticEndpoint(endpoint)) {
       return CachePresets.STATIC.ttl;
     }
-    
+
     // Semi-static data endpoints
     if (this.isSemiStaticEndpoint(endpoint)) {
       return CachePresets.SEMI_STATIC.ttl;
     }
-    
+
     // Session/auth endpoints
     if (this.isSessionEndpoint(endpoint)) {
       return CachePresets.SESSION.ttl;
     }
-    
+
     // Default to dynamic for posts, comments, etc.
     return CachePresets.DYNAMIC.ttl;
   }
@@ -307,32 +341,35 @@ export class HttpCacheWrapper {
     if (this.isStaticEndpoint(endpoint)) {
       return CachePresets.STATIC.cacheControl;
     }
-    
+
     if (this.isSemiStaticEndpoint(endpoint)) {
       return CachePresets.SEMI_STATIC.cacheControl;
     }
-    
+
     if (this.isSessionEndpoint(endpoint)) {
       return CachePresets.SESSION.cacheControl;
     }
-    
+
     return CachePresets.DYNAMIC.cacheControl;
   }
 
   /**
    * Generate cache headers
    */
-  private generateCacheHeaders(options?: HttpCacheOptions, endpoint?: string): Record<string, string> {
+  private generateCacheHeaders(
+    options?: HttpCacheOptions,
+    endpoint?: string,
+  ): Record<string, string> {
     const headers: Record<string, string> = {};
-    
+
     if (options?.cacheControl) {
-      headers['cache-control'] = options.cacheControl;
+      headers["cache-control"] = options.cacheControl;
     } else if (endpoint) {
-      headers['cache-control'] = this.getDefaultCacheControl(endpoint);
+      headers["cache-control"] = this.getDefaultCacheControl(endpoint);
     }
-    
+
     if (options?.varyHeaders?.length) {
-      headers['vary'] = options.varyHeaders.join(', ');
+      headers["vary"] = options.varyHeaders.join(", ");
     }
 
     return headers;
@@ -342,31 +379,31 @@ export class HttpCacheWrapper {
    * Check if endpoint contains static data
    */
   private isStaticEndpoint(endpoint: string): boolean {
-    const staticEndpoints = ['settings', 'types', 'statuses'];
-    return staticEndpoints.some(pattern => endpoint.includes(pattern));
+    const staticEndpoints = ["settings", "types", "statuses"];
+    return staticEndpoints.some((pattern) => endpoint.includes(pattern));
   }
 
   /**
-   * Check if endpoint contains semi-static data  
+   * Check if endpoint contains semi-static data
    */
   private isSemiStaticEndpoint(endpoint: string): boolean {
-    const semiStaticEndpoints = ['categories', 'tags', 'users', 'taxonomies'];
-    return semiStaticEndpoints.some(pattern => endpoint.includes(pattern));
+    const semiStaticEndpoints = ["categories", "tags", "users", "taxonomies"];
+    return semiStaticEndpoints.some((pattern) => endpoint.includes(pattern));
   }
 
   /**
    * Check if endpoint is session-related
    */
   private isSessionEndpoint(endpoint: string): boolean {
-    const sessionEndpoints = ['users/me', 'application-passwords'];
-    return sessionEndpoints.some(pattern => endpoint.includes(pattern));
+    const sessionEndpoints = ["users/me", "application-passwords"];
+    return sessionEndpoints.some((pattern) => endpoint.includes(pattern));
   }
 
   /**
    * Extract endpoint from cache key
    */
   private extractEndpointFromKey(cacheKey: string): string {
-    const parts = cacheKey.split(':');
-    return parts[1] || '';
+    const parts = cacheKey.split(":");
+    return parts[1] || "";
   }
 }

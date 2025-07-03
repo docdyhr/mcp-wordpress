@@ -3,23 +3,22 @@
  * Converts documentation objects to well-formatted markdown files
  */
 
-import type { 
-  ToolDocumentation, 
-  CategoryDocumentation, 
-  TypeDocumentation, 
+import type {
+  ToolDocumentation,
+  CategoryDocumentation,
+  TypeDocumentation,
   DocumentationOutput,
   ExampleUsage,
-  ParameterDocumentation 
-} from './DocumentationGenerator.js';
+  ParameterDocumentation,
+} from "./DocumentationGenerator.js";
 
 export class MarkdownFormatter {
-  
   /**
    * Generate main API overview documentation
    */
   generateApiOverview(output: DocumentationOutput): string {
     const { tools, categories, summary } = output;
-    
+
     return `# WordPress MCP Server - API Documentation
 
 ${this.generateBadges()}
@@ -165,9 +164,9 @@ ${this.generateParametersTable(tool.parameters)}
 
 ${this.generateExamples(tool.examples)}
 
-${tool.wordpressEndpoint ? this.generateWordPressMapping(tool.wordpressEndpoint) : ''}
+${tool.wordpressEndpoint ? this.generateWordPressMapping(tool.wordpressEndpoint) : ""}
 
-${tool.requiredPermissions ? this.generatePermissions(tool.requiredPermissions) : ''}
+${tool.requiredPermissions ? this.generatePermissions(tool.requiredPermissions) : ""}
 
 ## Response Format
 
@@ -179,7 +178,7 @@ ${this.generateResponseExample(tool)}
 
 ${this.generateErrorDocumentation(tool.errorCodes)}
 
-${tool.relatedTools.length > 0 ? this.generateRelatedTools(tool.relatedTools) : ''}
+${tool.relatedTools.length > 0 ? this.generateRelatedTools(tool.relatedTools) : ""}
 
 ---
 
@@ -199,11 +198,11 @@ ${category.description}
 
 ## Available Tools
 
-${category.tools.map(tool => `- [\`${tool}\`](./tools/${tool}.md)`).join('\n')}
+${category.tools.map((tool) => `- [\`${tool}\`](./tools/${tool}.md)`).join("\n")}
 
 ## Common Usage Patterns
 
-${category.usagePatterns.map(pattern => `- ${pattern}`).join('\n')}
+${category.usagePatterns.map((pattern) => `- ${pattern}`).join("\n")}
 
 ## Examples
 
@@ -238,7 +237,7 @@ wp_list_${category.name.toLowerCase()} --site=staging --limit=50
 
 ${type.description}
 
-${type.wordpressSource ? `**WordPress Source:** \`${type.wordpressSource}\`` : ''}
+${type.wordpressSource ? `**WordPress Source:** \`${type.wordpressSource}\`` : ""}
 
 ## Properties
 
@@ -250,30 +249,38 @@ ${this.generateTypePropertiesTable(type.properties)}
 ${JSON.stringify(type.examples[0] || {}, null, 2)}
 \`\`\`
 
-${type.examples.length > 1 ? this.generateAdditionalExamples(type.examples.slice(1)) : ''}
+${type.examples.length > 1 ? this.generateAdditionalExamples(type.examples.slice(1)) : ""}
 `;
   }
 
   /**
    * Generate parameters table
    */
-  private generateParametersTable(parameters: ParameterDocumentation[]): string {
+  private generateParametersTable(
+    parameters: ParameterDocumentation[],
+  ): string {
     if (parameters.length === 0) {
-      return '*No parameters required.*';
+      return "*No parameters required.*";
     }
 
-    const headers = '| Parameter | Type | Required | Description | Default | Examples |';
-    const separator = '|-----------|------|----------|-------------|---------|----------|';
-    
-    const rows = parameters.map(param => {
-      const examples = param.examples.slice(0, 2).map(ex => `\`${ex}\``).join(', ');
-      const defaultVal = param.defaultValue !== undefined ? `\`${param.defaultValue}\`` : '-';
-      const required = param.required ? '✅' : '❌';
-      
-      return `| \`${param.name}\` | \`${param.type}\` | ${required} | ${param.description} | ${defaultVal} | ${examples || '-'} |`;
+    const headers =
+      "| Parameter | Type | Required | Description | Default | Examples |";
+    const separator =
+      "|-----------|------|----------|-------------|---------|----------|";
+
+    const rows = parameters.map((param) => {
+      const examples = param.examples
+        .slice(0, 2)
+        .map((ex) => `\`${ex}\``)
+        .join(", ");
+      const defaultVal =
+        param.defaultValue !== undefined ? `\`${param.defaultValue}\`` : "-";
+      const required = param.required ? "✅" : "❌";
+
+      return `| \`${param.name}\` | \`${param.type}\` | ${required} | ${param.description} | ${defaultVal} | ${examples || "-"} |`;
     });
 
-    return [headers, separator, ...rows].join('\n');
+    return [headers, separator, ...rows].join("\n");
   }
 
   /**
@@ -281,10 +288,12 @@ ${type.examples.length > 1 ? this.generateAdditionalExamples(type.examples.slice
    */
   private generateExamples(examples: ExampleUsage[]): string {
     if (examples.length === 0) {
-      return '*No examples available.*';
+      return "*No examples available.*";
     }
 
-    return examples.map(example => `### ${example.title}
+    return examples
+      .map(
+        (example) => `### ${example.title}
 
 ${example.description}
 
@@ -298,14 +307,19 @@ ${example.command} ${this.formatParameters(example.parameters)}
 ${JSON.stringify(example.expectedResponse, null, 2)}
 \`\`\`
 
-${example.errorExample ? this.generateErrorExample(example.errorExample) : ''}
-`).join('\n\n');
+${example.errorExample ? this.generateErrorExample(example.errorExample) : ""}
+`,
+      )
+      .join("\n\n");
   }
 
   /**
    * Generate error example
    */
-  private generateErrorExample(errorExample: { scenario: string; error: any }): string {
+  private generateErrorExample(errorExample: {
+    scenario: string;
+    error: any;
+  }): string {
     return `**Error Example (${errorExample.scenario}):**
 \`\`\`json
 ${JSON.stringify(errorExample.error, null, 2)}
@@ -336,7 +350,7 @@ This tool directly interfaces with the WordPress REST API endpoint above. The re
 
 This tool requires the following WordPress user capabilities:
 
-${permissions.map(perm => `- \`${perm}\``).join('\n')}
+${permissions.map((perm) => `- \`${perm}\``).join("\n")}
 
 **Note:** The authenticated user must have these capabilities to successfully execute this tool.
 `;
@@ -376,12 +390,16 @@ ${permissions.map(perm => `- \`${perm}\``).join('\n')}
 See [Error Handling Guide](../error-handling.md) for complete error reference.`;
     }
 
-    return errorCodes.map(error => `### ${error.code}
+    return errorCodes
+      .map(
+        (error) => `### ${error.code}
 
 **Message:** ${error.message}  
 **Description:** ${error.description}  
 **Resolution:** ${error.resolution}
-`).join('\n\n');
+`,
+      )
+      .join("\n\n");
   }
 
   /**
@@ -390,7 +408,7 @@ See [Error Handling Guide](../error-handling.md) for complete error reference.`;
   private generateRelatedTools(relatedTools: string[]): string {
     return `## Related Tools
 
-${relatedTools.map(tool => `- [\`${tool}\`](./${tool}.md)`).join('\n')}
+${relatedTools.map((tool) => `- [\`${tool}\`](./${tool}.md)`).join("\n")}
 `;
   }
 
@@ -398,43 +416,45 @@ ${relatedTools.map(tool => `- [\`${tool}\`](./${tool}.md)`).join('\n')}
    * Generate categories table
    */
   private generateCategoriesTable(categories: CategoryDocumentation[]): string {
-    const headers = '| Category | Tools | Description |';
-    const separator = '|----------|-------|-------------|';
-    
-    const rows = categories.map(cat => 
-      `| [${cat.name}](./categories/${cat.name.toLowerCase()}.md) | ${cat.toolCount} | ${cat.description} |`
+    const headers = "| Category | Tools | Description |";
+    const separator = "|----------|-------|-------------|";
+
+    const rows = categories.map(
+      (cat) =>
+        `| [${cat.name}](./categories/${cat.name.toLowerCase()}.md) | ${cat.toolCount} | ${cat.description} |`,
     );
 
-    return [headers, separator, ...rows].join('\n');
+    return [headers, separator, ...rows].join("\n");
   }
 
   /**
    * Generate tools table
    */
   private generateToolsTable(tools: ToolDocumentation[]): string {
-    const headers = '| Tool | Category | Description |';
-    const separator = '|------|----------|-------------|';
-    
-    const rows = tools.map(tool => 
-      `| [\`${tool.name}\`](./tools/${tool.name}.md) | ${tool.category} | ${tool.description} |`
+    const headers = "| Tool | Category | Description |";
+    const separator = "|------|----------|-------------|";
+
+    const rows = tools.map(
+      (tool) =>
+        `| [\`${tool.name}\`](./tools/${tool.name}.md) | ${tool.category} | ${tool.description} |`,
     );
 
-    return [headers, separator, ...rows].join('\n');
+    return [headers, separator, ...rows].join("\n");
   }
 
   /**
    * Generate type properties table
    */
   private generateTypePropertiesTable(properties: any[]): string {
-    const headers = '| Property | Type | Required | Description |';
-    const separator = '|----------|------|----------|-------------|';
-    
-    const rows = properties.map(prop => {
-      const required = prop.required ? '✅' : '❌';
+    const headers = "| Property | Type | Required | Description |";
+    const separator = "|----------|------|----------|-------------|";
+
+    const rows = properties.map((prop) => {
+      const required = prop.required ? "✅" : "❌";
       return `| \`${prop.name}\` | \`${prop.type}\` | ${required} | ${prop.description} |`;
     });
 
-    return [headers, separator, ...rows].join('\n');
+    return [headers, separator, ...rows].join("\n");
   }
 
   /**
@@ -454,19 +474,20 @@ ${relatedTools.map(tool => `- [\`${tool}\`](./${tool}.md)`).join('\n')}
    */
   private generateToolBadge(category: string): string {
     const colors = {
-      posts: 'blue',
-      pages: 'green', 
-      media: 'purple',
-      users: 'orange',
-      comments: 'red',
-      taxonomies: 'yellow',
-      site: 'lightblue',
-      auth: 'darkblue',
-      cache: 'grey',
-      performance: 'brightgreen'
+      posts: "blue",
+      pages: "green",
+      media: "purple",
+      users: "orange",
+      comments: "red",
+      taxonomies: "yellow",
+      site: "lightblue",
+      auth: "darkblue",
+      cache: "grey",
+      performance: "brightgreen",
     };
-    
-    const color = colors[category.toLowerCase() as keyof typeof colors] || 'lightgrey';
+
+    const color =
+      colors[category.toLowerCase() as keyof typeof colors] || "lightgrey";
     return `![${category}](https://img.shields.io/badge/category-${category}-${color})`;
   }
 
@@ -476,7 +497,7 @@ ${relatedTools.map(tool => `- [\`${tool}\`](./${tool}.md)`).join('\n')}
   private formatParameters(params: Record<string, any>): string {
     return Object.entries(params)
       .map(([key, value]) => `--${key}="${value}"`)
-      .join(' ');
+      .join(" ");
   }
 
   /**
@@ -485,10 +506,14 @@ ${relatedTools.map(tool => `- [\`${tool}\`](./${tool}.md)`).join('\n')}
   private generateAdditionalExamples(examples: any[]): string {
     return `## Additional Examples
 
-${examples.map((example, index) => `### Example ${index + 2}
+${examples
+  .map(
+    (example, index) => `### Example ${index + 2}
 \`\`\`json
 ${JSON.stringify(example, null, 2)}
 \`\`\`
-`).join('\n')}`;
+`,
+  )
+  .join("\n")}`;
   }
 }

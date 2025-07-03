@@ -3,8 +3,8 @@
  * Exports all documentation generation components
  */
 
-export { DocumentationGenerator } from './DocumentationGenerator.js';
-export { MarkdownFormatter } from './MarkdownFormatter.js';
+export { DocumentationGenerator } from "./DocumentationGenerator.js";
+export { MarkdownFormatter } from "./MarkdownFormatter.js";
 
 export type {
   DocumentationConfig,
@@ -17,5 +17,5 @@ export type {
   TypeDocumentation,
   PropertyDocumentation,
   OpenAPISpecification,
-  DocumentationSummary
-} from './DocumentationGenerator.js';
+  DocumentationSummary,
+} from "./DocumentationGenerator.js";

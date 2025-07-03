@@ -3,7 +3,7 @@
  * Implements event-based and pattern-based invalidation
  */
 
-import { HttpCacheWrapper } from './HttpCacheWrapper.js';
+import { HttpCacheWrapper } from "./HttpCacheWrapper.js";
 
 export interface InvalidationRule {
   trigger: string;
@@ -13,7 +13,7 @@ export interface InvalidationRule {
 }
 
 export interface InvalidationEvent {
-  type: 'create' | 'update' | 'delete';
+  type: "create" | "update" | "delete";
   resource: string;
   id?: number | undefined;
   siteId: string;
@@ -48,7 +48,7 @@ export class CacheInvalidation {
    */
   async trigger(event: InvalidationEvent): Promise<void> {
     this.eventQueue.push(event);
-    
+
     if (!this.processing) {
       await this.processQueue();
     }
@@ -58,16 +58,16 @@ export class CacheInvalidation {
    * Invalidate cache for specific resource
    */
   async invalidateResource(
-    resource: string, 
-    id?: number, 
-    type: 'create' | 'update' | 'delete' = 'update'
+    resource: string,
+    id?: number,
+    type: "create" | "update" | "delete" = "update",
   ): Promise<void> {
     const event: InvalidationEvent = {
       type,
       resource,
       id,
-      siteId: this.httpCache['siteId'], // Access private property
-      timestamp: Date.now()
+      siteId: this.httpCache["siteId"], // Access private property
+      timestamp: Date.now(),
     };
 
     await this.trigger(event);
@@ -78,184 +78,184 @@ export class CacheInvalidation {
    */
   private setupDefaultRules(): void {
     // Post invalidation rules
-    this.registerRule('posts', {
-      trigger: 'create',
+    this.registerRule("posts", {
+      trigger: "create",
       patterns: [
-        'posts',           // All posts listings
-        'posts/\\d+',      // Specific post
-        'categories',      // Category listings (if post has categories)
-        'tags',           // Tag listings (if post has tags)
-        'search'          // Search results
+        "posts", // All posts listings
+        "posts/\\d+", // Specific post
+        "categories", // Category listings (if post has categories)
+        "tags", // Tag listings (if post has tags)
+        "search", // Search results
       ],
       immediate: true,
-      cascade: true
+      cascade: true,
     });
 
-    this.registerRule('posts', {
-      trigger: 'update',
+    this.registerRule("posts", {
+      trigger: "update",
       patterns: [
-        'posts/\\d+',      // Specific post
-        'posts.*',         // All posts with parameters
-        'search'           // Search results
-      ],
-      immediate: true
-    });
-
-    this.registerRule('posts', {
-      trigger: 'delete',
-      patterns: [
-        'posts',           // All posts listings
-        'posts/\\d+',      // Specific post
-        'categories',      // Category counts might change
-        'tags',           // Tag counts might change
-        'search'          // Search results
+        "posts/\\d+", // Specific post
+        "posts.*", // All posts with parameters
+        "search", // Search results
       ],
       immediate: true,
-      cascade: true
+    });
+
+    this.registerRule("posts", {
+      trigger: "delete",
+      patterns: [
+        "posts", // All posts listings
+        "posts/\\d+", // Specific post
+        "categories", // Category counts might change
+        "tags", // Tag counts might change
+        "search", // Search results
+      ],
+      immediate: true,
+      cascade: true,
     });
 
     // Page invalidation rules
-    this.registerRule('pages', {
-      trigger: 'create',
-      patterns: ['pages', 'pages/\\d+'],
-      immediate: true
+    this.registerRule("pages", {
+      trigger: "create",
+      patterns: ["pages", "pages/\\d+"],
+      immediate: true,
     });
 
-    this.registerRule('pages', {
-      trigger: 'update',
-      patterns: ['pages/\\d+', 'pages.*'],
-      immediate: true
+    this.registerRule("pages", {
+      trigger: "update",
+      patterns: ["pages/\\d+", "pages.*"],
+      immediate: true,
     });
 
-    this.registerRule('pages', {
-      trigger: 'delete',
-      patterns: ['pages', 'pages/\\d+'],
-      immediate: true
+    this.registerRule("pages", {
+      trigger: "delete",
+      patterns: ["pages", "pages/\\d+"],
+      immediate: true,
     });
 
     // Comment invalidation rules
-    this.registerRule('comments', {
-      trigger: 'create',
+    this.registerRule("comments", {
+      trigger: "create",
       patterns: [
-        'comments',
-        'comments.*',
-        'posts/\\d+.*'    // Parent post cache
+        "comments",
+        "comments.*",
+        "posts/\\d+.*", // Parent post cache
       ],
-      immediate: true
+      immediate: true,
     });
 
-    this.registerRule('comments', {
-      trigger: 'update',
+    this.registerRule("comments", {
+      trigger: "update",
       patterns: [
-        'comments/\\d+',
-        'comments.*',
-        'posts/\\d+.*'    // Parent post cache
+        "comments/\\d+",
+        "comments.*",
+        "posts/\\d+.*", // Parent post cache
       ],
-      immediate: true
+      immediate: true,
     });
 
-    this.registerRule('comments', {
-      trigger: 'delete',
+    this.registerRule("comments", {
+      trigger: "delete",
       patterns: [
-        'comments',
-        'comments/\\d+',
-        'posts/\\d+.*'    // Parent post cache
+        "comments",
+        "comments/\\d+",
+        "posts/\\d+.*", // Parent post cache
       ],
-      immediate: true
+      immediate: true,
     });
 
     // Media invalidation rules
-    this.registerRule('media', {
-      trigger: 'create',
-      patterns: ['media', 'media.*'],
-      immediate: true
+    this.registerRule("media", {
+      trigger: "create",
+      patterns: ["media", "media.*"],
+      immediate: true,
     });
 
-    this.registerRule('media', {
-      trigger: 'update',
-      patterns: ['media/\\d+', 'media.*'],
-      immediate: true
+    this.registerRule("media", {
+      trigger: "update",
+      patterns: ["media/\\d+", "media.*"],
+      immediate: true,
     });
 
-    this.registerRule('media', {
-      trigger: 'delete',
-      patterns: ['media', 'media/\\d+'],
-      immediate: true
+    this.registerRule("media", {
+      trigger: "delete",
+      patterns: ["media", "media/\\d+"],
+      immediate: true,
     });
 
     // User invalidation rules
-    this.registerRule('users', {
-      trigger: 'create',
-      patterns: ['users', 'users.*'],
-      immediate: true
+    this.registerRule("users", {
+      trigger: "create",
+      patterns: ["users", "users.*"],
+      immediate: true,
     });
 
-    this.registerRule('users', {
-      trigger: 'update',
+    this.registerRule("users", {
+      trigger: "update",
       patterns: [
-        'users/\\d+',
-        'users.*',
-        'users/me'        // Current user info
+        "users/\\d+",
+        "users.*",
+        "users/me", // Current user info
       ],
-      immediate: true
+      immediate: true,
     });
 
-    this.registerRule('users', {
-      trigger: 'delete',
-      patterns: ['users', 'users/\\d+'],
-      immediate: true
+    this.registerRule("users", {
+      trigger: "delete",
+      patterns: ["users", "users/\\d+"],
+      immediate: true,
     });
 
     // Category invalidation rules
-    this.registerRule('categories', {
-      trigger: 'create',
-      patterns: ['categories', 'categories.*', 'posts.*'],
+    this.registerRule("categories", {
+      trigger: "create",
+      patterns: ["categories", "categories.*", "posts.*"],
       immediate: true,
-      cascade: true
+      cascade: true,
     });
 
-    this.registerRule('categories', {
-      trigger: 'update',
-      patterns: ['categories/\\d+', 'categories.*', 'posts.*'],
+    this.registerRule("categories", {
+      trigger: "update",
+      patterns: ["categories/\\d+", "categories.*", "posts.*"],
       immediate: true,
-      cascade: true
+      cascade: true,
     });
 
-    this.registerRule('categories', {
-      trigger: 'delete',
-      patterns: ['categories', 'categories/\\d+', 'posts.*'],
+    this.registerRule("categories", {
+      trigger: "delete",
+      patterns: ["categories", "categories/\\d+", "posts.*"],
       immediate: true,
-      cascade: true
+      cascade: true,
     });
 
     // Tag invalidation rules
-    this.registerRule('tags', {
-      trigger: 'create',
-      patterns: ['tags', 'tags.*', 'posts.*'],
+    this.registerRule("tags", {
+      trigger: "create",
+      patterns: ["tags", "tags.*", "posts.*"],
       immediate: true,
-      cascade: true
+      cascade: true,
     });
 
-    this.registerRule('tags', {
-      trigger: 'update',
-      patterns: ['tags/\\d+', 'tags.*', 'posts.*'],
+    this.registerRule("tags", {
+      trigger: "update",
+      patterns: ["tags/\\d+", "tags.*", "posts.*"],
       immediate: true,
-      cascade: true
+      cascade: true,
     });
 
-    this.registerRule('tags', {
-      trigger: 'delete',
-      patterns: ['tags', 'tags/\\d+', 'posts.*'],
+    this.registerRule("tags", {
+      trigger: "delete",
+      patterns: ["tags", "tags/\\d+", "posts.*"],
       immediate: true,
-      cascade: true
+      cascade: true,
     });
 
     // Settings invalidation rules (rarely change)
-    this.registerRule('settings', {
-      trigger: 'update',
-      patterns: ['settings.*'],
+    this.registerRule("settings", {
+      trigger: "update",
+      patterns: ["settings.*"],
       immediate: true,
-      cascade: false
+      cascade: false,
     });
   }
 
@@ -284,9 +284,9 @@ export class CacheInvalidation {
    */
   private async processEvent(event: InvalidationEvent): Promise<void> {
     const rules = this.invalidationRules.get(event.resource) || [];
-    
+
     for (const rule of rules) {
-      if (rule.trigger === event.type || rule.trigger === '*') {
+      if (rule.trigger === event.type || rule.trigger === "*") {
         await this.applyInvalidationRule(event, rule);
       }
     }
@@ -296,22 +296,27 @@ export class CacheInvalidation {
    * Apply invalidation rule to cache
    */
   private async applyInvalidationRule(
-    event: InvalidationEvent, 
-    rule: InvalidationRule
+    event: InvalidationEvent,
+    rule: InvalidationRule,
   ): Promise<void> {
     for (const pattern of rule.patterns) {
       let invalidationPattern = pattern;
-      
+
       // Replace placeholders with actual values
       if (event.id) {
-        invalidationPattern = invalidationPattern.replace('\\d+', event.id.toString());
+        invalidationPattern = invalidationPattern.replace(
+          "\\d+",
+          event.id.toString(),
+        );
       }
-      
+
       // Invalidate matching cache entries
       const invalidated = this.httpCache.invalidatePattern(invalidationPattern);
-      
+
       if (invalidated > 0) {
-        console.log(`Invalidated ${invalidated} cache entries for pattern: ${invalidationPattern}`);
+        console.log(
+          `Invalidated ${invalidated} cache entries for pattern: ${invalidationPattern}`,
+        );
       }
     }
   }
@@ -323,11 +328,14 @@ export class CacheInvalidation {
     queueSize: number;
     rulesCount: number;
     processing: boolean;
-    } {
+  } {
     return {
       queueSize: this.eventQueue.length,
-      rulesCount: Array.from(this.invalidationRules.values()).reduce((acc, rules) => acc + rules.length, 0),
-      processing: this.processing
+      rulesCount: Array.from(this.invalidationRules.values()).reduce(
+        (acc, rules) => acc + rules.length,
+        0,
+      ),
+      processing: this.processing,
     };
   }
 
@@ -358,28 +366,28 @@ export class WordPressCachePatterns {
    * Invalidate all content-related caches
    */
   static invalidateContent(cache: HttpCacheWrapper): number {
-    return cache.invalidatePattern('(posts|pages|comments|media)');
+    return cache.invalidatePattern("(posts|pages|comments|media)");
   }
 
   /**
    * Invalidate all taxonomy-related caches
    */
   static invalidateTaxonomies(cache: HttpCacheWrapper): number {
-    return cache.invalidatePattern('(categories|tags|taxonomies)');
+    return cache.invalidatePattern("(categories|tags|taxonomies)");
   }
 
   /**
    * Invalidate all user-related caches
    */
   static invalidateUsers(cache: HttpCacheWrapper): number {
-    return cache.invalidatePattern('users');
+    return cache.invalidatePattern("users");
   }
 
   /**
    * Invalidate search-related caches
    */
   static invalidateSearch(cache: HttpCacheWrapper): number {
-    return cache.invalidatePattern('search');
+    return cache.invalidatePattern("search");
   }
 
   /**
@@ -402,20 +410,20 @@ export class CacheWarmer {
   async warmEssentials(): Promise<void> {
     // Implementation would depend on your specific WordPress client
     // This is a placeholder for the structure
-    console.log('Warming essential caches...');
+    console.log("Warming essential caches...");
   }
 
   /**
    * Warm cache with taxonomy data
    */
   async warmTaxonomies(): Promise<void> {
-    console.log('Warming taxonomy caches...');
+    console.log("Warming taxonomy caches...");
   }
 
   /**
    * Warm cache with user data
    */
   async warmUsers(): Promise<void> {
-    console.log('Warming user caches...');
+    console.log("Warming user caches...");
   }
 }

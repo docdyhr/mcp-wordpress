@@ -2,18 +2,18 @@
  * Tests for Environment Variable Loading
  */
 
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach } from "@jest/globals";
 
-import { writeFileSync, unlinkSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { writeFileSync, unlinkSync, existsSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const rootDir = join(__dirname, '..');
+const rootDir = join(__dirname, "..");
 
-describe('Environment Variable Loading', () => {
-  const testEnvPath = join(rootDir, '.env.test');
+describe("Environment Variable Loading", () => {
+  const testEnvPath = join(rootDir, ".env.test");
   const originalCwd = process.cwd();
   let originalEnv;
 
@@ -45,7 +45,7 @@ DEBUG=false
     process.chdir(originalCwd);
   });
 
-  it('should load .env from project root when called from same directory', async () => {
+  it("should load .env from project root when called from same directory", async () => {
     // Change to project root
     process.chdir(rootDir);
 
@@ -54,20 +54,20 @@ DEBUG=false
     delete process.env.WORDPRESS_USERNAME;
 
     // Test the dotenv loading logic manually
-    const { config } = await import('dotenv');
-    const envPath = join(rootDir, '.env.test');
+    const { config } = await import("dotenv");
+    const envPath = join(rootDir, ".env.test");
 
     const result = config({ path: envPath });
 
     expect(result.error).toBeUndefined();
     expect(result.parsed).toBeDefined();
-    expect(result.parsed.WORDPRESS_SITE_URL).toBe('https://test.example.com');
-    expect(result.parsed.WORDPRESS_USERNAME).toBe('testuser');
+    expect(result.parsed.WORDPRESS_SITE_URL).toBe("https://test.example.com");
+    expect(result.parsed.WORDPRESS_USERNAME).toBe("testuser");
   });
 
-  it('should load .env from project root when called from different directory', async () => {
+  it("should load .env from project root when called from different directory", async () => {
     // Change to a different directory (e.g., home directory)
-    const tempDir = process.env.HOME || '/tmp';
+    const tempDir = process.env.HOME || "/tmp";
     process.chdir(tempDir);
 
     // Clear environment variables
@@ -75,20 +75,20 @@ DEBUG=false
     delete process.env.WORDPRESS_USERNAME;
 
     // Test the dotenv loading logic manually
-    const { config } = await import('dotenv');
-    const envPath = join(rootDir, '.env.test');
+    const { config } = await import("dotenv");
+    const envPath = join(rootDir, ".env.test");
 
     const result = config({ path: envPath });
 
     expect(result.error).toBeUndefined();
     expect(result.parsed).toBeDefined();
-    expect(result.parsed.WORDPRESS_SITE_URL).toBe('https://test.example.com');
-    expect(result.parsed.WORDPRESS_USERNAME).toBe('testuser');
+    expect(result.parsed.WORDPRESS_SITE_URL).toBe("https://test.example.com");
+    expect(result.parsed.WORDPRESS_USERNAME).toBe("testuser");
   });
 
-  it('should handle missing .env file gracefully', async () => {
-    const { config } = await import('dotenv');
-    const nonExistentPath = join(rootDir, '.env.nonexistent');
+  it("should handle missing .env file gracefully", async () => {
+    const { config } = await import("dotenv");
+    const nonExistentPath = join(rootDir, ".env.nonexistent");
 
     const result = config({ path: nonExistentPath });
 
@@ -97,9 +97,9 @@ DEBUG=false
     expect(result.parsed).toEqual({});
   });
 
-  it('should load environment variables in the correct format', async () => {
-    const { config } = await import('dotenv');
-    const envPath = join(rootDir, '.env.test');
+  it("should load environment variables in the correct format", async () => {
+    const { config } = await import("dotenv");
+    const envPath = join(rootDir, ".env.test");
 
     const result = config({ path: envPath });
 
@@ -108,48 +108,48 @@ DEBUG=false
       WORDPRESS_USERNAME: expect.any(String),
       WORDPRESS_APP_PASSWORD: expect.any(String),
       WORDPRESS_AUTH_METHOD: expect.stringMatching(
-        /^(app-password|jwt|basic|api-key|cookie)$/
+        /^(app-password|jwt|basic|api-key|cookie)$/,
       ),
-      DEBUG: expect.stringMatching(/^(true|false)$/)
+      DEBUG: expect.stringMatching(/^(true|false)$/),
     });
   });
 
-  it('should resolve paths correctly relative to dist directory', () => {
+  it("should resolve paths correctly relative to dist directory", () => {
     // Simulate being in the dist directory (where compiled index.js is)
-    const distDir = join(rootDir, 'dist');
+    const distDir = join(rootDir, "dist");
 
     // Test path resolution logic
-    const mockFilename = join(distDir, 'index.js');
+    const mockFilename = join(distDir, "index.js");
     const mockDirname = dirname(mockFilename);
-    const resolvedRootDir = join(mockDirname, '..');
-    const resolvedEnvPath = join(resolvedRootDir, '.env.test');
+    const resolvedRootDir = join(mockDirname, "..");
+    const resolvedEnvPath = join(resolvedRootDir, ".env.test");
 
     expect(resolvedRootDir).toBe(rootDir);
     expect(existsSync(resolvedEnvPath)).toBe(true);
   });
 
-  it('should work when server is started from dist directory', async () => {
+  it("should work when server is started from dist directory", async () => {
     // Test path resolution logic that would be used in dist/index.js
-    const mockDistPath = join(rootDir, 'dist', 'index.js');
+    const mockDistPath = join(rootDir, "dist", "index.js");
     const mockDistDir = dirname(mockDistPath);
-    const resolvedRootDir = join(mockDistDir, '..');
-    const resolvedEnvPath = join(resolvedRootDir, '.env.test');
+    const resolvedRootDir = join(mockDistDir, "..");
+    const resolvedEnvPath = join(resolvedRootDir, ".env.test");
 
     // Verify the path resolution works correctly
     expect(resolvedRootDir).toBe(rootDir);
     expect(existsSync(resolvedEnvPath)).toBe(true);
 
     // Test that we can load the env file from this resolved path
-    const { config } = await import('dotenv');
+    const { config } = await import("dotenv");
     const result = config({ path: resolvedEnvPath });
 
     expect(result.error).toBeUndefined();
-    expect(result.parsed.WORDPRESS_SITE_URL).toBe('https://test.example.com');
+    expect(result.parsed.WORDPRESS_SITE_URL).toBe("https://test.example.com");
   });
 
-  it('should work when server is started from parent directory', async () => {
+  it("should work when server is started from parent directory", async () => {
     // Test that the absolute path approach works regardless of working directory
-    const absoluteEnvPath = join(rootDir, '.env.test');
+    const absoluteEnvPath = join(rootDir, ".env.test");
 
     // Change to parent directory to simulate running from different location
     const originalCwd = process.cwd();
@@ -158,12 +158,12 @@ DEBUG=false
       process.chdir(parentDir);
 
       // The absolute path should still work
-      const { config } = await import('dotenv');
+      const { config } = await import("dotenv");
       const result = config({ path: absoluteEnvPath });
 
       expect(result.error).toBeUndefined();
-      expect(result.parsed.WORDPRESS_SITE_URL).toBe('https://test.example.com');
-      expect(result.parsed.WORDPRESS_USERNAME).toBe('testuser');
+      expect(result.parsed.WORDPRESS_SITE_URL).toBe("https://test.example.com");
+      expect(result.parsed.WORDPRESS_USERNAME).toBe("testuser");
     } finally {
       process.chdir(originalCwd);
     }

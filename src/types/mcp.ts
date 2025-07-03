@@ -6,19 +6,19 @@
 
 import type {
   CallToolRequestSchema,
-  ListToolsRequestSchema
-} from '@modelcontextprotocol/sdk/types.js';
+  ListToolsRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js";
 
 // MCP Tool Schema Types
 export interface MCPToolSchema {
-  type: 'object';
+  type: "object";
   properties: Record<string, JSONSchemaProperty>;
   required?: string[];
   additionalProperties?: boolean;
 }
 
 export interface JSONSchemaProperty {
-  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
+  type: "string" | "number" | "boolean" | "array" | "object";
   description?: string;
   enum?: (string | number)[];
   items?: JSONSchemaProperty;
@@ -41,18 +41,18 @@ export interface MCPTool {
 
 // MCP Content Types
 export interface MCPTextContent {
-  type: 'text';
+  type: "text";
   text: string;
 }
 
 export interface MCPImageContent {
-  type: 'image';
+  type: "image";
   data: string;
   mimeType: string;
 }
 
 export interface MCPResourceContent {
-  type: 'resource';
+  type: "resource";
   resource: {
     uri: string;
     mimeType?: string;
@@ -94,14 +94,14 @@ export type MCPCallToolRequest = typeof CallToolRequestSchema;
 
 // Tool Categories for Organization
 export type MCPToolCategory =
-  | 'authentication'
-  | 'posts'
-  | 'pages'
-  | 'media'
-  | 'users'
-  | 'comments'
-  | 'taxonomies'
-  | 'site';
+  | "authentication"
+  | "posts"
+  | "pages"
+  | "media"
+  | "users"
+  | "comments"
+  | "taxonomies"
+  | "site";
 
 // Enhanced Tool Definition with Category
 export interface CategorizedMCPTool extends MCPTool {

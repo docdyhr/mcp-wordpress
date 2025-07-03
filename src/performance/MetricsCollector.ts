@@ -3,9 +3,12 @@
  * Integrates with existing client and cache systems
  */
 
-import { PerformanceMonitor, PerformanceMetrics } from './PerformanceMonitor.js';
-import type { CacheStats } from '../cache/CacheManager.js';
-import type { ClientStats } from '../types/client.js';
+import {
+  PerformanceMonitor,
+  PerformanceMetrics,
+} from "./PerformanceMonitor.js";
+import type { CacheStats } from "../cache/CacheManager.js";
+import type { ClientStats } from "../types/client.js";
 
 export interface CollectorConfig {
   enableRealTime: boolean;
@@ -45,7 +48,7 @@ export class MetricsCollector {
 
   constructor(
     monitor: PerformanceMonitor,
-    config: Partial<CollectorConfig> = {}
+    config: Partial<CollectorConfig> = {},
   ) {
     this.monitor = monitor;
     this.config = {
@@ -55,7 +58,7 @@ export class MetricsCollector {
       enableRequestInterception: true,
       enableCacheIntegration: true,
       enableSystemMetrics: true,
-      ...config
+      ...config,
     };
 
     if (this.config.enableRealTime) {
@@ -68,7 +71,7 @@ export class MetricsCollector {
    */
   registerClient(siteId: string, client: any): void {
     this.clientInstances.set(siteId, client);
-    
+
     if (this.config.enableRequestInterception) {
       this.interceptClientRequests(siteId, client);
     }
@@ -84,14 +87,18 @@ export class MetricsCollector {
   /**
    * Start tracking a tool execution
    */
-  startToolExecution(toolName: string, parameters: any, siteId?: string): string {
+  startToolExecution(
+    toolName: string,
+    parameters: any,
+    siteId?: string,
+  ): string {
     const executionId = `${toolName}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     this.activeTools.set(executionId, {
       toolName,
       parameters,
       startTime: Date.now(),
-      siteId
+      siteId,
     });
 
     return executionId;
@@ -105,10 +112,10 @@ export class MetricsCollector {
     if (!context) return;
 
     const responseTime = Date.now() - context.startTime;
-    
+
     // Record in performance monitor
     this.monitor.recordRequest(responseTime, success, context.toolName);
-    
+
     this.activeTools.delete(executionId);
   }
 
@@ -116,10 +123,10 @@ export class MetricsCollector {
    * Record a raw request (bypass tool tracking)
    */
   recordRawRequest(
-    responseTime: number, 
-    success: boolean, 
+    responseTime: number,
+    success: boolean,
     endpoint: string,
-    fromCache: boolean = false
+    fromCache: boolean = false,
   ): void {
     this.monitor.recordRequest(responseTime, success);
   }
@@ -130,10 +137,10 @@ export class MetricsCollector {
   collectCurrentMetrics(): PerformanceMetrics {
     // Update cache metrics from all registered cache managers
     this.updateCacheMetrics();
-    
+
     // Update client metrics from all registered clients
     this.updateClientMetrics();
-    
+
     // Get current metrics from monitor
     return this.monitor.getMetrics();
   }
@@ -147,11 +154,11 @@ export class MetricsCollector {
       misses: 0,
       evictions: 0,
       totalSize: 0,
-      hitRate: 0
+      hitRate: 0,
     };
 
     for (const [_siteId, cacheManager] of this.cacheManagers) {
-      if (cacheManager && typeof cacheManager.getStats === 'function') {
+      if (cacheManager && typeof cacheManager.getStats === "function") {
         const stats = cacheManager.getStats();
         aggregated.hits += stats.hits || 0;
         aggregated.misses += stats.misses || 0;
@@ -177,20 +184,20 @@ export class MetricsCollector {
       failedRequests: 0,
       averageResponseTime: 0,
       rateLimitHits: 0,
-      authFailures: 0
+      authFailures: 0,
     };
 
     const responseTimes: number[] = [];
 
     for (const [_siteId, client] of this.clientInstances) {
-      if (client && typeof client.getStats === 'function') {
+      if (client && typeof client.getStats === "function") {
         const stats = client.getStats();
         aggregated.totalRequests += stats.totalRequests || 0;
         aggregated.successfulRequests += stats.successfulRequests || 0;
         aggregated.failedRequests += stats.failedRequests || 0;
         aggregated.rateLimitHits += stats.rateLimitHits || 0;
         aggregated.authFailures += stats.authFailures || 0;
-        
+
         if (stats.averageResponseTime) {
           responseTimes.push(stats.averageResponseTime);
         }
@@ -199,7 +206,9 @@ export class MetricsCollector {
 
     // Calculate overall average response time
     if (responseTimes.length > 0) {
-      aggregated.averageResponseTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
+      aggregated.averageResponseTime =
+        responseTimes.reduce((sum, time) => sum + time, 0) /
+        responseTimes.length;
     }
 
     return aggregated;
@@ -216,13 +225,13 @@ export class MetricsCollector {
     const result: any = { isActive: false };
 
     const cacheManager = this.cacheManagers.get(siteId);
-    if (cacheManager && typeof cacheManager.getStats === 'function') {
+    if (cacheManager && typeof cacheManager.getStats === "function") {
       result.cache = cacheManager.getStats();
       result.isActive = true;
     }
 
     const client = this.clientInstances.get(siteId);
-    if (client && typeof client.getStats === 'function') {
+    if (client && typeof client.getStats === "function") {
       result.client = client.getStats();
       result.isActive = true;
     }
@@ -235,39 +244,47 @@ export class MetricsCollector {
    */
   compareSitePerformance(): {
     sites: string[];
-    comparison: Record<string, {
-      responseTime: number;
-      cacheHitRate: number;
-      errorRate: number;
-      requestCount: number;
-      ranking: number;
-    }>;
+    comparison: Record<
+      string,
+      {
+        responseTime: number;
+        cacheHitRate: number;
+        errorRate: number;
+        requestCount: number;
+        ranking: number;
+      }
+    >;
     bestPerforming: string;
     worstPerforming: string;
-    } {
+  } {
     const sites = Array.from(this.clientInstances.keys());
     const comparison: any = {};
     const rankings: Array<{ site: string; score: number }> = [];
 
     for (const siteId of sites) {
       const metrics = this.getSiteMetrics(siteId);
-      
+
       const responseTime = metrics.client?.averageResponseTime || 0;
       const cacheHitRate = metrics.cache?.hitRate || 0;
-      const errorRate = metrics.client 
-        ? (metrics.client.failedRequests / Math.max(metrics.client.totalRequests, 1))
+      const errorRate = metrics.client
+        ? metrics.client.failedRequests /
+          Math.max(metrics.client.totalRequests, 1)
         : 0;
       const requestCount = metrics.client?.totalRequests || 0;
 
       // Calculate performance score (lower is better for response time and error rate)
-      const score = (responseTime / 1000) + (errorRate * 100) - (cacheHitRate * 50) + (requestCount * 0.001);
+      const score =
+        responseTime / 1000 +
+        errorRate * 100 -
+        cacheHitRate * 50 +
+        requestCount * 0.001;
 
       comparison[siteId] = {
         responseTime,
         cacheHitRate,
         errorRate,
         requestCount,
-        ranking: 0 // Will be set after sorting
+        ranking: 0, // Will be set after sorting
       };
 
       rankings.push({ site: siteId, score });
@@ -284,8 +301,8 @@ export class MetricsCollector {
     return {
       sites,
       comparison,
-      bestPerforming: rankings[0]?.site || '',
-      worstPerforming: rankings[rankings.length - 1]?.site || ''
+      bestPerforming: rankings[0]?.site || "",
+      worstPerforming: rankings[rankings.length - 1]?.site || "",
     };
   }
 
@@ -296,7 +313,7 @@ export class MetricsCollector {
     critical: string[];
     recommended: string[];
     optional: string[];
-    } {
+  } {
     const metrics = this.collectCurrentMetrics();
     const critical: string[] = [];
     const recommended: string[] = [];
@@ -304,34 +321,49 @@ export class MetricsCollector {
 
     // Critical issues
     if (metrics.requests.averageResponseTime > 5000) {
-      critical.push('Response times are critically high (>5s). Enable caching immediately.');
+      critical.push(
+        "Response times are critically high (>5s). Enable caching immediately.",
+      );
     }
 
-    const errorRate = metrics.requests.failed / Math.max(metrics.requests.total, 1);
+    const errorRate =
+      metrics.requests.failed / Math.max(metrics.requests.total, 1);
     if (errorRate > 0.1) {
-      critical.push('Error rate is critically high (>10%). Check WordPress connectivity.');
+      critical.push(
+        "Error rate is critically high (>10%). Check WordPress connectivity.",
+      );
     }
 
     // Recommended optimizations
     if (metrics.cache.hitRate < 0.8) {
-      recommended.push('Cache hit rate is below 80%. Consider cache warming or TTL adjustment.');
+      recommended.push(
+        "Cache hit rate is below 80%. Consider cache warming or TTL adjustment.",
+      );
     }
 
     if (metrics.requests.averageResponseTime > 2000) {
-      recommended.push('Response times could be improved. Consider enabling more aggressive caching.');
+      recommended.push(
+        "Response times could be improved. Consider enabling more aggressive caching.",
+      );
     }
 
     if (metrics.system.memoryUsage > 80) {
-      recommended.push('Memory usage is high. Consider increasing cache size limits or server resources.');
+      recommended.push(
+        "Memory usage is high. Consider increasing cache size limits or server resources.",
+      );
     }
 
     // Optional optimizations
     if (metrics.cache.totalSize < 100) {
-      optional.push('Cache utilization is low. Consider pre-warming with frequently accessed data.');
+      optional.push(
+        "Cache utilization is low. Consider pre-warming with frequently accessed data.",
+      );
     }
 
     if (Object.keys(metrics.tools.toolUsageCount).length > 10) {
-      optional.push('Many tools are being used. Consider creating custom workflows for common operations.');
+      optional.push(
+        "Many tools are being used. Consider creating custom workflows for common operations.",
+      );
     }
 
     return { critical, recommended, optional };
@@ -350,17 +382,17 @@ export class MetricsCollector {
     };
     optimizations: any;
     alerts: any[];
-    } {
+  } {
     return {
       timestamp: new Date().toISOString(),
       overview: this.collectCurrentMetrics(),
       siteComparison: this.compareSitePerformance(),
       aggregatedStats: {
         cache: this.getAggregatedCacheStats(),
-        client: this.getAggregatedClientStats()
+        client: this.getAggregatedClientStats(),
       },
       optimizations: this.generateOptimizationSuggestions(),
-      alerts: this.monitor.getAlerts()
+      alerts: this.monitor.getAlerts(),
     };
   }
 
@@ -394,23 +426,23 @@ export class MetricsCollector {
    * Intercept client requests for automatic tracking
    */
   private interceptClientRequests(siteId: string, client: any): void {
-    if (!client.request || typeof client.request !== 'function') {
+    if (!client.request || typeof client.request !== "function") {
       return;
     }
 
     const originalRequest = client.request.bind(client);
-    
+
     client.request = async (...args: any[]) => {
       const startTime = Date.now();
       const requestId = `${siteId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
+
       // Extract metadata
       const metadata: RequestMetadata = {
         siteId,
-        endpoint: args[0] || 'unknown',
-        method: args[1] || 'GET',
+        endpoint: args[0] || "unknown",
+        method: args[1] || "GET",
         startTime,
-        fromCache: false
+        fromCache: false,
       };
 
       this.activeRequests.set(requestId, metadata);
@@ -418,19 +450,19 @@ export class MetricsCollector {
       try {
         const result = await originalRequest(...args);
         const responseTime = Date.now() - startTime;
-        
+
         // Check if response came from cache
         const _fromCache = result.cached || false;
-        
+
         this.monitor.recordRequest(responseTime, true);
         this.activeRequests.delete(requestId);
-        
+
         return result;
       } catch (error) {
         const responseTime = Date.now() - startTime;
         this.monitor.recordRequest(responseTime, false);
         this.activeRequests.delete(requestId);
-        
+
         throw error;
       }
     };

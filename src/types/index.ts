@@ -1,17 +1,17 @@
 /**
  * Type Exports
- * 
+ *
  * Central export point for all TypeScript types
  */
 
 // WordPress API Types
-export * from './wordpress.js';
+export * from "./wordpress.js";
 
 // MCP Types
-export * from './mcp.js';
+export * from "./mcp.js";
 
 // Client Types
-export * from './client.js';
+export * from "./client.js";
 
 // Common Utility Types
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
@@ -74,16 +74,16 @@ export interface DatabaseConfig {
 }
 
 export interface LoggingConfig {
-  level: 'debug' | 'info' | 'warn' | 'error';
+  level: "debug" | "info" | "warn" | "error";
   file?: string;
   console?: boolean;
-  format?: 'json' | 'text';
+  format?: "json" | "text";
 }
 
 export interface ServerConfig {
   host: string;
   port: number;
-  env: 'development' | 'production' | 'test';
+  env: "development" | "production" | "test";
   debug: boolean;
   logging: LoggingConfig;
 }
@@ -104,7 +104,16 @@ export interface Environment {
 
 // Validation Schema Types
 export interface ValidationRule {
-  type: 'required' | 'string' | 'number' | 'boolean' | 'email' | 'url' | 'enum' | 'array' | 'object';
+  type:
+    | "required"
+    | "string"
+    | "number"
+    | "boolean"
+    | "email"
+    | "url"
+    | "enum"
+    | "array"
+    | "object";
   message?: string;
   min?: number;
   max?: number;
@@ -127,7 +136,7 @@ export interface CacheEntry<T> {
 export interface CacheOptions {
   ttl?: number; // time to live in milliseconds
   maxSize?: number;
-  strategy?: 'lru' | 'fifo' | 'ttl';
+  strategy?: "lru" | "fifo" | "ttl";
 }
 
 // Event Types
@@ -149,13 +158,16 @@ export interface PerformanceMetric {
 
 // Health Check Types
 export interface HealthStatus {
-  status: 'healthy' | 'degraded' | 'unhealthy';
+  status: "healthy" | "degraded" | "unhealthy";
   timestamp: number;
-  checks: Record<string, {
-    status: 'pass' | 'fail' | 'warn';
-    message?: string;
-    duration?: number;
-  }>;
+  checks: Record<
+    string,
+    {
+      status: "pass" | "fail" | "warn";
+      message?: string;
+      duration?: number;
+    }
+  >;
   uptime: number;
   version: string;
 }
@@ -163,7 +175,7 @@ export interface HealthStatus {
 // Debugging Types
 export interface DebugInfo {
   timestamp: number;
-  level: 'debug' | 'info' | 'warn' | 'error';
+  level: "debug" | "info" | "warn" | "error";
   message: string;
   context?: Record<string, any>;
   stack?: string;
@@ -187,21 +199,31 @@ export type Awaited<T> = T extends Promise<infer U> ? U : T;
 // Brand types for better type safety
 export type Brand<T, B> = T & { __brand: B };
 
-export type WordPressID = Brand<number, 'WordPressID'>;
-export type UserID = Brand<number, 'UserID'>;
-export type PostID = Brand<number, 'PostID'>;
-export type MediaID = Brand<number, 'MediaID'>;
-export type CommentID = Brand<number, 'CommentID'>;
-export type CategoryID = Brand<number, 'CategoryID'>;
-export type TagID = Brand<number, 'TagID'>;
+export type WordPressID = Brand<number, "WordPressID">;
+export type UserID = Brand<number, "UserID">;
+export type PostID = Brand<number, "PostID">;
+export type MediaID = Brand<number, "MediaID">;
+export type CommentID = Brand<number, "CommentID">;
+export type CategoryID = Brand<number, "CategoryID">;
+export type TagID = Brand<number, "TagID">;
 
 // Function Types
-export type AsyncFunction<TArgs extends any[] = any[], TReturn = any> = (...args: TArgs) => Promise<TReturn>;
-export type SyncFunction<TArgs extends any[] = any[], TReturn = any> = (...args: TArgs) => TReturn;
-export type AnyFunction<TArgs extends any[] = any[], TReturn = any> = SyncFunction<TArgs, TReturn> | AsyncFunction<TArgs, TReturn>;
+export type AsyncFunction<TArgs extends any[] = any[], TReturn = any> = (
+  ...args: TArgs
+) => Promise<TReturn>;
+export type SyncFunction<TArgs extends any[] = any[], TReturn = any> = (
+  ...args: TArgs
+) => TReturn;
+export type AnyFunction<TArgs extends any[] = any[], TReturn = any> =
+  | SyncFunction<TArgs, TReturn>
+  | AsyncFunction<TArgs, TReturn>;
 
 // Conditional Types
 export type If<C extends boolean, T, F> = C extends true ? T : F;
 export type IsEqual<T, U> = T extends U ? (U extends T ? true : false) : false;
 export type IsArray<T> = T extends any[] ? true : false;
-export type IsObject<T> = T extends object ? (T extends any[] ? false : true) : false;
+export type IsObject<T> = T extends object
+  ? T extends any[]
+    ? false
+    : true
+  : false;

@@ -9,13 +9,12 @@ module.exports = {
   // Use the EXACT base configuration
   ...baseConfig,
   
-  // Add explicit exclusion for disabled tests
+  // Standard test exclusions
   testPathIgnorePatterns: [
     ...(baseConfig.testPathIgnorePatterns || []),
     "/node_modules/",
     "/dist/",
-    "/coverage/",
-    "/_disabled/"
+    "/coverage/"
   ],
   
   // The base config already has the correct setup

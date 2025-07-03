@@ -1,6 +1,6 @@
 /**
  * Core WordPress REST API Types
- * 
+ *
  * Comprehensive TypeScript definitions for WordPress REST API v2 responses
  */
 
@@ -22,19 +22,37 @@ export interface WordPressLinks {
   about?: WordPressLink[];
   author?: WordPressLink[];
   replies?: WordPressLink[];
-  'version-history'?: WordPressLink[];
-  'predecessor-version'?: WordPressLink[];
-  'wp:attachment'?: WordPressLink[];
-  'wp:term'?: WordPressLink[];
-  'wp:featuredmedia'?: WordPressLink[];
+  "version-history"?: WordPressLink[];
+  "predecessor-version"?: WordPressLink[];
+  "wp:attachment"?: WordPressLink[];
+  "wp:term"?: WordPressLink[];
+  "wp:featuredmedia"?: WordPressLink[];
   curies?: WordPressLink[];
 }
 
 // Post Types
-export type PostStatus = 'publish' | 'future' | 'draft' | 'pending' | 'private' | 'trash' | 'auto-draft' | 'inherit';
-export type PostFormat = 'standard' | 'aside' | 'chat' | 'gallery' | 'link' | 'image' | 'quote' | 'status' | 'video' | 'audio';
-export type CommentStatus = 'open' | 'closed';
-export type PingStatus = 'open' | 'closed';
+export type PostStatus =
+  | "publish"
+  | "future"
+  | "draft"
+  | "pending"
+  | "private"
+  | "trash"
+  | "auto-draft"
+  | "inherit";
+export type PostFormat =
+  | "standard"
+  | "aside"
+  | "chat"
+  | "gallery"
+  | "link"
+  | "image"
+  | "quote"
+  | "status"
+  | "video"
+  | "audio";
+export type CommentStatus = "open" | "closed";
+export type PingStatus = "open" | "closed";
 
 export interface WordPressPost {
   id: number;
@@ -89,20 +107,23 @@ export interface WordPressPage {
 }
 
 // Media Types
-export type MediaType = 'image' | 'video' | 'text' | 'application' | 'audio';
+export type MediaType = "image" | "video" | "text" | "application" | "audio";
 
 export interface MediaDetails {
   width?: number;
   height?: number;
   file?: string;
   filesize?: number;
-  sizes?: Record<string, {
-    file: string;
-    width: number;
-    height: number;
-    mime_type: string;
-    source_url: string;
-  }>;
+  sizes?: Record<
+    string,
+    {
+      file: string;
+      width: number;
+      height: number;
+      mime_type: string;
+      source_url: string;
+    }
+  >;
   image_meta?: {
     aperture?: string;
     credit?: string;
@@ -148,7 +169,12 @@ export interface WordPressMedia {
 }
 
 // User Types
-export type UserRole = 'administrator' | 'editor' | 'author' | 'contributor' | 'subscriber';
+export type UserRole =
+  | "administrator"
+  | "editor"
+  | "author"
+  | "contributor"
+  | "subscriber";
 
 export interface WordPressUser {
   id: number;
@@ -173,7 +199,7 @@ export interface WordPressUser {
 }
 
 // Comment Types
-export type CommentType = 'comment' | 'trackback' | 'pingback';
+export type CommentType = "comment" | "trackback" | "pingback";
 
 export interface WordPressComment {
   id: number;
@@ -189,7 +215,7 @@ export interface WordPressComment {
   date_gmt: string;
   content: WordPressRendered;
   link: string;
-  status: 'approved' | 'unapproved' | 'spam' | 'trash';
+  status: "approved" | "unapproved" | "spam" | "trash";
   type: CommentType;
   author_avatar_urls: Record<string, string>;
   meta: Record<string, any>;
@@ -288,7 +314,7 @@ export interface PaginationParams {
   page?: number;
   per_page?: number;
   search?: string;
-  order?: 'asc' | 'desc';
+  order?: "asc" | "desc";
   orderby?: string;
 }
 
@@ -326,19 +352,19 @@ export interface MediaQueryParams extends PaginationParams {
 }
 
 export interface UserQueryParams extends PaginationParams {
-  context?: 'view' | 'embed' | 'edit';
+  context?: "view" | "embed" | "edit";
   exclude?: number[];
   include?: number[];
   offset?: number;
   slug?: string[];
   roles?: UserRole[];
   capabilities?: string[];
-  who?: 'authors';
+  who?: "authors";
   has_published_posts?: string[];
 }
 
 export interface CommentQueryParams extends PaginationParams {
-  context?: 'view' | 'embed' | 'edit';
+  context?: "view" | "embed" | "edit";
   after?: string;
   author?: number[];
   author_exclude?: number[];
@@ -420,7 +446,8 @@ export interface CreateUserRequest {
   meta?: Record<string, any>;
 }
 
-export interface UpdateUserRequest extends Partial<Omit<CreateUserRequest, 'username'>> {
+export interface UpdateUserRequest
+  extends Partial<Omit<CreateUserRequest, "username">> {
   id: number;
 }
 
@@ -434,13 +461,14 @@ export interface CreateCommentRequest {
   author_url?: string;
   date?: string;
   date_gmt?: string;
-  status?: 'approved' | 'unapproved';
+  status?: "approved" | "unapproved";
   meta?: Record<string, any>;
 }
 
-export interface UpdateCommentRequest extends Partial<Omit<CreateCommentRequest, 'status'>> {
+export interface UpdateCommentRequest
+  extends Partial<Omit<CreateCommentRequest, "status">> {
   id: number;
-  status?: 'approved' | 'unapproved' | 'spam' | 'trash';
+  status?: "approved" | "unapproved" | "spam" | "trash";
 }
 
 export interface CreateCategoryRequest {

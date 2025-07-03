@@ -3,14 +3,14 @@
  * Standardizes error handling and reduces repetitive try-catch blocks
  */
 
-import { getErrorMessage } from './error.js';
+import { getErrorMessage } from "./error.js";
 
 /**
  * Wrapper for tool methods that standardizes error handling
  */
 export function withErrorHandling<T extends any[], R>(
   operation: string,
-  fn: (...args: T) => Promise<R>
+  fn: (...args: T) => Promise<R>,
 ): (...args: T) => Promise<R> {
   return async (...args: T): Promise<R> => {
     try {
@@ -27,7 +27,7 @@ export function withErrorHandling<T extends any[], R>(
 export function withValidation<T extends any[], R>(
   operation: string,
   validator: (...args: T) => void,
-  fn: (...args: T) => Promise<R>
+  fn: (...args: T) => Promise<R>,
 ): (...args: T) => Promise<R> {
   return async (...args: T): Promise<R> => {
     try {
@@ -45,18 +45,18 @@ export function withValidation<T extends any[], R>(
 export const validators = {
   requireSite: (client: any, params: any) => {
     if (!client) {
-      throw new Error('WordPress client is required');
+      throw new Error("WordPress client is required");
     }
   },
 
   requireId: (params: { id?: number | string }) => {
     if (!params.id) {
-      throw new Error('ID parameter is required');
+      throw new Error("ID parameter is required");
     }
   },
 
   requireNonEmpty: (value: any, fieldName: string) => {
-    if (!value || (typeof value === 'string' && value.trim() === '')) {
+    if (!value || (typeof value === "string" && value.trim() === "")) {
       throw new Error(`${fieldName} cannot be empty`);
     }
   },
@@ -67,14 +67,18 @@ export const validators = {
         throw new Error(`${field} is required`);
       }
     }
-  }
+  },
 };
 
 /**
  * Decorator for class methods to add error handling
  */
 export function errorHandler(operation: string) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {

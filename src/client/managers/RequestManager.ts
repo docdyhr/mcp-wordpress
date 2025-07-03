@@ -3,17 +3,17 @@
  * Handles all HTTP operations, rate limiting, and retries
  */
 
-import fetch from 'node-fetch';
-import type { 
-  HTTPMethod, 
-  RequestOptions, 
+import fetch from "node-fetch";
+import type {
+  HTTPMethod,
+  RequestOptions,
   ClientStats,
-  WordPressClientConfig 
-} from '../../types/client.js';
-import { WordPressAPIError, RateLimitError } from '../../types/client.js';
-import { BaseManager } from './BaseManager.js';
-import { AuthenticationManager } from './AuthenticationManager.js';
-import { debug, startTimer } from '../../utils/debug.js';
+  WordPressClientConfig,
+} from "../../types/client.js";
+import { WordPressAPIError, RateLimitError } from "../../types/client.js";
+import { BaseManager } from "./BaseManager.js";
+import { AuthenticationManager } from "./AuthenticationManager.js";
+import { debug, startTimer } from "../../utils/debug.js";
 
 export class RequestManager extends BaseManager {
   private stats: ClientStats;
@@ -21,18 +21,21 @@ export class RequestManager extends BaseManager {
   private requestInterval: number;
   private authManager: AuthenticationManager;
 
-  constructor(config: WordPressClientConfig, authManager: AuthenticationManager) {
+  constructor(
+    config: WordPressClientConfig,
+    authManager: AuthenticationManager,
+  ) {
     super(config);
-    
+
     this.authManager = authManager;
-    this.requestInterval = 60000 / parseInt(process.env.RATE_LIMIT || '60');
+    this.requestInterval = 60000 / parseInt(process.env.RATE_LIMIT || "60");
     this.stats = {
       totalRequests: 0,
       successfulRequests: 0,
       failedRequests: 0,
       averageResponseTime: 0,
       rateLimitHits: 0,
-      authFailures: 0
+      authFailures: 0,
     };
   }
 
@@ -43,18 +46,23 @@ export class RequestManager extends BaseManager {
     method: HTTPMethod,
     endpoint: string,
     data?: any,
-    options: RequestOptions = {}
+    options: RequestOptions = {},
   ): Promise<T> {
     const timer = startTimer();
-    
+
     try {
       await this.enforceRateLimit();
-      
-      const response = await this.makeRequestWithRetry(method, endpoint, data, options);
-      
+
+      const response = await this.makeRequestWithRetry(
+        method,
+        endpoint,
+        data,
+        options,
+      );
+
       this.stats.successfulRequests++;
       this.updateAverageResponseTime(timer.end());
-      
+
       return response as T;
     } catch (error) {
       this.stats.failedRequests++;
@@ -71,7 +79,7 @@ export class RequestManager extends BaseManager {
     method: HTTPMethod,
     endpoint: string,
     data?: any,
-    options: RequestOptions = {}
+    options: RequestOptions = {},
   ): Promise<T> {
     let lastError: any;
     const maxRetries = options.retries ?? this.config.maxRetries ?? 3;
@@ -81,17 +89,20 @@ export class RequestManager extends BaseManager {
         return await this.makeRequest<T>(method, endpoint, data, options);
       } catch (error: any) {
         lastError = error;
-        
+
         // Don't retry on authentication errors or client errors
         if (error.statusCode < 500 || attempt === maxRetries) {
           throw error;
         }
 
-        debug.log(`Request failed (attempt ${attempt}/${maxRetries}):`, error.message);
-        
+        debug.log(
+          `Request failed (attempt ${attempt}/${maxRetries}):`,
+          error.message,
+        );
+
         // Exponential backoff
         const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
 
@@ -105,38 +116,41 @@ export class RequestManager extends BaseManager {
     method: HTTPMethod,
     endpoint: string,
     data?: any,
-    options: RequestOptions = {}
+    options: RequestOptions = {},
   ): Promise<T> {
     const url = this.buildUrl(endpoint);
     const timeout = options.timeout ?? this.config.timeout ?? 30000;
-    
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
     try {
       // Get authentication headers
       const authHeaders = await this.authManager.getAuthHeaders();
-      
+
       const fetchOptions: any = {
         method,
         headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'MCP-WordPress/1.1.1',
-          ...authHeaders,  // Add auth headers before custom headers
-          ...options.headers
+          "Content-Type": "application/json",
+          "User-Agent": "MCP-WordPress/1.1.1",
+          ...authHeaders, // Add auth headers before custom headers
+          ...options.headers,
         },
-        signal: controller.signal
+        signal: controller.signal,
       };
 
-      if (data && method !== 'GET') {
-        if (data instanceof FormData || (data && typeof data.append === 'function')) {
+      if (data && method !== "GET") {
+        if (
+          data instanceof FormData ||
+          (data && typeof data.append === "function")
+        ) {
           // For FormData, don't set Content-Type (let fetch set it with boundary)
-          delete fetchOptions.headers['Content-Type'];
+          delete fetchOptions.headers["Content-Type"];
           fetchOptions.body = data;
         } else if (Buffer.isBuffer(data)) {
           // For Buffer data, keep Content-Type from headers
           fetchOptions.body = data;
-        } else if (typeof data === 'string') {
+        } else if (typeof data === "string") {
           fetchOptions.body = data;
         } else {
           fetchOptions.body = JSON.stringify(data);
@@ -144,16 +158,15 @@ export class RequestManager extends BaseManager {
       }
 
       debug.log(`API Request: ${method} ${url}`);
-      
+
       const response = await fetch(url, fetchOptions);
-      
+
       if (!response.ok) {
         await this.handleErrorResponse(response);
       }
 
       const responseData = await response.json();
       return responseData as T;
-      
     } finally {
       clearTimeout(timeoutId);
     }
@@ -164,15 +177,16 @@ export class RequestManager extends BaseManager {
    */
   private async handleErrorResponse(response: any): Promise<never> {
     let errorData: any = {};
-    
+
     try {
       errorData = await response.json();
     } catch {
       // Ignore JSON parsing errors
     }
 
-    const message = errorData.message || `HTTP ${response.status}: ${response.statusText}`;
-    const code = errorData.code || 'http_error';
+    const message =
+      errorData.message || `HTTP ${response.status}: ${response.statusText}`;
+    const code = errorData.code || "http_error";
 
     if (response.status === 429) {
       this.stats.rateLimitHits++;
@@ -190,10 +204,10 @@ export class RequestManager extends BaseManager {
    * Build full URL from endpoint
    */
   private buildUrl(endpoint: string): string {
-    const baseUrl = this.config.baseUrl.replace(/\/$/, '');
-    const apiBase = '/wp-json/wp/v2';
-    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-    
+    const baseUrl = this.config.baseUrl.replace(/\/$/, "");
+    const apiBase = "/wp-json/wp/v2";
+    const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+
     return `${baseUrl}${apiBase}${cleanEndpoint}`;
   }
 
@@ -203,12 +217,12 @@ export class RequestManager extends BaseManager {
   private async enforceRateLimit(): Promise<void> {
     const now = Date.now();
     const timeSinceLastRequest = now - this.lastRequestTime;
-    
+
     if (timeSinceLastRequest < this.requestInterval) {
       const delay = this.requestInterval - timeSinceLastRequest;
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
-    
+
     this.lastRequestTime = Date.now();
   }
 
@@ -218,8 +232,8 @@ export class RequestManager extends BaseManager {
   private updateAverageResponseTime(responseTime: number): void {
     const totalRequests = this.stats.successfulRequests;
     const currentAverage = this.stats.averageResponseTime;
-    
-    this.stats.averageResponseTime = 
+
+    this.stats.averageResponseTime =
       (currentAverage * (totalRequests - 1) + responseTime) / totalRequests;
   }
 

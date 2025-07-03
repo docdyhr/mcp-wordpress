@@ -42,8 +42,8 @@ export default [
       ],
       "no-console": "off",
       semi: ["error", "always"],
-      quotes: ["error", "single"],
-      "comma-dangle": ["error", "never"],
+      quotes: ["error", "double"],
+      "comma-dangle": ["error", "always-multiline"],
       indent: ["error", 2],
       "linebreak-style": ["error", "unix"],
       "eol-last": ["error", "always"],
@@ -109,7 +109,6 @@ export default [
       ".env*",
       "scripts/",
       "bin/",
-      "tests/_disabled/",
     ],
   },
 ];
