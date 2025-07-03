@@ -52,7 +52,7 @@ describe("SecurityUtils", () => {
 
   describe("redactString", () => {
     it("should redact password patterns", () => {
-      const text = 'password="secret123" and token="abc456"';
+      const text = "password=\"secret123\" and token=\"abc456\"";
       const result = SecurityUtils.redactString(text);
 
       expect(result).toContain("[REDACTED]");
@@ -118,7 +118,7 @@ describe("SecurityUtils", () => {
 
   describe("sanitizeForLog", () => {
     it("should sanitize string data", () => {
-      const logData = 'User login with password="secret123"';
+      const logData = "User login with password=\"secret123\"";
       const result = SecurityUtils.sanitizeForLog(logData);
 
       expect(result).toContain("[REDACTED]");

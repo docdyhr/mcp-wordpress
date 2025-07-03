@@ -5,6 +5,7 @@
 **The MCP WordPress Server has reached production maturity and transitioned to issue-based development.**
 
 ### ✅ **Core Milestones Completed**
+
 - **100% Test Coverage**: 207/207 tests passing (95%+ coverage)
 - **Production Infrastructure**: Complete CI/CD pipeline with automated releases
 - **Security Hardened**: 40/40 security tests passing with comprehensive validation
@@ -15,11 +16,13 @@
 ## 📋 **Future Development: GitHub Issues**
 
 **All future development is now tracked via GitHub Issues:**
+
 - 🔗 **[View Active Issues](https://github.com/docdyhr/mcp-wordpress/issues)**
 - 🔗 **[Feature Requests](https://github.com/docdyhr/mcp-wordpress/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)**
 - 🔗 **[Bug Reports](https://github.com/docdyhr/mcp-wordpress/issues?q=is%3Aissue+is%3Aopen+label%3Abug)**
 
 ### 🎯 **Migrated Enhancement Items**
+
 The remaining TODO items have been converted to GitHub Issues:
 
 - **[Issue #4](https://github.com/docdyhr/mcp-wordpress/issues/4)**: Property-based tests for cache invalidation patterns
@@ -27,6 +30,7 @@ The remaining TODO items have been converted to GitHub Issues:
 - **[Issue #6](https://github.com/docdyhr/mcp-wordpress/issues/6)**: Blue-green deployment with traffic switching
 
 ### 📝 **Contributing**
+
 - **🐛 Bug Reports**: Use the [Bug Report Template](https://github.com/docdyhr/mcp-wordpress/issues/new?template=bug_report.md)
 - **✨ Feature Requests**: Use the [Feature Request Template](https://github.com/docdyhr/mcp-wordpress/issues/new?template=feature_request.md)
 - **⚡ Performance Issues**: Use the [Performance Issue Template](https://github.com/docdyhr/mcp-wordpress/issues/new?template=performance_issue.md)

@@ -42,11 +42,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🐳 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@v3
 
       - name: 📝 Extract Metadata (Test)
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -117,7 +117,7 @@ jobs:
         uses: docker/setup-qemu-action@v3
 
       - name: 🐳 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@v3
         with:
           # Use latest buildkit features
           driver: docker-container
@@ -135,7 +135,7 @@ jobs:
 
       - name: 📝 Extract Metadata
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |

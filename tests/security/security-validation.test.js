@@ -173,22 +173,22 @@ const SecurityLimiter = {
 describe("Security Validation Tests", () => {
   describe("XSS Protection", () => {
     test("should reject script tags in safe strings", () => {
-      const maliciousInput = 'Hello <script>alert("XSS")</script> World';
+      const maliciousInput = "Hello <script>alert(\"XSS\")</script> World";
       expect(() => SecuritySchemas.safeString.parse(maliciousInput)).toThrow();
     });
 
     test("should reject javascript URLs", () => {
-      const maliciousInput = 'javascript:alert("XSS")';
+      const maliciousInput = "javascript:alert(\"XSS\")";
       expect(() => SecuritySchemas.url.parse(maliciousInput)).toThrow();
     });
 
     test("should reject data URLs", () => {
-      const maliciousInput = 'data:text/html,<script>alert("XSS")</script>';
+      const maliciousInput = "data:text/html,<script>alert(\"XSS\")</script>";
       expect(() => SecuritySchemas.url.parse(maliciousInput)).toThrow();
     });
 
     test("should sanitize HTML content properly", () => {
-      const input = '<p>Safe content</p><script>alert("evil")</script>';
+      const input = "<p>Safe content</p><script>alert(\"evil\")</script>";
       const sanitized = InputSanitizer.sanitizeHtml(input);
       expect(sanitized).not.toContain("<script>");
       expect(sanitized).toContain("<p>Safe content</p>");
@@ -201,7 +201,7 @@ describe("Security Validation Tests", () => {
     });
 
     test("should encode output safely", () => {
-      const input = '<script>alert("test")</script>';
+      const input = "<script>alert(\"test\")</script>";
       const encoded = InputSanitizer.encodeOutput(input);
       expect(encoded).toBe(
         "&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;",
@@ -333,8 +333,8 @@ describe("Security Validation Tests", () => {
     test("should reject invalid URLs", () => {
       const invalidUrls = [
         "not-a-url",
-        'javascript:alert("xss")',
-        'data:text/html,<script>alert("xss")</script>',
+        "javascript:alert(\"xss\")",
+        "data:text/html,<script>alert(\"xss\")</script>",
       ];
 
       invalidUrls.forEach((url) => {
@@ -437,8 +437,8 @@ describe("Content Security", () => {
 
   test("should reject dangerous WordPress content", () => {
     const dangerousContent = [
-      '<script>alert("xss")</script>',
-      'javascript:alert("xss")',
+      "<script>alert(\"xss\")</script>",
+      "javascript:alert(\"xss\")",
     ];
 
     dangerousContent.forEach((content) => {

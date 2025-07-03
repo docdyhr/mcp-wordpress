@@ -424,23 +424,23 @@ describe("Advanced Cache Testing Suite", () => {
         events.push(event);
 
         switch (event.type) {
-          case "post_published":
-            cache.delete("home:latest-posts");
-            cache.delete("home:post-count");
-            cache.delete(`category:${event.category}:posts`);
-            break;
+        case "post_published":
+          cache.delete("home:latest-posts");
+          cache.delete("home:post-count");
+          cache.delete(`category:${event.category}:posts`);
+          break;
 
-          case "user_updated":
-            cache.delete(`user:${event.userId}`);
-            cache.delete(`user:${event.userId}:posts`);
-            break;
+        case "user_updated":
+          cache.delete(`user:${event.userId}`);
+          cache.delete(`user:${event.userId}:posts`);
+          break;
 
-          case "site_settings_changed":
-            // Clear all caches starting with 'settings:'
-            Array.from(cache.cache.keys())
-              .filter((key) => key.startsWith("settings:"))
-              .forEach((key) => cache.delete(key));
-            break;
+        case "site_settings_changed":
+          // Clear all caches starting with 'settings:'
+          Array.from(cache.cache.keys())
+            .filter((key) => key.startsWith("settings:"))
+            .forEach((key) => cache.delete(key));
+          break;
         }
       };
 

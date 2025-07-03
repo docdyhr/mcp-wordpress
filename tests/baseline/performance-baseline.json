@@ -4,19 +4,28 @@
   "metrics": {
     "apiResponseTime": {
       "getPosts": {
-        "p50": 500,
-        "p95": 1000,
-        "p99": 2000
+        "p50": 800.590666,
+        "p95": 893.162541,
+        "p99": 893.162541,
+        "min": 501.455833,
+        "max": 893.162541,
+        "avg": 735.0208896
       },
       "createPost": {
-        "p50": 800,
-        "p95": 1500,
-        "p99": 3000
+        "p50": 1195.904542,
+        "p95": 1584.997125,
+        "p99": 1584.997125,
+        "min": 836.114208,
+        "max": 1584.997125,
+        "avg": 1170.6561112000002
       },
       "uploadMedia": {
-        "p50": 2000,
-        "p95": 5000,
-        "p99": 10000
+        "p50": 3069.805833,
+        "p95": 3824.449292,
+        "p99": 3824.449292,
+        "min": 1932.00375,
+        "max": 3824.449292,
+        "avg": 2994.1814584
       },
       "getUser": {
         "p50": 300,
@@ -25,12 +34,25 @@
       }
     },
     "memoryUsage": {
-      "baseline": 52428800,
-      "peak": 104857600
+      "baseline": 29789088,
+      "peak": 31608632,
+      "increase": 1819544
     },
     "throughput": {
-      "requestsPerSecond": 100,
-      "concurrentConnections": 10
+      "requestsPerSecond": 323.2758620689655,
+      "concurrentConnections": 10,
+      "totalRequests": 150,
+      "totalTime": 0.464
+    },
+    "cpuUsage": {
+      "userTime": 51587,
+      "systemTime": 1055,
+      "totalTime": 52.642
+    },
+    "fileDescriptors": {
+      "initial": 10,
+      "final": 12,
+      "increase": 2
     }
   },
   "thresholds": {

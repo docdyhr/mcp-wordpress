@@ -61,7 +61,7 @@ describe("CachedWordPressClient", () => {
       expect(customClient["siteId"]).toBe("custom-site");
     });
 
-    test('should default to "default" site ID', () => {
+    test("should default to \"default\" site ID", () => {
       const defaultClient = new CachedWordPressClient(config);
       expect(defaultClient["siteId"]).toBe("default");
     });

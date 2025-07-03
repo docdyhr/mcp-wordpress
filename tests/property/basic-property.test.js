@@ -82,7 +82,7 @@ describe("Basic Property-Based Testing", () => {
       fc.assert(
         fc.property(
           fc.constantFrom(
-            '<script>alert("xss")</script>',
+            "<script>alert(\"xss\")</script>",
             "javascript:alert(1)",
             "../../etc/passwd",
             "'; DROP TABLE posts; --",

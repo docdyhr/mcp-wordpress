@@ -368,7 +368,7 @@ describe("Cache Stress Tests", () => {
         "key with spaces and symbols !@#$%^&*()",
         "key:with:colons:and:separators",
         "unicode-key-αβγδε-中文-русский",
-        '{"json":"like","key":true}',
+        "{\"json\":\"like\",\"key\":true}",
         "http://example.com/path?query=value&other=123",
         Array(100).fill("nested").join(":"),
       ];

@@ -42,13 +42,13 @@ describe("Penetration Testing Suite", () => {
 
   describe("Cross-Site Scripting (XSS) Attacks", () => {
     const xssPayloads = [
-      '<script>alert("XSS")</script>',
-      '<img src="x" onerror="alert(\'XSS\')">',
+      "<script>alert(\"XSS\")</script>",
+      "<img src=\"x\" onerror=\"alert('XSS')\">",
       "<svg onload=\"alert('XSS')\"></svg>",
-      'javascript:alert("XSS")',
+      "javascript:alert(\"XSS\")",
       "<iframe src=\"javascript:alert('XSS')\"></iframe>",
       "<body onload=\"alert('XSS')\">",
-      '<input type="text" value="" onfocus="alert(\'XSS\')">',
+      "<input type=\"text\" value=\"\" onfocus=\"alert('XSS')\">",
     ];
 
     test("should prevent XSS in post titles", async () => {
@@ -112,7 +112,7 @@ describe("Penetration Testing Suite", () => {
       "| cat /etc/passwd",
       "& whoami",
       "`rm -rf /`",
-      '; echo "pwned" > /tmp/hacked',
+      "; echo \"pwned\" > /tmp/hacked",
     ];
 
     test("should prevent command injection in search queries", async () => {
@@ -134,7 +134,7 @@ describe("Penetration Testing Suite", () => {
       { username: "admin", password: "' OR '1'='1" },
       { username: "admin'--", password: "anything" },
       { username: "admin", password: "'; DROP TABLE wp_users; --" },
-      { username: '" or 1=1#', password: "password" },
+      { username: "\" or 1=1#", password: "password" },
     ];
 
     test("should prevent authentication bypass attempts", async () => {
