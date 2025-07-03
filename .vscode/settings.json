@@ -1,9 +1,9 @@
 {
   "jest.disabledWorkspaceFolders": [],
   "jest.runMode": "on-demand",
-  "jest.jestCommandLine": "./test-vscode.sh",
+  "jest.jestCommandLine": "NODE_OPTIONS='--experimental-vm-modules' npx jest",
   "jest.rootPath": "./",
-  "jest.configPath": "jest.vscode.config.json",
+  "jest.configPath": "jest.config.cjs",
   "jest.debugMode": false,
   "testExplorer.useNativeTesting": true,
   "typescript.preferences.includePackageJsonAutoImports": "auto"

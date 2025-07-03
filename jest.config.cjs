@@ -6,18 +6,24 @@
 const baseConfig = require('./jest.typescript.config.json');
 
 module.exports = {
+  // Keep ALL the working configuration from base
   ...baseConfig,
-  // Remove invalid options for clean config
-  preset: undefined,
-  transform: undefined,
-  // Use simpler test patterns for VS Code discovery
+  
+  // Only override test discovery patterns for VS Code
   testMatch: [
-    "<rootDir>/tests/**/*.test.js"
+    "<rootDir>/tests/**/*.test.js",
+    "<rootDir>/tests/**/*.test.ts",
+    "<rootDir>/src/**/__tests__/**/*.test.js",
+    "<rootDir>/src/**/__tests__/**/*.test.ts"
   ],
-  // Ensure VS Code can find tests
+  
+  // Keep test path ignores
   testPathIgnorePatterns: [
     "/node_modules/",
     "/dist/",
     "/coverage/"
   ]
+  
+  // DO NOT override preset, transform, or other working config!
+  // The base config has the correct TypeScript setup
 };
