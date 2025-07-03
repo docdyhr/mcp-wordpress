@@ -5,6 +5,67 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0](https://github.com/docdyhr/mcp-wordpress/compare/v1.2.0...v1.3.0) (2025-07-03)
+
+### 🚀 Features
+
+* automated CI/CD documentation pipeline with validation ([db6e5c8](https://github.com/docdyhr/mcp-wordpress/commit/db6e5c8a173087f1338accf19264e8071cc076a1))
+* automated live contract testing with Docker setup ([5f70922](https://github.com/docdyhr/mcp-wordpress/commit/5f70922944b5bccb1559cfdd04856ed109caa22c))
+* complete advanced cache testing implementation with 100% pass rate ([18a988a](https://github.com/docdyhr/mcp-wordpress/commit/18a988a53b20eb925a281255d24d2dbc6ec5abea))
+* comprehensive API documentation auto-generation system ([30234b3](https://github.com/docdyhr/mcp-wordpress/commit/30234b3e2c8a9db78aba019c0bb5aa3c6e2931de))
+* comprehensive performance monitoring and metrics collection system ([1d23ce5](https://github.com/docdyhr/mcp-wordpress/commit/1d23ce573f4136fb63e4f15e15af843b245352f6))
+* comprehensive security testing and input validation framework ([05864a9](https://github.com/docdyhr/mcp-wordpress/commit/05864a92bac49ea1eaacd468e05fa726eb1bf32b))
+* comprehensive v1.2.0 project documentation and containerization update ([978265f](https://github.com/docdyhr/mcp-wordpress/commit/978265fd9ed635b2fe1181bdb76f62ea3ce03997))
+* enhance CI/CD pipeline and pre-commit hooks with security integration ([57930c5](https://github.com/docdyhr/mcp-wordpress/commit/57930c5147fb6d94d0168249dc9074c05539b4e8))
+* enhance validation and testing with Zod schemas and property-based testing ([fb43508](https://github.com/docdyhr/mcp-wordpress/commit/fb43508780dc93980fbb8496e8cdd31140243d0b))
+* fix WordPress REST API authentication and achieve 100% contract test success ([fdc5835](https://github.com/docdyhr/mcp-wordpress/commit/fdc5835a47788c9050737bffbd4d8cb7b834ed66))
+* implement automated live contract testing for WordPress API ([db90dcb](https://github.com/docdyhr/mcp-wordpress/commit/db90dcbee7adec067c07e124c404fce5366421c6))
+* implement Claude Code hooks and Desktop Extension (DXT) support ([001162c](https://github.com/docdyhr/mcp-wordpress/commit/001162c086d77c5f385b0908f87e904235412000))
+* implement comprehensive advanced cache testing suite ([57725cf](https://github.com/docdyhr/mcp-wordpress/commit/57725cf4f59439b448683243d44e943e97783332))
+* implement Phase 2 advanced testing and deployment automation v1.3.0 ([351f0a9](https://github.com/docdyhr/mcp-wordpress/commit/351f0a91970e62daf303b6c3a0374a0885d9df29))
+* v1.2.1 - test infrastructure overhaul and multi-site enhancements ([d4db605](https://github.com/docdyhr/mcp-wordpress/commit/d4db60524cedaae23d49e2c555673799e0ce0046))
+
+### 🐛 Bug Fixes
+
+* add --forceExit flag to test:typescript script to resolve worker process cleanup issues ([7c5e851](https://github.com/docdyhr/mcp-wordpress/commit/7c5e8516ccb566181e85f35b8831f21118cbb15a))
+* add missing cache directory and modules to repository ([e25ed66](https://github.com/docdyhr/mcp-wordpress/commit/e25ed66fd64a02f698a0445958cd5e402166673f))
+* add missing conventional-changelog-conventionalcommits dependency for semantic release ([3813a9b](https://github.com/docdyhr/mcp-wordpress/commit/3813a9b5d36755a06f741ff1535ffea7fd69c383))
+* adjust performance test thresholds for CI reliability ([b5534d3](https://github.com/docdyhr/mcp-wordpress/commit/b5534d3a7ff7c407344dc1ee5e00546bd74e5b4b))
+* CI/CD pipeline failures - performance gates and coverage thresholds ([5d2c345](https://github.com/docdyhr/mcp-wordpress/commit/5d2c345544bb99db642a1e35c6e3b75ecdffe653))
+* complete technical debt remediation with all tests passing ([4cd40af](https://github.com/docdyhr/mcp-wordpress/commit/4cd40afed3a63bfae926fa9155adf7d58257f10e))
+* comprehensive CI/CD pipeline fixes for reliable automated releases ([2d9b30d](https://github.com/docdyhr/mcp-wordpress/commit/2d9b30d65ddd2dbf424207948441c43313c5b547))
+* correct repository URLs from thomasdyhr to docdyhr across all files ([e7574b3](https://github.com/docdyhr/mcp-wordpress/commit/e7574b307970e3431414172698166b4a17940fa9))
+* disable problematic contract tests to unblock CI/CD pipeline ([8de77b0](https://github.com/docdyhr/mcp-wordpress/commit/8de77b0aa1aa818e4e70d917e559c9c2264052ab))
+* final performance test threshold adjustment for CI stability ([1566830](https://github.com/docdyhr/mcp-wordpress/commit/1566830858a8e1db09b7cde98f0ea5a083869425))
+* improve test cleanup to resolve worker process hanging in CI/CD ([ca64f94](https://github.com/docdyhr/mcp-wordpress/commit/ca64f943cec0cef03ca540224c205fa95b8646bc))
+* improve WordPress REST API accessibility for contract testing ([01bd3b2](https://github.com/docdyhr/mcp-wordpress/commit/01bd3b2066c9840246f33a1a36c0b6fad636c1f5))
+* remove remaining AiondaDotCom references from release documentation ([6d7cb05](https://github.com/docdyhr/mcp-wordpress/commit/6d7cb05e9a91d161bc20113deb9d3a7d415fae4a))
+* resolve all failing cache tests - 100% core functionality working ([2b99475](https://github.com/docdyhr/mcp-wordpress/commit/2b994752150ee462a68698e95c22a843a841a4c3))
+* resolve cache module imports by using direct imports without .js extensions ([5b1af84](https://github.com/docdyhr/mcp-wordpress/commit/5b1af847c5142c3271ddae0ea6869205d05a6a71))
+* resolve ESLint errors blocking CI/CD pipeline ([0ad3089](https://github.com/docdyhr/mcp-wordpress/commit/0ad3089627876843602c9b2b8c23feec75fd5e6b))
+* resolve failing unit test for SecurityUtils and update Jest config ([0410f07](https://github.com/docdyhr/mcp-wordpress/commit/0410f0751f2a4a8cfe0d4a83fad846817935b39d))
+* resolve linting issues and add Jest config for new tests ([d114f9d](https://github.com/docdyhr/mcp-wordpress/commit/d114f9d70fc479df3fe16b4230ee60f06034a27f))
+* resolve linting issues in cache test files ([3c7c374](https://github.com/docdyhr/mcp-wordpress/commit/3c7c37418c70f5ac2daf4018caa06f7574298656))
+* resolve linting issues in documentation generator ([5f591b6](https://github.com/docdyhr/mcp-wordpress/commit/5f591b6792cd15953421a5ddea68372aebc2eacd))
+* resolve remaining test issues for complete CI/CD reliability ([aa7d44e](https://github.com/docdyhr/mcp-wordpress/commit/aa7d44ef8f0b336c98234b130910080353ba9a2f))
+* resolve TypeScript cache import path issues for CI/CD builds ([1bf5b72](https://github.com/docdyhr/mcp-wordpress/commit/1bf5b722efd27bd59f1905c1522c7048056c836b))
+* resolve WordPress REST API POST authentication issue ([fb04e2c](https://github.com/docdyhr/mcp-wordpress/commit/fb04e2c0c590fb5a0ac10aaa545a6b59840d1402))
+* resolve WordPress uploads directory permission error ([477532e](https://github.com/docdyhr/mcp-wordpress/commit/477532e59c87c696a0fa09ddc2acf217d61f3f4d))
+* restore .js extensions on individual cache module imports ([bde1963](https://github.com/docdyhr/mcp-wordpress/commit/bde196366a31cb44a91cd657baa057bf7c793742))
+* simplify BaseToolManager to BaseToolUtils with static methods ([2f21a7c](https://github.com/docdyhr/mcp-wordpress/commit/2f21a7cbe419718a20e193174edb84d6e31ceb51))
+* update TypeScript moduleResolution to 'bundler' for ES module compatibility ([3945afc](https://github.com/docdyhr/mcp-wordpress/commit/3945afc6c90589b5b375680cd8919ef2cf2b5791))
+* upgrade Node.js requirement to 20.8.1+ for semantic-release compatibility ([a28034e](https://github.com/docdyhr/mcp-wordpress/commit/a28034edee63848d570fac008bb50c8c3425a623))
+* v1.2.2 - technical debt cleanup and CI/CD improvements ([b102ad1](https://github.com/docdyhr/mcp-wordpress/commit/b102ad1f989f5db91ea3b0fbbb97a0307d8bbca8))
+
+### ♻️ Refactoring
+
+* comprehensive technical debt remediation and test infrastructure ([7270ea9](https://github.com/docdyhr/mcp-wordpress/commit/7270ea93d5eb9fa15c41bb54ef8ebada6ae9ec0e))
+
+### 📚 Documentation
+
+* update project documentation to reflect CI/CD fixes and test improvements ([b0c70f7](https://github.com/docdyhr/mcp-wordpress/commit/b0c70f7f2643586a0d04be59edd61a45e852d635))
+* update TODO.md to mark performance monitoring as completed ([881a43b](https://github.com/docdyhr/mcp-wordpress/commit/881a43b68564ac3fea2550451fde9d542c4e11a7))
+
 ## [Unreleased]
 
 ## [1.2.4] - 2025-07-03
