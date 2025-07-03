@@ -52,7 +52,7 @@ describe('Advanced Cache Testing Suite', () => {
     if (cacheManager?.cache && typeof cacheManager.cache.clear === 'function') {
       try {
         cacheManager.cache.clear();
-      } catch (error) {
+      } catch (_error) {
         // Ignore errors during cleanup
       }
     }
