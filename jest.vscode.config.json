@@ -1,0 +1,24 @@
+{
+  "testEnvironment": "node",
+  "roots": ["<rootDir>/tests"],
+  "testMatch": [
+    "**/tests/**/*.test.js",
+    "**/__tests__/**/*.js",
+    "**/?(*.)+(spec|test).js"
+  ],
+  "testPathIgnorePatterns": [
+    "/node_modules/",
+    "/dist/",
+    "/coverage/"
+  ],
+  "verbose": true,
+  "collectCoverage": false,
+  "testTimeout": 10000,
+  "maxWorkers": 2,
+  "cache": false,
+  "forceExit": true,
+  "detectOpenHandles": false,
+  "globals": {
+    "__EXECUTION_CONTEXT__": "jest"
+  }
+}
