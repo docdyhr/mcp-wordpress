@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/docdyhr/mcp-wordpress#readme
+    about: Check the comprehensive documentation and setup guides
+  - name: 💬 Discussions
+    url: https://github.com/docdyhr/mcp-wordpress/discussions
+    about: Ask questions, share ideas, or discuss features with the community
+  - name: 🔒 Security Issues
+    url: https://github.com/docdyhr/mcp-wordpress/security
+    about: Report security vulnerabilities privately
+  - name: 📦 NPM Package
+    url: https://www.npmjs.com/package/mcp-wordpress
+    about: View the official NPM package and installation instructions
+  - name: 🐳 Docker Hub
+    url: https://hub.docker.com/r/docdyhr/mcp-wordpress
+    about: Access the official Docker images and container documentation
