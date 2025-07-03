@@ -49,8 +49,12 @@ describe('Advanced Cache Testing Suite', () => {
       clearInterval(cacheManager.cleanupTimer);
       cacheManager.cleanupTimer = null;
     }
-    if (cacheManager?.cache) {
-      cacheManager.cache.clear();
+    if (cacheManager?.cache && typeof cacheManager.cache.clear === 'function') {
+      try {
+        cacheManager.cache.clear();
+      } catch (error) {
+        // Ignore errors during cleanup
+      }
     }
   });
   
