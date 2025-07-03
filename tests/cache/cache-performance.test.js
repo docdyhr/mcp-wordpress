@@ -19,8 +19,11 @@ describe('Cache Performance Benchmarks', () => {
     }
     if (cacheManager?.cleanupTimer) {
       clearInterval(cacheManager.cleanupTimer);
+      cacheManager.cleanupTimer = null;
     }
-    await new Promise(resolve => setTimeout(resolve, 5));
+    if (cacheManager?.cache) {
+      cacheManager.cache.clear();
+    }
   });
   
   describe('Throughput Benchmarks', () => {

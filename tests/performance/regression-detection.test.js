@@ -78,6 +78,10 @@ describe('Performance Regression Detection', () => {
   });
 
   afterAll(async () => {
+    // Clear any remaining timers
+    jest.clearAllTimers();
+    jest.useRealTimers();
+    
     // Save performance results
     await fs.promises.writeFile(
       resultsFile,

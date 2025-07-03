@@ -21,10 +21,12 @@ describe('Cache Stress Tests', () => {
     // Clear any pending timers
     if (cacheManager?.cleanupTimer) {
       clearInterval(cacheManager.cleanupTimer);
+      cacheManager.cleanupTimer = null;
     }
     
-    // Wait a bit for any async operations to complete
-    await new Promise(resolve => setTimeout(resolve, 10));
+    if (cacheManager?.cache) {
+      cacheManager.cache.clear();
+    }
   });
   
   describe('Extreme Load Tests', () => {
