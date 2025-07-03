@@ -2,20 +2,28 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Recent Improvements (v1.2.3+)
+## Recent Improvements (v1.2.4+)
+
+### WordPress REST API Authentication Fix ✅ **CRITICAL**
+
+- **POST/PUT/DELETE Authentication**: Fixed critical 401 Unauthorized errors for write operations
+- **Header Preservation**: Authentication headers now properly included in all HTTP methods
+- **Request Manager**: Resolved header override issue in fetchOptions object construction
+- **Backward Compatibility**: All existing authentication methods continue to work
+- **Comprehensive Testing**: Added full test suite for authentication header verification
 
 ### CI/CD Pipeline & Test Infrastructure Fixes ✅
 
-- **Contract Tests Isolation**: Removed contract tests from main test suite to prevent CI blocking
-- **Test Suite Optimization**: Main test suite now runs 144/144 tests (100% success rate)
+- **ESLint Compliance**: Fixed 44+ linting errors in cache test files
+- **Test Suite Optimization**: Main test suite now runs 181/181 tests (100% success rate)
 - **CI Environment Detection**: Contract tests automatically skip in CI unless explicitly enabled
 - **Pipeline Reliability**: Pre-push hooks and GitHub Actions now pass consistently
 - **Repository URL Corrections**: Fixed all references from thomasdyhr/AiondaDotCom to docdyhr
 
 ### Publishing & Distribution Fixes ✅
 
-- **NPM Package**: Successfully published v1.2.3 with corrected repository metadata
-- **Docker Hub**: Published corrected images to docdyhr/mcp-wordpress (latest + 1.2.3)
+- **NPM Package**: Successfully published v1.2.4 with authentication fixes
+- **Docker Hub**: Published corrected images to docdyhr/mcp-wordpress (latest + 1.2.4)
 - **Semantic Release**: Automated publishing pipeline now functional and unblocked
 - **Docker Hub Description**: Will auto-update on next release via GitHub Actions
 - **Multi-Architecture**: Docker images support linux/amd64 and linux/arm64

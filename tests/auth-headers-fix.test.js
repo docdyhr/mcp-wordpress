@@ -54,7 +54,7 @@ describe('WordPress REST API Authentication Headers', () => {
       await client.getPosts({ per_page: 1 });
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      const [url, options] = mockFetch.mock.calls[0];
+      const [_url, options] = mockFetch.mock.calls[0];
       
       expect(options.headers).toBeDefined();
       expect(options.headers.Authorization).toBeDefined();
@@ -75,7 +75,7 @@ describe('WordPress REST API Authentication Headers', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      const [url, options] = mockFetch.mock.calls[0];
+      const [_url, options] = mockFetch.mock.calls[0];
       
       expect(options.method).toBe('POST');
       expect(options.headers).toBeDefined();
@@ -97,7 +97,7 @@ describe('WordPress REST API Authentication Headers', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      const [url, options] = mockFetch.mock.calls[0];
+      const [_url, options] = mockFetch.mock.calls[0];
       
       expect(options.method).toBe('PUT');
       expect(options.headers).toBeDefined();
@@ -115,7 +115,7 @@ describe('WordPress REST API Authentication Headers', () => {
       await client.deletePost(123, true);
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      const [url, options] = mockFetch.mock.calls[0];
+      const [_url, options] = mockFetch.mock.calls[0];
       
       expect(options.method).toBe('DELETE');
       expect(options.headers).toBeDefined();
@@ -138,7 +138,7 @@ describe('WordPress REST API Authentication Headers', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      const [url, options] = mockFetch.mock.calls[0];
+      const [_url, options] = mockFetch.mock.calls[0];
       
       // Should have both auth and custom headers
       expect(options.headers.Authorization).toBeDefined();
@@ -160,7 +160,7 @@ describe('WordPress REST API Authentication Headers', () => {
       await client.post('media', formData);
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      const [url, options] = mockFetch.mock.calls[0];
+      const [_url, options] = mockFetch.mock.calls[0];
       
       expect(options.method).toBe('POST');
       expect(options.headers.Authorization).toBeDefined();
@@ -225,3 +225,4 @@ describe('WordPress REST API Authentication Headers', () => {
     });
   });
 });
+

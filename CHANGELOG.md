@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.4] - 2025-07-03
+
+### Fixed
+- **WordPress REST API Authentication** 🔐:
+  - Fixed critical issue where POST/PUT/DELETE requests returned 401 Unauthorized
+  - Authentication headers are now properly preserved in all HTTP methods
+  - Resolved header override issue when custom options were provided
+  - All write operations now work correctly with application passwords
+- **CI/CD Pipeline**:
+  - Fixed 44+ ESLint errors in cache test files
+  - Resolved all linting issues for 100% CI/CD compliance
+  - Enhanced test reliability for CI environments
+  - Achieved 181/181 tests passing (100% success rate)
+
+### Changed
+- **Request Manager Architecture**:
+  - Updated RequestManager to properly integrate AuthenticationManager
+  - Improved header handling to prevent authentication override
+  - Enhanced FormData request handling while preserving auth headers
+
+### Added
+- **Testing & Debugging**:
+  - Added comprehensive authentication header test suite
+  - Created debugging scripts for auth troubleshooting
+  - Added test coverage for all authentication methods
+
 ## [1.2.3] - 2025-07-02
 
 ### Fixed

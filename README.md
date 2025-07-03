@@ -128,7 +128,7 @@ We've implemented a **comprehensive performance monitoring system**, **intellige
 - [API Documentation](./docs/api/README.md)
 - [Docker Deployment Guide](./docs/DOCKER.md)
 
-## 🔐 Authentication & Testing Status (v1.2.3+)
+## 🔐 Authentication & Testing Status (v1.2.4+)
 
 ✅ **Application Passwords** - Tested and working perfectly
 ✅ **JWT Authentication** - Supported with plugin  
@@ -934,7 +934,7 @@ docker run -d docdyhr/mcp-wordpress:latest
 **Conventional Commit Format:**
 
 ```bash
-# Patch release (1.2.2 → 1.2.3)
+# Patch release (1.2.2 → 1.2.4)
 fix: resolve authentication timeout issue
 
 # Minor release (1.2.2 → 1.3.0)  
