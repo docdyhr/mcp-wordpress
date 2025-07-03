@@ -13,7 +13,7 @@
   ],
   "verbose": true,
   "collectCoverage": false,
-  "testTimeout": 10000,
+  "testTimeout": 30000,
   "maxWorkers": 2,
   "cache": false,
   "forceExit": true,

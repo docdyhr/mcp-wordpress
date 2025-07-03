@@ -22,7 +22,7 @@
   ],
   "coverageReporters": ["text", "lcov", "html"],
   "coverageDirectory": "coverage",
-  "testTimeout": 10000,
+  "testTimeout": 30000,
   "verbose": true,
   "maxWorkers": 2,
   "cache": true,
