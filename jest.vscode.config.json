@@ -16,8 +16,8 @@
   "testTimeout": 30000,
   "maxWorkers": 2,
   "cache": false,
-  "forceExit": true,
-  "detectOpenHandles": false,
+  "forceExit": false,
+  "detectOpenHandles": true,
   "globals": {
     "__EXECUTION_CONTEXT__": "jest"
   }

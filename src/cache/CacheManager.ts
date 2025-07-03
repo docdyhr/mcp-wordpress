@@ -3,7 +3,7 @@
  * Implements multi-layer caching with TTL, LRU eviction, and site-specific keys
  */
 
-import * as crypto from 'crypto';
+import * as crypto from "crypto";
 
 export interface CacheEntry<T = any> {
   value: T;
@@ -37,12 +37,13 @@ export interface CacheConfig {
 export class CacheManager {
   private cache: Map<string, CacheEntry> = new Map();
   private accessOrder: string[] = [];
+  private cleanupInterval: NodeJS.Timeout | null = null;
   private stats: CacheStats = {
     hits: 0,
     misses: 0,
     evictions: 0,
     totalSize: 0,
-    hitRate: 0
+    hitRate: 0,
   };
 
   constructor(private config: CacheConfig) {
@@ -55,16 +56,16 @@ export class CacheManager {
    */
   generateKey(siteId: string, endpoint: string, params?: any): string {
     const baseKey = `${siteId}:${endpoint}`;
-    
+
     if (!params || Object.keys(params).length === 0) {
       return baseKey;
     }
 
     // Create deterministic hash of parameters
     const paramHash = crypto
-      .createHash('md5')
+      .createHash("md5")
       .update(JSON.stringify(this.normalizeParams(params)))
-      .digest('hex')
+      .digest("hex")
       .substring(0, 8);
 
     return `${baseKey}:${paramHash}`;
@@ -75,7 +76,7 @@ export class CacheManager {
    */
   get<T>(key: string): T | null {
     const entry = this.cache.get(key);
-    
+
     if (!entry) {
       this.stats.misses++;
       this.updateHitRate();
@@ -95,10 +96,10 @@ export class CacheManager {
     entry.accessCount++;
     entry.lastAccessed = Date.now();
     this.updateAccessOrder(key);
-    
+
     this.stats.hits++;
     this.updateHitRate();
-    
+
     return entry.value;
   }
 
@@ -106,11 +107,11 @@ export class CacheManager {
    * Set value in cache with TTL
    */
   set<T>(
-    key: string, 
-    value: T, 
+    key: string,
+    value: T,
     ttl: number = this.config.defaultTTL,
     etag?: string,
-    lastModified?: string
+    lastModified?: string,
   ): void {
     // Check if we need to evict entries
     if (this.cache.size >= this.config.maxSize && !this.cache.has(key)) {
@@ -124,7 +125,7 @@ export class CacheManager {
       etag,
       lastModified,
       accessCount: 1,
-      lastAccessed: Date.now()
+      lastAccessed: Date.now(),
     };
 
     // If updating existing entry, remove from access order first
@@ -242,13 +243,13 @@ export class CacheManager {
     if (!entry) return {};
 
     const headers: Record<string, string> = {};
-    
+
     if (entry.etag) {
-      headers['If-None-Match'] = entry.etag;
+      headers["If-None-Match"] = entry.etag;
     }
-    
+
     if (entry.lastModified) {
-      headers['If-Modified-Since'] = entry.lastModified;
+      headers["If-Modified-Since"] = entry.lastModified;
     }
 
     return headers;
@@ -301,7 +302,7 @@ export class CacheManager {
    * Normalize parameters for consistent hashing
    */
   private normalizeParams(params: any): any {
-    if (typeof params !== 'object' || params === null) {
+    if (typeof params !== "object" || params === null) {
       return params;
     }
 
@@ -328,9 +329,19 @@ export class CacheManager {
    * Start periodic cleanup of expired entries
    */
   private startCleanupInterval(): void {
-    setInterval(() => {
+    this.cleanupInterval = setInterval(() => {
       this.cleanupExpired();
     }, 60000); // Cleanup every minute
+  }
+
+  /**
+   * Stop the cleanup interval and clean up resources
+   */
+  destroy(): void {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+    }
   }
 
   /**
@@ -362,30 +373,30 @@ export const CachePresets = {
   // Static data: site settings, user roles
   STATIC: {
     ttl: 4 * 60 * 60 * 1000, // 4 hours
-    cacheControl: 'public, max-age=14400'
+    cacheControl: "public, max-age=14400",
   },
-  
-  // Semi-static: categories, tags, user profiles  
+
+  // Semi-static: categories, tags, user profiles
   SEMI_STATIC: {
     ttl: 2 * 60 * 60 * 1000, // 2 hours
-    cacheControl: 'public, max-age=7200'
+    cacheControl: "public, max-age=7200",
   },
-  
+
   // Dynamic: posts, pages, comments
   DYNAMIC: {
     ttl: 15 * 60 * 1000, // 15 minutes
-    cacheControl: 'public, max-age=900'
+    cacheControl: "public, max-age=900",
   },
-  
+
   // Session: authentication, current user
   SESSION: {
     ttl: 30 * 60 * 1000, // 30 minutes
-    cacheControl: 'private, max-age=1800'
+    cacheControl: "private, max-age=1800",
   },
-  
+
   // Fast changing: real-time data
   REALTIME: {
     ttl: 60 * 1000, // 1 minute
-    cacheControl: 'public, max-age=60'
-  }
+    cacheControl: "public, max-age=60",
+  },
 };

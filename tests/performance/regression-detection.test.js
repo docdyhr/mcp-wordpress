@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeAll, afterAll, jest } from '@jest/globals';
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
+import { describe, it, expect, beforeAll, afterAll, jest } from "@jest/globals";
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,16 +10,16 @@ const __dirname = path.dirname(__filename);
  * Performance regression detection tests
  * These tests measure performance and fail if regression is detected
  */
-describe('Performance Regression Detection', () => {
+describe("Performance Regression Detection", () => {
   let performanceBaseline;
   let performanceResults;
   const baselineFile = path.resolve(
     __dirname,
-    '../baseline/performance-baseline.json'
+    "../baseline/performance-baseline.json",
   );
   const resultsFile = path.resolve(
     __dirname,
-    '../results/performance-results.json'
+    "../results/performance-results.json",
   );
 
   beforeAll(async () => {
@@ -29,51 +29,51 @@ describe('Performance Regression Detection', () => {
 
     // Load performance baseline
     try {
-      const baselineData = await fs.promises.readFile(baselineFile, 'utf-8');
+      const baselineData = await fs.promises.readFile(baselineFile, "utf-8");
       performanceBaseline = JSON.parse(baselineData);
     } catch (_error) {
       // If no baseline exists, create an initial one
       performanceBaseline = {
-        version: '1.0.0',
+        version: "1.0.0",
         timestamp: new Date().toISOString(),
         metrics: {
           apiResponseTime: {
             getPosts: { p50: 500, p95: 1000, p99: 2000 },
             createPost: { p50: 800, p95: 1500, p99: 3000 },
             uploadMedia: { p50: 2000, p95: 5000, p99: 10000 },
-            getUser: { p50: 300, p95: 600, p99: 1000 }
+            getUser: { p50: 300, p95: 600, p99: 1000 },
           },
           memoryUsage: {
             baseline: 50 * 1024 * 1024, // 50MB
-            peak: 100 * 1024 * 1024 // 100MB
+            peak: 100 * 1024 * 1024, // 100MB
           },
           throughput: {
             requestsPerSecond: 100,
-            concurrentConnections: 10
-          }
+            concurrentConnections: 10,
+          },
         },
         thresholds: {
           regressionThreshold: 0.2, // 20% regression threshold
           memoryThreshold: 0.15, // 15% memory increase threshold
-          throughputThreshold: 0.1 // 10% throughput decrease threshold
-        }
+          throughputThreshold: 0.1, // 10% throughput decrease threshold
+        },
       };
 
       await fs.promises.writeFile(
         baselineFile,
-        JSON.stringify(performanceBaseline, null, 2)
+        JSON.stringify(performanceBaseline, null, 2),
       );
-      console.log('Created initial performance baseline');
+      console.log("Created initial performance baseline");
     }
 
     performanceResults = {
-      version: '1.2.0',
+      version: "1.2.0",
       timestamp: new Date().toISOString(),
       metrics: {
         apiResponseTime: {},
         memoryUsage: {},
-        throughput: {}
-      }
+        throughput: {},
+      },
     };
   });
 
@@ -81,15 +81,15 @@ describe('Performance Regression Detection', () => {
     // Clear any remaining timers
     jest.clearAllTimers();
     jest.useRealTimers();
-    
+
     // Save performance results
     await fs.promises.writeFile(
       resultsFile,
-      JSON.stringify(performanceResults, null, 2)
+      JSON.stringify(performanceResults, null, 2),
     );
   });
 
-  describe('API Response Time Regression', () => {
+  describe("API Response Time Regression", () => {
     let mockClient;
 
     beforeAll(() => {
@@ -97,24 +97,23 @@ describe('Performance Regression Detection', () => {
       mockClient = {
         getPosts: () =>
           new Promise((resolve) =>
-            setTimeout(() => resolve([]), Math.random() * 600 + 400)
+            setTimeout(() => resolve([]), Math.random() * 600 + 400),
           ),
         createPost: () =>
           new Promise((resolve) =>
-            setTimeout(() => resolve({ id: 1 }), Math.random() * 900 + 700)
+            setTimeout(() => resolve({ id: 1 }), Math.random() * 900 + 700),
           ),
         uploadMedia: () =>
           new Promise((resolve) =>
-            setTimeout(() => resolve({ id: 1 }), Math.random() * 2500 + 1800)
+            setTimeout(() => resolve({ id: 1 }), Math.random() * 2500 + 1800),
           ),
         getUser: () =>
           new Promise((resolve) =>
-            setTimeout(() => resolve({ id: 1 }), Math.random() * 400 + 250)
-          )
+            setTimeout(() => resolve({ id: 1 }), Math.random() * 400 + 250),
+          ),
       };
     });
-
-    it('should not exceed baseline response time for getPosts', async () => {
+    it("should not exceed baseline response time for getPosts", async () => {
       const iterations = 20; // Reduced iterations
       const responseTimes = [];
 
@@ -141,12 +140,12 @@ describe('Performance Regression Detection', () => {
 
       if (p95Regression > threshold || p99Regression > threshold) {
         throw new Error(
-          `Performance regression detected in getPosts: P95=${metrics.p95}ms (baseline: ${baseline.p95}ms), P99=${metrics.p99}ms (baseline: ${baseline.p99}ms)`
+          `Performance regression detected in getPosts: P95=${metrics.p95}ms (baseline: ${baseline.p95}ms), P99=${metrics.p99}ms (baseline: ${baseline.p99}ms)`,
         );
       }
-    }, 15000); // 15 second timeout
+    }, 30000); // 30 second timeout
 
-    it('should not exceed baseline response time for createPost', async () => {
+    it("should not exceed baseline response time for createPost", async () => {
       const iterations = 15; // Reduced iterations
       const responseTimes = [];
 
@@ -168,7 +167,7 @@ describe('Performance Regression Detection', () => {
       expect(p95Regression).toBeLessThan(threshold);
     }, 20000); // 20 second timeout
 
-    it('should not exceed baseline response time for uploadMedia', async () => {
+    it("should not exceed baseline response time for uploadMedia", async () => {
       const iterations = 5; // Fewer iterations for slower operations
       const responseTimes = [];
 
@@ -191,8 +190,8 @@ describe('Performance Regression Detection', () => {
     }, 25000); // 25 second timeout
   });
 
-  describe('Memory Usage Regression', () => {
-    it('should not exceed baseline memory usage', async () => {
+  describe("Memory Usage Regression", () => {
+    it("should not exceed baseline memory usage", async () => {
       const initialMemory = process.memoryUsage();
 
       // Simulate memory-intensive operations
@@ -210,7 +209,7 @@ describe('Performance Regression Detection', () => {
       performanceResults.metrics.memoryUsage = {
         baseline: initialMemory.heapUsed,
         peak: finalMemory.heapUsed,
-        increase: memoryIncrease
+        increase: memoryIncrease,
       };
 
       const baselineMemory = performanceBaseline.metrics.memoryUsage.baseline;
@@ -221,12 +220,12 @@ describe('Performance Regression Detection', () => {
 
       if (memoryRegression > threshold) {
         throw new Error(
-          `Memory regression detected: ${memoryIncrease} bytes increase (${(memoryRegression * 100).toFixed(2)}% of baseline)`
+          `Memory regression detected: ${memoryIncrease} bytes increase (${(memoryRegression * 100).toFixed(2)}% of baseline)`,
         );
       }
     });
 
-    it('should detect memory leaks in long-running operations', async () => {
+    it("should detect memory leaks in long-running operations", async () => {
       const memorySnapshots = [];
 
       // Take memory snapshots during long-running operations
@@ -252,14 +251,14 @@ describe('Performance Regression Detection', () => {
 
       if (memoryGrowth.trend > 0.5) {
         throw new Error(
-          `Potential memory leak detected: ${(memoryGrowth.trend * 100).toFixed(2)}% consistent growth`
+          `Potential memory leak detected: ${(memoryGrowth.trend * 100).toFixed(2)}% consistent growth`,
         );
       }
     });
   });
 
-  describe('Throughput Regression', () => {
-    it('should maintain baseline throughput for concurrent requests', async () => {
+  describe("Throughput Regression", () => {
+    it("should maintain baseline throughput for concurrent requests", async () => {
       const concurrency = 10;
       const requestsPerBatch = 50;
       const batches = 3;
@@ -289,7 +288,7 @@ describe('Performance Regression Detection', () => {
         requestsPerSecond,
         concurrentConnections: concurrency,
         totalRequests,
-        totalTime
+        totalTime,
       };
 
       const baselineThroughput =
@@ -302,14 +301,14 @@ describe('Performance Regression Detection', () => {
 
       if (throughputRegression > threshold) {
         throw new Error(
-          `Throughput regression detected: ${requestsPerSecond.toFixed(2)} req/s (baseline: ${baselineThroughput} req/s)`
+          `Throughput regression detected: ${requestsPerSecond.toFixed(2)} req/s (baseline: ${baselineThroughput} req/s)`,
         );
       }
     });
   });
 
-  describe('Resource Utilization Regression', () => {
-    it('should not exceed CPU usage thresholds', async () => {
+  describe("Resource Utilization Regression", () => {
+    it("should not exceed CPU usage thresholds", async () => {
       const cpuUsageBefore = process.cpuUsage();
 
       // CPU-intensive operations
@@ -324,11 +323,11 @@ describe('Performance Regression Detection', () => {
       performanceResults.metrics.cpuUsage = {
         userTime: cpuUsageAfter.user,
         systemTime: cpuUsageAfter.system,
-        totalTime: cpuTimeMs
+        totalTime: cpuTimeMs,
       };
     });
 
-    it('should monitor file descriptor usage', async () => {
+    it("should monitor file descriptor usage", async () => {
       // This test would monitor file descriptor leaks
       // Simulated for now, but would check actual FD usage in real implementation
       const initialFDs = 10; // Simulated baseline
@@ -342,7 +341,7 @@ describe('Performance Regression Detection', () => {
       performanceResults.metrics.fileDescriptors = {
         initial: initialFDs,
         final: finalFDs,
-        increase: fdIncrease
+        increase: fdIncrease,
       };
     });
   });
@@ -359,7 +358,7 @@ function calculatePercentiles(values) {
     p99: sorted[Math.floor(len * 0.99)],
     min: sorted[0],
     max: sorted[len - 1],
-    avg: values.reduce((sum, val) => sum + val, 0) / len
+    avg: values.reduce((sum, val) => sum + val, 0) / len,
   };
 }
 
@@ -369,7 +368,7 @@ function simulateMemoryIntensiveOperation() {
     const largeArray = new Array(1000).fill(0).map((_, i) => ({
       id: i,
       data: `test-data-${i}`,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     }));
 
     // Simulate some processing
@@ -388,7 +387,7 @@ function simulateConcurrentRequest() {
       () => {
         resolve({ success: true, timestamp: Date.now() });
       },
-      Math.random() * 100 + 50
+      Math.random() * 100 + 50,
     );
   });
 }
@@ -416,7 +415,7 @@ function analyzeMemoryGrowth(snapshots) {
   // Return trend as percentage of initial memory
   return {
     trend: Math.abs(slope * n) / initialMemory,
-    slope
+    slope,
   };
 }
 

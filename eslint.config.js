@@ -109,6 +109,7 @@ export default [
       ".env*",
       "scripts/",
       "bin/",
+      "tests/_disabled/",
     ],
   },
 ];

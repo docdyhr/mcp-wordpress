@@ -26,8 +26,8 @@
   "verbose": true,
   "maxWorkers": 2,
   "cache": true,
-  "forceExit": true,
-  "detectOpenHandles": false,
+  "forceExit": false,
+  "detectOpenHandles": true,
   "setupFilesAfterEnv": ["<rootDir>/tests/jest.teardown.js"],
   "globals": {
     "__EXECUTION_CONTEXT__": "jest"
