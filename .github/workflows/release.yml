@@ -41,8 +41,9 @@ jobs:
       - name: 🏗️ Build Project
         run: npm run build
 
-      - name: 🧪 Run Tests
+      - name: 🧪 Run Essential Tests
         run: |
+          # Run core tests that must pass for release
           npm run test:typescript
           npm run test:config
           npm run test:security
@@ -50,12 +51,13 @@ jobs:
           WORDPRESS_SITE_URL: https://example.com
           WORDPRESS_USERNAME: test_user
           WORDPRESS_APP_PASSWORD: test_password
+          CI: true
 
       - name: 🏷️ Semantic Release
         id: semantic
         uses: cycjimmy/semantic-release-action@v4
         with:
-          semantic_version: 19
+          semantic_version: 24
           extra_plugins: |
             @semantic-release/changelog@6.0.3
             @semantic-release/git@10.0.1

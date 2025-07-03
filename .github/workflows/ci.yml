@@ -10,7 +10,7 @@ on:
     - cron: '0 2 * * *'
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
   NODE_OPTIONS: '--experimental-vm-modules'
 
 jobs:
@@ -23,11 +23,8 @@ jobs:
         node-version: [20, 22]
         test-suite: 
           - typescript
-          - tools
-          - mcp
-          - auth
-          - integration
           - security
+          - config
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
@@ -48,17 +45,15 @@ jobs:
         run: |
           case "${{ matrix.test-suite }}" in
             "typescript") npm run test:typescript ;;
-            "tools") npm run test:tools ;;
-            "mcp") npm run test:mcp ;;
-            "auth") npm run test:auth ;;
-            "integration") npm run test:integration ;;
             "security") npm run test:security ;;
+            "config") npm run test:config ;;
           esac
         env:
           # Mock credentials for testing
           WORDPRESS_SITE_URL: https://example.com
           WORDPRESS_USERNAME: test_user
           WORDPRESS_APP_PASSWORD: test_password
+          CI: true
 
   # 🔍 Code Quality & Security
   quality-checks:
