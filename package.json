@@ -93,7 +93,7 @@
     "test:security:penetration": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/penetration-tests.test.js --config=jest.typescript.config.json",
     "test:security:validation": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/security-validation.test.js --config=jest.typescript.config.json",
     "test:tools": "node scripts/test-all-tools-fixed.js",
-    "test:typescript": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest --config=jest.typescript.config.json",
+    "test:typescript": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest --config=jest.typescript.config.json --forceExit",
     "test:watch": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --watch --config=jest.typescript.config.json",
     "test:with-env": "bash scripts/start-test-env.sh && npm run test:typescript",
     "typecheck": "tsc --noEmit",
