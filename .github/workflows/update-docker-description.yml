@@ -1,0 +1,32 @@
+name: 🐳 Update Docker Hub Description
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'README.md'
+      - '.github/workflows/update-docker-description.yml'
+
+jobs:
+  update-description:
+    name: 📝 Update Docker Hub Description
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📝 Update Docker Hub Description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: docdyhr/mcp-wordpress
+          readme-filepath: ./README.md
+          short-description: "🚀 Complete WordPress MCP Server - 59 management tools, intelligent caching, real-time monitoring, multi-site support. TypeScript, Docker ready, 95%+ test coverage."
+
+      - name: ✅ Success Notification
+        run: |
+          echo "🎉 Docker Hub description updated successfully!"
+          echo "📝 Repository: docdyhr/mcp-wordpress"
+          echo "📂 Source: README.md"
