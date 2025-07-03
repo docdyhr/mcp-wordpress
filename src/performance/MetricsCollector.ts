@@ -4,7 +4,7 @@
  */
 
 import { PerformanceMonitor, PerformanceMetrics } from './PerformanceMonitor.js';
-import type { CacheStats } from '../cache/index.js';
+import type { CacheStats } from '../cache/CacheManager';
 import type { ClientStats } from '../types/client.js';
 
 export interface CollectorConfig {
