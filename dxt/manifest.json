@@ -1,0 +1,221 @@
+{
+  "dxt_version": "0.1",
+  "name": "mcp-wordpress",
+  "display_name": "WordPress MCP Server",
+  "version": "1.2.4",
+  "description": "Comprehensive WordPress management through 59 MCP tools with multi-site support, performance monitoring, and intelligent caching",
+  "long_description": "# WordPress MCP Server\n\nA comprehensive Model Context Protocol (MCP) server for WordPress management through the WordPress REST API v2. Features 59 WordPress management tools across 10 categories, multi-site support, intelligent caching system with 50-70% performance improvement, real-time performance monitoring, and production-ready security.\n\n## Key Features\n\n- **59 WordPress Management Tools** across Posts, Pages, Media, Users, Comments, Taxonomies, Site Management, Authentication, Cache Management, and Performance Monitoring\n- **Multi-Site Support** - Manage multiple WordPress sites from one configuration\n- **Intelligent Caching System** - 50-70% performance improvement with multi-layer caching\n- **Real-Time Performance Monitoring** - Comprehensive metrics and analytics\n- **Flexible Authentication** - Supports App Passwords, JWT, Basic Auth, API Key\n- **100% TypeScript** - Complete type safety and IntelliSense\n- **Production Ready** - Security-reviewed and battle-tested\n\n## Authentication Methods\n\n- **Application Passwords** (Recommended) - WordPress 5.6+ built-in\n- **JWT Authentication** - Requires JWT plugin\n- **Basic Authentication** - Development only\n- **API Key Authentication** - Requires plugin\n\n## Use Cases\n\n- Content management and publishing workflows\n- Multi-site WordPress administration\n- Media library management and optimization\n- User and comment moderation\n- Performance monitoring and optimization\n- Automated WordPress maintenance tasks",
+  "author": {
+    "name": "Thomas Dyhr",
+    "email": "contact@docdyhr.dev",
+    "url": "https://github.com/docdyhr"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/docdyhr/mcp-wordpress"
+  },
+  "homepage": "https://github.com/docdyhr/mcp-wordpress",
+  "documentation": "https://github.com/docdyhr/mcp-wordpress/blob/main/README.md",
+  "support": "https://github.com/docdyhr/mcp-wordpress/issues",
+  "license": "MIT",
+  "keywords": [
+    "wordpress",
+    "mcp",
+    "content-management",
+    "api",
+    "automation",
+    "multi-site",
+    "performance",
+    "caching"
+  ],
+  "icon": "icon.png",
+  "screenshots": [
+    "screenshots/tools-overview.png",
+    "screenshots/multi-site-config.png",
+    "screenshots/performance-monitoring.png"
+  ],
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/dist/index.js"
+      ],
+      "env": {
+        "WORDPRESS_SITE_URL": "${user_config.wordpress_site_url}",
+        "WORDPRESS_USERNAME": "${user_config.wordpress_username}",
+        "WORDPRESS_APP_PASSWORD": "${user_config.wordpress_app_password}",
+        "WORDPRESS_AUTH_METHOD": "${user_config.auth_method}",
+        "DEBUG": "${user_config.debug_mode}"
+      }
+    }
+  },
+  "user_config": {
+    "wordpress_site_url": {
+      "type": "string",
+      "title": "WordPress Site URL",
+      "description": "The full URL of your WordPress site (e.g., https://yoursite.com)",
+      "required": true,
+      "placeholder": "https://yoursite.com"
+    },
+    "wordpress_username": {
+      "type": "string",
+      "title": "WordPress Username",
+      "description": "Your WordPress username with appropriate permissions",
+      "required": true,
+      "placeholder": "your-username"
+    },
+    "wordpress_app_password": {
+      "type": "string",
+      "title": "WordPress Application Password",
+      "description": "Generate an Application Password in WordPress Admin → Users → Profile → Application Passwords",
+      "required": true,
+      "sensitive": true,
+      "placeholder": "xxxx xxxx xxxx xxxx xxxx xxxx"
+    },
+    "auth_method": {
+      "type": "string",
+      "title": "Authentication Method",
+      "description": "Choose your WordPress authentication method",
+      "required": false,
+      "default": "app-password",
+      "enum": ["app-password", "jwt", "basic", "api-key"],
+      "enum_labels": [
+        "Application Password (Recommended)",
+        "JWT Authentication",
+        "Basic Authentication",
+        "API Key Authentication"
+      ]
+    },
+    "debug_mode": {
+      "type": "boolean",
+      "title": "Debug Mode",
+      "description": "Enable verbose logging for troubleshooting",
+      "required": false,
+      "default": false
+    }
+  },
+  "tools": [
+    {
+      "name": "wp_list_posts",
+      "description": "List and filter WordPress blog posts"
+    },
+    {
+      "name": "wp_create_post",
+      "description": "Create new WordPress blog posts"
+    },
+    {
+      "name": "wp_update_post",
+      "description": "Edit existing WordPress posts"
+    },
+    {
+      "name": "wp_delete_post",
+      "description": "Delete WordPress posts"
+    },
+    {
+      "name": "wp_list_pages",
+      "description": "List WordPress pages"
+    },
+    {
+      "name": "wp_create_page",
+      "description": "Create new WordPress pages"
+    },
+    {
+      "name": "wp_upload_media",
+      "description": "Upload files to WordPress media library"
+    },
+    {
+      "name": "wp_list_media",
+      "description": "Browse WordPress media library"
+    },
+    {
+      "name": "wp_list_users",
+      "description": "List WordPress users"
+    },
+    {
+      "name": "wp_create_user",
+      "description": "Create new WordPress users"
+    },
+    {
+      "name": "wp_list_comments",
+      "description": "List WordPress comments"
+    },
+    {
+      "name": "wp_approve_comment",
+      "description": "Approve WordPress comments"
+    },
+    {
+      "name": "wp_list_categories",
+      "description": "List WordPress categories"
+    },
+    {
+      "name": "wp_create_category",
+      "description": "Create new WordPress categories"
+    },
+    {
+      "name": "wp_list_tags",
+      "description": "List WordPress tags"
+    },
+    {
+      "name": "wp_get_site_settings",
+      "description": "Get WordPress site settings"
+    },
+    {
+      "name": "wp_get_site_stats",
+      "description": "Get WordPress site statistics"
+    },
+    {
+      "name": "wp_test_auth",
+      "description": "Test WordPress authentication"
+    },
+    {
+      "name": "wp_cache_stats",
+      "description": "Get real-time cache performance statistics"
+    },
+    {
+      "name": "wp_cache_clear",
+      "description": "Clear cache entries with optional pattern matching"
+    },
+    {
+      "name": "wp_performance_stats",
+      "description": "Get real-time performance statistics and metrics"
+    },
+    {
+      "name": "wp_performance_optimize",
+      "description": "Get optimization recommendations and insights"
+    }
+  ],
+  "prompts": [
+    {
+      "name": "setup_wordpress",
+      "description": "Initial WordPress site setup and configuration",
+      "content": "Help me set up and configure my WordPress site using the MCP WordPress tools. Please:\n1. Test the connection and authentication\n2. Get site information and current settings\n3. Show me the available tools and their capabilities\n4. Provide recommendations for optimal configuration"
+    },
+    {
+      "name": "content_management",
+      "description": "WordPress content creation and management workflow",
+      "content": "I need help managing content on my WordPress site. Please:\n1. Show me recent posts and pages\n2. Help me create new content with proper SEO optimization\n3. Manage categories and tags for better organization\n4. Optimize media uploads and file management"
+    },
+    {
+      "name": "performance_optimization",
+      "description": "WordPress performance monitoring and optimization",
+      "content": "Help me optimize my WordPress site's performance. Please:\n1. Check current performance metrics and statistics\n2. Analyze cache performance and hit rates\n3. Provide optimization recommendations\n4. Monitor and alert on performance issues"
+    },
+    {
+      "name": "multi_site_management",
+      "description": "Multi-site WordPress administration workflow",
+      "content": "I'm managing multiple WordPress sites. Please help me:\n1. Check the status of all configured sites\n2. Synchronize content across sites where appropriate\n3. Monitor performance across all sites\n4. Manage users and permissions consistently"
+    }
+  ],
+  "compatibility": {
+    "dxt_version": "0.1",
+    "platforms": ["win32", "darwin", "linux"],
+    "node_version": ">=18.0.0"
+  },
+  "requirements": {
+    "wordpress_version": ">=5.0",
+    "rest_api": "enabled",
+    "https": "recommended"
+  }
+}

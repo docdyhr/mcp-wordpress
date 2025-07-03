@@ -1,0 +1,184 @@
+{
+  "hooks": {
+    "pre-commit": [
+      {
+        "name": "ESLint check",
+        "command": "npm run lint",
+        "description": "Run ESLint to check code quality and style",
+        "timeout": 60000,
+        "blocking": true
+      },
+      {
+        "name": "TypeScript type check",
+        "command": "npm run typecheck",
+        "description": "Verify TypeScript types without emitting files",
+        "timeout": 120000,
+        "blocking": true
+      },
+      {
+        "name": "Quick test validation",
+        "command": "npm run test:fast",
+        "description": "Run quick tests to catch obvious regressions",
+        "timeout": 180000,
+        "blocking": true
+      },
+      {
+        "name": "Markdown linting",
+        "command": "npx markdownlint *.md docs/**/*.md --fix",
+        "description": "Lint and auto-fix markdown files following GitHub best practices",
+        "timeout": 30000,
+        "blocking": true
+      },
+      {
+        "name": "Prettier formatting",
+        "command": "npx prettier --write *.md docs/**/*.md",
+        "description": "Format markdown files with consistent styling",
+        "timeout": 30000,
+        "blocking": true
+      },
+      {
+        "name": "Security scan",
+        "command": "npm run security:check",
+        "description": "Quick security vulnerability scan and credential detection",
+        "timeout": 60000,
+        "blocking": true
+      }
+    ],
+    "pre-push": [
+      {
+        "name": "Full build",
+        "command": "npm run build",
+        "description": "Ensure project builds successfully",
+        "timeout": 180000,
+        "blocking": true
+      },
+      {
+        "name": "Complete test suite",
+        "command": "npm test",
+        "description": "Run all tests to prevent CI failures",
+        "timeout": 600000,
+        "blocking": true
+      },
+      {
+        "name": "Security audit",
+        "command": "npm audit --audit-level=moderate",
+        "description": "Check for security vulnerabilities in dependencies",
+        "timeout": 120000,
+        "blocking": true
+      },
+      {
+        "name": "Comprehensive security tests",
+        "command": "npm run test:security",
+        "description": "Run comprehensive security validation and penetration tests",
+        "timeout": 300000,
+        "blocking": true
+      },
+      {
+        "name": "Security policy validation",
+        "command": "npm run security:test",
+        "description": "Validate security policies and configuration",
+        "timeout": 120000,
+        "blocking": true
+      },
+      {
+        "name": "Performance tests",
+        "command": "npm run test:performance",
+        "description": "Validate performance regression thresholds",
+        "timeout": 300000,
+        "blocking": false
+      }
+    ],
+    "file-specific": {
+      "src/**/*.ts": [
+        {
+          "name": "TypeScript compile check",
+          "command": "npx tsc --noEmit --strict ${files}",
+          "description": "Check TypeScript files for compilation errors",
+          "timeout": 60000,
+          "blocking": true
+        }
+      ],
+      "tests/**/*.{js,ts}": [
+        {
+          "name": "Test file validation",
+          "command": "npm run test -- --testPathPattern=${files}",
+          "description": "Run tests for modified test files",
+          "timeout": 300000,
+          "blocking": true
+        }
+      ],
+      "src/cache/**/*.ts": [
+        {
+          "name": "Cache module lint",
+          "command": "npx eslint ${files}",
+          "description": "Extra linting for cache modules",
+          "timeout": 30000,
+          "blocking": true
+        }
+      ],
+      "package.json": [
+        {
+          "name": "Package validation",
+          "command": "npm ls --depth=0",
+          "description": "Validate package.json dependencies",
+          "timeout": 60000,
+          "blocking": true
+        }
+      ],
+      "*.md": [
+        {
+          "name": "Markdown file validation",
+          "command": "npx markdownlint ${files} --fix && npx prettier --write ${files}",
+          "description": "Lint and format specific markdown files on change",
+          "timeout": 30000,
+          "blocking": true
+        }
+      ],
+      "src/security/**/*.ts": [
+        {
+          "name": "Security module validation",
+          "command": "npx eslint ${files} && node scripts/security-check.js --files=${files}",
+          "description": "Enhanced security validation for security-critical modules",
+          "timeout": 60000,
+          "blocking": true
+        }
+      ],
+      "src/client/**/*.ts": [
+        {
+          "name": "Client security scan",
+          "command": "node scripts/security-check.js --files=${files} --check-auth",
+          "description": "Security scan for authentication and HTTP client modules",
+          "timeout": 45000,
+          "blocking": true
+        }
+      ],
+      "*.{env,config,json}": [
+        {
+          "name": "Configuration security check",
+          "command": "node scripts/security-check.js --files=${files} --check-secrets",
+          "description": "Scan configuration files for exposed secrets and credentials",
+          "timeout": 30000,
+          "blocking": true
+        }
+      ]
+    }
+  },
+  "settings": {
+    "parallelExecution": true,
+    "continueOnFailure": false,
+    "logLevel": "info",
+    "retryCount": 1,
+    "notifications": {
+      "success": false,
+      "failure": true
+    }
+  },
+  "ignore": [
+    "dist/**/*",
+    "node_modules/**/*",
+    "coverage/**/*",
+    "*.log",
+    ".env*",
+    "mcp-wordpress.config.json"
+  ]
+}

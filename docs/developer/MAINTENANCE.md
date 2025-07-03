@@ -9,6 +9,7 @@ This document outlines automated and manual processes to keep the project secure
 ### NPM Package Configuration
 
 #### `.npmignore` File Maintenance
+
 The `.npmignore` file is automatically checked before each publication:
 
 ```bash
@@ -20,6 +21,7 @@ npm run check:ignore
 ```
 
 **What it checks:**
+
 - ✅ **Security files** are excluded (`.env`, `.npmrc`, `*.pem`, `*.key`, credentials)
 - ✅ **Test files** are excluded (`tests/`, `*.test.js`, `coverage/`)
 - ✅ **Development files** are excluded (`src/`, config files, IDE settings)
@@ -28,9 +30,11 @@ npm run check:ignore
 - ✅ **Documentation** is selectively included (README, LICENSE, CHANGELOG only)
 
 #### Files Excluded from NPM Package
+
 The following are **never** published to NPM:
 
 **Security & Secrets:**
+
 - `.env*` files
 - `.npmrc` (contains auth tokens)
 - `*.pem`, `*.key`, `*.cert` (certificates/keys)
@@ -38,22 +42,26 @@ The following are **never** published to NPM:
 - `*.token`, `*.credentials` files
 
 **Development Files:**
+
 - `src/` (source TypeScript - only `dist/` is published)
 - `tests/`, `coverage/`, test configuration files
 - `tsconfig.json`, `eslint.config.js`
 - `.vscode/`, `.idea/` (IDE settings)
 
 **CI/CD & Git:**
+
 - `.git/`, `.github/`
 - `.gitignore`, `.gitattributes`
 - CI configuration files (`.travis.yml`, `.circleci/`, etc.)
 
 **Logs & Temporary:**
+
 - `logs/`, `*.log`, `debug/`
 - `tmp/`, `temp/`, `*.tmp`
 - `test-results/`, `test-reports/`
 
 **Documentation (Selective):**
+
 - ❌ Development docs: `TODO.md`, `REFACTORING.md`, `MIGRATION_GUIDE.md`
 - ❌ Release docs: `COMMUNITY_ANNOUNCEMENT_*.md`, `RELEASE_NOTES_*.md`
 - ❌ Setup docs: `NPM_AUTH_SETUP.md`, `CLAUDE_DESKTOP_SETUP.md`
@@ -62,6 +70,7 @@ The following are **never** published to NPM:
 ### Scripts for Maintenance
 
 #### Ignore Files Sync (`scripts/sync-ignore-files.js`)
+
 Ensures `.gitignore` and `.npmignore` stay synchronized and secure:
 
 ```bash
@@ -73,12 +82,14 @@ npm run prepublishOnly
 ```
 
 **Features:**
+
 - Verifies security patterns are in place
 - Checks for missing patterns in both files
 - Validates that sensitive files are properly excluded
 - Reports summary statistics
 
 #### Pre-commit Hooks
+
 Automated checks before each commit:
 
 ```bash
@@ -90,6 +101,7 @@ npx lint-staged
 ```
 
 **What runs:**
+
 - ESLint fixes on TypeScript/JavaScript
 - Prettier formatting
 - Markdown linting
@@ -114,6 +126,7 @@ The following scripts help maintain file integrity:
 ### Weekly Tasks
 
 1. **Dependency Updates**
+
    ```bash
    npm audit
    npm audit fix
@@ -121,12 +134,14 @@ The following scripts help maintain file integrity:
    ```
 
 2. **Security Review**
+
    ```bash
    npm run check:ignore
    git status # Ensure no sensitive files are staged
    ```
 
 3. **Test Coverage Review**
+
    ```bash
    npm run test:coverage
    npm run health
@@ -145,6 +160,7 @@ The following scripts help maintain file integrity:
    - Check all markdown files for accuracy
 
 3. **Dependency Major Updates**
+
    ```bash
    npm update
    npm run test
@@ -154,6 +170,7 @@ The following scripts help maintain file integrity:
 ### Before Each Release
 
 1. **Pre-publication Checklist**
+
    ```bash
    # 1. Build and test everything
    npm run build
@@ -182,6 +199,7 @@ The following scripts help maintain file integrity:
 ### File Exclusion Patterns
 
 **Always exclude from NPM:**
+
 ```
 .env*
 .npmrc
@@ -194,6 +212,7 @@ secrets/
 ```
 
 **Always exclude from Git:**
+
 ```
 .env
 .npmrc
@@ -219,6 +238,7 @@ node_modules/
 **If credentials are accidentally published:**
 
 1. **Immediate Response:**
+
    ```bash
    npm unpublish mcp-wordpress@version
    # Or deprecate if unpublish is not allowed
@@ -232,6 +252,7 @@ node_modules/
    - Regenerate any exposed credentials
 
 3. **Republish:**
+
    ```bash
    npm version patch
    npm publish
@@ -242,6 +263,7 @@ node_modules/
 ### Automated Checks
 
 The following run automatically:
+
 - `prepublishOnly` before each npm publish
 - `pre-commit` before each git commit
 - CI/CD tests on every push/PR
@@ -249,6 +271,7 @@ The following run automatically:
 ### Manual Verification
 
 Regular checks to perform:
+
 ```bash
 # Check what would be published
 npm publish --dry-run
@@ -266,6 +289,7 @@ git log --oneline -10
 ## Tools and Dependencies
 
 ### Core Tools
+
 - **ESLint**: Code quality and consistency
 - **Prettier**: Code formatting
 - **Husky**: Git hooks management
@@ -273,6 +297,7 @@ git log --oneline -10
 - **Jest**: Testing framework
 
 ### Security Tools
+
 - **npm audit**: Vulnerability scanning
 - **Custom scripts**: File exclusion verification
 - **Git hooks**: Pre-commit security checks
@@ -301,6 +326,7 @@ git status --ignored
 ```
 
 This maintenance approach ensures:
+
 - 🔒 **Security**: No sensitive files ever published
 - 📦 **Optimization**: Minimal package size
 - 🔄 **Automation**: Critical checks run automatically

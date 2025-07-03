@@ -17,7 +17,7 @@ Your WordPress MCP server is successfully configured for Claude Desktop integrat
 
 ### WordPress Connection
 
-- **Site**: https://example.com
+- **Site**: <https://example.com>
 - **User**: wordpress_user
 - **Authentication**: Application Password (Recommended method)
 - **API Access**: ✅ Verified
@@ -37,6 +37,7 @@ Your WordPress MCP server is successfully configured for Claude Desktop integrat
 ## 🔧 Claude Desktop Configuration
 
 Your Claude Desktop configuration has been updated at:
+
 ```
 ~/Library/Application Support/Claude/claude_desktop_config.json
 ```
@@ -177,7 +178,7 @@ npm run verify-claude   # Claude Desktop integration check
 
 ---
 
-## ✨ Integration Complete!
+## ✨ Integration Complete
 
 Your WordPress MCP server is now fully integrated with Claude Desktop. You can manage your WordPress site directly through Claude Desktop conversations using natural language commands.
 

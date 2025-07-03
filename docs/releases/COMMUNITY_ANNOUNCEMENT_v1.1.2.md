@@ -1,4 +1,4 @@
-# 🎉 MCP WordPress v1.1.2 Released - Major Technical Achievement!
+# 🎉 MCP WordPress v1.1.2 Released - Major Technical Achievement
 
 ## For WordPress Forums / Reddit
 
@@ -9,21 +9,24 @@ Hey WordPress community! 👋
 I'm excited to share that we've just released **MCP WordPress v1.1.2**, featuring a major technical debt refactoring that achieved a **94% reduction in our core API module** (from 1,043 lines to just 59 lines)!
 
 ### What is MCP WordPress?
+
 It's a Model Context Protocol server that provides 54 tools for managing WordPress sites through the REST API. Perfect for automation, AI assistants, and developers who want programmatic WordPress control.
 
 ### What's New in v1.1.2?
+
 - 🏗️ **Modular Architecture**: Complete refactoring using manager pattern
 - ✅ **95%+ Test Coverage**: Everything is tested and verified
 - ⚡ **Performance Improvements**: Better memory management and rate limiting
 - 🔄 **100% Backward Compatible**: No breaking changes!
 
 ### Get Started
+
 ```bash
 npx mcp-wordpress
 ```
 
-**GitHub**: https://github.com/docdyhr/mcp-wordpress
-**NPM**: https://www.npmjs.com/package/mcp-wordpress
+**GitHub**: <https://github.com/docdyhr/mcp-wordpress>
+**NPM**: <https://www.npmjs.com/package/mcp-wordpress>
 
 Would love your feedback and contributions! 🚀
 
@@ -42,7 +45,7 @@ Major achievement: 94% code reduction through modular refactoring (1043→59 lin
 
 Try it: npx mcp-wordpress
 
-#WordPress #TypeScript #OpenSource
+# WordPress #TypeScript #OpenSource
 
 ---
 
@@ -62,9 +65,9 @@ This release demonstrates how technical debt can be addressed systematically wit
 
 MCP WordPress provides 54 tools for managing WordPress sites programmatically, supporting multi-site configurations and multiple authentication methods.
 
-Try it today: https://www.npmjs.com/package/mcp-wordpress
+Try it today: <https://www.npmjs.com/package/mcp-wordpress>
 
-#SoftwareEngineering #OpenSource #WordPress #TypeScript #TechnicalDebt
+# SoftwareEngineering #OpenSource #WordPress #TypeScript #TechnicalDebt
 
 ---
 
@@ -117,10 +120,11 @@ Just released a major update to MCP WordPress with significant architectural imp
 Perfect for using with Claude Desktop to manage your WordPress sites through natural language!
 
 Installation:
+
 ```bash
 npx mcp-wordpress
 ```
 
 Check out the modular architecture that makes it easy to extend and maintain. Would love feedback from the Claude community on how you're using it!
 
-GitHub: https://github.com/docdyhr/mcp-wordpress
+GitHub: <https://github.com/docdyhr/mcp-wordpress>

@@ -5,11 +5,13 @@
 The project includes a pre-configured `.npmrc` file that uses environment variables:
 
 1. **Set your NPM token as environment variable:**
+
    ```bash
    export NPM_TOKEN="npm_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
    ```
 
 2. **Or add to your shell profile:**
+
    ```bash
    # Add to ~/.bashrc, ~/.zshrc, or ~/.profile
    echo 'export NPM_TOKEN="npm_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"' >> ~/.zshrc
@@ -17,11 +19,13 @@ The project includes a pre-configured `.npmrc` file that uses environment variab
    ```
 
 3. **Verify authentication:**
+
    ```bash
    npm whoami
    ```
 
 4. **Publish:**
+
    ```bash
    npm publish
    ```
@@ -37,13 +41,15 @@ The project includes a pre-configured `.npmrc` file that uses environment variab
    - Copy the generated token
 
 2. **Store the token locally**:
-   
+
    Create or edit `~/.npmrc`:
+
    ```bash
    echo "//registry.npmjs.org/:_authToken=YOUR_NPM_TOKEN" >> ~/.npmrc
    ```
 
    Or set it for this project only in `.npmrc` (in project root):
+
    ```bash
    # Copy the example file
    cp .npmrc.example .npmrc
@@ -53,6 +59,7 @@ The project includes a pre-configured `.npmrc` file that uses environment variab
    ```
 
 3. **Using environment variable** (more secure):
+
    ```bash
    # Add to ~/.bashrc or ~/.zshrc
    export NPM_TOKEN="npm_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
@@ -95,11 +102,13 @@ npm config set //registry.npmjs.org/:_authToken YOUR_NPM_TOKEN
 ## Publishing with Token
 
 Once authenticated, publish with:
+
 ```bash
 npm publish
 ```
 
 Or with explicit registry:
+
 ```bash
 npm publish --registry https://registry.npmjs.org/
 ```
@@ -107,6 +116,7 @@ npm publish --registry https://registry.npmjs.org/
 ## Verifying Authentication
 
 Check if you're logged in:
+
 ```bash
 npm whoami
 ```
@@ -137,6 +147,7 @@ Your `NPM_TOKEN` is already stored in GitHub secrets. For automated publishing v
 ## Revoking Tokens
 
 If a token is compromised:
+
 1. Go to npmjs.com → Account Settings → Access Tokens
 2. Find the token and click "Revoke"
 3. Generate a new token and update your configurations

@@ -9,12 +9,14 @@ This document provides comprehensive security guidelines for the MCP WordPress s
 ### 1. **Credential Management**
 
 **NEVER store real credentials in:**
+
 - Configuration files (even if git-ignored)
 - Source code
 - Test files
 - Documentation or examples
 
 **Instead, use:**
+
 - Environment variables for single-site deployments
 - Secure credential management systems (HashiCorp Vault, AWS Secrets Manager)
 - System keychains for local development
@@ -130,6 +132,7 @@ if (!safePath.startsWith(allowedBasePath)) {
 ## 🚫 Common Security Mistakes to Avoid
 
 1. **Hardcoding Credentials**
+
    ```javascript
    // ❌ NEVER DO THIS
    const password = "actual-password-here";
@@ -139,6 +142,7 @@ if (!safePath.startsWith(allowedBasePath)) {
    ```
 
 2. **Logging Sensitive Data**
+
    ```javascript
    // ❌ NEVER DO THIS
    console.log(`Authenticating with password: ${password}`);
@@ -148,6 +152,7 @@ if (!safePath.startsWith(allowedBasePath)) {
    ```
 
 3. **Exposing Internal Errors**
+
    ```javascript
    // ❌ NEVER DO THIS
    catch (error) {

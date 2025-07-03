@@ -12,6 +12,7 @@ The MCP WordPress project includes comprehensive GitHub Actions workflows for au
 **Purpose**: Automatically publish the package to NPM
 
 **Features**:
+
 - ✅ Checkout code with latest actions
 - ✅ Setup Node.js 18 with NPM registry
 - ✅ Install dependencies with `npm ci`
@@ -23,6 +24,7 @@ The MCP WordPress project includes comprehensive GitHub Actions workflows for au
 **Required Secret**: `NPM_TOKEN`
 
 **Usage**:
+
 ```bash
 # Create a GitHub release to trigger publishing
 gh release create v1.1.3 --title "Release v1.1.3" --notes "Release notes here"
@@ -30,12 +32,14 @@ gh release create v1.1.3 --title "Release v1.1.3" --notes "Release notes here"
 
 ### 2. CI Workflow (`.github/workflows/ci.yml`)
 
-**Triggers**: 
+**Triggers**:
+
 - Push to `main` or `develop` branches
 - Pull requests to `main`
 - Scheduled nightly runs
 
 **Features**:
+
 - 🧪 **Test Matrix**: Multiple Node.js versions (18, 20, 22)
 - 🔍 **Quality Checks**: Linting, type checking, coverage
 - 📦 **Build Verification**: Package building and installation
@@ -79,12 +83,14 @@ Check that your workflows reference the correct package name and repository:
 ### 3. Test the Workflows
 
 1. **Test CI Workflow**:
+
    ```bash
    # Push to main branch triggers CI
    git push origin main
    ```
 
 2. **Test NPM Publish**:
+
    ```bash
    # Create a release to trigger publishing
    git tag v1.1.3

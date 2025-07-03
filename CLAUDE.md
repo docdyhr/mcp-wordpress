@@ -98,6 +98,43 @@ docker pull docdyhr/mcp-wordpress:latest
 docker run -d docdyhr/mcp-wordpress:latest
 ```
 
+### Claude Desktop Extension (DXT) Commands (v1.2.5+)
+
+**One-Click Installation**: Claude Desktop Extension package for easy installation.
+
+```bash
+# Build DXT package
+npm run dxt:package                     # Create mcp-wordpress.dxt file
+
+# Development commands
+npm run dxt:build                       # Build DXT package only
+npm run dxt:clean                       # Clean build artifacts
+npm run dxt:validate                    # Validate DXT package (requires dxt CLI)
+```
+
+**DXT Package Features**:
+
+- **Manifest Configuration**: Complete DXT v0.1 specification compliance
+- **User Configuration**: Secure credential storage via OS keychain integration
+- **Tool Documentation**: 22 primary tools with descriptions and usage examples
+- **Built-in Prompts**: 4 pre-configured workflow prompts for common tasks
+- **Production Ready**: Optimized package with production dependencies only (4.8MB)
+
+**Installation Process**:
+
+1. Build DXT package: `npm run dxt:package`
+2. Install in Claude Desktop through Extensions menu
+3. Configure WordPress credentials via secure UI
+4. Start using WordPress tools immediately
+
+**User Configuration Fields**:
+
+- WordPress Site URL (required)
+- WordPress Username (required)
+- Application Password (required, encrypted)
+- Authentication Method (optional, defaults to app-password)
+- Debug Mode (optional, defaults to false)
+
 ### Release & Publishing Commands (v1.2.3)
 
 ```bash
@@ -176,7 +213,61 @@ define('WP_ENVIRONMENT_TYPE', 'local');
 ```bash
 npm run lint               # ESLint check
 npm run lint:fix           # Auto-fix ESLint errors
+npm run lint:md            # Markdown linting
+npm run lint:md:fix        # Auto-fix markdown issues
+npm run format             # Format all files with Prettier
+npm run format:check       # Check formatting without changes
+npm run security:check     # Quick security vulnerability scan
+npm run security:scan      # Comprehensive security scanning
+npm run security:test      # Security policy validation
+npm run security:full      # Complete security testing suite
 ```
+
+### Claude Code Hooks (v1.2.5+)
+
+**Enhanced CI/CD Prevention**: Comprehensive hooks system to prevent CI/CD pipeline failures.
+
+```bash
+# Claude Code automatically runs configured hooks on:
+# - Pre-commit: ESLint, TypeScript checks, quick tests, markdown linting, security scan
+# - Pre-push: Full build, complete test suite, comprehensive security validation
+# - File-specific: Targeted validation including security scanning for critical modules
+```
+
+**Hook Configuration** (`.claude-code.json`):
+
+- **Pre-commit Hooks**: Prevent bad code from being committed
+  - ESLint validation (60s timeout)
+  - TypeScript type checking (120s timeout)
+  - Quick test validation (180s timeout)
+  - Markdown linting with auto-fix (30s timeout)
+  - Prettier formatting for consistent styling (30s timeout)
+  - Security vulnerability scan and credential detection (60s timeout)
+- **Pre-push Hooks**: Ensure CI/CD pipeline success
+  - Full build verification (180s timeout)
+  - Complete test suite (600s timeout)
+  - Security audit for dependency vulnerabilities (120s timeout)
+  - Comprehensive security tests and penetration testing (300s timeout)
+  - Security policy validation (120s timeout)
+  - Performance regression tests (300s timeout, non-blocking)
+- **File-specific Hooks**: Targeted validation
+  - TypeScript files: Compile-time error checking
+  - Test files: Automatic test execution for modified files
+  - Cache modules: Extra linting for critical components
+  - Package.json: Dependency validation
+  - Markdown files: Lint and format specific files on change
+  - Security modules: Enhanced security validation for critical security code
+  - Client modules: Authentication and HTTP security scanning
+  - Configuration files: Secret and credential detection
+
+**Hook Benefits**:
+
+- ✅ **Prevents CI failures**: Catches issues before they reach CI/CD
+- ✅ **Faster feedback**: Immediate validation during development
+- ✅ **Reduced pipeline costs**: Less CI/CD compute time
+- ✅ **Better code quality**: Consistent validation across all changes
+- ✅ **Enhanced security**: Proactive vulnerability detection and credential protection
+- ✅ **Compliance ready**: Automated security policy validation
 
 ### Authentication & Security Scripts
 
@@ -467,12 +558,14 @@ Supports 4 authentication methods with comprehensive testing:
 ### Automated Release Pipeline
 
 **Semantic Release System:**
+
 - **Trigger**: Conventional commits pushed to `main` branch
 - **Versioning**: Automatic semantic versioning based on commit types
 - **Publishing**: Simultaneous NPM and Docker Hub publishing
 - **Documentation**: Auto-generated release notes and CHANGELOG updates
 
 **Workflow Components:**
+
 ```bash
 .github/workflows/
 ├── release.yml              # Main automated release pipeline
@@ -484,6 +577,7 @@ Supports 4 authentication methods with comprehensive testing:
 ```
 
 **Release Automation Features:**
+
 - ✅ **Multi-Architecture Docker Builds**: linux/amd64, linux/arm64
 - ✅ **NPM Provenance**: Cryptographic signatures for package integrity
 - ✅ **Conventional Commits**: Automatic version bump detection
@@ -492,6 +586,7 @@ Supports 4 authentication methods with comprehensive testing:
 - ✅ **Rollback Capabilities**: Automated rollback on failure detection
 
 **Quality Gates:**
+
 - **Pre-Release**: All tests must pass (82+ tests, 100% success rate)
 - **Security**: Clean security audit and vulnerability scan
 - **Performance**: Performance regression detection (< 20% degradation)
