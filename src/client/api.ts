@@ -418,10 +418,10 @@ export class WordPressClient implements IWordPressClient {
     const timeoutId = setTimeout(() => controller.abort(), requestTimeout);
 
     const fetchOptions: any = {
+      ...options,  // Spread options first
       method,
-      headers,
-      signal: controller.signal,
-      ...options
+      headers,     // Headers come after to ensure auth headers aren't overridden
+      signal: controller.signal
     };
 
     // Add body for POST/PUT/PATCH requests

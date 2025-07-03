@@ -12,16 +12,19 @@ import type {
 } from '../../types/client.js';
 import { WordPressAPIError, RateLimitError } from '../../types/client.js';
 import { BaseManager } from './BaseManager.js';
+import { AuthenticationManager } from './AuthenticationManager.js';
 import { debug, startTimer } from '../../utils/debug.js';
 
 export class RequestManager extends BaseManager {
   private stats: ClientStats;
   private lastRequestTime: number = 0;
   private requestInterval: number;
+  private authManager: AuthenticationManager;
 
-  constructor(config: WordPressClientConfig) {
+  constructor(config: WordPressClientConfig, authManager: AuthenticationManager) {
     super(config);
     
+    this.authManager = authManager;
     this.requestInterval = 60000 / parseInt(process.env.RATE_LIMIT || '60');
     this.stats = {
       totalRequests: 0,
@@ -111,18 +114,33 @@ export class RequestManager extends BaseManager {
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
     try {
+      // Get authentication headers
+      const authHeaders = await this.authManager.getAuthHeaders();
+      
       const fetchOptions: any = {
         method,
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': 'MCP-WordPress/1.1.1',
+          ...authHeaders,  // Add auth headers before custom headers
           ...options.headers
         },
         signal: controller.signal
       };
 
       if (data && method !== 'GET') {
-        fetchOptions.body = JSON.stringify(data);
+        if (data instanceof FormData || (data && typeof data.append === 'function')) {
+          // For FormData, don't set Content-Type (let fetch set it with boundary)
+          delete fetchOptions.headers['Content-Type'];
+          fetchOptions.body = data;
+        } else if (Buffer.isBuffer(data)) {
+          // For Buffer data, keep Content-Type from headers
+          fetchOptions.body = data;
+        } else if (typeof data === 'string') {
+          fetchOptions.body = data;
+        } else {
+          fetchOptions.body = JSON.stringify(data);
+        }
       }
 
       debug.log(`API Request: ${method} ${url}`);
