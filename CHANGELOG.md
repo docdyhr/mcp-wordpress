@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0](https://github.com/docdyhr/mcp-wordpress/compare/v1.3.1...v1.4.0) (2025-07-07)
+
+### 🚀 Features
+
+* add publication verification workflow and script ([899d99f](https://github.com/docdyhr/mcp-wordpress/commit/899d99f7ba608ce3c1ce7bdb54f74fb3c51be873))
+
+### 🐛 Bug Fixes
+
+* include ES module type in DXT package.json ([770dbff](https://github.com/docdyhr/mcp-wordpress/commit/770dbff784d5d83f864c21d3d7d86c4b8191bca5))
+* remove unsupported Docker action parameters ([8eb9e42](https://github.com/docdyhr/mcp-wordpress/commit/8eb9e428cd1bb44262fd0a8f5945ab2892ca1a18))
+
+### 📚 Documentation
+
+* add comprehensive developer documentation suite ([a7428a6](https://github.com/docdyhr/mcp-wordpress/commit/a7428a6382fc6e60268ccc188eee60a315a34dff))
+* update DXT validation references to reflect current state ([0e3778f](https://github.com/docdyhr/mcp-wordpress/commit/0e3778ff7194e4315a8886deee21ddfb17c65c6d))
+
 ## [1.3.1](https://github.com/docdyhr/mcp-wordpress/compare/v1.3.0...v1.3.1) (2025-07-07)
 
 ### 🐛 Bug Fixes
