@@ -189,23 +189,35 @@
   "prompts": [
     {
       "name": "setup_wordpress",
+      "title": "WordPress Site Setup",
       "description": "Initial WordPress site setup and configuration",
-      "content": "Help me set up and configure my WordPress site using the MCP WordPress tools. Please:\n1. Test the connection and authentication\n2. Get site information and current settings\n3. Show me the available tools and their capabilities\n4. Provide recommendations for optimal configuration"
+      "content": "Help me set up and configure my WordPress site using the MCP WordPress tools. Please:\n1. Test the connection and authentication\n2. Get site information and current settings\n3. Show me the available tools and their capabilities\n4. Provide recommendations for optimal configuration",
+      "variables": [],
+      "category": "setup"
     },
     {
       "name": "content_management",
+      "title": "Content Management",
       "description": "WordPress content creation and management workflow",
-      "content": "I need help managing content on my WordPress site. Please:\n1. Show me recent posts and pages\n2. Help me create new content with proper SEO optimization\n3. Manage categories and tags for better organization\n4. Optimize media uploads and file management"
+      "content": "I need help managing content on my WordPress site. Please:\n1. Show me recent posts and pages\n2. Help me create new content with proper SEO optimization\n3. Manage categories and tags for better organization\n4. Optimize media uploads and file management",
+      "variables": [],
+      "category": "content"
     },
     {
       "name": "performance_optimization",
+      "title": "Performance Optimization",
       "description": "WordPress performance monitoring and optimization",
-      "content": "Help me optimize my WordPress site's performance. Please:\n1. Check current performance metrics and statistics\n2. Analyze cache performance and hit rates\n3. Provide optimization recommendations\n4. Monitor and alert on performance issues"
+      "content": "Help me optimize my WordPress site's performance. Please:\n1. Check current performance metrics and statistics\n2. Analyze cache performance and hit rates\n3. Provide optimization recommendations\n4. Monitor and alert on performance issues",
+      "variables": [],
+      "category": "performance"
     },
     {
       "name": "multi_site_management",
+      "title": "Multi-Site Management",
       "description": "Multi-site WordPress administration workflow",
-      "content": "I'm managing multiple WordPress sites. Please help me:\n1. Check the status of all configured sites\n2. Synchronize content across sites where appropriate\n3. Monitor performance across all sites\n4. Manage users and permissions consistently"
+      "content": "I'm managing multiple WordPress sites. Please help me:\n1. Check the status of all configured sites\n2. Synchronize content across sites where appropriate\n3. Monitor performance across all sites\n4. Manage users and permissions consistently",
+      "variables": [],
+      "category": "management"
     }
   ],
   "compatibility": {
