@@ -186,40 +186,72 @@
       "description": "Get optimization recommendations and insights"
     }
   ],
-  "prompts": [
-    {
+  "prompts": {
+    "setup_wordpress": {
       "name": "setup_wordpress",
-      "title": "WordPress Site Setup",
-      "description": "Initial WordPress site setup and configuration",
-      "content": "Help me set up and configure my WordPress site using the MCP WordPress tools. Please:\n1. Test the connection and authentication\n2. Get site information and current settings\n3. Show me the available tools and their capabilities\n4. Provide recommendations for optimal configuration",
-      "variables": [],
-      "category": "setup"
+      "description": "Initial WordPress site setup and configuration. Test authentication, get site information, explore available tools, and receive configuration recommendations.",
+      "arguments": {
+        "site_url": {
+          "type": "string",
+          "description": "WordPress site URL to configure",
+          "required": false
+        },
+        "check_auth": {
+          "type": "boolean",
+          "description": "Whether to test authentication",
+          "required": false
+        }
+      }
     },
-    {
-      "name": "content_management",
-      "title": "Content Management",
-      "description": "WordPress content creation and management workflow",
-      "content": "I need help managing content on my WordPress site. Please:\n1. Show me recent posts and pages\n2. Help me create new content with proper SEO optimization\n3. Manage categories and tags for better organization\n4. Optimize media uploads and file management",
-      "variables": [],
-      "category": "content"
+    "content_management": {
+      "name": "content_management", 
+      "description": "WordPress content creation and management workflow. Show recent content, create new posts/pages, manage categories and tags, and optimize media uploads.",
+      "arguments": {
+        "content_type": {
+          "type": "string",
+          "description": "Type of content to manage (posts, pages, media)",
+          "required": false
+        },
+        "limit": {
+          "type": "number",
+          "description": "Number of items to retrieve",
+          "required": false
+        }
+      }
     },
-    {
+    "performance_optimization": {
       "name": "performance_optimization",
-      "title": "Performance Optimization",
-      "description": "WordPress performance monitoring and optimization",
-      "content": "Help me optimize my WordPress site's performance. Please:\n1. Check current performance metrics and statistics\n2. Analyze cache performance and hit rates\n3. Provide optimization recommendations\n4. Monitor and alert on performance issues",
-      "variables": [],
-      "category": "performance"
+      "description": "WordPress performance monitoring and optimization. Check performance metrics, analyze cache hit rates, and get optimization recommendations.",
+      "arguments": {
+        "analysis_type": {
+          "type": "string", 
+          "description": "Type of performance analysis (cache, response_time, general)",
+          "required": false
+        },
+        "include_recommendations": {
+          "type": "boolean",
+          "description": "Whether to include optimization recommendations",
+          "required": false
+        }
+      }
     },
-    {
+    "multi_site_management": {
       "name": "multi_site_management",
-      "title": "Multi-Site Management",
-      "description": "Multi-site WordPress administration workflow",
-      "content": "I'm managing multiple WordPress sites. Please help me:\n1. Check the status of all configured sites\n2. Synchronize content across sites where appropriate\n3. Monitor performance across all sites\n4. Manage users and permissions consistently",
-      "variables": [],
-      "category": "management"
+      "description": "Multi-site WordPress administration workflow. Check status of all sites, synchronize content, monitor performance across sites, and manage users consistently.",
+      "arguments": {
+        "operation": {
+          "type": "string",
+          "description": "Multi-site operation (status_check, sync_content, performance_monitor)",
+          "required": false
+        },
+        "site_filter": {
+          "type": "string",
+          "description": "Filter for specific sites",
+          "required": false
+        }
+      }
     }
-  ],
+  },
   "compatibility": {
     "dxt_version": "0.1",
     "platforms": ["win32", "darwin", "linux"],
