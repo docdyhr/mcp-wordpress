@@ -200,7 +200,7 @@ The following scripts help maintain file integrity:
 
 **Always exclude from NPM:**
 
-```
+```text
 .env*
 .npmrc
 *.pem
@@ -213,7 +213,7 @@ secrets/
 
 **Always exclude from Git:**
 
-```
+```text
 .env
 .npmrc
 mcp-wordpress.config.json

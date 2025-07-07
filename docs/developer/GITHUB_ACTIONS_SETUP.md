@@ -2,7 +2,8 @@
 
 ## Overview
 
-The MCP WordPress project includes comprehensive GitHub Actions workflows for automated testing, quality assurance, and NPM publishing.
+The MCP WordPress project includes comprehensive GitHub Actions workflows for automated testing, quality
+assurance, and NPM publishing.
 
 ## Workflows
 

@@ -1,6 +1,7 @@
 # Migration Guide: Single-Site to Multi-Site Configuration
 
-This guide helps you migrate from the previous single-site configuration to the new multi-site configuration introduced in v2.0.0.
+This guide helps you migrate from the previous single-site configuration to the new multi-site
+configuration introduced in v2.0.0.
 
 ## Breaking Changes
 
@@ -39,13 +40,13 @@ All tools now require a `site` parameter when multiple sites are configured.
 
 **Old Usage:**
 
-```
+```bash
 wp_list_posts
 ```
 
 **New Usage:**
 
-```
+```bash
 wp_list_posts --site="main"
 ```
 
@@ -161,7 +162,8 @@ wp_create_post --site="site2" --title="New Blog Post"
 
 ## Backward Compatibility
 
-The server maintains backward compatibility with environment variables. If no `mcp-wordpress.config.json` file is found, it will fall back to using environment variables as before.
+The server maintains backward compatibility with environment variables. If no `mcp-wordpress.config.json`
+file is found, it will fall back to using environment variables as before.
 
 ## Troubleshooting
 
