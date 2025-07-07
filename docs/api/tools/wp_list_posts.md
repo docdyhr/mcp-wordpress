@@ -21,11 +21,13 @@ Lists posts from a WordPress site, with filters.
 Simple example of using wp_list_posts
 
 **Command:**
+
 ```bash
 wp_list_posts 
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -47,6 +49,7 @@ wp_list_posts
 ```
 
 **Error Example (Authentication failure):**
+
 ```json
 {
   "error": "Authentication failed",
@@ -54,17 +57,18 @@ wp_list_posts
 }
 ```
 
-
 ### Advanced post Configuration
 
 Comprehensive example using all available parameters
 
 **Command:**
+
 ```bash
 wp_list_posts --per_page="10" --search="wordpress" --status="publish" --categories="example_value" --tags="example_value"
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -85,9 +89,6 @@ wp_list_posts --per_page="10" --search="wordpress" --status="publish" --categori
 }
 ```
 
-
-
-
 ## WordPress REST API Mapping
 
 **Endpoint:** `/wp-json/wp/v2/posts`
@@ -95,11 +96,9 @@ wp_list_posts --per_page="10" --search="wordpress" --status="publish" --categori
 This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters are determined by WordPress core functionality.
 
 ### WordPress Documentation
+
 - [WordPress REST API Handbook](https://developer.wordpress.org/rest-api/)
 - [Endpoint Reference](https://developer.wordpress.org/rest-api/reference/)
-
-
-
 
 ## Response Format
 
@@ -127,13 +126,11 @@ This tool directly interfaces with the WordPress REST API endpoint above. The re
 **Description:** Invalid credentials or insufficient permissions  
 **Resolution:** Check your authentication credentials and user permissions
 
-
 ### VALIDATION_ERROR
 
 **Message:** Parameter validation failed  
 **Description:** One or more required parameters are missing or invalid  
 **Resolution:** Review the required parameters and their formats
-
 
 ### NOT_FOUND
 
@@ -141,15 +138,11 @@ This tool directly interfaces with the WordPress REST API endpoint above. The re
 **Description:** The requested resource does not exist  
 **Resolution:** Verify the resource ID and ensure it exists
 
-
 ### PERMISSION_DENIED
 
 **Message:** Insufficient permissions  
 **Description:** The user does not have permission to perform this action  
 **Resolution:** Contact an administrator to grant the necessary permissions
-
-
-
 
 ---
 

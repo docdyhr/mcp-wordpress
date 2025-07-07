@@ -2,7 +2,7 @@
 
 **Date:** June 29, 2025  
 **Project:** WordPress MCP Server  
-**Version:** 1.2.0  
+**Version:** 1.2.0
 
 ## 🔒 Security Framework Status: ✅ FULLY OPERATIONAL
 

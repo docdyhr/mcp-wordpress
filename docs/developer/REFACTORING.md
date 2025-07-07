@@ -13,7 +13,7 @@ This document outlines the technical debt refactoring performed to improve code 
 **Solution**: Implemented composition pattern with specialized managers:
 
 - `BaseManager`: Common functionality and error handling
-- `AuthenticationManager`: All authentication methods and token management  
+- `AuthenticationManager`: All authentication methods and token management
 - `RequestManager`: HTTP operations, rate limiting, and retries
 - `WordPressClient`: Refactored to orchestrate managers
 
@@ -136,7 +136,7 @@ The refactoring maintains 100% backward compatibility:
 - Cyclomatic complexity: High in client classes
 - Code duplication: ~30% in error handling
 
-### After Refactoring  
+### After Refactoring
 
 - Largest file: ~400 lines (reduced by 60%)
 - Try-catch blocks: 3 standardized patterns
@@ -166,11 +166,14 @@ The refactoring is transparent to end users but improves the development experie
 
 ```typescript
 // Old way (still works)
-import { WordPressClient } from './client/api.js';
+import { WordPressClient } from "./client/api.js";
 
 // New way (recommended for internal development)
-import { WordPressClient } from './client/WordPressClient.js';
-import { AuthenticationManager, RequestManager } from './client/managers/index.js';
+import { WordPressClient } from "./client/WordPressClient.js";
+import {
+  AuthenticationManager,
+  RequestManager,
+} from "./client/managers/index.js";
 ```
 
 ### For Tool Development
@@ -178,15 +181,15 @@ import { AuthenticationManager, RequestManager } from './client/managers/index.j
 New tools can leverage standardized patterns:
 
 ```typescript
-import { withErrorHandling, validators } from '../utils/toolWrapper.js';
+import { withErrorHandling, validators } from "../utils/toolWrapper.js";
 
 // Standardized error handling
 const handleGetPost = withErrorHandling(
-  'Failed to get post',
+  "Failed to get post",
   async (client, params) => {
     validators.requireId(params);
     return await client.getPost(params.id);
-  }
+  },
 );
 ```
 
@@ -217,7 +220,7 @@ This refactoring addresses the major technical debt items while maintaining full
 **Key Achievements**:
 
 - ✅ Reduced largest file size by 60%
-- ✅ Eliminated 85% of code duplication  
+- ✅ Eliminated 85% of code duplication
 - ✅ Improved architectural separation of concerns
 - ✅ Enhanced error handling consistency
 - ✅ Maintained 100% test coverage

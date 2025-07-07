@@ -59,7 +59,7 @@ We're excited to announce **v1.1.2**, a major milestone featuring comprehensive 
 ### **100% Core Functionality**
 
 - ✅ **TypeScript Build Tests**: 41/41 passing
-- ✅ **Tool Functionality Tests**: 14/14 tools operational  
+- ✅ **Tool Functionality Tests**: 14/14 tools operational
 - ✅ **Authentication Tests**: 100% success rate
 - ✅ **Multi-site Configuration**: All sites working correctly
 
@@ -194,6 +194,6 @@ npm update -g mcp-wordpress
 
 **🤖 Generated with [Claude Code](https://claude.ai/code)**
 
-*Release Date: June 29, 2025*
-*Version: 1.1.2*
-*Codename: "Modular Foundation"*
+_Release Date: June 29, 2025_
+_Version: 1.1.2_
+_Codename: "Modular Foundation"_

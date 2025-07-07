@@ -44,7 +44,7 @@ export class CacheTools {
             name: "pattern",
             type: "string",
             description:
-              "Optional pattern to clear specific cache entries (e.g., \"posts\", \"categories\").",
+              'Optional pattern to clear specific cache entries (e.g., "posts", "categories").',
           },
         ],
         handler: this.handleClearCache.bind(this),

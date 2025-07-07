@@ -20,11 +20,13 @@ Switches the authentication method for a site for the current session.
 Simple example of using wp_switch_auth_method
 
 **Command:**
+
 ```bash
 wp_switch_auth_method --method="example_value"
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -34,6 +36,7 @@ wp_switch_auth_method --method="example_value"
 ```
 
 **Error Example (Authentication failure):**
+
 ```json
 {
   "error": "Authentication failed",
@@ -41,17 +44,18 @@ wp_switch_auth_method --method="example_value"
 }
 ```
 
-
 ### Advanced auth Configuration
 
 Comprehensive example using all available parameters
 
 **Command:**
+
 ```bash
 wp_switch_auth_method --method="example_value" --username="john_doe" --password="example_value" --jwt_token="example_value"
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -59,13 +63,6 @@ wp_switch_auth_method --method="example_value" --username="john_doe" --password=
   "message": "wp_switch_auth_method executed successfully"
 }
 ```
-
-
-
-
-
-
-
 
 ## Response Format
 
@@ -93,13 +90,11 @@ wp_switch_auth_method --method="example_value" --username="john_doe" --password=
 **Description:** Invalid credentials or insufficient permissions  
 **Resolution:** Check your authentication credentials and user permissions
 
-
 ### VALIDATION_ERROR
 
 **Message:** Parameter validation failed  
 **Description:** One or more required parameters are missing or invalid  
 **Resolution:** Review the required parameters and their formats
-
 
 ### NOT_FOUND
 
@@ -107,15 +102,11 @@ wp_switch_auth_method --method="example_value" --username="john_doe" --password=
 **Description:** The requested resource does not exist  
 **Resolution:** Verify the resource ID and ensure it exists
 
-
 ### PERMISSION_DENIED
 
 **Message:** Insufficient permissions  
 **Description:** The user does not have permission to perform this action  
 **Resolution:** Contact an administrator to grant the necessary permissions
-
-
-
 
 ---
 

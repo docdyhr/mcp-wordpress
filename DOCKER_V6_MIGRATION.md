@@ -115,7 +115,7 @@ gh workflow run "🐳 Docker Build & Push (Manual/Fallback)" \
 # View provenance and SBOM
 docker buildx imagetools inspect docdyhr/mcp-wordpress:latest --format '{{json .}}'
 
-# Check security attestations  
+# Check security attestations
 docker scout cves docdyhr/mcp-wordpress:latest
 ```
 
@@ -127,7 +127,7 @@ docker scout cves docdyhr/mcp-wordpress:latest
 - **Vulnerability Tracking**: SBOM enables comprehensive security auditing
 - **Access Controls**: Enhanced permissions and authentication
 
-### ⚡ Performance  
+### ⚡ Performance
 
 - **Faster Builds**: Multi-level caching reduces build times by 60-80%
 - **Parallel Builds**: Multi-platform builds run concurrently

@@ -62,7 +62,7 @@ Building on v1.2.0's performance monitoring and documentation features, v1.2.1 d
 ### ✅ Test Infrastructure Overhaul (v1.2.1)
 
 - **🔧 100% Test Success Rate**: Fixed all failing integration and tool tests
-- **🌐 Multi-Site Testing**: Comprehensive test suite for multi-site WordPress configurations  
+- **🌐 Multi-Site Testing**: Comprehensive test suite for multi-site WordPress configurations
 - **🛡️ Enhanced Security**: Improved .gitignore and credential protection
 - **📋 Test Organization**: Streamlined test scripts and better error reporting
 - **⚡ Quick Validation**: New `npm run test:multisite` command for rapid configuration testing
@@ -106,7 +106,7 @@ We've implemented a **comprehensive performance monitoring system**, **intellige
 - **✅ Quality Validation**: Comprehensive documentation quality checks
 - **🌐 Multi-Format Output**: Markdown, JSON, and OpenAPI formats
 
-### 🐳 Docker Containerization  
+### 🐳 Docker Containerization
 
 - **📦 Production-Ready Images**: Optimized Docker containers for deployment
 - **🔧 Development Environment**: Docker Compose for local development
@@ -153,11 +153,13 @@ For detailed setup instructions, see our comprehensive guides:
 ### 🤖 Claude Desktop Quick Prompts
 
 **For NPX Users (Easiest):**
+
 ```text
 Set up MCP WordPress using NPX. My site: [YOUR_SITE_URL], username: [YOUR_USERNAME]. Help with application password creation and Claude Desktop configuration.
 ```
 
 **For Local Development:**
+
 ```text
 Set up MCP WordPress locally from GitHub. Clone, install, configure for my site: [YOUR_SITE_URL], username: [YOUR_USERNAME]. Include Claude Desktop setup.
 ```
@@ -170,16 +172,17 @@ The MCP WordPress server supports multiple configuration methods to fit differen
 
 ### Setup Methods Overview
 
-| Method | Best For | Configuration File |
-|--------|----------|---------------------|
-| **NPX** | Quick start, always latest | Claude Desktop config only |
-| **NPM** | Local development | `.env` or Claude Desktop config |
-| **Docker** | Production deployment | Environment variables or mounted config |
-| **DTX** | Simple GUI setup | DTX config + optional multi-site file |
+| Method     | Best For                   | Configuration File                      |
+| ---------- | -------------------------- | --------------------------------------- |
+| **NPX**    | Quick start, always latest | Claude Desktop config only              |
+| **NPM**    | Local development          | `.env` or Claude Desktop config         |
+| **Docker** | Production deployment      | Environment variables or mounted config |
+| **DTX**    | Simple GUI setup           | DTX config + optional multi-site file   |
 
 ### Environment Variables
 
 **Core Configuration:**
+
 ```env
 WORDPRESS_SITE_URL=https://your-wordpress-site.com
 WORDPRESS_USERNAME=your-username
@@ -189,6 +192,7 @@ DEBUG=false
 ```
 
 **📖 Detailed Configuration Guides:**
+
 - **[NPX Configuration](docs/user-guides/NPX_SETUP.md#quick-start)** - Claude Desktop environment variables
 - **[NPM Configuration](docs/user-guides/NPM_SETUP.md#configuration)** - Local `.env` file setup
 - **[Docker Configuration](docs/user-guides/DOCKER_SETUP.md#configuration)** - Container environment setup
@@ -197,11 +201,13 @@ DEBUG=false
 ### Claude Desktop Integration
 
 **Configuration File Locations:**
+
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 - **Linux**: `~/.config/Claude/claude_desktop_config.json`
 
 **Quick NPX Example:**
+
 ```json
 {
   "mcpServers": {
@@ -241,7 +247,7 @@ MCP WordPress Server supports managing multiple WordPress sites from a single co
       }
     },
     {
-      "id": "site2", 
+      "id": "site2",
       "name": "My Blog",
       "config": {
         "WORDPRESS_SITE_URL": "https://blog.site2.com",
@@ -647,13 +653,13 @@ mcp-wordpress/
 
 ### WordPress User Roles
 
-| Role | Access |
-|------|--------|
-| **Administrator** | Full access to all functions |
-| **Editor** | Posts, pages, comments, media |
-| **Author** | Own posts and media |
-| **Contributor** | Own posts (drafts only) |
-| **Subscriber** | Read only |
+| Role              | Access                        |
+| ----------------- | ----------------------------- |
+| **Administrator** | Full access to all functions  |
+| **Editor**        | Posts, pages, comments, media |
+| **Author**        | Own posts and media           |
+| **Contributor**   | Own posts (drafts only)       |
+| **Subscriber**    | Read only                     |
 
 ## 🐛 Troubleshooting
 
@@ -708,16 +714,22 @@ docker run --rm -i \
 ### Claude Desktop Docker Integration
 
 **Single-Site:**
+
 ```json
 {
   "mcpServers": {
     "mcp-wordpress": {
       "command": "docker",
       "args": [
-        "run", "--rm", "-i",
-        "-e", "WORDPRESS_SITE_URL=https://your-site.com",
-        "-e", "WORDPRESS_USERNAME=your-username",
-        "-e", "WORDPRESS_APP_PASSWORD=your-app-password",
+        "run",
+        "--rm",
+        "-i",
+        "-e",
+        "WORDPRESS_SITE_URL=https://your-site.com",
+        "-e",
+        "WORDPRESS_USERNAME=your-username",
+        "-e",
+        "WORDPRESS_APP_PASSWORD=your-app-password",
         "docdyhr/mcp-wordpress:latest"
       ]
     }
@@ -726,14 +738,18 @@ docker run --rm -i \
 ```
 
 **Multi-Site:**
+
 ```json
 {
   "mcpServers": {
     "mcp-wordpress": {
       "command": "docker",
       "args": [
-        "run", "--rm", "-i",
-        "-v", "/path/to/mcp-wordpress.config.json:/app/mcp-wordpress.config.json:ro",
+        "run",
+        "--rm",
+        "-i",
+        "-v",
+        "/path/to/mcp-wordpress.config.json:/app/mcp-wordpress.config.json:ro",
         "docdyhr/mcp-wordpress:latest"
       ]
     }
@@ -774,7 +790,7 @@ bash scripts/test-setup-only.sh
 
 # Use existing WordPress instance
 export WORDPRESS_TEST_URL="https://your-wordpress-site.com"
-export WORDPRESS_USERNAME="your-username"  
+export WORDPRESS_USERNAME="your-username"
 export WORDPRESS_APP_PASSWORD="your-app-password"
 export PACT_LIVE_TESTING="true"
 npm run test:contracts
@@ -859,7 +875,7 @@ docker run --rm -i docdyhr/mcp-wordpress:latest
 # Patch release (1.2.2 → 1.2.4)
 fix: resolve authentication timeout issue
 
-# Minor release (1.2.2 → 1.3.0)  
+# Minor release (1.2.2 → 1.3.0)
 feat: add new performance monitoring tools
 
 # Major release (1.2.2 → 2.0.0)
@@ -897,7 +913,7 @@ For contributors planning releases:
 
 3. **Automated Process Handles:**
    - 📝 Generate release notes
-   - 🏷️ Create GitHub release  
+   - 🏷️ Create GitHub release
    - 📦 Publish to NPM with provenance
    - 🐳 Build and push Docker images (multi-arch)
    - 📚 Update CHANGELOG.md
@@ -915,4 +931,4 @@ For contributors planning releases:
 
 Special thanks to **[Stephan Ferraro](https://github.com/ferraro)** for the upstream main project that inspired this implementation.
 
-> *"We are all standing on the shoulders of giants"*
+> _"We are all standing on the shoulders of giants"_

@@ -53,7 +53,7 @@ The project includes a pre-configured `.npmrc` file that uses environment variab
    ```bash
    # Copy the example file
    cp .npmrc.example .npmrc
-   
+
    # Edit .npmrc with your token (if not using environment variable)
    echo "//registry.npmjs.org/:_authToken=YOUR_NPM_TOKEN" > .npmrc
    ```
@@ -63,7 +63,7 @@ The project includes a pre-configured `.npmrc` file that uses environment variab
    ```bash
    # Add to ~/.bashrc or ~/.zshrc
    export NPM_TOKEN="npm_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-   
+
    # Then in .npmrc:
    //registry.npmjs.org/:_authToken=${NPM_TOKEN}
    ```
@@ -129,8 +129,8 @@ Your `NPM_TOKEN` is already stored in GitHub secrets. For automated publishing v
 - name: Setup Node.js
   uses: actions/setup-node@v3
   with:
-    node-version: '18'
-    registry-url: 'https://registry.npmjs.org'
+    node-version: "18"
+    registry-url: "https://registry.npmjs.org"
 
 - name: Publish to NPM
   run: npm publish

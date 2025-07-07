@@ -130,7 +130,7 @@ docker run -d --name mcp-wordpress-multisite \
 Create `docker-compose.yml`:
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   mcp-wordpress:
@@ -246,7 +246,7 @@ docker run --rm -i \
 - ✅ Use absolute paths for volume mounts
 - ✅ Quote passwords with spaces in command line
 
-### ❌ Don'ts  
+### ❌ Don'ts
 
 - ❌ **Never use `-d` flag with Claude Desktop** (breaks MCP communication)
 - ❌ **Don't expose ports** like `-p 3000:3000` (unnecessary for MCP)

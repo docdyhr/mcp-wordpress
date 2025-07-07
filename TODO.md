@@ -26,7 +26,7 @@
 The remaining TODO items have been converted to GitHub Issues:
 
 - **[Issue #4](https://github.com/docdyhr/mcp-wordpress/issues/4)**: Property-based tests for cache invalidation patterns
-- **[Issue #5](https://github.com/docdyhr/mcp-wordpress/issues/5)**: Continuous WordPress API contract validation  
+- **[Issue #5](https://github.com/docdyhr/mcp-wordpress/issues/5)**: Continuous WordPress API contract validation
 - **[Issue #6](https://github.com/docdyhr/mcp-wordpress/issues/6)**: Blue-green deployment with traffic switching
 
 ### 📝 **Contributing**

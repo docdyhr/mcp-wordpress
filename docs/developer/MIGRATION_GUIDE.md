@@ -140,7 +140,7 @@ The main benefit of the new configuration is support for multiple WordPress site
       }
     },
     {
-      "id": "site2", 
+      "id": "site2",
       "name": "Blog",
       "config": {
         "WORDPRESS_SITE_URL": "https://blog.site2.com",

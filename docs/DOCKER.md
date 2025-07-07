@@ -78,6 +78,7 @@ docker run -d \
 **⚠️ Mount Path**: Use `/app/mcp-wordpress.config.json` (not `/app/config/`).
 
 **Example `mcp-wordpress.config.json`:**
+
 ```json
 {
   \"sites\": [
@@ -108,6 +109,7 @@ docker run -d \
 ### Basic Setup
 
 **docker-compose.yml:**
+
 ```yaml
 version: '3.8'
 
@@ -190,6 +192,7 @@ networks:
 ### Kubernetes
 
 **deployment.yaml:**
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -350,6 +353,7 @@ docker logs mcp-wordpress > mcp-wordpress.log
 ### Secrets Management
 
 **Using Docker Secrets:**
+
 ```bash
 # Create secrets
 echo \"https://your-site.com\" | docker secret create wordpress_url -
@@ -392,6 +396,7 @@ ufw deny 3000/tcp from any to any  # Block external access if not needed
 ### Common Issues
 
 #### Container Won't Start
+
 ```bash
 # Check logs for errors
 docker logs mcp-wordpress
@@ -404,6 +409,7 @@ docker exec mcp-wordpress node dist/index.js --test-config
 ```
 
 #### Authentication Problems
+
 ```bash
 # Test WordPress connection
 docker exec mcp-wordpress node -e \"
@@ -416,6 +422,7 @@ docker exec mcp-wordpress printenv | grep WORDPRESS
 ```
 
 #### Performance Issues
+
 ```bash
 # Check resource usage
 docker stats mcp-wordpress

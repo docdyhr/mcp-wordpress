@@ -206,7 +206,7 @@ The DTX package automatically configures:
 After installation, you'll have access to these prompts:
 
 1. **Setup WordPress** - Initial site setup and configuration
-2. **Content Management** - Content creation and management workflow  
+2. **Content Management** - Content creation and management workflow
 3. **Performance Optimization** - Performance monitoring and optimization
 4. **Multi-Site Management** - Multi-site administration workflow
 
@@ -259,13 +259,13 @@ The DTX includes 59 tools across:
 ✅ **Secure credential storage** in OS keychain  
 ✅ **Built-in documentation** and prompts  
 ✅ **No command line required**  
-✅ **Automatic dependency management**  
+✅ **Automatic dependency management**
 
 ### DTX Limitations
 
 ❌ **Less flexibility** than manual configuration  
 ❌ **Limited customization** options  
-❌ **Requires DTX-compatible Claude Desktop**  
+❌ **Requires DTX-compatible Claude Desktop**
 
 ### When to Use DTX
 

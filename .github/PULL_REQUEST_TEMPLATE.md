@@ -30,12 +30,14 @@ Related to #(issue_number)
 ## Testing
 
 ### Test Environment
+
 - [ ] Local development environment
 - [ ] WordPress version: [e.g. 6.4.2]
 - [ ] Node.js version: [e.g. 18.17.0]
 - [ ] Authentication method tested: [e.g. App Passwords, JWT]
 
 ### Tests Performed
+
 - [ ] Unit tests pass (`npm test`)
 - [ ] Tool tests pass (`npm run test:tools`)
 - [ ] Integration tests pass (`npm run test:integration`)
@@ -45,6 +47,7 @@ Related to #(issue_number)
 - [ ] Manual testing performed
 
 ### Test Cases
+
 Describe the test cases you executed:
 
 1. Test case 1

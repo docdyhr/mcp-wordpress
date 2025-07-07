@@ -256,7 +256,7 @@ export class MetricsCollector {
     >;
     bestPerforming: string;
     worstPerforming: string;
-    } {
+  } {
     const sites = Array.from(this.clientInstances.keys());
     const comparison: any = {};
     const rankings: Array<{ site: string; score: number }> = [];
@@ -313,7 +313,7 @@ export class MetricsCollector {
     critical: string[];
     recommended: string[];
     optional: string[];
-    } {
+  } {
     const metrics = this.collectCurrentMetrics();
     const critical: string[] = [];
     const recommended: string[] = [];
@@ -382,7 +382,7 @@ export class MetricsCollector {
     };
     optimizations: any;
     alerts: any[];
-    } {
+  } {
     return {
       timestamp: new Date().toISOString(),
       overview: this.collectCurrentMetrics(),

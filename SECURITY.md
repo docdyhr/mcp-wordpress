@@ -85,7 +85,7 @@ const validatePostId = (id: string): boolean => {
 // Path traversal prevention
 const safePath = path.normalize(userPath);
 if (!safePath.startsWith(allowedBasePath)) {
-  throw new Error('Invalid path');
+  throw new Error("Invalid path");
 }
 ```
 
@@ -136,7 +136,7 @@ if (!safePath.startsWith(allowedBasePath)) {
    ```javascript
    // ❌ NEVER DO THIS
    const password = "actual-password-here";
-   
+
    // ✅ DO THIS INSTEAD
    const password = process.env.WORDPRESS_APP_PASSWORD;
    ```
@@ -146,9 +146,9 @@ if (!safePath.startsWith(allowedBasePath)) {
    ```javascript
    // ❌ NEVER DO THIS
    console.log(`Authenticating with password: ${password}`);
-   
+
    // ✅ DO THIS INSTEAD
-   console.log('Authenticating user...');
+   console.log("Authenticating user...");
    ```
 
 3. **Exposing Internal Errors**
@@ -158,7 +158,7 @@ if (!safePath.startsWith(allowedBasePath)) {
    catch (error) {
      return { error: error.stack };
    }
-   
+
    // ✅ DO THIS INSTEAD
    catch (error) {
      logger.error('Internal error:', error);
@@ -257,11 +257,11 @@ If you discover a security vulnerability:
 
 ## 📋 Security Audit Log
 
-| Date | Auditor | Findings | Actions Taken |
-|------|---------|----------|---------------|
-| 2025-06-29 | Claude AI | Exposed credentials in config | Documentation created |
-| - | - | Input validation gaps | Recommendations provided |
-| - | - | 0 dependency vulnerabilities | Continue monitoring |
+| Date       | Auditor   | Findings                      | Actions Taken            |
+| ---------- | --------- | ----------------------------- | ------------------------ |
+| 2025-06-29 | Claude AI | Exposed credentials in config | Documentation created    |
+| -          | -         | Input validation gaps         | Recommendations provided |
+| -          | -         | 0 dependency vulnerabilities  | Continue monitoring      |
 
 ---
 

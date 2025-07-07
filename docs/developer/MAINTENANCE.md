@@ -177,13 +177,13 @@ The following scripts help maintain file integrity:
    npm test
    npm run test:tools
    npm run health
-   
+
    # 2. Check ignore files
    npm run check:ignore
-   
+
    # 3. Verify no sensitive data
    npm publish --dry-run
-   
+
    # 4. Check package contents
    npx pkgfiles
    ```

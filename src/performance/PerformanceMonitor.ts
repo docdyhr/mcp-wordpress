@@ -292,7 +292,7 @@ export class PerformanceMonitor {
     recommendations: string[];
     trends: string[];
     health: "excellent" | "good" | "warning" | "critical";
-    } {
+  } {
     const current = this.getMetrics();
     const health = this.calculateOverallHealth(current);
 

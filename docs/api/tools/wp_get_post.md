@@ -17,11 +17,13 @@ Retrieves a single post by its ID.
 Simple example of using wp_get_post
 
 **Command:**
+
 ```bash
 wp_get_post --id="123"
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -36,13 +38,13 @@ wp_get_post --id="123"
 ```
 
 **Error Example (Authentication failure):**
+
 ```json
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
 }
 ```
-
 
 ## WordPress REST API Mapping
 
@@ -51,11 +53,9 @@ wp_get_post --id="123"
 This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters are determined by WordPress core functionality.
 
 ### WordPress Documentation
+
 - [WordPress REST API Handbook](https://developer.wordpress.org/rest-api/)
 - [Endpoint Reference](https://developer.wordpress.org/rest-api/reference/)
-
-
-
 
 ## Response Format
 
@@ -83,13 +83,11 @@ This tool directly interfaces with the WordPress REST API endpoint above. The re
 **Description:** Invalid credentials or insufficient permissions  
 **Resolution:** Check your authentication credentials and user permissions
 
-
 ### VALIDATION_ERROR
 
 **Message:** Parameter validation failed  
 **Description:** One or more required parameters are missing or invalid  
 **Resolution:** Review the required parameters and their formats
-
 
 ### NOT_FOUND
 
@@ -97,15 +95,11 @@ This tool directly interfaces with the WordPress REST API endpoint above. The re
 **Description:** The requested resource does not exist  
 **Resolution:** Verify the resource ID and ensure it exists
 
-
 ### PERMISSION_DENIED
 
 **Message:** Insufficient permissions  
 **Description:** The user does not have permission to perform this action  
 **Resolution:** Contact an administrator to grant the necessary permissions
-
-
-
 
 ---
 

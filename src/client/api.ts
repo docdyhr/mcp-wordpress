@@ -207,40 +207,40 @@ export class WordPressClient implements IWordPressClient {
     const method = this.auth.method?.toLowerCase() as AuthMethod;
 
     switch (method) {
-    case "app-password":
-      if (this.auth.username && this.auth.appPassword) {
-        const credentials = Buffer.from(
-          `${this.auth.username}:${this.auth.appPassword}`,
-        ).toString("base64");
-        headers["Authorization"] = `Basic ${credentials}`;
-      }
-      break;
-    case "basic":
-      if (this.auth.username && this.auth.password) {
-        const credentials = Buffer.from(
-          `${this.auth.username}:${this.auth.password}`,
-        ).toString("base64");
-        headers["Authorization"] = `Basic ${credentials}`;
-      }
-      break;
+      case "app-password":
+        if (this.auth.username && this.auth.appPassword) {
+          const credentials = Buffer.from(
+            `${this.auth.username}:${this.auth.appPassword}`,
+          ).toString("base64");
+          headers["Authorization"] = `Basic ${credentials}`;
+        }
+        break;
+      case "basic":
+        if (this.auth.username && this.auth.password) {
+          const credentials = Buffer.from(
+            `${this.auth.username}:${this.auth.password}`,
+          ).toString("base64");
+          headers["Authorization"] = `Basic ${credentials}`;
+        }
+        break;
 
-    case "jwt":
-      if (this.jwtToken) {
-        headers["Authorization"] = `Bearer ${this.jwtToken}`;
-      }
-      break;
+      case "jwt":
+        if (this.jwtToken) {
+          headers["Authorization"] = `Bearer ${this.jwtToken}`;
+        }
+        break;
 
-    case "api-key":
-      if (this.auth.apiKey) {
-        headers["X-API-Key"] = this.auth.apiKey;
-      }
-      break;
+      case "api-key":
+        if (this.auth.apiKey) {
+          headers["X-API-Key"] = this.auth.apiKey;
+        }
+        break;
 
-    case "cookie":
-      if (this.auth.nonce) {
-        headers["X-WP-Nonce"] = this.auth.nonce;
-      }
-      break;
+      case "cookie":
+        if (this.auth.nonce) {
+          headers["X-WP-Nonce"] = this.auth.nonce;
+        }
+        break;
     }
   }
 
@@ -271,19 +271,19 @@ export class WordPressClient implements IWordPressClient {
 
     try {
       switch (method) {
-      case "app-password":
-      case "basic":
-        return await this.authenticateWithBasic();
-      case "jwt":
-        return await this.authenticateWithJWT();
-      case "cookie":
-        return await this.authenticateWithCookie();
-      case "api-key":
-        // API key auth doesn't require separate authentication step
-        this.authenticated = true;
-        return true;
-      default:
-        throw new Error(`Unsupported authentication method: ${method}`);
+        case "app-password":
+        case "basic":
+          return await this.authenticateWithBasic();
+        case "jwt":
+          return await this.authenticateWithJWT();
+        case "cookie":
+          return await this.authenticateWithCookie();
+        case "api-key":
+          // API key auth doesn't require separate authentication step
+          this.authenticated = true;
+          return true;
+        default:
+          throw new Error(`Unsupported authentication method: ${method}`);
       }
     } catch (error) {
       this._stats.authFailures++;

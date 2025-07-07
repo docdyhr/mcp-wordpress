@@ -439,7 +439,7 @@ export class PerformanceAnalytics {
       implementationCost: "low" | "medium" | "high";
       timeToValue: number; // days
     };
-    } {
+  } {
     const insights = this.generateInsights();
 
     const quickWins = insights.filter(
@@ -506,7 +506,7 @@ export class PerformanceAnalytics {
     anomalies: PerformanceAnomaly[];
     predictions: any;
     optimizationPlan: any;
-    } {
+  } {
     const currentMetrics = this.collector.collectCurrentMetrics();
     const performanceScore = this.calculatePerformanceScore(currentMetrics);
 
@@ -823,20 +823,20 @@ export class PerformanceAnalytics {
     const current = this.collector.collectCurrentMetrics();
 
     switch (metricName) {
-    case "responseTime":
-      return current.requests.averageResponseTime;
-    case "cacheHitRate":
-      return current.cache.hitRate;
-    case "errorRate":
-      return current.requests.total > 0
-        ? current.requests.failed / current.requests.total
-        : 0;
-    case "memoryUsage":
-      return current.system.memoryUsage;
-    case "requestVolume":
-      return current.requests.requestsPerSecond;
-    default:
-      return 0;
+      case "responseTime":
+        return current.requests.averageResponseTime;
+      case "cacheHitRate":
+        return current.cache.hitRate;
+      case "errorRate":
+        return current.requests.total > 0
+          ? current.requests.failed / current.requests.total
+          : 0;
+      case "memoryUsage":
+        return current.system.memoryUsage;
+      case "requestVolume":
+        return current.requests.requestsPerSecond;
+      default:
+        return 0;
     }
   }
 

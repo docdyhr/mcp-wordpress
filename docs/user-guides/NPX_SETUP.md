@@ -164,14 +164,14 @@ npx --ignore-existing mcp-wordpress
 ✅ **Always latest version** - Automatic updates  
 ✅ **No maintenance** - No local files to manage  
 ✅ **Quick setup** - Under 30 seconds  
-✅ **Cross-platform** - Works everywhere Node.js works  
+✅ **Cross-platform** - Works everywhere Node.js works
 
 ### NPX Limitations
 
 ❌ **Requires internet** - Downloads package on first run  
 ❌ **Slower startup** - Initial download takes time  
 ❌ **No customization** - Can't modify the code  
-❌ **No offline work** - Needs internet connection  
+❌ **No offline work** - Needs internet connection
 
 ### When to Use NPX
 

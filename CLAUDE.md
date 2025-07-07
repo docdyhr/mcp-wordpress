@@ -57,7 +57,7 @@ npm run test:integration   # Integration tests with WordPress (100% success)
 npm run test:multisite     # Multi-site configuration tests (100% success)
 npm run test:auth          # Authentication system tests (100% success)
 npm run test:security      # Security validation and penetration tests (40/40 passing)
-npm run test:config        # Configuration validation tests (27/27 passing) 
+npm run test:config        # Configuration validation tests (27/27 passing)
 npm run test:property      # Property-based testing (12/12 passing)
 npm run test:contracts     # Contract testing with Pact framework (mock)
 npm run test:contracts:live # Contract tests with live WordPress (automated setup)
@@ -332,7 +332,7 @@ Each tool class follows a consistent pattern:
 ```typescript
 export class ToolCategoryTools {
   constructor(private client: WordPressClient) {}
-  
+
   async toolMethod(params: ToolParams): Promise<ToolResult> {
     // Parameter validation
     // Multi-site client resolution
@@ -376,7 +376,7 @@ export class ToolCategoryTools {
 - **Site-Specific Isolation**: Complete cache separation for multi-site WordPress installations
 - **Real-Time Monitoring**: Cache performance metrics integrated into the broader performance monitoring system
 
-```text
+````text
 
 ### Type System (`src/types/`)
 
@@ -444,7 +444,7 @@ To manage multiple WordPress sites, create a `mcp-wordpress.config.json` file in
     }
   ]
 }
-```
+````
 
 **Security Notes:**
 

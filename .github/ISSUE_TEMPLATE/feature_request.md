@@ -25,6 +25,7 @@ Describe any alternative solutions or features you've considered.
 ## 🎯 Use Cases
 
 **Who would benefit from this feature?**
+
 - [ ] WordPress administrators
 - [ ] MCP client developers  
 - [ ] Content managers
@@ -33,17 +34,20 @@ Describe any alternative solutions or features you've considered.
 - [ ] Security-conscious users
 
 **Example scenarios:**
+
 1. Scenario 1: [Describe how this feature would be used]
 2. Scenario 2: [Another use case]
 
 ## 📋 Acceptance Criteria
 
 **This feature should:**
+
 - [ ] Criterion 1
 - [ ] Criterion 2
 - [ ] Criterion 3
 
 **This feature should NOT:**
+
 - [ ] Break existing functionality
 - [ ] Require breaking changes to the API
 - [ ] Impact performance negatively
@@ -54,10 +58,12 @@ Describe any alternative solutions or features you've considered.
 [If you have technical insights, share them here]
 
 **Dependencies or prerequisites:**
+
 - [ ] Dependency 1
 - [ ] Dependency 2
 
 **Testing requirements:**
+
 - [ ] Unit tests
 - [ ] Integration tests
 - [ ] Performance tests
@@ -66,12 +72,14 @@ Describe any alternative solutions or features you've considered.
 ## 📊 Priority
 
 **How important is this feature to you?**
+
 - [ ] Critical - Blocking my use case
 - [ ] High - Would significantly improve my workflow
 - [ ] Medium - Nice to have improvement
 - [ ] Low - Minor enhancement
 
 **Timeline expectations:**
+
 - [ ] Urgent (within weeks)
 - [ ] Soon (within months)  
 - [ ] Eventually (when convenient)
@@ -90,6 +98,7 @@ Describe any alternative solutions or features you've considered.
 ---
 
 **Checklist for submitters:**
+
 - [ ] I've searched existing issues to avoid duplicates
 - [ ] I've provided a clear description of the feature
 - [ ] I've explained the problem this solves

@@ -9,6 +9,7 @@ assignees: 'docdyhr'
 ## Release Information
 
 **Release Type:**
+
 - [ ] Patch (bug fixes)
 - [ ] Minor (new features, backward compatible)
 - [ ] Major (breaking changes)
@@ -18,23 +19,29 @@ assignees: 'docdyhr'
 ## Changes Included
 
 ### 🚀 Features
-- 
+
+-
 
 ### 🐛 Bug Fixes
-- 
+
+-
 
 ### ⚡ Performance Improvements
-- 
+
+-
 
 ### 📚 Documentation
-- 
+
+-
 
 ### 🏗️ Internal Changes
-- 
+
+-
 
 ## Release Checklist
 
 ### Pre-Release
+
 - [ ] All tests passing
 - [ ] Documentation updated
 - [ ] CHANGELOG.md reviewed
@@ -42,6 +49,7 @@ assignees: 'docdyhr'
 - [ ] Breaking changes documented (if major)
 
 ### Release Process
+
 - [ ] Create release branch: `git checkout -b release/vX.X.X`
 - [ ] Commit changes with conventional commit format:
   - `feat:` for new features
@@ -56,8 +64,9 @@ assignees: 'docdyhr'
   - [ ] Update CHANGELOG.md
 
 ### Post-Release
-- [ ] Verify NPM package: https://www.npmjs.com/package/mcp-wordpress
-- [ ] Verify Docker images: https://hub.docker.com/r/docdyhr/mcp-wordpress
+
+- [ ] Verify NPM package: <https://www.npmjs.com/package/mcp-wordpress>
+- [ ] Verify Docker images: <https://hub.docker.com/r/docdyhr/mcp-wordpress>
 - [ ] Test installation: `npm install mcp-wordpress@latest`
 - [ ] Test Docker image: `docker run docdyhr/mcp-wordpress:latest`
 - [ ] Update documentation if needed

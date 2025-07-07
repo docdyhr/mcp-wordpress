@@ -15,11 +15,13 @@ Tests the authentication and connectivity for a configured WordPress site.
 Simple example of using wp_test_auth
 
 **Command:**
+
 ```bash
 wp_test_auth 
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -29,17 +31,13 @@ wp_test_auth
 ```
 
 **Error Example (Authentication failure):**
+
 ```json
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
 }
 ```
-
-
-
-
-
 
 ## Response Format
 
@@ -67,13 +65,11 @@ wp_test_auth
 **Description:** Invalid credentials or insufficient permissions  
 **Resolution:** Check your authentication credentials and user permissions
 
-
 ### VALIDATION_ERROR
 
 **Message:** Parameter validation failed  
 **Description:** One or more required parameters are missing or invalid  
 **Resolution:** Review the required parameters and their formats
-
 
 ### NOT_FOUND
 
@@ -81,15 +77,11 @@ wp_test_auth
 **Description:** The requested resource does not exist  
 **Resolution:** Verify the resource ID and ensure it exists
 
-
 ### PERMISSION_DENIED
 
 **Message:** Insufficient permissions  
 **Description:** The user does not have permission to perform this action  
 **Resolution:** Contact an administrator to grant the necessary permissions
-
-
-
 
 ---
 

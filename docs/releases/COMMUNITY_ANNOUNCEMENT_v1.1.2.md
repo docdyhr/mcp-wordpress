@@ -104,9 +104,15 @@ class WordPressAPI {
 }
 
 // After: Focused managers with single responsibilities
-class AuthenticationManager { /* 150 lines */ }
-class RequestManager { /* 200 lines */ }
-class BaseManager { /* 100 lines */ }
+class AuthenticationManager {
+  /* 150 lines */
+}
+class RequestManager {
+  /* 200 lines */
+}
+class BaseManager {
+  /* 100 lines */
+}
 ```
 
 [Continue with detailed technical discussion...]

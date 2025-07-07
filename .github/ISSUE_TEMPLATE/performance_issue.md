@@ -9,6 +9,7 @@ assignees: ''
 ## ⚡ Performance Issue Description
 
 **What performance issue are you experiencing?**
+
 - [ ] Slow response times
 - [ ] High memory usage
 - [ ] CPU usage spikes
@@ -22,17 +23,20 @@ assignees: ''
 ## 📊 Performance Metrics
 
 **Current performance:**
+
 - **Response time**: [e.g., 2-5 seconds average]
 - **Memory usage**: [e.g., 500MB+ during operation]
 - **CPU usage**: [e.g., 80%+ consistently]
 - **Cache hit rate**: [e.g., 30% from cache stats]
 
 **Expected performance:**
+
 - **Target response time**: [e.g., <500ms]
 - **Acceptable memory**: [e.g., <200MB]
 - **Expected CPU**: [e.g., <50%]
 
 **Performance test results:**
+
 ```bash
 # Run performance tests and share results
 npm run test:performance
@@ -42,6 +46,7 @@ npm run health
 ## 🌍 Environment Details
 
 **System Configuration:**
+
 - **OS**: [e.g., macOS 14.0, Ubuntu 22.04]
 - **Hardware**: [CPU, RAM, disk type]
 - **Node.js version**: [e.g., v20.10.0]
@@ -49,6 +54,7 @@ npm run health
 - **Installation**: [NPM, Docker, source]
 
 **WordPress Environment:**
+
 - **WordPress version**: [e.g., 6.4.2]
 - **Site size**: [posts, pages, media count]
 - **Active plugins**: [especially cache/performance plugins]
@@ -56,6 +62,7 @@ npm run health
 - **Database size**: [approximate size if known]
 
 **MCP Usage Pattern:**
+
 - **Concurrent users/clients**: [number of simultaneous connections]
 - **Request volume**: [requests per minute/hour]
 - **Operation types**: [which tools are used most frequently]
@@ -64,12 +71,14 @@ npm run health
 ## 🔄 Reproduction Steps
 
 **To reproduce the performance issue:**
+
 1. Configure MCP with [specific settings]
 2. Execute [specific commands or operations]
 3. Monitor [specific metrics]
 4. Observe [performance degradation]
 
 **Workload characteristics:**
+
 - **Peak usage times**: [when does the issue occur]
 - **Specific operations**: [which commands are slow]
 - **Data patterns**: [large files, many posts, etc.]
@@ -77,18 +86,21 @@ npm run health
 ## 📈 Monitoring Data
 
 **Performance monitoring output:**
+
 ```bash
 # Share output from performance monitoring
 npm run test:performance
 ```
 
 **Cache statistics:**
+
 ```bash
 # Share cache efficiency data
 wp_cache_stats --site=your-site
 ```
 
 **System resource usage:**
+
 ```bash
 # Monitor during issue occurrence
 top -p $(pgrep node)
@@ -98,6 +110,7 @@ top -p $(pgrep node)
 ## 🔧 Optimization Attempts
 
 **What have you tried?**
+
 - [ ] Adjusted cache settings
 - [ ] Modified rate limiting
 - [ ] Changed authentication method
@@ -106,6 +119,7 @@ top -p $(pgrep node)
 - [ ] Disabled plugins
 
 **Configuration changes tested:**
+
 ```json
 {
   "caching": {
@@ -121,6 +135,7 @@ top -p $(pgrep node)
 ## 💡 Suggested Solutions
 
 **Potential optimizations:**
+
 - [ ] Cache configuration tuning
 - [ ] Request batching/pagination
 - [ ] Connection pooling
@@ -134,6 +149,7 @@ top -p $(pgrep node)
 ## 📊 Impact Assessment
 
 **Business impact:**
+
 - [ ] Blocks normal usage
 - [ ] Significantly slows workflow
 - [ ] Causes user frustration
@@ -141,6 +157,7 @@ top -p $(pgrep node)
 - [ ] Minor inconvenience
 
 **Affected operations:**
+
 - [ ] All operations affected
 - [ ] Specific tools: [list which ones]
 - [ ] Only during peak usage
@@ -149,6 +166,7 @@ top -p $(pgrep node)
 ## 🎯 Performance Goals
 
 **Target metrics:**
+
 - **Response time**: [specific goal, e.g., <500ms for 95% of requests]
 - **Memory usage**: [target limit]
 - **Throughput**: [requests per second goal]
@@ -163,6 +181,7 @@ top -p $(pgrep node)
 [Compare with other tools, previous versions, or different environments]
 
 **Logs and diagnostics:**
+
 ```
 [Share relevant performance logs, slow query logs, etc.]
 ```
@@ -173,6 +192,7 @@ top -p $(pgrep node)
 ---
 
 **Checklist for submitters:**
+
 - [ ] I've measured actual performance metrics
 - [ ] I've tested with latest version
 - [ ] I've tried basic optimization steps

@@ -35,5 +35,3 @@ WordPress blog post object
   "slug": "welcome-to-wordpress"
 }
 ```
-
-
