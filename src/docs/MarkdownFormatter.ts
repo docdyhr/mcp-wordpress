@@ -507,13 +507,13 @@ ${relatedTools.map((tool) => `- [\`${tool}\`](./${tool}.md)`).join("\n")}
     return `## Additional Examples
 
 ${examples
-  .map(
-    (example, index) => `### Example ${index + 2}
+    .map(
+      (example, index) => `### Example ${index + 2}
 \`\`\`json
 ${JSON.stringify(example, null, 2)}
 \`\`\`
 `,
-  )
-  .join("\n")}`;
+    )
+    .join("\n")}`;
   }
 }

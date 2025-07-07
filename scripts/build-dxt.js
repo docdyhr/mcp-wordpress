@@ -164,12 +164,11 @@ For more information, visit: https://github.com/docdyhr/mcp-wordpress
     );
 
     console.log("\n🎉 DXT package build completed successfully!");
-    console.log(`\nTo test the package:`);
-    console.log(
-      `1. Install Claude Desktop Extensions CLI: npm install -g @anthropic/dxt`,
-    );
-    console.log(`2. Validate package: dxt validate ${PACKAGE_NAME}`);
-    console.log(`3. Install in Claude Desktop through the Extensions menu`);
+    console.log(`\nTo install the package:`);
+    console.log(`1. Open Claude Desktop`);
+    console.log(`2. Go to Extensions menu`);
+    console.log(`3. Install the ${PACKAGE_NAME} file`);
+    console.log(`4. Configure your WordPress credentials`);
   } catch (error) {
     console.error("❌ Build failed:", error.message);
     process.exit(1);

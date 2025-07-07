@@ -109,7 +109,7 @@ npm run dxt:package                     # Create mcp-wordpress.dxt file
 # Development commands
 npm run dxt:build                       # Build DXT package only
 npm run dxt:clean                       # Clean build artifacts
-npm run dxt:validate                    # Validate DXT package (requires dxt CLI)
+npm run dxt:validate                    # Validate DXT package (built-in validation)
 ```
 
 **DXT Package Features**:

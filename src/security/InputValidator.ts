@@ -228,11 +228,11 @@ export function validateSecurity(schema: z.ZodSchema) {
           error instanceof z.ZodError
             ? error.errors
             : [
-                {
-                  message:
+              {
+                message:
                     error instanceof Error ? error.message : String(error),
-                },
-              ],
+              },
+            ],
         );
       }
     };

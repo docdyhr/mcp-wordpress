@@ -328,7 +328,7 @@ export class CacheInvalidation {
     queueSize: number;
     rulesCount: number;
     processing: boolean;
-  } {
+    } {
     return {
       queueSize: this.eventQueue.length,
       rulesCount: Array.from(this.invalidationRules.values()).reduce(
