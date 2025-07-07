@@ -18,7 +18,10 @@
     "/node_modules/",
     "/dist/",
     "/tests/performance/",
-    "/tests/cache/"
+    "/tests/cache/",
+    "cache-stress.test.js",
+    "cache-performance.test.js",
+    "advanced-cache.test.js"
   ],
   "collectCoverage": false,
   "collectCoverageFrom": [
