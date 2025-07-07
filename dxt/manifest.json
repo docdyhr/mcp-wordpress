@@ -36,11 +36,11 @@
   ],
   "server": {
     "type": "node",
-    "entry_point": "dist/index.js",
+    "entry_point": "index.js",
     "mcp_config": {
       "command": "node",
       "args": [
-        "${__dirname}/dist/index.js"
+        "${__dirname}/index.js"
       ],
       "env": {
         "WORDPRESS_SITE_URL": "${user_config.wordpress_site_url}",
