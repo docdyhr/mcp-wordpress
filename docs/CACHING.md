@@ -21,16 +21,19 @@ Request → Cache Check → API Call (if miss) → Cache Store → Response
 ```
 
 **Layer 1: HTTP Response Cache**
+
 - ETags support for efficient revalidation
 - Cache-Control headers based on data volatility  
 - Conditional requests (If-None-Match)
 
 **Layer 2: In-Memory Application Cache**
+
 - TTL-based expiration by data type
 - LRU eviction for memory management
 - Site-specific cache keys for multi-site support
 
 **Layer 3: Intelligent Invalidation**
+
 - Event-based cache clearing on content changes
 - Pattern-based invalidation of related data
 - Cascading invalidation (e.g., post changes clear category counts)
@@ -38,21 +41,25 @@ Request → Cache Check → API Call (if miss) → Cache Store → Response
 ## 📊 **Cache Strategies by Data Type**
 
 ### **Static Data (4 hour TTL)**
+
 - Site settings, user roles, capabilities
 - Cache-Control: `public, max-age=14400`
 - **Why**: Changes very rarely, safe to cache long-term
 
 ### **Semi-Static Data (2 hour TTL)**  
+
 - Categories, tags, user profiles
 - Cache-Control: `public, max-age=7200`
 - **Why**: Changes occasionally but stable for hours
 
 ### **Dynamic Data (15 minute TTL)**
+
 - Posts, pages, comments
 - Cache-Control: `public, max-age=900`  
 - **Why**: Content changes frequently, shorter cache needed
 
 ### **Session Data (30 minute TTL)**
+
 - Authentication status, current user info
 - Cache-Control: `private, max-age=1800`
 - **Why**: User-specific data, moderate stability
@@ -62,6 +69,7 @@ Request → Cache Check → API Call (if miss) → Cache Store → Response
 The system includes dedicated cache management tools:
 
 ### **wp_cache_stats**
+
 Get detailed cache statistics for performance monitoring.
 
 ```bash
@@ -69,12 +77,14 @@ wp_cache_stats --site="site1"
 ```
 
 **Returns:**
+
 - Hit/miss rates
 - Total cache entries  
 - Eviction statistics
 - Invalidation queue status
 
 ### **wp_cache_clear**
+
 Clear cache entries with optional pattern matching.
 
 ```bash
@@ -87,6 +97,7 @@ wp_cache_clear --site="site1" --pattern="categories"
 ```
 
 ### **wp_cache_warm**
+
 Pre-populate cache with essential WordPress data.
 
 ```bash
@@ -94,11 +105,13 @@ wp_cache_warm --site="site1"
 ```
 
 Warms cache with:
+
 - Current user information
 - Categories and tags
 - Site settings
 
 ### **wp_cache_info**
+
 Get detailed cache configuration and status.
 
 ```bash
@@ -115,7 +128,7 @@ Caching is **enabled by default**. To disable:
 export DISABLE_CACHE=true
 ```
 
-### **Cache Settings** 
+### **Cache Settings**
 
 Configure via `SecurityConfig.cache` in `src/security/SecurityConfig.ts`:
 
@@ -145,15 +158,18 @@ cache: {
 The system automatically invalidates related cache entries when content changes:
 
 **Post Operations:**
+
 - **Create Post** → Clears posts listings, categories, tags, search
 - **Update Post** → Clears specific post, posts listings, search  
 - **Delete Post** → Clears posts listings, categories, tags, search
 
 **Category/Tag Operations:**
+
 - **Create/Update/Delete** → Clears taxonomies AND related posts
 - **Cascading Effect** → Post cache cleared when categories change
 
 **User Operations:**
+
 - **Update User** → Clears user cache, current user cache
 - **User Role Changes** → Clears capability-dependent caches
 
@@ -179,6 +195,7 @@ node scripts/test-caching.js
 ```
 
 **Tests Include:**
+
 - Cache infrastructure performance
 - Memory usage analysis
 - Hit/miss rate calculations
@@ -203,11 +220,13 @@ done
 ### **Expected Performance Gains**
 
 **Before Caching:**
+
 - Categories API call: ~200-500ms
 - Repeated user lookups: ~150-300ms each
 - Site settings: ~100-200ms each call
 
 **After Caching:**
+
 - Categories (cached): ~1-5ms  
 - User lookups (cached): ~1-3ms
 - Site settings (cached): ~1-2ms
@@ -217,11 +236,13 @@ done
 Each WordPress site gets isolated cache:
 
 **Cache Key Format:**
+
 ```
 {siteId}:{endpoint}:{params_hash}
 ```
 
 **Examples:**
+
 ```
 site1:posts:abc123        # Site 1 posts listing
 site2:posts:abc123        # Site 2 posts listing (separate)  
@@ -229,6 +250,7 @@ site1:categories:def456   # Site 1 categories
 ```
 
 **Site-Specific Operations:**
+
 ```bash
 wp_cache_clear --site="site1"              # Clear only site1 cache
 wp_cache_clear --site="site2" --pattern="posts"  # Clear site2 posts only
@@ -239,19 +261,23 @@ wp_cache_clear --site="site2" --pattern="posts"  # Clear site2 posts only
 ### **Cache Not Working**
 
 1. **Check if caching is enabled:**
+
    ```bash
    wp_cache_info --site="your-site"
    ```
 
 2. **Verify no DISABLE_CACHE environment variable:**
+
    ```bash
    echo $DISABLE_CACHE  # Should be empty or 'false'
    ```
 
 3. **Check cache statistics:**
+
    ```bash
    wp_cache_stats --site="your-site"
    ```
+
    - Hit rate should increase over time
    - Total entries should grow with usage
 
@@ -272,13 +298,16 @@ wp_cache_clear --site="site2" --pattern="posts"  # Clear site2 posts only
 ### **Stale Data Issues**
 
 1. **Check invalidation:**
+
    ```bash
    wp_cache_info --site="your-site"
    ```
+
    - Verify invalidation rules are active
    - Check queue processing status
 
 2. **Manual cache clear:**
+
    ```bash
    wp_cache_clear --site="your-site" --pattern="problematic_endpoint"
    ```
@@ -292,11 +321,13 @@ wp_cache_clear --site="site2" --pattern="posts"  # Clear site2 posts only
 ### **For High-Traffic Sites**
 
 1. **Increase cache size:**
+
    ```typescript
    maxSize: 2000  // From default 1000
    ```
 
 2. **Tune TTL values:**
+
    ```typescript
    ttlPresets: {
      static: 8 * 60 * 60 * 1000,      // 8 hours for very stable data
@@ -306,6 +337,7 @@ wp_cache_clear --site="site2" --pattern="posts"  # Clear site2 posts only
    ```
 
 3. **Pre-warm cache on deployment:**
+
    ```bash
    wp_cache_warm --site="production-site"
    ```
@@ -313,6 +345,7 @@ wp_cache_clear --site="site2" --pattern="posts"  # Clear site2 posts only
 ### **For Development**
 
 1. **Shorter TTL for faster iteration:**
+
    ```typescript
    ttlPresets: {
      dynamic: 30 * 1000,  // 30 seconds for development
@@ -320,6 +353,7 @@ wp_cache_clear --site="site2" --pattern="posts"  # Clear site2 posts only
    ```
 
 2. **Easy cache clearing:**
+
    ```bash
    # Add to development scripts
    wp_cache_clear  # Clear all during development

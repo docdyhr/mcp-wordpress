@@ -11,6 +11,7 @@ npm run test:contracts:live
 ```
 
 This command will:
+
 1. 🐳 Start isolated WordPress + MySQL containers (port 8081)
 2. ⚙️ Auto-configure WordPress with test data
 3. 🧪 Run contract tests against the live instance
@@ -21,17 +22,20 @@ This command will:
 ## 📋 What the Automated Setup Includes
 
 ### WordPress Configuration
+
 - **URL**: `http://localhost:8081`
 - **Admin User**: `testuser` / `test-password-123`
 - **App Password**: Auto-generated for API access
 - **Test Content**: Pre-created posts and media for testing
 
 ### Docker Services
+
 - **WordPress**: Latest WordPress with auto-setup
 - **MySQL**: 8.0 with optimized configuration
 - **WP-CLI**: For automated WordPress configuration
 
 ### Network Isolation
+
 - Uses separate Docker network: `wordpress-test-network`
 - Port 8081 (different from main development environment)
 - Isolated volumes: `wordpress_test_data`, `db_test_data`
@@ -41,21 +45,25 @@ This command will:
 If you prefer manual setup or need custom configuration:
 
 ### 1. Start Services
+
 ```bash
 docker-compose -f docker-compose.test.yml up -d
 ```
 
 ### 2. Check Status
+
 ```bash
 docker-compose -f docker-compose.test.yml ps
 docker-compose -f docker-compose.test.yml logs -f wordpress-test
 ```
 
 ### 3. Access WordPress
-- WordPress: http://localhost:8081
-- Admin Panel: http://localhost:8081/wp-admin
+
+- WordPress: <http://localhost:8081>
+- Admin Panel: <http://localhost:8081/wp-admin>
 
 ### 4. Run Tests
+
 ```bash
 # Set environment variables
 export WORDPRESS_TEST_URL="http://localhost:8081"
@@ -68,6 +76,7 @@ npm run test:contracts
 ```
 
 ### 5. Cleanup
+
 ```bash
 docker-compose -f docker-compose.test.yml down -v
 ```
@@ -75,18 +84,22 @@ docker-compose -f docker-compose.test.yml down -v
 ## 🧪 Test Modes
 
 ### Mock Testing (Default)
+
 ```bash
 npm run test:contracts
 ```
+
 - Uses Pact mock provider
 - No external dependencies
 - Fast execution
 - Good for CI/CD
 
 ### Live Testing
+
 ```bash
 npm run test:contracts:live
 ```
+
 - Tests against real WordPress
 - Validates actual API behavior
 - Comprehensive integration testing
@@ -97,21 +110,25 @@ npm run test:contracts:live
 The contract tests verify:
 
 ### ✅ Posts API
+
 - Create posts with proper structure
 - Retrieve posts with pagination
 - Response format validation
 
 ### ✅ Media API  
+
 - File upload handling
 - Multipart form data
 - Media library integration
 
 ### ✅ Users API
+
 - User information retrieval
 - Authentication validation
 - Permission handling
 
 ### ✅ Authentication
+
 - App password authentication
 - Authorization headers
 - Error handling
@@ -119,6 +136,7 @@ The contract tests verify:
 ## 🛠️ Troubleshooting
 
 ### Port Already in Use
+
 ```bash
 # Check what's using port 8081
 lsof -i :8081
@@ -128,6 +146,7 @@ kill -9 <PID>
 ```
 
 ### Docker Issues
+
 ```bash
 # Clean up Docker resources
 docker system prune -f
@@ -139,6 +158,7 @@ sudo service docker restart  # Linux
 ```
 
 ### WordPress Not Ready
+
 ```bash
 # Check WordPress logs
 docker-compose -f docker-compose.test.yml logs wordpress-test
@@ -151,6 +171,7 @@ curl http://localhost:8081/wp-json/wp/v2/
 ```
 
 ### Test Failures
+
 ```bash
 # Run with debug output
 DEBUG=true npm run test:contracts:live

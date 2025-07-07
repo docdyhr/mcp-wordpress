@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "mcp-wordpress": {
+      "command": "npx",
+      "args": ["-y", "mcp-wordpress"]
+    }
+  }
+}

@@ -30,36 +30,28 @@ A comprehensive Model Context Protocol (MCP) server for WordPress management thr
 
 ## ⚡ Quick Start
 
-### Option 1: NPX (Recommended)
+Choose your preferred setup method:
 
-The easiest way to get started - no installation required:
+- 🚀 **[NPX Setup](docs/user-guides/NPX_SETUP.md)** - Zero installation, always latest version
+- 💻 **[NPM Setup](docs/user-guides/NPM_SETUP.md)** - Local development and customization
+- 🐳 **[Docker Setup](docs/user-guides/DOCKER_SETUP.md)** - Containerized deployment
+- 📦 **[DTX Setup](docs/user-guides/DTX_SETUP.md)** - Claude Desktop Extension package
+
+### Ultra-Quick NPX Start
 
 ```bash
-# Run directly with NPX
-npx mcp-wordpress
+# Run directly with NPX (recommended)
+npx -y mcp-wordpress
 
 # Or install globally
 npm install -g mcp-wordpress
 mcp-wordpress
 ```
 
-### Option 2: Local Development
-
-```bash
-git clone https://github.com/docdyhr/mcp-wordpress.git
-cd mcp-wordpress
-npm install
-npm run setup
-npm start
-```
-
 ### Setup Wizard
 
 ```bash
-# For NPX users
-npx mcp-wordpress setup
-
-# For local installation
+# For any installation method
 npm run setup
 ```
 
@@ -147,55 +139,47 @@ The setup wizard guides you through:
 - Connection testing
 - Claude Desktop configuration
 
-## 🚀 Lazy Setup via Claude Desktop
+## 🚀 Claude Desktop Integration
 
-### Super Easy NPX Setup
+### 📖 Complete Setup Guides
 
-If you want the absolute easiest setup, just paste this prompt into Claude Desktop:
+For detailed setup instructions, see our comprehensive guides:
 
+- **[NPX Setup Guide](docs/user-guides/NPX_SETUP.md)** - Zero installation method
+- **[NPM Setup Guide](docs/user-guides/NPM_SETUP.md)** - Local development
+- **[Docker Setup Guide](docs/user-guides/DOCKER_SETUP.md)** - Containerized deployment
+- **[DTX Setup Guide](docs/user-guides/DTX_SETUP.md)** - Desktop Extension package
+
+### 🤖 Claude Desktop Quick Prompts
+
+**For NPX Users (Easiest):**
 ```text
-Set up the MCP WordPress server using NPX for my Claude Desktop. 
-
-My WordPress details:
-- Site URL: [YOUR_WORDPRESS_URL]
-- Username: [YOUR_USERNAME]
-
-Please:
-1. Help me create a WordPress Application Password
-2. Configure my Claude Desktop mcp.json file with the NPX command
-3. Test the connection to make sure everything works
-4. Show me how to use the WordPress tools
-
-I want to use the NPX version (mcp-wordpress) so I don't need to install anything locally.
+Set up MCP WordPress using NPX. My site: [YOUR_SITE_URL], username: [YOUR_USERNAME]. Help with application password creation and Claude Desktop configuration.
 ```
 
-### Full Local Development Setup
-
-For local development and customization:
-
+**For Local Development:**
 ```text
-Build and configure the MCP WordPress server project from https://github.com/docdyhr/mcp-wordpress locally on my computer. 
-
-Please:
-1. Clone the repository to an appropriate directory
-2. Install all dependencies 
-3. Run the setup wizard and help me configure my WordPress connection
-4. Test the connection to make sure everything works
-5. Set up the Claude Desktop MCP configuration
-6. Run a quick test to verify all tools are working
-
-My WordPress site URL is: [YOUR_WORDPRESS_URL]
-My WordPress username is: [YOUR_USERNAME]
-
-Guide me through any steps that require manual input, and let me know if you need any additional information from me.
+Set up MCP WordPress locally from GitHub. Clone, install, configure for my site: [YOUR_SITE_URL], username: [YOUR_USERNAME]. Include Claude Desktop setup.
 ```
 
-**Just replace `[YOUR_WORDPRESS_URL]` and `[YOUR_USERNAME]` with your actual WordPress site details, and Claude will handle the rest!**
+**Replace placeholders with your actual WordPress details - Claude will handle the rest!**
 
 ## 🔧 Configuration
 
-### Environment Variables (.env)
+The MCP WordPress server supports multiple configuration methods to fit different needs.
 
+### Setup Methods Overview
+
+| Method | Best For | Configuration File |
+|--------|----------|---------------------|
+| **NPX** | Quick start, always latest | Claude Desktop config only |
+| **NPM** | Local development | `.env` or Claude Desktop config |
+| **Docker** | Production deployment | Environment variables or mounted config |
+| **DTX** | Simple GUI setup | DTX config + optional multi-site file |
+
+### Environment Variables
+
+**Core Configuration:**
 ```env
 WORDPRESS_SITE_URL=https://your-wordpress-site.com
 WORDPRESS_USERNAME=your-username
@@ -204,117 +188,37 @@ WORDPRESS_AUTH_METHOD=app-password
 DEBUG=false
 ```
 
+**📖 Detailed Configuration Guides:**
+- **[NPX Configuration](docs/user-guides/NPX_SETUP.md#quick-start)** - Claude Desktop environment variables
+- **[NPM Configuration](docs/user-guides/NPM_SETUP.md#configuration)** - Local `.env` file setup
+- **[Docker Configuration](docs/user-guides/DOCKER_SETUP.md#configuration)** - Container environment setup
+- **[DTX Configuration](docs/user-guides/DTX_SETUP.md#configuration)** - Extension package setup
+
 ### Claude Desktop Integration
 
-Configure MCP WordPress Server in your Claude Desktop `mcp.json` configuration file:
-
-#### Option 1: NPX (Recommended)
-
-```json
-{
-  "mcpServers": {
-    "mcp-wordpress": {
-      "command": "npx",
-      "args": ["mcp-wordpress"],
-      "env": {
-        "WORDPRESS_SITE_URL": "https://your-site.com",
-        "WORDPRESS_USERNAME": "your-username", 
-        "WORDPRESS_APP_PASSWORD": "your-app-password",
-        "WORDPRESS_AUTH_METHOD": "app-password"
-      }
-    }
-  }
-}
-```
-
-#### Option 2: Global Installation
-
-```json
-{
-  "mcpServers": {
-    "mcp-wordpress": {
-      "command": "mcp-wordpress",
-      "env": {
-        "WORDPRESS_SITE_URL": "https://your-site.com",
-        "WORDPRESS_USERNAME": "your-username",
-        "WORDPRESS_APP_PASSWORD": "your-app-password", 
-        "WORDPRESS_AUTH_METHOD": "app-password"
-      }
-    }
-  }
-}
-```
-
-#### Option 3: Local Development
-
-```json
-{
-  "mcpServers": {
-    "mcp-wordpress": {
-      "command": "node",
-      "args": ["/path/to/mcp-wordpress/dist/index.js"],
-      "env": {
-        "WORDPRESS_SITE_URL": "https://your-site.com",
-        "WORDPRESS_USERNAME": "your-username",
-        "WORDPRESS_APP_PASSWORD": "your-app-password",
-        "WORDPRESS_AUTH_METHOD": "app-password"
-      }
-    }
-  }
-}
-```
-
-#### Using .env File (Any Option)
-
-If you prefer to use a `.env` file instead of environment variables in the config:
-
-```json
-{
-  "mcpServers": {
-    "mcp-wordpress": {
-      "command": "npx",
-      "args": ["mcp-wordpress"],
-      "env": {
-        "NODE_ENV": "production"
-      }
-    }
-  }
-}
-```
-
-### Claude Desktop Configuration File Locations
-
+**Configuration File Locations:**
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 - **Linux**: `~/.config/Claude/claude_desktop_config.json`
 
-### Quick Configuration Steps
-
-1. **Create or locate your Claude Desktop config file** at the path above
-2. **Add the MCP server configuration** using one of the options above
-3. **Restart Claude Desktop** for changes to take effect
-4. **Verify the connection** - you should see WordPress tools available in Claude Desktop
-
-### Example Complete Configuration
-
-Here's a complete `claude_desktop_config.json` file with MCP WordPress:
-
+**Quick NPX Example:**
 ```json
 {
   "mcpServers": {
     "mcp-wordpress": {
       "command": "npx",
-      "args": ["mcp-wordpress"],
+      "args": ["-y", "mcp-wordpress"],
       "env": {
         "WORDPRESS_SITE_URL": "https://your-site.com",
         "WORDPRESS_USERNAME": "your-username",
-        "WORDPRESS_APP_PASSWORD": "your-app-password",
-        "WORDPRESS_AUTH_METHOD": "app-password"
+        "WORDPRESS_APP_PASSWORD": "your-app-password"
       }
     }
   }
 }
 ```
+
+🔗 **See the detailed setup guides above for complete configuration examples for each method.**
 
 ## 🌐 Multi-Site Configuration
 
@@ -783,43 +687,61 @@ DEBUG=true npm run dev
 
 ## 🐳 Docker Support
 
+Docker support with production-ready containers and Claude Desktop integration.
+
 ### Quick Docker Start
 
 ```bash
-# Using Docker Hub image
-docker run -d \
-  --name mcp-wordpress \
+# Single-site with environment variables
+docker run --rm -i \
   -e WORDPRESS_SITE_URL=https://your-site.com \
   -e WORDPRESS_USERNAME=your-username \
   -e WORDPRESS_APP_PASSWORD=your-app-password \
   docdyhr/mcp-wordpress:latest
 
-# Using Docker Compose
-curl -O https://raw.githubusercontent.com/docdyhr/mcp-wordpress/main/docker-compose.yml
-docker-compose up -d
+# Multi-site with config file
+docker run --rm -i \
+  -v ./mcp-wordpress.config.json:/app/mcp-wordpress.config.json:ro \
+  docdyhr/mcp-wordpress:latest
 ```
 
-### Production Deployment
+### Claude Desktop Docker Integration
 
-```yaml
-version: '3.8'
-services:
-  mcp-wordpress:
-    image: docdyhr/mcp-wordpress:latest
-    restart: unless-stopped
-    environment:
-      - WORDPRESS_SITE_URL=https://your-site.com
-      - WORDPRESS_USERNAME=your-username
-      - WORDPRESS_APP_PASSWORD=your-app-password
-      - NODE_ENV=production
-    volumes:
-      - ./logs:/app/logs
-      - ./cache:/app/cache
-    ports:
-      - "3000:3000"
+**Single-Site:**
+```json
+{
+  "mcpServers": {
+    "mcp-wordpress": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "-e", "WORDPRESS_SITE_URL=https://your-site.com",
+        "-e", "WORDPRESS_USERNAME=your-username",
+        "-e", "WORDPRESS_APP_PASSWORD=your-app-password",
+        "docdyhr/mcp-wordpress:latest"
+      ]
+    }
+  }
+}
 ```
 
-**📖 Full Docker Documentation**: [docs/DOCKER.md](./docs/DOCKER.md)
+**Multi-Site:**
+```json
+{
+  "mcpServers": {
+    "mcp-wordpress": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "-v", "/path/to/mcp-wordpress.config.json:/app/mcp-wordpress.config.json:ro",
+        "docdyhr/mcp-wordpress:latest"
+      ]
+    }
+  }
+}
+```
+
+**📖 Complete Docker Guide**: [docs/user-guides/DOCKER_SETUP.md](docs/user-guides/DOCKER_SETUP.md)
 
 ## 🧪 Contract Testing with Live WordPress
 
@@ -919,8 +841,8 @@ docker pull docdyhr/mcp-wordpress:latest
 # Specific version
 docker pull docdyhr/mcp-wordpress:1.2.2
 
-# Run directly
-docker run -d docdyhr/mcp-wordpress:latest
+# Test container (interactive)
+docker run --rm -i docdyhr/mcp-wordpress:latest
 ```
 
 ### 🏷️ Release Process

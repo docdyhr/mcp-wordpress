@@ -1,17 +1,19 @@
-# Docker Deployment Guide
+# Docker Deployment Guide (Legacy)
 
 ![Docker](https://img.shields.io/badge/Docker-ready-blue)
 ![Version](https://img.shields.io/badge/version-1.2.0-green)
 ![Security](https://img.shields.io/badge/security-hardened-brightgreen)
 
-This guide covers deploying the MCP WordPress Server using Docker for production and development environments.
+> **📖 New Users**: For Claude Desktop MCP integration, see the **[Docker Setup Guide](user-guides/DOCKER_SETUP.md)** instead.
+
+This guide covers advanced Docker deployment scenarios for production and development environments.
 
 ## 🚀 Quick Start
 
 ### Option 1: Docker Hub (Recommended)
 
 ```bash
-# Pull and run the latest image
+# Production deployment (NOT for Claude Desktop MCP)
 docker run -d \
   --name mcp-wordpress \
   --restart unless-stopped \
@@ -20,6 +22,8 @@ docker run -d \
   -e WORDPRESS_APP_PASSWORD=your-app-password \
   docdyhr/mcp-wordpress:latest
 ```
+
+**⚠️ Claude Desktop Users**: Do NOT use `-d` flag with Claude Desktop. See [Docker Setup Guide](user-guides/DOCKER_SETUP.md) for MCP integration.
 
 ### Option 2: Docker Compose
 
@@ -67,9 +71,11 @@ For multi-site setups, mount a configuration file:
 ```bash
 docker run -d \
   --name mcp-wordpress \
-  -v ./mcp-wordpress.config.json:/app/config/mcp-wordpress.config.json:ro \
+  -v ./mcp-wordpress.config.json:/app/mcp-wordpress.config.json:ro \
   docdyhr/mcp-wordpress:latest
 ```
+
+**⚠️ Mount Path**: Use `/app/mcp-wordpress.config.json` (not `/app/config/`).
 
 **Example `mcp-wordpress.config.json`:**
 ```json
@@ -117,7 +123,7 @@ services:
       - NODE_ENV=production
     volumes:
       # Optional: Mount config for multi-site
-      - ./mcp-wordpress.config.json:/app/config/mcp-wordpress.config.json:ro
+      - ./mcp-wordpress.config.json:/app/mcp-wordpress.config.json:ro
       # Optional: Persist logs
       - ./logs:/app/logs
       # Optional: Persist cache

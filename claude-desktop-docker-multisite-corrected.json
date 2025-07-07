@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "mcp-wordpress": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "-v",
+        "/Users/thomas/Programming/mcp-wordpress/mcp-wordpress.config.json:/app/mcp-wordpress.config.json:ro",
+        "docdyhr/mcp-wordpress:latest"
+      ]
+    }
+  }
+}

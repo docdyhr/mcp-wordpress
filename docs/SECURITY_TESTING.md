@@ -84,6 +84,7 @@ npm test tests/security/security-validation.test.js -- --grep "XSS"
 ```
 
 **Covered Attack Vectors:**
+
 - Script tag injection
 - Event handler injection
 - JavaScript URL schemes
@@ -91,6 +92,7 @@ npm test tests/security/security-validation.test.js -- --grep "XSS"
 - HTML entity encoding
 
 **Example Test:**
+
 ```javascript
 test('should reject script tags in safe strings', () => {
   const maliciousInput = 'Hello <script>alert("XSS")</script> World';
@@ -105,6 +107,7 @@ npm test tests/security/security-validation.test.js -- --grep "SQL"
 ```
 
 **Covered Attack Vectors:**
+
 - Union-based injection
 - Boolean-based blind injection
 - Time-based blind injection
@@ -112,6 +115,7 @@ npm test tests/security/security-validation.test.js -- --grep "SQL"
 - Comment-based injection
 
 **Example Test:**
+
 ```javascript
 test('should reject SQL injection patterns', () => {
   const maliciousQueries = [
@@ -133,6 +137,7 @@ npm test tests/security/security-validation.test.js -- --grep "Path"
 ```
 
 **Covered Attack Vectors:**
+
 - Directory traversal (../)
 - Encoded path traversal
 - Windows path traversal (..\\)
@@ -145,6 +150,7 @@ npm test tests/security/penetration-tests.test.js
 ```
 
 **Comprehensive Attack Simulation:**
+
 - Command injection attempts
 - Authentication bypass
 - Header injection
@@ -156,11 +162,13 @@ npm test tests/security/penetration-tests.test.js
 ### Adding Security to New Tools
 
 1. **Import Security Framework:**
+
 ```typescript
 import { validateSecurity, ToolSchemas } from '../security/InputValidator.js';
 ```
 
 2. **Apply Validation Decorator:**
+
 ```typescript
 export class MyTools {
   @validateSecurity(ToolSchemas.postData)
@@ -171,6 +179,7 @@ export class MyTools {
 ```
 
 3. **Custom Validation Schema:**
+
 ```typescript
 const customSchema = z.object({
   customField: SecuritySchemas.safeString,
@@ -217,11 +226,13 @@ async function toolMethod(params: any) {
 ## 🚨 Security Testing Commands
 
 ### Run All Security Tests
+
 ```bash
 npm run test:security
 ```
 
 ### Run Specific Security Test Categories
+
 ```bash
 # Input validation tests
 npm test tests/security/security-validation.test.js
@@ -237,6 +248,7 @@ npm test -- --grep "SQL"
 ```
 
 ### Security Test Coverage
+
 ```bash
 npm run test:coverage -- tests/security/
 ```
@@ -244,6 +256,7 @@ npm run test:coverage -- tests/security/
 ## 📊 Security Monitoring
 
 ### Error Logging
+
 Security validation errors are automatically logged:
 
 ```typescript
@@ -260,6 +273,7 @@ Security validation errors are automatically logged:
 ```
 
 ### Rate Limiting Monitoring
+
 ```typescript
 {
   timestamp: "2024-01-01T00:00:00.000Z",
@@ -274,6 +288,7 @@ Security validation errors are automatically logged:
 ## 🔍 Security Audit Checklist
 
 ### ✅ Input Validation
+
 - [ ] All user inputs validated with Zod schemas
 - [ ] XSS protection on all text fields
 - [ ] SQL injection protection on search/query fields
@@ -281,24 +296,28 @@ Security validation errors are automatically logged:
 - [ ] Length limits enforced on all inputs
 
 ### ✅ Output Encoding
+
 - [ ] HTML entities encoded in output
 - [ ] JSON responses properly escaped
 - [ ] Error messages sanitized
 - [ ] Log entries do not contain sensitive data
 
 ### ✅ Authentication & Authorization
+
 - [ ] Rate limiting implemented
 - [ ] Secure password handling
 - [ ] Session management (if applicable)
 - [ ] Permission checks on all operations
 
 ### ✅ Error Handling
+
 - [ ] Sensitive information not exposed in errors
 - [ ] Consistent error response format
 - [ ] Proper logging without data leakage
 - [ ] Graceful handling of edge cases
 
 ### ✅ File Operations
+
 - [ ] Upload restrictions enforced
 - [ ] File type validation
 - [ ] Size limits implemented
@@ -307,6 +326,7 @@ Security validation errors are automatically logged:
 ## 🛠️ Security Tools Integration
 
 ### ESLint Security Rules
+
 ```javascript
 {
   "extends": ["plugin:security/recommended"],
@@ -319,6 +339,7 @@ Security validation errors are automatically logged:
 ```
 
 ### Automated Security Scanning
+
 ```bash
 # Add to package.json
 {
@@ -331,6 +352,7 @@ Security validation errors are automatically logged:
 ```
 
 ### CI/CD Security Pipeline
+
 ```yaml
 # GitHub Actions workflow
 - name: Security Audit
@@ -343,18 +365,21 @@ Security validation errors are automatically logged:
 ## 📚 Best Practices
 
 ### Input Validation Best Practices
+
 1. **Validate Early**: Check inputs at the entry point
 2. **Use Allow Lists**: Define what is allowed, not what is blocked
 3. **Sanitize and Validate**: Both sanitize and validate inputs
 4. **Fail Securely**: Default to rejecting invalid input
 
 ### Error Handling Best Practices
+
 1. **Generic Error Messages**: Don't expose implementation details
 2. **Log Detailed Errors**: Log full details for debugging (securely)
 3. **Rate Limit Errors**: Prevent information gathering
 4. **Sanitize Stack Traces**: Remove sensitive information
 
 ### Security Testing Best Practices
+
 1. **Test All Input Vectors**: Every parameter that accepts user input
 2. **Use Real Attack Payloads**: Test with actual malicious inputs
 3. **Automate Security Tests**: Include in CI/CD pipeline
@@ -363,12 +388,14 @@ Security validation errors are automatically logged:
 ## 🚀 Continuous Security
 
 ### Regular Security Updates
+
 - Monthly dependency audits
 - Quarterly penetration testing
 - Annual security architecture review
 - Continuous monitoring and alerting
 
 ### Security Metrics
+
 - Number of blocked malicious requests
 - Rate limiting effectiveness
 - Input validation error rates
@@ -377,12 +404,14 @@ Security validation errors are automatically logged:
 ## 📞 Security Incident Response
 
 ### If You Discover a Vulnerability
+
 1. **Do Not** create a public issue
 2. **Do** email security concerns privately
 3. **Include** steps to reproduce
 4. **Provide** impact assessment if possible
 
 ### Response Timeline
+
 - **24 hours**: Initial acknowledgment
 - **72 hours**: Preliminary assessment
 - **7 days**: Fix development and testing

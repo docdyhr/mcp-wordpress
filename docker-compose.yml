@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     volumes:
       # Mount configuration file
-      - ./mcp-wordpress.config.json:/app/config/mcp-wordpress.config.json:ro
+      - ./mcp-wordpress.config.json:/app/mcp-wordpress.config.json:ro
       # Optional: Mount .env file for single-site mode
       - ./.env:/app/.env:ro
     environment:

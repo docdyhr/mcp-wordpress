@@ -19,6 +19,7 @@ This document addresses the common issue where WordPress REST API POST/PUT/DELET
 **Most Common Cause:** Apache strips the `Authorization` header by default, particularly affecting write operations.
 
 **Solution:** Add to your `.htaccess` file:
+
 ```apache
 # WordPress REST API - Preserve Authorization Header
 RewriteCond %{HTTP:Authorization} ^(.*)
@@ -26,6 +27,7 @@ RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 ```
 
 Alternative approach:
+
 ```apache
 RewriteEngine On
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -36,6 +38,7 @@ RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 **Issue:** WordPress requires HTTPS for application passwords by default, but Docker development environments typically use HTTP.
 
 **Solution:** Add to your `docker-compose.yml`:
+
 ```yaml
 services:
   wordpress:
@@ -49,6 +52,7 @@ services:
 **Issue:** WordPress has multiple places to generate passwords, and using the wrong one causes failures.
 
 **Solution:** Generate application passwords from:
+
 - ✅ `/wp-admin/profile.php` - User Profile page
 - ❌ NOT from 2FA/Security plugin settings
 
@@ -68,6 +72,8 @@ services:
 | Proxy Impact | Not affected | Can be blocked by proxies |
 
 ## Docker-Specific Solutions
+
+📖 **For complete Docker setup**: See [Docker Setup Guide](user-guides/DOCKER_SETUP.md)
 
 ### Complete Docker Configuration
 
@@ -91,6 +97,7 @@ services:
 ### WordPress .htaccess Template
 
 Create `wp-htaccess.conf`:
+
 ```apache
 # BEGIN WordPress
 RewriteEngine On
@@ -122,6 +129,7 @@ Look for `Authorization` header in the request output.
 ### 2. WordPress Debug Information
 
 Add to `wp-config.php`:
+
 ```php
 define('WP_DEBUG', true);
 define('WP_DEBUG_LOG', true);
@@ -177,14 +185,17 @@ testAuth();
 ## Common Security Plugin Issues
 
 ### Wordfence
+
 - Check if REST API is blocked in Wordfence settings
 - Temporarily disable to test
 
 ### iThemes Security
+
 - May block REST API requests
 - Check "WordPress Tweaks" → "Disable REST API"
 
 ### Jetpack
+
 - May interfere with authentication
 - Check Jetpack security settings
 
@@ -211,7 +222,7 @@ testAuth();
 If application passwords continue to fail:
 
 1. **JWT Authentication Plugin**
-2. **OAuth 2.0 Plugin** 
+2. **OAuth 2.0 Plugin**
 3. **Custom nonce-based authentication**
 4. **API Key plugins**
 

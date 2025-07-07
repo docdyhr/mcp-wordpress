@@ -95,7 +95,7 @@ docker-compose down                     # Stop all services
 
 # Pull from Docker Hub
 docker pull docdyhr/mcp-wordpress:latest
-docker run -d docdyhr/mcp-wordpress:latest
+docker run --rm -i docdyhr/mcp-wordpress:latest
 ```
 
 ### Claude Desktop Extension (DXT) Commands (v1.2.5+)

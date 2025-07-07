@@ -25,6 +25,13 @@ It's a Model Context Protocol server that provides 54 tools for managing WordPre
 npx mcp-wordpress
 ```
 
+📖 **Comprehensive Setup Guides**:
+
+- [NPX Setup](../user-guides/NPX_SETUP.md) - Zero installation (recommended)
+- [NPM Setup](../user-guides/NPM_SETUP.md) - Local development
+- [Docker Setup](../user-guides/DOCKER_SETUP.md) - Containerized deployment
+- [DTX Setup](../user-guides/DTX_SETUP.md) - Desktop Extension
+
 **GitHub**: <https://github.com/docdyhr/mcp-wordpress>
 **NPM**: <https://www.npmjs.com/package/mcp-wordpress>
 

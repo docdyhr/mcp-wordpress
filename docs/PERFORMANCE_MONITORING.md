@@ -13,6 +13,7 @@ The performance monitoring system consists of three main components:
 ## 🚀 Key Features
 
 ### Real-Time Monitoring
+
 - **Response Time Tracking**: Monitor API response times with percentile analysis (P50, P95, P99)
 - **Error Rate Monitoring**: Track success/failure rates across all operations
 - **Cache Performance**: Monitor cache hit rates, memory usage, and efficiency
@@ -20,12 +21,14 @@ The performance monitoring system consists of three main components:
 - **Tool Usage Analytics**: Monitor which MCP tools are used most frequently
 
 ### Historical Analysis
+
 - **Performance Trends**: Analyze performance changes over time
 - **Predictive Analytics**: Forecast future performance based on historical data
 - **Anomaly Detection**: Automatically detect unusual performance patterns
 - **Benchmark Comparisons**: Compare against industry standards
 
 ### Intelligent Insights
+
 - **Optimization Recommendations**: Get actionable suggestions for performance improvements
 - **ROI Estimates**: Understand the impact of potential optimizations
 - **Alert System**: Receive notifications for performance issues
@@ -36,6 +39,7 @@ The performance monitoring system consists of three main components:
 The system provides 6 new MCP tools for performance management:
 
 ### 1. `wp_performance_stats`
+
 Get real-time performance statistics and metrics.
 
 ```bash
@@ -50,11 +54,13 @@ wp_performance_stats --site=site1 --category=all
 ```
 
 **Parameters:**
+
 - `site` (optional): Specific site ID for multi-site setups
 - `category`: `overview`, `requests`, `cache`, `system`, `tools`, `all` (default: `overview`)
 - `format`: `summary`, `detailed`, `raw` (default: `summary`)
 
 **Example Output:**
+
 ```json
 {
   "success": true,
@@ -73,6 +79,7 @@ wp_performance_stats --site=site1 --category=all
 ```
 
 ### 2. `wp_performance_history`
+
 Get historical performance data and trend analysis.
 
 ```bash
@@ -87,12 +94,14 @@ wp_performance_history --timeframe=6h --includeTrends=true
 ```
 
 **Parameters:**
+
 - `site` (optional): Specific site ID
 - `timeframe`: `1h`, `6h`, `12h`, `24h`, `7d` (default: `24h`)
 - `metrics`: Array of specific metrics to include
 - `includeTrends`: Include trend analysis (default: `true`)
 
 ### 3. `wp_performance_benchmark`
+
 Compare current performance against industry benchmarks.
 
 ```bash
@@ -104,11 +113,13 @@ wp_performance_benchmark --category=response_time --includeRecommendations=true
 ```
 
 **Parameters:**
+
 - `site` (optional): Specific site ID
 - `category`: `response_time`, `cache_performance`, `error_rate`, `system_resources`, `all`
 - `includeRecommendations`: Include improvement suggestions (default: `true`)
 
 **Example Output:**
+
 ```json
 {
   "benchmarks": [
@@ -131,6 +142,7 @@ wp_performance_benchmark --category=response_time --includeRecommendations=true
 ```
 
 ### 4. `wp_performance_alerts`
+
 Get performance alerts and anomaly detection results.
 
 ```bash
@@ -145,6 +157,7 @@ wp_performance_alerts --category=cache --includeAnomalies=true
 ```
 
 **Parameters:**
+
 - `site` (optional): Specific site ID
 - `severity`: `info`, `warning`, `error`, `critical`
 - `category`: `performance`, `cache`, `system`, `wordpress`
@@ -152,6 +165,7 @@ wp_performance_alerts --category=cache --includeAnomalies=true
 - `includeAnomalies`: Include detected anomalies (default: `true`)
 
 ### 5. `wp_performance_optimize`
+
 Get optimization recommendations and insights.
 
 ```bash
@@ -166,6 +180,7 @@ wp_performance_optimize --priority=all --includePredictions=true
 ```
 
 **Parameters:**
+
 - `site` (optional): Specific site ID
 - `focus`: `speed`, `reliability`, `efficiency`, `scaling` (default: `speed`)
 - `priority`: `quick_wins`, `medium_term`, `long_term`, `all` (default: `all`)
@@ -173,6 +188,7 @@ wp_performance_optimize --priority=all --includePredictions=true
 - `includePredictions`: Include performance predictions (default: `true`)
 
 **Example Output:**
+
 ```json
 {
   "recommendations": [
@@ -195,6 +211,7 @@ wp_performance_optimize --priority=all --includePredictions=true
 ```
 
 ### 6. `wp_performance_export`
+
 Export comprehensive performance report.
 
 ```bash
@@ -209,6 +226,7 @@ wp_performance_export --format=summary --includeAnalytics=true
 ```
 
 **Parameters:**
+
 - `site` (optional): Specific site ID
 - `format`: `json`, `csv`, `summary` (default: `json`)
 - `includeHistorical`: Include historical data (default: `true`)
@@ -218,12 +236,14 @@ wp_performance_export --format=summary --includeAnalytics=true
 ## 📊 Performance Metrics
 
 ### Response Time Metrics
+
 - **Average Response Time**: Mean response time across all requests
 - **Percentiles**: P50 (median), P95, P99 response times
 - **Min/Max**: Fastest and slowest response times
 - **Requests Per Second**: Request throughput rate
 
 ### Cache Performance Metrics
+
 - **Hit Rate**: Percentage of requests served from cache
 - **Cache Size**: Number of cached entries
 - **Memory Usage**: Estimated memory consumption
@@ -231,12 +251,14 @@ wp_performance_export --format=summary --includeAnalytics=true
 - **Cache Efficiency**: Overall cache performance rating
 
 ### System Metrics
+
 - **Memory Usage**: Current memory consumption percentage
 - **CPU Usage**: Estimated CPU utilization
 - **Uptime**: System operational time
 - **Active Connections**: Number of concurrent connections
 
 ### Tool Usage Metrics
+
 - **Most Used Tool**: Tool with highest usage count
 - **Tool Performance**: Response times and success rates per tool
 - **Usage Distribution**: Frequency of tool usage
@@ -244,6 +266,7 @@ wp_performance_export --format=summary --includeAnalytics=true
 ## 🔍 Performance Analysis
 
 ### Trend Analysis
+
 The system automatically analyzes performance trends using linear regression:
 
 - **Direction**: `improving`, `declining`, or `stable`
@@ -252,6 +275,7 @@ The system automatically analyzes performance trends using linear regression:
 - **Predictions**: Forecasted future values
 
 ### Anomaly Detection
+
 Automatic detection of unusual performance patterns:
 
 - **Z-Score Analysis**: Statistical deviation from normal patterns
@@ -260,6 +284,7 @@ Automatic detection of unusual performance patterns:
 - **Possible Causes**: AI-generated suggestions for anomaly causes
 
 ### Benchmark Comparisons
+
 Compare against industry standards:
 
 - **Response Time**: `<200ms` (excellent), `200-500ms` (good), `500ms-1s` (average)
@@ -272,16 +297,19 @@ Compare against industry standards:
 The performance monitoring system is deeply integrated with the intelligent caching system:
 
 ### Automatic Cache Metrics
+
 - **Real-time cache statistics** from all registered cache managers
 - **Site-specific cache isolation** for multi-site installations
 - **Cache efficiency calculations** with performance impact analysis
 
 ### Cache Performance Insights
+
 - **Cache warming recommendations** based on usage patterns
 - **TTL optimization suggestions** for different data types
 - **Memory optimization** recommendations
 
 ### Cache Management Integration
+
 - Performance monitoring **automatically registers** with cache managers
 - **Request interception** for transparent performance tracking
 - **Cache invalidation tracking** for data consistency monitoring
@@ -289,12 +317,14 @@ The performance monitoring system is deeply integrated with the intelligent cach
 ## 🚨 Alert System
 
 ### Alert Types
+
 - **Performance Degradation**: Response times exceeding thresholds
 - **Error Rate Spikes**: Increased failure rates
 - **Cache Performance Issues**: Low hit rates or high memory usage
 - **System Resource Warnings**: High memory or CPU usage
 
 ### Alert Configuration
+
 Configure alert thresholds in your monitoring setup:
 
 ```javascript
@@ -310,6 +340,7 @@ const monitor = new PerformanceMonitor({
 ```
 
 ### Alert Severity Levels
+
 - **🔴 Critical**: Immediate attention required
 - **🟠 Error**: Significant performance impact
 - **🟡 Warning**: Performance degradation detected
@@ -318,31 +349,37 @@ const monitor = new PerformanceMonitor({
 ## 📈 Optimization Workflow
 
 ### 1. Monitor Current Performance
+
 ```bash
 wp_performance_stats --format=detailed
 ```
 
 ### 2. Analyze Historical Trends
+
 ```bash
 wp_performance_history --timeframe=7d --includeTrends=true
 ```
 
 ### 3. Compare Against Benchmarks
+
 ```bash
 wp_performance_benchmark --includeRecommendations=true
 ```
 
 ### 4. Check for Alerts and Anomalies
+
 ```bash
 wp_performance_alerts --includeAnomalies=true
 ```
 
 ### 5. Get Optimization Recommendations
+
 ```bash
 wp_performance_optimize --focus=speed --includeROI=true
 ```
 
 ### 6. Export Comprehensive Report
+
 ```bash
 wp_performance_export --format=json --includeAnalytics=true
 ```
@@ -350,6 +387,7 @@ wp_performance_export --format=json --includeAnalytics=true
 ## 🔧 Configuration
 
 ### Performance Monitor Configuration
+
 ```javascript
 const config = {
   collectInterval: 30000,           // 30 seconds
@@ -368,6 +406,7 @@ const config = {
 ```
 
 ### Metrics Collector Configuration
+
 ```javascript
 const config = {
   enableRealTime: true,
@@ -380,6 +419,7 @@ const config = {
 ```
 
 ### Analytics Configuration
+
 ```javascript
 const config = {
   enablePredictiveAnalysis: true,
@@ -393,21 +433,25 @@ const config = {
 ## 🎯 Best Practices
 
 ### 1. Regular Monitoring
+
 - Check performance stats daily with `wp_performance_stats`
 - Review weekly trends with `wp_performance_history --timeframe=7d`
 - Monitor alerts regularly with `wp_performance_alerts`
 
 ### 2. Proactive Optimization
+
 - Implement quick wins from `wp_performance_optimize --priority=quick_wins`
 - Address critical alerts immediately
 - Follow benchmark recommendations
 
 ### 3. Data-Driven Decisions
+
 - Use historical data to identify patterns
 - Compare before/after optimization results
 - Export reports for stakeholder communication
 
 ### 4. Multi-Site Management
+
 - Monitor each site individually
 - Compare performance across sites
 - Implement site-specific optimizations
@@ -417,6 +461,7 @@ const config = {
 ### Common Issues
 
 **1. High Response Times**
+
 ```bash
 # Check current performance
 wp_performance_stats --category=requests
@@ -426,6 +471,7 @@ wp_performance_optimize --focus=speed
 ```
 
 **2. Low Cache Hit Rates**
+
 ```bash
 # Check cache performance
 wp_performance_stats --category=cache
@@ -435,6 +481,7 @@ wp_performance_optimize --focus=efficiency
 ```
 
 **3. System Resource Issues**
+
 ```bash
 # Check system metrics
 wp_performance_stats --category=system
@@ -444,6 +491,7 @@ wp_performance_optimize --focus=scaling
 ```
 
 ### Performance Debugging
+
 1. **Enable detailed logging** in development environments
 2. **Use benchmark comparisons** to identify problem areas
 3. **Monitor trends** to catch performance degradation early
