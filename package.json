@@ -78,6 +78,7 @@
     "test": "npm run test:typescript",
     "test:auth": "node scripts/test-auth.js",
     "test:cache": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/cache/ --config=jest.typescript.config.json",
+    "test:ci": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest --config=jest.ci.config.json --runInBand",
     "test:config": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/config/ --config=jest.typescript.config.json",
     "test:contracts": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/contracts/ --passWithNoTests --config=jest.typescript.config.json",
     "test:contracts:live": "bash scripts/test-contracts-live.sh",

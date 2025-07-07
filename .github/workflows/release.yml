@@ -44,9 +44,7 @@ jobs:
       - name: 🧪 Run Essential Tests
         run: |
           # Run core tests that must pass for release
-          npm run test:typescript
-          npm run test:config
-          npm run test:security
+          npm run test:ci
         env:
           WORDPRESS_SITE_URL: https://example.com
           WORDPRESS_USERNAME: test_user

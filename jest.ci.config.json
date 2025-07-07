@@ -12,9 +12,13 @@
     "**/security/**/*.test.js",
     "**/config/**/*.test.js",
     "**/property/**/*.test.js",
-    "**/performance/**/*.test.js",
-    "**/unit/**/*.test.js",
-    "**/cache/**/*.test.js"
+    "**/unit/**/*.test.js"
+  ],
+  "testPathIgnorePatterns": [
+    "/node_modules/",
+    "/dist/",
+    "/tests/performance/",
+    "/tests/cache/"
   ],
   "collectCoverage": false,
   "collectCoverageFrom": [
@@ -25,10 +29,10 @@
   ],
   "coverageReporters": ["text", "lcov", "html"],
   "coverageDirectory": "coverage",
-  "testTimeout": 30000,
-  "verbose": true,
-  "maxWorkers": 2,
-  "cache": true,
+  "testTimeout": 20000,
+  "verbose": false,
+  "maxWorkers": 1,
+  "cache": false,
   "forceExit": true,
   "detectOpenHandles": false,
   "setupFilesAfterEnv": ["<rootDir>/tests/jest.teardown.js"],

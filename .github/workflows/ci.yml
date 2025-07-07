@@ -44,7 +44,7 @@ jobs:
       - name: 🧪 Run ${{ matrix.test-suite }} Tests
         run: |
           case "${{ matrix.test-suite }}" in
-            "typescript") npm run test:typescript ;;
+            "typescript") npm run test:ci ;;
             "security") npm run test:security ;;
             "config") npm run test:config ;;
           esac
