@@ -7,6 +7,7 @@ Successfully migrated from legacy Docker publish workflows to modern `docker/bui
 ## What Changed
 
 ### Action Upgrades
+
 - ✅ `docker/build-push-action@v5` → `@v6`
 - ✅ `docker/setup-buildx-action@v3` → `@v4`
 - ✅ `docker/login-action@v3` → `@v4`
@@ -16,18 +17,21 @@ Successfully migrated from legacy Docker publish workflows to modern `docker/bui
 ### New v6 Features Implemented
 
 #### 🔐 Enhanced Security
+
 - **Provenance Attestation**: Cryptographic proof of build integrity
 - **SBOM Generation**: Software Bill of Materials for dependency tracking
 - **Build Records**: Detailed logs for debugging and auditing
 - **Enhanced Permissions**: `attestations: write` and `id-token: write`
 
 #### 🏗️ Advanced Build Features
+
 - **Multi-level Caching**: GitHub Actions + Registry cache optimization
 - **OCI Annotations**: Enhanced metadata compliance and searchability
 - **Multi-platform Support**: linux/amd64, linux/arm64, linux/arm64/v8
 - **Build Arguments**: Dynamic VERSION, BUILD_DATE, VCS_REF injection
 
 #### 📊 Improved Observability
+
 - **Job Summaries**: Automatic GitHub Actions summaries with build details
 - **Build Analysis**: Comprehensive reporting of build metrics and features
 - **Interactive Inputs**: Flexible workflow parameters for manual builds
@@ -35,21 +39,27 @@ Successfully migrated from legacy Docker publish workflows to modern `docker/bui
 ## Updated Workflows
 
 ### 1. Release Workflow (`release.yml`)
+
 **Purpose**: Automated releases via semantic-release
+
 - Full v6 feature set enabled
 - Enhanced OCI labels and metadata
 - Automatic Docker Hub description updates
 - Multi-platform builds with advanced caching
 
-### 2. Manual/Fallback Workflow (`docker-publish.yml`) 
+### 2. Manual/Fallback Workflow (`docker-publish.yml`)
+
 **Purpose**: Manual builds and fallback releases
+
 - Interactive workflow inputs (tag, platforms, push option)
 - Comprehensive build summaries
 - Flexible platform targeting
 - Enhanced security features
 
 ### 3. Modern Showcase Workflow (`docker-modern.yml`)
+
 **Purpose**: Demonstration of all v6 capabilities
+
 - Test builds without pushing (PR validation)
 - Full security scanning integration hooks
 - Advanced buildkit features
@@ -58,18 +68,21 @@ Successfully migrated from legacy Docker publish workflows to modern `docker/bui
 ## Dockerfile Enhancements
 
 ### Security Improvements
+
 - ✅ **Non-root user**: Security-first approach with proper ownership
 - ✅ **Tini init system**: Proper signal handling and zombie reaping
 - ✅ **Minimal attack surface**: Alpine base with security updates only
 - ✅ **Build arguments**: Dynamic metadata injection
 
 ### Performance Optimizations
+
 - ✅ **Layer caching**: Optimized COPY order for better cache utilization
 - ✅ **Multi-stage builds**: Separate builder and production stages
 - ✅ **Dependency optimization**: Clean npm cache and dev dependencies
 - ✅ **Size reduction**: Minimal production image footprint
 
 ### Metadata Compliance
+
 - ✅ **OCI Specification**: Full compliance with container image spec
 - ✅ **Enhanced Labels**: Comprehensive metadata for registries
 - ✅ **Build Information**: Version, date, and VCS ref tracking
@@ -78,6 +91,7 @@ Successfully migrated from legacy Docker publish workflows to modern `docker/bui
 ## Usage Examples
 
 ### Manual Build (No Push)
+
 ```bash
 gh workflow run "🚀 Modern Docker Build (v6 Features)" \
   --ref main \
@@ -86,6 +100,7 @@ gh workflow run "🚀 Modern Docker Build (v6 Features)" \
 ```
 
 ### Production Build with Push
+
 ```bash
 gh workflow run "🐳 Docker Build & Push (Manual/Fallback)" \
   --ref main \
@@ -95,6 +110,7 @@ gh workflow run "🐳 Docker Build & Push (Manual/Fallback)" \
 ```
 
 ### Verify Security Features
+
 ```bash
 # View provenance and SBOM
 docker buildx imagetools inspect docdyhr/mcp-wordpress:latest --format '{{json .}}'
@@ -106,21 +122,25 @@ docker scout cves docdyhr/mcp-wordpress:latest
 ## Benefits Achieved
 
 ### 🔒 Security
+
 - **Supply Chain Security**: Provenance attestations ensure build integrity
 - **Vulnerability Tracking**: SBOM enables comprehensive security auditing
 - **Access Controls**: Enhanced permissions and authentication
 
 ### ⚡ Performance  
+
 - **Faster Builds**: Multi-level caching reduces build times by 60-80%
 - **Parallel Builds**: Multi-platform builds run concurrently
 - **Resource Efficiency**: Optimized layer caching and reuse
 
 ### 📊 Observability
+
 - **Build Transparency**: Detailed summaries and job outputs
 - **Debugging Support**: Build records for troubleshooting
 - **Compliance Reporting**: Automated security and quality metrics
 
 ### 🔄 Developer Experience
+
 - **Interactive Workflows**: Flexible manual build options
 - **Test Integration**: PR validation without registry pushes
 - **Documentation**: Auto-generated usage instructions and examples
@@ -128,16 +148,19 @@ docker scout cves docdyhr/mcp-wordpress:latest
 ## Migration Impact
 
 ### ✅ Fully Backward Compatible
+
 - All existing Docker images remain functional
 - No breaking changes to container runtime behavior
 - Registry compatibility maintained
 
 ### ✅ Zero Downtime
+
 - Gradual migration approach
 - Legacy workflows remain available during transition
 - Automatic failover capabilities
 
 ### ✅ Enhanced CI/CD Pipeline
+
 - More reliable builds with better error handling
 - Comprehensive security scanning integration
 - Automated quality gates and validation
@@ -153,11 +176,13 @@ docker scout cves docdyhr/mcp-wordpress:latest
 ## Troubleshooting
 
 ### Common Issues
+
 - **Permission Errors**: Ensure `DOCKER_USERNAME` and `DOCKER_PASSWORD` secrets are set
 - **Platform Failures**: Some platforms may require QEMU setup for emulation
 - **Cache Misses**: GitHub Actions cache has size limits and retention policies
 
 ### Debug Commands
+
 ```bash
 # View workflow logs
 gh run view <run-id> --log

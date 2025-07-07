@@ -7,6 +7,7 @@ This guide provides step-by-step instructions for using the MCP WordPress server
 ## 🚀 What is NPX?
 
 NPX is a package runner that comes with npm 5.2+. It allows you to:
+
 - Run packages without installing them locally
 - Always use the latest published version
 - Avoid global installations
@@ -118,6 +119,7 @@ npx -y mcp-wordpress
 ### Claude Desktop Testing
 
 After configuration, test with these commands:
+
 - "List my WordPress posts"
 - "Show my site statistics"
 - "What WordPress tools are available?"
@@ -190,19 +192,23 @@ npx --ignore-existing mcp-wordpress
 ### Common Issues
 
 **"Command not found: npx"**
+
 - Install Node.js 18+ which includes npx
 - Or install npx globally: `npm install -g npx`
 
 **"No matching version found"**
+
 - Check your internet connection
 - Try clearing npm cache: `npm cache clean --force`
 
 **"Authentication failed"**
+
 - Verify Application Password has no extra spaces
 - Check WordPress username is correct
 - Ensure REST API is accessible
 
 **"Config file not found"**
+
 - For multi-site, ensure `mcp-wordpress.config.json` is in:
   - Home directory: `~/mcp-wordpress.config.json`
   - Or current directory when testing
@@ -225,6 +231,7 @@ Enable debug output by adding to env:
 ### NPX Caching
 
 NPX caches packages after first download:
+
 - First run: Downloads package (5-10 seconds)
 - Subsequent runs: Uses cache (instant)
 - Cache location: `~/.npm/_npx/`
