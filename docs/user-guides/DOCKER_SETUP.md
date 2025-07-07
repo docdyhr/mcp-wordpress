@@ -12,7 +12,7 @@ This guide provides step-by-step instructions for setting up the MCP WordPress s
 docker pull docdyhr/mcp-wordpress:latest
 ```
 
-### 2. Choose Your Setup Method
+### 2. Add to Claude Desktop configuration
 
 ## 🎯 Claude Desktop Integration (Recommended)
 

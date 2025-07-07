@@ -22,6 +22,7 @@ page management tools
 ## Examples
 
 ### Basic page Workflow
+
 ```bash
 # List all page
 wp_list_page
@@ -34,6 +35,7 @@ wp_create_pag --title="Example"
 ```
 
 ### Multi-Site page Management
+
 ```bash
 # Work with specific site
 wp_list_page --site=production

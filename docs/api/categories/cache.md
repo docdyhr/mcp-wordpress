@@ -20,6 +20,7 @@ Performance caching and optimization tools
 ## Examples
 
 ### Basic cache Workflow
+
 ```bash
 # List all cache
 wp_list_cache
@@ -32,6 +33,7 @@ wp_create_cach --title="Example"
 ```
 
 ### Multi-Site cache Management
+
 ```bash
 # Work with specific site
 wp_list_cache --site=production

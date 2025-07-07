@@ -22,6 +22,7 @@ user management tools
 ## Examples
 
 ### Basic user Workflow
+
 ```bash
 # List all user
 wp_list_user
@@ -34,6 +35,7 @@ wp_create_use --title="Example"
 ```
 
 ### Multi-Site user Management
+
 ```bash
 # Work with specific site
 wp_list_user --site=production

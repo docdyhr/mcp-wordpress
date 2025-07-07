@@ -111,12 +111,12 @@ The DTX package supports multi-site configuration, but requires manual setup:
 }
 ```
 
-2. **Place the file** in one of these locations:
+2. **Place the file in one of these locations:**
    - **macOS/Linux**: `~/mcp-wordpress.config.json`
    - **Windows**: `%USERPROFILE%\mcp-wordpress.config.json`
    - **DTX Install Directory**: Next to the DTX package files
 
-3. **Skip the DTX configuration** prompts (or enter dummy values)
+3. **Skip the DTX configuration prompts (or enter dummy values)**
 
 4. **Restart Claude Desktop** - the server will detect and use your config file
 

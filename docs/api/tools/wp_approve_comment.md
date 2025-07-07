@@ -17,11 +17,13 @@ Approves a pending comment.
 Simple example of using wp_approve_comment
 
 **Command:**
+
 ```bash
 wp_approve_comment --id="123"
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -31,17 +33,13 @@ wp_approve_comment --id="123"
 ```
 
 **Error Example (Authentication failure):**
+
 ```json
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
 }
 ```
-
-
-
-
-
 
 ## Response Format
 
