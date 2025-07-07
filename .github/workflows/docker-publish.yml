@@ -85,14 +85,9 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             VERSION=${{ github.ref_name }}
-          # v6 features for enhanced security and debugging
+          # Security features supported in v5
           provenance: true
           sbom: true
-          record: true
-          # Generate attestations for security
-          annotations: |
-            org.opencontainers.image.title=MCP WordPress Server
-            org.opencontainers.image.description=Complete WordPress MCP Server
 
       - name: 📝 Update Docker Hub Description
         uses: peter-evans/dockerhub-description@v3
