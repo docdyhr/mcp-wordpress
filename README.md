@@ -908,3 +908,11 @@ For contributors planning releases:
 - **NPM:** [`mcp-wordpress`](https://www.npmjs.com/package/mcp-wordpress)
 - **Docker Hub:** [`docdyhr/mcp-wordpress`](https://hub.docker.com/r/docdyhr/mcp-wordpress)
 - **GitHub Releases:** [Latest releases](https://github.com/docdyhr/mcp-wordpress/releases)
+
+---
+
+## 🙏 Acknowledgments
+
+Special thanks to **[Stephan Ferraro](https://github.com/ferraro)** for the upstream main project that inspired this implementation.
+
+> *"We are all standing on the shoulders of giants"*
