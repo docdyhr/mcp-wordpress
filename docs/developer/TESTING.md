@@ -65,7 +65,7 @@ npm test
 
 # Run specific test suites
 npm run test:unit           # Unit tests only
-npm run test:integration    # Integration tests only  
+npm run test:integration    # Integration tests only
 npm run test:security       # Security tests only
 npm run test:performance    # Performance tests only
 npm run test:cache          # Cache tests only
@@ -106,23 +106,19 @@ npm run test:with-env       # Tests with Docker WordPress
 ```javascript
 // jest.config.js
 module.exports = {
-  testEnvironment: 'node',
-  testMatch: ['**/tests/**/*.test.js'],
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/**/*.d.ts',
-    '!src/**/*.test.ts'
-  ],
+  testEnvironment: "node",
+  testMatch: ["**/tests/**/*.test.js"],
+  collectCoverageFrom: ["src/**/*.ts", "!src/**/*.d.ts", "!src/**/*.test.ts"],
   coverageThreshold: {
     global: {
       branches: 50,
       functions: 50,
       lines: 50,
-      statements: 50
-    }
+      statements: 50,
+    },
   },
-  setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
-  testTimeout: 30000
+  setupFilesAfterEnv: ["<rootDir>/tests/setup.js"],
+  testTimeout: 30000,
 };
 ```
 
@@ -130,24 +126,28 @@ module.exports = {
 
 ```javascript
 // tests/setup.js
-const { performance } = require('perf_hooks');
+const { performance } = require("perf_hooks");
 
 // Global test utilities
 global.testUtils = {
-  createMockClient: () => ({ /* mock client */ }),
-  generateTestData: (schema) => ({ /* generated data */ }),
+  createMockClient: () => ({
+    /* mock client */
+  }),
+  generateTestData: (schema) => ({
+    /* generated data */
+  }),
   measurePerformance: (fn) => {
     const start = performance.now();
     const result = fn();
     const duration = performance.now() - start;
     return { result, duration };
-  }
+  },
 };
 
 // Setup test environment
 beforeAll(() => {
-  process.env.NODE_ENV = 'test';
-  process.env.DEBUG = 'false';
+  process.env.NODE_ENV = "test";
+  process.env.DEBUG = "false";
 });
 
 afterAll(() => {
@@ -172,16 +172,16 @@ afterAll(() => {
 
 ```javascript
 // tests/unit/security-utils.test.js
-describe('SecurityUtils', () => {
-  test('should sanitize input correctly', () => {
+describe("SecurityUtils", () => {
+  test("should sanitize input correctly", () => {
     const input = '<script>alert("xss")</script>';
     const sanitized = SecurityUtils.sanitizeInput(input);
-    expect(sanitized).not.toContain('<script>');
+    expect(sanitized).not.toContain("<script>");
   });
 
-  test('should validate email format', () => {
-    expect(SecurityUtils.isValidEmail('test@example.com')).toBe(true);
-    expect(SecurityUtils.isValidEmail('invalid-email')).toBe(false);
+  test("should validate email format", () => {
+    expect(SecurityUtils.isValidEmail("test@example.com")).toBe(true);
+    expect(SecurityUtils.isValidEmail("invalid-email")).toBe(false);
   });
 });
 ```
@@ -201,29 +201,29 @@ describe('SecurityUtils', () => {
 
 ```javascript
 // tests/integration/wordpress-api.test.js
-describe('WordPress API Integration', () => {
+describe("WordPress API Integration", () => {
   let client;
 
   beforeAll(async () => {
     client = new WordPressClient({
       siteUrl: process.env.WORDPRESS_TEST_URL,
-      username: 'admin',
-      appPassword: 'test test test test test test'
+      username: "admin",
+      appPassword: "test test test test test test",
     });
   });
 
-  test('should create and retrieve post', async () => {
+  test("should create and retrieve post", async () => {
     const post = await client.posts.create({
-      title: 'Test Post',
-      content: 'Test content',
-      status: 'publish'
+      title: "Test Post",
+      content: "Test content",
+      status: "publish",
     });
 
     expect(post.id).toBeDefined();
-    expect(post.title).toBe('Test Post');
+    expect(post.title).toBe("Test Post");
 
     const retrieved = await client.posts.get({ id: post.id });
-    expect(retrieved.title).toBe('Test Post');
+    expect(retrieved.title).toBe("Test Post");
   });
 });
 ```
@@ -244,23 +244,23 @@ describe('WordPress API Integration', () => {
 
 ```javascript
 // tests/security/input-validation.test.js
-describe('Input Validation Security', () => {
-  test('should reject malicious script injection', () => {
+describe("Input Validation Security", () => {
+  test("should reject malicious script injection", () => {
     const maliciousInput = {
       title: '<script>alert("xss")</script>',
-      content: '"><script>alert("xss")</script>'
+      content: '"><script>alert("xss")</script>',
     };
 
     expect(() => {
       createPostSchema.parse(maliciousInput);
-    }).toThrow('Invalid input');
+    }).toThrow("Invalid input");
   });
 
-  test('should prevent SQL injection in search', () => {
+  test("should prevent SQL injection in search", () => {
     const sqlInjection = "'; DROP TABLE posts; --";
     expect(() => {
       searchSchema.parse({ query: sqlInjection });
-    }).toThrow('Invalid characters');
+    }).toThrow("Invalid characters");
   });
 });
 ```
@@ -280,24 +280,24 @@ describe('Input Validation Security', () => {
 
 ```javascript
 // tests/performance/benchmarks.test.js
-describe('Performance Benchmarks', () => {
-  test('should handle post creation under 500ms', async () => {
+describe("Performance Benchmarks", () => {
+  test("should handle post creation under 500ms", async () => {
     const start = performance.now();
-    
+
     await client.posts.create({
-      title: 'Performance Test',
-      content: 'Test content'
+      title: "Performance Test",
+      content: "Test content",
     });
-    
+
     const duration = performance.now() - start;
     expect(duration).toBeLessThan(500);
   });
 
-  test('should maintain cache hit rate above 70%', async () => {
+  test("should maintain cache hit rate above 70%", async () => {
     // Warm cache
     await client.posts.list();
     await client.posts.list();
-    
+
     const stats = await client.cache.getStats();
     expect(stats.hitRate).toBeGreaterThan(0.7);
   });
@@ -319,39 +319,39 @@ describe('Performance Benchmarks', () => {
 
 ```javascript
 // tests/cache/cache-functionality.test.js
-describe('Cache Functionality', () => {
-  test('should cache GET requests', async () => {
+describe("Cache Functionality", () => {
+  test("should cache GET requests", async () => {
     const client = new CachedWordPressClient(config);
-    
+
     // First request - cache miss
     const start1 = performance.now();
     const posts1 = await client.posts.list();
     const duration1 = performance.now() - start1;
-    
+
     // Second request - cache hit
     const start2 = performance.now();
     const posts2 = await client.posts.list();
     const duration2 = performance.now() - start2;
-    
+
     expect(posts1).toEqual(posts2);
     expect(duration2).toBeLessThan(duration1 * 0.1); // 90% faster
   });
 
-  test('should invalidate cache on updates', async () => {
+  test("should invalidate cache on updates", async () => {
     const client = new CachedWordPressClient(config);
-    
+
     // Cache posts list
     await client.posts.list();
-    
+
     // Create new post
     await client.posts.create({
-      title: 'New Post',
-      content: 'Content'
+      title: "New Post",
+      content: "Content",
     });
-    
+
     // List should be refreshed
     const posts = await client.posts.list();
-    expect(posts.some(p => p.title === 'New Post')).toBe(true);
+    expect(posts.some((p) => p.title === "New Post")).toBe(true);
   });
 });
 ```
@@ -371,22 +371,24 @@ describe('Cache Functionality', () => {
 
 ```javascript
 // tests/property/data-structure.test.js
-const fc = require('fast-check');
+const fc = require("fast-check");
 
-describe('Property-Based Testing', () => {
-  test('should handle any valid post data', () => {
-    fc.assert(fc.property(
-      fc.record({
-        title: fc.string({ minLength: 1, maxLength: 200 }),
-        content: fc.string(),
-        status: fc.constantFrom('draft', 'publish', 'private')
-      }),
-      async (postData) => {
-        const result = await client.posts.create(postData);
-        expect(result.title).toBe(postData.title);
-        expect(result.status).toBe(postData.status);
-      }
-    ));
+describe("Property-Based Testing", () => {
+  test("should handle any valid post data", () => {
+    fc.assert(
+      fc.property(
+        fc.record({
+          title: fc.string({ minLength: 1, maxLength: 200 }),
+          content: fc.string(),
+          status: fc.constantFrom("draft", "publish", "private"),
+        }),
+        async (postData) => {
+          const result = await client.posts.create(postData);
+          expect(result.title).toBe(postData.title);
+          expect(result.status).toBe(postData.status);
+        },
+      ),
+    );
   });
 });
 ```
@@ -406,20 +408,20 @@ describe('Property-Based Testing', () => {
 
 ```javascript
 // tests/config/schema-validation.test.js
-describe('Configuration Schema Validation', () => {
-  test('should validate multi-site configuration', () => {
+describe("Configuration Schema Validation", () => {
+  test("should validate multi-site configuration", () => {
     const validConfig = {
       sites: [
         {
-          id: 'site1',
-          name: 'Test Site',
+          id: "site1",
+          name: "Test Site",
           config: {
-            WORDPRESS_SITE_URL: 'https://example.com',
-            WORDPRESS_USERNAME: 'admin',
-            WORDPRESS_APP_PASSWORD: 'test test test test test test'
-          }
-        }
-      ]
+            WORDPRESS_SITE_URL: "https://example.com",
+            WORDPRESS_USERNAME: "admin",
+            WORDPRESS_APP_PASSWORD: "test test test test test test",
+          },
+        },
+      ],
     };
 
     expect(() => {
@@ -427,22 +429,24 @@ describe('Configuration Schema Validation', () => {
     }).not.toThrow();
   });
 
-  test('should reject invalid site URLs', () => {
+  test("should reject invalid site URLs", () => {
     const invalidConfig = {
-      sites: [{
-        id: 'site1',
-        name: 'Test Site',
-        config: {
-          WORDPRESS_SITE_URL: 'invalid-url',
-          WORDPRESS_USERNAME: 'admin',
-          WORDPRESS_APP_PASSWORD: 'password'
-        }
-      }]
+      sites: [
+        {
+          id: "site1",
+          name: "Test Site",
+          config: {
+            WORDPRESS_SITE_URL: "invalid-url",
+            WORDPRESS_USERNAME: "admin",
+            WORDPRESS_APP_PASSWORD: "password",
+          },
+        },
+      ],
     };
 
     expect(() => {
       multiSiteConfigSchema.parse(invalidConfig);
-    }).toThrow('Invalid URL');
+    }).toThrow("Invalid URL");
   });
 });
 ```
@@ -466,7 +470,7 @@ describe('Configuration Schema Validation', () => {
 
 ```yaml
 # docker-compose.test.yml
-version: '3.8'
+version: "3.8"
 services:
   wordpress:
     image: wordpress:latest
@@ -481,7 +485,7 @@ services:
       - db
     volumes:
       - ./tests/wordpress-config.php:/var/www/html/wp-config.php
-      
+
   db:
     image: mysql:8.0
     environment:
@@ -592,7 +596,7 @@ jobs:
 
 ```javascript
 // Standard test structure
-describe('Component Name', () => {
+describe("Component Name", () => {
   // Setup
   beforeAll(() => {
     // One-time setup
@@ -603,16 +607,16 @@ describe('Component Name', () => {
   });
 
   // Test cases
-  describe('method name', () => {
-    test('should do something specific', () => {
+  describe("method name", () => {
+    test("should do something specific", () => {
       // Arrange
-      const input = 'test data';
-      
+      const input = "test data";
+
       // Act
       const result = component.method(input);
-      
+
       // Assert
-      expect(result).toBe('expected output');
+      expect(result).toBe("expected output");
     });
   });
 
@@ -646,18 +650,18 @@ export const mockWordPressClient = {
     update: jest.fn(),
     delete: jest.fn(),
     get: jest.fn(),
-    list: jest.fn()
+    list: jest.fn(),
   },
   auth: {
     authenticate: jest.fn(),
-    getAuthHeaders: jest.fn()
-  }
+    getAuthHeaders: jest.fn(),
+  },
 };
 
 export const mockConfig = {
-  siteUrl: 'https://test.example.com',
-  username: 'testuser',
-  appPassword: 'test test test test test test'
+  siteUrl: "https://test.example.com",
+  username: "testuser",
+  appPassword: "test test test test test test",
 };
 ```
 
@@ -703,15 +707,15 @@ node --inspect-brk ./node_modules/.bin/jest --runInBand
 
 ```javascript
 // Debug utility functions
-const debug = require('debug')('test:debug');
+const debug = require("debug")("test:debug");
 
-describe('Debug Example', () => {
-  test('should debug test execution', () => {
-    debug('Starting test execution');
-    
+describe("Debug Example", () => {
+  test("should debug test execution", () => {
+    debug("Starting test execution");
+
     const result = someFunction();
-    debug('Function result:', result);
-    
+    debug("Function result:", result);
+
     expect(result).toBeDefined();
   });
 });

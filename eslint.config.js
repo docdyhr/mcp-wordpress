@@ -2,6 +2,7 @@ import js from "@eslint/js";
 import nodePlugin from "eslint-plugin-node";
 import jestPlugin from "eslint-plugin-jest";
 import tsParser from "@typescript-eslint/parser";
+import prettierConfig from "eslint-config-prettier";
 
 export default [
   js.configs.recommended,
@@ -44,7 +45,7 @@ export default [
       semi: ["error", "always"],
       quotes: ["error", "double"],
       "comma-dangle": ["error", "always-multiline"],
-      indent: ["error", 2, { SwitchCase: 1 }],
+      // indent: ["error", 2, { SwitchCase: 1 }], // Disabled in favor of prettier
       "linebreak-style": ["error", "unix"],
       "eol-last": ["error", "always"],
 
@@ -111,4 +112,5 @@ export default [
       "bin/",
     ],
   },
+  prettierConfig,
 ];

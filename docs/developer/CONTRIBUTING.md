@@ -138,7 +138,7 @@ export class PostTools {
   constructor(private client: WordPressClient) {}
 
   async createPost(params: CreatePostParams): Promise<PostResult> {
-    return toolWrapper(this.client, 'create_post', params, async () => {
+    return toolWrapper(this.client, "create_post", params, async () => {
       const validatedParams = createPostSchema.parse(params);
       return await this.client.posts.create(validatedParams);
     });
@@ -191,31 +191,33 @@ async function listPosts(params: any) {
 
 ```typescript
 // ✅ Good: Comprehensive test coverage
-describe('PostTools', () => {
-  describe('createPost', () => {
-    test('should create post with valid parameters', async () => {
+describe("PostTools", () => {
+  describe("createPost", () => {
+    test("should create post with valid parameters", async () => {
       const params = {
-        title: 'Test Post',
-        content: 'Test content',
-        status: 'publish' as PostStatus
+        title: "Test Post",
+        content: "Test content",
+        status: "publish" as PostStatus,
       };
-      
+
       const result = await postTools.createPost(params);
-      
+
       expect(result.success).toBe(true);
-      expect(result.data.title).toBe('Test Post');
+      expect(result.data.title).toBe("Test Post");
     });
 
-    test('should handle invalid parameters', async () => {
-      const params = { title: '' }; // Invalid empty title
-      
+    test("should handle invalid parameters", async () => {
+      const params = { title: "" }; // Invalid empty title
+
       await expect(postTools.createPost(params)).rejects.toThrow();
     });
 
-    test('should handle API errors gracefully', async () => {
-      mockClient.posts.create.mockRejectedValue(new Error('API Error'));
-      
-      await expect(postTools.createPost(validParams)).rejects.toThrow('API Error');
+    test("should handle API errors gracefully", async () => {
+      mockClient.posts.create.mockRejectedValue(new Error("API Error"));
+
+      await expect(postTools.createPost(validParams)).rejects.toThrow(
+        "API Error",
+      );
     });
   });
 });
@@ -246,9 +248,9 @@ describe('PostTools', () => {
 const createPostSchema = z.object({
   title: z.string().min(1).max(200),
   content: z.string().optional(),
-  status: z.enum(['draft', 'publish', 'private', 'pending']).optional(),
+  status: z.enum(["draft", "publish", "private", "pending"]).optional(),
   author: z.number().positive().optional(),
-  site: z.string().optional()
+  site: z.string().optional(),
 });
 
 // Always validate before processing
@@ -286,10 +288,10 @@ getAuthHeaders(): Record<string, string> {
 
 ### Code Documentation
 
-```typescript
+````typescript
 /**
  * Creates a new WordPress post with the specified parameters.
- * 
+ *
  * @param params - The post creation parameters
  * @param params.title - The post title (required)
  * @param params.content - The post content (optional)
@@ -297,7 +299,7 @@ getAuthHeaders(): Record<string, string> {
  * @param params.site - The target site ID for multi-site setups (optional)
  * @returns Promise resolving to the created post information
  * @throws {Error} When post creation fails or parameters are invalid
- * 
+ *
  * @example
  * ```typescript
  * const post = await postTools.createPost({
@@ -310,7 +312,7 @@ getAuthHeaders(): Record<string, string> {
 async createPost(params: CreatePostParams): Promise<PostResult> {
   // Implementation
 }
-```
+````
 
 ### Update Documentation
 
@@ -350,9 +352,11 @@ When requesting features:
 
 ```markdown
 ## Description
+
 Brief description of the changes made.
 
 ## Type of Change
+
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
@@ -361,6 +365,7 @@ Brief description of the changes made.
 - [ ] Security improvement
 
 ## Testing
+
 - [ ] Unit tests added/updated
 - [ ] Integration tests added/updated
 - [ ] Security tests added/updated
@@ -368,6 +373,7 @@ Brief description of the changes made.
 - [ ] Performance tests pass (if applicable)
 
 ## Checklist
+
 - [ ] Code follows the established patterns
 - [ ] Self-review completed
 - [ ] Code is commented where necessary

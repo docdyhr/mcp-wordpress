@@ -213,12 +213,7 @@ docker buildx build --platform linux/amd64,linux/arm64 -t mcp-wordpress .
 {
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist/",
-    "src/",
-    "README.md",
-    "LICENSE"
-  ],
+  "files": ["dist/", "src/", "README.md", "LICENSE"],
   "engines": {
     "node": ">=18.0.0"
   }
@@ -336,8 +331,8 @@ build:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
-        node-version: '20'
-        cache: 'npm'
+        node-version: "20"
+        cache: "npm"
     - run: npm ci
     - run: npm run typecheck
     - run: npm run build
@@ -429,11 +424,11 @@ npm install -g webpack-bundle-analyzer
 ```json
 {
   "compilerOptions": {
-    "skipLibCheck": true,           // Skip node_modules type checking
-    "incremental": true,            // Enable incremental builds
-    "composite": true,              // Enable project references
-    "declaration": false,           // Disable for dev builds
-    "sourceMap": false             // Disable for production builds
+    "skipLibCheck": true, // Skip node_modules type checking
+    "incremental": true, // Enable incremental builds
+    "composite": true, // Enable project references
+    "declaration": false, // Disable for dev builds
+    "sourceMap": false // Disable for production builds
   }
 }
 ```

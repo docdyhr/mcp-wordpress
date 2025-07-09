@@ -34,16 +34,19 @@ npm run setup
 ## 🚀 Features
 
 ### WordPress Management
+
 - **59 WordPress Tools** - Posts, pages, media, users, comments, categories, tags, site settings
 - **Multi-Site Support** - Manage multiple WordPress sites from one configuration
 - **Flexible Authentication** - App Passwords (recommended), JWT, Basic Auth, API Key
 
 ### Performance & Monitoring
+
 - **⚡ Intelligent Caching** - 50-70% performance improvement with multi-layer caching
 - **📊 Real-Time Monitoring** - Performance metrics, analytics, and optimization insights
 - **🔒 Production Ready** - Security-reviewed, 95%+ test coverage, battle-tested
 
 ### Developer Experience
+
 - **100% TypeScript** - Complete type safety and IntelliSense
 - **🐳 Docker Support** - Containerized deployment for production
 - **📚 Auto-Generated Docs** - Complete API documentation with examples
@@ -93,6 +96,7 @@ Use with site parameter: `wp_list_posts --site="main-site"`
 5. Copy the generated password
 
 ### Alternative Methods
+
 - **JWT Authentication** - With JWT plugin
 - **Basic Authentication** - Username/password (dev only)
 - **API Key Authentication** - With API Key plugin
@@ -102,16 +106,19 @@ Use with site parameter: `wp_list_posts --site="main-site"`
 ## 📋 Available Tools (59 Tools)
 
 ### Content Management
+
 - **📝 Posts** (6 tools) - Create, edit, delete, list posts and revisions
 - **📄 Pages** (6 tools) - Manage static pages and revisions
 - **🖼️ Media** (6 tools) - Upload, manage media library and files
 
 ### User & Community
+
 - **👥 Users** (6 tools) - User management and profiles
 - **💬 Comments** (7 tools) - Comment moderation and management
 - **🏷️ Taxonomies** (10 tools) - Categories and tags management
 
 ### Site Management
+
 - **⚙️ Site Settings** (7 tools) - Site configuration and statistics
 - **🔐 Authentication** (6 tools) - Auth testing and management
 - **⚡ Cache Management** (4 tools) - Performance caching control
@@ -124,16 +131,19 @@ Use with site parameter: `wp_list_posts --site="main-site"`
 ### Quick Prompts for Claude
 
 **Setup Help:**
+
 ```text
 Set up MCP WordPress using NPX. My site: https://mysite.com, username: myuser. Help with application password creation and Claude Desktop configuration.
 ```
 
 **Content Management:**
+
 ```text
 List my recent WordPress posts, then help me create a new post about [topic] with SEO-optimized content.
 ```
 
 **Site Analysis:**
+
 ```text
 Check my WordPress site performance, cache statistics, and provide optimization recommendations.
 ```
@@ -161,12 +171,14 @@ Check my WordPress site performance, cache statistics, and provide optimization 
 ## 🧪 Testing & Status
 
 ### Current Test Status ✅
+
 - **Main Test Suite**: 207/207 passed (100%)
 - **Security Tests**: 40/40 passed (100%)
 - **Performance Tests**: 8/8 passed (100%)
 - **CI/CD Pipeline**: Fully functional
 
 ### Test Your Installation
+
 ```bash
 # Check connection status
 npm run status
@@ -196,6 +208,7 @@ npm run test:fast
    - Check Claude Desktop config file format
 
 ### Get Help
+
 ```bash
 # Debug mode
 DEBUG=true npm run dev
@@ -210,18 +223,21 @@ npm run setup
 ## 📚 Documentation
 
 ### User Guides
+
 - **[NPX Setup](docs/user-guides/NPX_SETUP.md)** - Quick start guide
 - **[NPM Setup](docs/user-guides/NPM_SETUP.md)** - Local development
 - **[Docker Setup](docs/user-guides/DOCKER_SETUP.md)** - Production deployment
 - **[DTX Setup](docs/user-guides/DTX_SETUP.md)** - Desktop extension
 
 ### Technical Documentation
+
 - **[API Documentation](docs/api/README.md)** - Complete tool reference
 - **[Performance Guide](docs/PERFORMANCE_MONITORING.md)** - Monitoring and optimization
 - **[Caching Guide](docs/CACHING.md)** - Cache configuration and management
 - **[Security Guide](docs/SECURITY_TESTING.md)** - Security best practices
 
 ### Developer Resources
+
 - **[Development Guide](docs/developer/README.md)** - Contributing and development
 - **[API Reference](docs/developer/API_REFERENCE.md)** - Technical API details
 - **[Architecture Guide](docs/developer/ARCHITECTURE.md)** - System architecture
@@ -247,6 +263,7 @@ npm run setup
 ## 📦 Installation Options
 
 ### NPM Package
+
 ```bash
 # Global installation
 npm install -g mcp-wordpress
@@ -256,6 +273,7 @@ npx -y mcp-wordpress
 ```
 
 ### Docker Images
+
 ```bash
 # Latest version
 docker pull docdyhr/mcp-wordpress:latest
@@ -265,6 +283,7 @@ docker pull docdyhr/mcp-wordpress:1.3.1
 ```
 
 ### Distribution Channels
+
 - **NPM:** [`mcp-wordpress`](https://www.npmjs.com/package/mcp-wordpress)
 - **Docker Hub:** [`docdyhr/mcp-wordpress`](https://hub.docker.com/r/docdyhr/mcp-wordpress)
 - **GitHub:** [Latest releases](https://github.com/docdyhr/mcp-wordpress/releases)

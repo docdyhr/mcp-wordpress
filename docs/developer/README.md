@@ -5,21 +5,25 @@ This directory contains comprehensive documentation for developers contributing 
 ## 📋 Developer Guides
 
 ### Getting Started
+
 - **[Development Setup](DEVELOPMENT_SETUP.md)** - Local development environment setup
 - **[Architecture Overview](ARCHITECTURE.md)** - System architecture and design patterns
 - **[Contributing Guidelines](CONTRIBUTING.md)** - How to contribute to the project
 
 ### Technical Reference
+
 - **[API Reference](API_REFERENCE.md)** - Complete technical API documentation
 - **[Testing Guide](TESTING.md)** - Test suite, CI/CD, and testing best practices
 - **[Performance Guide](PERFORMANCE_DEVELOPMENT.md)** - Performance optimization and monitoring
 
 ### Build & Deployment
+
 - **[Build System](BUILD_SYSTEM.md)** - TypeScript compilation and build process
 - **[Release Process](RELEASE_PROCESS.md)** - Semantic versioning and automated releases
 - **[CI/CD Pipeline](CI_CD_PIPELINE.md)** - GitHub Actions workflows and automation
 
 ### Maintenance & Operations
+
 - **[Maintenance Guide](MAINTENANCE.md)** - Ongoing maintenance and updates
 - **[Migration Guide](MIGRATION_GUIDE.md)** - Breaking changes and migration paths
 - **[Security Guidelines](SECURITY_DEVELOPMENT.md)** - Security best practices for development
@@ -53,12 +57,14 @@ mcp-wordpress/
 ## 🔧 Development Environment
 
 ### Prerequisites
+
 - **Node.js 18+** - Runtime environment
 - **TypeScript 5+** - Primary development language
 - **Docker** - For containerization and testing
 - **Git** - Version control
 
 ### Quick Setup
+
 ```bash
 # Clone the repository
 git clone https://github.com/docdyhr/mcp-wordpress.git
@@ -78,6 +84,7 @@ npm run dev
 ```
 
 ### Development Commands
+
 ```bash
 # Build and compilation
 npm run build              # Compile TypeScript
@@ -103,6 +110,7 @@ npm run status             # Check connection status
 ## 🧪 Testing Infrastructure
 
 ### Test Categories
+
 - **Unit Tests** - Individual component testing
 - **Integration Tests** - WordPress API integration
 - **Security Tests** - Vulnerability and penetration testing
@@ -111,6 +119,7 @@ npm run status             # Check connection status
 - **Property-Based Tests** - Generative testing with edge cases
 
 ### Current Test Status ✅
+
 - **Main Test Suite**: 207/207 passed (100%)
 - **Security Tests**: 40/40 passed (100%)
 - **Performance Tests**: 8/8 passed (100%)
@@ -119,18 +128,21 @@ npm run status             # Check connection status
 ## 🏛️ Architecture Highlights
 
 ### Modular Client Architecture
+
 - **Manager Pattern** - Composition over inheritance
 - **Authentication Manager** - Multiple auth method support
 - **Request Manager** - HTTP operations with retry logic
 - **Cache Manager** - Multi-layer caching system
 
 ### Tool System
+
 - **Class-Based Tools** - Consistent tool implementation pattern
 - **Type-Safe Parameters** - Comprehensive Zod validation
 - **Error Handling** - Standardized error patterns
 - **Multi-Site Support** - Site-specific tool execution
 
 ### Performance Systems
+
 - **Intelligent Caching** - 50-70% performance improvement
 - **Real-Time Monitoring** - Comprehensive metrics collection
 - **Performance Analytics** - Trend analysis and optimization
@@ -139,12 +151,14 @@ npm run status             # Check connection status
 ## 📚 Documentation System
 
 ### Auto-Generated Documentation
+
 - **Tool Documentation** - Extracted from TypeScript definitions
 - **OpenAPI Specification** - Machine-readable API spec
 - **Markdown Generation** - User-friendly documentation
 - **CI/CD Integration** - Automatic updates on code changes
 
 ### Documentation Standards
+
 - **JSDoc Comments** - Comprehensive code documentation
 - **Type Annotations** - Complete TypeScript typing
 - **Usage Examples** - Practical implementation examples
@@ -153,6 +167,7 @@ npm run status             # Check connection status
 ## 🔒 Security Framework
 
 ### Security Measures
+
 - **Input Validation** - Comprehensive Zod schema validation
 - **Authentication Security** - Multiple secure auth methods
 - **Rate Limiting** - API abuse prevention
@@ -160,6 +175,7 @@ npm run status             # Check connection status
 - **HTTPS Enforcement** - Secure communication
 
 ### Security Testing
+
 - **Penetration Tests** - Automated vulnerability testing
 - **Input Validation Tests** - Edge case and injection testing
 - **Authentication Tests** - Security validation for all auth methods
@@ -168,12 +184,14 @@ npm run status             # Check connection status
 ## 🚀 Release & Publishing
 
 ### Automated Release Pipeline
+
 - **Semantic Versioning** - Conventional commit-based versioning
 - **Multi-Platform Publishing** - NPM and Docker Hub
 - **Security Scanning** - Automated vulnerability detection
 - **Performance Validation** - Regression testing before release
 
 ### Distribution Channels
+
 - **NPM Package** - Node.js package manager
 - **Docker Images** - Multi-architecture container images
 - **GitHub Releases** - Source code and release notes
@@ -181,6 +199,7 @@ npm run status             # Check connection status
 ## 🤝 Contributing
 
 ### Development Workflow
+
 1. **Fork & Clone** - Create your development environment
 2. **Feature Branch** - Create feature branches from main
 3. **Development** - Implement changes with tests
@@ -189,6 +208,7 @@ npm run status             # Check connection status
 6. **Pull Request** - Submit for review
 
 ### Code Standards
+
 - **TypeScript** - Strict mode with comprehensive typing
 - **ESLint** - Consistent code style and best practices
 - **Prettier** - Automated code formatting
@@ -196,6 +216,7 @@ npm run status             # Check connection status
 - **Conventional Commits** - Semantic commit messages
 
 ### Review Process
+
 - **Automated Testing** - CI/CD pipeline validation
 - **Security Scanning** - Automated vulnerability detection
 - **Performance Testing** - Regression detection
@@ -205,11 +226,13 @@ npm run status             # Check connection status
 ## 📞 Getting Help
 
 ### Development Support
+
 - **GitHub Issues** - Bug reports and feature requests
 - **GitHub Discussions** - Development questions and community
 - **Security Issues** - Responsible disclosure process
 
 ### Resources
+
 - **WordPress REST API** - Official WordPress API documentation
 - **Model Context Protocol** - MCP specification and guidelines
 - **TypeScript Handbook** - TypeScript language reference

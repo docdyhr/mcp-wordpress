@@ -9,25 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🚀 Features
 
-* add publication verification workflow and script ([899d99f](https://github.com/docdyhr/mcp-wordpress/commit/899d99f7ba608ce3c1ce7bdb54f74fb3c51be873))
+- add publication verification workflow and script ([899d99f](https://github.com/docdyhr/mcp-wordpress/commit/899d99f7ba608ce3c1ce7bdb54f74fb3c51be873))
 
 ### 🐛 Bug Fixes
 
-* include ES module type in DXT package.json ([770dbff](https://github.com/docdyhr/mcp-wordpress/commit/770dbff784d5d83f864c21d3d7d86c4b8191bca5))
-* remove unsupported Docker action parameters ([8eb9e42](https://github.com/docdyhr/mcp-wordpress/commit/8eb9e428cd1bb44262fd0a8f5945ab2892ca1a18))
+- include ES module type in DXT package.json ([770dbff](https://github.com/docdyhr/mcp-wordpress/commit/770dbff784d5d83f864c21d3d7d86c4b8191bca5))
+- remove unsupported Docker action parameters ([8eb9e42](https://github.com/docdyhr/mcp-wordpress/commit/8eb9e428cd1bb44262fd0a8f5945ab2892ca1a18))
 
 ### 📚 Documentation
 
-* add comprehensive developer documentation suite ([a7428a6](https://github.com/docdyhr/mcp-wordpress/commit/a7428a6382fc6e60268ccc188eee60a315a34dff))
-* update DXT validation references to reflect current state ([0e3778f](https://github.com/docdyhr/mcp-wordpress/commit/0e3778ff7194e4315a8886deee21ddfb17c65c6d))
+- add comprehensive developer documentation suite ([a7428a6](https://github.com/docdyhr/mcp-wordpress/commit/a7428a6382fc6e60268ccc188eee60a315a34dff))
+- update DXT validation references to reflect current state ([0e3778f](https://github.com/docdyhr/mcp-wordpress/commit/0e3778ff7194e4315a8886deee21ddfb17c65c6d))
 
 ## [1.3.1](https://github.com/docdyhr/mcp-wordpress/compare/v1.3.0...v1.3.1) (2025-07-07)
 
 ### 🐛 Bug Fixes
 
-* downgrade Docker action versions to stable releases ([11657c1](https://github.com/docdyhr/mcp-wordpress/commit/11657c14b67e0ba7d5074f92b2019c963ea2b4eb))
-* downgrade Docker actions to stable versions ([3542101](https://github.com/docdyhr/mcp-wordpress/commit/354210112f7aaf08d40381ef3a3105993a1e7a7c))
-* exclude flaky cache tests from CI test suite ([fe93eba](https://github.com/docdyhr/mcp-wordpress/commit/fe93ebac53bd3d900db10eae67d332ff61d39c8c))
+- downgrade Docker action versions to stable releases ([11657c1](https://github.com/docdyhr/mcp-wordpress/commit/11657c14b67e0ba7d5074f92b2019c963ea2b4eb))
+- downgrade Docker actions to stable versions ([3542101](https://github.com/docdyhr/mcp-wordpress/commit/354210112f7aaf08d40381ef3a3105993a1e7a7c))
+- exclude flaky cache tests from CI test suite ([fe93eba](https://github.com/docdyhr/mcp-wordpress/commit/fe93ebac53bd3d900db10eae67d332ff61d39c8c))
 
 ## [1.3.0](https://github.com/docdyhr/mcp-wordpress/compare/v1.2.0...v1.3.0) (2025-07-07)
 

@@ -52,7 +52,7 @@ fix: resolve authentication header issue in POST requests
 fix(auth): handle JWT token expiration gracefully
 fix(cache): fix cache invalidation for multi-site setups
 
-# MINOR version bump  
+# MINOR version bump
 feat: add new WordPress plugin management tool
 feat(tools): add bulk comment moderation functionality
 feat(api): add support for custom post types
@@ -111,11 +111,11 @@ on:
   workflow_dispatch:
     inputs:
       release_type:
-        description: 'Release type'
+        description: "Release type"
         required: true
-        default: 'patch'
+        default: "patch"
         type: choice
-        options: ['patch', 'minor', 'major', 'prerelease']
+        options: ["patch", "minor", "major", "prerelease"]
 
 jobs:
   release:
@@ -127,25 +127,25 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-      
+          node-version: "20"
+          cache: "npm"
+
       - name: 📦 Install Dependencies
         run: npm ci
-      
+
       - name: 🧪 Run Tests
         run: npm test
-      
+
       - name: 🔒 Security Audit
         run: npm audit --audit-level=high
-      
+
       - name: 🏗️ Build Project
         run: npm run build
-      
+
       - name: 🚀 Semantic Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -244,17 +244,17 @@ jobs:
 {
   "preset": "conventionalcommits",
   "releaseRules": [
-    {"type": "feat", "release": "minor"},
-    {"type": "fix", "release": "patch"},
-    {"type": "perf", "release": "patch"},
-    {"type": "docs", "release": false},
-    {"type": "style", "release": false},
-    {"type": "refactor", "release": "patch"},
-    {"type": "test", "release": false},
-    {"type": "build", "release": "patch"},
-    {"type": "ci", "release": false},
-    {"type": "chore", "release": false},
-    {"breaking": true, "release": "major"}
+    { "type": "feat", "release": "minor" },
+    { "type": "fix", "release": "patch" },
+    { "type": "perf", "release": "patch" },
+    { "type": "docs", "release": false },
+    { "type": "style", "release": false },
+    { "type": "refactor", "release": "patch" },
+    { "type": "test", "release": false },
+    { "type": "build", "release": "patch" },
+    { "type": "ci", "release": false },
+    { "type": "chore", "release": false },
+    { "breaking": true, "release": "major" }
   ]
 }
 ```
@@ -421,26 +421,30 @@ npm dist-tag add mcp-wordpress@1.2.3 latest
 # [1.3.0](https://github.com/docdyhr/mcp-wordpress/compare/v1.2.0...v1.3.0) (2024-01-15)
 
 ### Features
-* add new WordPress plugin management tool ([abc123](https://github.com/docdyhr/mcp-wordpress/commit/abc123))
-* improve authentication system ([def456](https://github.com/docdyhr/mcp-wordpress/commit/def456))
+
+- add new WordPress plugin management tool ([abc123](https://github.com/docdyhr/mcp-wordpress/commit/abc123))
+- improve authentication system ([def456](https://github.com/docdyhr/mcp-wordpress/commit/def456))
 
 ### Bug Fixes
-* resolve cache invalidation issue ([ghi789](https://github.com/docdyhr/mcp-wordpress/commit/ghi789))
+
+- resolve cache invalidation issue ([ghi789](https://github.com/docdyhr/mcp-wordpress/commit/ghi789))
 
 ### BREAKING CHANGES
-* authentication configuration format has changed
+
+- authentication configuration format has changed
 ```
 
 ### Migration Guides
 
 For breaking changes, create migration guides in `docs/developer/MIGRATION_GUIDE.md`:
 
-```markdown
+````markdown
 ## Migrating from v1.x to v2.x
 
 ### Authentication Configuration Changes
 
 **Before (v1.x)**:
+
 ```javascript
 {
   auth: {
@@ -449,6 +453,7 @@ For breaking changes, create migration guides in `docs/developer/MIGRATION_GUIDE
   }
 }
 ```
+````
 
 **After (v2.x)**:
 

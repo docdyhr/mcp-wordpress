@@ -67,7 +67,7 @@ The MCP WordPress Server follows a modular, layered architecture designed for sc
 class MCPWordPressServer {
   private toolRegistry: ToolRegistry;
   private clients: Map<string, WordPressClient>;
-  
+
   constructor(config: Config) {
     this.toolRegistry = new ToolRegistry();
     this.clients = this.initializeClients(config);
@@ -86,7 +86,7 @@ class WordPressClient {
   private authManager: AuthenticationManager;
   private requestManager: RequestManager;
   private cacheManager: CacheManager;
-  
+
   constructor(config: ClientConfig) {
     this.authManager = new AuthenticationManager(config);
     this.requestManager = new RequestManager(config);
@@ -110,9 +110,9 @@ class WordPressClient {
 ```typescript
 export class PostTools {
   constructor(private client: WordPressClient) {}
-  
+
   async createPost(params: CreatePostParams): Promise<PostResult> {
-    return toolWrapper(this.client, 'create_post', params, async () => {
+    return toolWrapper(this.client, "create_post", params, async () => {
       const validatedParams = createPostSchema.parse(params);
       return await this.client.posts.create(validatedParams);
     });
@@ -137,9 +137,9 @@ export class PostTools {
 class PerformanceMonitor {
   private collectors: MetricsCollector[];
   private analytics: PerformanceAnalytics;
-  
+
   collect(metric: Metric): void {
-    this.collectors.forEach(collector => collector.collect(metric));
+    this.collectors.forEach((collector) => collector.collect(metric));
     this.analytics.analyze(metric);
   }
 }
@@ -160,7 +160,7 @@ class PerformanceMonitor {
 ```typescript
 class CacheManager {
   private strategies: Map<string, CacheStrategy>;
-  
+
   async get<T>(key: string): Promise<T | null> {
     const strategy = this.strategies.get(this.getStrategyKey(key));
     return await strategy.get(key);

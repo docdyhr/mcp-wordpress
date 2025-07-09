@@ -290,7 +290,7 @@ export function getEnvironmentSecurity(): {
   strictMode: boolean;
   verboseErrors: boolean;
   enforceHttps: boolean;
-  } {
+} {
   const isProduction = process.env.NODE_ENV === "production";
 
   return {

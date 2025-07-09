@@ -11,12 +11,12 @@ Primary interface for WordPress REST API communication.
 ```typescript
 class WordPressClient {
   constructor(config: ClientConfig);
-  
+
   // Core managers
   auth: AuthenticationManager;
   request: RequestManager;
   cache: CacheManager;
-  
+
   // Content APIs
   posts: PostsAPI;
   pages: PagesAPI;
@@ -24,7 +24,7 @@ class WordPressClient {
   users: UsersAPI;
   comments: CommentsAPI;
   taxonomies: TaxonomiesAPI;
-  
+
   // Site management
   settings: SettingsAPI;
   plugins: PluginsAPI;
@@ -40,7 +40,7 @@ interface ClientConfig {
   username: string;
   password?: string;
   appPassword?: string;
-  authMethod?: 'app-password' | 'jwt' | 'basic' | 'api-key';
+  authMethod?: "app-password" | "jwt" | "basic" | "api-key";
   timeout?: number;
   retryAttempts?: number;
   cacheEnabled?: boolean;
@@ -55,16 +55,25 @@ Handles multiple WordPress authentication methods.
 ```typescript
 class AuthenticationManager {
   // Authentication methods
-  async authenticateWithAppPassword(username: string, password: string): Promise<AuthResult>;
-  async authenticateWithJWT(username: string, password: string): Promise<AuthResult>;
-  async authenticateWithBasic(username: string, password: string): Promise<AuthResult>;
+  async authenticateWithAppPassword(
+    username: string,
+    password: string,
+  ): Promise<AuthResult>;
+  async authenticateWithJWT(
+    username: string,
+    password: string,
+  ): Promise<AuthResult>;
+  async authenticateWithBasic(
+    username: string,
+    password: string,
+  ): Promise<AuthResult>;
   async authenticateWithApiKey(apiKey: string): Promise<AuthResult>;
-  
+
   // Token management
   async refreshToken(): Promise<string>;
   async validateToken(token: string): Promise<boolean>;
   async revokeToken(token: string): Promise<void>;
-  
+
   // Headers
   getAuthHeaders(): Record<string, string>;
   isAuthenticated(): boolean;
@@ -83,13 +92,13 @@ class RequestManager {
   async put<T>(endpoint: string, data?: any): Promise<T>;
   async patch<T>(endpoint: string, data?: any): Promise<T>;
   async delete<T>(endpoint: string): Promise<T>;
-  
+
   // Batch operations
   async batchRequest<T>(requests: BatchRequest[]): Promise<T[]>;
-  
+
   // File uploads
   async uploadFile(file: File, options?: UploadOptions): Promise<MediaItem>;
-  
+
   // Rate limiting
   async waitForRateLimit(): Promise<void>;
   getRateLimitStatus(): RateLimitStatus;
@@ -110,7 +119,9 @@ class PostTools {
   async deletePost(params: DeletePostParams): Promise<DeleteResult>;
   async getPost(params: GetPostParams): Promise<PostResult>;
   async listPosts(params: ListPostsParams): Promise<PostListResult>;
-  async getPostRevisions(params: GetPostRevisionsParams): Promise<PostRevisionsResult>;
+  async getPostRevisions(
+    params: GetPostRevisionsParams,
+  ): Promise<PostRevisionsResult>;
 }
 ```
 
@@ -121,7 +132,7 @@ interface CreatePostParams {
   title: string;
   content?: string;
   excerpt?: string;
-  status?: 'draft' | 'publish' | 'private' | 'pending';
+  status?: "draft" | "publish" | "private" | "pending";
   author?: number;
   categories?: number[];
   tags?: number[];
@@ -157,7 +168,9 @@ class PageTools {
   async deletePage(params: DeletePageParams): Promise<DeleteResult>;
   async getPage(params: GetPageParams): Promise<PageResult>;
   async listPages(params: ListPagesParams): Promise<PageListResult>;
-  async getPageRevisions(params: GetPageRevisionsParams): Promise<PageRevisionsResult>;
+  async getPageRevisions(
+    params: GetPageRevisionsParams,
+  ): Promise<PageRevisionsResult>;
 }
 ```
 
@@ -211,7 +224,9 @@ class CommentTools {
   async getComment(params: GetCommentParams): Promise<CommentResult>;
   async listComments(params: ListCommentsParams): Promise<CommentListResult>;
   async moderateComment(params: ModerateCommentParams): Promise<CommentResult>;
-  async bulkModerateComments(params: BulkModerateCommentsParams): Promise<BulkResult>;
+  async bulkModerateComments(
+    params: BulkModerateCommentsParams,
+  ): Promise<BulkResult>;
 }
 ```
 
@@ -224,8 +239,10 @@ class TaxonomyTools {
   async updateCategory(params: UpdateCategoryParams): Promise<CategoryResult>;
   async deleteCategory(params: DeleteCategoryParams): Promise<DeleteResult>;
   async getCategory(params: GetCategoryParams): Promise<CategoryResult>;
-  async listCategories(params: ListCategoriesParams): Promise<CategoryListResult>;
-  
+  async listCategories(
+    params: ListCategoriesParams,
+  ): Promise<CategoryListResult>;
+
   // Tags
   async createTag(params: CreateTagParams): Promise<TagResult>;
   async updateTag(params: UpdateTagParams): Promise<TagResult>;
@@ -240,7 +257,9 @@ class TaxonomyTools {
 ```typescript
 class SiteTools {
   async getSiteInfo(params: GetSiteInfoParams): Promise<SiteInfoResult>;
-  async updateSiteSettings(params: UpdateSiteSettingsParams): Promise<SiteSettingsResult>;
+  async updateSiteSettings(
+    params: UpdateSiteSettingsParams,
+  ): Promise<SiteSettingsResult>;
   async getSiteStats(params: GetSiteStatsParams): Promise<SiteStatsResult>;
   async getPlugins(params: GetPluginsParams): Promise<PluginsResult>;
   async getThemes(params: GetThemesParams): Promise<ThemesResult>;
@@ -254,7 +273,9 @@ class SiteTools {
 class AuthTools {
   async testAuth(params: TestAuthParams): Promise<AuthTestResult>;
   async refreshToken(params: RefreshTokenParams): Promise<TokenResult>;
-  async validatePermissions(params: ValidatePermissionsParams): Promise<PermissionsResult>;
+  async validatePermissions(
+    params: ValidatePermissionsParams,
+  ): Promise<PermissionsResult>;
 }
 ```
 
@@ -265,7 +286,9 @@ class CacheTools {
   async getCacheStats(params: GetCacheStatsParams): Promise<CacheStatsResult>;
   async clearCache(params: ClearCacheParams): Promise<ClearCacheResult>;
   async warmCache(params: WarmCacheParams): Promise<WarmCacheResult>;
-  async setCacheConfig(params: SetCacheConfigParams): Promise<CacheConfigResult>;
+  async setCacheConfig(
+    params: SetCacheConfigParams,
+  ): Promise<CacheConfigResult>;
 }
 ```
 
@@ -273,12 +296,24 @@ class CacheTools {
 
 ```typescript
 class PerformanceTools {
-  async getPerformanceMetrics(params: GetPerformanceMetricsParams): Promise<PerformanceMetricsResult>;
-  async runPerformanceTest(params: RunPerformanceTestParams): Promise<PerformanceTestResult>;
-  async getSystemHealth(params: GetSystemHealthParams): Promise<SystemHealthResult>;
-  async benchmarkOperations(params: BenchmarkOperationsParams): Promise<BenchmarkResult>;
-  async getOptimizationSuggestions(params: GetOptimizationSuggestionsParams): Promise<OptimizationResult>;
-  async monitorRealTimeMetrics(params: MonitorRealTimeMetricsParams): Promise<RealTimeMetricsResult>;
+  async getPerformanceMetrics(
+    params: GetPerformanceMetricsParams,
+  ): Promise<PerformanceMetricsResult>;
+  async runPerformanceTest(
+    params: RunPerformanceTestParams,
+  ): Promise<PerformanceTestResult>;
+  async getSystemHealth(
+    params: GetSystemHealthParams,
+  ): Promise<SystemHealthResult>;
+  async benchmarkOperations(
+    params: BenchmarkOperationsParams,
+  ): Promise<BenchmarkResult>;
+  async getOptimizationSuggestions(
+    params: GetOptimizationSuggestionsParams,
+  ): Promise<OptimizationResult>;
+  async monitorRealTimeMetrics(
+    params: MonitorRealTimeMetricsParams,
+  ): Promise<RealTimeMetricsResult>;
 }
 ```
 
@@ -292,11 +327,11 @@ All tools use Zod schemas for parameter validation:
 const createPostSchema = z.object({
   title: z.string().min(1).max(200),
   content: z.string().optional(),
-  status: z.enum(['draft', 'publish', 'private', 'pending']).optional(),
+  status: z.enum(["draft", "publish", "private", "pending"]).optional(),
   author: z.number().positive().optional(),
   categories: z.array(z.number().positive()).optional(),
   tags: z.array(z.number().positive()).optional(),
-  site: z.string().optional()
+  site: z.string().optional(),
 });
 ```
 
@@ -315,10 +350,10 @@ class WordPressAPIError extends Error {
     public code: string,
     message: string,
     public statusCode?: number,
-    public details?: any
+    public details?: any,
   ) {
     super(message);
-    this.name = 'WordPressAPIError';
+    this.name = "WordPressAPIError";
   }
 }
 ```
@@ -378,7 +413,7 @@ class CacheManager {
   async set<T>(key: string, value: T, ttl?: number): Promise<void>;
   async del(key: string): Promise<void>;
   async clear(pattern?: string): Promise<void>;
-  
+
   // Cache statistics
   getStats(): CacheStats;
   getSize(): number;
@@ -538,7 +573,12 @@ class DebugLogger {
   static log(level: LogLevel, message: string, context?: any): void;
   static error(error: Error, context?: any): void;
   static performance(operation: string, duration: number): void;
-  static http(method: string, url: string, status: number, duration: number): void;
+  static http(
+    method: string,
+    url: string,
+    status: number,
+    duration: number,
+  ): void;
 }
 ```
 
@@ -546,7 +586,7 @@ class DebugLogger {
 
 ```typescript
 interface HealthCheck {
-  status: 'healthy' | 'degraded' | 'unhealthy';
+  status: "healthy" | "degraded" | "unhealthy";
   checks: {
     database: HealthStatus;
     cache: HealthStatus;
@@ -569,49 +609,49 @@ class HealthChecker {
 ### Basic Client Usage
 
 ```typescript
-import { WordPressClient } from 'mcp-wordpress';
+import { WordPressClient } from "mcp-wordpress";
 
 const client = new WordPressClient({
-  siteUrl: 'https://your-site.com',
-  username: 'admin',
-  appPassword: 'xxxx xxxx xxxx xxxx xxxx xxxx',
-  authMethod: 'app-password'
+  siteUrl: "https://your-site.com",
+  username: "admin",
+  appPassword: "xxxx xxxx xxxx xxxx xxxx xxxx",
+  authMethod: "app-password",
 });
 
 // Create a post
 const post = await client.posts.create({
-  title: 'My New Post',
-  content: 'This is the post content',
-  status: 'publish'
+  title: "My New Post",
+  content: "This is the post content",
+  status: "publish",
 });
 ```
 
 ### Multi-Site Usage
 
 ```typescript
-import { MCPWordPressServer } from 'mcp-wordpress';
+import { MCPWordPressServer } from "mcp-wordpress";
 
 const server = new MCPWordPressServer({
   sites: [
     {
-      id: 'site1',
-      name: 'Main Site',
+      id: "site1",
+      name: "Main Site",
       config: {
-        WORDPRESS_SITE_URL: 'https://site1.com',
-        WORDPRESS_USERNAME: 'admin',
-        WORDPRESS_APP_PASSWORD: 'password1'
-      }
+        WORDPRESS_SITE_URL: "https://site1.com",
+        WORDPRESS_USERNAME: "admin",
+        WORDPRESS_APP_PASSWORD: "password1",
+      },
     },
     {
-      id: 'site2',
-      name: 'Blog Site',
+      id: "site2",
+      name: "Blog Site",
       config: {
-        WORDPRESS_SITE_URL: 'https://site2.com',
-        WORDPRESS_USERNAME: 'editor',
-        WORDPRESS_APP_PASSWORD: 'password2'
-      }
-    }
-  ]
+        WORDPRESS_SITE_URL: "https://site2.com",
+        WORDPRESS_USERNAME: "editor",
+        WORDPRESS_APP_PASSWORD: "password2",
+      },
+    },
+  ],
 });
 ```
 
