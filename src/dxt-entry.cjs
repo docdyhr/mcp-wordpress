@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable */
 /**
  * CommonJS entry point for DXT package - ensures compatibility with Claude Desktop
  */

@@ -180,18 +180,18 @@ export class ToolRegistry {
    */
   private getZodTypeForParameter(param: any): z.ZodType {
     switch (param.type) {
-    case "string":
-      return z.string();
-    case "number":
-      return z.number();
-    case "boolean":
-      return z.boolean();
-    case "array":
-      return z.array(z.string());
-    case "object":
-      return z.record(z.any());
-    default:
-      return z.string();
+      case "string":
+        return z.string();
+      case "number":
+        return z.number();
+      case "boolean":
+        return z.boolean();
+      case "array":
+        return z.array(z.string());
+      case "object":
+        return z.record(z.any());
+      default:
+        return z.string();
     }
   }
 

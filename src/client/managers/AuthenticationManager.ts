@@ -20,42 +20,42 @@ export class AuthenticationManager extends BaseManager {
       (process.env.WORDPRESS_AUTH_METHOD as AuthMethod) || "app-password";
 
     switch (method) {
-    case "app-password":
-      return {
-        method: "app-password",
-        username: process.env.WORDPRESS_USERNAME || "",
-        appPassword: process.env.WORDPRESS_APP_PASSWORD || "",
-      };
+      case "app-password":
+        return {
+          method: "app-password",
+          username: process.env.WORDPRESS_USERNAME || "",
+          appPassword: process.env.WORDPRESS_APP_PASSWORD || "",
+        };
 
-    case "jwt":
-      return {
-        method: "jwt",
-        username: process.env.WORDPRESS_USERNAME || "",
-        password:
+      case "jwt":
+        return {
+          method: "jwt",
+          username: process.env.WORDPRESS_USERNAME || "",
+          password:
             process.env.WORDPRESS_JWT_PASSWORD ||
             process.env.WORDPRESS_PASSWORD ||
             "",
-        secret: process.env.WORDPRESS_JWT_SECRET || "",
-      };
+          secret: process.env.WORDPRESS_JWT_SECRET || "",
+        };
 
-    case "basic":
-      return {
-        method: "basic",
-        username: process.env.WORDPRESS_USERNAME || "",
-        password: process.env.WORDPRESS_PASSWORD || "",
-      };
+      case "basic":
+        return {
+          method: "basic",
+          username: process.env.WORDPRESS_USERNAME || "",
+          password: process.env.WORDPRESS_PASSWORD || "",
+        };
 
-    case "api-key":
-      return {
-        method: "api-key",
-        apiKey: process.env.WORDPRESS_API_KEY || "",
-      };
+      case "api-key":
+        return {
+          method: "api-key",
+          apiKey: process.env.WORDPRESS_API_KEY || "",
+        };
 
-    default:
-      throw new AuthenticationError(
-        `Unsupported authentication method: ${method}`,
-        method,
-      );
+      default:
+        throw new AuthenticationError(
+          `Unsupported authentication method: ${method}`,
+          method,
+        );
     }
   }
 
@@ -66,49 +66,49 @@ export class AuthenticationManager extends BaseManager {
     const auth = this.config.auth;
 
     switch (auth.method) {
-    case "app-password":
-      if (!auth.username || !auth.appPassword) {
+      case "app-password":
+        if (!auth.username || !auth.appPassword) {
+          throw new AuthenticationError(
+            "Username and app password are required",
+            auth.method,
+          );
+        }
+
+        const credentials = Buffer.from(
+          `${auth.username}:${auth.appPassword}`,
+        ).toString("base64");
+        return { Authorization: `Basic ${credentials}` };
+
+      case "jwt":
+        if (!this.jwtToken) {
+          await this.authenticateJWT();
+        }
+        return { Authorization: `Bearer ${this.jwtToken}` };
+
+      case "basic":
+        if (!auth.username || !auth.password) {
+          throw new AuthenticationError(
+            "Username and password are required",
+            auth.method,
+          );
+        }
+
+        const basicCredentials = Buffer.from(
+          `${auth.username}:${auth.password}`,
+        ).toString("base64");
+        return { Authorization: `Basic ${basicCredentials}` };
+
+      case "api-key":
+        if (!auth.apiKey) {
+          throw new AuthenticationError("API key is required", auth.method);
+        }
+        return { "X-API-Key": auth.apiKey };
+
+      default:
         throw new AuthenticationError(
-          "Username and app password are required",
+          `Unsupported authentication method: ${auth.method}`,
           auth.method,
         );
-      }
-
-      const credentials = Buffer.from(
-        `${auth.username}:${auth.appPassword}`,
-      ).toString("base64");
-      return { Authorization: `Basic ${credentials}` };
-
-    case "jwt":
-      if (!this.jwtToken) {
-        await this.authenticateJWT();
-      }
-      return { Authorization: `Bearer ${this.jwtToken}` };
-
-    case "basic":
-      if (!auth.username || !auth.password) {
-        throw new AuthenticationError(
-          "Username and password are required",
-          auth.method,
-        );
-      }
-
-      const basicCredentials = Buffer.from(
-        `${auth.username}:${auth.password}`,
-      ).toString("base64");
-      return { Authorization: `Basic ${basicCredentials}` };
-
-    case "api-key":
-      if (!auth.apiKey) {
-        throw new AuthenticationError("API key is required", auth.method);
-      }
-      return { "X-API-Key": auth.apiKey };
-
-    default:
-      throw new AuthenticationError(
-        `Unsupported authentication method: ${auth.method}`,
-        auth.method,
-      );
     }
   }
 
@@ -187,47 +187,47 @@ export class AuthenticationManager extends BaseManager {
     }
 
     switch (auth.method) {
-    case "app-password":
-      if (!auth.username || !auth.appPassword) {
-        throw new AuthenticationError(
-          "App password authentication requires username and appPassword",
-          "app-password",
-        );
-      }
-      break;
+      case "app-password":
+        if (!auth.username || !auth.appPassword) {
+          throw new AuthenticationError(
+            "App password authentication requires username and appPassword",
+            "app-password",
+          );
+        }
+        break;
 
-    case "jwt":
-      if (!auth.username || !auth.password || !auth.secret) {
-        throw new AuthenticationError(
-          "JWT authentication requires username, password, and secret",
-          "jwt",
-        );
-      }
-      break;
+      case "jwt":
+        if (!auth.username || !auth.password || !auth.secret) {
+          throw new AuthenticationError(
+            "JWT authentication requires username, password, and secret",
+            "jwt",
+          );
+        }
+        break;
 
-    case "basic":
-      if (!auth.username || !auth.password) {
-        throw new AuthenticationError(
-          "Basic authentication requires username and password",
-          "basic",
-        );
-      }
-      break;
+      case "basic":
+        if (!auth.username || !auth.password) {
+          throw new AuthenticationError(
+            "Basic authentication requires username and password",
+            "basic",
+          );
+        }
+        break;
 
-    case "api-key":
-      if (!auth.apiKey) {
-        throw new AuthenticationError(
-          "API key authentication requires apiKey",
-          "api-key",
-        );
-      }
-      break;
+      case "api-key":
+        if (!auth.apiKey) {
+          throw new AuthenticationError(
+            "API key authentication requires apiKey",
+            "api-key",
+          );
+        }
+        break;
 
-    default:
-      throw new AuthenticationError(
-        `Unsupported authentication method: ${auth.method}`,
-        auth.method,
-      );
+      default:
+        throw new AuthenticationError(
+          `Unsupported authentication method: ${auth.method}`,
+          auth.method,
+        );
     }
   }
 }

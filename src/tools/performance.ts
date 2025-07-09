@@ -493,10 +493,10 @@ export default class PerformanceTools {
             improvement:
               benchmark.improvement > 0
                 ? {
-                  needed: benchmark.improvement,
-                  description:
+                    needed: benchmark.improvement,
+                    description:
                       this.getBenchmarkImprovementDescription(benchmark),
-                }
+                  }
                 : null,
           })),
           overallRanking: this.calculateOverallRanking(benchmarks),
@@ -878,21 +878,21 @@ export default class PerformanceTools {
 
   private extractMetricValue(dataPoint: any, metric: string): number {
     switch (metric) {
-    case "responseTime":
-      return dataPoint.requests.averageResponseTime;
-    case "cacheHitRate":
-      return dataPoint.cache.hitRate * 100;
-    case "errorRate":
-      return (
-        (dataPoint.requests.failed / Math.max(dataPoint.requests.total, 1)) *
+      case "responseTime":
+        return dataPoint.requests.averageResponseTime;
+      case "cacheHitRate":
+        return dataPoint.cache.hitRate * 100;
+      case "errorRate":
+        return (
+          (dataPoint.requests.failed / Math.max(dataPoint.requests.total, 1)) *
           100
-      );
-    case "memoryUsage":
-      return dataPoint.system.memoryUsage;
-    case "requestVolume":
-      return dataPoint.requests.requestsPerSecond;
-    default:
-      return 0;
+        );
+      case "memoryUsage":
+        return dataPoint.system.memoryUsage;
+      case "requestVolume":
+        return dataPoint.requests.requestsPerSecond;
+      default:
+        return 0;
     }
   }
 

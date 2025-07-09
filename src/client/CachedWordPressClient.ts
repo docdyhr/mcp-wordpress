@@ -250,18 +250,18 @@ export class CachedWordPressClient extends WordPressClient {
     let operationType: "create" | "update" | "delete";
 
     switch (method.toUpperCase()) {
-    case "POST":
-      operationType = "create";
-      break;
-    case "PUT":
-    case "PATCH":
-      operationType = "update";
-      break;
-    case "DELETE":
-      operationType = "delete";
-      break;
-    default:
-      return;
+      case "POST":
+        operationType = "create";
+        break;
+      case "PUT":
+      case "PATCH":
+        operationType = "update";
+        break;
+      case "DELETE":
+        operationType = "delete";
+        break;
+      default:
+        return;
     }
 
     await this.cacheInvalidation.invalidateResource(
@@ -375,7 +375,7 @@ export class CachedWordPressClient extends WordPressClient {
     efficiency: string;
     memoryUsage: number;
     totalEntries: number;
-    } {
+  } {
     const stats = this.cacheManager.getStats();
     const total = stats.hits + stats.misses;
     const hitRate = total > 0 ? stats.hits / total : 0;
@@ -405,7 +405,7 @@ export class CachedWordPressClient extends WordPressClient {
     defaultTTL: number;
     currentSize: number;
     ttlPresets: any;
-    } {
+  } {
     const stats = this.cacheManager.getStats();
 
     return {
@@ -438,7 +438,7 @@ export class CachedWordPressClient extends WordPressClient {
       siteId: string;
       baseUrl: string;
     };
-    } {
+  } {
     return {
       statistics: this.getCacheStats(),
       efficiency: this.getCacheEfficiency(),

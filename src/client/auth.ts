@@ -29,18 +29,18 @@ export class WordPressAuth {
   async authenticate(): Promise<boolean> {
     try {
       switch (this.authType) {
-      case "app-password":
-        return await this.handleAppPasswordAuth();
-      case "jwt":
-        return await this.handleJWTAuth();
-      case "basic":
-        return await this.handleBasicAuth();
-      case "api-key":
-        return await this.handleAPIKeyAuth();
-      case "cookie":
-        return await this.handleCookieAuth();
-      default:
-        throw new Error(`Unsupported authentication type: ${this.authType}`);
+        case "app-password":
+          return await this.handleAppPasswordAuth();
+        case "jwt":
+          return await this.handleJWTAuth();
+        case "basic":
+          return await this.handleBasicAuth();
+        case "api-key":
+          return await this.handleAPIKeyAuth();
+        case "cookie":
+          return await this.handleCookieAuth();
+        default:
+          throw new Error(`Unsupported authentication type: ${this.authType}`);
       }
     } catch (error) {
       logger.error("Authentication failed:", error);
@@ -185,11 +185,11 @@ export class WordPressAuth {
    */
   async refreshAuth(): Promise<boolean> {
     switch (this.authType) {
-    case "jwt":
-      return await this.refreshJWTToken();
-    default:
-      logger.log(`Authentication refresh not supported for ${this.authType}`);
-      return true;
+      case "jwt":
+        return await this.refreshJWTToken();
+      default:
+        logger.log(`Authentication refresh not supported for ${this.authType}`);
+        return true;
     }
   }
 
@@ -312,40 +312,40 @@ export class WordPressAuth {
     const auth = this.client.config.auth;
 
     switch (this.authType) {
-    case "app-password":
-      if (auth.username && auth.appPassword) {
-        const credentials = Buffer.from(
-          `${auth.username}:${auth.appPassword}`,
-        ).toString("base64");
-        headers["Authorization"] = `Basic ${credentials}`;
-      }
-      break;
-    case "basic":
-      if (auth.username && auth.password) {
-        const credentials = Buffer.from(
-          `${auth.username}:${auth.password}`,
-        ).toString("base64");
-        headers["Authorization"] = `Basic ${credentials}`;
-      }
-      break;
+      case "app-password":
+        if (auth.username && auth.appPassword) {
+          const credentials = Buffer.from(
+            `${auth.username}:${auth.appPassword}`,
+          ).toString("base64");
+          headers["Authorization"] = `Basic ${credentials}`;
+        }
+        break;
+      case "basic":
+        if (auth.username && auth.password) {
+          const credentials = Buffer.from(
+            `${auth.username}:${auth.password}`,
+          ).toString("base64");
+          headers["Authorization"] = `Basic ${credentials}`;
+        }
+        break;
 
-    case "jwt":
-      if (auth.token) {
-        headers["Authorization"] = `Bearer ${auth.token}`;
-      }
-      break;
+      case "jwt":
+        if (auth.token) {
+          headers["Authorization"] = `Bearer ${auth.token}`;
+        }
+        break;
 
-    case "api-key":
-      if (auth.apiKey) {
-        headers["X-API-Key"] = auth.apiKey;
-      }
-      break;
+      case "api-key":
+        if (auth.apiKey) {
+          headers["X-API-Key"] = auth.apiKey;
+        }
+        break;
 
-    case "cookie":
-      if (auth.nonce) {
-        headers["X-WP-Nonce"] = auth.nonce;
-      }
-      break;
+      case "cookie":
+        if (auth.nonce) {
+          headers["X-WP-Nonce"] = auth.nonce;
+        }
+        break;
     }
 
     return headers;
@@ -356,23 +356,23 @@ export class WordPressAuth {
    */
   requiresSetup(): boolean {
     switch (this.authType) {
-    case "jwt":
-      return !this.client.config.auth.secret;
-    case "api-key":
-      return !this.client.config.auth.apiKey;
-    case "app-password":
-      return (
-        !this.client.config.auth.username ||
+      case "jwt":
+        return !this.client.config.auth.secret;
+      case "api-key":
+        return !this.client.config.auth.apiKey;
+      case "app-password":
+        return (
+          !this.client.config.auth.username ||
           !this.client.config.auth.appPassword
-      );
-    case "basic":
-      return (
-        !this.client.config.auth.username || !this.client.config.auth.password
-      );
-    case "cookie":
-      return false; // Cookie auth can work without additional setup
-    default:
-      return true;
+        );
+      case "basic":
+        return (
+          !this.client.config.auth.username || !this.client.config.auth.password
+        );
+      case "cookie":
+        return false; // Cookie auth can work without additional setup
+      default:
+        return true;
     }
   }
 
@@ -381,8 +381,8 @@ export class WordPressAuth {
    */
   getSetupInstructions(): string {
     switch (this.authType) {
-    case "app-password":
-      return `
+      case "app-password":
+        return `
 To set up Application Password authentication:
 1. Log into your WordPress admin dashboard
 2. Go to Users → Profile (or Users → All Users → Edit your user)
@@ -393,8 +393,8 @@ To set up Application Password authentication:
 7. Set WORDPRESS_USERNAME to your WordPress username
 `;
 
-    case "jwt":
-      return `
+      case "jwt":
+        return `
 To set up JWT authentication:
 1. Install the "JWT Authentication for WP REST API" plugin
 2. Add JWT_AUTH_SECRET_KEY to your wp-config.php file
@@ -403,30 +403,30 @@ To set up JWT authentication:
 5. Set WORDPRESS_USERNAME and WORDPRESS_PASSWORD
 `;
 
-    case "api-key":
-      return `
+      case "api-key":
+        return `
 To set up API Key authentication:
 1. Install an API Key plugin (varies by plugin)
 2. Generate an API key in the plugin settings
 3. Set WORDPRESS_API_KEY environment variable
 `;
 
-    case "basic":
-      return `
+      case "basic":
+        return `
 To set up Basic authentication:
 1. Set WORDPRESS_USERNAME to your WordPress username
 2. Set WORDPRESS_PASSWORD to your WordPress password
 Note: This method is less secure than Application Passwords
 `;
 
-    case "cookie":
-      return `
+      case "cookie":
+        return `
 Cookie authentication is automatically configured when you're logged into WordPress.
 For write operations, you may need to set WORDPRESS_COOKIE_NONCE.
 `;
 
-    default:
-      return "No setup instructions available for this authentication method.";
+      default:
+        return "No setup instructions available for this authentication method.";
     }
   }
 }
@@ -510,17 +510,17 @@ export class CookieAuthProvider implements IAuthProvider {
  */
 export function createAuthProvider(method: AuthMethod): IAuthProvider {
   switch (method) {
-  case "app-password":
-    return new AppPasswordAuthProvider();
-  case "jwt":
-    return new JWTAuthProvider();
-  case "basic":
-    return new BasicAuthProvider();
-  case "api-key":
-    return new APIKeyAuthProvider();
-  case "cookie":
-    return new CookieAuthProvider();
-  default:
-    throw new Error(`Unsupported authentication method: ${method}`);
+    case "app-password":
+      return new AppPasswordAuthProvider();
+    case "jwt":
+      return new JWTAuthProvider();
+    case "basic":
+      return new BasicAuthProvider();
+    case "api-key":
+      return new APIKeyAuthProvider();
+    case "cookie":
+      return new CookieAuthProvider();
+    default:
+      throw new Error(`Unsupported authentication method: ${method}`);
   }
 }
