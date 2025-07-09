@@ -45,13 +45,13 @@ async function buildDXT() {
       path.join(BUILD_DIR, "icon.png"),
     );
 
-    // Copy compiled JavaScript
+    // Copy main entry point to root
+    console.log("📦 Copying main entry point...");
+    fs.copyFileSync("dist/index.js", path.join(BUILD_DIR, "index.js"));
+
+    // Copy essential dependencies directly
     console.log("📦 Copying compiled code...");
     copyDirectory("dist", path.join(BUILD_DIR, "dist"));
-
-    // Copy main entry point to root for DXT compatibility
-    console.log("📝 Setting up DXT entry point...");
-    fs.copyFileSync("dist/index.js", path.join(BUILD_DIR, "index.js"));
 
     // Copy package.json first for dependency installation
     console.log("📚 Copying package.json for dependencies...");
@@ -72,7 +72,7 @@ async function buildDXT() {
       version: packageJson.version,
       description: packageJson.description,
       type: packageJson.type, // Essential for ES modules support
-      main: packageJson.main,
+      main: "index.js", // Point to root index.js
       dependencies: packageJson.dependencies,
       engines: packageJson.engines,
     };

@@ -33,6 +33,14 @@ export class ServerConfiguration {
 
     // Load environment variables
     dotenv.config({ path: this.envPath });
+
+    // Debug output for DXT troubleshooting
+    console.error("DEBUG: ServerConfiguration initialized");
+    console.error(`DEBUG: Root directory: ${this.rootDir}`);
+    console.error(`DEBUG: Environment file path: ${this.envPath}`);
+    console.error(
+      `DEBUG: Environment file exists: ${fs.existsSync(this.envPath)}`,
+    );
   }
 
   /**
@@ -131,6 +139,23 @@ export class ServerConfiguration {
     configs: SiteConfig[];
   } {
     try {
+      // Debug output for DXT troubleshooting
+      console.error("DEBUG: loadSingleSiteFromEnv called");
+      console.error(`DEBUG: mcpConfig provided: ${mcpConfig ? "YES" : "NO"}`);
+      console.error("DEBUG: Current environment variables:");
+      console.error(
+        `  WORDPRESS_SITE_URL: ${process.env.WORDPRESS_SITE_URL || "NOT SET"}`,
+      );
+      console.error(
+        `  WORDPRESS_USERNAME: ${process.env.WORDPRESS_USERNAME || "NOT SET"}`,
+      );
+      console.error(
+        `  WORDPRESS_APP_PASSWORD: ${process.env.WORDPRESS_APP_PASSWORD ? "SET" : "NOT SET"}`,
+      );
+      console.error(
+        `  WORDPRESS_AUTH_METHOD: ${process.env.WORDPRESS_AUTH_METHOD || "NOT SET"}`,
+      );
+
       // Validate MCP config if provided
       const validatedMcpConfig = mcpConfig
         ? ConfigurationValidator.validateMcpConfig(mcpConfig)
@@ -156,6 +181,20 @@ export class ServerConfiguration {
         DISABLE_CACHE: process.env.DISABLE_CACHE,
         LOG_LEVEL: process.env.LOG_LEVEL,
       };
+
+      console.error("DEBUG: Final envConfig for validation:");
+      console.error(
+        `  WORDPRESS_SITE_URL: ${envConfig.WORDPRESS_SITE_URL || "NOT SET"}`,
+      );
+      console.error(
+        `  WORDPRESS_USERNAME: ${envConfig.WORDPRESS_USERNAME || "NOT SET"}`,
+      );
+      console.error(
+        `  WORDPRESS_APP_PASSWORD: ${envConfig.WORDPRESS_APP_PASSWORD ? "SET" : "NOT SET"}`,
+      );
+      console.error(
+        `  WORDPRESS_AUTH_METHOD: ${envConfig.WORDPRESS_AUTH_METHOD || "NOT SET"}`,
+      );
 
       // Validate environment configuration using Zod schema
       const validatedConfig =

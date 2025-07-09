@@ -3,7 +3,7 @@
  * Handles all HTTP operations, rate limiting, and retries
  */
 
-import fetch from "node-fetch";
+// Use native fetch in Node.js 18+
 import type {
   HTTPMethod,
   RequestOptions,

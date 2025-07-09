@@ -103,10 +103,11 @@ docker run --rm -i docdyhr/mcp-wordpress:latest
 **One-Click Installation**: Claude Desktop Extension package for easy installation.
 
 ```bash
-# Build DXT package
-npm run dxt:package                     # Create mcp-wordpress.dxt file
+# Build DXT package (Official Method - REQUIRED)
+npm run dxt:package:official            # Create mcp-wordpress.dxt file using official DXT CLI
 
-# Development commands
+# Alternative build commands (for development)
+npm run dxt:package                     # Create using custom build script (may have compatibility issues)
 npm run dxt:build                       # Build DXT package only
 npm run dxt:clean                       # Clean build artifacts
 npm run dxt:validate                    # Validate DXT package (built-in validation)
@@ -118,14 +119,22 @@ npm run dxt:validate                    # Validate DXT package (built-in validat
 - **User Configuration**: Secure credential storage via OS keychain integration
 - **Tool Documentation**: 22 primary tools with descriptions and usage examples
 - **Built-in Prompts**: 4 pre-configured workflow prompts for common tasks
-- **Production Ready**: Optimized package with production dependencies only (4.8MB)
+- **Production Ready**: Optimized package with production dependencies only (3.5MB)
+- **Official DXT CLI Compatibility**: Built using Anthropic's official DXT tool for guaranteed compatibility
 
 **Installation Process**:
 
-1. Build DXT package: `npm run dxt:package`
-2. Install in Claude Desktop through Extensions menu
-3. Configure WordPress credentials via secure UI
-4. Start using WordPress tools immediately
+1. **Build DXT package**: `npm run dxt:package:official` (IMPORTANT: Use official DXT CLI)
+2. **Install in Claude Desktop**: Extensions menu → Install Extension → Select `mcp-wordpress.dxt`
+3. **Configure WordPress credentials**: Secure UI prompts for site URL, username, and application password
+4. **Start using WordPress tools**: Immediate access to 59 WordPress management tools
+
+**Critical Requirements for DXT Installation**:
+
+- ✅ **Use Official DXT CLI**: The `dxt pack` command ensures proper package structure that Claude Desktop can install
+- ✅ **Include Production Dependencies**: node_modules with runtime dependencies must be included
+- ✅ **Proper File Structure**: manifest.json at root, compiled code in dist/, proper .dxtignore
+- ❌ **Custom Archiving**: Custom zip creation may cause installation failures due to incompatible structure
 
 **User Configuration Fields**:
 

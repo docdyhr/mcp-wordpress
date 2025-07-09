@@ -2,7 +2,7 @@
   "dxt_version": "0.1",
   "name": "mcp-wordpress",
   "display_name": "WordPress MCP Server",
-  "version": "1.2.4",
+  "version": "1.3.1",
   "description": "Comprehensive WordPress management through 59 MCP tools with multi-site support, performance monitoring, and intelligent caching",
   "long_description": "# WordPress MCP Server\n\nA comprehensive Model Context Protocol (MCP) server for WordPress management through the WordPress REST API v2. Features 59 WordPress management tools across 10 categories, multi-site support, intelligent caching system with 50-70% performance improvement, real-time performance monitoring, and production-ready security.\n\n## Key Features\n\n- **59 WordPress Management Tools** across Posts, Pages, Media, Users, Comments, Taxonomies, Site Management, Authentication, Cache Management, and Performance Monitoring\n- **Multi-Site Support** - Manage multiple WordPress sites from one configuration\n- **Intelligent Caching System** - 50-70% performance improvement with multi-layer caching\n- **Real-Time Performance Monitoring** - Comprehensive metrics and analytics\n- **Flexible Authentication** - Supports App Passwords, JWT, Basic Auth, API Key\n- **100% TypeScript** - Complete type safety and IntelliSense\n- **Production Ready** - Security-reviewed and battle-tested\n\n## Authentication Methods\n\n- **Application Passwords** (Recommended) - WordPress 5.6+ built-in\n- **JWT Authentication** - Requires JWT plugin\n- **Basic Authentication** - Development only\n- **API Key Authentication** - Requires plugin\n\n## Use Cases\n\n- Content management and publishing workflows\n- Multi-site WordPress administration\n- Media library management and optimization\n- User and comment moderation\n- Performance monitoring and optimization\n- Automated WordPress maintenance tasks",
   "author": {
@@ -36,11 +36,11 @@
   ],
   "server": {
     "type": "node",
-    "entry_point": "index.js",
+    "entry_point": "dist/dxt-entry.cjs",
     "mcp_config": {
       "command": "node",
       "args": [
-        "${__dirname}/index.js"
+        "${__dirname}/dist/dxt-entry.cjs"
       ],
       "env": {
         "WORDPRESS_SITE_URL": "${user_config.wordpress_site_url}",
@@ -191,25 +191,25 @@
       "name": "setup_wordpress",
       "description": "Initial WordPress site setup and configuration. Test authentication, get site information, explore available tools, and receive configuration recommendations.",
       "arguments": ["site_url", "check_auth"],
-      "text": "Help me set up and configure my WordPress site using the MCP WordPress tools. Please:\n1. Test the connection and authentication${arguments.site_url ? ' for ' + arguments.site_url : ''}\n2. Get site information and current settings\n3. Show me the available tools and their capabilities\n4. Provide recommendations for optimal configuration${arguments.check_auth ? '\n\nPerform authentication check: ' + arguments.check_auth : ''}"
+      "text": "Help me set up and configure my WordPress site using the MCP WordPress tools. Please:\n1. Test the connection and authentication\n2. Get site information and current settings\n3. Show me the available tools and their capabilities\n4. Provide recommendations for optimal configuration"
     },
     {
       "name": "content_management", 
       "description": "WordPress content creation and management workflow. Show recent content, create new posts/pages, manage categories and tags, and optimize media uploads.",
       "arguments": ["content_type", "limit"],
-      "text": "I need help managing content on my WordPress site. Please:\n1. Show me recent ${arguments.content_type || 'posts and pages'}${arguments.limit ? ' (limit: ' + arguments.limit + ')' : ''}\n2. Help me create new content with proper SEO optimization\n3. Manage categories and tags for better organization\n4. Optimize media uploads and file management"
+      "text": "I need help managing content on my WordPress site. Please:\n1. Show me recent posts and pages\n2. Help me create new content with proper SEO optimization\n3. Manage categories and tags for better organization\n4. Optimize media uploads and file management"
     },
     {
       "name": "performance_optimization",
       "description": "WordPress performance monitoring and optimization. Check performance metrics, analyze cache hit rates, and get optimization recommendations.",
       "arguments": ["analysis_type", "include_recommendations"],
-      "text": "Help me optimize my WordPress site's performance. Please:\n1. Check current performance metrics and statistics${arguments.analysis_type ? ' (focus on: ' + arguments.analysis_type + ')' : ''}\n2. Analyze cache performance and hit rates\n3. Provide optimization recommendations${arguments.include_recommendations === false ? ' (analysis only)' : ''}\n4. Monitor and alert on performance issues"
+      "text": "Help me optimize my WordPress site's performance. Please:\n1. Check current performance metrics and statistics\n2. Analyze cache performance and hit rates\n3. Provide optimization recommendations\n4. Monitor and alert on performance issues"
     },
     {
       "name": "multi_site_management",
       "description": "Multi-site WordPress administration workflow. Check status of all sites, synchronize content, monitor performance across sites, and manage users consistently.",
       "arguments": ["operation", "site_filter"],
-      "text": "I'm managing multiple WordPress sites. Please help me:\n1. Check the status of all configured sites${arguments.site_filter ? ' (filter: ' + arguments.site_filter + ')' : ''}\n2. ${arguments.operation === 'sync_content' ? 'Synchronize content across sites where appropriate' : arguments.operation === 'performance_monitor' ? 'Monitor performance across all sites' : 'Perform general multi-site management tasks'}\n3. Monitor performance across all sites\n4. Manage users and permissions consistently"
+      "text": "I'm managing multiple WordPress sites. Please help me:\n1. Check the status of all configured sites\n2. Perform multi-site management tasks\n3. Monitor performance across all sites\n4. Manage users and permissions consistently"
     }
   ],
   "compatibility": {

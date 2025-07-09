@@ -50,8 +50,9 @@
     "docs:validate": "npm run docs:generate && node scripts/validate-docs.js",
     "docs:watch": "npm run docs:generate && echo 'Watching for changes...' && npm run docs:serve",
     "dxt:build": "node scripts/build-dxt.js",
-    "dxt:clean": "rm -rf dxt-build mcp-wordpress.dxt",
+    "dxt:clean": "rm -rf dxt-build mcp-wordpress.dxt minimal-dxt-build mcp-wordpress-minimal.dxt mcp-wordpress-official.dxt",
     "dxt:package": "npm run dxt:clean && npm run dxt:build",
+    "dxt:package:official": "npm run build && npm run dxt:clean && cp dxt/manifest.json . && cp dxt/icon.png . && dxt pack . mcp-wordpress.dxt && rm manifest.json icon.png",
     "dxt:validate": "echo '✅ DXT package validation - Basic validation performed during build'",
     "fix:rest-auth": "bash scripts/fix-rest-api-auth.sh",
     "format": "prettier --write *.md docs/**/*.md src/**/*.ts tests/**/*.ts",
@@ -116,7 +117,6 @@
     "@modelcontextprotocol/sdk": "^1.0.0",
     "dotenv": "^16.3.1",
     "form-data": "^4.0.0",
-    "node-fetch": "^3.3.2",
     "zod": "^3.25.67"
   },
   "devDependencies": {

@@ -1,0 +1,64 @@
+# DXT ignore file
+
+# Development files
+.git/
+.github/
+.vscode/
+.husky/
+coverage/
+docs/
+images/
+scripts/
+tests/
+examples/
+bin/
+
+# Build artifacts
+dxt-build/
+minimal-dxt-build/
+*.dxt
+
+# Config files
+.*
+*.yml
+*.yaml
+*.json
+!manifest.json
+!package.json
+!package-lock.json
+!node_modules/ajv/lib/refs/*.json
+!node_modules/**/mime-db/db.json
+
+# Development dependencies
+node_modules/@types/
+node_modules/@typescript-eslint/
+node_modules/@eslint/
+node_modules/@jest/
+node_modules/@babel/
+node_modules/@semantic-release/
+node_modules/eslint*/
+node_modules/jest*/
+node_modules/babel*/
+node_modules/prettier/
+node_modules/husky/
+node_modules/lint-staged/
+node_modules/markdownlint*/
+node_modules/semantic-release/
+node_modules/typescript/
+
+# Source files
+src/
+*.ts
+*.tsx
+*.md
+!README.md
+
+# Logs and temp files
+*.log
+*.tmp
+*.temp
+
+# Test files
+*.test.js
+*.spec.js
+__tests__/
