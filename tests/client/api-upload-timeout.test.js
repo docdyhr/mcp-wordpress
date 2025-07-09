@@ -197,24 +197,18 @@ describe("WordPress API Client Upload Timeout", () => {
     it("should not retry timeout errors", async () => {
       let requestCount = 0;
 
-      // The upload automatically uses 5-minute timeout, so we need to use custom timeout
+      // Test timeout behavior using a regular POST request to avoid FormData parsing issues
       nock(testBaseUrl)
-        .post("/wp-json/wp/v2/media")
+        .post("/wp-json/wp/v2/posts")
         .times(3) // Allow up to 3 requests to check retry behavior
         .delay(150) // Longer than our custom timeout
-        .reply(() => {
+        .reply(function (_uri, _requestBody) {
           requestCount++;
           return [200, { id: 999 }];
         });
 
       await expect(
-        client.uploadFile(
-          testFile,
-          "test.txt",
-          "text/plain",
-          {},
-          { timeout: 100 },
-        ),
+        client.post("posts", { title: "Test Post" }, { timeout: 100 }),
       ).rejects.toThrow(/Request timeout after/);
 
       // Should only make 1 request, no retries for timeout

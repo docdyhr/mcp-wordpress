@@ -173,33 +173,30 @@ describe("WordPress REST API Authentication Headers", () => {
     });
 
     it("should handle FormData requests without breaking auth headers", async () => {
-      let capturedHeaders;
-
-      // Mock successful response
-      nock(testBaseUrl)
-        .post("/wp-json/wp/v2/media")
-        .reply(function () {
-          capturedHeaders = this.req.headers;
-          return [
-            200,
-            {
-              id: 456,
-              source_url: "https://example.com/image.jpg",
-            },
-          ];
-        });
-
       // Create mock FormData
       const FormData = (await import("form-data")).default;
       const formData = new FormData();
       formData.append("file", Buffer.from("test"), "test.jpg");
 
-      await client.post("media", formData);
+      // Test that FormData gets proper content-type headers from form-data library
+      const headers = formData.getHeaders();
+      expect(headers["content-type"]).toContain("multipart/form-data");
 
-      expect(capturedHeaders).toBeDefined();
-      expect(capturedHeaders.authorization).toBeDefined();
-      // Content-Type should include multipart/form-data for FormData
-      expect(capturedHeaders["content-type"]).toContain("multipart/form-data");
+      // Mock successful response
+      nock(testBaseUrl)
+        .post("/wp-json/wp/v2/media")
+        .matchHeader("authorization", /^Basic/)
+        .matchHeader("content-type", /multipart\/form-data/)
+        .reply(200, {
+          id: 456,
+          source_url: "https://example.com/image.jpg",
+        });
+
+      const result = await client.post("media", formData);
+
+      // Verify the request was successful
+      expect(result.id).toBe(456);
+      expect(result.source_url).toBe("https://example.com/image.jpg");
     });
   });
 
