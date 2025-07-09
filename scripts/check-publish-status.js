@@ -6,7 +6,7 @@
  */
 
 import { execSync } from "child_process";
-import fetch from "node-fetch";
+// Use native fetch in Node.js 18+
 
 const PACKAGE_NAME = "mcp-wordpress";
 const DOCKER_IMAGE = "docdyhr/mcp-wordpress";
