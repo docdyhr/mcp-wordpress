@@ -1,0 +1,13 @@
+{
+  "ignores": [
+    "node-fetch",
+    "@pact-foundation/pact-node",
+    "@semantic-release/changelog",
+    "@semantic-release/git",
+    "conventional-changelog-conventionalcommits",
+    "sort-package-json"
+  ],
+  "skip-missing": [
+    "node-fetch"
+  ]
+}
