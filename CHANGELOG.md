@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0](https://github.com/docdyhr/mcp-wordpress/compare/v1.4.0...v1.5.0) (2025-07-09)
+
+### 🚀 Features
+
+* add DXT (Claude Desktop Extension) support and improvements ([24a6766](https://github.com/docdyhr/mcp-wordpress/commit/24a67668c4b3753275446333e8731e5ce018f0e3))
+
+### 🐛 Bug Fixes
+
+* correct DXT entry point structure for installation ([3b8e242](https://github.com/docdyhr/mcp-wordpress/commit/3b8e242b5321a7f440c076aff227c76f266ca4b5))
+* correct DXT manifest prompts structure for MCP compatibility ([37027c7](https://github.com/docdyhr/mcp-wordpress/commit/37027c7ed012730a22c32cf71501849f73d33ffb))
+* correct DXT prompts to use array format per DXT specification ([3e159f4](https://github.com/docdyhr/mcp-wordpress/commit/3e159f4db8a0892a08b3ed7c19b1b19fd72673ec))
+* enhance DXT manifest prompts with required fields ([769ff57](https://github.com/docdyhr/mcp-wordpress/commit/769ff578301cc689367528797d4c4378ac8a1bf2))
+* resolve CI/CD pipeline linting failures ([61500c2](https://github.com/docdyhr/mcp-wordpress/commit/61500c2d50fe286a296db14b1fe2f30c4f74fce9))
+* resolve FormData content-type header test failures ([1307d7f](https://github.com/docdyhr/mcp-wordpress/commit/1307d7f43fcdf5312d654a0c717e240432e80f53))
+
 ## [1.4.0](https://github.com/docdyhr/mcp-wordpress/compare/v1.3.1...v1.4.0) (2025-07-07)
 
 ### 🚀 Features
