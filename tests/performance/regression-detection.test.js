@@ -31,6 +31,22 @@ describe("Performance Regression Detection", () => {
     try {
       const baselineData = await fs.promises.readFile(baselineFile, "utf-8");
       performanceBaseline = JSON.parse(baselineData);
+
+      // Ensure thresholds exist (for backward compatibility)
+      if (!performanceBaseline.thresholds) {
+        performanceBaseline.thresholds = {
+          regressionThreshold: 0.2, // 20% regression threshold
+          memoryThreshold: 0.15, // 15% memory increase threshold
+          throughputThreshold: 0.1, // 10% throughput decrease threshold
+        };
+
+        // Update the baseline file with thresholds
+        await fs.promises.writeFile(
+          baselineFile,
+          JSON.stringify(performanceBaseline, null, 2),
+        );
+        console.log("Added missing thresholds to performance baseline");
+      }
     } catch (_error) {
       // If no baseline exists, create an initial one
       performanceBaseline = {
@@ -129,7 +145,8 @@ describe("Performance Regression Detection", () => {
       performanceResults.metrics.apiResponseTime.getPosts = metrics;
 
       const baseline = performanceBaseline.metrics.apiResponseTime.getPosts;
-      const threshold = performanceBaseline.thresholds.regressionThreshold;
+      const threshold =
+        performanceBaseline.thresholds?.regressionThreshold || 0.2;
 
       // Check for regression
       const p95Regression = (metrics.p95 - baseline.p95) / baseline.p95;
@@ -161,7 +178,8 @@ describe("Performance Regression Detection", () => {
       performanceResults.metrics.apiResponseTime.createPost = metrics;
 
       const baseline = performanceBaseline.metrics.apiResponseTime.createPost;
-      const threshold = performanceBaseline.thresholds.regressionThreshold;
+      const threshold =
+        performanceBaseline.thresholds?.regressionThreshold || 0.2;
 
       const p95Regression = (metrics.p95 - baseline.p95) / baseline.p95;
       expect(p95Regression).toBeLessThan(threshold);
@@ -183,7 +201,8 @@ describe("Performance Regression Detection", () => {
       performanceResults.metrics.apiResponseTime.uploadMedia = metrics;
 
       const baseline = performanceBaseline.metrics.apiResponseTime.uploadMedia;
-      const threshold = performanceBaseline.thresholds.regressionThreshold;
+      const threshold =
+        performanceBaseline.thresholds?.regressionThreshold || 0.2;
 
       const p95Regression = (metrics.p95 - baseline.p95) / baseline.p95;
       expect(p95Regression).toBeLessThan(threshold);
@@ -213,7 +232,7 @@ describe("Performance Regression Detection", () => {
       };
 
       const baselineMemory = performanceBaseline.metrics.memoryUsage.baseline;
-      const threshold = performanceBaseline.thresholds.memoryThreshold;
+      const threshold = performanceBaseline.thresholds?.memoryThreshold || 0.15;
       const memoryRegression = memoryIncrease / baselineMemory;
 
       expect(memoryRegression).toBeLessThan(threshold);
@@ -293,7 +312,8 @@ describe("Performance Regression Detection", () => {
 
       const baselineThroughput =
         performanceBaseline.metrics.throughput.requestsPerSecond;
-      const threshold = performanceBaseline.thresholds.throughputThreshold;
+      const threshold =
+        performanceBaseline.thresholds?.throughputThreshold || 0.1;
       const throughputRegression =
         (baselineThroughput - requestsPerSecond) / baselineThroughput;
 
