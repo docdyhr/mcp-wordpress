@@ -12,6 +12,7 @@ scripts/
 tests/
 examples/
 bin/
+run/
 
 # Build artifacts
 dxt-build/
@@ -28,6 +29,32 @@ minimal-dxt-build/
 !package-lock.json
 !node_modules/ajv/lib/refs/*.json
 !node_modules/**/mime-db/db.json
+!mcp-wordpress.config.json.example
+
+# Sensitive and unnecessary files
+private-configs.txt
+security-fixes.txt
+Dockerfile
+*.sh
+test-*
+mcp-wordpress.config.json
+.env
+.env.*
+
+# Additional files to exclude
+README.md
+CHANGELOG.md
+CLAUDE.md
+TODO.md
+DOCKER_V6_MIGRATION.md
+PERFORMANCE_AUDIT_REPORT.md
+PRD.md
+SECURITY.md
+SECURITY_TEST_REPORT.md
+claude-desktop-config-*.json
+*.log
+*.tmp
+*.temp
 
 # Development dependencies
 node_modules/@types/
