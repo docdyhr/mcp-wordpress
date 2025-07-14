@@ -8,6 +8,7 @@ Complete installation guide for MCP WordPress Server with all supported methods.
 |--------|----------|------------|------------|
 | **[DXT Extension](#-dxt-extension-recommended)** | Most users | 2 minutes | Beginner |
 | **[NPX](#-npx-quick-start)** | Power users | 5 minutes | Beginner |
+| **[Smithery](#-smithery-package-manager)** | MCP users | 3 minutes | Beginner |
 | **[NPM Global](#-npm-global-installation)** | Developers | 10 minutes | Intermediate |
 | **[Docker](#-docker-deployment)** | Production | 15 minutes | Intermediate |
 | **[Development](#️-development-setup)** | Contributors | 20 minutes | Advanced |
@@ -92,6 +93,74 @@ Add to your Claude Desktop config:
 ```
 
 **📖 [Complete NPX Setup Guide →](user-guides/NPX_SETUP.md)**
+
+## 📦 Smithery Package Manager
+
+Smithery is a dedicated package manager for MCP servers, providing easy installation and management.
+
+### Prerequisites
+- Smithery package manager installed
+- Claude Desktop application
+- WordPress site with REST API enabled
+- WordPress Application Password
+
+### Installation
+
+```bash
+# Install mcp-wordpress via Smithery
+smithery install mcp-wordpress
+
+# Verify installation
+smithery list | grep mcp-wordpress
+```
+
+### Configuration
+
+```bash
+# Configure the WordPress connection
+smithery configure mcp-wordpress
+
+# Start the MCP server
+smithery start mcp-wordpress
+
+# Check status
+smithery status mcp-wordpress
+```
+
+### Claude Desktop Integration
+
+Smithery automatically configures Claude Desktop integration. After installation:
+
+1. **Restart Claude Desktop**
+2. **Test WordPress functionality**
+   ```text
+   "List my WordPress posts"
+   ```
+
+### Smithery Commands
+
+```bash
+# Install package
+smithery install mcp-wordpress
+
+# Update to latest version
+smithery update mcp-wordpress
+
+# Configure settings
+smithery configure mcp-wordpress
+
+# Start/stop server
+smithery start mcp-wordpress
+smithery stop mcp-wordpress
+
+# View logs
+smithery logs mcp-wordpress
+
+# Remove package
+smithery remove mcp-wordpress
+```
+
+**📖 [Complete Smithery Setup Guide →](user-guides/SMITHERY_SETUP.md)**
 
 ## 📦 NPM Global Installation
 

@@ -57,11 +57,26 @@ npx -y mcp-wordpress
 npm run setup
 ```
 
+### 📦 Secondary: Smithery Package Manager
+
+```bash
+# Install via Smithery (MCP package manager)
+smithery install mcp-wordpress
+
+# Configure and start
+smithery configure mcp-wordpress
+```
+
+✅ **Package management**  
+✅ **Version control**  
+✅ **Easy updates**  
+
 ### 🔧 Other Options
 
 - 💻 **[NPM Setup](docs/user-guides/NPM_SETUP.md)** - Local development
 - 🐳 **[Docker Setup](docs/user-guides/DOCKER_SETUP.md)** - Production deployment
-- 📦 **[Manual Build](docs/developer/BUILD_SYSTEM.md)** - Custom builds
+- 📦 **[Smithery Setup](docs/user-guides/SMITHERY_SETUP.md)** - MCP package manager (detailed guide)
+- 🔧 **[Manual Build](docs/developer/BUILD_SYSTEM.md)** - Custom builds
 
 ## 🌟 What Makes This Special
 
@@ -280,6 +295,7 @@ npm run setup
 |-------|----------|------------|
 | **[DXT Extension](docs/integrations/claude-desktop.md)** | Most users | 2 minutes |
 | **[NPX Setup](docs/user-guides/NPX_SETUP.md)** | Power users | 5 minutes |
+| **[Smithery Setup](docs/INSTALLATION.md#-smithery-package-manager)** | MCP users | 3 minutes |
 | **[Docker Setup](docs/user-guides/DOCKER_SETUP.md)** | Production | 10 minutes |
 | **[NPM Development](docs/user-guides/NPM_SETUP.md)** | Developers | 15 minutes |
 
