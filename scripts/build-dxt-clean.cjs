@@ -25,6 +25,20 @@ async function buildCleanDXT() {
     // Copy dist directory
     await fs.copy(path.join(rootDir, 'dist'), path.join(tempDir, 'dist'));
     
+    // Copy AJV schema files for DXT compatibility
+    const ajvRefsDir = path.join(tempDir, 'dist', 'ajv-refs');
+    await fs.ensureDir(ajvRefsDir);
+    await fs.copy(path.join(rootDir, 'node_modules', 'ajv', 'lib', 'refs', 'json-schema-draft-07.json'), 
+                  path.join(ajvRefsDir, 'json-schema-draft-07.json'));
+    await fs.copy(path.join(rootDir, 'node_modules', 'ajv', 'lib', 'refs', 'json-schema-draft-04.json'), 
+                  path.join(ajvRefsDir, 'json-schema-draft-04.json'));
+    await fs.copy(path.join(rootDir, 'node_modules', 'ajv', 'lib', 'refs', 'json-schema-draft-06.json'), 
+                  path.join(ajvRefsDir, 'json-schema-draft-06.json'));
+    await fs.copy(path.join(rootDir, 'node_modules', 'ajv', 'lib', 'refs', 'json-schema-secure.json'), 
+                  path.join(ajvRefsDir, 'json-schema-secure.json'));
+    await fs.copy(path.join(rootDir, 'node_modules', 'ajv', 'lib', 'refs', 'data.json'), 
+                  path.join(ajvRefsDir, 'data.json'));
+    
     // Copy essential config files
     await fs.copy(path.join(rootDir, 'package.json'), path.join(tempDir, 'package.json'));
     await fs.copy(path.join(rootDir, 'package-lock.json'), path.join(tempDir, 'package-lock.json'));

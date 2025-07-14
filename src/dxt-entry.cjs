@@ -16,6 +16,9 @@ console.error(`DEBUG: Current working directory: ${process.cwd()}`);
 console.error(`DEBUG: __dirname: ${__dirname}`);
 console.error(`DEBUG: Node version: ${process.version}`);
 
+// Set DXT mode environment variable
+process.env.NODE_ENV = "dxt";
+
 console.error("DEBUG: Environment variables passed from DXT:");
 console.error(`  WORDPRESS_SITE_URL: ${process.env.WORDPRESS_SITE_URL ? 'SET' : 'NOT SET'}`);
 console.error(`  WORDPRESS_USERNAME: ${process.env.WORDPRESS_USERNAME ? 'SET' : 'NOT SET'}`);
@@ -30,7 +33,7 @@ async function startDXTServer() {
         console.error("DEBUG: Creating MCPWordPressServer instance from DXT entry point...");
         const server = new MCPWordPressServer();
         
-        console.error("DEBUG: Starting server...");
+        console.error("DEBUG: Starting server (DXT mode - fast startup)...");
         await server.run();
         
         // Handle graceful shutdown

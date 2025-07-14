@@ -59,19 +59,45 @@ class MCPWordPressServer {
   }
 
   async run() {
-    if (!this.initialized) {
-      await this.testClientConnections();
+    // Skip connection testing in DXT environment to prevent timeouts
+    const isDXTMode = process.env.NODE_ENV === "dxt" || process.argv[0]?.includes("dxt-entry");
+
+    if (!this.initialized && !isDXTMode) {
+      console.error("INFO: Testing connections to configured WordPress sites...");
+      try {
+        await this.testClientConnections();
+      } catch (error) {
+        console.error(`WARNING: Connection test failed: ${getErrorMessage(error)}`);
+        console.error("INFO: Continuing with server startup. Tools will be available but connections may fail.");
+      }
+    } else if (isDXTMode) {
+      console.error("INFO: DXT mode detected - skipping connection tests for faster startup");
+      this.initialized = true;
     }
+
     console.error("INFO: Starting MCP WordPress Server...");
 
-    // Connect to stdio transport
+    // Connect to stdio transport with timeout
     const transport = new StdioServerTransport();
-    await this.server.connect(transport);
 
-    console.error(`INFO: Server started and connected. Tools available for ${this.wordpressClients.size} site(s).`);
+    // Add timeout protection for server connection
+    const connectionTimeout = setTimeout(() => {
+      console.error("ERROR: Server connection timed out after 30 seconds");
+      process.exit(1);
+    }, 30000);
 
-    // Keep the process alive
-    process.stdin.resume();
+    try {
+      await this.server.connect(transport);
+      clearTimeout(connectionTimeout);
+
+      console.error(`INFO: Server started and connected. Tools available for ${this.wordpressClients.size} site(s).`);
+
+      // Keep the process alive
+      process.stdin.resume();
+    } catch (error) {
+      clearTimeout(connectionTimeout);
+      throw error;
+    }
   }
 
   async shutdown() {

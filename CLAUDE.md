@@ -98,7 +98,7 @@ docker pull docdyhr/mcp-wordpress:latest
 docker run --rm -i docdyhr/mcp-wordpress:latest
 ```
 
-### Claude Desktop Extension (DXT) Commands (v1.2.5+)
+### Claude Desktop Extension (DXT) Commands (v1.5.3+)
 
 **One-Click Installation**: Claude Desktop Extension package for easy installation.
 
@@ -119,8 +119,10 @@ npm run dxt:validate                    # Validate DXT package (built-in validat
 - **User Configuration**: Secure credential storage via OS keychain integration
 - **Tool Documentation**: 22 primary tools with descriptions and usage examples
 - **Built-in Prompts**: 4 pre-configured workflow prompts for common tasks
-- **Production Ready**: Optimized package with production dependencies only (3.5MB)
+- **Production Ready**: Optimized package with production dependencies only (2.6MB)
 - **Official DXT CLI Compatibility**: Built using Anthropic's official DXT tool for guaranteed compatibility
+- **Fast Startup**: DXT mode bypasses connection testing for immediate server startup
+- **Complete AJV Schema Support**: All required JSON schema files included for dependency validation
 
 **Installation Process**:
 
@@ -134,7 +136,16 @@ npm run dxt:validate                    # Validate DXT package (built-in validat
 - ✅ **Use Official DXT CLI**: The `dxt pack` command ensures proper package structure that Claude Desktop can install
 - ✅ **Include Production Dependencies**: node_modules with runtime dependencies must be included
 - ✅ **Proper File Structure**: manifest.json at root, compiled code in dist/, proper .dxtignore
+- ✅ **AJV Schema Files**: All JSON schema dependencies included in dist/ajv-refs/
+- ✅ **DXT Mode Support**: Configuration schema accepts NODE_ENV=dxt for proper DXT operation
 - ❌ **Custom Archiving**: Custom zip creation may cause installation failures due to incompatible structure
+
+**DXT Installation Issues Fixed (v1.5.3)**:
+
+- ✅ **Missing AJV Schema Files**: Added all required JSON schema files to dist/ajv-refs/
+- ✅ **Invalid NODE_ENV**: Configuration now accepts "dxt" as valid NODE_ENV value  
+- ✅ **Timeout Issues**: DXT mode skips connection testing for fast startup
+- ✅ **Server Initialization**: Enhanced error handling and timeout protection
 
 **User Configuration Fields**:
 

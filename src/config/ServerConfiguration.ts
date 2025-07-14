@@ -34,13 +34,14 @@ export class ServerConfiguration {
     // Load environment variables
     dotenv.config({ path: this.envPath });
 
-    // Debug output for DXT troubleshooting
-    console.error("DEBUG: ServerConfiguration initialized");
-    console.error(`DEBUG: Root directory: ${this.rootDir}`);
-    console.error(`DEBUG: Environment file path: ${this.envPath}`);
-    console.error(
-      `DEBUG: Environment file exists: ${fs.existsSync(this.envPath)}`,
-    );
+    // Debug output for DXT troubleshooting (reduced in DXT mode)
+    const isDXTMode = process.env.NODE_ENV === "dxt";
+    if (!isDXTMode) {
+      console.error("DEBUG: ServerConfiguration initialized");
+      console.error(`DEBUG: Root directory: ${this.rootDir}`);
+      console.error(`DEBUG: Environment file path: ${this.envPath}`);
+      console.error(`DEBUG: Environment file exists: ${fs.existsSync(this.envPath)}`);
+    }
   }
 
   /**
@@ -65,9 +66,7 @@ export class ServerConfiguration {
 
     if (fs.existsSync(configPath)) {
       if (process.env.NODE_ENV !== "test") {
-        console.error(
-          "INFO: Found mcp-wordpress.config.json, loading multi-site configuration.",
-        );
+        console.error("INFO: Found mcp-wordpress.config.json, loading multi-site configuration.");
       }
       return this.loadMultiSiteConfig(configPath);
     } else {
@@ -116,17 +115,13 @@ export class ServerConfiguration {
         validConfigs.push(site);
 
         if (process.env.NODE_ENV !== "test") {
-          console.error(
-            `INFO: Initialized client for site: ${site.name} (ID: ${site.id})`,
-          );
+          console.error(`INFO: Initialized client for site: ${site.name} (ID: ${site.id})`);
         }
       }
 
       return { clients, configs: validConfigs };
     } catch (error) {
-      console.error(
-        `FATAL: Error reading or parsing mcp-wordpress.config.json: ${getErrorMessage(error)}`,
-      );
+      console.error(`FATAL: Error reading or parsing mcp-wordpress.config.json: ${getErrorMessage(error)}`);
       process.exit(1);
     }
   }
@@ -139,66 +134,44 @@ export class ServerConfiguration {
     configs: SiteConfig[];
   } {
     try {
-      // Debug output for DXT troubleshooting
-      console.error("DEBUG: loadSingleSiteFromEnv called");
-      console.error(`DEBUG: mcpConfig provided: ${mcpConfig ? "YES" : "NO"}`);
-      console.error("DEBUG: Current environment variables:");
-      console.error(
-        `  WORDPRESS_SITE_URL: ${process.env.WORDPRESS_SITE_URL || "NOT SET"}`,
-      );
-      console.error(
-        `  WORDPRESS_USERNAME: ${process.env.WORDPRESS_USERNAME || "NOT SET"}`,
-      );
-      console.error(
-        `  WORDPRESS_APP_PASSWORD: ${process.env.WORDPRESS_APP_PASSWORD ? "SET" : "NOT SET"}`,
-      );
-      console.error(
-        `  WORDPRESS_AUTH_METHOD: ${process.env.WORDPRESS_AUTH_METHOD || "NOT SET"}`,
-      );
+      // Debug output for DXT troubleshooting (reduced in DXT mode)
+      const isDXTMode = process.env.NODE_ENV === "dxt";
+      if (!isDXTMode) {
+        console.error("DEBUG: loadSingleSiteFromEnv called");
+        console.error(`DEBUG: mcpConfig provided: ${mcpConfig ? "YES" : "NO"}`);
+        console.error("DEBUG: Current environment variables:");
+        console.error(`  WORDPRESS_SITE_URL: ${process.env.WORDPRESS_SITE_URL || "NOT SET"}`);
+        console.error(`  WORDPRESS_USERNAME: ${process.env.WORDPRESS_USERNAME || "NOT SET"}`);
+        console.error(`  WORDPRESS_APP_PASSWORD: ${process.env.WORDPRESS_APP_PASSWORD ? "SET" : "NOT SET"}`);
+        console.error(`  WORDPRESS_AUTH_METHOD: ${process.env.WORDPRESS_AUTH_METHOD || "NOT SET"}`);
+      }
 
       // Validate MCP config if provided
-      const validatedMcpConfig = mcpConfig
-        ? ConfigurationValidator.validateMcpConfig(mcpConfig)
-        : undefined;
+      const validatedMcpConfig = mcpConfig ? ConfigurationValidator.validateMcpConfig(mcpConfig) : undefined;
 
       // Prepare environment configuration for validation
       const envConfig = {
-        WORDPRESS_SITE_URL:
-          validatedMcpConfig?.wordpressSiteUrl ||
-          process.env.WORDPRESS_SITE_URL,
-        WORDPRESS_USERNAME:
-          validatedMcpConfig?.wordpressUsername ||
-          process.env.WORDPRESS_USERNAME,
-        WORDPRESS_APP_PASSWORD:
-          validatedMcpConfig?.wordpressAppPassword ||
-          process.env.WORDPRESS_APP_PASSWORD,
+        WORDPRESS_SITE_URL: validatedMcpConfig?.wordpressSiteUrl || process.env.WORDPRESS_SITE_URL,
+        WORDPRESS_USERNAME: validatedMcpConfig?.wordpressUsername || process.env.WORDPRESS_USERNAME,
+        WORDPRESS_APP_PASSWORD: validatedMcpConfig?.wordpressAppPassword || process.env.WORDPRESS_APP_PASSWORD,
         WORDPRESS_AUTH_METHOD:
-          validatedMcpConfig?.wordpressAuthMethod ||
-          process.env.WORDPRESS_AUTH_METHOD ||
-          "app-password",
+          validatedMcpConfig?.wordpressAuthMethod || process.env.WORDPRESS_AUTH_METHOD || "app-password",
         NODE_ENV: process.env.NODE_ENV,
         DEBUG: process.env.DEBUG,
         DISABLE_CACHE: process.env.DISABLE_CACHE,
         LOG_LEVEL: process.env.LOG_LEVEL,
       };
 
-      console.error("DEBUG: Final envConfig for validation:");
-      console.error(
-        `  WORDPRESS_SITE_URL: ${envConfig.WORDPRESS_SITE_URL || "NOT SET"}`,
-      );
-      console.error(
-        `  WORDPRESS_USERNAME: ${envConfig.WORDPRESS_USERNAME || "NOT SET"}`,
-      );
-      console.error(
-        `  WORDPRESS_APP_PASSWORD: ${envConfig.WORDPRESS_APP_PASSWORD ? "SET" : "NOT SET"}`,
-      );
-      console.error(
-        `  WORDPRESS_AUTH_METHOD: ${envConfig.WORDPRESS_AUTH_METHOD || "NOT SET"}`,
-      );
+      if (!isDXTMode) {
+        console.error("DEBUG: Final envConfig for validation:");
+        console.error(`  WORDPRESS_SITE_URL: ${envConfig.WORDPRESS_SITE_URL || "NOT SET"}`);
+        console.error(`  WORDPRESS_USERNAME: ${envConfig.WORDPRESS_USERNAME || "NOT SET"}`);
+        console.error(`  WORDPRESS_APP_PASSWORD: ${envConfig.WORDPRESS_APP_PASSWORD ? "SET" : "NOT SET"}`);
+        console.error(`  WORDPRESS_AUTH_METHOD: ${envConfig.WORDPRESS_AUTH_METHOD || "NOT SET"}`);
+      }
 
       // Validate environment configuration using Zod schema
-      const validatedConfig =
-        ConfigurationValidator.validateEnvironmentConfig(envConfig);
+      const validatedConfig = ConfigurationValidator.validateEnvironmentConfig(envConfig);
 
       const clientConfig: WordPressClientConfig = {
         baseUrl: validatedConfig.WORDPRESS_SITE_URL,
@@ -228,19 +201,15 @@ export class ServerConfiguration {
         },
       };
 
-      console.error(
-        "INFO: Initialized client for default site in single-site mode.",
-      );
+      if (!isDXTMode) {
+        console.error("INFO: Initialized client for default site in single-site mode.");
+      }
 
       return { clients, configs: [siteConfig] };
     } catch (error) {
-      console.error(
-        "ERROR: Configuration validation failed for single-site mode.",
-      );
+      console.error("ERROR: Configuration validation failed for single-site mode.");
       console.error(`Details: ${getErrorMessage(error)}`);
-      console.error(
-        "Please check your environment variables or MCP configuration.",
-      );
+      console.error("Please check your environment variables or MCP configuration.");
       return { clients: new Map(), configs: [] };
     }
   }
