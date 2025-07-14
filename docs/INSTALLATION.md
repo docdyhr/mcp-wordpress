@@ -350,4 +350,5 @@ After successful installation:
 
 ---
 
-**Found an issue with this guide?** [Edit on GitHub](https://github.com/docdyhr/mcp-wordpress/edit/main/docs/INSTALLATION.md) or [open an issue](https://github.com/docdyhr/mcp-wordpress/issues/new).
+**Found an issue with this guide?** [Edit on GitHub](https://github.com/docdyhr/mcp-wordpress/edit/main/docs/INSTALLATION.md) or
+[open an issue](https://github.com/docdyhr/mcp-wordpress/issues/new).

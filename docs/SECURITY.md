@@ -4,7 +4,8 @@ Comprehensive security guide for MCP WordPress Server deployment and operation.
 
 ## 🎯 Security Overview
 
-The MCP WordPress Server is designed with security as a core principle. This guide covers security best practices, threat mitigation, and compliance requirements.
+The MCP WordPress Server is designed with security as a core principle. This guide covers security best practices,
+threat mitigation, and compliance requirements.
 
 ### Security Posture
 
@@ -479,4 +480,5 @@ npm run test:security:penetration
 
 ---
 
-**Security Concern?** [Report a security issue](mailto:security@example.com) or [open a confidential issue](https://github.com/docdyhr/mcp-wordpress/security/advisories/new).
+**Security Concern?** [Report a security issue](mailto:security@example.com) or
+[open a confidential issue](https://github.com/docdyhr/mcp-wordpress/security/advisories/new).

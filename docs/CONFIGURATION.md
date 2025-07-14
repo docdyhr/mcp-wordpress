@@ -656,4 +656,5 @@ CACHE_TTL=60
 
 ---
 
-**Need help with configuration?** Check the [Troubleshooting Guide](TROUBLESHOOTING.md) or [open an issue](https://github.com/docdyhr/mcp-wordpress/issues/new) for assistance.
+**Need help with configuration?** Check the [Troubleshooting Guide](TROUBLESHOOTING.md) or
+[open an issue](https://github.com/docdyhr/mcp-wordpress/issues/new) for assistance.
