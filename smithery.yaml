@@ -40,5 +40,5 @@ startCommand:
   exampleConfig:
     wordpressSiteUrl: https://example.com
     wordpressUsername: admin
-    wordpressAppPassword: abcd efgh ijkl mnop qrst uvwx
+    wordpressAppPassword: your-app-password-here
     wordpressAuthMethod: app-password
