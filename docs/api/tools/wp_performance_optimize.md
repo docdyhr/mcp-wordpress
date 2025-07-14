@@ -6,13 +6,13 @@ Get optimization recommendations and insights
 
 ## Parameters
 
-| Parameter            | Type      | Required | Description                                                       | Default | Examples              |
-| -------------------- | --------- | -------- | ----------------------------------------------------------------- | ------- | --------------------- |
-| `site`               | `string`  | ❌       | Specific site ID for multi-site setups (optional for single site) | -       | `site1`, `production` |
-| `focus`              | `string`  | ❌       | Optimization focus area (speed, reliability, efficiency, scaling) | -       | `example`             |
-| `priority`           | `string`  | ❌       | Implementation timeline (quick_wins, medium_term, long_term, all) | -       | `example`             |
-| `includeROI`         | `boolean` | ❌       | Include ROI estimates (default: true)                             | -       | `example`             |
-| `includePredictions` | `boolean` | ❌       | Include performance predictions (default: true)                   | -       | `example`             |
+| Parameter | Type | Required | Description | Default | Examples |
+|-----------|------|----------|-------------|---------|----------|
+| `site` | `string` | ❌ | Specific site ID for multi-site setups (optional for single site) | - | `site1`, `production` |
+| `focus` | `string` | ❌ | Optimization focus area (speed, reliability, efficiency, scaling) | - | `example` |
+| `priority` | `string` | ❌ | Implementation timeline (quick_wins, medium_term, long_term, all) | - | `example` |
+| `includeROI` | `boolean` | ❌ | Include ROI estimates (default: true) | - | `example` |
+| `includePredictions` | `boolean` | ❌ | Include performance predictions (default: true) | - | `example` |
 
 ## Examples
 
@@ -21,13 +21,11 @@ Get optimization recommendations and insights
 Simple example of using wp_performance_optimize
 
 **Command:**
-
 ```bash
-wp_performance_optimize
+wp_performance_optimize 
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -43,7 +41,6 @@ wp_performance_optimize
 ```
 
 **Error Example (Authentication failure):**
-
 ```json
 {
   "error": "Authentication failed",
@@ -51,18 +48,17 @@ wp_performance_optimize
 }
 ```
 
+
 ### Multi-Site performance Usage
 
 Using wp_performance_optimize with specific site targeting
 
 **Command:**
-
 ```bash
 wp_performance_optimize --site="site1"
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -76,19 +72,20 @@ wp_performance_optimize --site="site1"
   }
 }
 ```
+
+
+
 
 ### Advanced performance Configuration
 
 Comprehensive example using all available parameters
 
 **Command:**
-
 ```bash
 wp_performance_optimize --site="site1" --focus="example_value" --priority="example_value" --includeROI="example_value" --includePredictions="example_value"
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -102,6 +99,13 @@ wp_performance_optimize --site="site1" --focus="example_value" --priority="examp
   }
 }
 ```
+
+
+
+
+
+
+
 
 ## Response Format
 
@@ -129,11 +133,13 @@ wp_performance_optimize --site="site1" --focus="example_value" --priority="examp
 **Description:** Invalid credentials or insufficient permissions  
 **Resolution:** Check your authentication credentials and user permissions
 
+
 ### VALIDATION_ERROR
 
 **Message:** Parameter validation failed  
 **Description:** One or more required parameters are missing or invalid  
 **Resolution:** Review the required parameters and their formats
+
 
 ### NOT_FOUND
 
@@ -141,12 +147,16 @@ wp_performance_optimize --site="site1" --focus="example_value" --priority="examp
 **Description:** The requested resource does not exist  
 **Resolution:** Verify the resource ID and ensure it exists
 
+
 ### PERMISSION_DENIED
 
 **Message:** Insufficient permissions  
 **Description:** The user does not have permission to perform this action  
 **Resolution:** Contact an administrator to grant the necessary permissions
 
+
+
+
 ---
 
-_Generated automatically from tool definitions - Do not edit manually_
+*Generated automatically from tool definitions - Do not edit manually*

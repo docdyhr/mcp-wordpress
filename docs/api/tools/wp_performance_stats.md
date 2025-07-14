@@ -6,11 +6,11 @@ Get real-time performance statistics and metrics
 
 ## Parameters
 
-| Parameter  | Type     | Required | Description                                                                   | Default   | Examples              |
-| ---------- | -------- | -------- | ----------------------------------------------------------------------------- | --------- | --------------------- |
-| `site`     | `string` | ❌       | Specific site ID for multi-site setups (optional for single site)             | -         | `site1`, `production` |
-| `category` | `string` | ❌       | Category of metrics to return (overview, requests, cache, system, tools, all) | `all`     | `example`             |
-| `format`   | `string` | ❌       | Detail level of the response (summary, detailed, raw)                         | `summary` | `example`             |
+| Parameter | Type | Required | Description | Default | Examples |
+|-----------|------|----------|-------------|---------|----------|
+| `site` | `string` | ❌ | Specific site ID for multi-site setups (optional for single site) | - | `site1`, `production` |
+| `category` | `string` | ❌ | Category of metrics to return (overview, requests, cache, system, tools, all) | `all` | `example` |
+| `format` | `string` | ❌ | Detail level of the response (summary, detailed, raw) | `summary` | `example` |
 
 ## Examples
 
@@ -19,13 +19,11 @@ Get real-time performance statistics and metrics
 Simple example of using wp_performance_stats
 
 **Command:**
-
 ```bash
-wp_performance_stats
+wp_performance_stats 
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -41,7 +39,6 @@ wp_performance_stats
 ```
 
 **Error Example (Authentication failure):**
-
 ```json
 {
   "error": "Authentication failed",
@@ -49,18 +46,17 @@ wp_performance_stats
 }
 ```
 
+
 ### Multi-Site performance Usage
 
 Using wp_performance_stats with specific site targeting
 
 **Command:**
-
 ```bash
 wp_performance_stats --site="site1"
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -74,19 +70,20 @@ wp_performance_stats --site="site1"
   }
 }
 ```
+
+
+
 
 ### Advanced performance Configuration
 
 Comprehensive example using all available parameters
 
 **Command:**
-
 ```bash
 wp_performance_stats --site="site1" --category="overview" --format="summary"
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -100,6 +97,13 @@ wp_performance_stats --site="site1" --category="overview" --format="summary"
   }
 }
 ```
+
+
+
+
+
+
+
 
 ## Response Format
 
@@ -127,11 +131,13 @@ wp_performance_stats --site="site1" --category="overview" --format="summary"
 **Description:** Invalid credentials or insufficient permissions  
 **Resolution:** Check your authentication credentials and user permissions
 
+
 ### VALIDATION_ERROR
 
 **Message:** Parameter validation failed  
 **Description:** One or more required parameters are missing or invalid  
 **Resolution:** Review the required parameters and their formats
+
 
 ### NOT_FOUND
 
@@ -139,12 +145,16 @@ wp_performance_stats --site="site1" --category="overview" --format="summary"
 **Description:** The requested resource does not exist  
 **Resolution:** Verify the resource ID and ensure it exists
 
+
 ### PERMISSION_DENIED
 
 **Message:** Insufficient permissions  
 **Description:** The user does not have permission to perform this action  
 **Resolution:** Contact an administrator to grant the necessary permissions
 
+
+
+
 ---
 
-_Generated automatically from tool definitions - Do not edit manually_
+*Generated automatically from tool definitions - Do not edit manually*

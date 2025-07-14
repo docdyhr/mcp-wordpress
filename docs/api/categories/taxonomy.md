@@ -26,7 +26,6 @@ taxonomy management tools
 ## Examples
 
 ### Basic taxonomy Workflow
-
 ```bash
 # List all taxonomy
 wp_list_taxonomy
@@ -34,12 +33,11 @@ wp_list_taxonomy
 # Get specific item
 wp_get_taxonom --id=123
 
-# Create new item
+# Create new item  
 wp_create_taxonom --title="Example"
 ```
 
 ### Multi-Site taxonomy Management
-
 ```bash
 # Work with specific site
 wp_list_taxonomy --site=production
