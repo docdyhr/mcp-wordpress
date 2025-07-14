@@ -12,6 +12,7 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://github.com/docdyhr/mcp-wordpress)
 [![Security](https://img.shields.io/badge/security-40%2F40%20tests%20passing-green)](https://github.com/docdyhr/mcp-wordpress)
 [![Docker](https://img.shields.io/badge/docker-ready-blue)](https://hub.docker.com/r/docdyhr/mcp-wordpress)
+[![smithery badge](https://smithery.ai/badge/@docdyhr/mcp-wordpress)](https://smithery.ai/server/@docdyhr/mcp-wordpress)
 
 </div>
 
@@ -70,6 +71,14 @@ smithery configure mcp-wordpress
 ✅ **Package management**  
 ✅ **Version control**  
 ✅ **Easy updates**  
+
+### Installing via Smithery
+
+To install mcp-wordpress for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@docdyhr/mcp-wordpress):
+
+```bash
+npx -y @smithery/cli install @docdyhr/mcp-wordpress --client claude
+```
 
 ### 🔧 Other Options
 
