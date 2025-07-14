@@ -6,13 +6,13 @@ Get performance alerts and anomaly detection results
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `site` | `string` | ❌ | Specific site ID for multi-site setups (optional for single site) | - | `site1`, `production` |
-| `severity` | `string` | ❌ | Filter alerts by severity level (info, warning, error, critical) | - | `example` |
-| `category` | `string` | ❌ | Filter alerts by category (performance, cache, system, wordpress) | `all` | `example` |
-| `limit` | `number` | ❌ | Maximum number of alerts to return (default: 20) | - | `10`, `20` |
-| `includeAnomalies` | `boolean` | ❌ | Include detected anomalies (default: true) | - | `example` |
+| Parameter          | Type      | Required | Description                                                       | Default | Examples              |
+| ------------------ | --------- | -------- | ----------------------------------------------------------------- | ------- | --------------------- |
+| `site`             | `string`  | ❌       | Specific site ID for multi-site setups (optional for single site) | -       | `site1`, `production` |
+| `severity`         | `string`  | ❌       | Filter alerts by severity level (info, warning, error, critical)  | -       | `example`             |
+| `category`         | `string`  | ❌       | Filter alerts by category (performance, cache, system, wordpress) | `all`   | `example`             |
+| `limit`            | `number`  | ❌       | Maximum number of alerts to return (default: 20)                  | -       | `10`, `20`            |
+| `includeAnomalies` | `boolean` | ❌       | Include detected anomalies (default: true)                        | -       | `example`             |
 
 ## Examples
 
@@ -23,7 +23,7 @@ Simple example of using wp_performance_alerts
 **Command:**
 
 ```bash
-wp_performance_alerts 
+wp_performance_alerts
 ```
 
 **Response:**
@@ -149,4 +149,4 @@ wp_performance_alerts --site="site1" --severity="example_value" --category="over
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

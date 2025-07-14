@@ -4,7 +4,8 @@
 <img src="images/wordpress-mcp-logo.png" width="50%" alt="WordPress MCP Logo">
 </div>
 
-A comprehensive Model Context Protocol (MCP) server for WordPress management through Claude Desktop. Manage your WordPress sites with natural language through 59 powerful tools.
+A comprehensive Model Context Protocol (MCP) server for WordPress management through Claude Desktop. Manage your
+WordPress sites with natural language through 59 powerful tools.
 
 [![NPM Version](https://img.shields.io/npm/v/mcp-wordpress)](https://www.npmjs.com/package/mcp-wordpress)
 [![Test Coverage](https://img.shields.io/badge/test%20coverage-95%25%2B-brightgreen)](https://github.com/docdyhr/mcp-wordpress)
@@ -290,8 +291,10 @@ docker pull docdyhr/mcp-wordpress:1.3.1
 
 ## 🙏 Acknowledgments
 
-Special thanks to **[Stephan Ferraro](https://github.com/ferraro)** for the upstream project that inspired this implementation.
+Special thanks to **[Stephan Ferraro](https://github.com/ferraro)** for the upstream project that inspired this
+implementation.
 
 ---
 
-**Ready to get started?** Choose your setup method above and follow the guide - you'll be managing WordPress with Claude in minutes! 🚀
+**Ready to get started?** Choose your setup method above and follow the guide - you'll be managing WordPress with Claude
+in minutes! 🚀

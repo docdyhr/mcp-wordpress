@@ -6,13 +6,13 @@ Export comprehensive performance report
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `site` | `string` | ❌ | Specific site ID for multi-site setups (optional for single site) | - | `site1`, `production` |
-| `format` | `string` | ❌ | Export format (json, csv, summary) | `summary` | `example` |
-| `includeHistorical` | `boolean` | ❌ | Include historical data (default: true) | - | `example` |
-| `includeAnalytics` | `boolean` | ❌ | Include analytics and insights (default: true) | - | `example` |
-| `timeRange` | `string` | ❌ | Time range for data export (1h, 6h, 24h, 7d, 30d) | - | `example` |
+| Parameter           | Type      | Required | Description                                                       | Default   | Examples              |
+| ------------------- | --------- | -------- | ----------------------------------------------------------------- | --------- | --------------------- |
+| `site`              | `string`  | ❌       | Specific site ID for multi-site setups (optional for single site) | -         | `site1`, `production` |
+| `format`            | `string`  | ❌       | Export format (json, csv, summary)                                | `summary` | `example`             |
+| `includeHistorical` | `boolean` | ❌       | Include historical data (default: true)                           | -         | `example`             |
+| `includeAnalytics`  | `boolean` | ❌       | Include analytics and insights (default: true)                    | -         | `example`             |
+| `timeRange`         | `string`  | ❌       | Time range for data export (1h, 6h, 24h, 7d, 30d)                 | -         | `example`             |
 
 ## Examples
 
@@ -23,7 +23,7 @@ Simple example of using wp_performance_export
 **Command:**
 
 ```bash
-wp_performance_export 
+wp_performance_export
 ```
 
 **Response:**
@@ -149,4 +149,4 @@ wp_performance_export --site="site1" --format="summary" --includeHistorical="exa
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

@@ -6,9 +6,9 @@ Retrieves revisions for a specific post.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `id` | `number` | ✅ | The ID of the post to get revisions for. | - | `123`, `456` |
+| Parameter | Type     | Required | Description                              | Default | Examples     |
+| --------- | -------- | -------- | ---------------------------------------- | ------- | ------------ |
+| `id`      | `number` | ✅       | The ID of the post to get revisions for. | -       | `123`, `456` |
 
 ## Examples
 
@@ -92,4 +92,4 @@ wp_get_post_revisions --id="123"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

@@ -6,9 +6,9 @@ Get cache statistics for a WordPress site.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `site` | `string` | ❌ | Site ID to get cache stats for. If not provided, uses default site or fails if multiple sites configured. | - | `site1`, `production` |
+| Parameter | Type     | Required | Description                                                                                               | Default | Examples              |
+| --------- | -------- | -------- | --------------------------------------------------------------------------------------------------------- | ------- | --------------------- |
+| `site`    | `string` | ❌       | Site ID to get cache stats for. If not provided, uses default site or fails if multiple sites configured. | -       | `site1`, `production` |
 
 ## Examples
 
@@ -19,7 +19,7 @@ Simple example of using wp_cache_stats
 **Command:**
 
 ```bash
-wp_cache_stats 
+wp_cache_stats
 ```
 
 **Response:**
@@ -107,4 +107,4 @@ wp_cache_stats --site="site1"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

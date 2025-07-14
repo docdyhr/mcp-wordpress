@@ -6,12 +6,12 @@ Get historical performance data and trends
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `site` | `string` | ❌ | Specific site ID for multi-site setups (optional for single site) | - | `site1`, `production` |
-| `timeframe` | `string` | ❌ | Time period for historical data (1h, 6h, 12h, 24h, 7d) | - | `24h`, `7d` |
-| `metrics` | `array` | ❌ | Specific metrics to include (responseTime, cacheHitRate, errorRate, memoryUsage, requestVolume) | - | `example` |
-| `includeTrends` | `boolean` | ❌ | Include trend analysis (default: true) | `true` | `example` |
+| Parameter       | Type      | Required | Description                                                                                     | Default | Examples              |
+| --------------- | --------- | -------- | ----------------------------------------------------------------------------------------------- | ------- | --------------------- |
+| `site`          | `string`  | ❌       | Specific site ID for multi-site setups (optional for single site)                               | -       | `site1`, `production` |
+| `timeframe`     | `string`  | ❌       | Time period for historical data (1h, 6h, 12h, 24h, 7d)                                          | -       | `24h`, `7d`           |
+| `metrics`       | `array`   | ❌       | Specific metrics to include (responseTime, cacheHitRate, errorRate, memoryUsage, requestVolume) | -       | `example`             |
+| `includeTrends` | `boolean` | ❌       | Include trend analysis (default: true)                                                          | `true`  | `example`             |
 
 ## Examples
 
@@ -22,7 +22,7 @@ Simple example of using wp_performance_history
 **Command:**
 
 ```bash
-wp_performance_history 
+wp_performance_history
 ```
 
 **Response:**
@@ -148,4 +148,4 @@ wp_performance_history --site="site1" --timeframe="24h" --metrics="example_value
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

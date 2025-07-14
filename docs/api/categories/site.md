@@ -30,7 +30,7 @@ wp_list_site
 # Get specific item
 wp_get_sit --id=123
 
-# Create new item  
+# Create new item
 wp_create_sit --title="Example"
 ```
 

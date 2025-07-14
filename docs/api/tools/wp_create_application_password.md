@@ -6,10 +6,10 @@ Creates a new application password for a user.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `user_id` | `number` | ✅ | The ID of the user to create the password for. | - | `example` |
-| `app_name` | `string` | ✅ | The name of the application this password is for. | - | `example` |
+| Parameter  | Type     | Required | Description                                       | Default | Examples  |
+| ---------- | -------- | -------- | ------------------------------------------------- | ------- | --------- |
+| `user_id`  | `number` | ✅       | The ID of the user to create the password for.    | -       | `example` |
+| `app_name` | `string` | ✅       | The name of the application this password is for. | -       | `example` |
 
 ## Examples
 
@@ -91,4 +91,4 @@ wp_create_application_password --user_id="example_value" --app_name="example_val
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

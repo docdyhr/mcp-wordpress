@@ -6,10 +6,10 @@ Deletes a post.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `id` | `number` | ✅ | The ID of the post to delete. | - | `123`, `456` |
-| `force` | `boolean` | ❌ | If true, permanently delete. If false, move to trash. Defaults to false. | - | `example` |
+| Parameter | Type      | Required | Description                                                              | Default | Examples     |
+| --------- | --------- | -------- | ------------------------------------------------------------------------ | ------- | ------------ |
+| `id`      | `number`  | ✅       | The ID of the post to delete.                                            | -       | `123`, `456` |
+| `force`   | `boolean` | ❌       | If true, permanently delete. If false, move to trash. Defaults to false. | -       | `example`    |
 
 ## Examples
 
@@ -48,7 +48,8 @@ wp_delete_post --id="123"
 
 **Endpoint:** `/wp-json/wp/v2/posts/{id}`
 
-This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters are determined by WordPress core functionality.
+This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters
+are determined by WordPress core functionality.
 
 ### WordPress Documentation
 
@@ -109,4 +110,4 @@ This tool requires the following WordPress user capabilities:
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

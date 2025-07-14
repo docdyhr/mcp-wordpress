@@ -2,7 +2,8 @@
 
 ## 🏆 Major Technical Debt Refactoring Achievement
 
-We're excited to announce **v1.1.2**, a major milestone featuring comprehensive technical debt refactoring that dramatically improves code maintainability while preserving 100% backward compatibility.
+We're excited to announce **v1.1.2**, a major milestone featuring comprehensive technical debt refactoring that
+dramatically improves code maintainability while preserving 100% backward compatibility.
 
 ---
 
@@ -152,9 +153,11 @@ We're excited to announce **v1.1.2**, a major milestone featuring comprehensive 
 
 ## 🙏 Acknowledgments
 
-This refactoring represents months of careful planning and implementation, ensuring that we could dramatically improve the codebase while maintaining complete compatibility for our users.
+This refactoring represents months of careful planning and implementation, ensuring that we could dramatically improve
+the codebase while maintaining complete compatibility for our users.
 
-**Special thanks to all community members** who have been using and testing the WordPress MCP server, providing valuable feedback that guided this refactoring effort.
+**Special thanks to all community members** who have been using and testing the WordPress MCP server, providing valuable
+feedback that guided this refactoring effort.
 
 ---
 
@@ -194,6 +197,4 @@ npm update -g mcp-wordpress
 
 **🤖 Generated with [Claude Code](https://claude.ai/code)**
 
-_Release Date: June 29, 2025_
-_Version: 1.1.2_
-_Codename: "Modular Foundation"_
+_Release Date: June 29, 2025_ _Version: 1.1.2_ _Codename: "Modular Foundation"_

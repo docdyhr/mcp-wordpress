@@ -34,7 +34,7 @@ wp_list_taxonomy
 # Get specific item
 wp_get_taxonom --id=123
 
-# Create new item  
+# Create new item
 wp_create_taxonom --title="Example"
 ```
 

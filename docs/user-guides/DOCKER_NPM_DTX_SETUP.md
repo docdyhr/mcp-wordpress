@@ -1,6 +1,7 @@
 # Docker, NPM, and DTX Setup Guide
 
-This guide provides step-by-step instructions for setting up the MCP WordPress server using Docker, NPM, and DTX, including Claude Desktop configuration.
+This guide provides step-by-step instructions for setting up the MCP WordPress server using Docker, NPM, and DTX,
+including Claude Desktop configuration.
 
 ---
 
@@ -67,7 +68,7 @@ For multi-site setups, mount a configuration file:
 }
 ```
 
-2. Run the container with the configuration file:
+1. Run the container with the configuration file:
 
 ```bash
 # For Claude Desktop MCP integration (recommended)

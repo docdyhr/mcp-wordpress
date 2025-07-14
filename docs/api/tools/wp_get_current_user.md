@@ -6,7 +6,7 @@ Retrieves the currently authenticated user.
 
 ## Parameters
 
-*No parameters required.*
+_No parameters required._
 
 ## Examples
 
@@ -17,7 +17,7 @@ Simple example of using wp_get_current_user
 **Command:**
 
 ```bash
-wp_get_current_user 
+wp_get_current_user
 ```
 
 **Response:**
@@ -90,4 +90,4 @@ wp_get_current_user
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

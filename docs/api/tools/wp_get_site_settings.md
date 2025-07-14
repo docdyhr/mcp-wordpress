@@ -6,7 +6,7 @@ Retrieves the general settings for a WordPress site.
 
 ## Parameters
 
-*No parameters required.*
+_No parameters required._
 
 ## Examples
 
@@ -17,7 +17,7 @@ Simple example of using wp_get_site_settings
 **Command:**
 
 ```bash
-wp_get_site_settings 
+wp_get_site_settings
 ```
 
 **Response:**
@@ -98,4 +98,4 @@ This tool requires the following WordPress user capabilities:
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

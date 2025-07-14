@@ -62,6 +62,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          HUSKY: 0
 
   # 📦 NPM Publish
   npm-publish:
@@ -164,8 +165,6 @@ jobs:
           # v6 features
           provenance: true
           sbom: true
-          # Build record for debugging
-          record: true
 
       - name: 📝 Update Docker Hub Description
         uses: peter-evans/dockerhub-description@v3

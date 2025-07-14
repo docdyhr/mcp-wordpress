@@ -6,10 +6,10 @@ Deletes a user.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `id` | `number` | ✅ | The ID of the user to delete. | - | `123`, `456` |
-| `reassign` | `number` | ❌ | The ID of a user to reassign the deleted user's content to. | - | `example` |
+| Parameter  | Type     | Required | Description                                                 | Default | Examples     |
+| ---------- | -------- | -------- | ----------------------------------------------------------- | ------- | ------------ |
+| `id`       | `number` | ✅       | The ID of the user to delete.                               | -       | `123`, `456` |
+| `reassign` | `number` | ❌       | The ID of a user to reassign the deleted user's content to. | -       | `example`    |
 
 ## Examples
 
@@ -98,4 +98,4 @@ This tool requires the following WordPress user capabilities:
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

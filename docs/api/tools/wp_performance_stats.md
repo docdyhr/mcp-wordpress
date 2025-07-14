@@ -6,11 +6,11 @@ Get real-time performance statistics and metrics
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `site` | `string` | ❌ | Specific site ID for multi-site setups (optional for single site) | - | `site1`, `production` |
-| `category` | `string` | ❌ | Category of metrics to return (overview, requests, cache, system, tools, all) | `all` | `example` |
-| `format` | `string` | ❌ | Detail level of the response (summary, detailed, raw) | `summary` | `example` |
+| Parameter  | Type     | Required | Description                                                                   | Default   | Examples              |
+| ---------- | -------- | -------- | ----------------------------------------------------------------------------- | --------- | --------------------- |
+| `site`     | `string` | ❌       | Specific site ID for multi-site setups (optional for single site)             | -         | `site1`, `production` |
+| `category` | `string` | ❌       | Category of metrics to return (overview, requests, cache, system, tools, all) | `all`     | `example`             |
+| `format`   | `string` | ❌       | Detail level of the response (summary, detailed, raw)                         | `summary` | `example`             |
 
 ## Examples
 
@@ -21,7 +21,7 @@ Simple example of using wp_performance_stats
 **Command:**
 
 ```bash
-wp_performance_stats 
+wp_performance_stats
 ```
 
 **Response:**
@@ -147,4 +147,4 @@ wp_performance_stats --site="site1" --category="overview" --format="summary"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

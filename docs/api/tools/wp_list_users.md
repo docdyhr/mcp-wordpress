@@ -6,10 +6,10 @@ Lists users from a WordPress site, with filters.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `search` | `string` | ❌ | Limit results to those matching a search term. | - | `wordpress`, `tutorial` |
-| `roles` | `array` | ❌ | Limit results to users with specific roles. | - | `example` |
+| Parameter | Type     | Required | Description                                    | Default | Examples                |
+| --------- | -------- | -------- | ---------------------------------------------- | ------- | ----------------------- |
+| `search`  | `string` | ❌       | Limit results to those matching a search term. | -       | `wordpress`, `tutorial` |
+| `roles`   | `array`  | ❌       | Limit results to users with specific roles.    | -       | `example`               |
 
 ## Examples
 
@@ -20,7 +20,7 @@ Simple example of using wp_list_users
 **Command:**
 
 ```bash
-wp_list_users 
+wp_list_users
 ```
 
 **Response:**
@@ -100,4 +100,4 @@ wp_list_users
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

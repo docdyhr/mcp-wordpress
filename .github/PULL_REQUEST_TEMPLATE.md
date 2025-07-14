@@ -23,9 +23,7 @@ Brief description of the changes in this PR.
 
 ## Related Issues
 
-Fixes #(issue_number)
-Closes #(issue_number)
-Related to #(issue_number)
+Fixes #(issue_number) Closes #(issue_number) Related to #(issue_number)
 
 ## Testing
 

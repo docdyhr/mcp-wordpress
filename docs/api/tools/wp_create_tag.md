@@ -6,9 +6,9 @@ Creates a new tag.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `name` | `string` | ✅ | The name of the tag. | - | `example` |
+| Parameter | Type     | Required | Description          | Default | Examples  |
+| --------- | -------- | -------- | -------------------- | ------- | --------- |
+| `name`    | `string` | ✅       | The name of the tag. | -       | `example` |
 
 ## Examples
 
@@ -90,4 +90,4 @@ wp_create_tag --name="example_value"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

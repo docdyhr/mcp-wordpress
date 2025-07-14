@@ -730,5 +730,5 @@ describe("Debug Example", () => {
 
 ---
 
-**Need help with testing?** This comprehensive testing infrastructure ensures code quality, security,
-and performance. All tests are designed to be fast, reliable, and maintainable.
+**Need help with testing?** This comprehensive testing infrastructure ensures code quality, security, and performance.
+All tests are designed to be fast, reliable, and maintainable.

@@ -2,7 +2,8 @@
 
 ## Overview
 
-This document outlines the technical debt refactoring performed to improve code quality, maintainability, and performance.
+This document outlines the technical debt refactoring performed to improve code quality, maintainability, and
+performance.
 
 ## Issues Addressed
 
@@ -170,10 +171,7 @@ import { WordPressClient } from "./client/api.js";
 
 // New way (recommended for internal development)
 import { WordPressClient } from "./client/WordPressClient.js";
-import {
-  AuthenticationManager,
-  RequestManager,
-} from "./client/managers/index.js";
+import { AuthenticationManager, RequestManager } from "./client/managers/index.js";
 ```
 
 ### For Tool Development
@@ -184,13 +182,10 @@ New tools can leverage standardized patterns:
 import { withErrorHandling, validators } from "../utils/toolWrapper.js";
 
 // Standardized error handling
-const handleGetPost = withErrorHandling(
-  "Failed to get post",
-  async (client, params) => {
-    validators.requireId(params);
-    return await client.getPost(params.id);
-  },
-);
+const handleGetPost = withErrorHandling("Failed to get post", async (client, params) => {
+  validators.requireId(params);
+  return await client.getPost(params.id);
+});
 ```
 
 ## Future Improvements
@@ -215,9 +210,8 @@ const handleGetPost = withErrorHandling(
 
 ## Conclusion
 
-This refactoring addresses the major technical debt items while maintaining full backward compatibility.
-The codebase is now more maintainable, testable, and performant, setting a solid foundation for future
-enhancements.
+This refactoring addresses the major technical debt items while maintaining full backward compatibility. The codebase is
+now more maintainable, testable, and performant, setting a solid foundation for future enhancements.
 
 **Key Achievements**:
 

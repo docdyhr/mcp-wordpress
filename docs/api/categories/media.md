@@ -30,7 +30,7 @@ wp_list_media
 # Get specific item
 wp_get_medi --id=123
 
-# Create new item  
+# Create new item
 wp_create_medi --title="Example"
 ```
 

@@ -2,7 +2,8 @@
 
 ## Overview
 
-Successfully migrated from legacy Docker publish workflows to modern `docker/build-push-action@v6` with comprehensive security and performance improvements.
+Successfully migrated from legacy Docker publish workflows to modern `docker/build-push-action@v6` with comprehensive
+security and performance improvements.
 
 ## What Changed
 
@@ -196,7 +197,7 @@ docker buildx ls
 
 ---
 
-**Migration completed**: ✅ All workflows updated to docker/build-push-action@v6
-**Security enhanced**: ✅ Provenance, SBOM, and build records enabled  
-**Performance improved**: ✅ Advanced caching and multi-platform builds
-**Documentation updated**: ✅ Comprehensive examples and troubleshooting guides
+**Migration completed**: ✅ All workflows updated to docker/build-push-action@v6 **Security enhanced**: ✅ Provenance,
+SBOM, and build records enabled  
+**Performance improved**: ✅ Advanced caching and multi-platform builds **Documentation updated**: ✅ Comprehensive
+examples and troubleshooting guides

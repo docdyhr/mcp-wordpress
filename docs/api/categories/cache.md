@@ -28,7 +28,7 @@ wp_list_cache
 # Get specific item
 wp_get_cach --id=123
 
-# Create new item  
+# Create new item
 wp_create_cach --title="Example"
 ```
 

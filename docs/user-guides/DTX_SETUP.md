@@ -1,6 +1,7 @@
 # DTX (Desktop Extension) Setup Guide
 
-This guide provides step-by-step instructions for setting up the MCP WordPress server using the DTX (Desktop Extension) package format for Claude Desktop.
+This guide provides step-by-step instructions for setting up the MCP WordPress server using the DTX (Desktop Extension)
+package format for Claude Desktop.
 
 ---
 
@@ -111,14 +112,14 @@ The DTX package supports multi-site configuration, but requires manual setup:
 }
 ```
 
-2. **Place the file in one of these locations:**
+1. **Place the file in one of these locations:**
    - **macOS/Linux**: `~/mcp-wordpress.config.json`
    - **Windows**: `%USERPROFILE%\mcp-wordpress.config.json`
    - **DTX Install Directory**: Next to the DTX package files
 
-3. **Skip the DTX configuration prompts (or enter dummy values)**
+2. **Skip the DTX configuration prompts (or enter dummy values)**
 
-4. **Restart Claude Desktop** - the server will detect and use your config file
+3. **Restart Claude Desktop** - the server will detect and use your config file
 
 #### Method 2: Environment Variable Override
 
@@ -181,7 +182,7 @@ npm run dxt:validate
 
 The DTX package includes:
 
-```
+```diagram
 mcp-wordpress.dxt/
 ├── manifest.json          # DTX configuration and metadata
 ├── icon.png              # Extension icon

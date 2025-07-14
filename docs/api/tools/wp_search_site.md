@@ -6,10 +6,10 @@ Performs a site-wide search for content.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `term` | `string` | ✅ | The search term to look for. | - | `example` |
-| `type` | `string` | ❌ | The type of content to search. | - | `example` |
+| Parameter | Type     | Required | Description                    | Default | Examples  |
+| --------- | -------- | -------- | ------------------------------ | ------- | --------- |
+| `term`    | `string` | ✅       | The search term to look for.   | -       | `example` |
+| `type`    | `string` | ❌       | The type of content to search. | -       | `example` |
 
 ## Examples
 
@@ -88,4 +88,4 @@ wp_search_site --term="example_value"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

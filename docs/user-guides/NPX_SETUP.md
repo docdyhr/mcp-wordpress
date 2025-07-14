@@ -1,6 +1,7 @@
 # NPX Setup Guide
 
-This guide provides step-by-step instructions for using the MCP WordPress server with NPX - the quickest way to get started without local installation.
+This guide provides step-by-step instructions for using the MCP WordPress server with NPX - the quickest way to get
+started without local installation.
 
 ---
 
@@ -278,4 +279,5 @@ LOG_LEVEL              # Optional: Logging level (debug, info, warn, error)
 
 ---
 
-NPX provides the fastest way to get started with WordPress tools in Claude Desktop - no installation, no maintenance, just pure functionality!
+NPX provides the fastest way to get started with WordPress tools in Claude Desktop - no installation, no maintenance,
+just pure functionality!

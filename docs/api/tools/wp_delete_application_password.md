@@ -6,10 +6,10 @@ Revokes an existing application password.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `user_id` | `number` | ✅ | The ID of the user who owns the password. | - | `example` |
-| `uuid` | `string` | ✅ | The UUID of the application password to revoke. | - | `example` |
+| Parameter | Type     | Required | Description                                     | Default | Examples  |
+| --------- | -------- | -------- | ----------------------------------------------- | ------- | --------- |
+| `user_id` | `number` | ✅       | The ID of the user who owns the password.       | -       | `example` |
+| `uuid`    | `string` | ✅       | The UUID of the application password to revoke. | -       | `example` |
 
 ## Examples
 
@@ -90,4 +90,4 @@ wp_delete_application_password --user_id="example_value" --uuid="example_value"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

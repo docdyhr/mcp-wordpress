@@ -6,9 +6,9 @@ Retrieves a single media item by its ID.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `id` | `number` | ✅ | The unique identifier for the media item. | - | `123`, `456` |
+| Parameter | Type     | Required | Description                               | Default | Examples     |
+| --------- | -------- | -------- | ----------------------------------------- | ------- | ------------ |
+| `id`      | `number` | ✅       | The unique identifier for the media item. | -       | `123`, `456` |
 
 ## Examples
 
@@ -92,4 +92,4 @@ wp_get_media --id="123"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

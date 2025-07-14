@@ -6,9 +6,9 @@ Get detailed cache configuration and status information.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `site` | `string` | ❌ | Site ID to get cache info for. | - | `site1`, `production` |
+| Parameter | Type     | Required | Description                    | Default | Examples              |
+| --------- | -------- | -------- | ------------------------------ | ------- | --------------------- |
+| `site`    | `string` | ❌       | Site ID to get cache info for. | -       | `site1`, `production` |
 
 ## Examples
 
@@ -19,7 +19,7 @@ Simple example of using wp_cache_info
 **Command:**
 
 ```bash
-wp_cache_info 
+wp_cache_info
 ```
 
 **Response:**
@@ -107,4 +107,4 @@ wp_cache_info --site="site1"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

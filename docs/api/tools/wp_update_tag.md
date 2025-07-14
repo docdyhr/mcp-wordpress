@@ -6,10 +6,10 @@ Updates an existing tag.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `id` | `number` | ✅ | The ID of the tag to update. | - | `123`, `456` |
-| `name` | `string` | ❌ | The new name for the tag. | - | `example` |
+| Parameter | Type     | Required | Description                  | Default | Examples     |
+| --------- | -------- | -------- | ---------------------------- | ------- | ------------ |
+| `id`      | `number` | ✅       | The ID of the tag to update. | -       | `123`, `456` |
+| `name`    | `string` | ❌       | The new name for the tag.    | -       | `example`    |
 
 ## Examples
 
@@ -91,4 +91,4 @@ wp_update_tag --id="123"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

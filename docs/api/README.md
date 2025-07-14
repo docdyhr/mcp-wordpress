@@ -1,14 +1,14 @@
 # WordPress MCP Server - API Documentation
 
-![Version](https://img.shields.io/badge/version-1.2.0-blue)
-![Tools](https://img.shields.io/badge/tools-60+-green)
+![Version](https://img.shields.io/badge/version-1.2.0-blue) ![Tools](https://img.shields.io/badge/tools-60+-green)
 ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 ## Overview
 
-The WordPress MCP Server provides **59 tools** across **10 categories** for comprehensive WordPress management through the Model Context Protocol.
+The WordPress MCP Server provides **59 tools** across **10 categories** for comprehensive WordPress management through
+the Model Context Protocol.
 
 **Last Updated:** 3.7.2025  
 **Version:** 1.2.0  

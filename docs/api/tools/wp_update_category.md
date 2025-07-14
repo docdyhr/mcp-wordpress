@@ -6,10 +6,10 @@ Updates an existing category.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `id` | `number` | ✅ | The ID of the category to update. | - | `123`, `456` |
-| `name` | `string` | ❌ | The new name for the category. | - | `example` |
+| Parameter | Type     | Required | Description                       | Default | Examples     |
+| --------- | -------- | -------- | --------------------------------- | ------- | ------------ |
+| `id`      | `number` | ✅       | The ID of the category to update. | -       | `123`, `456` |
+| `name`    | `string` | ❌       | The new name for the category.    | -       | `example`    |
 
 ## Examples
 
@@ -91,4 +91,4 @@ wp_update_category --id="123"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

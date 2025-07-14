@@ -6,11 +6,11 @@ Lists media items from a WordPress site, with filters.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `per_page` | `number` | ❌ | Number of items to return per page (max 100). | `10` | `10`, `20` |
-| `search` | `string` | ❌ | Limit results to those matching a search term. | - | `wordpress`, `tutorial` |
-| `media_type` | `string` | ❌ | Limit results to a specific media type. | - | `example` |
+| Parameter    | Type     | Required | Description                                    | Default | Examples                |
+| ------------ | -------- | -------- | ---------------------------------------------- | ------- | ----------------------- |
+| `per_page`   | `number` | ❌       | Number of items to return per page (max 100).  | `10`    | `10`, `20`              |
+| `search`     | `string` | ❌       | Limit results to those matching a search term. | -       | `wordpress`, `tutorial` |
+| `media_type` | `string` | ❌       | Limit results to a specific media type.        | -       | `example`               |
 
 ## Examples
 
@@ -21,7 +21,7 @@ Simple example of using wp_list_media
 **Command:**
 
 ```bash
-wp_list_media 
+wp_list_media
 ```
 
 **Response:**
@@ -133,4 +133,4 @@ wp_list_media --per_page="10" --search="wordpress" --media_type="example_value"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

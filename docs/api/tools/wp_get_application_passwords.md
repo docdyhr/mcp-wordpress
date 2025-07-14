@@ -6,9 +6,9 @@ Lists application passwords for a specific user.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `user_id` | `number` | ✅ | The ID of the user to get application passwords for. | - | `example` |
+| Parameter | Type     | Required | Description                                          | Default | Examples  |
+| --------- | -------- | -------- | ---------------------------------------------------- | ------- | --------- |
+| `user_id` | `number` | ✅       | The ID of the user to get application passwords for. | -       | `example` |
 
 ## Examples
 
@@ -92,4 +92,4 @@ wp_get_application_passwords --user_id="example_value"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

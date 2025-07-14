@@ -1,6 +1,7 @@
 # Docker Setup Guide
 
-This guide provides step-by-step instructions for setting up the MCP WordPress server using Docker, specifically for Claude Desktop integration.
+This guide provides step-by-step instructions for setting up the MCP WordPress server using Docker, specifically for
+Claude Desktop integration.
 
 ---
 
@@ -71,7 +72,7 @@ Add this to your Claude Desktop configuration file (`~/Library/Application Suppo
 }
 ```
 
-2. **Add to Claude Desktop configuration**:
+1. **Add to Claude Desktop configuration**:
 
 ```json
 {

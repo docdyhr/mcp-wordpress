@@ -30,7 +30,7 @@ wp_list_post
 # Get specific item
 wp_get_pos --id=123
 
-# Create new item  
+# Create new item
 wp_create_pos --title="Example"
 ```
 

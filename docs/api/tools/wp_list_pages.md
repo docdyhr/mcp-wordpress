@@ -6,11 +6,11 @@ Lists pages from a WordPress site, with filters.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `per_page` | `number` | ❌ | Number of items to return per page (max 100). | `10` | `10`, `20` |
-| `search` | `string` | ❌ | Limit results to those matching a search term. | - | `wordpress`, `tutorial` |
-| `status` | `string` | ❌ | Filter by page status. | `publish` | `example` |
+| Parameter  | Type     | Required | Description                                    | Default   | Examples                |
+| ---------- | -------- | -------- | ---------------------------------------------- | --------- | ----------------------- |
+| `per_page` | `number` | ❌       | Number of items to return per page (max 100).  | `10`      | `10`, `20`              |
+| `search`   | `string` | ❌       | Limit results to those matching a search term. | -         | `wordpress`, `tutorial` |
+| `status`   | `string` | ❌       | Filter by page status.                         | `publish` | `example`               |
 
 ## Examples
 
@@ -21,7 +21,7 @@ Simple example of using wp_list_pages
 **Command:**
 
 ```bash
-wp_list_pages 
+wp_list_pages
 ```
 
 **Response:**
@@ -133,4 +133,4 @@ wp_list_pages --per_page="10" --search="wordpress" --status="publish"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

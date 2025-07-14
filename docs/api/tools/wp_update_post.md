@@ -6,12 +6,12 @@ Updates an existing post.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `id` | `number` | ✅ | The ID of the post to update. | - | `123`, `456` |
-| `title` | `string` | ❌ | The new title for the post. | - | `My Blog Post`, `Hello World` |
-| `content` | `string` | ❌ | The new content for the post, in HTML format. | - | `<p>Post content here</p>`, `This is my post content` |
-| `status` | `string` | ❌ | The new status for the post. | `publish` | `example` |
+| Parameter | Type     | Required | Description                                   | Default   | Examples                                              |
+| --------- | -------- | -------- | --------------------------------------------- | --------- | ----------------------------------------------------- |
+| `id`      | `number` | ✅       | The ID of the post to update.                 | -         | `123`, `456`                                          |
+| `title`   | `string` | ❌       | The new title for the post.                   | -         | `My Blog Post`, `Hello World`                         |
+| `content` | `string` | ❌       | The new content for the post, in HTML format. | -         | `<p>Post content here</p>`, `This is my post content` |
+| `status`  | `string` | ❌       | The new status for the post.                  | `publish` | `example`                                             |
 
 ## Examples
 
@@ -74,7 +74,8 @@ wp_update_post --id="123" --title="Example Post Title" --content="This is exampl
 
 **Endpoint:** `/wp-json/wp/v2/posts/{id}`
 
-This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters are determined by WordPress core functionality.
+This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters
+are determined by WordPress core functionality.
 
 ### WordPress Documentation
 
@@ -135,4 +136,4 @@ This tool requires the following WordPress user capabilities:
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

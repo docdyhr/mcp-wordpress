@@ -2,11 +2,12 @@
 
 ## Issue: POST Requests Return 401 Unauthorized with Application Passwords
 
-This document addresses the common issue where WordPress REST API POST/PUT/DELETE requests fail with 401 Unauthorized errors, while GET requests work fine with the same application password credentials.
+This document addresses the common issue where WordPress REST API POST/PUT/DELETE requests fail with 401 Unauthorized
+errors, while GET requests work fine with the same application password credentials.
 
 ## Symptoms
 
-- ✅ GET requests work perfectly with application passwords  
+- ✅ GET requests work perfectly with application passwords
 - ✅ WP-CLI commands work with the same credentials
 - ✅ User has administrator role and all necessary capabilities
 - ❌ POST/PUT/DELETE requests return 401 Unauthorized
@@ -35,7 +36,8 @@ RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
 ### 2. Docker Environment Configuration
 
-**Issue:** WordPress requires HTTPS for application passwords by default, but Docker development environments typically use HTTP.
+**Issue:** WordPress requires HTTPS for application passwords by default, but Docker development environments typically
+use HTTP.
 
 **Solution:** Add to your `docker-compose.yml`:
 
@@ -64,12 +66,12 @@ services:
 
 ## Technical Differences: WP-CLI vs REST API
 
-| Aspect | WP-CLI | REST API |
-|--------|--------|----------|
-| Access Method | Direct file system | HTTP requests |
-| Authentication | Bypasses web server | Requires HTTP headers |
-| Configuration Impact | Not affected | Subject to .htaccess rules |
-| Proxy Impact | Not affected | Can be blocked by proxies |
+| Aspect               | WP-CLI              | REST API                   |
+| -------------------- | ------------------- | -------------------------- |
+| Access Method        | Direct file system  | HTTP requests              |
+| Authentication       | Bypasses web server | Requires HTTP headers      |
+| Configuration Impact | Not affected        | Subject to .htaccess rules |
+| Proxy Impact         | Not affected        | Can be blocked by proxies  |
 
 ## Docker-Specific Solutions
 
@@ -78,7 +80,7 @@ services:
 ### Complete Docker Configuration
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   wordpress:
     image: wordpress:latest
@@ -146,37 +148,37 @@ add_action('rest_authentication_errors', function($result) {
 
 ```javascript
 const testAuth = async () => {
-    const username = 'your_username';
-    const appPassword = 'xxxx xxxx xxxx xxxx xxxx xxxx'; // Preserve spaces
-    const siteUrl = 'http://localhost:8081';
-    
-    const auth = Buffer.from(`${username}:${appPassword}`).toString('base64');
-    
-    console.log('Testing GET request...');
-    const getResponse = await fetch(`${siteUrl}/wp-json/wp/v2/posts?per_page=1`, {
-        headers: { 'Authorization': `Basic ${auth}` }
-    });
-    console.log('GET Status:', getResponse.status);
-    
-    console.log('Testing POST request...');
-    const postResponse = await fetch(`${siteUrl}/wp-json/wp/v2/posts`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Basic ${auth}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            title: 'Auth Test Post',
-            content: 'Testing authentication',
-            status: 'draft'
-        })
-    });
-    console.log('POST Status:', postResponse.status);
-    
-    if (!postResponse.ok) {
-        const error = await postResponse.json();
-        console.log('Error:', error);
-    }
+  const username = "your_username";
+  const appPassword = "xxxx xxxx xxxx xxxx xxxx xxxx"; // Preserve spaces
+  const siteUrl = "http://localhost:8081";
+
+  const auth = Buffer.from(`${username}:${appPassword}`).toString("base64");
+
+  console.log("Testing GET request...");
+  const getResponse = await fetch(`${siteUrl}/wp-json/wp/v2/posts?per_page=1`, {
+    headers: { Authorization: `Basic ${auth}` },
+  });
+  console.log("GET Status:", getResponse.status);
+
+  console.log("Testing POST request...");
+  const postResponse = await fetch(`${siteUrl}/wp-json/wp/v2/posts`, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${auth}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      title: "Auth Test Post",
+      content: "Testing authentication",
+      status: "draft",
+    }),
+  });
+  console.log("POST Status:", postResponse.status);
+
+  if (!postResponse.ok) {
+    const error = await postResponse.json();
+    console.log("Error:", error);
+  }
 };
 
 testAuth();
@@ -226,4 +228,5 @@ If application passwords continue to fail:
 3. **Custom nonce-based authentication**
 4. **API Key plugins**
 
-Remember: The goal is to achieve the same level of functionality that WP-CLI provides, but through the REST API interface.
+Remember: The goal is to achieve the same level of functionality that WP-CLI provides, but through the REST API
+interface.

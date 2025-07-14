@@ -456,5 +456,5 @@ npm install -g webpack-bundle-analyzer
 
 ---
 
-**Optimizing your build?** This build system is designed for both development speed and
-production efficiency. Each configuration option is tuned for optimal performance.
+**Optimizing your build?** This build system is designed for both development speed and production efficiency. Each
+configuration option is tuned for optimal performance.

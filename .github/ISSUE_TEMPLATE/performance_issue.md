@@ -1,9 +1,9 @@
 ---
 name: ⚡ Performance Issue
 about: Report performance problems, slowness, or optimization suggestions
-title: '[PERFORMANCE] '
-labels: 'performance'
-assignees: ''
+title: "[PERFORMANCE] "
+labels: "performance"
+assignees: ""
 ---
 
 ## ⚡ Performance Issue Description
@@ -17,8 +17,7 @@ assignees: ''
 - [ ] Network timeouts
 - [ ] Large file handling issues
 
-**Detailed description:**
-[Describe the specific performance problem you're encountering]
+**Detailed description:** [Describe the specific performance problem you're encountering]
 
 ## 📊 Performance Metrics
 
@@ -129,8 +128,7 @@ top -p $(pgrep node)
 }
 ```
 
-**Results of optimization attempts:**
-[Describe what worked, what didn't, and measured improvements]
+**Results of optimization attempts:** [Describe what worked, what didn't, and measured improvements]
 
 ## 💡 Suggested Solutions
 
@@ -143,8 +141,7 @@ top -p $(pgrep node)
 - [ ] Memory management improvements
 - [ ] Database query optimization
 
-**Specific suggestions:**
-[If you have ideas for performance improvements]
+**Specific suggestions:** [If you have ideas for performance improvements]
 
 ## 📊 Impact Assessment
 
@@ -172,22 +169,19 @@ top -p $(pgrep node)
 - **Throughput**: [requests per second goal]
 - **Cache efficiency**: [target hit rate %]
 
-**Acceptable degradation:**
-[What performance levels would be acceptable]
+**Acceptable degradation:** [What performance levels would be acceptable]
 
 ## 📝 Additional Context
 
-**Performance comparisons:**
-[Compare with other tools, previous versions, or different environments]
+**Performance comparisons:** [Compare with other tools, previous versions, or different environments]
 
 **Logs and diagnostics:**
 
-```
+```text
 [Share relevant performance logs, slow query logs, etc.]
 ```
 
-**Profiling data:**
-[If you have profiling information, share it here]
+**Profiling data:** [If you have profiling information, share it here]
 
 ---
 

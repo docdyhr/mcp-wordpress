@@ -1,10 +1,10 @@
 # Docker Deployment Guide (Legacy)
 
-![Docker](https://img.shields.io/badge/Docker-ready-blue)
-![Version](https://img.shields.io/badge/version-1.2.0-green)
+![Docker](https://img.shields.io/badge/Docker-ready-blue) ![Version](https://img.shields.io/badge/version-1.2.0-green)
 ![Security](https://img.shields.io/badge/security-hardened-brightgreen)
 
-> **📖 New Users**: For Claude Desktop MCP integration, see the **[Docker Setup Guide](user-guides/DOCKER_SETUP.md)** instead.
+> **📖 New Users**: For Claude Desktop MCP integration, see the **[Docker Setup Guide](user-guides/DOCKER_SETUP.md)**
+> instead.
 
 This guide covers advanced Docker deployment scenarios for production and development environments.
 
@@ -23,7 +23,8 @@ docker run -d \
   docdyhr/mcp-wordpress:latest
 ```
 
-**⚠️ Claude Desktop Users**: Do NOT use `-d` flag with Claude Desktop. See [Docker Setup Guide](user-guides/DOCKER_SETUP.md) for MCP integration.
+**⚠️ Claude Desktop Users**: Do NOT use `-d` flag with Claude Desktop. See
+[Docker Setup Guide](user-guides/DOCKER_SETUP.md) for MCP integration.
 
 ### Option 2: Docker Compose
 
@@ -54,15 +55,15 @@ docker run -d --name mcp-wordpress mcp-wordpress
 
 ### Environment Variables
 
-| Variable | Required | Description | Example |
-|----------|----------|-------------|---------|
-| `WORDPRESS_SITE_URL` | ✅ | WordPress site URL | `https://example.com` |
-| `WORDPRESS_USERNAME` | ✅ | WordPress username | `admin` |
-| `WORDPRESS_APP_PASSWORD` | ✅ | Application password | `xxxx xxxx xxxx xxxx xxxx xxxx` |
-| `WORDPRESS_AUTH_METHOD` | ❌ | Authentication method | `app-password` (default) |
-| `NODE_ENV` | ❌ | Environment mode | `production` |
-| `DEBUG` | ❌ | Enable debug logging | `false` |
-| `DISABLE_CACHE` | ❌ | Disable caching system | `false` |
+| Variable                 | Required | Description            | Example                         |
+| ------------------------ | -------- | ---------------------- | ------------------------------- |
+| `WORDPRESS_SITE_URL`     | ✅       | WordPress site URL     | `https://example.com`           |
+| `WORDPRESS_USERNAME`     | ✅       | WordPress username     | `admin`                         |
+| `WORDPRESS_APP_PASSWORD` | ✅       | Application password   | `xxxx xxxx xxxx xxxx xxxx xxxx` |
+| `WORDPRESS_AUTH_METHOD`  | ❌       | Authentication method  | `app-password` (default)        |
+| `NODE_ENV`               | ❌       | Environment mode       | `production`                    |
+| `DEBUG`                  | ❌       | Enable debug logging   | `false`                         |
+| `DISABLE_CACHE`          | ❌       | Disable caching system | `false`                         |
 
 ### Multi-Site Configuration
 
@@ -111,7 +112,7 @@ docker run -d \
 **docker-compose.yml:**
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   mcp-wordpress:
@@ -157,7 +158,7 @@ docker-compose up --profile dev
 ### Docker Swarm
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   mcp-wordpress:
@@ -209,51 +210,51 @@ spec:
         app: mcp-wordpress
     spec:
       containers:
-      - name: mcp-wordpress
-        image: docdyhr/mcp-wordpress:latest
-        ports:
-        - containerPort: 3000
-        env:
-        - name: NODE_ENV
-          value: \"production\"
-        - name: WORDPRESS_SITE_URL
-          valueFrom:
-            secretKeyRef:
-              name: wordpress-secrets
-              key: site-url
-        - name: WORDPRESS_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: wordpress-secrets
-              key: username
-        - name: WORDPRESS_APP_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: wordpress-secrets
-              key: app-password
-        resources:
-          requests:
-            memory: \"256Mi\"
-            cpu: \"250m\"
-          limits:
-            memory: \"512Mi\"
-            cpu: \"500m\"
-        livenessProbe:
-          exec:
-            command:
-            - node
-            - dist/index.js
-            - --health-check
-          initialDelaySeconds: 30
-          periodSeconds: 30
-        readinessProbe:
-          exec:
-            command:
-            - node
-            - dist/index.js
-            - --health-check
-          initialDelaySeconds: 10
-          periodSeconds: 10
+        - name: mcp-wordpress
+          image: docdyhr/mcp-wordpress:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: \"production\"
+            - name: WORDPRESS_SITE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: wordpress-secrets
+                  key: site-url
+            - name: WORDPRESS_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: wordpress-secrets
+                  key: username
+            - name: WORDPRESS_APP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wordpress-secrets
+                  key: app-password
+          resources:
+            requests:
+              memory: \"256Mi\"
+              cpu: \"250m\"
+            limits:
+              memory: \"512Mi\"
+              cpu: \"500m\"
+          livenessProbe:
+            exec:
+              command:
+                - node
+                - dist/index.js
+                - --health-check
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            exec:
+              command:
+                - node
+                - dist/index.js
+                - --health-check
+            initialDelaySeconds: 10
+            periodSeconds: 10
 ```
 
 ## 🔧 Management Commands

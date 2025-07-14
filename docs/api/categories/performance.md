@@ -31,7 +31,7 @@ wp_list_performance
 # Get specific item
 wp_get_performanc --id=123
 
-# Create new item  
+# Create new item
 wp_create_performanc --title="Example"
 ```
 

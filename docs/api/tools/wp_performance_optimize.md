@@ -6,13 +6,13 @@ Get optimization recommendations and insights
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `site` | `string` | ❌ | Specific site ID for multi-site setups (optional for single site) | - | `site1`, `production` |
-| `focus` | `string` | ❌ | Optimization focus area (speed, reliability, efficiency, scaling) | - | `example` |
-| `priority` | `string` | ❌ | Implementation timeline (quick_wins, medium_term, long_term, all) | - | `example` |
-| `includeROI` | `boolean` | ❌ | Include ROI estimates (default: true) | - | `example` |
-| `includePredictions` | `boolean` | ❌ | Include performance predictions (default: true) | - | `example` |
+| Parameter            | Type      | Required | Description                                                       | Default | Examples              |
+| -------------------- | --------- | -------- | ----------------------------------------------------------------- | ------- | --------------------- |
+| `site`               | `string`  | ❌       | Specific site ID for multi-site setups (optional for single site) | -       | `site1`, `production` |
+| `focus`              | `string`  | ❌       | Optimization focus area (speed, reliability, efficiency, scaling) | -       | `example`             |
+| `priority`           | `string`  | ❌       | Implementation timeline (quick_wins, medium_term, long_term, all) | -       | `example`             |
+| `includeROI`         | `boolean` | ❌       | Include ROI estimates (default: true)                             | -       | `example`             |
+| `includePredictions` | `boolean` | ❌       | Include performance predictions (default: true)                   | -       | `example`             |
 
 ## Examples
 
@@ -23,7 +23,7 @@ Simple example of using wp_performance_optimize
 **Command:**
 
 ```bash
-wp_performance_optimize 
+wp_performance_optimize
 ```
 
 **Response:**
@@ -149,4 +149,4 @@ wp_performance_optimize --site="site1" --focus="example_value" --priority="examp
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

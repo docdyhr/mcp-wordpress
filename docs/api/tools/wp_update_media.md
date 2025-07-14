@@ -6,13 +6,13 @@ Updates the metadata of an existing media item.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `id` | `number` | ✅ | The ID of the media item to update. | - | `123`, `456` |
-| `title` | `string` | ❌ | The new title for the media item. | - | `My Blog Post`, `Hello World` |
-| `alt_text` | `string` | ❌ | The new alternative text. | - | `example` |
-| `caption` | `string` | ❌ | The new caption. | - | `example` |
-| `description` | `string` | ❌ | The new description. | - | `example` |
+| Parameter     | Type     | Required | Description                         | Default | Examples                      |
+| ------------- | -------- | -------- | ----------------------------------- | ------- | ----------------------------- |
+| `id`          | `number` | ✅       | The ID of the media item to update. | -       | `123`, `456`                  |
+| `title`       | `string` | ❌       | The new title for the media item.   | -       | `My Blog Post`, `Hello World` |
+| `alt_text`    | `string` | ❌       | The new alternative text.           | -       | `example`                     |
+| `caption`     | `string` | ❌       | The new caption.                    | -       | `example`                     |
+| `description` | `string` | ❌       | The new description.                | -       | `example`                     |
 
 ## Examples
 
@@ -117,4 +117,4 @@ wp_update_media --id="123" --title="Example Post Title" --alt_text="example_valu
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

@@ -1,18 +1,16 @@
 ---
 name: 🐛 Bug Report
 about: Report a bug or unexpected behavior in MCP WordPress Server
-title: '[BUG] '
-labels: 'bug'
-assignees: ''
+title: "[BUG] "
+labels: "bug"
+assignees: ""
 ---
 
 ## 🐛 Bug Description
 
-**What happened?**
-A clear and concise description of the bug.
+**What happened?** A clear and concise description of the bug.
 
-**What did you expect to happen?**
-A clear description of what you expected to happen instead.
+**What did you expect to happen?** A clear description of what you expected to happen instead.
 
 ## 🔄 Steps to Reproduce
 
@@ -55,29 +53,27 @@ A clear description of what you expected to happen instead.
 
 **Error messages or logs:**
 
-```
+```text
 [Paste error messages, stack traces, or relevant log output]
 ```
 
 **Console output:**
 
-```
+```text
 [Share relevant console output]
 ```
 
 **Browser/client errors (if applicable):**
 
-```
+```text
 [Any client-side errors]
 ```
 
 ## 🔍 Additional Context
 
-**Screenshots or recordings:**
-[Attach any visual evidence that helps explain the problem]
+**Screenshots or recordings:** [Attach any visual evidence that helps explain the problem]
 
-**Workarounds discovered:**
-[Any temporary solutions you've found]
+**Workarounds discovered:** [Any temporary solutions you've found]
 
 **Impact assessment:**
 

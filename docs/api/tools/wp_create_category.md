@@ -6,10 +6,10 @@ Creates a new category.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `name` | `string` | ✅ | The name of the category. | - | `example` |
-| `description` | `string` | ❌ | The description for the category. | - | `example` |
+| Parameter     | Type     | Required | Description                       | Default | Examples  |
+| ------------- | -------- | -------- | --------------------------------- | ------- | --------- |
+| `name`        | `string` | ✅       | The name of the category.         | -       | `example` |
+| `description` | `string` | ❌       | The description for the category. | -       | `example` |
 
 ## Examples
 
@@ -91,4 +91,4 @@ wp_create_category --name="example_value"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

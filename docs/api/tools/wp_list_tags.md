@@ -6,9 +6,9 @@ Lists tags from a WordPress site.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `search` | `string` | ❌ | Limit results to those matching a search term. | - | `wordpress`, `tutorial` |
+| Parameter | Type     | Required | Description                                    | Default | Examples                |
+| --------- | -------- | -------- | ---------------------------------------------- | ------- | ----------------------- |
+| `search`  | `string` | ❌       | Limit results to those matching a search term. | -       | `wordpress`, `tutorial` |
 
 ## Examples
 
@@ -19,7 +19,7 @@ Simple example of using wp_list_tags
 **Command:**
 
 ```bash
-wp_list_tags 
+wp_list_tags
 ```
 
 **Response:**
@@ -99,4 +99,4 @@ wp_list_tags
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

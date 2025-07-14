@@ -6,9 +6,9 @@ Retrieves revisions for a specific page.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `id` | `number` | ✅ | The ID of the page to get revisions for. | - | `123`, `456` |
+| Parameter | Type     | Required | Description                              | Default | Examples     |
+| --------- | -------- | -------- | ---------------------------------------- | ------- | ------------ |
+| `id`      | `number` | ✅       | The ID of the page to get revisions for. | -       | `123`, `456` |
 
 ## Examples
 
@@ -92,4 +92,4 @@ wp_get_page_revisions --id="123"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

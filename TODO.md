@@ -25,15 +25,19 @@
 
 The remaining TODO items have been converted to GitHub Issues:
 
-- **[Issue #4](https://github.com/docdyhr/mcp-wordpress/issues/4)**: Property-based tests for cache invalidation patterns
+- **[Issue #4](https://github.com/docdyhr/mcp-wordpress/issues/4)**: Property-based tests for cache invalidation
+  patterns
 - **[Issue #5](https://github.com/docdyhr/mcp-wordpress/issues/5)**: Continuous WordPress API contract validation
 - **[Issue #6](https://github.com/docdyhr/mcp-wordpress/issues/6)**: Blue-green deployment with traffic switching
 
 ### 📝 **Contributing**
 
-- **🐛 Bug Reports**: Use the [Bug Report Template](https://github.com/docdyhr/mcp-wordpress/issues/new?template=bug_report.md)
-- **✨ Feature Requests**: Use the [Feature Request Template](https://github.com/docdyhr/mcp-wordpress/issues/new?template=feature_request.md)
-- **⚡ Performance Issues**: Use the [Performance Issue Template](https://github.com/docdyhr/mcp-wordpress/issues/new?template=performance_issue.md)
+- **🐛 Bug Reports**: Use the
+  [Bug Report Template](https://github.com/docdyhr/mcp-wordpress/issues/new?template=bug_report.md)
+- **✨ Feature Requests**: Use the
+  [Feature Request Template](https://github.com/docdyhr/mcp-wordpress/issues/new?template=feature_request.md)
+- **⚡ Performance Issues**: Use the
+  [Performance Issue Template](https://github.com/docdyhr/mcp-wordpress/issues/new?template=performance_issue.md)
 
 ## Recently Completed ✅
 

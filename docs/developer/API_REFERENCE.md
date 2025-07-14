@@ -55,18 +55,9 @@ Handles multiple WordPress authentication methods.
 ```typescript
 class AuthenticationManager {
   // Authentication methods
-  async authenticateWithAppPassword(
-    username: string,
-    password: string,
-  ): Promise<AuthResult>;
-  async authenticateWithJWT(
-    username: string,
-    password: string,
-  ): Promise<AuthResult>;
-  async authenticateWithBasic(
-    username: string,
-    password: string,
-  ): Promise<AuthResult>;
+  async authenticateWithAppPassword(username: string, password: string): Promise<AuthResult>;
+  async authenticateWithJWT(username: string, password: string): Promise<AuthResult>;
+  async authenticateWithBasic(username: string, password: string): Promise<AuthResult>;
   async authenticateWithApiKey(apiKey: string): Promise<AuthResult>;
 
   // Token management
@@ -119,9 +110,7 @@ class PostTools {
   async deletePost(params: DeletePostParams): Promise<DeleteResult>;
   async getPost(params: GetPostParams): Promise<PostResult>;
   async listPosts(params: ListPostsParams): Promise<PostListResult>;
-  async getPostRevisions(
-    params: GetPostRevisionsParams,
-  ): Promise<PostRevisionsResult>;
+  async getPostRevisions(params: GetPostRevisionsParams): Promise<PostRevisionsResult>;
 }
 ```
 
@@ -168,9 +157,7 @@ class PageTools {
   async deletePage(params: DeletePageParams): Promise<DeleteResult>;
   async getPage(params: GetPageParams): Promise<PageResult>;
   async listPages(params: ListPagesParams): Promise<PageListResult>;
-  async getPageRevisions(
-    params: GetPageRevisionsParams,
-  ): Promise<PageRevisionsResult>;
+  async getPageRevisions(params: GetPageRevisionsParams): Promise<PageRevisionsResult>;
 }
 ```
 
@@ -224,9 +211,7 @@ class CommentTools {
   async getComment(params: GetCommentParams): Promise<CommentResult>;
   async listComments(params: ListCommentsParams): Promise<CommentListResult>;
   async moderateComment(params: ModerateCommentParams): Promise<CommentResult>;
-  async bulkModerateComments(
-    params: BulkModerateCommentsParams,
-  ): Promise<BulkResult>;
+  async bulkModerateComments(params: BulkModerateCommentsParams): Promise<BulkResult>;
 }
 ```
 
@@ -239,9 +224,7 @@ class TaxonomyTools {
   async updateCategory(params: UpdateCategoryParams): Promise<CategoryResult>;
   async deleteCategory(params: DeleteCategoryParams): Promise<DeleteResult>;
   async getCategory(params: GetCategoryParams): Promise<CategoryResult>;
-  async listCategories(
-    params: ListCategoriesParams,
-  ): Promise<CategoryListResult>;
+  async listCategories(params: ListCategoriesParams): Promise<CategoryListResult>;
 
   // Tags
   async createTag(params: CreateTagParams): Promise<TagResult>;
@@ -257,9 +240,7 @@ class TaxonomyTools {
 ```typescript
 class SiteTools {
   async getSiteInfo(params: GetSiteInfoParams): Promise<SiteInfoResult>;
-  async updateSiteSettings(
-    params: UpdateSiteSettingsParams,
-  ): Promise<SiteSettingsResult>;
+  async updateSiteSettings(params: UpdateSiteSettingsParams): Promise<SiteSettingsResult>;
   async getSiteStats(params: GetSiteStatsParams): Promise<SiteStatsResult>;
   async getPlugins(params: GetPluginsParams): Promise<PluginsResult>;
   async getThemes(params: GetThemesParams): Promise<ThemesResult>;
@@ -273,9 +254,7 @@ class SiteTools {
 class AuthTools {
   async testAuth(params: TestAuthParams): Promise<AuthTestResult>;
   async refreshToken(params: RefreshTokenParams): Promise<TokenResult>;
-  async validatePermissions(
-    params: ValidatePermissionsParams,
-  ): Promise<PermissionsResult>;
+  async validatePermissions(params: ValidatePermissionsParams): Promise<PermissionsResult>;
 }
 ```
 
@@ -286,9 +265,7 @@ class CacheTools {
   async getCacheStats(params: GetCacheStatsParams): Promise<CacheStatsResult>;
   async clearCache(params: ClearCacheParams): Promise<ClearCacheResult>;
   async warmCache(params: WarmCacheParams): Promise<WarmCacheResult>;
-  async setCacheConfig(
-    params: SetCacheConfigParams,
-  ): Promise<CacheConfigResult>;
+  async setCacheConfig(params: SetCacheConfigParams): Promise<CacheConfigResult>;
 }
 ```
 
@@ -296,24 +273,12 @@ class CacheTools {
 
 ```typescript
 class PerformanceTools {
-  async getPerformanceMetrics(
-    params: GetPerformanceMetricsParams,
-  ): Promise<PerformanceMetricsResult>;
-  async runPerformanceTest(
-    params: RunPerformanceTestParams,
-  ): Promise<PerformanceTestResult>;
-  async getSystemHealth(
-    params: GetSystemHealthParams,
-  ): Promise<SystemHealthResult>;
-  async benchmarkOperations(
-    params: BenchmarkOperationsParams,
-  ): Promise<BenchmarkResult>;
-  async getOptimizationSuggestions(
-    params: GetOptimizationSuggestionsParams,
-  ): Promise<OptimizationResult>;
-  async monitorRealTimeMetrics(
-    params: MonitorRealTimeMetricsParams,
-  ): Promise<RealTimeMetricsResult>;
+  async getPerformanceMetrics(params: GetPerformanceMetricsParams): Promise<PerformanceMetricsResult>;
+  async runPerformanceTest(params: RunPerformanceTestParams): Promise<PerformanceTestResult>;
+  async getSystemHealth(params: GetSystemHealthParams): Promise<SystemHealthResult>;
+  async benchmarkOperations(params: BenchmarkOperationsParams): Promise<BenchmarkResult>;
+  async getOptimizationSuggestions(params: GetOptimizationSuggestionsParams): Promise<OptimizationResult>;
+  async monitorRealTimeMetrics(params: MonitorRealTimeMetricsParams): Promise<RealTimeMetricsResult>;
 }
 ```
 
@@ -573,12 +538,7 @@ class DebugLogger {
   static log(level: LogLevel, message: string, context?: any): void;
   static error(error: Error, context?: any): void;
   static performance(operation: string, duration: number): void;
-  static http(
-    method: string,
-    url: string,
-    status: number,
-    duration: number,
-  ): void;
+  static http(method: string, url: string, status: number, duration: number): void;
 }
 ```
 
@@ -664,5 +624,5 @@ const server = new MCPWordPressServer({
 
 ---
 
-**Need more details?** This API reference covers the complete technical interface. For implementation
-examples, see the source code in `src/` directory.
+**Need more details?** This API reference covers the complete technical interface. For implementation examples, see the
+source code in `src/` directory.

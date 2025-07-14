@@ -1,11 +1,12 @@
 # Intelligent Caching System
 
-The WordPress MCP Server includes a comprehensive intelligent caching system that dramatically improves performance by reducing API calls and providing faster response times.
+The WordPress MCP Server includes a comprehensive intelligent caching system that dramatically improves performance by
+reducing API calls and providing faster response times.
 
 ## 🚀 **Performance Benefits**
 
 - **50-70% reduction** in taxonomy API calls (categories, tags)
-- **40-60% reduction** in authentication requests  
+- **40-60% reduction** in authentication requests
 - **30-50% reduction** in user profile lookups
 - **Significantly improved** response times for static data
 - **Better rate limit utilization** - 60 requests/minute becomes much more effective
@@ -14,7 +15,7 @@ The WordPress MCP Server includes a comprehensive intelligent caching system tha
 
 ### **Multi-Layer Caching System**
 
-```
+```text
 Request → Cache Check → API Call (if miss) → Cache Store → Response
      ↑                                              ↓
      └── ETag Validation ← HTTP Headers ←──────────┘
@@ -23,7 +24,7 @@ Request → Cache Check → API Call (if miss) → Cache Store → Response
 **Layer 1: HTTP Response Cache**
 
 - ETags support for efficient revalidation
-- Cache-Control headers based on data volatility  
+- Cache-Control headers based on data volatility
 - Conditional requests (If-None-Match)
 
 **Layer 2: In-Memory Application Cache**
@@ -46,7 +47,7 @@ Request → Cache Check → API Call (if miss) → Cache Store → Response
 - Cache-Control: `public, max-age=14400`
 - **Why**: Changes very rarely, safe to cache long-term
 
-### **Semi-Static Data (2 hour TTL)**  
+### **Semi-Static Data (2 hour TTL)**
 
 - Categories, tags, user profiles
 - Cache-Control: `public, max-age=7200`
@@ -55,7 +56,7 @@ Request → Cache Check → API Call (if miss) → Cache Store → Response
 ### **Dynamic Data (15 minute TTL)**
 
 - Posts, pages, comments
-- Cache-Control: `public, max-age=900`  
+- Cache-Control: `public, max-age=900`
 - **Why**: Content changes frequently, shorter cache needed
 
 ### **Session Data (30 minute TTL)**
@@ -79,7 +80,7 @@ wp_cache_stats --site="site1"
 **Returns:**
 
 - Hit/miss rates
-- Total cache entries  
+- Total cache entries
 - Eviction statistics
 - Invalidation queue status
 
@@ -139,11 +140,11 @@ cache: {
   defaultTTL: 15 * 60 * 1000,  // 15 minutes default
   enableLRU: true,
   enableStats: true,
-  
+
   // TTL presets by data type
   ttlPresets: {
     static: 4 * 60 * 60 * 1000,      // 4 hours
-    semiStatic: 2 * 60 * 60 * 1000,  // 2 hours  
+    semiStatic: 2 * 60 * 60 * 1000,  // 2 hours
     dynamic: 15 * 60 * 1000,         // 15 minutes
     session: 30 * 60 * 1000,         // 30 minutes
     realtime: 60 * 1000              // 1 minute
@@ -160,7 +161,7 @@ The system automatically invalidates related cache entries when content changes:
 **Post Operations:**
 
 - **Create Post** → Clears posts listings, categories, tags, search
-- **Update Post** → Clears specific post, posts listings, search  
+- **Update Post** → Clears specific post, posts listings, search
 - **Delete Post** → Clears posts listings, categories, tags, search
 
 **Category/Tag Operations:**
@@ -227,7 +228,7 @@ done
 
 **After Caching:**
 
-- Categories (cached): ~1-5ms  
+- Categories (cached): ~1-5ms
 - User lookups (cached): ~1-3ms
 - Site settings (cached): ~1-2ms
 
@@ -237,15 +238,15 @@ Each WordPress site gets isolated cache:
 
 **Cache Key Format:**
 
-```
+```text
 {siteId}:{endpoint}:{params_hash}
 ```
 
 **Examples:**
 
-```
+```text
 site1:posts:abc123        # Site 1 posts listing
-site2:posts:abc123        # Site 2 posts listing (separate)  
+site2:posts:abc123        # Site 2 posts listing (separate)
 site1:categories:def456   # Site 1 categories
 ```
 
@@ -323,7 +324,7 @@ wp_cache_clear --site="site2" --pattern="posts"  # Clear site2 posts only
 1. **Increase cache size:**
 
    ```typescript
-   maxSize: 2000  // From default 1000
+   maxSize: 2000; // From default 1000
    ```
 
 2. **Tune TTL values:**
@@ -364,11 +365,13 @@ wp_cache_clear --site="site2" --pattern="posts"  # Clear site2 posts only
 Planned improvements:
 
 - **Redis backend** for distributed caching
-- **Cache warming strategies** based on access patterns  
+- **Cache warming strategies** based on access patterns
 - **Adaptive TTL** based on content change frequency
 - **Cache compression** for larger datasets
 - **Metrics dashboard** for cache performance visualization
 
 ---
 
-The intelligent caching system provides significant performance improvements while maintaining data freshness appropriate for each content type. It's designed to work transparently with existing WordPress operations while providing tools for monitoring and management.
+The intelligent caching system provides significant performance improvements while maintaining data freshness
+appropriate for each content type. It's designed to work transparently with existing WordPress operations while
+providing tools for monitoring and management.

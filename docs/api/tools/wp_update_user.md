@@ -6,11 +6,11 @@ Updates an existing user.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `id` | `number` | ✅ | The ID of the user to update. | - | `123`, `456` |
-| `email` | `string` | ❌ | The new email address for the user. | - | `user@example.com`, `admin@site.com` |
-| `name` | `string` | ❌ | The new display name for the user. | - | `example` |
+| Parameter | Type     | Required | Description                         | Default | Examples                             |
+| --------- | -------- | -------- | ----------------------------------- | ------- | ------------------------------------ |
+| `id`      | `number` | ✅       | The ID of the user to update.       | -       | `123`, `456`                         |
+| `email`   | `string` | ❌       | The new email address for the user. | -       | `user@example.com`, `admin@site.com` |
+| `name`    | `string` | ❌       | The new display name for the user.  | -       | `example`                            |
 
 ## Examples
 
@@ -123,4 +123,4 @@ This tool requires the following WordPress user capabilities:
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

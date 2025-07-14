@@ -1,6 +1,7 @@
 # Release Process Guide
 
-Complete guide to the automated release pipeline, semantic versioning, and deployment process for the MCP WordPress Server.
+Complete guide to the automated release pipeline, semantic versioning, and deployment process for the MCP WordPress
+Server.
 
 ## 🚀 Release Pipeline Overview
 
@@ -524,5 +525,5 @@ For breaking changes, create migration guides in `docs/developer/MIGRATION_GUIDE
 
 ---
 
-**Planning a release?** This automated system ensures consistent, reliable releases while maintaining high
-quality standards. Every release is tested, verified, and documented automatically.
+**Planning a release?** This automated system ensures consistent, reliable releases while maintaining high quality
+standards. Every release is tested, verified, and documented automatically.

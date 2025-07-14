@@ -115,7 +115,7 @@ The contract tests verify:
 - Retrieve posts with pagination
 - Response format validation
 
-### ✅ Media API  
+### ✅ Media API
 
 - File upload handling
 - Multipart form data

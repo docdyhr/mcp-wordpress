@@ -4,7 +4,8 @@ This guide explains the system architecture and design patterns used in the MCP 
 
 ## 🏗️ Overall Architecture
 
-The MCP WordPress Server follows a modular, layered architecture designed for scalability, maintainability, and extensibility.
+The MCP WordPress Server follows a modular, layered architecture designed for scalability, maintainability, and
+extensibility.
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
@@ -309,10 +310,8 @@ Commit → CI/CD Pipeline → Tests → Security Scan → Publishing
 
 ### Request Optimization
 
-**Batching**: Group related requests
-**Deduplication**: Eliminate duplicate requests
-**Connection Pooling**: Reuse HTTP connections
-**Compression**: Reduce payload size
+**Batching**: Group related requests **Deduplication**: Eliminate duplicate requests **Connection Pooling**: Reuse HTTP
+connections **Compression**: Reduce payload size
 
 ## 🔮 Extensibility
 
@@ -356,10 +355,8 @@ Commit → CI/CD Pipeline → Tests → Security Scan → Publishing
 
 ### Logging Strategy
 
-**Structured Logging**: JSON format for parsing
-**Log Levels**: DEBUG, INFO, WARN, ERROR
-**Contextual Information**: Request IDs, user context
-**Security Logging**: Authentication events, suspicious activity
+**Structured Logging**: JSON format for parsing **Log Levels**: DEBUG, INFO, WARN, ERROR **Contextual Information**:
+Request IDs, user context **Security Logging**: Authentication events, suspicious activity
 
 ## 📚 Further Reading
 
@@ -370,5 +367,5 @@ Commit → CI/CD Pipeline → Tests → Security Scan → Publishing
 
 ---
 
-**Understanding the architecture?** This foundation enables the system's reliability, performance,
-and extensibility. Each component is designed to be testable, maintainable, and scalable.
+**Understanding the architecture?** This foundation enables the system's reliability, performance, and extensibility.
+Each component is designed to be testable, maintainable, and scalable.

@@ -6,13 +6,13 @@ Lists posts from a WordPress site, with filters.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `per_page` | `number` | ❌ | Number of items to return per page (max 100). | `10` | `10`, `20` |
-| `search` | `string` | ❌ | Limit results to those matching a search term. | - | `wordpress`, `tutorial` |
-| `status` | `string` | ❌ | Filter by post status. | `publish` | `example` |
-| `categories` | `array` | ❌ | Limit results to posts in specific category IDs. | - | `example` |
-| `tags` | `array` | ❌ | Limit results to posts with specific tag IDs. | - | `example` |
+| Parameter    | Type     | Required | Description                                      | Default   | Examples                |
+| ------------ | -------- | -------- | ------------------------------------------------ | --------- | ----------------------- |
+| `per_page`   | `number` | ❌       | Number of items to return per page (max 100).    | `10`      | `10`, `20`              |
+| `search`     | `string` | ❌       | Limit results to those matching a search term.   | -         | `wordpress`, `tutorial` |
+| `status`     | `string` | ❌       | Filter by post status.                           | `publish` | `example`               |
+| `categories` | `array`  | ❌       | Limit results to posts in specific category IDs. | -         | `example`               |
+| `tags`       | `array`  | ❌       | Limit results to posts with specific tag IDs.    | -         | `example`               |
 
 ## Examples
 
@@ -23,7 +23,7 @@ Simple example of using wp_list_posts
 **Command:**
 
 ```bash
-wp_list_posts 
+wp_list_posts
 ```
 
 **Response:**
@@ -93,7 +93,8 @@ wp_list_posts --per_page="10" --search="wordpress" --status="publish" --categori
 
 **Endpoint:** `/wp-json/wp/v2/posts`
 
-This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters are determined by WordPress core functionality.
+This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters
+are determined by WordPress core functionality.
 
 ### WordPress Documentation
 
@@ -146,4 +147,4 @@ This tool directly interfaces with the WordPress REST API endpoint above. The re
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

@@ -239,4 +239,5 @@ npm run status             # Check connection status
 
 ---
 
-**Ready to contribute?** Start with the [Development Setup](DEVELOPMENT_SETUP.md) guide and join our community of contributors!
+**Ready to contribute?** Start with the [Development Setup](DEVELOPMENT_SETUP.md) guide and join our community of
+contributors!

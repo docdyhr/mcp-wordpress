@@ -6,12 +6,12 @@ Creates a new user.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `username` | `string` | ✅ | The username for the new user. | - | `john_doe`, `admin` |
-| `email` | `string` | ✅ | The email address for the new user. | - | `user@example.com`, `admin@site.com` |
-| `password` | `string` | ✅ | The password for the new user. | - | `example` |
-| `roles` | `array` | ❌ | An array of roles to assign to the user. | - | `example` |
+| Parameter  | Type     | Required | Description                              | Default | Examples                             |
+| ---------- | -------- | -------- | ---------------------------------------- | ------- | ------------------------------------ |
+| `username` | `string` | ✅       | The username for the new user.           | -       | `john_doe`, `admin`                  |
+| `email`    | `string` | ✅       | The email address for the new user.      | -       | `user@example.com`, `admin@site.com` |
+| `password` | `string` | ✅       | The password for the new user.           | -       | `example`                            |
+| `roles`    | `array`  | ❌       | An array of roles to assign to the user. | -       | `example`                            |
 
 ## Examples
 
@@ -124,4 +124,4 @@ This tool requires the following WordPress user capabilities:
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

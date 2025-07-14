@@ -6,11 +6,11 @@ Updates one or more general settings for a WordPress site.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `title` | `string` | ❌ | The title of the site. | - | `My Blog Post`, `Hello World` |
-| `description` | `string` | ❌ | The tagline or description of the site. | - | `example` |
-| `timezone` | `string` | ❌ | A city in the same timezone, e.g., 'America/New_York'. | - | `example` |
+| Parameter     | Type     | Required | Description                                            | Default | Examples                      |
+| ------------- | -------- | -------- | ------------------------------------------------------ | ------- | ----------------------------- |
+| `title`       | `string` | ❌       | The title of the site.                                 | -       | `My Blog Post`, `Hello World` |
+| `description` | `string` | ❌       | The tagline or description of the site.                | -       | `example`                     |
+| `timezone`    | `string` | ❌       | A city in the same timezone, e.g., 'America/New_York'. | -       | `example`                     |
 
 ## Examples
 
@@ -21,7 +21,7 @@ Simple example of using wp_update_site_settings
 **Command:**
 
 ```bash
-wp_update_site_settings 
+wp_update_site_settings
 ```
 
 **Response:**
@@ -115,4 +115,4 @@ wp_update_site_settings --title="Example Post Title" --description="example_valu
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

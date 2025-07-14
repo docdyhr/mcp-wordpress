@@ -2,7 +2,8 @@
 
 ## 🔒 Security Overview
 
-This document provides comprehensive security guidelines for the MCP WordPress server, covering configuration, deployment, and best practices for maintaining a secure WordPress management environment.
+This document provides comprehensive security guidelines for the MCP WordPress server, covering configuration,
+deployment, and best practices for maintaining a secure WordPress management environment.
 
 ## 🚨 Critical Security Requirements
 
@@ -225,7 +226,7 @@ FROM node:18-alpine@sha256:specific-hash
 # docker scan mcp-wordpress:latest
 ```
 
-### Environment Variables
+### Docker Environment Variables
 
 ```bash
 # Production deployment
@@ -265,4 +266,5 @@ If you discover a security vulnerability:
 
 ---
 
-**Remember**: Security is not a one-time task but an ongoing process. Stay vigilant, keep dependencies updated, and follow these guidelines to maintain a secure WordPress management environment.
+**Remember**: Security is not a one-time task but an ongoing process. Stay vigilant, keep dependencies updated, and
+follow these guidelines to maintain a secure WordPress management environment.

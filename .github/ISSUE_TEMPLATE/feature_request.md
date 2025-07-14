@@ -1,33 +1,30 @@
 ---
 name: ✨ Feature Request
 about: Suggest a new feature or enhancement for MCP WordPress Server
-title: '[FEATURE] '
-labels: 'enhancement'
-assignees: ''
+title: "[FEATURE] "
+labels: "enhancement"
+assignees: ""
 ---
 
 ## 🚀 Feature Description
 
-**What feature would you like to see added?**
-A clear and concise description of the feature you'd like to see implemented.
+**What feature would you like to see added?** A clear and concise description of the feature you'd like to see
+implemented.
 
-**What problem does this solve?**
-Describe the problem or use case this feature would address.
+**What problem does this solve?** Describe the problem or use case this feature would address.
 
 ## 💡 Proposed Solution
 
-**Describe your ideal solution**
-A clear description of what you want to happen.
+**Describe your ideal solution** A clear description of what you want to happen.
 
-**Alternative solutions considered**
-Describe any alternative solutions or features you've considered.
+**Alternative solutions considered** Describe any alternative solutions or features you've considered.
 
 ## 🎯 Use Cases
 
 **Who would benefit from this feature?**
 
 - [ ] WordPress administrators
-- [ ] MCP client developers  
+- [ ] MCP client developers
 - [ ] Content managers
 - [ ] Multi-site administrators
 - [ ] Performance-focused users
@@ -54,8 +51,7 @@ Describe any alternative solutions or features you've considered.
 
 ## 🔧 Technical Considerations
 
-**Potential implementation approach:**
-[If you have technical insights, share them here]
+**Potential implementation approach:** [If you have technical insights, share them here]
 
 **Dependencies or prerequisites:**
 
@@ -81,19 +77,16 @@ Describe any alternative solutions or features you've considered.
 **Timeline expectations:**
 
 - [ ] Urgent (within weeks)
-- [ ] Soon (within months)  
+- [ ] Soon (within months)
 - [ ] Eventually (when convenient)
 
 ## 📝 Additional Context
 
-**Screenshots, mockups, or examples:**
-[Add any visual aids that help explain the feature]
+**Screenshots, mockups, or examples:** [Add any visual aids that help explain the feature]
 
-**Related issues or PRs:**
-[Link to any related discussions]
+**Related issues or PRs:** [Link to any related discussions]
 
-**External references:**
-[Links to WordPress docs, MCP specs, or other relevant resources]
+**External references:** [Links to WordPress docs, MCP specs, or other relevant resources]
 
 ---
 

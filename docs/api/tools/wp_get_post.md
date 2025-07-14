@@ -6,9 +6,9 @@ Retrieves a single post by its ID.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `id` | `number` | ✅ | The unique identifier for the post. | - | `123`, `456` |
+| Parameter | Type     | Required | Description                         | Default | Examples     |
+| --------- | -------- | -------- | ----------------------------------- | ------- | ------------ |
+| `id`      | `number` | ✅       | The unique identifier for the post. | -       | `123`, `456` |
 
 ## Examples
 
@@ -50,7 +50,8 @@ wp_get_post --id="123"
 
 **Endpoint:** `/wp-json/wp/v2/posts/{id}`
 
-This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters are determined by WordPress core functionality.
+This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters
+are determined by WordPress core functionality.
 
 ### WordPress Documentation
 
@@ -103,4 +104,4 @@ This tool directly interfaces with the WordPress REST API endpoint above. The re
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

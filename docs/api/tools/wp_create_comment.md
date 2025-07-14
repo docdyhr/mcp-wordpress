@@ -6,12 +6,12 @@ Creates a new comment on a post.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `post` | `number` | ✅ | The ID of the post to comment on. | - | `example` |
-| `content` | `string` | ✅ | The content of the comment. | - | `<p>Post content here</p>`, `This is my post content` |
-| `author_name` | `string` | ❌ | The name of the comment author. | - | `example` |
-| `author_email` | `string` | ❌ | The email of the comment author. | - | `example` |
+| Parameter      | Type     | Required | Description                       | Default | Examples                                              |
+| -------------- | -------- | -------- | --------------------------------- | ------- | ----------------------------------------------------- |
+| `post`         | `number` | ✅       | The ID of the post to comment on. | -       | `example`                                             |
+| `content`      | `string` | ✅       | The content of the comment.       | -       | `<p>Post content here</p>`, `This is my post content` |
+| `author_name`  | `string` | ❌       | The name of the comment author.   | -       | `example`                                             |
+| `author_email` | `string` | ❌       | The email of the comment author.  | -       | `example`                                             |
 
 ## Examples
 
@@ -116,4 +116,4 @@ wp_create_comment --post="example_value" --content="This is example content for 
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

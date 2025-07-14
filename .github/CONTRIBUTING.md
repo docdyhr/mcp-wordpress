@@ -1,7 +1,7 @@
 # Contributing to MCP WordPress
 
-Thank you for your interest in contributing to MCP WordPress! This document
-provides guidelines and information for contributors.
+Thank you for your interest in contributing to MCP WordPress! This document provides guidelines and information for
+contributors.
 
 ## 🚀 Quick Start
 
@@ -99,7 +99,7 @@ Example tool structure:
 ```typescript
 export class NewTool {
   constructor(private client: WordPressClient) {}
-  
+
   async newMethod(params: ToolParams): Promise<ToolResult> {
     // Implementation
   }
@@ -228,10 +228,8 @@ For security vulnerabilities:
 
 ### Community
 
-- [GitHub Issues](https://github.com/docdyhr/mcp-wordpress/issues) -
-  Bug reports and features
-- [GitHub Discussions](https://github.com/docdyhr/mcp-wordpress/discussions) -
-  Questions and ideas
+- [GitHub Issues](https://github.com/docdyhr/mcp-wordpress/issues) - Bug reports and features
+- [GitHub Discussions](https://github.com/docdyhr/mcp-wordpress/discussions) - Questions and ideas
 
 ## 🙏 Recognition
 
@@ -243,15 +241,12 @@ Contributors are recognized in:
 
 ## 📄 License
 
-By contributing, you agree that your contributions will be licensed under the
-MIT License.
+By contributing, you agree that your contributions will be licensed under the MIT License.
 
 ## ❓ Questions?
 
 - Check existing [documentation](../docs/)
-- Search
-  [issues and discussions](https://github.com/docdyhr/mcp-wordpress/issues)
-- Create a
-  [question issue](https://github.com/docdyhr/mcp-wordpress/issues/new/choose)
+- Search [issues and discussions](https://github.com/docdyhr/mcp-wordpress/issues)
+- Create a [question issue](https://github.com/docdyhr/mcp-wordpress/issues/new/choose)
 
 Thank you for contributing to MCP WordPress! 🎉

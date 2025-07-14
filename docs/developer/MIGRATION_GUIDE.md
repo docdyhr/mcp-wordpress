@@ -1,7 +1,7 @@
 # Migration Guide: Single-Site to Multi-Site Configuration
 
-This guide helps you migrate from the previous single-site configuration to the new multi-site
-configuration introduced in v2.0.0.
+This guide helps you migrate from the previous single-site configuration to the new multi-site configuration introduced
+in v2.0.0.
 
 ## Breaking Changes
 
@@ -15,8 +15,7 @@ WORDPRESS_USERNAME=admin
 WORDPRESS_APP_PASSWORD=xxxx xxxx xxxx xxxx xxxx xxxx
 ```
 
-**New Method (Configuration File):**
-Create a `mcp-wordpress.config.json` file:
+**New Method (Configuration File):** Create a `mcp-wordpress.config.json` file:
 
 ```json
 {
@@ -162,8 +161,8 @@ wp_create_post --site="site2" --title="New Blog Post"
 
 ## Backward Compatibility
 
-The server maintains backward compatibility with environment variables. If no `mcp-wordpress.config.json`
-file is found, it will fall back to using environment variables as before.
+The server maintains backward compatibility with environment variables. If no `mcp-wordpress.config.json` file is found,
+it will fall back to using environment variables as before.
 
 ## Troubleshooting
 

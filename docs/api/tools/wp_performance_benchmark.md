@@ -6,11 +6,11 @@ Compare current performance against industry benchmarks
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `site` | `string` | ❌ | Specific site ID for multi-site setups (optional for single site) | - | `site1`, `production` |
-| `category` | `string` | ❌ | Benchmark category (response_time, cache_performance, error_rate, system_resources, all) | `all` | `example` |
-| `includeRecommendations` | `boolean` | ❌ | Include improvement recommendations (default: true) | - | `example` |
+| Parameter                | Type      | Required | Description                                                                              | Default | Examples              |
+| ------------------------ | --------- | -------- | ---------------------------------------------------------------------------------------- | ------- | --------------------- |
+| `site`                   | `string`  | ❌       | Specific site ID for multi-site setups (optional for single site)                        | -       | `site1`, `production` |
+| `category`               | `string`  | ❌       | Benchmark category (response_time, cache_performance, error_rate, system_resources, all) | `all`   | `example`             |
+| `includeRecommendations` | `boolean` | ❌       | Include improvement recommendations (default: true)                                      | -       | `example`             |
 
 ## Examples
 
@@ -21,7 +21,7 @@ Simple example of using wp_performance_benchmark
 **Command:**
 
 ```bash
-wp_performance_benchmark 
+wp_performance_benchmark
 ```
 
 **Response:**
@@ -147,4 +147,4 @@ wp_performance_benchmark --site="site1" --category="overview" --includeRecommend
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

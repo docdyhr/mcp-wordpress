@@ -6,9 +6,9 @@ Approves a pending comment.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `id` | `number` | ✅ | The ID of the comment to approve. | - | `123`, `456` |
+| Parameter | Type     | Required | Description                       | Default | Examples     |
+| --------- | -------- | -------- | --------------------------------- | ------- | ------------ |
+| `id`      | `number` | ✅       | The ID of the comment to approve. | -       | `123`, `456` |
 
 ## Examples
 
@@ -87,4 +87,4 @@ wp_approve_comment --id="123"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

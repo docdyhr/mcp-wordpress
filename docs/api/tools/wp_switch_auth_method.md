@@ -6,12 +6,12 @@ Switches the authentication method for a site for the current session.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `method` | `string` | ✅ | The new authentication method to use. | - | `example` |
-| `username` | `string` | ❌ | The username for 'app-password' or 'basic' authentication. | - | `john_doe`, `admin` |
-| `password` | `string` | ❌ | The Application Password for 'app-password' or password for 'basic' auth. | - | `example` |
-| `jwt_token` | `string` | ❌ | The token for 'jwt' authentication. | - | `example` |
+| Parameter   | Type     | Required | Description                                                               | Default | Examples            |
+| ----------- | -------- | -------- | ------------------------------------------------------------------------- | ------- | ------------------- |
+| `method`    | `string` | ✅       | The new authentication method to use.                                     | -       | `example`           |
+| `username`  | `string` | ❌       | The username for 'app-password' or 'basic' authentication.                | -       | `john_doe`, `admin` |
+| `password`  | `string` | ❌       | The Application Password for 'app-password' or password for 'basic' auth. | -       | `example`           |
+| `jwt_token` | `string` | ❌       | The token for 'jwt' authentication.                                       | -       | `example`           |
 
 ## Examples
 
@@ -110,4 +110,4 @@ wp_switch_auth_method --method="example_value" --username="john_doe" --password=
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

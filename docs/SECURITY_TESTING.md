@@ -40,20 +40,20 @@ This guide covers the comprehensive security testing and validation framework im
 // Safe string validation (XSS protection)
 SecuritySchemas.safeString
   .max(10000)
-  .refine(val => !SCRIPT_PATTERN.test(val))
-  .refine(val => !val.includes('javascript:'))
+  .refine((val) => !SCRIPT_PATTERN.test(val))
+  .refine((val) => !val.includes("javascript:"));
 
 // URL validation
 SecuritySchemas.url
   .url()
   .regex(URL_PATTERN)
-  .refine(val => !val.includes('javascript:'))
+  .refine((val) => !val.includes("javascript:"));
 
 // Search query validation (SQL injection protection)
 SecuritySchemas.searchQuery
   .max(500)
-  .refine(val => !SQL_INJECTION_PATTERN.test(val))
-  .refine(val => !val.includes('--'))
+  .refine((val) => !SQL_INJECTION_PATTERN.test(val))
+  .refine((val) => !val.includes("--"));
 ```
 
 ### Tool-Specific Schemas
@@ -64,14 +64,14 @@ ToolSchemas.postData = z.object({
   site: SecuritySchemas.siteId.optional(),
   title: SecuritySchemas.safeString.optional(),
   content: SecuritySchemas.wpContent.optional(),
-  status: z.enum(['publish', 'draft', 'private', 'pending']).optional()
+  status: z.enum(["publish", "draft", "private", "pending"]).optional(),
 });
 
 // User management validation
 ToolSchemas.userData = z.object({
   username: SecuritySchemas.slug,
   email: SecuritySchemas.email,
-  password: SecuritySchemas.safeString.optional()
+  password: SecuritySchemas.safeString.optional(),
 });
 ```
 
@@ -94,7 +94,7 @@ npm test tests/security/security-validation.test.js -- --grep "XSS"
 **Example Test:**
 
 ```javascript
-test('should reject script tags in safe strings', () => {
+test("should reject script tags in safe strings", () => {
   const maliciousInput = 'Hello <script>alert("XSS")</script> World';
   expect(() => SecuritySchemas.safeString.parse(maliciousInput)).toThrow();
 });
@@ -117,14 +117,10 @@ npm test tests/security/security-validation.test.js -- --grep "SQL"
 **Example Test:**
 
 ```javascript
-test('should reject SQL injection patterns', () => {
-  const maliciousQueries = [
-    "'; DROP TABLE wp_posts; --",
-    "1' OR '1'='1",
-    "admin'--"
-  ];
-  
-  maliciousQueries.forEach(query => {
+test("should reject SQL injection patterns", () => {
+  const maliciousQueries = ["'; DROP TABLE wp_posts; --", "1' OR '1'='1", "admin'--"];
+
+  maliciousQueries.forEach((query) => {
     expect(() => SecuritySchemas.searchQuery.parse(query)).toThrow();
   });
 });
@@ -164,10 +160,10 @@ npm test tests/security/penetration-tests.test.js
 1. **Import Security Framework:**
 
 ```typescript
-import { validateSecurity, ToolSchemas } from '../security/InputValidator.js';
+import { validateSecurity, ToolSchemas } from "../security/InputValidator.js";
 ```
 
-2. **Apply Validation Decorator:**
+1. **Apply Validation Decorator:**
 
 ```typescript
 export class MyTools {
@@ -178,7 +174,7 @@ export class MyTools {
 }
 ```
 
-3. **Custom Validation Schema:**
+1. **Custom Validation Schema:**
 
 ```typescript
 const customSchema = z.object({
@@ -195,7 +191,7 @@ async customTool(params: any) {
 ### Manual Input Sanitization
 
 ```typescript
-import { InputSanitizer } from '../security/InputValidator.js';
+import { InputSanitizer } from "../security/InputValidator.js";
 
 // Sanitize HTML content
 const safeHtml = InputSanitizer.sanitizeHtml(userInput);
@@ -210,15 +206,15 @@ const safeOutput = InputSanitizer.encodeOutput(userContent);
 ### Rate Limiting Integration
 
 ```typescript
-import { SecurityLimiter } from '../security/InputValidator.js';
+import { SecurityLimiter } from "../security/InputValidator.js";
 
 async function toolMethod(params: any) {
-  const userId = params.userId || 'anonymous';
-  
+  const userId = params.userId || "anonymous";
+
   if (!SecurityLimiter.checkRateLimit(userId)) {
-    throw new Error('Rate limit exceeded. Please try again later.');
+    throw new Error("Rate limit exceeded. Please try again later.");
   }
-  
+
   // Continue with tool logic
 }
 ```
@@ -277,7 +273,7 @@ Security validation errors are automatically logged:
 ```typescript
 {
   timestamp: "2024-01-01T00:00:00.000Z",
-  level: "warning", 
+  level: "warning",
   event: "rate_limit_exceeded",
   userId: "user123",
   requestCount: 1001,

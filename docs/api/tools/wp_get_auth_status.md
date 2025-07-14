@@ -6,7 +6,7 @@ Gets the current authentication status for a configured WordPress site.
 
 ## Parameters
 
-*No parameters required.*
+_No parameters required._
 
 ## Examples
 
@@ -17,7 +17,7 @@ Simple example of using wp_get_auth_status
 **Command:**
 
 ```bash
-wp_get_auth_status 
+wp_get_auth_status
 ```
 
 **Response:**
@@ -90,4 +90,4 @@ wp_get_auth_status
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

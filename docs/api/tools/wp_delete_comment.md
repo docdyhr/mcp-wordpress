@@ -6,10 +6,10 @@ Deletes a comment.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `id` | `number` | ✅ | The ID of the comment to delete. | - | `123`, `456` |
-| `force` | `boolean` | ❌ | If true, the comment will be permanently deleted. Defaults to false (moved to trash). | - | `example` |
+| Parameter | Type      | Required | Description                                                                           | Default | Examples     |
+| --------- | --------- | -------- | ------------------------------------------------------------------------------------- | ------- | ------------ |
+| `id`      | `number`  | ✅       | The ID of the comment to delete.                                                      | -       | `123`, `456` |
+| `force`   | `boolean` | ❌       | If true, the comment will be permanently deleted. Defaults to false (moved to trash). | -       | `example`    |
 
 ## Examples
 
@@ -90,4 +90,4 @@ wp_delete_comment --id="123"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

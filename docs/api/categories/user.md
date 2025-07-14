@@ -30,7 +30,7 @@ wp_list_user
 # Get specific item
 wp_get_use --id=123
 
-# Create new item  
+# Create new item
 wp_create_use --title="Example"
 ```
 

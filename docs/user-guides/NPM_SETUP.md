@@ -1,6 +1,7 @@
 # NPM Setup Guide (Local Development)
 
-This guide provides step-by-step instructions for setting up the MCP WordPress server locally for development, customization, and contribution.
+This guide provides step-by-step instructions for setting up the MCP WordPress server locally for development,
+customization, and contribution.
 
 ---
 
@@ -106,4 +107,5 @@ npm run docs:generate   # Generate API documentation
 
 ---
 
-After setup, restart Claude Desktop and test with commands like "List my WordPress posts" or "Show me my site statistics".
+After setup, restart Claude Desktop and test with commands like "List my WordPress posts" or "Show me my site
+statistics".

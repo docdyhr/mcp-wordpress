@@ -6,9 +6,9 @@ Pre-warm cache with essential WordPress data.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `site` | `string` | ❌ | Site ID to warm cache for. | - | `site1`, `production` |
+| Parameter | Type     | Required | Description                | Default | Examples              |
+| --------- | -------- | -------- | -------------------------- | ------- | --------------------- |
+| `site`    | `string` | ❌       | Site ID to warm cache for. | -       | `site1`, `production` |
 
 ## Examples
 
@@ -19,7 +19,7 @@ Simple example of using wp_cache_warm
 **Command:**
 
 ```bash
-wp_cache_warm 
+wp_cache_warm
 ```
 
 **Response:**
@@ -107,4 +107,4 @@ wp_cache_warm --site="site1"
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

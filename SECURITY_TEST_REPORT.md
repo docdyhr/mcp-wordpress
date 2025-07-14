@@ -191,7 +191,8 @@ The WordPress MCP Server security framework is **PRODUCTION READY** with:
 4. **Enterprise-grade security** implementation
 5. **Thorough testing** coverage (40 security tests)
 
-The security implementation successfully blocks all tested attack vectors while maintaining usability for legitimate operations. The framework provides defense-in-depth with multiple layers of protection.
+The security implementation successfully blocks all tested attack vectors while maintaining usability for legitimate
+operations. The framework provides defense-in-depth with multiple layers of protection.
 
 ---
 

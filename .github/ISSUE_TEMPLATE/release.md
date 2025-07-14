@@ -1,9 +1,9 @@
 ---
 name: 🚀 Release Request
 about: Request a new release to NPM and Docker Hub
-title: 'Release v[VERSION]'
-labels: 'release'
-assignees: 'docdyhr'
+title: "Release v[VERSION]"
+labels: "release"
+assignees: "docdyhr"
 ---
 
 ## Release Information
@@ -86,4 +86,5 @@ assignees: 'docdyhr'
 
 ---
 
-**Automation:** This release will be automatically published to NPM and Docker Hub when merged to main with conventional commit messages.
+**Automation:** This release will be automatically published to NPM and Docker Hub when merged to main with conventional
+commit messages.

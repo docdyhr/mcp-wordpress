@@ -6,12 +6,12 @@ Updates an existing page.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `id` | `number` | ✅ | The ID of the page to update. | - | `123`, `456` |
-| `title` | `string` | ❌ | The new title for the page. | - | `My Blog Post`, `Hello World` |
-| `content` | `string` | ❌ | The new content for the page, in HTML format. | - | `<p>Post content here</p>`, `This is my post content` |
-| `status` | `string` | ❌ | The new status for the page. | `publish` | `example` |
+| Parameter | Type     | Required | Description                                   | Default   | Examples                                              |
+| --------- | -------- | -------- | --------------------------------------------- | --------- | ----------------------------------------------------- |
+| `id`      | `number` | ✅       | The ID of the page to update.                 | -         | `123`, `456`                                          |
+| `title`   | `string` | ❌       | The new title for the page.                   | -         | `My Blog Post`, `Hello World`                         |
+| `content` | `string` | ❌       | The new content for the page, in HTML format. | -         | `<p>Post content here</p>`, `This is my post content` |
+| `status`  | `string` | ❌       | The new status for the page.                  | `publish` | `example`                                             |
 
 ## Examples
 
@@ -124,4 +124,4 @@ This tool requires the following WordPress user capabilities:
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

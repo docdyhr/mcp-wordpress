@@ -61,8 +61,8 @@ After installation, you'll be prompted to configure:
 
 ### 4. Verify Installation
 
-After configuration, the extension should appear in your Claude Desktop extensions list. You can test it by
-asking Claude to:
+After configuration, the extension should appear in your Claude Desktop extensions list. You can test it by asking
+Claude to:
 
 - "List my recent WordPress posts"
 - "Check my WordPress site status"
@@ -145,5 +145,5 @@ The final DXT package includes:
 
 ## Multi-Site Support
 
-The DXT extension supports managing multiple WordPress sites. Configure additional sites through the extension
-settings or use site-specific commands with the `--site` parameter.
+The DXT extension supports managing multiple WordPress sites. Configure additional sites through the extension settings
+or use site-specific commands with the `--site` parameter.

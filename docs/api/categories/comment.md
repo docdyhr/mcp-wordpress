@@ -31,7 +31,7 @@ wp_list_comment
 # Get specific item
 wp_get_commen --id=123
 
-# Create new item  
+# Create new item
 wp_create_commen --title="Example"
 ```
 

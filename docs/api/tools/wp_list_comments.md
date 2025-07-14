@@ -6,10 +6,10 @@ Lists comments from a WordPress site, with filters.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `post` | `number` | ❌ | Limit results to comments assigned to a specific post ID. | - | `example` |
-| `status` | `string` | ❌ | Filter by comment status. | `publish` | `example` |
+| Parameter | Type     | Required | Description                                               | Default   | Examples  |
+| --------- | -------- | -------- | --------------------------------------------------------- | --------- | --------- |
+| `post`    | `number` | ❌       | Limit results to comments assigned to a specific post ID. | -         | `example` |
+| `status`  | `string` | ❌       | Filter by comment status.                                 | `publish` | `example` |
 
 ## Examples
 
@@ -20,7 +20,7 @@ Simple example of using wp_list_comments
 **Command:**
 
 ```bash
-wp_list_comments 
+wp_list_comments
 ```
 
 **Response:**
@@ -100,4 +100,4 @@ wp_list_comments
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

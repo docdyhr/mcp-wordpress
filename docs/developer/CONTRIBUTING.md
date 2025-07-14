@@ -215,9 +215,7 @@ describe("PostTools", () => {
     test("should handle API errors gracefully", async () => {
       mockClient.posts.create.mockRejectedValue(new Error("API Error"));
 
-      await expect(postTools.createPost(validParams)).rejects.toThrow(
-        "API Error",
-      );
+      await expect(postTools.createPost(validParams)).rejects.toThrow("API Error");
     });
   });
 });
@@ -465,5 +463,5 @@ Please read it to understand the expected behavior in our community.
 
 ---
 
-**Ready to contribute?** Thank you for your interest in improving the MCP WordPress Server! Every
-contribution, no matter how small, helps make this project better for everyone. 🚀
+**Ready to contribute?** Thank you for your interest in improving the MCP WordPress Server! Every contribution, no
+matter how small, helps make this project better for everyone. 🚀

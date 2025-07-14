@@ -6,14 +6,14 @@ Uploads a file to the WordPress media library.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `file_path` | `string` | ✅ | The local, absolute path to the file to upload. | - | `example` |
-| `title` | `string` | ❌ | The title for the media item. | - | `My Blog Post`, `Hello World` |
-| `alt_text` | `string` | ❌ | Alternative text for the media item (for accessibility). | - | `example` |
-| `caption` | `string` | ❌ | The caption for the media item. | - | `example` |
-| `description` | `string` | ❌ | The description for the media item. | - | `example` |
-| `post` | `number` | ❌ | The ID of a post to attach this media to. | - | `example` |
+| Parameter     | Type     | Required | Description                                              | Default | Examples                      |
+| ------------- | -------- | -------- | -------------------------------------------------------- | ------- | ----------------------------- |
+| `file_path`   | `string` | ✅       | The local, absolute path to the file to upload.          | -       | `example`                     |
+| `title`       | `string` | ❌       | The title for the media item.                            | -       | `My Blog Post`, `Hello World` |
+| `alt_text`    | `string` | ❌       | Alternative text for the media item (for accessibility). | -       | `example`                     |
+| `caption`     | `string` | ❌       | The caption for the media item.                          | -       | `example`                     |
+| `description` | `string` | ❌       | The description for the media item.                      | -       | `example`                     |
+| `post`        | `number` | ❌       | The ID of a post to attach this media to.                | -       | `example`                     |
 
 ## Examples
 
@@ -120,4 +120,4 @@ This tool requires the following WordPress user capabilities:
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

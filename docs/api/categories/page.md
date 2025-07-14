@@ -30,7 +30,7 @@ wp_list_page
 # Get specific item
 wp_get_pag --id=123
 
-# Create new item  
+# Create new item
 wp_create_pag --title="Example"
 ```
 

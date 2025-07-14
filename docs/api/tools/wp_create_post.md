@@ -6,14 +6,14 @@ Creates a new post.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `title` | `string` | ✅ | The title for the post. | - | `My Blog Post`, `Hello World` |
-| `content` | `string` | ❌ | The content for the post, in HTML format. | - | `<p>Post content here</p>`, `This is my post content` |
-| `status` | `string` | ❌ | The publishing status for the post. | `publish` | `example` |
-| `excerpt` | `string` | ❌ | The excerpt for the post. | - | `example` |
-| `categories` | `array` | ❌ | An array of category IDs to assign to the post. | - | `example` |
-| `tags` | `array` | ❌ | An array of tag IDs to assign to the post. | - | `example` |
+| Parameter    | Type     | Required | Description                                     | Default   | Examples                                              |
+| ------------ | -------- | -------- | ----------------------------------------------- | --------- | ----------------------------------------------------- |
+| `title`      | `string` | ✅       | The title for the post.                         | -         | `My Blog Post`, `Hello World`                         |
+| `content`    | `string` | ❌       | The content for the post, in HTML format.       | -         | `<p>Post content here</p>`, `This is my post content` |
+| `status`     | `string` | ❌       | The publishing status for the post.             | `publish` | `example`                                             |
+| `excerpt`    | `string` | ❌       | The excerpt for the post.                       | -         | `example`                                             |
+| `categories` | `array`  | ❌       | An array of category IDs to assign to the post. | -         | `example`                                             |
+| `tags`       | `array`  | ❌       | An array of tag IDs to assign to the post.      | -         | `example`                                             |
 
 ## Examples
 
@@ -76,7 +76,8 @@ wp_create_post --title="Example Post Title" --content="This is example content f
 
 **Endpoint:** `/wp-json/wp/v2/posts`
 
-This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters are determined by WordPress core functionality.
+This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters
+are determined by WordPress core functionality.
 
 ### WordPress Documentation
 
@@ -138,4 +139,4 @@ This tool requires the following WordPress user capabilities:
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

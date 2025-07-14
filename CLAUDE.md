@@ -194,11 +194,10 @@ DEBUG=true npm run dev     # Enable debug logging
 npm run fix:rest-auth      # Automated fix for REST API POST authentication
 ```
 
-**Issue**: POST/PUT/DELETE requests return 401 Unauthorized even with valid application passwords, while GET
-requests work fine.
+**Issue**: POST/PUT/DELETE requests return 401 Unauthorized even with valid application passwords, while GET requests
+work fine.
 
-**Root Cause**: Apache strips Authorization headers by default, particularly affecting write
-operations.
+**Root Cause**: Apache strips Authorization headers by default, particularly affecting write operations.
 
 **Automated Solution**: The `fix:rest-auth` script applies these fixes:
 
@@ -335,8 +334,7 @@ node scripts/health-check.js    # Full system diagnostics
 - **Cache** (`cache.ts` - CacheTools): Performance caching and optimization (4 tools)
 - **Performance** (`performance.ts` - PerformanceTools): Real-time monitoring and analytics (6 tools)
 
-**Tool Class Structure:**
-Each tool class follows a consistent pattern:
+**Tool Class Structure:** Each tool class follows a consistent pattern:
 
 ```typescript
 export class ToolCategoryTools {
@@ -356,19 +354,20 @@ export class ToolCategoryTools {
 
 **Performance Monitoring System** (`src/performance/`): Real-time performance tracking and analytics.
 
-- **PerformanceMonitor** (`PerformanceMonitor.ts`): Core monitoring engine with metrics collection,
-  historical data storage, and alert generation
-- **MetricsCollector** (`MetricsCollector.ts`): Central hub for collecting metrics from clients
-  and cache managers with real-time aggregation
-- **PerformanceAnalytics** (`PerformanceAnalytics.ts`): Advanced analytics with trend analysis,
-  anomaly detection, linear regression, and predictive insights
+- **PerformanceMonitor** (`PerformanceMonitor.ts`): Core monitoring engine with metrics collection, historical data
+  storage, and alert generation
+- **MetricsCollector** (`MetricsCollector.ts`): Central hub for collecting metrics from clients and cache managers with
+  real-time aggregation
+- **PerformanceAnalytics** (`PerformanceAnalytics.ts`): Advanced analytics with trend analysis, anomaly detection,
+  linear regression, and predictive insights
 - **6 Performance Tools**: Complete performance management toolkit for monitoring, benchmarking, and optimization
 
 **Documentation Generation System** (`src/docs/`): Auto-generated API documentation.
 
-- **DocumentationGenerator** (`DocumentationGenerator.ts`): Automatic extraction of tool
-  documentation from TypeScript classes and type definitions
-- **MarkdownFormatter** (`MarkdownFormatter.ts`): Multi-format documentation output (Markdown, JSON, OpenAPI specification)
+- **DocumentationGenerator** (`DocumentationGenerator.ts`): Automatic extraction of tool documentation from TypeScript
+  classes and type definitions
+- **MarkdownFormatter** (`MarkdownFormatter.ts`): Multi-format documentation output (Markdown, JSON, OpenAPI
+  specification)
 - **CI/CD Integration**: GitHub Actions workflow for automatic documentation updates on code changes
 - **Quality Validation**: Comprehensive structure checks, cross-reference validation, and completeness verification
 
@@ -476,19 +475,17 @@ To manage multiple WordPress sites, create a `mcp-wordpress.config.json` file in
 
 #### Using the `site` Parameter
 
-When using a multi-site configuration, all tools accept a `site` parameter to specify which site to
-target.
+When using a multi-site configuration, all tools accept a `site` parameter to specify which site to target.
 
-**Example:**
-`wp_list_posts --site="site1"`
+**Example:** `wp_list_posts --site="site1"`
 
-If the `site` parameter is omitted and more than one site is configured, the tool will fail. If only
-one site is configured, it will be used by default.
+If the `site` parameter is omitted and more than one site is configured, the tool will fail. If only one site is
+configured, it will be used by default.
 
 #### Single-Site Configuration (Environment Variables)
 
-If `mcp-wordpress.config.json` is not found, the server will use the following environment variables
-(loaded from `.env` or passed via MCP config):
+If `mcp-wordpress.config.json` is not found, the server will use the following environment variables (loaded from `.env`
+or passed via MCP config):
 
 - `WORDPRESS_SITE_URL` - WordPress site URL (required)
 - `WORDPRESS_USERNAME` - WordPress username (required)
@@ -510,8 +507,7 @@ Supports 4 authentication methods with comprehensive testing:
 - **Integration Tests**: WordPress API connectivity for single and multi-site setups.
 - **Authentication Tests**: All auth methods with timeout handling.
 - **Configuration Tests**: Comprehensive Zod schema validation for all configuration scenarios.
-- **Property-Based Tests**: Generative testing using fast-check for edge case discovery and data
-  structure validation.
+- **Property-Based Tests**: Generative testing using fast-check for edge case discovery and data structure validation.
 - **Security Tests**: Input validation, XSS protection, SQL injection prevention, and penetration testing.
 
 ### Development Guidelines
@@ -519,8 +515,8 @@ Supports 4 authentication methods with comprehensive testing:
 #### Code Quality
 
 - **TypeScript**: Adhere to strict mode and maintain comprehensive type safety.
-- **ESLint**: Follow established linting rules for consistent code style - all files now linted
-  including previously disabled tests.
+- **ESLint**: Follow established linting rules for consistent code style - all files now linted including previously
+  disabled tests.
 - **Class-Based Architecture**: All new tools must be implemented as classes following the established pattern.
 
 #### Tool Development
@@ -536,8 +532,7 @@ Supports 4 authentication methods with comprehensive testing:
 - **Integration Tests**: Test multi-site functionality with real WordPress connections.
 - **Authentication Tests**: Verify all authentication methods work correctly.
 - **Coverage**: Maintain minimum 50% code coverage threshold.
-- **Test Maintenance**: All tests are now enabled and functional - no disabled tests remain
-  in the codebase.
+- **Test Maintenance**: All tests are now enabled and functional - no disabled tests remain in the codebase.
 
 #### Documentation Standards
 
@@ -545,14 +540,15 @@ Supports 4 authentication methods with comprehensive testing:
 - **Migration Guides**: Create migration documentation for breaking changes.
 - **Tool Documentation**: Document new tools with usage examples and parameter descriptions.
 - **Security Notes**: Document any security considerations or credential handling changes.
-- **Dummy Data**: Always use placeholder data (like example.com, your_username) in documentation and
-  examples to prevent accidental credential exposure.
+- **Dummy Data**: Always use placeholder data (like example.com, your_username) in documentation and examples to prevent
+  accidental credential exposure.
 
 #### Repository Maintenance Guidelines
 
 **Keep Repository Clean and Concise**
 
-- **Markdown Files**: Limit root-level markdown files to essential documents only (README.md, CHANGELOG.md, CLAUDE.md, TODO.md)
+- **Markdown Files**: Limit root-level markdown files to essential documents only (README.md, CHANGELOG.md, CLAUDE.md,
+  TODO.md)
 - **Documentation Organization**: Use `docs/` folder for detailed documentation, organized by category
 - **Archive Management**: Remove outdated files rather than keeping archive folders - use git history for reference
 - **TODO Management**: Keep TODO.md concise and actionable - remove completed items and consolidate verbose descriptions

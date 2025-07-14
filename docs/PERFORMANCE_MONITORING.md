@@ -1,13 +1,14 @@
 # Performance Monitoring System
 
-The MCP WordPress Server includes a comprehensive performance monitoring system that provides real-time insights, historical analysis, and optimization recommendations for your WordPress API operations.
+The MCP WordPress Server includes a comprehensive performance monitoring system that provides real-time insights,
+historical analysis, and optimization recommendations for your WordPress API operations.
 
 ## 🎯 Overview
 
 The performance monitoring system consists of three main components:
 
 - **PerformanceMonitor**: Core metrics collection and alerting
-- **MetricsCollector**: Real-time data gathering and client integration  
+- **MetricsCollector**: Real-time data gathering and client integration
 - **PerformanceAnalytics**: Advanced analysis, trends, and predictions
 
 ## 🚀 Key Features
@@ -330,12 +331,12 @@ Configure alert thresholds in your monitoring setup:
 ```javascript
 const monitor = new PerformanceMonitor({
   alertThresholds: {
-    responseTime: 2000,     // 2 seconds
-    errorRate: 0.05,        // 5%
-    cacheHitRate: 0.8,      // 80%
-    memoryUsage: 80,        // 80%
-    cpuUsage: 80           // 80%
-  }
+    responseTime: 2000, // 2 seconds
+    errorRate: 0.05, // 5%
+    cacheHitRate: 0.8, // 80%
+    memoryUsage: 80, // 80%
+    cpuUsage: 80, // 80%
+  },
 });
 ```
 
@@ -390,7 +391,7 @@ wp_performance_export --format=json --includeAnalytics=true
 
 ```javascript
 const config = {
-  collectInterval: 30000,           // 30 seconds
+  collectInterval: 30000, // 30 seconds
   retentionPeriod: 24 * 60 * 60 * 1000, // 24 hours
   enableRealTimeMonitoring: true,
   enableHistoricalData: true,
@@ -400,8 +401,8 @@ const config = {
     errorRate: 0.05,
     cacheHitRate: 0.8,
     memoryUsage: 80,
-    cpuUsage: 80
-  }
+    cpuUsage: 80,
+  },
 };
 ```
 
@@ -414,7 +415,7 @@ const config = {
   enableToolTracking: true,
   enableRequestInterception: true,
   enableCacheIntegration: true,
-  enableSystemMetrics: true
+  enableSystemMetrics: true,
 };
 ```
 
@@ -426,7 +427,7 @@ const config = {
   enableAnomalyDetection: true,
   enableTrendAnalysis: true,
   lookbackPeriod: 24 * 60 * 60 * 1000, // 24 hours
-  sensitivityLevel: 'medium' // low, medium, high
+  sensitivityLevel: "medium", // low, medium, high
 };
 ```
 
@@ -509,11 +510,12 @@ wp_performance_optimize --focus=scaling
 To contribute to the performance monitoring system:
 
 1. **Add new metrics** in `PerformanceMonitor.ts`
-2. **Enhance analytics** in `PerformanceAnalytics.ts`  
+2. **Enhance analytics** in `PerformanceAnalytics.ts`
 3. **Create new tools** in `tools/performance.ts`
 4. **Add tests** in `scripts/test-performance-monitoring.js`
 5. **Update documentation** in this file
 
 ---
 
-**🚀 The performance monitoring system helps you maintain optimal WordPress MCP server performance with real-time insights, intelligent analysis, and actionable recommendations.**
+**🚀 The performance monitoring system helps you maintain optimal WordPress MCP server performance with real-time
+insights, intelligent analysis, and actionable recommendations.**

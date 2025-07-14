@@ -6,11 +6,11 @@ Creates a new page.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `title` | `string` | ✅ | The title for the page. | - | `My Blog Post`, `Hello World` |
-| `content` | `string` | ❌ | The content for the page, in HTML format. | - | `<p>Post content here</p>`, `This is my post content` |
-| `status` | `string` | ❌ | The publishing status for the page. | `publish` | `example` |
+| Parameter | Type     | Required | Description                               | Default   | Examples                                              |
+| --------- | -------- | -------- | ----------------------------------------- | --------- | ----------------------------------------------------- |
+| `title`   | `string` | ✅       | The title for the page.                   | -         | `My Blog Post`, `Hello World`                         |
+| `content` | `string` | ❌       | The content for the page, in HTML format. | -         | `<p>Post content here</p>`, `This is my post content` |
+| `status`  | `string` | ❌       | The publishing status for the page.       | `publish` | `example`                                             |
 
 ## Examples
 
@@ -124,4 +124,4 @@ This tool requires the following WordPress user capabilities:
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

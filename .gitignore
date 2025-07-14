@@ -208,4 +208,7 @@ mcp-wordpress-*.config.json
 
 # Private development files
 private/
-private-*
+private/*
+private*
+PRIVATE*
+

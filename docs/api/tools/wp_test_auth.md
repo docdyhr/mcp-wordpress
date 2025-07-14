@@ -6,7 +6,7 @@ Tests the authentication and connectivity for a configured WordPress site.
 
 ## Parameters
 
-*No parameters required.*
+_No parameters required._
 
 ## Examples
 
@@ -17,7 +17,7 @@ Simple example of using wp_test_auth
 **Command:**
 
 ```bash
-wp_test_auth 
+wp_test_auth
 ```
 
 **Response:**
@@ -85,4 +85,4 @@ wp_test_auth
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_
