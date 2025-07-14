@@ -10,8 +10,7 @@ const URL_PATTERN = /^https?:\/\/[^\s<>'"{}|\\^`\[\]]+$/;
 const EMAIL_PATTERN = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const SLUG_PATTERN = /^[a-z0-9-]+$/;
 const SCRIPT_PATTERN = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
-const SQL_INJECTION_PATTERN =
-  /('|(\\')|(;)|(\\x00)|(\\n)|(\\r)|(\\x1a)|(\\x22)|(\\x27)|(\\x5c)|(\\x60))/i;
+const SQL_INJECTION_PATTERN = /('|(\\')|(;)|(\\x00)|(\\n)|(\\r)|(\\x1a)|(\\x22)|(\\x27)|(\\x5c)|(\\x60))/i;
 
 /**
  * Security validation schemas
@@ -22,10 +21,7 @@ export const SecuritySchemas = {
     .string()
     .max(10000, "String too long")
     .refine((val) => !SCRIPT_PATTERN.test(val), "Script tags not allowed")
-    .refine(
-      (val) => !val.includes("javascript:"),
-      "JavaScript URLs not allowed",
-    )
+    .refine((val) => !val.includes("javascript:"), "JavaScript URLs not allowed")
     .refine((val) => !val.includes("data:"), "Data URLs not allowed")
     .refine((val) => !val.includes("onerror="), "Event handlers not allowed")
     .refine((val) => !val.includes("onload="), "Event handlers not allowed")
@@ -36,10 +32,7 @@ export const SecuritySchemas = {
     .string()
     .max(100000, "Content too long")
     .refine((val) => !SCRIPT_PATTERN.test(val), "Script tags not allowed")
-    .refine(
-      (val) => !val.includes("javascript:"),
-      "JavaScript URLs not allowed",
-    )
+    .refine((val) => !val.includes("javascript:"), "JavaScript URLs not allowed")
     .refine((val) => !val.includes("on[a-z]+="), "Event handlers not allowed"),
 
   // URL validation
@@ -47,10 +40,7 @@ export const SecuritySchemas = {
     .string()
     .url("Invalid URL format")
     .regex(URL_PATTERN, "URL contains invalid characters")
-    .refine(
-      (val) => !val.includes("javascript:"),
-      "JavaScript URLs not allowed",
-    )
+    .refine((val) => !val.includes("javascript:"), "JavaScript URLs not allowed")
     .refine((val) => !val.includes("data:"), "Data URLs not allowed"),
 
   // Email validation
@@ -65,49 +55,30 @@ export const SecuritySchemas = {
     .string()
     .min(1, "Slug cannot be empty")
     .max(100, "Slug too long")
-    .regex(
-      SLUG_PATTERN,
-      "Slug can only contain lowercase letters, numbers, and hyphens",
-    ),
+    .regex(SLUG_PATTERN, "Slug can only contain lowercase letters, numbers, and hyphens"),
 
   // WordPress post/page content
   wpContent: z
     .string()
     .max(1000000, "Content too long")
-    .refine(
-      (val) => !SCRIPT_PATTERN.test(val),
-      "Script tags not allowed in content",
-    )
-    .refine(
-      (val) => !val.includes("javascript:"),
-      "JavaScript URLs not allowed",
-    ),
+    .refine((val) => !SCRIPT_PATTERN.test(val), "Script tags not allowed in content")
+    .refine((val) => !val.includes("javascript:"), "JavaScript URLs not allowed"),
 
   // Site ID validation
   siteId: z
     .string()
     .min(1, "Site ID cannot be empty")
     .max(50, "Site ID too long")
-    .regex(
-      /^[a-zA-Z0-9\-_]+$/,
-      "Site ID can only contain letters, numbers, hyphens, and underscores",
-    ),
+    .regex(/^[a-zA-Z0-9\-_]+$/, "Site ID can only contain letters, numbers, hyphens, and underscores"),
 
   // WordPress ID (numeric)
-  wpId: z
-    .number()
-    .int("ID must be an integer")
-    .positive("ID must be positive")
-    .max(999999999, "ID too large"),
+  wpId: z.number().int("ID must be an integer").positive("ID must be positive").max(999999999, "ID too large"),
 
   // Search query with SQL injection protection
   searchQuery: z
     .string()
     .max(500, "Search query too long")
-    .refine(
-      (val) => !SQL_INJECTION_PATTERN.test(val),
-      "Invalid characters in search query",
-    )
+    .refine((val) => !SQL_INJECTION_PATTERN.test(val), "Invalid characters in search query")
     .refine((val) => !val.includes("--"), "SQL comments not allowed")
     .refine((val) => !val.includes("/*"), "SQL comments not allowed"),
 
@@ -188,11 +159,7 @@ export class InputSanitizer {
  * Security validation decorator for tool methods
  */
 export function validateSecurity(schema: z.ZodSchema) {
-  return function (
-    target: any,
-    propertyName: string,
-    descriptor: PropertyDescriptor,
-  ) {
+  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
@@ -202,7 +169,7 @@ export function validateSecurity(schema: z.ZodSchema) {
         const validatedParams = schema.parse(params);
 
         // Log security validation (without sensitive data)
-        console.log(`Security validation passed for ${propertyName}`, {
+        console.error(`Security validation passed for ${propertyName}`, {
           timestamp: new Date().toISOString(),
           method: propertyName,
           paramCount: Object.keys(validatedParams).length,
@@ -215,12 +182,7 @@ export function validateSecurity(schema: z.ZodSchema) {
         console.error(`Security validation failed for ${propertyName}`, {
           timestamp: new Date().toISOString(),
           method: propertyName,
-          error:
-            error instanceof z.ZodError
-              ? error.errors
-              : error instanceof Error
-                ? error.message
-                : String(error),
+          error: error instanceof z.ZodError ? error.errors : error instanceof Error ? error.message : String(error),
         });
 
         throw new SecurityValidationError(
@@ -229,8 +191,7 @@ export function validateSecurity(schema: z.ZodSchema) {
             ? error.errors
             : [
                 {
-                  message:
-                    error instanceof Error ? error.message : String(error),
+                  message: error instanceof Error ? error.message : String(error),
                 },
               ],
         );
@@ -328,10 +289,7 @@ export const ToolSchemas = {
  * Rate limiting and DoS protection
  */
 export class SecurityLimiter {
-  private static requestCounts = new Map<
-    string,
-    { count: number; resetTime: number }
-  >();
+  private static requestCounts = new Map<string, { count: number; resetTime: number }>();
   private static readonly RATE_LIMIT = 1000; // requests per window
   private static readonly WINDOW_MS = 60 * 1000; // 1 minute
 
