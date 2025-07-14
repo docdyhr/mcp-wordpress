@@ -374,13 +374,6 @@ docker pull docdyhr/mcp-wordpress:1.3.1
 - **Docker Hub:** [`docdyhr/mcp-wordpress`](https://hub.docker.com/r/docdyhr/mcp-wordpress)
 - **GitHub:** [Latest releases](https://github.com/docdyhr/mcp-wordpress/releases)
 
-## 🙏 Acknowledgments
-
-Special thanks to **[Stephan Ferraro](https://github.com/ferraro)** for the upstream project that inspired this
-implementation.
-
----
-
 ## 🚀 Next Steps
 
 **Ready to transform your WordPress management?**
@@ -389,6 +382,13 @@ implementation.
 2. **⚡ [Try NPX Method](docs/user-guides/NPX_SETUP.md)** - Power user setup (5 minutes)
 3. **📚 [Explore All Tools](docs/api/README.md)** - See what's possible
 4. **💬 [Join Discussions](https://github.com/docdyhr/mcp-wordpress/discussions)** - Get help and share ideas
+
+---
+
+## 🙏 Acknowledgments
+
+Special thanks to **[Stephan Ferraro](https://github.com/ferraro)** for the upstream project that inspired this
+implementation.
 
 ---
 
