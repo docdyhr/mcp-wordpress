@@ -6,13 +6,13 @@ Get performance alerts and anomaly detection results
 
 ## Parameters
 
-| Parameter          | Type      | Required | Description                                                       | Default | Examples              |
-| ------------------ | --------- | -------- | ----------------------------------------------------------------- | ------- | --------------------- |
-| `site`             | `string`  | ❌       | Specific site ID for multi-site setups (optional for single site) | -       | `site1`, `production` |
-| `severity`         | `string`  | ❌       | Filter alerts by severity level (info, warning, error, critical)  | -       | `example`             |
-| `category`         | `string`  | ❌       | Filter alerts by category (performance, cache, system, wordpress) | `all`   | `example`             |
-| `limit`            | `number`  | ❌       | Maximum number of alerts to return (default: 20)                  | -       | `10`, `20`            |
-| `includeAnomalies` | `boolean` | ❌       | Include detected anomalies (default: true)                        | -       | `example`             |
+| Parameter | Type | Required | Description | Default | Examples |
+|-----------|------|----------|-------------|---------|----------|
+| `site` | `string` | ❌ | Specific site ID for multi-site setups (optional for single site) | - | `site1`, `production` |
+| `severity` | `string` | ❌ | Filter alerts by severity level (info, warning, error, critical) | - | `example` |
+| `category` | `string` | ❌ | Filter alerts by category (performance, cache, system, wordpress) | `all` | `example` |
+| `limit` | `number` | ❌ | Maximum number of alerts to return (default: 20) | - | `10`, `20` |
+| `includeAnomalies` | `boolean` | ❌ | Include detected anomalies (default: true) | - | `example` |
 
 ## Examples
 
@@ -21,13 +21,11 @@ Get performance alerts and anomaly detection results
 Simple example of using wp_performance_alerts
 
 **Command:**
-
 ```bash
-wp_performance_alerts
+wp_performance_alerts 
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -43,7 +41,6 @@ wp_performance_alerts
 ```
 
 **Error Example (Authentication failure):**
-
 ```json
 {
   "error": "Authentication failed",
@@ -51,18 +48,17 @@ wp_performance_alerts
 }
 ```
 
+
 ### Multi-Site performance Usage
 
 Using wp_performance_alerts with specific site targeting
 
 **Command:**
-
 ```bash
 wp_performance_alerts --site="site1"
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -76,19 +72,20 @@ wp_performance_alerts --site="site1"
   }
 }
 ```
+
+
+
 
 ### Advanced performance Configuration
 
 Comprehensive example using all available parameters
 
 **Command:**
-
 ```bash
 wp_performance_alerts --site="site1" --severity="example_value" --category="overview" --limit="20" --includeAnomalies="example_value"
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -102,6 +99,13 @@ wp_performance_alerts --site="site1" --severity="example_value" --category="over
   }
 }
 ```
+
+
+
+
+
+
+
 
 ## Response Format
 
@@ -129,11 +133,13 @@ wp_performance_alerts --site="site1" --severity="example_value" --category="over
 **Description:** Invalid credentials or insufficient permissions  
 **Resolution:** Check your authentication credentials and user permissions
 
+
 ### VALIDATION_ERROR
 
 **Message:** Parameter validation failed  
 **Description:** One or more required parameters are missing or invalid  
 **Resolution:** Review the required parameters and their formats
+
 
 ### NOT_FOUND
 
@@ -141,12 +147,16 @@ wp_performance_alerts --site="site1" --severity="example_value" --category="over
 **Description:** The requested resource does not exist  
 **Resolution:** Verify the resource ID and ensure it exists
 
+
 ### PERMISSION_DENIED
 
 **Message:** Insufficient permissions  
 **Description:** The user does not have permission to perform this action  
 **Resolution:** Contact an administrator to grant the necessary permissions
 
+
+
+
 ---
 
-_Generated automatically from tool definitions - Do not edit manually_
+*Generated automatically from tool definitions - Do not edit manually*

@@ -6,11 +6,11 @@ Updates one or more general settings for a WordPress site.
 
 ## Parameters
 
-| Parameter     | Type     | Required | Description                                            | Default | Examples                      |
-| ------------- | -------- | -------- | ------------------------------------------------------ | ------- | ----------------------------- |
-| `title`       | `string` | ❌       | The title of the site.                                 | -       | `My Blog Post`, `Hello World` |
-| `description` | `string` | ❌       | The tagline or description of the site.                | -       | `example`                     |
-| `timezone`    | `string` | ❌       | A city in the same timezone, e.g., 'America/New_York'. | -       | `example`                     |
+| Parameter | Type | Required | Description | Default | Examples |
+|-----------|------|----------|-------------|---------|----------|
+| `title` | `string` | ❌ | The title of the site. | - | `My Blog Post`, `Hello World` |
+| `description` | `string` | ❌ | The tagline or description of the site. | - | `example` |
+| `timezone` | `string` | ❌ | A city in the same timezone, e.g., 'America/New_York'. | - | `example` |
 
 ## Examples
 
@@ -19,13 +19,11 @@ Updates one or more general settings for a WordPress site.
 Simple example of using wp_update_site_settings
 
 **Command:**
-
 ```bash
-wp_update_site_settings
+wp_update_site_settings 
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -38,7 +36,6 @@ wp_update_site_settings
 ```
 
 **Error Example (Authentication failure):**
-
 ```json
 {
   "error": "Authentication failed",
@@ -46,18 +43,17 @@ wp_update_site_settings
 }
 ```
 
+
 ### Advanced site Configuration
 
 Comprehensive example using all available parameters
 
 **Command:**
-
 ```bash
 wp_update_site_settings --title="Example Post Title" --description="example_value" --timezone="example_value"
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -68,6 +64,13 @@ wp_update_site_settings --title="Example Post Title" --description="example_valu
   }
 }
 ```
+
+
+
+
+
+
+
 
 ## Response Format
 
@@ -95,11 +98,13 @@ wp_update_site_settings --title="Example Post Title" --description="example_valu
 **Description:** Invalid credentials or insufficient permissions  
 **Resolution:** Check your authentication credentials and user permissions
 
+
 ### VALIDATION_ERROR
 
 **Message:** Parameter validation failed  
 **Description:** One or more required parameters are missing or invalid  
 **Resolution:** Review the required parameters and their formats
+
 
 ### NOT_FOUND
 
@@ -107,12 +112,16 @@ wp_update_site_settings --title="Example Post Title" --description="example_valu
 **Description:** The requested resource does not exist  
 **Resolution:** Verify the resource ID and ensure it exists
 
+
 ### PERMISSION_DENIED
 
 **Message:** Insufficient permissions  
 **Description:** The user does not have permission to perform this action  
 **Resolution:** Contact an administrator to grant the necessary permissions
 
+
+
+
 ---
 
-_Generated automatically from tool definitions - Do not edit manually_
+*Generated automatically from tool definitions - Do not edit manually*

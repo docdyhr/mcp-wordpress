@@ -23,7 +23,6 @@ Performance monitoring and analytics tools
 ## Examples
 
 ### Basic performance Workflow
-
 ```bash
 # List all performance
 wp_list_performance
@@ -31,12 +30,11 @@ wp_list_performance
 # Get specific item
 wp_get_performanc --id=123
 
-# Create new item
+# Create new item  
 wp_create_performanc --title="Example"
 ```
 
 ### Multi-Site performance Management
-
 ```bash
 # Work with specific site
 wp_list_performance --site=production

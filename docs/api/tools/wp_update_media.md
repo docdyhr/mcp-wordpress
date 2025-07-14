@@ -6,13 +6,13 @@ Updates the metadata of an existing media item.
 
 ## Parameters
 
-| Parameter     | Type     | Required | Description                         | Default | Examples                      |
-| ------------- | -------- | -------- | ----------------------------------- | ------- | ----------------------------- |
-| `id`          | `number` | ✅       | The ID of the media item to update. | -       | `123`, `456`                  |
-| `title`       | `string` | ❌       | The new title for the media item.   | -       | `My Blog Post`, `Hello World` |
-| `alt_text`    | `string` | ❌       | The new alternative text.           | -       | `example`                     |
-| `caption`     | `string` | ❌       | The new caption.                    | -       | `example`                     |
-| `description` | `string` | ❌       | The new description.                | -       | `example`                     |
+| Parameter | Type | Required | Description | Default | Examples |
+|-----------|------|----------|-------------|---------|----------|
+| `id` | `number` | ✅ | The ID of the media item to update. | - | `123`, `456` |
+| `title` | `string` | ❌ | The new title for the media item. | - | `My Blog Post`, `Hello World` |
+| `alt_text` | `string` | ❌ | The new alternative text. | - | `example` |
+| `caption` | `string` | ❌ | The new caption. | - | `example` |
+| `description` | `string` | ❌ | The new description. | - | `example` |
 
 ## Examples
 
@@ -21,13 +21,11 @@ Updates the metadata of an existing media item.
 Simple example of using wp_update_media
 
 **Command:**
-
 ```bash
 wp_update_media --id="123"
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -40,7 +38,6 @@ wp_update_media --id="123"
 ```
 
 **Error Example (Authentication failure):**
-
 ```json
 {
   "error": "Authentication failed",
@@ -48,18 +45,17 @@ wp_update_media --id="123"
 }
 ```
 
+
 ### Advanced media Configuration
 
 Comprehensive example using all available parameters
 
 **Command:**
-
 ```bash
 wp_update_media --id="123" --title="Example Post Title" --alt_text="example_value" --caption="example_value" --description="example_value"
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -70,6 +66,13 @@ wp_update_media --id="123" --title="Example Post Title" --alt_text="example_valu
   }
 }
 ```
+
+
+
+
+
+
+
 
 ## Response Format
 
@@ -97,11 +100,13 @@ wp_update_media --id="123" --title="Example Post Title" --alt_text="example_valu
 **Description:** Invalid credentials or insufficient permissions  
 **Resolution:** Check your authentication credentials and user permissions
 
+
 ### VALIDATION_ERROR
 
 **Message:** Parameter validation failed  
 **Description:** One or more required parameters are missing or invalid  
 **Resolution:** Review the required parameters and their formats
+
 
 ### NOT_FOUND
 
@@ -109,12 +114,16 @@ wp_update_media --id="123" --title="Example Post Title" --alt_text="example_valu
 **Description:** The requested resource does not exist  
 **Resolution:** Verify the resource ID and ensure it exists
 
+
 ### PERMISSION_DENIED
 
 **Message:** Insufficient permissions  
 **Description:** The user does not have permission to perform this action  
 **Resolution:** Contact an administrator to grant the necessary permissions
 
+
+
+
 ---
 
-_Generated automatically from tool definitions - Do not edit manually_
+*Generated automatically from tool definitions - Do not edit manually*

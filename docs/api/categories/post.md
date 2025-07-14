@@ -22,7 +22,6 @@ post management tools
 ## Examples
 
 ### Basic post Workflow
-
 ```bash
 # List all post
 wp_list_post
@@ -30,12 +29,11 @@ wp_list_post
 # Get specific item
 wp_get_pos --id=123
 
-# Create new item
+# Create new item  
 wp_create_pos --title="Example"
 ```
 
 ### Multi-Site post Management
-
 ```bash
 # Work with specific site
 wp_list_post --site=production

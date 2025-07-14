@@ -295,28 +295,20 @@ export class CacheInvalidation {
   /**
    * Apply invalidation rule to cache
    */
-  private async applyInvalidationRule(
-    event: InvalidationEvent,
-    rule: InvalidationRule,
-  ): Promise<void> {
+  private async applyInvalidationRule(event: InvalidationEvent, rule: InvalidationRule): Promise<void> {
     for (const pattern of rule.patterns) {
       let invalidationPattern = pattern;
 
       // Replace placeholders with actual values
       if (event.id) {
-        invalidationPattern = invalidationPattern.replace(
-          "\\d+",
-          event.id.toString(),
-        );
+        invalidationPattern = invalidationPattern.replace("\\d+", event.id.toString());
       }
 
       // Invalidate matching cache entries
       const invalidated = this.httpCache.invalidatePattern(invalidationPattern);
 
       if (invalidated > 0) {
-        console.log(
-          `Invalidated ${invalidated} cache entries for pattern: ${invalidationPattern}`,
-        );
+        console.error(`INFO: Invalidated ${invalidated} cache entries for pattern: ${invalidationPattern}`);
       }
     }
   }
@@ -331,10 +323,7 @@ export class CacheInvalidation {
   } {
     return {
       queueSize: this.eventQueue.length,
-      rulesCount: Array.from(this.invalidationRules.values()).reduce(
-        (acc, rules) => acc + rules.length,
-        0,
-      ),
+      rulesCount: Array.from(this.invalidationRules.values()).reduce((acc, rules) => acc + rules.length, 0),
       processing: this.processing,
     };
   }
@@ -410,20 +399,20 @@ export class CacheWarmer {
   async warmEssentials(): Promise<void> {
     // Implementation would depend on your specific WordPress client
     // This is a placeholder for the structure
-    console.log("Warming essential caches...");
+    console.error("INFO: Warming essential caches...");
   }
 
   /**
    * Warm cache with taxonomy data
    */
   async warmTaxonomies(): Promise<void> {
-    console.log("Warming taxonomy caches...");
+    console.error("INFO: Warming taxonomy caches...");
   }
 
   /**
    * Warm cache with user data
    */
   async warmUsers(): Promise<void> {
-    console.log("Warming user caches...");
+    console.error("INFO: Warming user caches...");
   }
 }

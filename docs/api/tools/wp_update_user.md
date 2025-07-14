@@ -6,11 +6,11 @@ Updates an existing user.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                         | Default | Examples                             |
-| --------- | -------- | -------- | ----------------------------------- | ------- | ------------------------------------ |
-| `id`      | `number` | ✅       | The ID of the user to update.       | -       | `123`, `456`                         |
-| `email`   | `string` | ❌       | The new email address for the user. | -       | `user@example.com`, `admin@site.com` |
-| `name`    | `string` | ❌       | The new display name for the user.  | -       | `example`                            |
+| Parameter | Type | Required | Description | Default | Examples |
+|-----------|------|----------|-------------|---------|----------|
+| `id` | `number` | ✅ | The ID of the user to update. | - | `123`, `456` |
+| `email` | `string` | ❌ | The new email address for the user. | - | `user@example.com`, `admin@site.com` |
+| `name` | `string` | ❌ | The new display name for the user. | - | `example` |
 
 ## Examples
 
@@ -19,13 +19,11 @@ Updates an existing user.
 Simple example of using wp_update_user
 
 **Command:**
-
 ```bash
 wp_update_user --id="123"
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -38,7 +36,6 @@ wp_update_user --id="123"
 ```
 
 **Error Example (Authentication failure):**
-
 ```json
 {
   "error": "Authentication failed",
@@ -46,18 +43,17 @@ wp_update_user --id="123"
 }
 ```
 
+
 ### Advanced user Configuration
 
 Comprehensive example using all available parameters
 
 **Command:**
-
 ```bash
 wp_update_user --id="123" --email="user@example.com" --name="example_value"
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -69,6 +65,11 @@ wp_update_user --id="123" --email="user@example.com" --name="example_value"
 }
 ```
 
+
+
+
+
+
 ## Required Permissions
 
 This tool requires the following WordPress user capabilities:
@@ -76,6 +77,7 @@ This tool requires the following WordPress user capabilities:
 - `edit_users`
 
 **Note:** The authenticated user must have these capabilities to successfully execute this tool.
+
 
 ## Response Format
 
@@ -103,11 +105,13 @@ This tool requires the following WordPress user capabilities:
 **Description:** Invalid credentials or insufficient permissions  
 **Resolution:** Check your authentication credentials and user permissions
 
+
 ### VALIDATION_ERROR
 
 **Message:** Parameter validation failed  
 **Description:** One or more required parameters are missing or invalid  
 **Resolution:** Review the required parameters and their formats
+
 
 ### NOT_FOUND
 
@@ -115,12 +119,16 @@ This tool requires the following WordPress user capabilities:
 **Description:** The requested resource does not exist  
 **Resolution:** Verify the resource ID and ensure it exists
 
+
 ### PERMISSION_DENIED
 
 **Message:** Insufficient permissions  
 **Description:** The user does not have permission to perform this action  
 **Resolution:** Contact an administrator to grant the necessary permissions
 
+
+
+
 ---
 
-_Generated automatically from tool definitions - Do not edit manually_
+*Generated automatically from tool definitions - Do not edit manually*

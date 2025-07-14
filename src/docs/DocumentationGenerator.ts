@@ -138,7 +138,7 @@ export class DocumentationGenerator {
    * Generate complete documentation for all tools and types
    */
   async generateFullDocumentation(): Promise<DocumentationOutput> {
-    console.log("🚀 Starting API documentation generation...");
+    console.error("🚀 Starting API documentation generation...");
 
     const tools = await this.extractAllToolDocumentation();
     const categories = this.generateCategoryDocumentation(tools);
@@ -162,9 +162,7 @@ export class DocumentationGenerator {
     // Write documentation to files
     await this.writeDocumentationFiles(output);
 
-    console.log(
-      `✅ Documentation generation complete! ${tools.length} tools documented.`,
-    );
+    console.error(`✅ Documentation generation complete! ${tools.length} tools documented.`);
     return output;
   }
 
@@ -190,18 +188,11 @@ export class DocumentationGenerator {
         const category = this.extractCategoryFromClassName(className);
 
         for (const toolDef of toolDefinitions) {
-          const doc = await this.extractToolDocumentation(
-            toolDef,
-            category,
-            className,
-          );
+          const doc = await this.extractToolDocumentation(toolDef, category, className);
           toolDocs.push(doc);
         }
       } catch (error) {
-        console.warn(
-          `⚠️ Failed to extract documentation for ${className}:`,
-          error,
-        );
+        console.warn(`⚠️ Failed to extract documentation for ${className}:`, error);
       }
     }
 
@@ -216,9 +207,7 @@ export class DocumentationGenerator {
     category: string,
     className: string,
   ): Promise<ToolDocumentation> {
-    const parameters = this.extractParameterDocumentation(
-      toolDef.parameters || [],
-    );
+    const parameters = this.extractParameterDocumentation(toolDef.parameters || []);
     const examples = this.generateToolExamples(toolDef, category);
     const wordpressEndpoint = this.wordpressEndpoints.get(toolDef.name);
     const returnType = this.inferReturnType(toolDef.name, category);
@@ -242,9 +231,7 @@ export class DocumentationGenerator {
   /**
    * Extract parameter documentation
    */
-  private extractParameterDocumentation(
-    parameters: any[],
-  ): ParameterDocumentation[] {
+  private extractParameterDocumentation(parameters: any[]): ParameterDocumentation[] {
     return parameters.map((param) => ({
       name: param.name,
       type: param.type || "string",
@@ -259,10 +246,7 @@ export class DocumentationGenerator {
   /**
    * Generate usage examples for tools
    */
-  private generateToolExamples(
-    toolDef: ToolDefinition,
-    category: string,
-  ): ExampleUsage[] {
+  private generateToolExamples(toolDef: ToolDefinition, category: string): ExampleUsage[] {
     const examples: ExampleUsage[] = [];
 
     // Basic usage example
@@ -291,10 +275,7 @@ export class DocumentationGenerator {
   /**
    * Generate basic usage example
    */
-  private generateBasicExample(
-    toolDef: ToolDefinition,
-    category: string,
-  ): ExampleUsage | null {
+  private generateBasicExample(toolDef: ToolDefinition, category: string): ExampleUsage | null {
     const toolName = toolDef.name;
     const basicParams: Record<string, any> = {};
 
@@ -310,11 +291,7 @@ export class DocumentationGenerator {
       description: `Simple example of using ${toolName}`,
       command: toolName,
       parameters: basicParams,
-      expectedResponse: this.generateExpectedResponse(
-        toolName,
-        category,
-        "basic",
-      ),
+      expectedResponse: this.generateExpectedResponse(toolName, category, "basic"),
       errorExample: {
         scenario: "Authentication failure",
         error: {
@@ -328,10 +305,7 @@ export class DocumentationGenerator {
   /**
    * Generate multi-site example
    */
-  private generateMultiSiteExample(
-    toolDef: ToolDefinition,
-    category: string,
-  ): ExampleUsage | null {
+  private generateMultiSiteExample(toolDef: ToolDefinition, category: string): ExampleUsage | null {
     const params = { site: "site1", ...this.getExampleParameters(toolDef, 1) };
 
     return {
@@ -339,21 +313,14 @@ export class DocumentationGenerator {
       description: `Using ${toolDef.name} with specific site targeting`,
       command: toolDef.name,
       parameters: params,
-      expectedResponse: this.generateExpectedResponse(
-        toolDef.name,
-        category,
-        "multisite",
-      ),
+      expectedResponse: this.generateExpectedResponse(toolDef.name, category, "multisite"),
     };
   }
 
   /**
    * Generate advanced example with all parameters
    */
-  private generateAdvancedExample(
-    toolDef: ToolDefinition,
-    category: string,
-  ): ExampleUsage | null {
+  private generateAdvancedExample(toolDef: ToolDefinition, category: string): ExampleUsage | null {
     const allParams = this.getExampleParameters(toolDef, "all");
 
     if (Object.keys(allParams).length <= 2) {
@@ -365,20 +332,14 @@ export class DocumentationGenerator {
       description: "Comprehensive example using all available parameters",
       command: toolDef.name,
       parameters: allParams,
-      expectedResponse: this.generateExpectedResponse(
-        toolDef.name,
-        category,
-        "advanced",
-      ),
+      expectedResponse: this.generateExpectedResponse(toolDef.name, category, "advanced"),
     };
   }
 
   /**
    * Generate category documentation
    */
-  private generateCategoryDocumentation(
-    tools: ToolDocumentation[],
-  ): CategoryDocumentation[] {
+  private generateCategoryDocumentation(tools: ToolDocumentation[]): CategoryDocumentation[] {
     const categories = new Map<string, ToolDocumentation[]>();
 
     // Group tools by category
@@ -389,15 +350,13 @@ export class DocumentationGenerator {
       categories.get(tool.category)!.push(tool);
     }
 
-    return Array.from(categories.entries()).map(
-      ([categoryName, categoryTools]) => ({
-        name: categoryName,
-        description: this.getCategoryDescription(categoryName),
-        toolCount: categoryTools.length,
-        tools: categoryTools.map((t) => t.name).sort(),
-        usagePatterns: this.generateUsagePatterns(categoryName, categoryTools),
-      }),
-    );
+    return Array.from(categories.entries()).map(([categoryName, categoryTools]) => ({
+      name: categoryName,
+      description: this.getCategoryDescription(categoryName),
+      toolCount: categoryTools.length,
+      tools: categoryTools.map((t) => t.name).sort(),
+      usagePatterns: this.generateUsagePatterns(categoryName, categoryTools),
+    }));
   }
 
   /**
@@ -446,10 +405,7 @@ export class DocumentationGenerator {
   /**
    * Generate OpenAPI specification
    */
-  private generateOpenAPISpecification(
-    tools: ToolDocumentation[],
-    types: TypeDocumentation[],
-  ): OpenAPISpecification {
+  private generateOpenAPISpecification(tools: ToolDocumentation[], types: TypeDocumentation[]): OpenAPISpecification {
     const paths: Record<string, any> = {};
     const components: Record<string, any> = {
       schemas: {},
@@ -524,9 +480,7 @@ export class DocumentationGenerator {
   /**
    * Write all documentation files
    */
-  private async writeDocumentationFiles(
-    output: DocumentationOutput,
-  ): Promise<void> {
+  private async writeDocumentationFiles(output: DocumentationOutput): Promise<void> {
     const outputDir = this.config.outputDir;
 
     // Ensure output directory exists
@@ -560,19 +514,13 @@ export class DocumentationGenerator {
 
     // Write OpenAPI specification
     if (output.openApiSpec) {
-      await fs.promises.writeFile(
-        path.join(outputDir, "openapi.json"),
-        JSON.stringify(output.openApiSpec, null, 2),
-      );
+      await fs.promises.writeFile(path.join(outputDir, "openapi.json"), JSON.stringify(output.openApiSpec, null, 2));
     }
 
     // Write summary
-    await fs.promises.writeFile(
-      path.join(outputDir, "summary.json"),
-      JSON.stringify(output.summary, null, 2),
-    );
+    await fs.promises.writeFile(path.join(outputDir, "summary.json"), JSON.stringify(output.summary, null, 2));
 
-    console.log(`📁 Documentation written to ${outputDir}/`);
+    console.error(`📁 Documentation written to ${outputDir}/`);
   }
 
   // Helper methods for specific documentation tasks...
@@ -624,8 +572,7 @@ export class DocumentationGenerator {
       version: "1.2.0",
       coverage: {
         toolsWithExamples: tools.filter((t) => t.examples.length > 0).length,
-        toolsWithWordPressMapping: tools.filter((t) => t.wordpressEndpoint)
-          .length,
+        toolsWithWordPressMapping: tools.filter((t) => t.wordpressEndpoint).length,
         typesDocumented: types.length,
       },
     };
@@ -709,11 +656,7 @@ export class DocumentationGenerator {
     return exampleValues[param.name] || "example_value";
   }
 
-  private generateExpectedResponse(
-    toolName: string,
-    category: string,
-    type: string,
-  ): any {
+  private generateExpectedResponse(toolName: string, category: string, type: string): any {
     if (toolName.includes("list")) {
       return {
         success: true,
@@ -781,10 +724,7 @@ export class DocumentationGenerator {
     };
   }
 
-  private getExampleParameters(
-    toolDef: ToolDefinition,
-    type: string | number,
-  ): Record<string, any> {
+  private getExampleParameters(toolDef: ToolDefinition, type: string | number): Record<string, any> {
     const params: Record<string, any> = {};
     const parameters = toolDef.parameters || [];
 
@@ -816,16 +756,10 @@ export class DocumentationGenerator {
       cache: "Performance caching and optimization tools",
       performance: "Performance monitoring and analytics tools",
     };
-    return (
-      descriptions[categoryName.toLowerCase()] ||
-      `${categoryName} management tools`
-    );
+    return descriptions[categoryName.toLowerCase()] || `${categoryName} management tools`;
   }
 
-  private generateUsagePatterns(
-    categoryName: string,
-    tools: ToolDocumentation[],
-  ): string[] {
+  private generateUsagePatterns(categoryName: string, tools: ToolDocumentation[]): string[] {
     const patterns: Record<string, string[]> = {
       posts: [
         "Create and publish blog posts",
@@ -865,8 +799,7 @@ export class DocumentationGenerator {
     return {
       id: 123,
       title: "Welcome to WordPress",
-      content:
-        "<p>This is your first post. Edit or delete it to get started!</p>",
+      content: "<p>This is your first post. Edit or delete it to get started!</p>",
       status: "publish",
       date: "2024-01-01T00:00:00Z",
       author: 1,
@@ -953,8 +886,7 @@ export class DocumentationGenerator {
         code: "AUTHENTICATION_FAILED",
         message: "Authentication failed",
         description: "Invalid credentials or insufficient permissions",
-        resolution:
-          "Check your authentication credentials and user permissions",
+        resolution: "Check your authentication credentials and user permissions",
       },
       {
         code: "VALIDATION_ERROR",
@@ -972,8 +904,7 @@ export class DocumentationGenerator {
         code: "PERMISSION_DENIED",
         message: "Insufficient permissions",
         description: "The user does not have permission to perform this action",
-        resolution:
-          "Contact an administrator to grant the necessary permissions",
+        resolution: "Contact an administrator to grant the necessary permissions",
       },
     ];
   }
@@ -1012,10 +943,7 @@ export class DocumentationGenerator {
     const formatter = new MarkdownFormatter();
     const content = formatter.generateApiOverview(output);
 
-    await fs.promises.writeFile(
-      path.join(this.config.outputDir, "README.md"),
-      content,
-    );
+    await fs.promises.writeFile(path.join(this.config.outputDir, "README.md"), content);
   }
 
   private async writeToolDocumentation(tool: ToolDocumentation): Promise<void> {
@@ -1023,25 +951,16 @@ export class DocumentationGenerator {
     const formatter = new MarkdownFormatter();
     const content = formatter.generateToolDocumentation(tool);
 
-    await fs.promises.writeFile(
-      path.join(this.config.outputDir, "tools", `${tool.name}.md`),
-      content,
-    );
+    await fs.promises.writeFile(path.join(this.config.outputDir, "tools", `${tool.name}.md`), content);
   }
 
-  private async writeCategoryDocumentation(
-    category: CategoryDocumentation,
-  ): Promise<void> {
+  private async writeCategoryDocumentation(category: CategoryDocumentation): Promise<void> {
     const { MarkdownFormatter } = await import("./MarkdownFormatter.js");
     const formatter = new MarkdownFormatter();
     const content = formatter.generateCategoryDocumentation(category);
 
     await fs.promises.writeFile(
-      path.join(
-        this.config.outputDir,
-        "categories",
-        `${category.name.toLowerCase()}.md`,
-      ),
+      path.join(this.config.outputDir, "categories", `${category.name.toLowerCase()}.md`),
       content,
     );
   }
@@ -1051,9 +970,6 @@ export class DocumentationGenerator {
     const formatter = new MarkdownFormatter();
     const content = formatter.generateTypeDocumentation(type);
 
-    await fs.promises.writeFile(
-      path.join(this.config.outputDir, "types", `${type.name}.md`),
-      content,
-    );
+    await fs.promises.writeFile(path.join(this.config.outputDir, "types", `${type.name}.md`), content);
   }
 }

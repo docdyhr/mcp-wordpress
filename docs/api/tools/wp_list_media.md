@@ -6,11 +6,11 @@ Lists media items from a WordPress site, with filters.
 
 ## Parameters
 
-| Parameter    | Type     | Required | Description                                    | Default | Examples                |
-| ------------ | -------- | -------- | ---------------------------------------------- | ------- | ----------------------- |
-| `per_page`   | `number` | ❌       | Number of items to return per page (max 100).  | `10`    | `10`, `20`              |
-| `search`     | `string` | ❌       | Limit results to those matching a search term. | -       | `wordpress`, `tutorial` |
-| `media_type` | `string` | ❌       | Limit results to a specific media type.        | -       | `example`               |
+| Parameter | Type | Required | Description | Default | Examples |
+|-----------|------|----------|-------------|---------|----------|
+| `per_page` | `number` | ❌ | Number of items to return per page (max 100). | `10` | `10`, `20` |
+| `search` | `string` | ❌ | Limit results to those matching a search term. | - | `wordpress`, `tutorial` |
+| `media_type` | `string` | ❌ | Limit results to a specific media type. | - | `example` |
 
 ## Examples
 
@@ -19,13 +19,11 @@ Lists media items from a WordPress site, with filters.
 Simple example of using wp_list_media
 
 **Command:**
-
 ```bash
-wp_list_media
+wp_list_media 
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -47,7 +45,6 @@ wp_list_media
 ```
 
 **Error Example (Authentication failure):**
-
 ```json
 {
   "error": "Authentication failed",
@@ -55,18 +52,17 @@ wp_list_media
 }
 ```
 
+
 ### Advanced media Configuration
 
 Comprehensive example using all available parameters
 
 **Command:**
-
 ```bash
 wp_list_media --per_page="10" --search="wordpress" --media_type="example_value"
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -86,6 +82,13 @@ wp_list_media --per_page="10" --search="wordpress" --media_type="example_value"
   "pages": 1
 }
 ```
+
+
+
+
+
+
+
 
 ## Response Format
 
@@ -113,11 +116,13 @@ wp_list_media --per_page="10" --search="wordpress" --media_type="example_value"
 **Description:** Invalid credentials or insufficient permissions  
 **Resolution:** Check your authentication credentials and user permissions
 
+
 ### VALIDATION_ERROR
 
 **Message:** Parameter validation failed  
 **Description:** One or more required parameters are missing or invalid  
 **Resolution:** Review the required parameters and their formats
+
 
 ### NOT_FOUND
 
@@ -125,12 +130,16 @@ wp_list_media --per_page="10" --search="wordpress" --media_type="example_value"
 **Description:** The requested resource does not exist  
 **Resolution:** Verify the resource ID and ensure it exists
 
+
 ### PERMISSION_DENIED
 
 **Message:** Insufficient permissions  
 **Description:** The user does not have permission to perform this action  
 **Resolution:** Contact an administrator to grant the necessary permissions
 
+
+
+
 ---
 
-_Generated automatically from tool definitions - Do not edit manually_
+*Generated automatically from tool definitions - Do not edit manually*

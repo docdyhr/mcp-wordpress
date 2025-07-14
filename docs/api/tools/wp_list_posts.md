@@ -6,13 +6,13 @@ Lists posts from a WordPress site, with filters.
 
 ## Parameters
 
-| Parameter    | Type     | Required | Description                                      | Default   | Examples                |
-| ------------ | -------- | -------- | ------------------------------------------------ | --------- | ----------------------- |
-| `per_page`   | `number` | ❌       | Number of items to return per page (max 100).    | `10`      | `10`, `20`              |
-| `search`     | `string` | ❌       | Limit results to those matching a search term.   | -         | `wordpress`, `tutorial` |
-| `status`     | `string` | ❌       | Filter by post status.                           | `publish` | `example`               |
-| `categories` | `array`  | ❌       | Limit results to posts in specific category IDs. | -         | `example`               |
-| `tags`       | `array`  | ❌       | Limit results to posts with specific tag IDs.    | -         | `example`               |
+| Parameter | Type | Required | Description | Default | Examples |
+|-----------|------|----------|-------------|---------|----------|
+| `per_page` | `number` | ❌ | Number of items to return per page (max 100). | `10` | `10`, `20` |
+| `search` | `string` | ❌ | Limit results to those matching a search term. | - | `wordpress`, `tutorial` |
+| `status` | `string` | ❌ | Filter by post status. | `publish` | `example` |
+| `categories` | `array` | ❌ | Limit results to posts in specific category IDs. | - | `example` |
+| `tags` | `array` | ❌ | Limit results to posts with specific tag IDs. | - | `example` |
 
 ## Examples
 
@@ -21,13 +21,11 @@ Lists posts from a WordPress site, with filters.
 Simple example of using wp_list_posts
 
 **Command:**
-
 ```bash
-wp_list_posts
+wp_list_posts 
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -49,7 +47,6 @@ wp_list_posts
 ```
 
 **Error Example (Authentication failure):**
-
 ```json
 {
   "error": "Authentication failed",
@@ -57,18 +54,17 @@ wp_list_posts
 }
 ```
 
+
 ### Advanced post Configuration
 
 Comprehensive example using all available parameters
 
 **Command:**
-
 ```bash
 wp_list_posts --per_page="10" --search="wordpress" --status="publish" --categories="example_value" --tags="example_value"
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -89,17 +85,22 @@ wp_list_posts --per_page="10" --search="wordpress" --status="publish" --categori
 }
 ```
 
+
+
+
 ## WordPress REST API Mapping
 
 **Endpoint:** `/wp-json/wp/v2/posts`
 
-This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters
-are determined by WordPress core functionality.
+This tool directly interfaces with the WordPress REST API endpoint above. The response format and available
+parameters are determined by WordPress core functionality.
 
 ### WordPress Documentation
-
 - [WordPress REST API Handbook](https://developer.wordpress.org/rest-api/)
 - [Endpoint Reference](https://developer.wordpress.org/rest-api/reference/)
+
+
+
 
 ## Response Format
 
@@ -127,11 +128,13 @@ are determined by WordPress core functionality.
 **Description:** Invalid credentials or insufficient permissions  
 **Resolution:** Check your authentication credentials and user permissions
 
+
 ### VALIDATION_ERROR
 
 **Message:** Parameter validation failed  
 **Description:** One or more required parameters are missing or invalid  
 **Resolution:** Review the required parameters and their formats
+
 
 ### NOT_FOUND
 
@@ -139,12 +142,16 @@ are determined by WordPress core functionality.
 **Description:** The requested resource does not exist  
 **Resolution:** Verify the resource ID and ensure it exists
 
+
 ### PERMISSION_DENIED
 
 **Message:** Insufficient permissions  
 **Description:** The user does not have permission to perform this action  
 **Resolution:** Contact an administrator to grant the necessary permissions
 
+
+
+
 ---
 
-_Generated automatically from tool definitions - Do not edit manually_
+*Generated automatically from tool definitions - Do not edit manually*

@@ -22,7 +22,6 @@ File upload, management, and media library tools
 ## Examples
 
 ### Basic media Workflow
-
 ```bash
 # List all media
 wp_list_media
@@ -30,12 +29,11 @@ wp_list_media
 # Get specific item
 wp_get_medi --id=123
 
-# Create new item
+# Create new item  
 wp_create_medi --title="Example"
 ```
 
 ### Multi-Site media Management
-
 ```bash
 # Work with specific site
 wp_list_media --site=production
