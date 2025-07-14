@@ -10,6 +10,7 @@ WordPress sites with natural language through 59 powerful tools.
 [![NPM Version](https://img.shields.io/npm/v/mcp-wordpress)](https://www.npmjs.com/package/mcp-wordpress)
 [![Test Coverage](https://img.shields.io/badge/test%20coverage-95%25%2B-brightgreen)](https://github.com/docdyhr/mcp-wordpress)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://github.com/docdyhr/mcp-wordpress)
+[![smithery badge](https://smithery.ai/badge/@docdyhr/mcp-wordpress)](https://smithery.ai/server/@docdyhr/mcp-wordpress)
 
 ## ⚡ Quick Start
 
@@ -19,7 +20,8 @@ WordPress sites with natural language through 59 powerful tools.
 - 💻 **[NPM Setup](docs/user-guides/NPM_SETUP.md)** - Local development
 - 🐳 **[Docker Setup](docs/user-guides/DOCKER_SETUP.md)** - Containerized deployment
 - 📦 **[DTX Setup](docs/user-guides/DTX_SETUP.md)** - Claude Desktop Extension
-
+- 🔌 **Smithery Setup** - Installation using Smithery
+     
 ### Ultra-Quick Start (NPX)
 
 ```bash
@@ -28,6 +30,14 @@ npx -y mcp-wordpress
 
 # Follow the setup wizard
 npm run setup
+```
+
+### Installing via Smithery
+
+To install mcp-wordpress for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@docdyhr/mcp-wordpress):
+
+```bash
+npx -y @smithery/cli install @docdyhr/mcp-wordpress --client claude
 ```
 
 **Setup takes 2 minutes** - the wizard guides you through WordPress connection and Claude Desktop configuration.
