@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WordPressClient } from "../client/api.js";
 import { getErrorMessage } from "../utils/error.js";
+import { EnhancedError, ErrorHandlers } from "../utils/enhancedError.js";
 import * as Tools from "../tools/index.js";
 import { z } from "zod";
 
@@ -89,37 +90,34 @@ export class ToolRegistry {
 
           // If no site specified and multiple sites configured, require site parameter
           if (!siteId && this.wordpressClients.size > 1) {
-            const availableSites = Array.from(this.wordpressClients.keys()).join(", ");
+            const availableSites = Array.from(this.wordpressClients.keys());
+            const error = ErrorHandlers.siteParameterMissing(availableSites);
             return {
               content: [
                 {
                   type: "text" as const,
-                  text: `Error: Multiple sites configured. Please specify --site parameter. Available sites: ${availableSites}`,
+                  text: error.toString(),
                 },
               ],
               isError: true,
             };
           }
 
-          // If no site specified and only one site, use that site
-          if (!siteId && this.wordpressClients.size === 1) {
-            siteId = Array.from(this.wordpressClients.keys())[0];
-          }
-
-          // Default fallback (should rarely be used)
+          // Intelligent site selection for single-site configurations
           if (!siteId) {
-            siteId = "default";
+            siteId = this.selectBestSite(tool.name, args);
           }
 
           const client = this.wordpressClients.get(siteId);
 
           if (!client) {
-            const availableSites = Array.from(this.wordpressClients.keys()).join(", ");
+            const availableSites = Array.from(this.wordpressClients.keys());
+            const error = ErrorHandlers.siteNotFound(siteId, availableSites);
             return {
               content: [
                 {
                   type: "text" as const,
-                  text: `Error: Site with ID '${siteId}' not found. Available sites: ${availableSites}`,
+                  text: error.toString(),
                 },
               ],
               isError: true,
@@ -144,6 +142,19 @@ export class ToolRegistry {
                 {
                   type: "text" as const,
                   text: `Authentication failed for site '${args.site || "default"}'. Please check your credentials.`,
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          // Handle enhanced errors with suggestions
+          if (error instanceof EnhancedError) {
+            return {
+              content: [
+                {
+                  type: "text" as const,
+                  text: error.toString(),
                 },
               ],
               isError: true,
@@ -207,6 +218,52 @@ export class ToolRegistry {
       default:
         return z.string();
     }
+  }
+
+  /**
+   * Intelligent site selection based on context
+   */
+  private selectBestSite(toolName: string, args: any): string {
+    const availableSites = Array.from(this.wordpressClients.keys());
+
+    // Single site scenario - use it directly
+    if (availableSites.length === 1) {
+      return availableSites[0];
+    }
+
+    // Multiple sites scenario - intelligent selection
+    if (availableSites.length > 1) {
+      // Try to find a site based on context clues
+
+      // 1. Check if there's a 'default' site
+      if (availableSites.includes("default")) {
+        return "default";
+      }
+
+      // 2. Check if there's a 'main' or 'primary' site
+      const primarySites = availableSites.filter((site) =>
+        ["main", "primary", "prod", "production"].includes(site.toLowerCase()),
+      );
+      if (primarySites.length > 0) {
+        return primarySites[0];
+      }
+
+      // 3. For development/test operations, prefer dev sites
+      if (toolName.includes("test") || process.env.NODE_ENV === "development") {
+        const devSites = availableSites.filter((site) =>
+          ["dev", "test", "staging", "local"].includes(site.toLowerCase()),
+        );
+        if (devSites.length > 0) {
+          return devSites[0];
+        }
+      }
+
+      // 4. Default to first available site
+      return availableSites[0];
+    }
+
+    // Fallback to 'default' if no sites available
+    return "default";
   }
 
   /**

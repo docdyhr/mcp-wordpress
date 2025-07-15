@@ -1,6 +1,7 @@
 import { WordPressClient } from "../client/api.js";
 import { CreatePostRequest, PostQueryParams, UpdatePostRequest } from "../types/wordpress.js";
 import { getErrorMessage } from "../utils/error.js";
+import { ErrorHandlers } from "../utils/enhancedError.js";
 
 /**
  * Provides tools for managing posts on a WordPress site.
@@ -15,7 +16,8 @@ export class PostTools {
     return [
       {
         name: "wp_list_posts",
-        description: "Lists posts from a WordPress site, with filters.",
+        description:
+          "Lists posts from a WordPress site with comprehensive filtering options. Supports search, status filtering, and category/tag filtering with enhanced metadata display.",
         parameters: [
           {
             name: "per_page",
@@ -50,7 +52,8 @@ export class PostTools {
       },
       {
         name: "wp_get_post",
-        description: "Retrieves a single post by its ID.",
+        description:
+          "Retrieves detailed information about a single post including metadata, content statistics, and management links.",
         parameters: [
           {
             name: "id",
@@ -63,7 +66,8 @@ export class PostTools {
       },
       {
         name: "wp_create_post",
-        description: "Creates a new post.",
+        description:
+          "Creates a new WordPress post with comprehensive validation and detailed success feedback including management links.",
         parameters: [
           {
             name: "title",
@@ -104,7 +108,7 @@ export class PostTools {
       },
       {
         name: "wp_update_post",
-        description: "Updates an existing post.",
+        description: "Updates an existing WordPress post with validation and detailed confirmation.",
         parameters: [
           {
             name: "id",
@@ -133,7 +137,7 @@ export class PostTools {
       },
       {
         name: "wp_delete_post",
-        description: "Deletes a post.",
+        description: "Deletes a WordPress post with option for permanent deletion or moving to trash.",
         parameters: [
           {
             name: "id",
@@ -151,7 +155,7 @@ export class PostTools {
       },
       {
         name: "wp_get_post_revisions",
-        description: "Retrieves revisions for a specific post.",
+        description: "Retrieves the revision history for a specific post showing author and modification dates.",
         parameters: [
           {
             name: "id",
@@ -167,16 +171,73 @@ export class PostTools {
 
   public async handleListPosts(client: WordPressClient, params: PostQueryParams): Promise<any> {
     try {
-      const posts = await client.getPosts(params);
-      if (posts.length === 0) {
-        return "No posts found matching the criteria.";
+      // Input validation and sanitization
+      const sanitizedParams = { ...params };
+
+      // Validate per_page parameter
+      if (sanitizedParams.per_page) {
+        if (sanitizedParams.per_page < 1) {
+          sanitizedParams.per_page = 1;
+        } else if (sanitizedParams.per_page > 100) {
+          sanitizedParams.per_page = 100;
+        }
       }
 
-      // Add site context information
+      // Validate and sanitize search term
+      if (sanitizedParams.search) {
+        sanitizedParams.search = sanitizedParams.search.trim();
+        if (sanitizedParams.search.length === 0) {
+          delete sanitizedParams.search;
+        }
+      }
+
+      // Validate status parameter
+      if (sanitizedParams.status) {
+        const validStatuses = ["publish", "future", "draft", "pending", "private"];
+        if (!validStatuses.includes(sanitizedParams.status)) {
+          throw ErrorHandlers.validationError("status", sanitizedParams.status, "one of: " + validStatuses.join(", "));
+        }
+      }
+
+      // Performance optimization: set reasonable defaults
+      if (!sanitizedParams.per_page) {
+        sanitizedParams.per_page = 10; // Default to 10 posts for better performance
+      }
+
+      const posts = await client.getPosts(sanitizedParams);
+      if (posts.length === 0) {
+        const searchInfo = sanitizedParams.search ? ` matching "${sanitizedParams.search}"` : "";
+        const statusInfo = sanitizedParams.status ? ` with status "${sanitizedParams.status}"` : "";
+        return `No posts found${searchInfo}${statusInfo}. Try adjusting your search criteria or check if posts exist.`;
+      }
+
+      // Add comprehensive site context information
       const siteUrl = client.getSiteUrl ? client.getSiteUrl() : "Unknown site";
+      const totalPosts = posts.length;
+      const statusCounts = posts.reduce(
+        (acc, p) => {
+          acc[p.status] = (acc[p.status] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+
+      // Enhanced metadata
+      const metadata = [
+        `📊 **Posts Summary**: ${totalPosts} total`,
+        `📝 **Status Breakdown**: ${Object.entries(statusCounts)
+          .map(([status, count]) => `${status}: ${count}`)
+          .join(", ")}`,
+        `🌐 **Source**: ${siteUrl}`,
+        `📅 **Retrieved**: ${new Date().toLocaleString()}`,
+        ...(params.search ? [`🔍 **Search Term**: "${params.search}"`] : []),
+        ...(params.categories ? [`📁 **Categories**: ${params.categories.join(", ")}`] : []),
+        ...(params.tags ? [`🏷️ **Tags**: ${params.tags.join(", ")}`] : []),
+      ];
 
       const content =
-        `Found ${posts.length} posts from ${siteUrl}:\n\n` +
+        metadata.join("\n") +
+        "\n\n" +
         posts
           .map((p) => {
             const date = new Date(p.date);
@@ -185,10 +246,20 @@ export class PostTools {
               month: "short",
               day: "numeric",
             });
-            return `- ID ${p.id}: **${p.title.rendered}** (${p.status})\n  Published: ${formattedDate}\n  Link: ${p.link}`;
+            const excerpt = p.excerpt?.rendered
+              ? p.excerpt.rendered.replace(/<[^>]*>/g, "").substring(0, 80) + "..."
+              : "";
+            return `- ID ${p.id}: **${p.title.rendered}** (${p.status})\n  📅 Published: ${formattedDate}\n  🔗 Link: ${p.link}${excerpt ? `\n  📝 Excerpt: ${excerpt}` : ""}`;
           })
           .join("\n");
-      return content;
+
+      // Add pagination guidance for large result sets
+      let finalContent = content;
+      if (posts.length >= (sanitizedParams.per_page || 10)) {
+        finalContent += `\n\n📄 **Pagination Tip**: Use \`per_page\` parameter to control results (max 100). Current: ${sanitizedParams.per_page || 10}`;
+      }
+
+      return finalContent;
     } catch (error) {
       throw new Error(`Failed to list posts: ${getErrorMessage(error)}`);
     }
@@ -196,24 +267,103 @@ export class PostTools {
 
   public async handleGetPost(client: WordPressClient, params: { id: number }): Promise<any> {
     try {
+      // Input validation
+      if (!params.id || typeof params.id !== "number" || params.id <= 0) {
+        throw ErrorHandlers.validationError("id", params.id, "positive integer");
+      }
+
       const post = await client.getPost(params.id);
+      // Enhanced post details with comprehensive metadata
+      const siteUrl = client.getSiteUrl ? client.getSiteUrl() : "Unknown site";
+      const publishedDate = new Date(post.date);
+      const modifiedDate = new Date(post.modified);
+      const excerpt = post.excerpt?.rendered
+        ? post.excerpt.rendered.replace(/<[^>]*>/g, "").substring(0, 150) + "..."
+        : "No excerpt available";
+      const wordCount = post.content?.rendered ? post.content.rendered.replace(/<[^>]*>/g, "").split(/\s+/).length : 0;
+
       const content =
-        `**Post Details (ID: ${post.id})**\n\n` +
+        `**📄 Post Details (ID: ${post.id})**\n\n` +
+        `**📋 Basic Information:**\n` +
         `- **Title:** ${post.title.rendered}\n` +
         `- **Status:** ${post.status}\n` +
-        `- **Link:** ${post.link}\n` +
-        `- **Date:** ${new Date(post.date).toLocaleString()}`;
+        `- **Type:** ${post.type}\n` +
+        `- **Author ID:** ${post.author}\n` +
+        `- **Slug:** ${post.slug}\n\n` +
+        `**📅 Dates:**\n` +
+        `- **Published:** ${publishedDate.toLocaleString()}\n` +
+        `- **Modified:** ${modifiedDate.toLocaleString()}\n\n` +
+        `**📊 Content:**\n` +
+        `- **Word Count:** ~${wordCount} words\n` +
+        `- **Excerpt:** ${excerpt}\n\n` +
+        `**🔗 Links:**\n` +
+        `- **Permalink:** ${post.link}\n` +
+        `- **Edit Link:** ${post.link.replace(/\/$/, "")}/wp-admin/post.php?post=${post.id}&action=edit\n\n` +
+        `**🌐 Source:** ${siteUrl}\n` +
+        `**📅 Retrieved:** ${new Date().toLocaleString()}`;
       return content;
     } catch (error) {
-      throw new Error(`Failed to get post: ${getErrorMessage(error)}`);
+      // Handle specific error cases
+      const errorMessage = getErrorMessage(error);
+
+      if (errorMessage.includes("Invalid post ID") || errorMessage.includes("not found")) {
+        throw ErrorHandlers.postNotFound(params.id, error);
+      }
+
+      if (errorMessage.includes("401") || errorMessage.includes("Unauthorized")) {
+        throw ErrorHandlers.authenticationFailed(error);
+      }
+
+      if (errorMessage.includes("403") || errorMessage.includes("Forbidden")) {
+        throw ErrorHandlers.permissionDenied("get post", error);
+      }
+
+      if (errorMessage.includes("timeout") || errorMessage.includes("network")) {
+        throw ErrorHandlers.connectionError(error);
+      }
+
+      // Generic error with suggestions
+      throw ErrorHandlers.generic("get post", error);
     }
   }
 
   public async handleCreatePost(client: WordPressClient, params: CreatePostRequest): Promise<any> {
     try {
-      const post = await client.createPost(params);
-      return `✅ Post created successfully!\n- ID: ${post.id}\n- Title: ${post.title.rendered}\n- Link: ${post.link}`;
+      // Input validation
+      if (!params.title || typeof params.title !== "string" || params.title.trim().length === 0) {
+        throw ErrorHandlers.validationError("title", params.title, "non-empty string");
+      }
+
+      // Sanitize title
+      const sanitizedParams = { ...params };
+      sanitizedParams.title = sanitizedParams.title.trim();
+
+      // Validate status if provided
+      if (sanitizedParams.status) {
+        const validStatuses = ["publish", "draft", "pending", "private"];
+        if (!validStatuses.includes(sanitizedParams.status)) {
+          throw ErrorHandlers.validationError("status", sanitizedParams.status, "one of: " + validStatuses.join(", "));
+        }
+      }
+
+      const post = await client.createPost(sanitizedParams);
+      const siteUrl = client.getSiteUrl ? client.getSiteUrl() : "Unknown site";
+
+      return (
+        `✅ **Post Created Successfully!**\n\n` +
+        `**📄 Post Details:**\n` +
+        `- **ID:** ${post.id}\n` +
+        `- **Title:** ${post.title.rendered}\n` +
+        `- **Status:** ${post.status}\n` +
+        `- **Link:** ${post.link}\n` +
+        `- **Edit Link:** ${post.link.replace(/\/$/, "")}/wp-admin/post.php?post=${post.id}&action=edit\n\n` +
+        `**🌐 Site:** ${siteUrl}\n` +
+        `**📅 Created:** ${new Date().toLocaleString()}`
+      );
     } catch (error) {
+      if (error instanceof ErrorHandlers.EnhancedError) {
+        throw error;
+      }
       throw new Error(`Failed to create post: ${getErrorMessage(error)}`);
     }
   }

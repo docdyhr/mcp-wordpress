@@ -84,7 +84,7 @@ const EnvironmentConfigSchema = z.object({
   WORDPRESS_APP_PASSWORD: SiteConfigSchema.shape.WORDPRESS_APP_PASSWORD,
   WORDPRESS_AUTH_METHOD: AuthMethodSchema.optional().default("app-password"),
   // Optional environment variables
-  NODE_ENV: z.enum(["development", "production", "test", "dxt"]).optional(),
+  NODE_ENV: z.enum(["development", "production", "test", "dxt", "ci"]).optional(),
   DEBUG: z.string().optional(),
   DISABLE_CACHE: z.string().optional(),
   LOG_LEVEL: z.enum(["error", "warn", "info", "debug"]).optional(),

@@ -162,16 +162,58 @@ export class UserTools {
       const user = await client.getCurrentUser();
       const siteUrl = client.getSiteUrl();
 
+      // Extract meaningful information from capabilities
+      const capabilities = user.capabilities || {};
+      const keyCapabilities = [
+        "edit_posts",
+        "edit_pages",
+        "publish_posts",
+        "publish_pages",
+        "delete_posts",
+        "delete_pages",
+        "manage_categories",
+        "manage_options",
+        "moderate_comments",
+        "upload_files",
+        "edit_others_posts",
+        "delete_others_posts",
+      ];
+
+      const userCapabilities = keyCapabilities.filter((cap) => capabilities[cap]).join(", ");
+      const totalCapabilities = Object.keys(capabilities).length;
+
+      // Format registration date more clearly
+      const registrationDate = user.registered_date
+        ? new Date(user.registered_date).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        : "Not available";
+
+      // Extract role information
+      const roles = user.roles || [];
+      const primaryRole = roles[0] || "No role assigned";
+      const allRoles = roles.length > 1 ? roles.join(", ") : primaryRole;
+
+      // Build comprehensive user information
       const content =
         `**Current User Details for ${siteUrl}**\n\n` +
         `- **ID:** ${user.id}\n` +
-        `- **Name:** ${user.name || "Not set"}\n` +
+        `- **Display Name:** ${user.name || "Not set"}\n` +
         `- **Username:** ${user.slug || "Not set"}\n` +
         `- **Email:** ${user.email || "Not set"}\n` +
-        `- **Roles:** ${user.roles?.join(", ") || "N/A"}\n` +
-        `- **Capabilities:** ${user.capabilities ? Object.keys(user.capabilities).length + " capabilities" : "N/A"}\n` +
-        `- **Registration Date:** ${user.registered_date ? new Date(user.registered_date).toLocaleDateString() : "N/A"}\n` +
-        `- **URL:** ${user.url || "Not set"}`;
+        `- **User URL:** ${user.url || "Not set"}\n` +
+        `- **Nickname:** ${user.nickname || user.name || "Not set"}\n` +
+        `- **Description:** ${user.description || "No description provided"}\n` +
+        `- **Locale:** ${user.locale || "Default"}\n` +
+        `- **Registration Date:** ${registrationDate}\n` +
+        `- **Primary Role:** ${primaryRole}\n` +
+        `- **All Roles:** ${allRoles}\n` +
+        `- **Total Capabilities:** ${totalCapabilities} capabilities\n` +
+        `- **Key Capabilities:** ${userCapabilities || "None"}\n` +
+        `- **Profile Link:** ${user.link || `${siteUrl}/wp-admin/profile.php`}`;
+
       return content;
     } catch (error) {
       throw new Error(`Failed to get current user: ${getErrorMessage(error)}`);

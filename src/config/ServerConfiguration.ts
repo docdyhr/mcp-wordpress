@@ -4,6 +4,7 @@ import * as path from "path";
 import { fileURLToPath } from "url";
 import { WordPressClient } from "../client/api.js";
 import { CachedWordPressClient } from "../client/CachedWordPressClient.js";
+import { MockWordPressClient } from "../client/MockWordPressClient.js";
 import { WordPressClientConfig } from "../types/client.js";
 import { getErrorMessage } from "../utils/error.js";
 import {
@@ -127,6 +128,58 @@ export class ServerConfiguration {
   }
 
   /**
+   * Check if we're in CI environment
+   */
+  private isCIEnvironment(): boolean {
+    return (
+      process.env.CI === "true" ||
+      process.env.NODE_ENV === "ci" ||
+      process.env.NODE_ENV === "test" ||
+      process.env.GITHUB_ACTIONS === "true" ||
+      process.env.TRAVIS === "true" ||
+      process.env.CIRCLECI === "true"
+    );
+  }
+
+  /**
+   * Create mock configuration for CI environments
+   */
+  private createMockConfiguration(): {
+    clients: Map<string, WordPressClient>;
+    configs: SiteConfig[];
+  } {
+    const mockConfig = {
+      WORDPRESS_SITE_URL: "https://demo.wordpress.com",
+      WORDPRESS_USERNAME: "ci-user",
+      WORDPRESS_APP_PASSWORD: "ci-mock-password",
+      WORDPRESS_AUTH_METHOD: "app-password" as const,
+    };
+
+    const clientConfig: WordPressClientConfig = {
+      baseUrl: mockConfig.WORDPRESS_SITE_URL,
+      auth: {
+        method: mockConfig.WORDPRESS_AUTH_METHOD,
+        username: mockConfig.WORDPRESS_USERNAME,
+        appPassword: mockConfig.WORDPRESS_APP_PASSWORD,
+      },
+    };
+
+    // Create mock client that won't actually connect to WordPress
+    const client = new MockWordPressClient(clientConfig);
+    const clients = new Map<string, WordPressClient>();
+    clients.set("default", client);
+
+    const siteConfig: SiteConfig = {
+      id: "default",
+      name: "Demo Site (CI Mode)",
+      config: mockConfig,
+    };
+
+    console.error("INFO: Using mock configuration for CI environment.");
+    return { clients, configs: [siteConfig] };
+  }
+
+  /**
    * Load single-site configuration from environment variables
    */
   private loadSingleSiteFromEnv(mcpConfig?: McpConfigType): {
@@ -144,6 +197,11 @@ export class ServerConfiguration {
         console.error(`  WORDPRESS_USERNAME: ${process.env.WORDPRESS_USERNAME || "NOT SET"}`);
         console.error(`  WORDPRESS_APP_PASSWORD: ${process.env.WORDPRESS_APP_PASSWORD ? "SET" : "NOT SET"}`);
         console.error(`  WORDPRESS_AUTH_METHOD: ${process.env.WORDPRESS_AUTH_METHOD || "NOT SET"}`);
+      }
+
+      // Check if we're in CI environment and credentials are missing
+      if (this.isCIEnvironment() && !process.env.WORDPRESS_SITE_URL) {
+        return this.createMockConfiguration();
       }
 
       // Validate MCP config if provided
