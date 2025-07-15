@@ -3,61 +3,37 @@ model:
   name: gpt-4o-mini  # Faster and more cost-effective for CI
 
 evals:
-  # Core functionality - these must work reliably
-  - name: list_posts_basic
-    description: Basic post listing functionality
-    prompt: "List the 3 most recent posts"
+  # Minimal CI-focused evaluations
+  # These test tool availability and basic functionality without requiring live WordPress sites
+  
+  - name: tool_availability_check
+    description: Check that WordPress tools are available
+    prompt: "What WordPress tools are available for managing posts?"
+    expected_tools:
+      - wp_list_posts
+      - wp_get_post
+      - wp_create_post
+    success_criteria:
+      - Tools are listed and available
+      - No connection errors occur
+      - Appropriate error messages for missing credentials
+
+  - name: multi_site_error_handling
+    description: Multi-site configuration error handling
+    prompt: "List posts without specifying a site"
     expected_tools:
       - wp_list_posts
     success_criteria:
-      - Posts are returned
-      - Dates are formatted correctly
-      - No errors occur
+      - Appropriate error message about missing site parameter
+      - Available sites are listed if multiple configured
+      - No crashes or unexpected errors
 
-  - name: site_settings_basic
-    description: Basic site settings retrieval
-    prompt: "Get the site title and description"
-    expected_tools:
-      - wp_get_site_settings
-    success_criteria:
-      - Site information is returned
-      - No errors occur
-
-  - name: current_user_basic
-    description: Basic current user retrieval
-    prompt: "Show current user information"
+  - name: configuration_validation
+    description: Configuration validation in CI environment
+    prompt: "Get current user information"
     expected_tools:
       - wp_get_current_user
     success_criteria:
-      - User information is returned
-      - No errors occur
-
-  # Multi-site functionality
-  - name: multi_site_handling
-    description: Multi-site parameter handling
-    prompt: "List posts from the first site"
-    expected_tools:
-      - wp_list_posts
-    success_criteria:
-      - Site parameter is handled correctly
-      - Posts are returned from correct site
-
-  # Error handling
-  - name: error_handling_basic
-    description: Basic error handling
-    prompt: "Get post with ID 999999"
-    expected_tools:
-      - wp_get_post
-    success_criteria:
-      - Error is handled gracefully
-      - Appropriate error message is shown
-
-  # Search functionality
-  - name: search_basic
-    description: Basic search functionality
-    prompt: "Search for 'test'"
-    expected_tools:
-      - wp_search_site
-    success_criteria:
-      - Search executes without errors
-      - Results are formatted properly
+      - Graceful handling of missing credentials
+      - Clear error messages about configuration
+      - No server crashes or unexpected failures
