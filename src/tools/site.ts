@@ -119,16 +119,53 @@ export class SiteTools {
       const settings = await client.getSiteSettings();
       const siteUrl = client.getSiteUrl();
 
-      const content =
-        `**Site Settings for ${siteUrl}**\n\n` +
-        `- **Title:** ${settings.title || "Not set"}\n` +
-        `- **Description:** ${settings.description || "Not set"}\n` +
-        `- **URL:** ${settings.url || siteUrl}\n` +
-        `- **Timezone:** ${settings.timezone || "Not set"}\n` +
-        `- **Language:** ${settings.language || "Not set"}\n` +
-        `- **Date Format:** ${settings.date_format || "Not set"}\n` +
-        `- **Time Format:** ${settings.time_format || "Not set"}\n` +
-        `- **Start of Week:** ${settings.start_of_week !== undefined ? ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][settings.start_of_week] : "Not set"}`;
+      // Enhanced site settings with comprehensive details
+      const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const startOfWeek = settings.start_of_week !== undefined ? weekDays[settings.start_of_week] : "Not set";
+
+      // Get additional site information
+      const currentTime = new Date().toLocaleString("en-US", {
+        timeZone: settings.timezone || "UTC",
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        timeZoneName: "short",
+      });
+
+      let content = `**🌐 Site Settings for ${siteUrl}**\n\n`;
+
+      content += `**📋 Basic Information:**\n`;
+      content += `- **Title:** ${settings.title || "Not set"}\n`;
+      content += `- **Description:** ${settings.description || "Not set"}\n`;
+      content += `- **URL:** ${settings.url || siteUrl}\n`;
+      content += `- **Admin Email:** ${settings.email || "Not set"}\n\n`;
+
+      content += `**🌍 Localization:**\n`;
+      content += `- **Language:** ${settings.language || "English (US)"}\n`;
+      content += `- **Timezone:** ${settings.timezone || "UTC"}\n`;
+      content += `- **Current Time:** ${currentTime}\n\n`;
+
+      content += `**📅 Date & Time Format:**\n`;
+      content += `- **Date Format:** ${settings.date_format || "Not set"}\n`;
+      content += `- **Time Format:** ${settings.time_format || "Not set"}\n`;
+      content += `- **Start of Week:** ${startOfWeek}\n\n`;
+
+      content += `**📝 Content Settings:**\n`;
+      content += `- **Posts per Page:** ${settings.posts_per_page || "Not set"}\n`;
+      content += `- **Default Category:** ${settings.default_category || "Not set"}\n`;
+      content += `- **Default Post Format:** ${settings.default_post_format || "Standard"}\n\n`;
+
+      content += `**💬 Discussion Settings:**\n`;
+      content += `- **Default Comment Status:** ${settings.default_comment_status || "Not set"}\n`;
+      content += `- **Default Ping Status:** ${settings.default_ping_status || "Not set"}\n`;
+      content += `- **Use Smilies:** ${settings.use_smilies ? "Yes" : "No"}\n\n`;
+
+      content += `**📊 Retrieved:** ${new Date().toLocaleString()}`;
+
       return content;
     } catch (error) {
       throw new Error(`Failed to get site settings: ${getErrorMessage(error)}`);

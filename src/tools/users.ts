@@ -131,11 +131,58 @@ export class UserTools {
       if (users.length === 0) {
         return "No users found matching the criteria.";
       }
+
+      // Enhanced user information with comprehensive details
+      const siteUrl = client.getSiteUrl ? client.getSiteUrl() : "Unknown site";
+      const userCount = users.length;
+      const rolesSummary = users.reduce(
+        (acc, u) => {
+          const roles = u.roles || [];
+          roles.forEach((role) => {
+            acc[role] = (acc[role] || 0) + 1;
+          });
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+
+      const metadata = [
+        `👥 **Users Summary**: ${userCount} total users`,
+        `🌐 **Source**: ${siteUrl}`,
+        `📊 **Roles Distribution**: ${Object.entries(rolesSummary)
+          .map(([role, count]) => `${role}: ${count}`)
+          .join(", ")}`,
+        `📅 **Retrieved**: ${new Date().toLocaleString()}`,
+      ];
+
       const content =
-        `Found ${users.length} users:\n\n` +
+        metadata.join("\n") +
+        "\n\n" +
         users
-          .map((u) => `- ID ${u.id}: **${u.name}** (@${u.slug}) - ${u.email}\n  Roles: ${u.roles?.join(", ") || "N/A"}`)
-          .join("\n");
+          .map((u) => {
+            const registrationDate = u.registered_date
+              ? new Date(u.registered_date).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "Unknown";
+
+            const roles = u.roles?.join(", ") || "No roles";
+            const description = u.description || "No description";
+            const displayName = u.name || "No display name";
+            const userUrl = u.url || "No URL";
+
+            return (
+              `- **ID ${u.id}**: ${displayName} (@${u.slug})\n` +
+              `  📧 Email: ${u.email || "No email"}\n` +
+              `  🎭 Roles: ${roles}\n` +
+              `  📅 Registered: ${registrationDate}\n` +
+              `  🔗 URL: ${userUrl}\n` +
+              `  📝 Description: ${description}`
+            );
+          })
+          .join("\n\n");
       return content;
     } catch (error) {
       throw new Error(`Failed to list users: ${getErrorMessage(error)}`);

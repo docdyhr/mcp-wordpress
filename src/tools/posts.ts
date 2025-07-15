@@ -241,6 +241,56 @@ export class PostTools {
         ...(params.tags ? [`🏷️ **Tags**: ${params.tags.join(", ")}`] : []),
       ];
 
+      // Fetch additional metadata for enhanced responses
+      const authorIds = [...new Set(posts.map((p) => p.author).filter(Boolean))];
+      const categoryIds = [...new Set(posts.flatMap((p) => p.categories || []))];
+      const tagIds = [...new Set(posts.flatMap((p) => p.tags || []))];
+
+      // Fetch authors, categories, and tags in parallel for better performance
+      const [authors, categories, tags] = await Promise.all([
+        authorIds.length > 0
+          ? Promise.all(
+              authorIds.map(async (id) => {
+                try {
+                  const user = await client.getUser(id);
+                  return { id, name: user.name || user.username || `User ${id}` };
+                } catch {
+                  return { id, name: `User ${id}` };
+                }
+              }),
+            )
+          : [],
+        categoryIds.length > 0
+          ? Promise.all(
+              categoryIds.map(async (id) => {
+                try {
+                  const category = await client.getCategory(id);
+                  return { id, name: category.name || `Category ${id}` };
+                } catch {
+                  return { id, name: `Category ${id}` };
+                }
+              }),
+            )
+          : [],
+        tagIds.length > 0
+          ? Promise.all(
+              tagIds.map(async (id) => {
+                try {
+                  const tag = await client.getTag(id);
+                  return { id, name: tag.name || `Tag ${id}` };
+                } catch {
+                  return { id, name: `Tag ${id}` };
+                }
+              }),
+            )
+          : [],
+      ]);
+
+      // Create lookup maps for performance
+      const authorMap = new Map(authors.map((a) => [a.id, a.name]));
+      const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
+      const tagMap = new Map(tags.map((t) => [t.id, t.name]));
+
       const content =
         metadata.join("\n") +
         "\n\n" +
@@ -255,9 +305,29 @@ export class PostTools {
             const excerpt = p.excerpt?.rendered
               ? p.excerpt.rendered.replace(/<[^>]*>/g, "").substring(0, 80) + "..."
               : "";
-            return `- ID ${p.id}: **${p.title.rendered}** (${p.status})\n  📅 Published: ${formattedDate}\n  🔗 Link: ${p.link}${excerpt ? `\n  📝 Excerpt: ${excerpt}` : ""}`;
+
+            // Enhanced metadata
+            const authorName = authorMap.get(p.author) || `User ${p.author}`;
+            const postCategories = (p.categories || []).map((id) => categoryMap.get(id) || `Category ${id}`);
+            const postTags = (p.tags || []).map((id) => tagMap.get(id) || `Tag ${id}`);
+
+            let postInfo = `- ID ${p.id}: **${p.title.rendered}** (${p.status})\n`;
+            postInfo += `  👤 Author: ${authorName}\n`;
+            postInfo += `  📅 Published: ${formattedDate}\n`;
+            if (postCategories.length > 0) {
+              postInfo += `  📁 Categories: ${postCategories.join(", ")}\n`;
+            }
+            if (postTags.length > 0) {
+              postInfo += `  🏷️ Tags: ${postTags.join(", ")}\n`;
+            }
+            if (excerpt) {
+              postInfo += `  📝 Excerpt: ${excerpt}\n`;
+            }
+            postInfo += `  🔗 Link: ${p.link}`;
+
+            return postInfo;
           })
-          .join("\n");
+          .join("\n\n");
 
       // Add pagination guidance for large result sets
       let finalContent = content;
@@ -279,6 +349,45 @@ export class PostTools {
       }
 
       const post = await client.getPost(params.id);
+
+      // Fetch additional metadata for enhanced response
+      const [author, categories, tags] = await Promise.all([
+        post.author
+          ? (async () => {
+              try {
+                const user = await client.getUser(post.author);
+                return user.name || user.username || `User ${post.author}`;
+              } catch {
+                return `User ${post.author}`;
+              }
+            })()
+          : "Unknown",
+        post.categories && post.categories.length > 0
+          ? Promise.all(
+              post.categories.map(async (id) => {
+                try {
+                  const category = await client.getCategory(id);
+                  return category.name || `Category ${id}`;
+                } catch {
+                  return `Category ${id}`;
+                }
+              }),
+            )
+          : [],
+        post.tags && post.tags.length > 0
+          ? Promise.all(
+              post.tags.map(async (id) => {
+                try {
+                  const tag = await client.getTag(id);
+                  return tag.name || `Tag ${id}`;
+                } catch {
+                  return `Tag ${id}`;
+                }
+              }),
+            )
+          : [],
+      ]);
+
       // Enhanced post details with comprehensive metadata
       const siteUrl = client.getSiteUrl ? client.getSiteUrl() : "Unknown site";
       const publishedDate = new Date(post.date);
@@ -288,25 +397,38 @@ export class PostTools {
         : "No excerpt available";
       const wordCount = post.content?.rendered ? post.content.rendered.replace(/<[^>]*>/g, "").split(/\s+/).length : 0;
 
-      const content =
-        `**📄 Post Details (ID: ${post.id})**\n\n` +
-        `**📋 Basic Information:**\n` +
-        `- **Title:** ${post.title.rendered}\n` +
-        `- **Status:** ${post.status}\n` +
-        `- **Type:** ${post.type}\n` +
-        `- **Author ID:** ${post.author}\n` +
-        `- **Slug:** ${post.slug}\n\n` +
-        `**📅 Dates:**\n` +
-        `- **Published:** ${publishedDate.toLocaleString()}\n` +
-        `- **Modified:** ${modifiedDate.toLocaleString()}\n\n` +
-        `**📊 Content:**\n` +
-        `- **Word Count:** ~${wordCount} words\n` +
-        `- **Excerpt:** ${excerpt}\n\n` +
-        `**🔗 Links:**\n` +
-        `- **Permalink:** ${post.link}\n` +
-        `- **Edit Link:** ${post.link.replace(/\/$/, "")}/wp-admin/post.php?post=${post.id}&action=edit\n\n` +
-        `**🌐 Source:** ${siteUrl}\n` +
-        `**📅 Retrieved:** ${new Date().toLocaleString()}`;
+      let content = `**📄 Post Details (ID: ${post.id})**\n\n`;
+      content += `**📋 Basic Information:**\n`;
+      content += `- **Title:** ${post.title.rendered}\n`;
+      content += `- **Status:** ${post.status}\n`;
+      content += `- **Type:** ${post.type}\n`;
+      content += `- **Author:** ${author}\n`;
+      content += `- **Slug:** ${post.slug}\n\n`;
+
+      content += `**📅 Dates:**\n`;
+      content += `- **Published:** ${publishedDate.toLocaleString()}\n`;
+      content += `- **Modified:** ${modifiedDate.toLocaleString()}\n\n`;
+
+      content += `**📊 Content:**\n`;
+      content += `- **Word Count:** ~${wordCount} words\n`;
+      content += `- **Excerpt:** ${excerpt}\n\n`;
+
+      if (categories.length > 0) {
+        content += `**📁 Categories:** ${categories.join(", ")}\n`;
+      }
+      if (tags.length > 0) {
+        content += `**🏷️ Tags:** ${tags.join(", ")}\n`;
+      }
+      if (categories.length > 0 || tags.length > 0) {
+        content += `\n`;
+      }
+
+      content += `**🔗 Links:**\n`;
+      content += `- **Permalink:** ${post.link}\n`;
+      content += `- **Edit Link:** ${post.link.replace(/\/$/, "")}/wp-admin/post.php?post=${post.id}&action=edit\n\n`;
+      content += `**🌐 Source:** ${siteUrl}\n`;
+      content += `**📅 Retrieved:** ${new Date().toLocaleString()}`;
+
       return content;
     } catch (error) {
       // Handle specific error cases
