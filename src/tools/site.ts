@@ -21,8 +21,7 @@ export class SiteTools {
       },
       {
         name: "wp_update_site_settings",
-        description:
-          "Updates one or more general settings for a WordPress site.",
+        description: "Updates one or more general settings for a WordPress site.",
         parameters: [
           {
             name: "title",
@@ -37,8 +36,7 @@ export class SiteTools {
           {
             name: "timezone",
             type: "string",
-            description:
-              "A city in the same timezone, e.g., 'America/New_York'.",
+            description: "A city in the same timezone, e.g., 'America/New_York'.",
           },
         ],
         handler: this.handleUpdateSiteSettings.bind(this),
@@ -116,35 +114,33 @@ export class SiteTools {
     ];
   }
 
-  public async handleGetSiteSettings(
-    client: WordPressClient,
-    params: any,
-  ): Promise<any> {
+  public async handleGetSiteSettings(client: WordPressClient, params: any): Promise<any> {
     try {
       const settings = await client.getSiteSettings();
+      const siteUrl = client.getSiteUrl();
+
       const content =
-        `**Site Settings for ${settings.url}**\n\n` +
-        `- **Title:** ${settings.title}\n` +
-        `- **Description:** ${settings.description}\n` +
-        `- **Timezone:** ${settings.timezone}\n` +
-        `- **Language:** ${settings.language}`;
+        `**Site Settings for ${siteUrl}**\n\n` +
+        `- **Title:** ${settings.title || "Not set"}\n` +
+        `- **Description:** ${settings.description || "Not set"}\n` +
+        `- **URL:** ${settings.url || siteUrl}\n` +
+        `- **Timezone:** ${settings.timezone || "Not set"}\n` +
+        `- **Language:** ${settings.language || "Not set"}\n` +
+        `- **Date Format:** ${settings.date_format || "Not set"}\n` +
+        `- **Time Format:** ${settings.time_format || "Not set"}\n` +
+        `- **Start of Week:** ${settings.start_of_week !== undefined ? ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][settings.start_of_week] : "Not set"}`;
       return content;
     } catch (error) {
       throw new Error(`Failed to get site settings: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleUpdateSiteSettings(
-    client: WordPressClient,
-    params: any,
-  ): Promise<any> {
+  public async handleUpdateSiteSettings(client: WordPressClient, params: any): Promise<any> {
     try {
       const updatedSettings = await client.updateSiteSettings(params);
       return `✅ Site settings updated successfully. New title: ${updatedSettings.title}`;
     } catch (error) {
-      throw new Error(
-        `Failed to update site settings: ${getErrorMessage(error)}`,
-      );
+      throw new Error(`Failed to update site settings: ${getErrorMessage(error)}`);
     }
   }
 
@@ -153,28 +149,20 @@ export class SiteTools {
     params: { term: string; type?: "posts" | "pages" | "media" },
   ): Promise<any> {
     try {
-      const results = await client.search(
-        params.term,
-        params.type ? [params.type] : undefined,
-      );
+      const results = await client.search(params.term, params.type ? [params.type] : undefined);
       if (results.length === 0) {
         return `No results found for "${params.term}".`;
       }
       const content =
         `Found ${results.length} results for "${params.term}":\n\n` +
-        results
-          .map((r) => `- [${r.type}] **${r.title}**\n  Link: ${r.url}`)
-          .join("\n");
+        results.map((r) => `- [${r.type}] **${r.title}**\n  Link: ${r.url}`).join("\n");
       return content;
     } catch (error) {
       throw new Error(`Failed to perform search: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleGetApplicationPasswords(
-    client: WordPressClient,
-    params: { user_id: number },
-  ): Promise<any> {
+  public async handleGetApplicationPasswords(client: WordPressClient, params: { user_id: number }): Promise<any> {
     try {
       const passwords = await client.getApplicationPasswords(params.user_id);
       if (passwords.length === 0) {
@@ -190,9 +178,7 @@ export class SiteTools {
           .join("\n");
       return content;
     } catch (error) {
-      throw new Error(
-        `Failed to get application passwords: ${getErrorMessage(error)}`,
-      );
+      throw new Error(`Failed to get application passwords: ${getErrorMessage(error)}`);
     }
   }
 
@@ -201,10 +187,7 @@ export class SiteTools {
     params: { user_id: number; app_name: string },
   ): Promise<any> {
     try {
-      const result = await client.createApplicationPassword(
-        params.user_id,
-        params.app_name,
-      );
+      const result = await client.createApplicationPassword(params.user_id, params.app_name);
       const content =
         "✅ **Application password created successfully!**\n\n" +
         `**Name:** ${result.name}\n` +
@@ -212,9 +195,7 @@ export class SiteTools {
         "**IMPORTANT:** This password is shown only once. Please save it securely.";
       return content;
     } catch (error) {
-      throw new Error(
-        `Failed to create application password: ${getErrorMessage(error)}`,
-      );
+      throw new Error(`Failed to create application password: ${getErrorMessage(error)}`);
     }
   }
 
@@ -226,9 +207,7 @@ export class SiteTools {
       await client.deleteApplicationPassword(params.user_id, params.uuid);
       return `✅ Application password with UUID ${params.uuid} has been revoked.`;
     } catch (error) {
-      throw new Error(
-        `Failed to delete application password: ${getErrorMessage(error)}`,
-      );
+      throw new Error(`Failed to delete application password: ${getErrorMessage(error)}`);
     }
   }
 }

@@ -103,14 +103,30 @@ export default [
     },
   },
   {
-    ignores: [
-      "node_modules/",
-      "coverage/",
-      "dist/",
-      ".env*",
-      "scripts/",
-      "bin/",
-    ],
+    files: ["evaluations/**/*.js"],
+    languageOptions: {
+      globals: {
+        require: "readonly",
+        module: "readonly",
+        exports: "writable",
+        __dirname: "readonly",
+        __filename: "readonly",
+        process: "readonly",
+        console: "readonly",
+        Buffer: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
+        global: "writable",
+      },
+    },
+    rules: {
+      "no-console": "off",
+    },
+  },
+  {
+    ignores: ["node_modules/", "coverage/", "dist/", ".env*", "bin/"],
   },
   prettierConfig,
 ];

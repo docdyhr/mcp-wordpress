@@ -27,10 +27,7 @@ export class ToolRegistry {
   private server: McpServer;
   private wordpressClients: Map<string, WordPressClient>;
 
-  constructor(
-    server: McpServer,
-    wordpressClients: Map<string, WordPressClient>,
-  ) {
+  constructor(server: McpServer, wordpressClients: Map<string, WordPressClient>) {
     this.server = server;
     this.wordpressClients = wordpressClients;
   }
@@ -44,10 +41,7 @@ export class ToolRegistry {
       let toolInstance: any;
 
       // Cache and Performance tools need the clients map
-      if (
-        ToolClass.name === "CacheTools" ||
-        ToolClass.name === "PerformanceTools"
-      ) {
+      if (ToolClass.name === "CacheTools" || ToolClass.name === "PerformanceTools") {
         toolInstance = new ToolClass(this.wordpressClients);
       } else {
         toolInstance = new (ToolClass as new () => any)();
@@ -91,13 +85,36 @@ export class ToolRegistry {
       parameterSchema,
       async (args: any) => {
         try {
-          const siteId = args.site || "default";
+          let siteId = args.site;
+
+          // If no site specified and multiple sites configured, require site parameter
+          if (!siteId && this.wordpressClients.size > 1) {
+            const availableSites = Array.from(this.wordpressClients.keys()).join(", ");
+            return {
+              content: [
+                {
+                  type: "text" as const,
+                  text: `Error: Multiple sites configured. Please specify --site parameter. Available sites: ${availableSites}`,
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          // If no site specified and only one site, use that site
+          if (!siteId && this.wordpressClients.size === 1) {
+            siteId = Array.from(this.wordpressClients.keys())[0];
+          }
+
+          // Default fallback (should rarely be used)
+          if (!siteId) {
+            siteId = "default";
+          }
+
           const client = this.wordpressClients.get(siteId);
 
           if (!client) {
-            const availableSites = Array.from(
-              this.wordpressClients.keys(),
-            ).join(", ");
+            const availableSites = Array.from(this.wordpressClients.keys()).join(", ");
             return {
               content: [
                 {
@@ -116,10 +133,7 @@ export class ToolRegistry {
             content: [
               {
                 type: "text" as const,
-                text:
-                  typeof result === "string"
-                    ? result
-                    : JSON.stringify(result, null, 2),
+                text: typeof result === "string" ? result : JSON.stringify(result, null, 2),
               },
             ],
           };

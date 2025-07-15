@@ -1,0 +1,86 @@
+model:
+  provider: openai
+  name: gpt-4o
+
+evals:
+  # Core functionality tests
+  - name: list_posts_improved
+    description: Test improved post listing with date handling and site context
+    prompt: "List the 3 most recent posts from the WordPress site"
+    expected_tools:
+      - wp_list_posts
+    success_criteria:
+      - Tool includes proper site context
+      - Dates are formatted correctly (not showing future dates)
+      - Response is complete and informative
+
+  - name: get_site_settings_improved
+    description: Test improved site settings with comprehensive information
+    prompt: "Get the site settings including title, description, and timezone"
+    expected_tools:
+      - wp_get_site_settings
+    success_criteria:
+      - Response includes site URL context
+      - All requested information is present
+      - Proper handling of missing data
+
+  - name: get_current_user_improved
+    description: Test improved current user information with site context
+    prompt: "Show me information about the currently authenticated user"
+    expected_tools:
+      - wp_get_current_user
+    success_criteria:
+      - Response includes site context
+      - User information is comprehensive
+      - Proper data verification
+
+  - name: site_parameter_handling
+    description: Test multi-site parameter handling
+    prompt: "List posts from site1"
+    expected_tools:
+      - wp_list_posts
+    success_criteria:
+      - Tool correctly handles site parameter
+      - No errors about missing site specification
+      - Response includes correct site context
+
+  - name: error_handling_test
+    description: Test error handling for invalid requests
+    prompt: "Get post with ID 999999999"
+    expected_tools:
+      - wp_get_post
+    success_criteria:
+      - Error message is clear and helpful
+      - No crashes or unexpected behavior
+      - Proper error format
+
+  # Test other core tools
+  - name: create_post_test
+    description: Test post creation functionality
+    prompt: "Create a new blog post titled 'Test Post' with content 'This is a test post'"
+    expected_tools:
+      - wp_create_post
+    success_criteria:
+      - Post is created successfully
+      - Response includes post ID and link
+      - Proper confirmation message
+
+  - name: list_users_test
+    description: Test user listing functionality
+    prompt: "List all users on the site"
+    expected_tools:
+      - wp_list_users
+    success_criteria:
+      - Users are listed properly
+      - User information is complete
+      - Site context is included
+
+  - name: search_functionality
+    description: Test site search functionality
+    prompt: "Search for posts containing 'test'"
+    expected_tools:
+      - wp_search_site
+    success_criteria:
+      - Search results are returned
+      - Results are formatted properly
+      - Site context is included

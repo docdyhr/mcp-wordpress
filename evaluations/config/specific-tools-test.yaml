@@ -1,0 +1,32 @@
+# Specific Tools Testing Configuration
+# Tests individual WordPress tools with focused scenarios
+
+model:
+  provider: openai
+  name: gpt-4o
+
+evals:
+  - name: test_wp_list_posts
+    description: Test wp_list_posts tool specifically
+    prompt: "Use the wp_list_posts tool to get the 3 most recent posts from site1"
+    expected_result: "Should return recent posts with correct dates and site parameter usage"
+  
+  - name: test_wp_get_site_settings
+    description: Test wp_get_site_settings tool specifically
+    prompt: "Use the wp_get_site_settings tool to get information about site1"
+    expected_result: "Should return site settings with proper site parameter handling"
+  
+  - name: test_wp_get_current_user
+    description: Test wp_get_current_user tool specifically
+    prompt: "Use the wp_get_current_user tool to get current user information for site2"
+    expected_result: "Should return user information with correct site context"
+  
+  - name: test_wp_list_categories
+    description: Test wp_list_categories tool specifically
+    prompt: "Use the wp_list_categories tool to list categories from site3"
+    expected_result: "Should return categories with proper site parameter usage"
+
+  - name: test_wp_performance_stats
+    description: Test wp_performance_stats tool specifically
+    prompt: "Use the wp_performance_stats tool to get performance metrics from site1"
+    expected_result: "Should return performance data with correct site context"

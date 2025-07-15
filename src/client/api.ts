@@ -16,11 +16,7 @@ import type {
   RequestOptions,
   ClientStats,
 } from "../types/client.js";
-import {
-  WordPressAPIError,
-  AuthenticationError,
-  RateLimitError,
-} from "../types/client.js";
+import { WordPressAPIError, AuthenticationError, RateLimitError } from "../types/client.js";
 import type {
   WordPressPost,
   WordPressPage,
@@ -68,10 +64,8 @@ export class WordPressClient implements IWordPressClient {
   constructor(options: Partial<WordPressClientConfig> = {}) {
     this.baseUrl = options.baseUrl || process.env.WORDPRESS_SITE_URL || "";
     this.apiUrl = "";
-    this.timeout =
-      options.timeout || parseInt(process.env.WORDPRESS_TIMEOUT || "30000");
-    this.maxRetries =
-      options.maxRetries || parseInt(process.env.WORDPRESS_MAX_RETRIES || "3");
+    this.timeout = options.timeout || parseInt(process.env.WORDPRESS_TIMEOUT || "30000");
+    this.maxRetries = options.maxRetries || parseInt(process.env.WORDPRESS_MAX_RETRIES || "3");
 
     // Authentication configuration
     this.auth = options.auth || this.getAuthFromEnv();
@@ -110,15 +104,15 @@ export class WordPressClient implements IWordPressClient {
     return { ...this._stats };
   }
 
+  getSiteUrl(): string {
+    return this.baseUrl;
+  }
+
   private getAuthFromEnv(): AuthConfig {
     const authMethod = process.env.WORDPRESS_AUTH_METHOD as AuthMethod;
 
     // Use explicit auth method if set
-    if (
-      authMethod === "app-password" &&
-      process.env.WORDPRESS_USERNAME &&
-      process.env.WORDPRESS_APP_PASSWORD
-    ) {
+    if (authMethod === "app-password" && process.env.WORDPRESS_USERNAME && process.env.WORDPRESS_APP_PASSWORD) {
       return {
         method: "app-password",
         username: process.env.WORDPRESS_USERNAME,
@@ -136,11 +130,7 @@ export class WordPressClient implements IWordPressClient {
     }
 
     // Try JWT
-    if (
-      process.env.WORDPRESS_JWT_SECRET &&
-      process.env.WORDPRESS_USERNAME &&
-      process.env.WORDPRESS_PASSWORD
-    ) {
+    if (process.env.WORDPRESS_JWT_SECRET && process.env.WORDPRESS_USERNAME && process.env.WORDPRESS_PASSWORD) {
       return {
         method: "jwt",
         secret: process.env.WORDPRESS_JWT_SECRET,
@@ -169,18 +159,13 @@ export class WordPressClient implements IWordPressClient {
     return {
       method: "basic",
       username: process.env.WORDPRESS_USERNAME || "",
-      password:
-        process.env.WORDPRESS_PASSWORD ||
-        process.env.WORDPRESS_APP_PASSWORD ||
-        "",
+      password: process.env.WORDPRESS_PASSWORD || process.env.WORDPRESS_APP_PASSWORD || "",
     };
   }
 
   private validateConfig(): void {
     if (!this.baseUrl) {
-      throw new Error(
-        "WordPress configuration is incomplete: baseUrl is required",
-      );
+      throw new Error("WordPress configuration is incomplete: baseUrl is required");
     }
 
     // Ensure URL doesn't end with slash and add API path
@@ -209,17 +194,13 @@ export class WordPressClient implements IWordPressClient {
     switch (method) {
       case "app-password":
         if (this.auth.username && this.auth.appPassword) {
-          const credentials = Buffer.from(
-            `${this.auth.username}:${this.auth.appPassword}`,
-          ).toString("base64");
+          const credentials = Buffer.from(`${this.auth.username}:${this.auth.appPassword}`).toString("base64");
           headers["Authorization"] = `Basic ${credentials}`;
         }
         break;
       case "basic":
         if (this.auth.username && this.auth.password) {
-          const credentials = Buffer.from(
-            `${this.auth.username}:${this.auth.password}`,
-          ).toString("base64");
+          const credentials = Buffer.from(`${this.auth.username}:${this.auth.password}`).toString("base64");
           headers["Authorization"] = `Basic ${credentials}`;
         }
         break;
@@ -297,16 +278,11 @@ export class WordPressClient implements IWordPressClient {
    */
   private async authenticateWithBasic(): Promise<boolean> {
     const hasCredentials =
-      this.auth.username &&
-      (this.auth.method === "app-password"
-        ? this.auth.appPassword
-        : this.auth.password);
+      this.auth.username && (this.auth.method === "app-password" ? this.auth.appPassword : this.auth.password);
 
     if (!hasCredentials) {
-      const methodName =
-        this.auth.method === "app-password" ? "Application Password" : "Basic";
-      const passwordField =
-        this.auth.method === "app-password" ? "app password" : "password";
+      const methodName = this.auth.method === "app-password" ? "Application Password" : "Basic";
+      const passwordField = this.auth.method === "app-password" ? "app password" : "password";
       throw new AuthenticationError(
         `Username and ${passwordField} are required for ${methodName} authentication`,
         this.auth.method,
@@ -320,10 +296,7 @@ export class WordPressClient implements IWordPressClient {
       debug.log("Basic/Application Password authentication successful");
       return true;
     } catch (error) {
-      throw new AuthenticationError(
-        `Basic authentication failed: ${(error as Error).message}`,
-        this.auth.method,
-      );
+      throw new AuthenticationError(`Basic authentication failed: ${(error as Error).message}`, this.auth.method);
     }
   }
 
@@ -339,19 +312,16 @@ export class WordPressClient implements IWordPressClient {
     }
 
     try {
-      const response = await fetch(
-        `${this.baseUrl}/wp-json/jwt-auth/v1/token`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: this.auth.username,
-            password: this.auth.password,
-          }),
+      const response = await fetch(`${this.baseUrl}/wp-json/jwt-auth/v1/token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          username: this.auth.username,
+          password: this.auth.password,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -363,10 +333,7 @@ export class WordPressClient implements IWordPressClient {
       debug.log("JWT authentication successful");
       return true;
     } catch (error) {
-      throw new AuthenticationError(
-        `JWT authentication failed: ${(error as Error).message}`,
-        this.auth.method,
-      );
+      throw new AuthenticationError(`JWT authentication failed: ${(error as Error).message}`, this.auth.method);
     }
   }
 
@@ -375,10 +342,7 @@ export class WordPressClient implements IWordPressClient {
    */
   private async authenticateWithCookie(): Promise<boolean> {
     if (!this.auth.nonce) {
-      throw new AuthenticationError(
-        "Nonce is required for cookie authentication",
-        this.auth.method,
-      );
+      throw new AuthenticationError("Nonce is required for cookie authentication", this.auth.method);
     }
     this.authenticated = true;
     debug.log("Cookie authentication configured");
@@ -399,9 +363,7 @@ export class WordPressClient implements IWordPressClient {
 
     // Handle endpoint properly - remove leading slash if present to avoid double slashes
     const cleanEndpoint = endpoint.replace(/^\/+/, "");
-    const url = endpoint.startsWith("http")
-      ? endpoint
-      : `${this.apiUrl}/${cleanEndpoint}`;
+    const url = endpoint.startsWith("http") ? endpoint : `${this.apiUrl}/${cleanEndpoint}`;
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -426,10 +388,7 @@ export class WordPressClient implements IWordPressClient {
 
     // Add body for POST/PUT/PATCH requests
     if (data && ["POST", "PUT", "PATCH"].includes(method)) {
-      if (
-        data instanceof FormData ||
-        (data && typeof data.append === "function")
-      ) {
+      if (data instanceof FormData || (data && typeof data.append === "function")) {
         // For FormData, check if it has getHeaders method (form-data package)
         if (data && typeof data.getHeaders === "function") {
           // Use headers from form-data package
@@ -456,9 +415,7 @@ export class WordPressClient implements IWordPressClient {
     let lastError: Error = new Error("Unknown error");
     for (let attempt = 0; attempt < this.maxRetries; attempt++) {
       try {
-        debug.log(
-          `API Request: ${method} ${url}${attempt > 0 ? ` (attempt ${attempt + 1})` : ""}`,
-        );
+        debug.log(`API Request: ${method} ${url}${attempt > 0 ? ` (attempt ${attempt + 1})` : ""}`);
 
         const response = await fetch(url, fetchOptions);
         clearTimeout(timeoutId);
@@ -470,11 +427,9 @@ export class WordPressClient implements IWordPressClient {
 
           try {
             const errorData = JSON.parse(errorText);
-            errorMessage =
-              errorData.message || errorData.error || `HTTP ${response.status}`;
+            errorMessage = errorData.message || errorData.error || `HTTP ${response.status}`;
           } catch {
-            errorMessage =
-              errorText || `HTTP ${response.status}: ${response.statusText}`;
+            errorMessage = errorText || `HTTP ${response.status}: ${response.statusText}`;
           }
 
           // Handle rate limiting
@@ -484,11 +439,7 @@ export class WordPressClient implements IWordPressClient {
           }
 
           // Handle permission errors specifically for uploads
-          if (
-            response.status === 403 &&
-            endpoint.includes("media") &&
-            method === "POST"
-          ) {
+          if (response.status === 403 && endpoint.includes("media") && method === "POST") {
             throw new AuthenticationError(
               "Media upload blocked: WordPress REST API media uploads appear to be disabled or restricted by a plugin/security policy. " +
                 `Error: ${errorMessage}. ` +
@@ -499,10 +450,7 @@ export class WordPressClient implements IWordPressClient {
           }
 
           // Handle general upload permission errors
-          if (
-            errorMessage.includes("Beiträge zu erstellen") &&
-            endpoint.includes("media")
-          ) {
+          if (errorMessage.includes("Beiträge zu erstellen") && endpoint.includes("media")) {
             throw new AuthenticationError(
               `WordPress REST API media upload restriction detected: ${errorMessage}. ` +
                 "This typically indicates that media uploads via REST API are disabled by WordPress configuration, " +
@@ -533,9 +481,7 @@ export class WordPressClient implements IWordPressClient {
         } catch (parseError) {
           // For authentication requests, malformed JSON should be an error
           if (endpoint.includes("users/me") || endpoint.includes("jwt-auth")) {
-            throw new WordPressAPIError(
-              `Invalid JSON response: ${(parseError as Error).message}`,
-            );
+            throw new WordPressAPIError(`Invalid JSON response: ${(parseError as Error).message}`);
           }
           this._stats.successfulRequests++;
           const duration = timer.end();
@@ -552,18 +498,11 @@ export class WordPressClient implements IWordPressClient {
         }
 
         // Handle network errors
-        if (
-          lastError.message.includes("socket hang up") ||
-          lastError.message.includes("ECONNRESET")
-        ) {
-          lastError = new Error(
-            `Network connection lost during upload: ${lastError.message}`,
-          );
+        if (lastError.message.includes("socket hang up") || lastError.message.includes("ECONNRESET")) {
+          lastError = new Error(`Network connection lost during upload: ${lastError.message}`);
         }
 
-        debug.log(
-          `Request failed (attempt ${attempt + 1}): ${lastError.message}`,
-        );
+        debug.log(`Request failed (attempt ${attempt + 1}): ${lastError.message}`);
 
         // Don't retry on authentication errors, timeouts, or critical network errors
         if (
@@ -583,16 +522,13 @@ export class WordPressClient implements IWordPressClient {
 
     this._stats.failedRequests++;
     timer.end();
-    throw new WordPressAPIError(
-      `Request failed after ${this.maxRetries} attempts: ${lastError.message}`,
-    );
+    throw new WordPressAPIError(`Request failed after ${this.maxRetries} attempts: ${lastError.message}`);
   }
 
   private updateAverageResponseTime(duration: number): void {
     const totalSuccessful = this._stats.successfulRequests;
     this._stats.averageResponseTime =
-      (this._stats.averageResponseTime * (totalSuccessful - 1) + duration) /
-      totalSuccessful;
+      (this._stats.averageResponseTime * (totalSuccessful - 1) + duration) / totalSuccessful;
     this._stats.lastRequestTime = Date.now();
   }
 
@@ -601,34 +537,19 @@ export class WordPressClient implements IWordPressClient {
     return this.request<T>("GET", endpoint, null, options);
   }
 
-  async post<T = any>(
-    endpoint: string,
-    data?: any,
-    options?: RequestOptions,
-  ): Promise<T> {
+  async post<T = any>(endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
     return this.request<T>("POST", endpoint, data, options);
   }
 
-  async put<T = any>(
-    endpoint: string,
-    data?: any,
-    options?: RequestOptions,
-  ): Promise<T> {
+  async put<T = any>(endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
     return this.request<T>("PUT", endpoint, data, options);
   }
 
-  async patch<T = any>(
-    endpoint: string,
-    data?: any,
-    options?: RequestOptions,
-  ): Promise<T> {
+  async patch<T = any>(endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
     return this.request<T>("PATCH", endpoint, data, options);
   }
 
-  async delete<T = any>(
-    endpoint: string,
-    options?: RequestOptions,
-  ): Promise<T> {
+  async delete<T = any>(endpoint: string, options?: RequestOptions): Promise<T> {
     return this.request<T>("DELETE", endpoint, null, options);
   }
 
@@ -636,16 +557,11 @@ export class WordPressClient implements IWordPressClient {
 
   // Posts
   async getPosts(params?: PostQueryParams): Promise<WordPressPost[]> {
-    const queryString = params
-      ? "?" + new URLSearchParams(params as any).toString()
-      : "";
+    const queryString = params ? "?" + new URLSearchParams(params as any).toString() : "";
     return this.get<WordPressPost[]>(`posts${queryString}`);
   }
 
-  async getPost(
-    id: number,
-    context: "view" | "embed" | "edit" = "view",
-  ): Promise<WordPressPost> {
+  async getPost(id: number, context: "view" | "embed" | "edit" = "view"): Promise<WordPressPost> {
     return this.get<WordPressPost>(`posts/${id}?context=${context}`);
   }
 
@@ -658,10 +574,7 @@ export class WordPressClient implements IWordPressClient {
     return this.put<WordPressPost>(`posts/${id}`, updateData);
   }
 
-  async deletePost(
-    id: number,
-    force = false,
-  ): Promise<{ deleted: boolean; previous?: WordPressPost }> {
+  async deletePost(id: number, force = false): Promise<{ deleted: boolean; previous?: WordPressPost }> {
     return this.delete(`posts/${id}?force=${force}`);
   }
 
@@ -671,16 +584,11 @@ export class WordPressClient implements IWordPressClient {
 
   // Pages
   async getPages(params?: PostQueryParams): Promise<WordPressPage[]> {
-    const queryString = params
-      ? "?" + new URLSearchParams(params as any).toString()
-      : "";
+    const queryString = params ? "?" + new URLSearchParams(params as any).toString() : "";
     return this.get<WordPressPage[]>(`pages${queryString}`);
   }
 
-  async getPage(
-    id: number,
-    context: "view" | "embed" | "edit" = "view",
-  ): Promise<WordPressPage> {
+  async getPage(id: number, context: "view" | "embed" | "edit" = "view"): Promise<WordPressPage> {
     return this.get<WordPressPage>(`pages/${id}?context=${context}`);
   }
 
@@ -693,10 +601,7 @@ export class WordPressClient implements IWordPressClient {
     return this.put<WordPressPage>(`pages/${id}`, updateData);
   }
 
-  async deletePage(
-    id: number,
-    force = false,
-  ): Promise<{ deleted: boolean; previous?: WordPressPage }> {
+  async deletePage(id: number, force = false): Promise<{ deleted: boolean; previous?: WordPressPage }> {
     return this.delete(`pages/${id}?force=${force}`);
   }
 
@@ -706,16 +611,11 @@ export class WordPressClient implements IWordPressClient {
 
   // Media
   async getMedia(params?: MediaQueryParams): Promise<WordPressMedia[]> {
-    const queryString = params
-      ? "?" + new URLSearchParams(params as any).toString()
-      : "";
+    const queryString = params ? "?" + new URLSearchParams(params as any).toString() : "";
     return this.get<WordPressMedia[]>(`media${queryString}`);
   }
 
-  async getMediaItem(
-    id: number,
-    context: "view" | "embed" | "edit" = "view",
-  ): Promise<WordPressMedia> {
+  async getMediaItem(id: number, context: "view" | "embed" | "edit" = "view"): Promise<WordPressMedia> {
     return this.get<WordPressMedia>(`media/${id}?context=${context}`);
   }
 
@@ -736,16 +636,9 @@ export class WordPressClient implements IWordPressClient {
       );
     }
 
-    debug.log(
-      `Uploading file: ${filename} (${(stats.size / 1024).toFixed(2)}KB)`,
-    );
+    debug.log(`Uploading file: ${filename} (${(stats.size / 1024).toFixed(2)}KB)`);
 
-    return this.uploadFile(
-      fileBuffer,
-      filename,
-      this.getMimeType(data.file_path),
-      data,
-    );
+    return this.uploadFile(fileBuffer, filename, this.getMimeType(data.file_path), data);
   }
 
   async uploadFile(
@@ -775,8 +668,7 @@ export class WordPressClient implements IWordPressClient {
     if (meta.post) formData.append("post", meta.post.toString());
 
     // Use longer timeout for file uploads
-    const uploadTimeout =
-      options?.timeout !== undefined ? options.timeout : 600000; // 10 minutes default
+    const uploadTimeout = options?.timeout !== undefined ? options.timeout : 600000; // 10 minutes default
     const uploadOptions: RequestOptions = {
       ...options,
       timeout: uploadTimeout,
@@ -793,25 +685,17 @@ export class WordPressClient implements IWordPressClient {
     return this.put<WordPressMedia>(`media/${id}`, updateData);
   }
 
-  async deleteMedia(
-    id: number,
-    force = false,
-  ): Promise<{ deleted: boolean; previous?: WordPressMedia }> {
+  async deleteMedia(id: number, force = false): Promise<{ deleted: boolean; previous?: WordPressMedia }> {
     return this.delete(`media/${id}?force=${force}`);
   }
 
   // Users
   async getUsers(params?: UserQueryParams): Promise<WordPressUser[]> {
-    const queryString = params
-      ? "?" + new URLSearchParams(params as any).toString()
-      : "";
+    const queryString = params ? "?" + new URLSearchParams(params as any).toString() : "";
     return this.get<WordPressUser[]>(`users${queryString}`);
   }
 
-  async getUser(
-    id: number | "me",
-    context: "view" | "embed" | "edit" = "view",
-  ): Promise<WordPressUser> {
+  async getUser(id: number | "me", context: "view" | "embed" | "edit" = "view"): Promise<WordPressUser> {
     return this.get<WordPressUser>(`users/${id}?context=${context}`);
   }
 
@@ -824,13 +708,8 @@ export class WordPressClient implements IWordPressClient {
     return this.put<WordPressUser>(`users/${id}`, updateData);
   }
 
-  async deleteUser(
-    id: number,
-    reassign?: number,
-  ): Promise<{ deleted: boolean; previous?: WordPressUser }> {
-    const params = reassign
-      ? `?reassign=${reassign}&force=true`
-      : "?force=true";
+  async deleteUser(id: number, reassign?: number): Promise<{ deleted: boolean; previous?: WordPressUser }> {
+    const params = reassign ? `?reassign=${reassign}&force=true` : "?force=true";
     return this.delete(`users/${id}${params}`);
   }
 
@@ -840,16 +719,11 @@ export class WordPressClient implements IWordPressClient {
 
   // Comments
   async getComments(params?: CommentQueryParams): Promise<WordPressComment[]> {
-    const queryString = params
-      ? "?" + new URLSearchParams(params as any).toString()
-      : "";
+    const queryString = params ? "?" + new URLSearchParams(params as any).toString() : "";
     return this.get<WordPressComment[]>(`comments${queryString}`);
   }
 
-  async getComment(
-    id: number,
-    context: "view" | "embed" | "edit" = "view",
-  ): Promise<WordPressComment> {
+  async getComment(id: number, context: "view" | "embed" | "edit" = "view"): Promise<WordPressComment> {
     return this.get<WordPressComment>(`comments/${id}?context=${context}`);
   }
 
@@ -862,10 +736,7 @@ export class WordPressClient implements IWordPressClient {
     return this.put<WordPressComment>(`comments/${id}`, updateData);
   }
 
-  async deleteComment(
-    id: number,
-    force = false,
-  ): Promise<{ deleted: boolean; previous?: WordPressComment }> {
+  async deleteComment(id: number, force = false): Promise<{ deleted: boolean; previous?: WordPressComment }> {
     return this.delete(`comments/${id}?force=${force}`);
   }
 
@@ -885,9 +756,7 @@ export class WordPressClient implements IWordPressClient {
 
   // Taxonomies
   async getCategories(params?: any): Promise<WordPressCategory[]> {
-    const queryString = params
-      ? "?" + new URLSearchParams(params).toString()
-      : "";
+    const queryString = params ? "?" + new URLSearchParams(params).toString() : "";
     return this.get<WordPressCategory[]>(`categories${queryString}`);
   }
 
@@ -895,30 +764,21 @@ export class WordPressClient implements IWordPressClient {
     return this.get<WordPressCategory>(`categories/${id}`);
   }
 
-  async createCategory(
-    data: CreateCategoryRequest,
-  ): Promise<WordPressCategory> {
+  async createCategory(data: CreateCategoryRequest): Promise<WordPressCategory> {
     return this.post<WordPressCategory>("categories", data);
   }
 
-  async updateCategory(
-    data: UpdateCategoryRequest,
-  ): Promise<WordPressCategory> {
+  async updateCategory(data: UpdateCategoryRequest): Promise<WordPressCategory> {
     const { id, ...updateData } = data;
     return this.put<WordPressCategory>(`categories/${id}`, updateData);
   }
 
-  async deleteCategory(
-    id: number,
-    force = false,
-  ): Promise<{ deleted: boolean; previous?: WordPressCategory }> {
+  async deleteCategory(id: number, force = false): Promise<{ deleted: boolean; previous?: WordPressCategory }> {
     return this.delete(`categories/${id}?force=${force}`);
   }
 
   async getTags(params?: any): Promise<WordPressTag[]> {
-    const queryString = params
-      ? "?" + new URLSearchParams(params).toString()
-      : "";
+    const queryString = params ? "?" + new URLSearchParams(params).toString() : "";
     return this.get<WordPressTag[]>(`tags${queryString}`);
   }
 
@@ -935,10 +795,7 @@ export class WordPressClient implements IWordPressClient {
     return this.put<WordPressTag>(`tags/${id}`, updateData);
   }
 
-  async deleteTag(
-    id: number,
-    force = false,
-  ): Promise<{ deleted: boolean; previous?: WordPressTag }> {
+  async deleteTag(id: number, force = false): Promise<{ deleted: boolean; previous?: WordPressTag }> {
     return this.delete(`tags/${id}?force=${force}`);
   }
 
@@ -947,9 +804,7 @@ export class WordPressClient implements IWordPressClient {
     return this.get<WordPressSiteSettings>("settings");
   }
 
-  async updateSiteSettings(
-    settings: Partial<WordPressSiteSettings>,
-  ): Promise<WordPressSiteSettings> {
+  async updateSiteSettings(settings: Partial<WordPressSiteSettings>): Promise<WordPressSiteSettings> {
     return this.post<WordPressSiteSettings>("settings", settings);
   }
 
@@ -958,12 +813,8 @@ export class WordPressClient implements IWordPressClient {
   }
 
   // Application Passwords
-  async getApplicationPasswords(
-    userId: number | "me" = "me",
-  ): Promise<WordPressApplicationPassword[]> {
-    return this.get<WordPressApplicationPassword[]>(
-      `users/${userId}/application-passwords`,
-    );
+  async getApplicationPasswords(userId: number | "me" = "me"): Promise<WordPressApplicationPassword[]> {
+    return this.get<WordPressApplicationPassword[]>(`users/${userId}/application-passwords`);
   }
 
   async createApplicationPassword(
@@ -973,25 +824,15 @@ export class WordPressClient implements IWordPressClient {
   ): Promise<WordPressApplicationPassword> {
     const data: any = { name };
     if (appId) data.app_id = appId;
-    return this.post<WordPressApplicationPassword>(
-      `users/${userId}/application-passwords`,
-      data,
-    );
+    return this.post<WordPressApplicationPassword>(`users/${userId}/application-passwords`, data);
   }
 
-  async deleteApplicationPassword(
-    userId: number | "me",
-    uuid: string,
-  ): Promise<{ deleted: boolean }> {
+  async deleteApplicationPassword(userId: number | "me", uuid: string): Promise<{ deleted: boolean }> {
     return this.delete(`users/${userId}/application-passwords/${uuid}`);
   }
 
   // Search
-  async search(
-    query: string,
-    types?: string[],
-    subtype?: string,
-  ): Promise<any[]> {
+  async search(query: string, types?: string[], subtype?: string): Promise<any[]> {
     const params = new URLSearchParams({ search: query });
     if (types) params.append("type", types.join(","));
     if (subtype) params.append("subtype", subtype);
@@ -1037,8 +878,7 @@ export class WordPressClient implements IWordPressClient {
       ".svg": "image/svg+xml",
       ".pdf": "application/pdf",
       ".doc": "application/msword",
-      ".docx":
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       ".txt": "text/plain",
       ".mp4": "video/mp4",
       ".mp3": "audio/mpeg",

@@ -1,9 +1,5 @@
 import { WordPressClient } from "../client/api.js";
-import {
-  CreateUserRequest,
-  UpdateUserRequest,
-  UserQueryParams,
-} from "../types/wordpress.js";
+import { CreateUserRequest, UpdateUserRequest, UserQueryParams } from "../types/wordpress.js";
 import { getErrorMessage } from "../utils/error.js";
 
 /**
@@ -121,8 +117,7 @@ export class UserTools {
           {
             name: "reassign",
             type: "number",
-            description:
-              "The ID of a user to reassign the deleted user's content to.",
+            description: "The ID of a user to reassign the deleted user's content to.",
           },
         ],
         handler: this.handleDeleteUser.bind(this),
@@ -130,10 +125,7 @@ export class UserTools {
     ];
   }
 
-  public async handleListUsers(
-    client: WordPressClient,
-    params: UserQueryParams,
-  ): Promise<any> {
+  public async handleListUsers(client: WordPressClient, params: UserQueryParams): Promise<any> {
     try {
       const users = await client.getUsers(params);
       if (users.length === 0) {
@@ -142,10 +134,7 @@ export class UserTools {
       const content =
         `Found ${users.length} users:\n\n` +
         users
-          .map(
-            (u) =>
-              `- ID ${u.id}: **${u.name}** (@${u.slug}) - ${u.email}\n  Roles: ${u.roles?.join(", ") || "N/A"}`,
-          )
+          .map((u) => `- ID ${u.id}: **${u.name}** (@${u.slug}) - ${u.email}\n  Roles: ${u.roles?.join(", ") || "N/A"}`)
           .join("\n");
       return content;
     } catch (error) {
@@ -153,10 +142,7 @@ export class UserTools {
     }
   }
 
-  public async handleGetUser(
-    client: WordPressClient,
-    params: { id: number },
-  ): Promise<any> {
+  public async handleGetUser(client: WordPressClient, params: { id: number }): Promise<any> {
     try {
       const user = await client.getUser(params.id);
       const content =
@@ -171,28 +157,28 @@ export class UserTools {
     }
   }
 
-  public async handleGetCurrentUser(
-    client: WordPressClient,
-    params: any,
-  ): Promise<any> {
+  public async handleGetCurrentUser(client: WordPressClient, params: any): Promise<any> {
     try {
       const user = await client.getCurrentUser();
+      const siteUrl = client.getSiteUrl();
+
       const content =
-        `**Current User Details (ID: ${user.id})**\n\n` +
-        `- **Name:** ${user.name}\n` +
-        `- **Username:** ${user.slug}\n` +
-        `- **Email:** ${user.email}\n` +
-        `- **Roles:** ${user.roles?.join(", ") || "N/A"}`;
+        `**Current User Details for ${siteUrl}**\n\n` +
+        `- **ID:** ${user.id}\n` +
+        `- **Name:** ${user.name || "Not set"}\n` +
+        `- **Username:** ${user.slug || "Not set"}\n` +
+        `- **Email:** ${user.email || "Not set"}\n` +
+        `- **Roles:** ${user.roles?.join(", ") || "N/A"}\n` +
+        `- **Capabilities:** ${user.capabilities ? Object.keys(user.capabilities).length + " capabilities" : "N/A"}\n` +
+        `- **Registration Date:** ${user.registered_date ? new Date(user.registered_date).toLocaleDateString() : "N/A"}\n` +
+        `- **URL:** ${user.url || "Not set"}`;
       return content;
     } catch (error) {
       throw new Error(`Failed to get current user: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleCreateUser(
-    client: WordPressClient,
-    params: CreateUserRequest,
-  ): Promise<any> {
+  public async handleCreateUser(client: WordPressClient, params: CreateUserRequest): Promise<any> {
     try {
       const user = await client.createUser(params);
       return `✅ User "${user.name}" created successfully with ID: ${user.id}.`;
@@ -201,10 +187,7 @@ export class UserTools {
     }
   }
 
-  public async handleUpdateUser(
-    client: WordPressClient,
-    params: UpdateUserRequest & { id: number },
-  ): Promise<any> {
+  public async handleUpdateUser(client: WordPressClient, params: UpdateUserRequest & { id: number }): Promise<any> {
     try {
       const user = await client.updateUser(params);
       return `✅ User ${user.id} updated successfully.`;
@@ -213,10 +196,7 @@ export class UserTools {
     }
   }
 
-  public async handleDeleteUser(
-    client: WordPressClient,
-    params: { id: number; reassign?: number },
-  ): Promise<any> {
+  public async handleDeleteUser(client: WordPressClient, params: { id: number; reassign?: number }): Promise<any> {
     try {
       await client.deleteUser(params.id, params.reassign);
       let content = `✅ User ${params.id} has been deleted.`;

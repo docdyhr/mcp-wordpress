@@ -1,9 +1,5 @@
 import { WordPressClient } from "../client/api.js";
-import {
-  CreatePostRequest,
-  PostQueryParams,
-  UpdatePostRequest,
-} from "../types/wordpress.js";
+import { CreatePostRequest, PostQueryParams, UpdatePostRequest } from "../types/wordpress.js";
 import { getErrorMessage } from "../utils/error.js";
 
 /**
@@ -148,8 +144,7 @@ export class PostTools {
           {
             name: "force",
             type: "boolean",
-            description:
-              "If true, permanently delete. If false, move to trash. Defaults to false.",
+            description: "If true, permanently delete. If false, move to trash. Defaults to false.",
           },
         ],
         handler: this.handleDeletePost.bind(this),
@@ -170,22 +165,28 @@ export class PostTools {
     ];
   }
 
-  public async handleListPosts(
-    client: WordPressClient,
-    params: PostQueryParams,
-  ): Promise<any> {
+  public async handleListPosts(client: WordPressClient, params: PostQueryParams): Promise<any> {
     try {
       const posts = await client.getPosts(params);
       if (posts.length === 0) {
         return "No posts found matching the criteria.";
       }
+
+      // Add site context information
+      const siteUrl = client.getSiteUrl ? client.getSiteUrl() : "Unknown site";
+
       const content =
-        `Found ${posts.length} posts:\n\n` +
+        `Found ${posts.length} posts from ${siteUrl}:\n\n` +
         posts
-          .map(
-            (p) =>
-              `- ID ${p.id}: **${p.title.rendered}** (${p.status})\n  Link: ${p.link}`,
-          )
+          .map((p) => {
+            const date = new Date(p.date);
+            const formattedDate = date.toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            });
+            return `- ID ${p.id}: **${p.title.rendered}** (${p.status})\n  Published: ${formattedDate}\n  Link: ${p.link}`;
+          })
           .join("\n");
       return content;
     } catch (error) {
@@ -193,10 +194,7 @@ export class PostTools {
     }
   }
 
-  public async handleGetPost(
-    client: WordPressClient,
-    params: { id: number },
-  ): Promise<any> {
+  public async handleGetPost(client: WordPressClient, params: { id: number }): Promise<any> {
     try {
       const post = await client.getPost(params.id);
       const content =
@@ -211,10 +209,7 @@ export class PostTools {
     }
   }
 
-  public async handleCreatePost(
-    client: WordPressClient,
-    params: CreatePostRequest,
-  ): Promise<any> {
+  public async handleCreatePost(client: WordPressClient, params: CreatePostRequest): Promise<any> {
     try {
       const post = await client.createPost(params);
       return `✅ Post created successfully!\n- ID: ${post.id}\n- Title: ${post.title.rendered}\n- Link: ${post.link}`;
@@ -223,10 +218,7 @@ export class PostTools {
     }
   }
 
-  public async handleUpdatePost(
-    client: WordPressClient,
-    params: UpdatePostRequest & { id: number },
-  ): Promise<any> {
+  public async handleUpdatePost(client: WordPressClient, params: UpdatePostRequest & { id: number }): Promise<any> {
     try {
       const post = await client.updatePost(params);
       return `✅ Post ${post.id} updated successfully.`;
@@ -235,10 +227,7 @@ export class PostTools {
     }
   }
 
-  public async handleDeletePost(
-    client: WordPressClient,
-    params: { id: number; force?: boolean },
-  ): Promise<any> {
+  public async handleDeletePost(client: WordPressClient, params: { id: number; force?: boolean }): Promise<any> {
     try {
       await client.deletePost(params.id, params.force);
       const action = params.force ? "permanently deleted" : "moved to trash";
@@ -248,10 +237,7 @@ export class PostTools {
     }
   }
 
-  public async handleGetPostRevisions(
-    client: WordPressClient,
-    params: { id: number },
-  ): Promise<any> {
+  public async handleGetPostRevisions(client: WordPressClient, params: { id: number }): Promise<any> {
     try {
       const revisions = await client.getPostRevisions(params.id);
       if (revisions.length === 0) {
@@ -260,18 +246,11 @@ export class PostTools {
       const content =
         `Found ${revisions.length} revisions for post ${params.id}:\n\n` +
         revisions
-          .map(
-            (r) =>
-              `- Revision by user ID ${r.author} at ${new Date(
-                r.modified,
-              ).toLocaleString()}`,
-          )
+          .map((r) => `- Revision by user ID ${r.author} at ${new Date(r.modified).toLocaleString()}`)
           .join("\n");
       return content;
     } catch (error) {
-      throw new Error(
-        `Failed to get post revisions: ${getErrorMessage(error)}`,
-      );
+      throw new Error(`Failed to get post revisions: ${getErrorMessage(error)}`);
     }
   }
 }
