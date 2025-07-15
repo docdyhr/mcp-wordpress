@@ -24,7 +24,7 @@ on:
       eval_config:
         description: 'Evaluation config file to use'
         required: false
-        default: 'wordpress-tools-eval.yaml'
+        default: 'ci-eval.yaml'
       
   # Schedule weekly evaluations
   schedule:
@@ -79,7 +79,7 @@ jobs:
         run: |
           # Run evaluations using mcp-eval
           npx mcp-eval \
-            evaluations/config/${{ github.event.inputs.eval_config || 'existing-sites-eval.yaml' }} \
+            evaluations/config/${{ github.event.inputs.eval_config || 'ci-eval.yaml' }} \
             dist/index.js
       
       - name: Process Evaluation Results
