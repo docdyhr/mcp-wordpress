@@ -7,11 +7,16 @@
 
 Manage WordPress sites with natural language through AI tools like Claude Desktop
 
-[![NPM Version](https://img.shields.io/npm/v/mcp-wordpress)](https://www.npmjs.com/package/mcp-wordpress)
-[![Test Coverage](https://img.shields.io/badge/test%20coverage-95%25%2B-brightgreen)](https://github.com/docdyhr/mcp-wordpress)
-[![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://github.com/docdyhr/mcp-wordpress)
-[![Security](https://img.shields.io/badge/security-40%2F40%20tests%20passing-green)](https://github.com/docdyhr/mcp-wordpress)
-[![Docker](https://img.shields.io/badge/docker-ready-blue)](https://hub.docker.com/r/docdyhr/mcp-wordpress)
+[![CI/CD Pipeline](https://github.com/docdyhr/mcp-wordpress/workflows/CI/badge.svg)](https://github.com/docdyhr/mcp-wordpress/actions)
+[![NPM Version](https://img.shields.io/npm/v/mcp-wordpress?logo=npm&logoColor=white)](https://www.npmjs.com/package/mcp-wordpress)
+[![NPM Downloads](https://img.shields.io/npm/dm/mcp-wordpress?logo=npm&logoColor=white)](https://www.npmjs.com/package/mcp-wordpress)
+[![Test Coverage](https://img.shields.io/badge/test%20coverage-95%25%2B-brightgreen?logo=jest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
+[![Test Results](https://img.shields.io/badge/tests-207%2F207%20passing-brightgreen?logo=checkmarx&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue?logo=typescript&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
+[![Security](https://img.shields.io/badge/security-40%2F40%20tests%20passing-green?logo=security&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
+[![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker&logoColor=white)](https://hub.docker.com/r/docdyhr/mcp-wordpress)
+[![License](https://img.shields.io/badge/license-MIT-green?logo=opensource&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/blob/main/LICENSE)
 [![smithery badge](https://smithery.ai/badge/@docdyhr/mcp-wordpress)](https://smithery.ai/server/@docdyhr/mcp-wordpress)
 
 </div>
