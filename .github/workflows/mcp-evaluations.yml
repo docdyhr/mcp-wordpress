@@ -68,15 +68,19 @@ jobs:
       - name: Run MCP Evaluations
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          WORDPRESS_SITE_URL: ${{ secrets.TEST_WORDPRESS_URL || 'https://test.wordpress.com' }}
-          WORDPRESS_USERNAME: ${{ secrets.TEST_WORDPRESS_USER || 'testuser' }}
-          WORDPRESS_APP_PASSWORD: ${{ secrets.TEST_WORDPRESS_PASSWORD || 'test-password' }}
+          TEST_WORDPRESS_URL: ${{ secrets.TEST_WORDPRESS_URL }}
+          TEST_WORDPRESS_USER: ${{ secrets.TEST_WORDPRESS_USER }}
+          TEST_WORDPRESS_PASSWORD: ${{ secrets.TEST_WORDPRESS_PASSWORD }}
+          # Fallback to existing config if test credentials not set
+          WORDPRESS_SITE_URL: ${{ secrets.TEST_WORDPRESS_URL || secrets.WORDPRESS_SITE_URL }}
+          WORDPRESS_USERNAME: ${{ secrets.TEST_WORDPRESS_USER || secrets.WORDPRESS_USERNAME }}
+          WORDPRESS_APP_PASSWORD: ${{ secrets.TEST_WORDPRESS_PASSWORD || secrets.WORDPRESS_APP_PASSWORD }}
           NODE_ENV: test
         run: |
-          # Run evaluations using mcp-evals
-          npx mcp-evals run \
-            --config evaluations/config/${{ github.event.inputs.eval_config || 'wordpress-tools-eval.yaml' }} \
-            --output evaluations/results/evaluation-results.json
+          # Run evaluations using mcp-eval
+          npx mcp-eval \
+            evaluations/config/${{ github.event.inputs.eval_config || 'existing-sites-eval.yaml' }} \
+            dist/index.js
       
       - name: Process Evaluation Results
         id: process_results

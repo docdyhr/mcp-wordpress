@@ -14,9 +14,11 @@ dxt-build/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.evaluation
 
 # Keep .env.example for template
 !.env.example
+!.env.evaluation.example
 
 # Logs
 logs

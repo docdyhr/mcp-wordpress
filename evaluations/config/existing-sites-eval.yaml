@@ -1,0 +1,27 @@
+# Evaluation using existing WordPress sites
+# This uses your current mcp-wordpress.config.json sites
+
+model:
+  provider: openai
+  name: gpt-4o
+
+evals:
+  - name: test_site1_connection
+    description: Test connection to dyhr.com site
+    prompt: "Get site information from the dyhr.com WordPress site using site parameter 'site1'"
+    expected_result: "Should return site information from dyhr.com"
+  
+  - name: test_list_posts_site1
+    description: Test listing posts from dyhr.com
+    prompt: "List the 3 most recent posts from site 'site1'"
+    expected_result: "Should return recent posts from dyhr.com"
+  
+  - name: test_site2_connection
+    description: Test connection to neigong.net site
+    prompt: "Get site information from the neigong.net WordPress site using site parameter 'site2'"
+    expected_result: "Should return site information from neigong.net"
+  
+  - name: test_multisite_functionality
+    description: Test multi-site functionality
+    prompt: "Show me how many sites are configured and list one post from each site"
+    expected_result: "Should demonstrate multi-site capabilities"
