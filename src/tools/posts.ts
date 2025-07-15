@@ -1,7 +1,7 @@
 import { WordPressClient } from "../client/api.js";
 import { CreatePostRequest, PostQueryParams, UpdatePostRequest } from "../types/wordpress.js";
 import { getErrorMessage } from "../utils/error.js";
-import { ErrorHandlers } from "../utils/enhancedError.js";
+import { ErrorHandlers, EnhancedError } from "../utils/enhancedError.js";
 
 /**
  * Provides tools for managing posts on a WordPress site.
@@ -194,8 +194,14 @@ export class PostTools {
       // Validate status parameter
       if (sanitizedParams.status) {
         const validStatuses = ["publish", "future", "draft", "pending", "private"];
-        if (!validStatuses.includes(sanitizedParams.status)) {
-          throw ErrorHandlers.validationError("status", sanitizedParams.status, "one of: " + validStatuses.join(", "));
+        const statusesToCheck = Array.isArray(sanitizedParams.status)
+          ? sanitizedParams.status
+          : [sanitizedParams.status];
+
+        for (const statusToCheck of statusesToCheck) {
+          if (!validStatuses.includes(statusToCheck)) {
+            throw ErrorHandlers.validationError("status", statusToCheck, "one of: " + validStatuses.join(", "));
+          }
         }
       }
 
@@ -336,7 +342,9 @@ export class PostTools {
 
       // Sanitize title
       const sanitizedParams = { ...params };
-      sanitizedParams.title = sanitizedParams.title.trim();
+      if (sanitizedParams.title) {
+        sanitizedParams.title = sanitizedParams.title.trim();
+      }
 
       // Validate status if provided
       if (sanitizedParams.status) {
@@ -361,7 +369,7 @@ export class PostTools {
         `**📅 Created:** ${new Date().toLocaleString()}`
       );
     } catch (error) {
-      if (error instanceof ErrorHandlers.EnhancedError) {
+      if (error instanceof EnhancedError) {
         throw error;
       }
       throw new Error(`Failed to create post: ${getErrorMessage(error)}`);

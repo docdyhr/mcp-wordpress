@@ -163,6 +163,9 @@ export class MockWordPressClient extends WordPressClient {
     const mockUser: WordPressUser = {
       id: 1,
       name: "CI Demo User",
+      username: "ci-demo-user",
+      first_name: "CI",
+      last_name: "Demo",
       slug: "ci-demo-user",
       email: "demo@example.com",
       url: "https://demo.wordpress.com",
