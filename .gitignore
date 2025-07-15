@@ -212,3 +212,7 @@ private/*
 private*
 PRIVATE*
 
+# Evaluation results (keep config, ignore results)
+evaluations/results/
+evaluations/reports/
+

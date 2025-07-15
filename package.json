@@ -99,7 +99,12 @@
     "test:watch": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --watch --config=jest.typescript.config.json",
     "test:with-env": "bash scripts/start-test-env.sh && npm run test:typescript",
     "typecheck": "tsc --noEmit",
-    "verify-claude": "node scripts/verify-claude-integration.js"
+    "verify-claude": "node scripts/verify-claude-integration.js",
+    "eval": "mcp-evals run --config evaluations/config/wordpress-tools-eval.yaml",
+    "eval:quick": "mcp-evals run --config evaluations/config/wordpress-tools-eval.yaml --filter create_post_basic,list_posts_filter",
+    "eval:critical": "mcp-evals run --config evaluations/config/critical-tools-eval.yaml",
+    "eval:report": "node evaluations/scripts/generate-report.js",
+    "eval:watch": "nodemon --watch src --exec 'npm run build && npm run eval:quick'"
   },
   "lint-staged": {
     "*.{ts,js}": [
@@ -140,6 +145,7 @@
     "jest": "^30.0.0",
     "lint-staged": "^16.1.2",
     "markdownlint-cli": "^0.45.0",
+    "mcp-evals": "^2.0.1",
     "nock": "^14.0.5",
     "open": "^9.1.0",
     "prettier": "^3.6.2",

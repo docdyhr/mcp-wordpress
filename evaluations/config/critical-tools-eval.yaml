@@ -1,0 +1,137 @@
+# Critical Tools Evaluation Configuration
+# Focused evaluation of the most important WordPress MCP tools
+
+model:
+  provider: openai
+  name: gpt-4o
+  temperature: 0.3
+
+server:
+  command: node
+  args: ["dist/index.js"]
+  env:
+    WORDPRESS_SITE_URL: "${WORDPRESS_SITE_URL}"
+    WORDPRESS_USERNAME: "${WORDPRESS_USERNAME}"
+    WORDPRESS_APP_PASSWORD: "${WORDPRESS_APP_PASSWORD}"
+    NODE_ENV: "test"
+
+settings:
+  timeout: 30000
+  retries: 2
+  parallel: false  # Run sequentially to avoid conflicts
+
+# Critical tool evaluations only
+evals:
+  # Post Management - Critical
+  - name: create_publish_post
+    description: Test core post creation and publishing
+    prompt: "Create a new blog post titled 'Getting Started with WordPress MCP' with comprehensive content about using this MCP server"
+    expected_tools:
+      - wp_create_post
+    success_criteria:
+      - Post created successfully
+      - Content is comprehensive
+      - Post is published status
+
+  - name: update_post_content
+    description: Test post update functionality
+    prompt: "Find the most recent post and add a 'Last Updated' notice at the beginning"
+    expected_tools:
+      - wp_list_posts
+      - wp_get_post
+      - wp_update_post
+    success_criteria:
+      - Identifies correct post
+      - Preserves existing content
+      - Adds update notice properly
+
+  # Media Management - Critical
+  - name: upload_media_file
+    description: Test basic media upload
+    prompt: "Upload a placeholder image to the media library with the title 'MCP Logo'"
+    expected_tools:
+      - wp_upload_media
+    success_criteria:
+      - Upload succeeds
+      - Title set correctly
+      - Returns media ID and URL
+
+  # User Management - Critical
+  - name: list_admin_users
+    description: Test user listing with role filter
+    prompt: "List all administrator users on the site"
+    expected_tools:
+      - wp_list_users
+    success_criteria:
+      - Returns only admins
+      - Includes user metadata
+      - Handles results properly
+
+  # Site Management - Critical
+  - name: get_site_health
+    description: Test site health and performance check
+    prompt: "Check the current site health including performance metrics and cache status"
+    expected_tools:
+      - wp_get_site_settings
+      - wp_performance_stats
+      - wp_cache_stats
+    success_criteria:
+      - Retrieves all metrics
+      - Identifies any issues
+      - Provides clear summary
+
+  # Authentication - Critical
+  - name: verify_authentication
+    description: Test authentication verification
+    prompt: "Verify that I'm properly authenticated and show my current permissions"
+    expected_tools:
+      - wp_test_auth
+      - wp_get_current_user
+    success_criteria:
+      - Confirms auth status
+      - Shows user details
+      - Lists capabilities
+
+  # Error Handling - Critical
+  - name: handle_not_found
+    description: Test 404 error handling
+    prompt: "Try to get a post with ID 999999999"
+    expected_tools:
+      - wp_get_post
+    success_criteria:
+      - Handles error gracefully
+      - Returns clear error message
+      - Doesn't crash
+
+  # Cache Management - Critical
+  - name: cache_operations
+    description: Test cache clear and stats
+    prompt: "Check cache statistics and clear the cache"
+    expected_tools:
+      - wp_cache_stats
+      - wp_cache_clear
+    success_criteria:
+      - Gets cache stats
+      - Clears cache successfully
+      - Confirms cache cleared
+
+# Use TypeScript evaluations for complex scenarios
+typescript_evals:
+  - file: evaluations/critical-tools.eval.ts
+    tests:
+      - postCreationWithSEO
+      - mediaUploadWithOptimization
+      - userRoleManagement
+      - siteHealthCheck
+      - errorRecovery
+
+# Stricter thresholds for critical tools
+thresholds:
+  pass: 4.0      # Higher than general eval
+  good: 4.5
+  excellent: 4.8
+
+output:
+  format: json
+  include_reasoning: true
+  save_to: evaluations/results/critical-tools-results.json

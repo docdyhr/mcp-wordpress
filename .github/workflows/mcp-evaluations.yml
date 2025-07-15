@@ -1,0 +1,209 @@
+name: MCP Tools Evaluation
+
+on:
+  # Run on pull requests
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'src/tools/**'
+      - 'src/client/**'
+      - 'evaluations/**'
+      - '.github/workflows/mcp-evaluations.yml'
+  
+  # Run on push to main
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/tools/**'
+      - 'src/client/**'
+  
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      eval_config:
+        description: 'Evaluation config file to use'
+        required: false
+        default: 'wordpress-tools-eval.yaml'
+      
+  # Schedule weekly evaluations
+  schedule:
+    - cron: '0 2 * * 1' # Every Monday at 2 AM UTC
+
+jobs:
+  evaluate:
+    name: Evaluate MCP Tools
+    runs-on: ubuntu-latest
+    
+    # Only run if OPENAI_API_KEY is available
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+    
+    strategy:
+      matrix:
+        node-version: [20.x]
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      
+      - name: Install Dependencies
+        run: npm ci
+      
+      - name: Build Project
+        run: npm run build
+      
+      - name: Setup Test WordPress Environment
+        if: github.event_name != 'pull_request'
+        run: |
+          # This would ideally spin up a test WordPress instance
+          # For now, we'll use environment variables for a test site
+          echo "Setting up test environment..."
+      
+      - name: Run MCP Evaluations
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          WORDPRESS_SITE_URL: ${{ secrets.TEST_WORDPRESS_URL || 'https://test.wordpress.com' }}
+          WORDPRESS_USERNAME: ${{ secrets.TEST_WORDPRESS_USER || 'testuser' }}
+          WORDPRESS_APP_PASSWORD: ${{ secrets.TEST_WORDPRESS_PASSWORD || 'test-password' }}
+          NODE_ENV: test
+        run: |
+          # Run evaluations using mcp-evals
+          npx mcp-evals run \
+            --config evaluations/config/${{ github.event.inputs.eval_config || 'wordpress-tools-eval.yaml' }} \
+            --output evaluations/results/evaluation-results.json
+      
+      - name: Process Evaluation Results
+        id: process_results
+        run: |
+          # Create evaluation summary
+          node evaluations/scripts/process-results.js
+          
+          # Set outputs for PR comment
+          echo "score=$(jq -r '.overall_score' evaluations/results/evaluation-summary.json)" >> $GITHUB_OUTPUT
+          echo "passed=$(jq -r '.tests_passed' evaluations/results/evaluation-summary.json)" >> $GITHUB_OUTPUT
+          echo "total=$(jq -r '.total_tests' evaluations/results/evaluation-summary.json)" >> $GITHUB_OUTPUT
+      
+      - name: Upload Evaluation Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: evaluation-results
+          path: |
+            evaluations/results/evaluation-results.json
+            evaluations/results/evaluation-summary.json
+          retention-days: 30
+      
+      - name: Comment PR with Results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const score = '${{ steps.process_results.outputs.score }}';
+            const passed = '${{ steps.process_results.outputs.passed }}';
+            const total = '${{ steps.process_results.outputs.total }}';
+            
+            const comment = `## 🤖 MCP Tools Evaluation Results
+            
+            **Overall Score:** ${score}/5.0
+            **Tests Passed:** ${passed}/${total}
+            
+            <details>
+            <summary>View Detailed Results</summary>
+            
+            \`\`\`json
+            ${fs.readFileSync('evaluations/results/evaluation-summary.json', 'utf8')}
+            \`\`\`
+            
+            </details>
+            
+            ${score >= 4.5 ? '✅ Excellent performance!' : score >= 4.0 ? '✅ Good performance' : score >= 3.5 ? '⚠️ Acceptable performance' : '❌ Performance needs improvement'}
+            
+            [View Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+      
+      - name: Fail if Score Too Low
+        if: steps.process_results.outputs.score < 3.5
+        run: |
+          echo "❌ Evaluation score too low: ${{ steps.process_results.outputs.score }}/5.0"
+          echo "Minimum required score: 3.5/5.0"
+          exit 1
+      
+      - name: Generate Performance Trends
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          # Track performance over time
+          node evaluations/scripts/track-performance.js
+      
+      - name: Update Evaluation Badge
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          # Update README with latest evaluation score
+          score="${{ steps.process_results.outputs.score }}"
+          color="brightgreen"
+          if (( $(echo "$score < 3.5" | bc -l) )); then
+            color="red"
+          elif (( $(echo "$score < 4.0" | bc -l) )); then
+            color="yellow"
+          elif (( $(echo "$score < 4.5" | bc -l) )); then
+            color="green"
+          fi
+          
+          # This would update a badge in README or create a gist
+          echo "MCP Evaluation Score: $score - Color: $color"
+
+  evaluate-performance:
+    name: Performance Evaluation
+    runs-on: ubuntu-latest
+    needs: evaluate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Download Previous Results
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: mcp-evaluations.yml
+          name: evaluation-results
+          path: evaluations/results/previous
+        continue-on-error: true
+      
+      - name: Download Current Results
+        uses: actions/download-artifact@v4
+        with:
+          name: evaluation-results
+          path: evaluations/results/current
+      
+      - name: Compare Performance
+        run: |
+          # Compare with previous results
+          if [ -f "evaluations/results/previous/evaluation-summary.json" ]; then
+            node evaluations/scripts/compare-performance.js
+          else
+            echo "No previous results found for comparison"
+          fi
+      
+      - name: Notify on Performance Regression
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '⚠️ MCP Tools Performance Regression Detected',
+              body: 'The latest evaluation shows a performance regression. Please review the [evaluation results](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).',
+              labels: ['performance', 'automated']
+            });

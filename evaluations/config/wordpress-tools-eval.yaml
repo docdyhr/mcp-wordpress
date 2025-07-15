@@ -1,0 +1,274 @@
+# MCP WordPress Tools Evaluation Configuration
+# Tests comprehensive functionality of WordPress MCP tools
+
+model:
+  provider: openai
+  name: gpt-4o
+  temperature: 0.3
+
+# Server configuration for MCP WordPress
+server:
+  command: node
+  args: ["dist/index.js"]
+  env:
+    WORDPRESS_SITE_URL: "${WORDPRESS_SITE_URL}"
+    WORDPRESS_USERNAME: "${WORDPRESS_USERNAME}"
+    WORDPRESS_APP_PASSWORD: "${WORDPRESS_APP_PASSWORD}"
+    NODE_ENV: "test"
+
+# Evaluation settings
+settings:
+  timeout: 30000
+  retries: 2
+  scoring:
+    accuracy:
+      weight: 0.25
+      criteria: "How accurately the tool performs its intended function"
+    completeness:
+      weight: 0.20
+      criteria: "How thoroughly the tool completes the requested task"
+    relevance:
+      weight: 0.20
+      criteria: "How relevant the tool's response is to the query"
+    clarity:
+      weight: 0.20
+      criteria: "How clear and understandable the tool's output is"
+    reasoning:
+      weight: 0.15
+      criteria: "How well the tool handles edge cases and errors"
+
+# Core functionality evaluations
+evals:
+  # Post Management Tests
+  - name: create_post_basic
+    description: Test basic post creation functionality
+    prompt: "Create a new blog post titled 'AI Trends in 2025' with some content about emerging AI technologies"
+    expected_tools:
+      - wp_create_post
+    success_criteria:
+      - Post is created successfully
+      - Title matches the request
+      - Content is relevant to AI trends
+
+  - name: list_posts_filter
+    description: Test post listing with filters
+    prompt: "List the 5 most recent published posts"
+    expected_tools:
+      - wp_list_posts
+    success_criteria:
+      - Returns posts in correct order
+      - Respects the limit of 5 posts
+      - Only shows published posts
+
+  - name: update_post_content
+    description: Test post update functionality
+    prompt: "Find the most recent post and update it to add a conclusion paragraph"
+    expected_tools:
+      - wp_list_posts
+      - wp_get_post
+      - wp_update_post
+    success_criteria:
+      - Correctly identifies the most recent post
+      - Adds appropriate conclusion content
+      - Preserves existing content
+
+  # Media Management Tests
+  - name: upload_media_basic
+    description: Test media upload functionality
+    prompt: "Upload a test image to the media library with the title 'Test Logo'"
+    expected_tools:
+      - wp_upload_media
+    success_criteria:
+      - Media uploads successfully
+      - Title is set correctly
+      - Returns media ID and URL
+
+  - name: list_media_images
+    description: Test media listing with type filter
+    prompt: "List all images in the media library"
+    expected_tools:
+      - wp_list_media
+    success_criteria:
+      - Returns only image files
+      - Includes relevant metadata
+      - Handles empty results gracefully
+
+  # User Management Tests
+  - name: create_user_author
+    description: Test user creation with specific role
+    prompt: "Create a new user with username 'test_author' and email 'author@test.com' with the Author role"
+    expected_tools:
+      - wp_create_user
+    success_criteria:
+      - User created successfully
+      - Correct role assigned
+      - Returns user ID
+
+  - name: list_users_by_role
+    description: Test user listing with role filter
+    prompt: "List all users with Administrator role"
+    expected_tools:
+      - wp_list_users
+    success_criteria:
+      - Only returns administrators
+      - Includes user metadata
+      - Handles pagination correctly
+
+  # Comment Management Tests
+  - name: moderate_comments
+    description: Test comment moderation workflow
+    prompt: "List all pending comments and approve any that look legitimate"
+    expected_tools:
+      - wp_list_comments
+      - wp_approve_comment
+    success_criteria:
+      - Correctly identifies pending comments
+      - Makes appropriate moderation decisions
+      - Updates comment status
+
+  # Taxonomy Tests
+  - name: create_category_hierarchy
+    description: Test category creation with parent
+    prompt: "Create a category 'Technology' and a subcategory 'AI & Machine Learning' under it"
+    expected_tools:
+      - wp_create_category
+    success_criteria:
+      - Creates parent category first
+      - Correctly sets parent relationship
+      - Returns category IDs
+
+  - name: tag_management
+    description: Test tag creation and assignment
+    prompt: "Create tags 'wordpress', 'automation', and 'mcp' if they don't exist"
+    expected_tools:
+      - wp_list_tags
+      - wp_create_tag
+    success_criteria:
+      - Checks for existing tags
+      - Creates only missing tags
+      - Handles duplicates gracefully
+
+  # Site Management Tests
+  - name: get_site_info
+    description: Test site information retrieval
+    prompt: "Get the site title, tagline, and WordPress version"
+    expected_tools:
+      - wp_get_site_settings
+    success_criteria:
+      - Returns all requested information
+      - Data is properly formatted
+      - Includes version information
+
+  - name: search_content
+    description: Test site-wide search functionality
+    prompt: "Search for all content mentioning 'wordpress'"
+    expected_tools:
+      - wp_search_site
+    success_criteria:
+      - Searches posts and pages
+      - Returns relevant results
+      - Includes content snippets
+
+  # Authentication Tests
+  - name: verify_auth_status
+    description: Test authentication verification
+    prompt: "Check if I'm properly authenticated and what permissions I have"
+    expected_tools:
+      - wp_test_auth
+      - wp_get_current_user
+    success_criteria:
+      - Confirms authentication status
+      - Returns user information
+      - Shows capabilities
+
+  # Performance Tests
+  - name: cache_management
+    description: Test cache operations
+    prompt: "Check cache statistics and clear the cache if hit rate is below 50%"
+    expected_tools:
+      - wp_cache_stats
+      - wp_cache_clear
+    success_criteria:
+      - Retrieves cache statistics
+      - Makes appropriate decision
+      - Executes cache clear if needed
+
+  - name: performance_monitoring
+    description: Test performance monitoring
+    prompt: "Get current performance metrics and identify any bottlenecks"
+    expected_tools:
+      - wp_performance_stats
+      - wp_performance_alerts
+    success_criteria:
+      - Returns comprehensive metrics
+      - Identifies performance issues
+      - Provides actionable insights
+
+  # Multi-Site Tests (if applicable)
+  - name: multi_site_operations
+    description: Test operations across multiple sites
+    prompt: "List posts from site 'main-site' if multiple sites are configured"
+    expected_tools:
+      - wp_list_posts
+    success_criteria:
+      - Correctly uses site parameter
+      - Returns site-specific data
+      - Handles single-site gracefully
+
+  # Error Handling Tests
+  - name: handle_invalid_post
+    description: Test error handling for invalid operations
+    prompt: "Try to update a post with ID 999999999"
+    expected_tools:
+      - wp_update_post
+    success_criteria:
+      - Handles error gracefully
+      - Returns meaningful error message
+      - Doesn't crash the system
+
+  - name: handle_permission_denied
+    description: Test permission handling
+    prompt: "Try to delete a user without proper permissions"
+    expected_tools:
+      - wp_delete_user
+    success_criteria:
+      - Recognizes permission issue
+      - Returns appropriate error
+      - Suggests alternative action
+
+  # Complex Workflow Tests
+  - name: content_migration_workflow
+    description: Test complex multi-tool workflow
+    prompt: "Find all draft posts older than 30 days and either publish or delete them based on content quality"
+    expected_tools:
+      - wp_list_posts
+      - wp_get_post
+      - wp_update_post
+      - wp_delete_post
+    success_criteria:
+      - Correctly filters posts
+      - Makes appropriate decisions
+      - Completes full workflow
+
+  - name: media_optimization_workflow
+    description: Test media management workflow
+    prompt: "Find all images larger than 1MB and create a report of optimization opportunities"
+    expected_tools:
+      - wp_list_media
+      - wp_get_media
+    success_criteria:
+      - Identifies large images
+      - Calculates sizes correctly
+      - Generates useful report
+
+# Scoring thresholds
+thresholds:
+  pass: 3.5
+  good: 4.0
+  excellent: 4.5
+
+# Output configuration
+output:
+  format: json
+  include_reasoning: true
+  save_to: evaluations/results/wordpress-tools-results.json
