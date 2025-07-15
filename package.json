@@ -54,6 +54,11 @@
     "dxt:package": "npm run dxt:clean && npm run dxt:build",
     "dxt:package:official": "npm run build && node scripts/build-dxt-clean.cjs",
     "dxt:validate": "echo '✅ DXT package validation - Basic validation performed during build'",
+    "eval": "npm run build && npx mcp-eval evaluations/config/wordpress-tools-eval.yaml dist/index.js",
+    "eval:critical": "npm run build && npx mcp-eval evaluations/critical-tools.eval.ts dist/index.js",
+    "eval:quick": "npm run build && npx mcp-eval evaluations/config/critical-tools-eval.yaml dist/index.js",
+    "eval:report": "node evaluations/scripts/generate-report.js",
+    "eval:watch": "nodemon --watch src --exec 'npm run build && npm run eval:quick'",
     "fix:rest-auth": "bash scripts/fix-rest-api-auth.sh",
     "format": "prettier --write *.md docs/**/*.md src/**/*.ts tests/**/*.ts",
     "format:check": "prettier --check *.md docs/**/*.md src/**/*.ts tests/**/*.ts",
@@ -99,12 +104,7 @@
     "test:watch": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --watch --config=jest.typescript.config.json",
     "test:with-env": "bash scripts/start-test-env.sh && npm run test:typescript",
     "typecheck": "tsc --noEmit",
-    "verify-claude": "node scripts/verify-claude-integration.js",
-    "eval": "mcp-evals run --config evaluations/config/wordpress-tools-eval.yaml",
-    "eval:quick": "mcp-evals run --config evaluations/config/wordpress-tools-eval.yaml --filter create_post_basic,list_posts_filter",
-    "eval:critical": "mcp-evals run --config evaluations/config/critical-tools-eval.yaml",
-    "eval:report": "node evaluations/scripts/generate-report.js",
-    "eval:watch": "nodemon --watch src --exec 'npm run build && npm run eval:quick'"
+    "verify-claude": "node scripts/verify-claude-integration.js"
   },
   "lint-staged": {
     "*.{ts,js}": [
