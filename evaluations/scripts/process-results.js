@@ -4,8 +4,8 @@
  * Process MCP evaluation results and generate summary
  */
 
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
 
 const RESULTS_DIR = path.join(__dirname, "..", "results");
 const RESULTS_FILE = path.join(RESULTS_DIR, "evaluation-results.json");
@@ -203,8 +203,8 @@ function processResults() {
 }
 
 // Run if called directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   processResults();
 }
 
-module.exports = { processResults };
+export { processResults };
