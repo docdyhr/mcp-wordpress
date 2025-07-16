@@ -2,6 +2,59 @@
 
 All notable changes to this project will be documented in this file.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.0.0](https://github.com/docdyhr/mcp-wordpress/compare/v1.5.2...v2.0.0) (2025-07-16)
+
+### ⚠ BREAKING CHANGES
+
+* Removed individual claude-desktop-config-*.json files.
+Configuration examples are now consolidated in docs/examples/claude-desktop-config.md
+
+### 🚀 Features
+
+* add comprehensive MCP evaluation system with CI/CD integration ([8cd940c](https://github.com/docdyhr/mcp-wordpress/commit/8cd940cf1c4e0e386a548f4d8d8bcd9fd92e4c30))
+* add comprehensive MCP tools evaluation system with mcp-evals ([953400d](https://github.com/docdyhr/mcp-wordpress/commit/953400d0d9130bcd9f2c8c69c5c1a62069f622b3))
+* add comprehensive WordPress test credentials configuration ([ef25153](https://github.com/docdyhr/mcp-wordpress/commit/ef25153675fc19ac7b733cfd1178cf08d596edb5))
+* add official DXT package with JSON response fixes ([64e18b4](https://github.com/docdyhr/mcp-wordpress/commit/64e18b48d6104f791d04fe7cf88439678896f7ae))
+* add Smithery package manager as secondary installation option ([0c0868c](https://github.com/docdyhr/mcp-wordpress/commit/0c0868c8540f6697eb4fccdf4a88ba755f07fa67))
+* implement comprehensive WordPress MCP tool improvements ([6e2ff33](https://github.com/docdyhr/mcp-wordpress/commit/6e2ff3338c57f782e54807159eb5f19b3eb0b975))
+
+### 🐛 Bug Fixes
+
+* adjust cache performance test memory variation threshold ([bfa94f4](https://github.com/docdyhr/mcp-wordpress/commit/bfa94f4acce87b459283e8b066ac9c1463d188dc))
+* convert evaluation script to ES modules ([fa188d6](https://github.com/docdyhr/mcp-wordpress/commit/fa188d6c9bdcc836c905ea248909b90b7d6939bb))
+* correct mcp-evals command syntax and add simplified test config ([1fbec17](https://github.com/docdyhr/mcp-wordpress/commit/1fbec17ab38222d4594697c8a9a2ca3a84de7c18))
+* **dxt:** resolve DXT package installation and timeout issues ([6fa6468](https://github.com/docdyhr/mcp-wordpress/commit/6fa64684bdb645cfd4e92e32de7d4bb1d53d051b))
+* improve Jest configuration and coverage script for CI/CD ([4a6027f](https://github.com/docdyhr/mcp-wordpress/commit/4a6027f36ac193551a7fe3b6efab6fcae75fb3e7))
+* improve performance test resilience in CI environments ([1801460](https://github.com/docdyhr/mcp-wordpress/commit/18014601e246ee0357bc0da1d458d1fe5cc429ec))
+* improve release workflow configuration and add best practices ([34a963d](https://github.com/docdyhr/mcp-wordpress/commit/34a963d652013dcfa6f42ac2214ce7813aeebabe))
+* replace 'eval' variable name in evaluation results processing ([06d8fdb](https://github.com/docdyhr/mcp-wordpress/commit/06d8fdb9739f604969e7c123390a872a7cac3a46))
+* resolve authentication manager runtime error and test mocking ([e56d5ac](https://github.com/docdyhr/mcp-wordpress/commit/e56d5acbac0fb5d142b263daf916b3347e0f4b67))
+* resolve JSON-RPC protocol violations in MCP communication ([593412c](https://github.com/docdyhr/mcp-wordpress/commit/593412c7dd22b8f55556aa6967a4b46c378b655b))
+* resolve markdown line length violations ([8f32240](https://github.com/docdyhr/mcp-wordpress/commit/8f322407d53f61e0f2c283ca666481b810882023))
+* resolve test import issues and update assertions ([b04ab74](https://github.com/docdyhr/mcp-wordpress/commit/b04ab7422c73486bcb34c9ccb0bf88828a3f256d))
+* resolve TypeScript errors in posts.ts ([c11f1bb](https://github.com/docdyhr/mcp-wordpress/commit/c11f1bb4bb028746b0ba47c642560f37c147536c))
+* **security:** replace hardcoded password with placeholder in smithery.yaml ([dce19ff](https://github.com/docdyhr/mcp-wordpress/commit/dce19fffcb7f40da34776e44be8d591d2ce77364))
+* update CI evaluation to handle missing WordPress credentials gracefully ([713c261](https://github.com/docdyhr/mcp-wordpress/commit/713c261efb86ab49ae3434e3814381f97acba13d))
+* update MCP evaluation workflow to use CI-compatible configuration ([83aed55](https://github.com/docdyhr/mcp-wordpress/commit/83aed5557f9dd05485534760bc6e419988cbf20f))
+
+### ♻️ Refactoring
+
+* clean up technical debt and improve repository organization ([8d54ea3](https://github.com/docdyhr/mcp-wordpress/commit/8d54ea33ce37404eb25de154c64412bf2c5c8cd6))
+
+### 📚 Documentation
+
+* add eye-catching badges to README header ([3c78c53](https://github.com/docdyhr/mcp-wordpress/commit/3c78c5376ad81a734fc1e535a4fc616f0463b68b))
+* comprehensive documentation updates and project maintenance ([beeb1b1](https://github.com/docdyhr/mcp-wordpress/commit/beeb1b1b303aa3478e26cd6009266a6a7c3fbb96))
+* implement comprehensive documentation restructure ([53dc3b1](https://github.com/docdyhr/mcp-wordpress/commit/53dc3b1c342bb45293221ef7c77aec13ad5fffed))
+* move Acknowledgments section to bottom of README ([1dfebfe](https://github.com/docdyhr/mcp-wordpress/commit/1dfebfe31550f6f37fc4d8cd3e9d83ec34ee43ac))
+
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
