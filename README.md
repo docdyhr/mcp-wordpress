@@ -7,6 +7,8 @@
 
 Manage WordPress sites with natural language through AI tools like Claude Desktop
 
+[Quick Start](#-quick-start) • [Features](#-features) • [Installation](#-installation-options) • [Documentation](#-documentation) • [Examples](#-examples)
+
 [![CI/CD Pipeline](https://github.com/docdyhr/mcp-wordpress/workflows/CI/badge.svg)](https://github.com/docdyhr/mcp-wordpress/actions)
 [![NPM Version](https://img.shields.io/npm/v/mcp-wordpress?logo=npm&logoColor=white)](https://www.npmjs.com/package/mcp-wordpress)
 [![NPM Downloads](https://img.shields.io/npm/dm/mcp-wordpress?logo=npm&logoColor=white)](https://www.npmjs.com/package/mcp-wordpress)
@@ -39,6 +41,44 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 - 🔒 **Production Ready**: 207 tests, security audited, battle-tested
 - 🎯 **TypeScript Native**: 100% type safety, best-in-class developer experience
 - 🌐 **Multi-Site**: Manage unlimited WordPress sites from one place
+
+## 🚀 Quick Start
+
+Get up and running in **under 5 minutes**:
+
+### Prerequisites
+- **WordPress**: Version 5.6+ with REST API enabled
+- **Claude Desktop**: Latest version installed
+- **Application Password**: Generated from WordPress admin panel
+
+### 3-Step Setup
+
+**1️⃣ Generate WordPress Application Password**
+```text
+WordPress Admin → Users → Profile → Application Passwords → Add New
+```
+
+**2️⃣ Install MCP Server (Choose One)**
+
+**Option A: DXT Extension (Easiest)**
+```bash
+# Download and install in Claude Desktop
+curl -L https://github.com/docdyhr/mcp-wordpress/raw/main/mcp-wordpress.dxt -o mcp-wordpress.dxt
+# Then: Claude Desktop → Extensions → Install → Select DXT file
+```
+
+**Option B: NPM Global Install**
+```bash
+npm install -g mcp-wordpress
+```
+
+**3️⃣ Test Your Connection**
+```text
+In Claude: "Test my WordPress connection"
+Response: "✅ Authentication successful! Connected to: Your Site Name"
+```
+
+📺 **[Watch 2-minute Setup Video](https://github.com/docdyhr/mcp-wordpress/wiki/setup-video)** | 📖 **[Detailed Setup Guide](docs/INSTALLATION.md)**
 
 ## ⚡ Installation Options
 
@@ -252,6 +292,75 @@ Use with site parameter: `wp_list_posts --site="main-site"`
 
 📖 **[Complete Integration Guide](docs/integrations/claude-desktop.md)**
 
+## 📚 Examples
+
+### Basic Content Management
+
+**Create and Publish a Blog Post**
+```text
+You: "Create a new blog post titled 'AI Revolution in 2024' with content about recent AI breakthroughs"
+Claude: "I'll create that blog post for you..."
+Result: ✅ Post "AI Revolution in 2024" created successfully (ID: 123)
+```
+
+**Media Management**
+```text
+You: "Upload the image at /path/to/image.jpg and set it as featured image for post 123"
+Claude: "I'll upload that image and set it as the featured image..."
+Result: ✅ Image uploaded (ID: 456) and set as featured image
+```
+
+### Advanced Workflows
+
+**SEO-Optimized Content Creation**
+```text
+You: "Create an SEO-optimized blog post about 'WordPress Security Best Practices' with:
+     - Focus keyword: 'WordPress security'
+     - Meta description
+     - Proper heading structure
+     - At least 1500 words"
+     
+Claude: "I'll create a comprehensive SEO-optimized post on WordPress security..."
+```
+
+**Bulk Operations**
+```text
+You: "Find all draft posts older than 30 days and provide a summary"
+You: "Update all posts in category 'News' to include a disclaimer at the end"
+You: "Delete all spam comments from the last week"
+```
+
+### Site Management
+
+**Performance Monitoring**
+```text
+You: "Analyze my site's performance and suggest optimizations"
+Claude: "Let me check your site's performance metrics...
+         - Cache hit rate: 67%
+         - Average response time: 245ms
+         - Recommendations: Enable object caching, optimize images..."
+```
+
+**User Management**
+```text
+You: "Create a new editor account for john@example.com with a secure password"
+You: "List all users who haven't logged in for 90 days"
+You: "Update Sarah's role from Author to Editor"
+```
+
+### Multi-Site Management
+
+**Working with Multiple Sites**
+```text
+You: "List all posts from my client-blog site"
+Claude: "I'll list the posts from the client-blog site..."
+
+You: "Compare traffic between main-site and client-blog"
+Claude: "Here's a comparison of both sites..."
+```
+
+📖 **[More Examples](docs/examples/)** | **[Use Case Library](docs/use-cases/)**
+
 ## 🧪 Testing & Status
 
 ### Current Test Status ✅
@@ -356,38 +465,38 @@ npm run status
 npm run setup
 ```
 
-## 📚 Documentation Hub
+## 📚 Documentation
 
-### 🚀 Getting Started
+### Getting Started
+- **[Quick Start Guide](#-quick-start)** - Get running in 5 minutes
+- **[Installation Guide](docs/INSTALLATION.md)** - Detailed setup instructions
+- **[Configuration Guide](docs/CONFIGURATION.md)** - All configuration options
+- **[Authentication Setup](docs/SECURITY.md#authentication)** - WordPress auth methods
 
-| Guide | Best For | Setup Time |
-|-------|----------|------------|
-| **[DXT Extension](docs/integrations/claude-desktop.md)** | Most users | 2 minutes |
-| **[NPX Setup](docs/user-guides/NPX_SETUP.md)** | Power users | 5 minutes |
-| **[Smithery Setup](docs/INSTALLATION.md#-smithery-package-manager)** | MCP users | 3 minutes |
-| **[Docker Setup](docs/user-guides/DOCKER_SETUP.md)** | Production | 10 minutes |
-| **[NPM Development](docs/user-guides/NPM_SETUP.md)** | Developers | 15 minutes |
-
-### 📖 User Documentation
-
-- **[Installation Guide](docs/INSTALLATION.md)** - All setup methods with troubleshooting
-- **[Configuration Guide](docs/CONFIGURATION.md)** - Complete configuration reference
-- **[Multi-Site Setup](docs/user-guides/NPM_SETUP.md#multi-site-configuration)** - Managing multiple WordPress sites
+### User Guides
+- **[Basic Usage](docs/examples/basic-usage.md)** - Common tasks and workflows
+- **[Advanced Workflows](docs/examples/advanced-workflows.md)** - Complex automation
+- **[Multi-Site Management](docs/user-guides/multi-site.md)** - Managing multiple sites
 - **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues and solutions
 
-### 🔧 Technical Reference
+### Integration Guides
+- **[Claude Desktop](docs/integrations/claude-desktop.md)** - Complete Claude integration
+- **[VS Code](docs/integrations/vs-code.md)** - VS Code extension setup
+- **[Cline](docs/integrations/cline.md)** - Cline AI assistant integration
+- **[Custom Clients](docs/developer/custom-clients.md)** - Build your own MCP client
 
-- **[API Documentation](docs/api/README.md)** - All 59 tools with examples
-- **[Architecture Overview](docs/developer/ARCHITECTURE.md)** - System design and TypeScript benefits
-- **[Performance Guide](docs/PERFORMANCE_MONITORING.md)** - Monitoring and optimization
-- **[Security Guide](docs/SECURITY.md)** - Best practices and compliance
+### Developer Documentation
+- **[API Reference](docs/API_REFERENCE.md)** - Complete tool documentation
+- **[Architecture](docs/ARCHITECTURE.md)** - System design and decisions
+- **[Contributing](CONTRIBUTING.md)** - Development guidelines
+- **[Plugin Development](docs/developer/plugins.md)** - Extend functionality
 
-### 👨‍💻 Developer Resources
+### Deployment & Operations
+- **[Docker Deployment](docs/deployment/docker.md)** - Container deployment
+- **[Security Best Practices](docs/SECURITY.md)** - Production security
+- **[Performance Tuning](docs/deployment/performance.md)** - Optimization guide
+- **[Monitoring](docs/deployment/monitoring.md)** - Logging and metrics
 
-- **[Contributing Guide](docs/developer/CONTRIBUTING.md)** - How to contribute
-- **[Development Setup](docs/developer/DEVELOPMENT.md)** - Local development environment
-- **[Testing Guide](docs/developer/TESTING.md)** - Running and writing tests
-- **[Release Process](docs/developer/RELEASE_PROCESS.md)** - CI/CD and versioning
 
 ## 🔧 Requirements
 

@@ -1,8 +1,19 @@
-# Security Guide
+# 🔒 Security Guide
 
-Comprehensive security guide for MCP WordPress Server deployment and operation.
+**Comprehensive security guide for MCP WordPress Server deployment and operation.**
 
-## 🎯 Security Overview
+## Table of Contents
+
+- [Security Overview](#security-overview)
+- [Authentication Security](#authentication-security)
+- [Input Validation & Sanitization](#input-validation--sanitization)
+- [Network Security](#network-security)
+- [Data Protection](#data-protection)
+- [Security Testing](#security-testing)
+- [Production Deployment](#secure-deployment)
+- [Incident Response](#incident-response)
+
+## Security Overview
 
 The MCP WordPress Server is designed with security as a core principle. This guide covers security best practices,
 threat mitigation, and compliance requirements.
@@ -10,24 +21,56 @@ threat mitigation, and compliance requirements.
 ### Security Posture
 
 - **✅ 40/40 Security Tests Passing** - Comprehensive security validation
-- **✅ Input Validation** - All inputs validated and sanitized
-- **✅ XSS Protection** - Cross-site scripting prevention
-- **✅ SQL Injection Prevention** - Database attack protection
-- **✅ Path Traversal Protection** - File system security
-- **✅ Rate Limiting** - DoS protection
-- **✅ Credential Security** - Secure authentication handling
+- **✅ Input Validation** - All inputs validated and sanitized with edge case handling
+- **✅ XSS Protection** - Cross-site scripting prevention with content sanitization
+- **✅ SQL Injection Prevention** - Database attack protection with parameterized queries
+- **✅ Path Traversal Protection** - File system security with directory restrictions
+- **✅ Rate Limiting** - DoS protection with configurable thresholds
+- **✅ Credential Security** - Secure authentication handling with encryption
 
-## 🔐 Authentication Security
+### Security Architecture
+
+```text
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   AI Client     │    │   MCP Server    │    │   WordPress     │
+│   (Claude)      │◄──►│   (This App)    │◄──►│   REST API      │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                              │
+                              ▼
+                    ┌─────────────────┐
+                    │ Security Layer  │
+                    │ - Validation    │
+                    │ - Sanitization  │
+                    │ - Rate Limiting │
+                    │ - Audit Log     │
+                    └─────────────────┘
+```
+
+### Threat Model
+
+**Protected Against:**
+
+- ✅ **Injection Attacks** - SQL, NoSQL, Command injection
+- ✅ **Cross-Site Scripting (XSS)** - Reflected, stored, DOM-based
+- ✅ **Path Traversal** - Directory traversal, file inclusion
+- ✅ **Authentication Bypass** - Session hijacking, credential stuffing
+- ✅ **Denial of Service** - Request flooding, resource exhaustion
+- ✅ **Data Exposure** - Sensitive information leakage
+- ✅ **Authorization Flaws** - Privilege escalation, access control bypass
+
+## Authentication Security
 
 ### WordPress Application Passwords (Recommended)
 
 **Benefits:**
+
 - ✅ Revocable without changing main password
 - ✅ Scoped to specific applications
 - ✅ Audit trail and access logging
 - ✅ WordPress native security features
 
 **Security Implementation:**
+
 ```bash
 # Create dedicated MCP user with minimal permissions
 # Use unique application password name
@@ -35,6 +78,7 @@ threat mitigation, and compliance requirements.
 ```
 
 **Best Practices:**
+
 1. **Dedicated User Account**: Create specific user for MCP access
 2. **Minimal Permissions**: Grant only required WordPress capabilities
 3. **Regular Rotation**: Change passwords every 90 days
@@ -50,39 +94,97 @@ threat mitigation, and compliance requirements.
 | **Basic Auth** | 🔴 Low | ❌ No | Development only |
 | **API Key** | 🟡 Medium | ⚠️ Plugin dependent | Plugin-based authentication |
 
-## 🛡️ Input Validation & Sanitization
+## Input Validation & Sanitization
 
-### Implemented Protections
+### Enhanced Validation System
 
-#### XSS (Cross-Site Scripting) Prevention
+The MCP WordPress Server implements **multi-layer validation** with comprehensive edge case handling:
+
+#### 1. Type & Format Validation
+
 ```typescript
-// All string inputs are validated
-SecuritySchemas.safeString
-  .refine(val => !SCRIPT_PATTERN.test(val), "Script tags not allowed")
-  .refine(val => !val.includes("javascript:"), "JavaScript URLs not allowed")
-  .refine(val => !val.includes("onerror="), "Event handlers not allowed")
+// Enhanced ID validation with edge cases
+validateId(id, "post ID");
+// Handles: null, undefined, strings, decimals, negatives, overflow
+
+// URL validation with security checks
+validateUrl(url, "site URL");
+// Validates: protocol, hostname, port, localhost restrictions
+
+// Username validation with security filtering
+validateUsername(username);
+// Checks: length, characters, reserved names, consecutive spaces
 ```
 
-#### SQL Injection Protection
+#### 2. Content Sanitization
+
 ```typescript
-// Search queries are sanitized
-SecuritySchemas.searchQuery
-  .refine(val => !SQL_INJECTION_PATTERN.test(val), "Invalid characters")
-  .refine(val => !val.includes("--"), "SQL comments not allowed")
-  .refine(val => !val.includes("/*"), "SQL comments not allowed")
+// HTML content sanitization
+sanitizeHtml(content);
+// Removes: <script>, event handlers, javascript:, dangerous patterns
+
+// Search query sanitization
+validateSearchQuery(query);
+// Filters: SQL patterns, XSS attempts, control characters
 ```
 
-#### Path Traversal Prevention
+#### 3. Complex Parameter Validation
+
 ```typescript
-// File paths are validated
-SecuritySchemas.filePath
-  .refine(val => !val.includes(".."), "Path traversal not allowed")
-  .refine(val => !val.includes("<"), "Invalid characters in path")
+// Post creation with contextual validation
+validatePostParams({
+  title: "My Post",           // Required, sanitized
+  content: "<p>Safe HTML</p>", // XSS protection
+  status: "future",           // Valid status
+  date: "2024-01-01T10:00:00", // Required for future posts
+  categories: [1, 2, 3]       // Valid category IDs
+});
+
+// Pagination with conflict detection
+validatePaginationParams({
+  page: 1,
+  per_page: 10,
+  offset: 20  // ERROR: Cannot use page and offset together
+});
+```
+
+#### 4. Security Patterns Protection
+
+**XSS Prevention:**
+
+```typescript
+// Content filtering
+const dangerousPatterns = [
+  /<script[^>]*>[\s\S]*?<\/script>/gi,
+  /<iframe[^>]*>/gi,
+  /javascript:/gi,
+  /on\w+\s*=/gi  // Event handlers
+];
+```
+
+**SQL Injection Prevention:**
+
+```typescript
+// Query sanitization
+sanitized = sanitized.replace(
+  /(\b(union|select|insert|update|delete|drop|create)\b)/gi,
+  ""
+);
+```
+
+**Path Traversal Prevention:**
+
+```typescript
+// File path validation
+if (path.includes("..") || path.includes("~")) {
+  throw new Error("Directory traversal not allowed");
+}
 ```
 
 ### Content Security Policies
 
 #### WordPress Content Validation
+
 - HTML content sanitization
 - Media file type validation
 - URL format verification
@@ -90,16 +192,18 @@ SecuritySchemas.filePath
 - WordPress ID validation
 
 #### File Upload Security
+
 - Extension whitelist enforcement
 - MIME type validation
 - File size limitations
 - Virus scanning integration points
 
-## 🌐 Network Security
+## Network Security
 
 ### HTTPS Requirements
 
 **Production Deployment:**
+
 ```bash
 # Always use HTTPS in production
 WORDPRESS_SITE_URL=https://your-site.com  # ✅ Secure
@@ -107,6 +211,7 @@ WORDPRESS_SITE_URL=http://your-site.com   # ❌ Insecure
 ```
 
 **Development Exceptions:**
+
 ```bash
 # HTTP acceptable for localhost only
 WORDPRESS_SITE_URL=http://localhost:8080  # ✅ OK for development
@@ -115,6 +220,7 @@ WORDPRESS_SITE_URL=http://localhost:8080  # ✅ OK for development
 ### Rate Limiting
 
 **Default Protection:**
+
 ```bash
 # Built-in rate limiting
 RATE_LIMIT_REQUESTS=1000    # 1000 requests
@@ -122,6 +228,7 @@ RATE_LIMIT_WINDOW=60000     # per minute (60 seconds)
 ```
 
 **Aggressive Protection:**
+
 ```bash
 # High-security environments
 RATE_LIMIT_REQUESTS=100     # 100 requests
@@ -131,6 +238,7 @@ RATE_LIMIT_WINDOW=60000     # per minute
 ### Network Access Control
 
 #### Docker Deployment
+
 ```yaml
 # Restrict network access
 services:
@@ -141,17 +249,19 @@ services:
 ```
 
 #### Firewall Configuration
+
 ```bash
 # Allow only necessary ports
 # Port 80/443 for WordPress API access
 # Internal ports for MCP communication only
 ```
 
-## 🔒 Credential Management
+## Credential Management
 
 ### Environment Variables Security
 
 **✅ Secure Practices:**
+
 ```bash
 # Use environment variables for credentials
 WORDPRESS_APP_PASSWORD=xxxx xxxx xxxx xxxx xxxx xxxx
@@ -162,6 +272,7 @@ WORDPRESS_APP_PASSWORD=xxxx xxxx xxxx xxxx xxxx xxxx
 ```
 
 **❌ Insecure Practices:**
+
 ```javascript
 // Never do this
 const password = "my-password";
@@ -171,6 +282,7 @@ const config = { password: "hardcoded-password" };
 ### File Permissions
 
 **Configuration Files:**
+
 ```bash
 # Secure file permissions
 chmod 600 .env
@@ -185,6 +297,7 @@ ls -la .env
 ### Git Security
 
 **Exclude Sensitive Files:**
+
 ```gitignore
 # .gitignore - Always exclude
 .env
@@ -194,17 +307,19 @@ claude_desktop_config.json
 ```
 
 **Credential Scanning:**
+
 ```bash
 # Use tools to scan for committed secrets
 git-secrets --scan
 truffleHog --regex --entropy=False .
 ```
 
-## 🐳 Docker Security
+## Docker Security
 
 ### Container Security
 
 **Base Image Security:**
+
 ```dockerfile
 # Use official, minimal base images
 FROM node:18-alpine
@@ -216,6 +331,7 @@ USER nextjs
 ```
 
 **Runtime Security:**
+
 ```bash
 # Run container with security restrictions
 docker run \
@@ -229,6 +345,7 @@ docker run \
 ### Secrets Management
 
 **Docker Secrets:**
+
 ```yaml
 # docker-compose.yml
 services:
@@ -241,6 +358,7 @@ secrets:
 ```
 
 **Environment Variables:**
+
 ```bash
 # Use external secret management
 docker run \
@@ -248,11 +366,12 @@ docker run \
   docdyhr/mcp-wordpress:latest
 ```
 
-## 🔍 Security Monitoring
+## Security Monitoring
 
 ### Audit Logging
 
 **Enable Comprehensive Logging:**
+
 ```bash
 # Production logging configuration
 NODE_ENV=production
@@ -262,6 +381,7 @@ SECURITY_LOG_ENABLED=true
 ```
 
 **Log Analysis:**
+
 ```bash
 # Monitor authentication failures
 grep "Authentication failed" /var/log/mcp-wordpress.log
@@ -276,6 +396,7 @@ grep "Security validation failed" /var/log/mcp-wordpress.log
 ### Security Metrics
 
 **Key Metrics to Monitor:**
+
 - Authentication failure rate
 - Rate limiting triggers
 - Invalid input attempts
@@ -285,6 +406,7 @@ grep "Security validation failed" /var/log/mcp-wordpress.log
 ### Alerting
 
 **Critical Security Events:**
+
 ```bash
 # Set up alerts for:
 # - Multiple authentication failures
@@ -294,7 +416,7 @@ grep "Security validation failed" /var/log/mcp-wordpress.log
 # - Error rate spikes
 ```
 
-## 🚨 Incident Response
+## Incident Response
 
 ### Security Incident Checklist
 
@@ -325,6 +447,7 @@ grep "Security validation failed" /var/log/mcp-wordpress.log
 ### Emergency Procedures
 
 **Credential Compromise:**
+
 ```bash
 # 1. Immediately revoke WordPress application passwords
 # 2. Generate new application passwords
@@ -334,6 +457,7 @@ grep "Security validation failed" /var/log/mcp-wordpress.log
 ```
 
 **System Compromise:**
+
 ```bash
 # 1. Isolate affected systems
 # 2. Preserve evidence
@@ -342,11 +466,12 @@ grep "Security validation failed" /var/log/mcp-wordpress.log
 # 5. Implement additional security controls
 ```
 
-## 🏗️ Secure Deployment
+## Secure Deployment
 
 ### Production Checklist
 
 **Pre-Deployment:**
+
 - [ ] All credentials use Application Passwords
 - [ ] HTTPS configured and enforced
 - [ ] Rate limiting enabled
@@ -356,6 +481,7 @@ grep "Security validation failed" /var/log/mcp-wordpress.log
 - [ ] Network access restricted
 
 **WordPress Security:**
+
 - [ ] WordPress core updated
 - [ ] Security plugins installed
 - [ ] User permissions audited
@@ -364,6 +490,7 @@ grep "Security validation failed" /var/log/mcp-wordpress.log
 - [ ] REST API access controlled
 
 **Infrastructure Security:**
+
 - [ ] Firewall configured
 - [ ] SSL certificates valid
 - [ ] Docker containers hardened
@@ -374,12 +501,14 @@ grep "Security validation failed" /var/log/mcp-wordpress.log
 ### Security Updates
 
 **Update Schedule:**
+
 - **Critical Security Updates**: Immediate
 - **Security Patches**: Within 7 days
 - **Regular Updates**: Monthly
 - **Dependency Updates**: Bi-weekly
 
 **Update Process:**
+
 1. Review security advisories
 2. Test updates in staging
 3. Schedule maintenance window
@@ -387,11 +516,12 @@ grep "Security validation failed" /var/log/mcp-wordpress.log
 5. Verify security controls
 6. Update documentation
 
-## 📋 Compliance
+## Compliance
 
 ### Security Standards
 
 **Supported Standards:**
+
 - OWASP Top 10 compliance
 - WordPress security best practices
 - Docker security benchmarks
@@ -400,6 +530,7 @@ grep "Security validation failed" /var/log/mcp-wordpress.log
 ### Data Protection
 
 **WordPress Data Handling:**
+
 - Minimal data collection
 - Encrypted data transmission
 - Secure credential storage
@@ -409,16 +540,18 @@ grep "Security validation failed" /var/log/mcp-wordpress.log
 ### Privacy Considerations
 
 **User Data:**
+
 - Authentication data encrypted
 - No persistent storage of credentials
 - Audit trail maintained
 - Access controls enforced
 
-## 🧪 Security Testing
+## Security Testing
 
 ### Automated Testing
 
 **Test Suite Coverage:**
+
 ```bash
 # Run security tests
 npm run test:security
@@ -433,6 +566,7 @@ npm run test:security:penetration
 ### Manual Testing
 
 **Security Validation:**
+
 1. **Authentication Testing**
    - Invalid credential handling
    - Brute force protection
@@ -451,21 +585,24 @@ npm run test:security:penetration
 ### Penetration Testing
 
 **Regular Security Assessments:**
+
 - Quarterly penetration testing
 - Annual security audits
 - Continuous vulnerability scanning
 - Bug bounty program consideration
 
-## 🆘 Security Support
+## Security Support
 
 ### Reporting Security Issues
 
 **Security Contact:**
+
 - Email: [Create security email]
 - GPG Key: [Provide GPG key for encrypted communication]
 - Response Time: 24 hours for critical issues
 
 **Disclosure Policy:**
+
 - Responsible disclosure encouraged
 - 90-day disclosure timeline
 - Security credit provided

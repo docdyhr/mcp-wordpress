@@ -2,6 +2,8 @@ import { WordPressClient } from "../client/api.js";
 import { CreatePostRequest, PostQueryParams, UpdatePostRequest } from "../types/wordpress.js";
 import { getErrorMessage } from "../utils/error.js";
 import { ErrorHandlers, EnhancedError } from "../utils/enhancedError.js";
+import { validateId, validatePaginationParams, validatePostParams } from "../utils/validation.js";
+import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "../utils/streaming.js";
 
 /**
  * Provides tools for managing posts on a WordPress site.
@@ -17,7 +19,14 @@ export class PostTools {
       {
         name: "wp_list_posts",
         description:
-          "Lists posts from a WordPress site with comprehensive filtering options. Supports search, status filtering, and category/tag filtering with enhanced metadata display.",
+          "Lists posts from a WordPress site with comprehensive filtering options. Supports search, status filtering, and category/tag filtering with enhanced metadata display.\n\n" +
+          "**Usage Examples:**\n" +
+          "• Basic listing: `wp_list_posts`\n" +
+          '• Search posts: `wp_list_posts --search="AI trends"`\n' +
+          '• Filter by status: `wp_list_posts --status="draft"`\n' +
+          "• Category filtering: `wp_list_posts --categories=[1,2,3]`\n" +
+          "• Paginated results: `wp_list_posts --per_page=20 --page=2`\n" +
+          '• Combined filters: `wp_list_posts --search="WordPress" --status="publish" --per_page=10`',
         parameters: [
           {
             name: "per_page",
@@ -67,7 +76,13 @@ export class PostTools {
       {
         name: "wp_create_post",
         description:
-          "Creates a new WordPress post with comprehensive validation and detailed success feedback including management links.",
+          "Creates a new WordPress post with comprehensive validation and detailed success feedback including management links.\n\n" +
+          "**Usage Examples:**\n" +
+          '• Simple post: `wp_create_post --title="My New Post" --content="<p>Hello World!</p>"`\n' +
+          '• Draft post: `wp_create_post --title="Draft Post" --status="draft"`\n' +
+          '• Categorized post: `wp_create_post --title="Tech News" --categories=[1,5] --tags=[10,20]`\n' +
+          '• Scheduled post: `wp_create_post --title="Future Post" --status="future" --date="2024-12-25T10:00:00"`\n' +
+          '• Complete post: `wp_create_post --title="Complete Post" --content="<p>Content</p>" --excerpt="Summary" --status="publish"`',
         parameters: [
           {
             name: "title",
@@ -171,17 +186,17 @@ export class PostTools {
 
   public async handleListPosts(client: WordPressClient, params: PostQueryParams): Promise<any> {
     try {
-      // Input validation and sanitization
-      const sanitizedParams = { ...params };
+      // Enhanced input validation and sanitization
+      const paginationValidated = validatePaginationParams({
+        page: params.page,
+        per_page: params.per_page,
+        offset: params.offset,
+      });
 
-      // Validate per_page parameter
-      if (sanitizedParams.per_page) {
-        if (sanitizedParams.per_page < 1) {
-          sanitizedParams.per_page = 1;
-        } else if (sanitizedParams.per_page > 100) {
-          sanitizedParams.per_page = 100;
-        }
-      }
+      const sanitizedParams = {
+        ...params,
+        ...paginationValidated,
+      };
 
       // Validate and sanitize search term
       if (sanitizedParams.search) {
@@ -189,6 +204,15 @@ export class PostTools {
         if (sanitizedParams.search.length === 0) {
           delete sanitizedParams.search;
         }
+      }
+
+      // Validate category and tag IDs if provided
+      if (sanitizedParams.categories) {
+        sanitizedParams.categories = sanitizedParams.categories.map((id) => validateId(id, "category ID"));
+      }
+
+      if (sanitizedParams.tags) {
+        sanitizedParams.tags = sanitizedParams.tags.map((id) => validateId(id, "tag ID"));
       }
 
       // Validate status parameter
@@ -215,6 +239,22 @@ export class PostTools {
         const searchInfo = sanitizedParams.search ? ` matching "${sanitizedParams.search}"` : "";
         const statusInfo = sanitizedParams.status ? ` with status "${sanitizedParams.status}"` : "";
         return `No posts found${searchInfo}${statusInfo}. Try adjusting your search criteria or check if posts exist.`;
+      }
+
+      // Use streaming for large result sets (>50 posts)
+      if (posts.length > 50) {
+        const streamResults: StreamingResult<any>[] = [];
+
+        for await (const result of WordPressDataStreamer.streamPosts(posts, {
+          includeAuthor: true,
+          includeCategories: true,
+          includeTags: true,
+          batchSize: 20,
+        })) {
+          streamResults.push(result);
+        }
+
+        return StreamingUtils.formatStreamingResponse(streamResults, "posts");
       }
 
       // Add comprehensive site context information
@@ -457,26 +497,10 @@ export class PostTools {
 
   public async handleCreatePost(client: WordPressClient, params: CreatePostRequest): Promise<any> {
     try {
-      // Input validation
-      if (!params.title || typeof params.title !== "string" || params.title.trim().length === 0) {
-        throw ErrorHandlers.validationError("title", params.title, "non-empty string");
-      }
+      // Enhanced input validation using new validation utilities
+      const validatedParams = validatePostParams(params);
 
-      // Sanitize title
-      const sanitizedParams = { ...params };
-      if (sanitizedParams.title) {
-        sanitizedParams.title = sanitizedParams.title.trim();
-      }
-
-      // Validate status if provided
-      if (sanitizedParams.status) {
-        const validStatuses = ["publish", "draft", "pending", "private"];
-        if (!validStatuses.includes(sanitizedParams.status)) {
-          throw ErrorHandlers.validationError("status", sanitizedParams.status, "one of: " + validStatuses.join(", "));
-        }
-      }
-
-      const post = await client.createPost(sanitizedParams);
+      const post = await client.createPost(validatedParams);
       const siteUrl = client.getSiteUrl ? client.getSiteUrl() : "Unknown site";
 
       return (

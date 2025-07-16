@@ -1,6 +1,7 @@
 import { WordPressClient } from "../client/api.js";
 import { CreateUserRequest, UpdateUserRequest, UserQueryParams } from "../types/wordpress.js";
 import { getErrorMessage } from "../utils/error.js";
+import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "../utils/streaming.js";
 
 /**
  * Provides tools for managing users on a WordPress site.
@@ -15,7 +16,14 @@ export class UserTools {
     return [
       {
         name: "wp_list_users",
-        description: "Lists users from a WordPress site, with filters.",
+        description:
+          "Lists users from a WordPress site with comprehensive filtering and detailed user information including roles, registration dates, and activity status.\n\n" +
+          "**Usage Examples:**\n" +
+          "• List all users: `wp_list_users`\n" +
+          '• Search users: `wp_list_users --search="john"`\n' +
+          '• Filter by role: `wp_list_users --roles=["editor","author"]`\n' +
+          '• Find admins: `wp_list_users --roles=["administrator"]`\n' +
+          '• Combined search: `wp_list_users --search="smith" --roles=["subscriber"]`',
         parameters: [
           {
             name: "search",
@@ -46,7 +54,13 @@ export class UserTools {
       },
       {
         name: "wp_get_current_user",
-        description: "Retrieves the currently authenticated user.",
+        description:
+          "Retrieves the currently authenticated user with comprehensive profile information including roles, capabilities, and account details.\n\n" +
+          "**Usage Examples:**\n" +
+          "• Get current user: `wp_get_current_user`\n" +
+          "• Check permissions: Use this to verify your current user's capabilities and roles\n" +
+          "• Account verification: Confirm you're authenticated with the correct account\n" +
+          "• Profile details: View registration date, email, and user metadata",
         parameters: [],
         handler: this.handleGetCurrentUser.bind(this),
       },
@@ -130,6 +144,21 @@ export class UserTools {
       const users = await client.getUsers(params);
       if (users.length === 0) {
         return "No users found matching the criteria.";
+      }
+
+      // Use streaming for large user result sets (>30 users)
+      if (users.length > 30) {
+        const streamResults: StreamingResult<any>[] = [];
+
+        for await (const result of WordPressDataStreamer.streamUsers(users, {
+          includeRoles: true,
+          includeCapabilities: false, // Too verbose for large sets
+          batchSize: 15,
+        })) {
+          streamResults.push(result);
+        }
+
+        return StreamingUtils.formatStreamingResponse(streamResults, "users");
       }
 
       // Enhanced user information with comprehensive details

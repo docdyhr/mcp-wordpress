@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "mcp-wordpress": {
-      "command": "node",
-      "args": ["/path/to/mcp-wordpress/dist/index.js"]
-    }
-  }
-}

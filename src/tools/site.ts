@@ -43,7 +43,14 @@ export class SiteTools {
       },
       {
         name: "wp_search_site",
-        description: "Performs a site-wide search for content.",
+        description:
+          "Performs a site-wide search for content across posts, pages, and media with comprehensive results and metadata.\n\n" +
+          "**Usage Examples:**\n" +
+          '• Search everything: `wp_search_site --term="WordPress"`\n' +
+          '• Search posts only: `wp_search_site --term="tutorial" --type="posts"`\n' +
+          '• Search pages: `wp_search_site --term="about" --type="pages"`\n' +
+          '• Search media: `wp_search_site --term="logo" --type="media"`\n' +
+          '• Find specific content: `wp_search_site --term="contact form"`',
         parameters: [
           {
             name: "term",

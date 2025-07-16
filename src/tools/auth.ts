@@ -16,21 +16,25 @@ export class AuthTools {
       {
         name: "wp_test_auth",
         description:
-          "Tests the authentication and connectivity for a configured WordPress site.",
+          "Tests the authentication and connectivity for a configured WordPress site with detailed connection diagnostics.\n\n" +
+          "**Usage Examples:**\n" +
+          "• Test connection: `wp_test_auth`\n" +
+          '• Multi-site test: `wp_test_auth --site="my-site"`\n' +
+          "• Verify setup: Use this after configuring new credentials\n" +
+          "• Troubleshoot: Run when experiencing connection issues\n" +
+          "• Health check: Regular verification of WordPress connectivity",
         parameters: [], // The 'site' parameter is added dynamically by the server
         handler: this.handleTestAuth.bind(this),
       },
       {
         name: "wp_get_auth_status",
-        description:
-          "Gets the current authentication status for a configured WordPress site.",
+        description: "Gets the current authentication status for a configured WordPress site.",
         parameters: [],
         handler: this.handleGetAuthStatus.bind(this),
       },
       {
         name: "wp_switch_auth_method",
-        description:
-          "Switches the authentication method for a site for the current session.",
+        description: "Switches the authentication method for a site for the current session.",
         parameters: [
           {
             name: "method",
@@ -42,14 +46,12 @@ export class AuthTools {
           {
             name: "username",
             type: "string",
-            description:
-              "The username for 'app-password' or 'basic' authentication.",
+            description: "The username for 'app-password' or 'basic' authentication.",
           },
           {
             name: "password",
             type: "string",
-            description:
-              "The Application Password for 'app-password' or password for 'basic' auth.",
+            description: "The Application Password for 'app-password' or password for 'basic' auth.",
           },
           {
             name: "jwt_token",
@@ -69,10 +71,7 @@ export class AuthTools {
    * @param params - The parameters for the tool request.
    * @returns A promise that resolves to an MCPToolResponse.
    */
-  public async handleTestAuth(
-    client: WordPressClient,
-    params: any,
-  ): Promise<any> {
+  public async handleTestAuth(client: WordPressClient, params: any): Promise<any> {
     try {
       await client.ping();
       const user = await client.getCurrentUser();
@@ -99,10 +98,7 @@ export class AuthTools {
    * @param params - The parameters for the tool request.
    * @returns A promise that resolves to an MCPToolResponse.
    */
-  public async handleGetAuthStatus(
-    client: WordPressClient,
-    params: any,
-  ): Promise<any> {
+  public async handleGetAuthStatus(client: WordPressClient, params: any): Promise<any> {
     try {
       const isAuthenticated = client.isAuthenticated;
       const config = client.config;
@@ -115,8 +111,7 @@ export class AuthTools {
         const user = await client.getCurrentUser();
         content += `**User:** ${user.name} (@${user.slug})\n`;
       } else {
-        content +=
-          "**Status:** Not connected. Use 'wp_test_auth' to connect and verify credentials.";
+        content += "**Status:** Not connected. Use 'wp_test_auth' to connect and verify credentials.";
       }
 
       return content;
@@ -148,9 +143,7 @@ export class AuthTools {
         "Dynamic authentication method switching is not currently supported. Please update your configuration file and restart the server.",
       );
     } catch (error) {
-      throw new Error(
-        `Failed to switch auth method: ${getErrorMessage(error)}`,
-      );
+      throw new Error(`Failed to switch auth method: ${getErrorMessage(error)}`);
     }
   }
 }
