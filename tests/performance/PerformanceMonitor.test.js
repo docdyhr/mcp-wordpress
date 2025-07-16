@@ -37,6 +37,8 @@ describe("PerformanceMonitor", () => {
       const defaultMonitor = new PerformanceMonitor();
       expect(defaultMonitor).toBeDefined();
       expect(defaultMonitor.getMetrics()).toBeDefined();
+      // Clean up to prevent open handles
+      defaultMonitor.stop();
     });
 
     it("should initialize with custom config", () => {

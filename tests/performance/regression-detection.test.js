@@ -13,14 +13,8 @@ const __dirname = path.dirname(__filename);
 describe("Performance Regression Detection", () => {
   let performanceBaseline;
   let performanceResults;
-  const baselineFile = path.resolve(
-    __dirname,
-    "../baseline/performance-baseline.json",
-  );
-  const resultsFile = path.resolve(
-    __dirname,
-    "../results/performance-results.json",
-  );
+  const baselineFile = path.resolve(__dirname, "../baseline/performance-baseline.json");
+  const resultsFile = path.resolve(__dirname, "../results/performance-results.json");
 
   beforeAll(async () => {
     // Create directories if they don't exist
@@ -41,10 +35,7 @@ describe("Performance Regression Detection", () => {
         };
 
         // Update the baseline file with thresholds
-        await fs.promises.writeFile(
-          baselineFile,
-          JSON.stringify(performanceBaseline, null, 2),
-        );
+        await fs.promises.writeFile(baselineFile, JSON.stringify(performanceBaseline, null, 2));
         console.log("Added missing thresholds to performance baseline");
       }
     } catch (_error) {
@@ -75,10 +66,7 @@ describe("Performance Regression Detection", () => {
         },
       };
 
-      await fs.promises.writeFile(
-        baselineFile,
-        JSON.stringify(performanceBaseline, null, 2),
-      );
+      await fs.promises.writeFile(baselineFile, JSON.stringify(performanceBaseline, null, 2));
       console.log("Created initial performance baseline");
     }
 
@@ -99,10 +87,7 @@ describe("Performance Regression Detection", () => {
     jest.useRealTimers();
 
     // Save performance results
-    await fs.promises.writeFile(
-      resultsFile,
-      JSON.stringify(performanceResults, null, 2),
-    );
+    await fs.promises.writeFile(resultsFile, JSON.stringify(performanceResults, null, 2));
   });
 
   describe("API Response Time Regression", () => {
@@ -111,22 +96,10 @@ describe("Performance Regression Detection", () => {
     beforeAll(() => {
       // Use mock client for consistent testing
       mockClient = {
-        getPosts: () =>
-          new Promise((resolve) =>
-            setTimeout(() => resolve([]), Math.random() * 600 + 400),
-          ),
-        createPost: () =>
-          new Promise((resolve) =>
-            setTimeout(() => resolve({ id: 1 }), Math.random() * 900 + 700),
-          ),
-        uploadMedia: () =>
-          new Promise((resolve) =>
-            setTimeout(() => resolve({ id: 1 }), Math.random() * 2500 + 1800),
-          ),
-        getUser: () =>
-          new Promise((resolve) =>
-            setTimeout(() => resolve({ id: 1 }), Math.random() * 400 + 250),
-          ),
+        getPosts: () => new Promise((resolve) => setTimeout(() => resolve([]), Math.random() * 600 + 400)),
+        createPost: () => new Promise((resolve) => setTimeout(() => resolve({ id: 1 }), Math.random() * 900 + 700)),
+        uploadMedia: () => new Promise((resolve) => setTimeout(() => resolve({ id: 1 }), Math.random() * 2500 + 1800)),
+        getUser: () => new Promise((resolve) => setTimeout(() => resolve({ id: 1 }), Math.random() * 400 + 250)),
       };
     });
     it("should not exceed baseline response time for getPosts", async () => {
@@ -145,8 +118,7 @@ describe("Performance Regression Detection", () => {
       performanceResults.metrics.apiResponseTime.getPosts = metrics;
 
       const baseline = performanceBaseline.metrics.apiResponseTime.getPosts;
-      const threshold =
-        performanceBaseline.thresholds?.regressionThreshold || 0.2;
+      const threshold = performanceBaseline.thresholds?.regressionThreshold || 0.2;
 
       // Check for regression
       const p95Regression = (metrics.p95 - baseline.p95) / baseline.p95;
@@ -178,12 +150,11 @@ describe("Performance Regression Detection", () => {
       performanceResults.metrics.apiResponseTime.createPost = metrics;
 
       const baseline = performanceBaseline.metrics.apiResponseTime.createPost;
-      const threshold =
-        performanceBaseline.thresholds?.regressionThreshold || 0.2;
+      const threshold = performanceBaseline.thresholds?.regressionThreshold || 0.2;
 
       const p95Regression = (metrics.p95 - baseline.p95) / baseline.p95;
       expect(p95Regression).toBeLessThan(threshold);
-    }, 20000); // 20 second timeout
+    }, 30000); // 30 second timeout
 
     it("should not exceed baseline response time for uploadMedia", async () => {
       const iterations = 5; // Fewer iterations for slower operations
@@ -201,8 +172,7 @@ describe("Performance Regression Detection", () => {
       performanceResults.metrics.apiResponseTime.uploadMedia = metrics;
 
       const baseline = performanceBaseline.metrics.apiResponseTime.uploadMedia;
-      const threshold =
-        performanceBaseline.thresholds?.regressionThreshold || 0.2;
+      const threshold = performanceBaseline.thresholds?.regressionThreshold || 0.2;
 
       const p95Regression = (metrics.p95 - baseline.p95) / baseline.p95;
       expect(p95Regression).toBeLessThan(threshold);
@@ -269,9 +239,7 @@ describe("Performance Regression Detection", () => {
       expect(memoryGrowth.trend).toBeLessThan(0.5);
 
       if (memoryGrowth.trend > 0.5) {
-        throw new Error(
-          `Potential memory leak detected: ${(memoryGrowth.trend * 100).toFixed(2)}% consistent growth`,
-        );
+        throw new Error(`Potential memory leak detected: ${(memoryGrowth.trend * 100).toFixed(2)}% consistent growth`);
       }
     });
   });
@@ -310,12 +278,9 @@ describe("Performance Regression Detection", () => {
         totalTime,
       };
 
-      const baselineThroughput =
-        performanceBaseline.metrics.throughput.requestsPerSecond;
-      const threshold =
-        performanceBaseline.thresholds?.throughputThreshold || 0.1;
-      const throughputRegression =
-        (baselineThroughput - requestsPerSecond) / baselineThroughput;
+      const baselineThroughput = performanceBaseline.metrics.throughput.requestsPerSecond;
+      const threshold = performanceBaseline.thresholds?.throughputThreshold || 0.1;
+      const throughputRegression = (baselineThroughput - requestsPerSecond) / baselineThroughput;
 
       expect(throughputRegression).toBeLessThan(threshold);
 

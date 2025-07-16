@@ -35,7 +35,7 @@
   "cache": true,
   "forceExit": true,
   "detectOpenHandles": true,
-  "setupFilesAfterEnv": ["<rootDir>/tests/jest.teardown.js"],
+  "setupFilesAfterEnv": ["<rootDir>/tests/jest.teardown.js", "<rootDir>/tests/performance/jest.setup.js"],
   "globals": {
     "__EXECUTION_CONTEXT__": "jest"
   }

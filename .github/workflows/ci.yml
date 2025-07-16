@@ -288,7 +288,24 @@ jobs:
           # Extract version from package.json
           VERSION=$(node -p "require('./package.json').version")
           
-          # Create GitHub release
+          # Check if release already exists
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "✅ Release v$VERSION already exists (created by semantic-release)"
+            exit 0
+          fi
+          
+          # Create GitHub release only if it doesn't exist
+          echo "📝 Creating release v$VERSION..."
+          
+          # Generate release notes if file doesn't exist
+          if [ ! -f "RELEASE_NOTES_v$VERSION.md" ]; then
+            echo "# Release v$VERSION" > RELEASE_NOTES_v$VERSION.md
+            echo "" >> RELEASE_NOTES_v$VERSION.md
+            echo "Release created by CI/CD pipeline" >> RELEASE_NOTES_v$VERSION.md
+            echo "" >> RELEASE_NOTES_v$VERSION.md
+            echo "See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details." >> RELEASE_NOTES_v$VERSION.md
+          fi
+          
           gh release create "v$VERSION" \
             --title "Release v$VERSION" \
             --notes-file RELEASE_NOTES_v$VERSION.md \
