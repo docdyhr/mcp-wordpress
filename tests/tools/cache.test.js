@@ -1,13 +1,16 @@
 import { jest } from "@jest/globals";
 import { CacheTools } from "../../dist/tools/cache.js";
+import { CachedWordPressClient } from "../../dist/client/CachedWordPressClient.js";
 
 describe("CacheTools", () => {
   let cacheTools;
   let mockClient;
+  let mockCachedClient;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
+    // Mock regular client
     mockClient = {
       cacheManager: {
         getStats: jest.fn(),
@@ -16,8 +19,21 @@ describe("CacheTools", () => {
       },
     };
 
+    // Mock cached client with cache functionality
+    mockCachedClient = {
+      getCacheStats: jest.fn(),
+      clearCache: jest.fn(),
+      clearCachePattern: jest.fn(),
+      warmCache: jest.fn(),
+    };
+
+    // Make the cached client appear as instance of CachedWordPressClient
+    Object.setPrototypeOf(mockCachedClient, CachedWordPressClient.prototype);
+
     const mockClients = new Map();
     mockClients.set("default", mockClient);
+    mockClients.set("cached", mockCachedClient);
+
     cacheTools = new CacheTools(mockClients);
   });
 
@@ -48,217 +64,214 @@ describe("CacheTools", () => {
   });
 
   describe("wp_cache_stats", () => {
-    it("should return cache statistics", async () => {
+    it("should return cache statistics when caching is enabled", async () => {
       const mockStats = {
+        cache: {
+          hits: 150,
+          misses: 50,
+          hitRate: 0.75,
+          totalSize: 100,
+          evictions: 5,
+        },
+        invalidation: {
+          queueSize: 10,
+          rulesCount: 25,
+          processing: false,
+        },
+      };
+
+      mockCachedClient.getCacheStats.mockReturnValue(mockStats);
+
+      const tools = cacheTools.getTools();
+      const statsTool = tools.find((t) => t.name === "wp_cache_stats");
+      const result = await statsTool.handler({ site: "cached" });
+
+      expect(result.caching_enabled).toBe(true);
+      expect(result.cache_stats).toEqual({
         hits: 150,
         misses: 50,
-        sets: 200,
-        deletes: 10,
+        hit_rate: "75%",
+        total_entries: 100,
         evictions: 5,
-        hitRate: 0.75,
-        totalRequests: 200,
-        memoryUsage: 1048576, // 1MB
-        size: 100,
-        maxSize: 1000,
-        sites: ["site1", "site2"],
-      };
-
-      mockClient.cacheManager.getStats.mockReturnValue(mockStats);
-
-      const tools = cacheTools.getTools();
-      const statsTool = tools.find((t) => t.name === "wp_cache_stats");
-      const result = await statsTool.handler({}, mockClient);
-
-      expect(result).toMatchObject({
-        content: [
-          {
-            type: "text",
-            text: expect.stringContaining("Cache Statistics"),
-          },
-        ],
       });
-
-      const text = result.content[0].text;
-      expect(text).toContain("Hit Rate: 75.00%");
-      expect(text).toContain("Total Requests: 200");
-      expect(text).toContain("Hits: 150");
-      expect(text).toContain("Misses: 50");
-      expect(text).toContain("Memory Usage: 1.00 MB");
-      expect(text).toContain("Cache Size: 100 / 1000 items");
-      expect(text).toContain("Active Sites: 2");
+      expect(result.invalidation_stats).toEqual({
+        queue_size: 10,
+        rules_count: 25,
+        processing: false,
+      });
     });
 
-    it("should handle empty cache stats", async () => {
-      const emptyStats = {
-        hits: 0,
-        misses: 0,
-        sets: 0,
-        deletes: 0,
-        evictions: 0,
-        hitRate: 0,
-        totalRequests: 0,
-        memoryUsage: 0,
-        size: 0,
-        maxSize: 1000,
-        sites: [],
-      };
-
-      mockClient.cacheManager.getStats.mockReturnValue(emptyStats);
-
+    it("should return disabled message when caching is disabled", async () => {
       const tools = cacheTools.getTools();
       const statsTool = tools.find((t) => t.name === "wp_cache_stats");
-      const result = await statsTool.handler({}, mockClient);
+      const result = await statsTool.handler({ site: "default" });
 
-      const text = result.content[0].text;
-      expect(text).toContain("Hit Rate: 0.00%");
-      expect(text).toContain("Memory Usage: 0.00 MB");
-      expect(text).toContain("Cache is empty");
+      expect(result.caching_enabled).toBe(false);
+      expect(result.message).toContain("Caching is disabled for this site");
     });
 
-    it("should show reset option if stats available", async () => {
-      const mockStats = {
-        hits: 10,
-        misses: 5,
-        totalRequests: 15,
-        hitRate: 0.667,
-        size: 5,
-        maxSize: 100,
-      };
-
-      mockClient.cacheManager.getStats.mockReturnValue(mockStats);
-
-      const tools = cacheTools.getTools();
-      const statsTool = tools.find((t) => t.name === "wp_cache_stats");
-      const result = await statsTool.handler({}, mockClient);
-
-      expect(result.content[0].text).toContain("Use wp_cache_clear --reset-stats to reset statistics only");
-    });
-
-    it("should handle error when getting stats", async () => {
-      mockClient.cacheManager.getStats.mockImplementation(() => {
+    it("should handle cache stats errors", async () => {
+      mockCachedClient.getCacheStats.mockImplementation(() => {
         throw new Error("Failed to get stats");
       });
 
       const tools = cacheTools.getTools();
       const statsTool = tools.find((t) => t.name === "wp_cache_stats");
-      const result = await statsTool.handler({}, mockClient);
 
-      expect(result.content[0].text).toContain("Failed to get cache statistics");
-      expect(result.content[0].text).toContain("Failed to get stats");
+      await expect(statsTool.handler({ site: "cached" })).rejects.toThrow("Failed to get stats");
     });
   });
 
   describe("wp_cache_clear", () => {
-    it("should clear all cache entries", async () => {
-      mockClient.cacheManager.clear.mockResolvedValue(true);
+    it("should clear all cache entries when caching is enabled", async () => {
+      mockCachedClient.clearCache.mockReturnValue(75);
 
       const tools = cacheTools.getTools();
       const clearTool = tools.find((t) => t.name === "wp_cache_clear");
-      const result = await clearTool.handler({}, mockClient);
+      const result = await clearTool.handler({ site: "cached" });
 
-      expect(result.content[0].text).toContain("✅ Cache cleared successfully");
-      expect(mockClient.cacheManager.clear).toHaveBeenCalledWith();
+      expect(result.success).toBe(true);
+      expect(result.message).toContain("Cleared all cache entries (75 total)");
+      expect(result.cleared_entries).toBe(75);
+      expect(mockCachedClient.clearCache).toHaveBeenCalledWith();
     });
 
-    it("should clear cache for specific site", async () => {
-      mockClient.cacheManager.clear.mockResolvedValue(true);
+    it("should clear cache entries by pattern when pattern is provided", async () => {
+      mockCachedClient.clearCachePattern.mockReturnValue(25);
 
       const tools = cacheTools.getTools();
       const clearTool = tools.find((t) => t.name === "wp_cache_clear");
-      const result = await clearTool.handler({ site: "site1" }, mockClient);
+      const result = await clearTool.handler({ site: "cached", pattern: "posts" });
 
-      expect(result.content[0].text).toContain("✅ Cache cleared successfully for site: site1");
-      expect(mockClient.cacheManager.clear).toHaveBeenCalledWith("site1");
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('Cleared 25 cache entries matching pattern "posts"');
+      expect(result.cleared_entries).toBe(25);
+      expect(result.pattern).toBe("posts");
+      expect(mockCachedClient.clearCachePattern).toHaveBeenCalledWith("posts");
     });
 
-    it("should reset stats only when flag is set", async () => {
-      mockClient.cacheManager.resetStats.mockResolvedValue(true);
-
+    it("should return disabled message when caching is disabled", async () => {
       const tools = cacheTools.getTools();
       const clearTool = tools.find((t) => t.name === "wp_cache_clear");
-      const result = await clearTool.handler({ reset_stats: true }, mockClient);
+      const result = await clearTool.handler({ site: "default" });
 
-      expect(result.content[0].text).toContain("✅ Cache statistics reset successfully");
-      expect(mockClient.cacheManager.resetStats).toHaveBeenCalledWith();
+      expect(result.success).toBe(false);
+      expect(result.message).toContain("Caching is not enabled for this site");
     });
 
     it("should handle clear cache errors", async () => {
-      mockClient.cacheManager.clear.mockRejectedValue(new Error("Clear failed"));
+      mockCachedClient.clearCache.mockImplementation(() => {
+        throw new Error("Clear failed");
+      });
 
       const tools = cacheTools.getTools();
       const clearTool = tools.find((t) => t.name === "wp_cache_clear");
-      const result = await clearTool.handler({}, mockClient);
 
-      expect(result.content[0].text).toContain("Failed to clear cache");
-      expect(result.content[0].text).toContain("Clear failed");
+      await expect(clearTool.handler({ site: "cached" })).rejects.toThrow("Clear failed");
     });
   });
 
   describe("wp_cache_warm", () => {
-    it("should warm cache with essential data", async () => {
+    it("should warm cache with essential data when caching is enabled", async () => {
+      const mockStats = {
+        cache: {
+          totalSize: 50,
+        },
+      };
+
+      mockCachedClient.warmCache.mockResolvedValue(undefined);
+      mockCachedClient.getCacheStats.mockReturnValue(mockStats);
+
       const tools = cacheTools.getTools();
       const warmTool = tools.find((t) => t.name === "wp_cache_warm");
-      const result = await warmTool.handler({}, mockClient);
+      const result = await warmTool.handler({ site: "cached" });
 
-      expect(result.content[0].text).toContain("🔥 Cache Warming");
-      expect(result.content[0].text).toContain("Cache warming initiated");
+      expect(result.success).toBe(true);
+      expect(result.message).toContain("Cache warmed with essential WordPress data");
+      expect(result.cache_entries_after_warming).toBe(50);
+      expect(result.warmed_data).toEqual(["Current user information", "Categories", "Tags", "Site settings"]);
+      expect(mockCachedClient.warmCache).toHaveBeenCalledWith();
     });
 
-    it("should handle warm cache for specific site", async () => {
+    it("should return disabled message when caching is disabled", async () => {
       const tools = cacheTools.getTools();
       const warmTool = tools.find((t) => t.name === "wp_cache_warm");
-      const result = await warmTool.handler({ site: "site1" }, mockClient);
+      const result = await warmTool.handler({ site: "default" });
 
-      expect(result.content[0].text).toContain("🔥 Cache Warming");
-      expect(result.content[0].text).toContain("Cache warming for site: site1");
+      expect(result.success).toBe(false);
+      expect(result.message).toContain("Caching is not enabled for this site");
     });
 
     it("should handle warm cache errors", async () => {
+      mockCachedClient.warmCache.mockRejectedValue(new Error("Warm failed"));
+
       const tools = cacheTools.getTools();
       const warmTool = tools.find((t) => t.name === "wp_cache_warm");
 
-      // Mock console.error for any errors during cache warming
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-
-      const result = await warmTool.handler({}, mockClient);
-
-      expect(result.content[0].text).toContain("🔥 Cache Warming");
-
-      consoleSpy.mockRestore();
+      await expect(warmTool.handler({ site: "cached" })).rejects.toThrow("Warm failed");
     });
   });
 
   describe("wp_cache_info", () => {
-    it("should return cache configuration info", async () => {
+    it("should return cache configuration info when caching is enabled", async () => {
+      const mockStats = {
+        cache: {
+          totalSize: 100,
+          hitRate: 0.85,
+          hits: 170,
+          misses: 30,
+          evictions: 5,
+        },
+        invalidation: {
+          queueSize: 5,
+          rulesCount: 15,
+          processing: true,
+        },
+      };
+
+      mockCachedClient.getCacheStats.mockReturnValue(mockStats);
+
       const tools = cacheTools.getTools();
       const infoTool = tools.find((t) => t.name === "wp_cache_info");
-      const result = await infoTool.handler({}, mockClient);
+      const result = await infoTool.handler({ site: "cached" });
 
-      expect(result.content[0].text).toContain("ℹ️ Cache Information");
-      expect(result.content[0].text).toContain("Cache status: Active");
+      expect(result.caching_enabled).toBe(true);
+      expect(result.cache_configuration).toBeDefined();
+      expect(result.ttl_presets).toBeDefined();
+      expect(result.current_stats).toEqual({
+        total_entries: 100,
+        hit_rate: "85%",
+        hits: 170,
+        misses: 30,
+        evictions: 5,
+      });
+      expect(result.invalidation_info).toEqual({
+        queue_size: 5,
+        rules_registered: 15,
+        currently_processing: true,
+      });
+      expect(result.performance_benefits).toBeDefined();
     });
 
-    it("should handle cache info for specific site", async () => {
+    it("should return disabled message when caching is disabled", async () => {
       const tools = cacheTools.getTools();
       const infoTool = tools.find((t) => t.name === "wp_cache_info");
-      const result = await infoTool.handler({ site: "site1" }, mockClient);
+      const result = await infoTool.handler({ site: "default" });
 
-      expect(result.content[0].text).toContain("ℹ️ Cache Information");
-      expect(result.content[0].text).toContain("Site: site1");
+      expect(result.caching_enabled).toBe(false);
+      expect(result.message).toContain("Caching is disabled for this site");
+      expect(result.how_to_enable).toBeDefined();
     });
 
     it("should handle cache info errors", async () => {
+      mockCachedClient.getCacheStats.mockImplementation(() => {
+        throw new Error("Info failed");
+      });
+
       const tools = cacheTools.getTools();
       const infoTool = tools.find((t) => t.name === "wp_cache_info");
 
-      // Mock console.error for any errors during info gathering
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-
-      const result = await infoTool.handler({}, mockClient);
-
-      expect(result.content[0].text).toContain("ℹ️ Cache Information");
-
-      consoleSpy.mockRestore();
+      await expect(infoTool.handler({ site: "cached" })).rejects.toThrow("Info failed");
     });
   });
 
@@ -279,6 +292,24 @@ describe("CacheTools", () => {
           expect(typeof param.description).toBe("string");
         });
       });
+    });
+  });
+
+  describe("site resolution", () => {
+    it("should handle invalid site gracefully", async () => {
+      const tools = cacheTools.getTools();
+      const statsTool = tools.find((t) => t.name === "wp_cache_stats");
+
+      await expect(statsTool.handler({ site: "nonexistent" })).rejects.toThrow('Site "nonexistent" not found');
+    });
+
+    it("should use default site when no site specified", async () => {
+      const tools = cacheTools.getTools();
+      const statsTool = tools.find((t) => t.name === "wp_cache_stats");
+      const result = await statsTool.handler({});
+
+      expect(result.caching_enabled).toBe(false);
+      expect(result.message).toContain("Caching is disabled for this site");
     });
   });
 });
