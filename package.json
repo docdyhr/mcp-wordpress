@@ -75,6 +75,7 @@
     "prepublishOnly": "npm run build && npm run check:ignore",
     "release": "semantic-release",
     "release:dry": "semantic-release --dry-run",
+    "release:test": "bash scripts/test-release.sh",
     "security:audit": "npm audit --production",
     "security:check": "node scripts/security-check.js",
     "security:fix": "npm audit fix",
