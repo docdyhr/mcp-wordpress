@@ -3,9 +3,11 @@ import { ConnectionTester } from "../../dist/server/ConnectionTester.js";
 
 // Mock dependencies
 jest.mock("../../dist/client/api.js");
-jest.mock("../../dist/utils/error.js", () => ({
-  getErrorMessage: jest.fn((error) => error.message || "Unknown error"),
-}));
+jest.mock("../../dist/utils/error.js", () => {
+  return {
+    getErrorMessage: jest.fn((error) => error.message || "Unknown error"),
+  };
+});
 
 describe("ConnectionTester", () => {
   let mockClient1;

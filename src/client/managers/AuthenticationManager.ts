@@ -16,8 +16,7 @@ export class AuthenticationManager extends BaseManager {
    * Get authentication from environment variables
    */
   static getAuthFromEnv(): AuthConfig {
-    const method: AuthMethod =
-      (process.env.WORDPRESS_AUTH_METHOD as AuthMethod) || "app-password";
+    const method: AuthMethod = (process.env.WORDPRESS_AUTH_METHOD as AuthMethod) || "app-password";
 
     switch (method) {
       case "app-password":
@@ -31,10 +30,7 @@ export class AuthenticationManager extends BaseManager {
         return {
           method: "jwt",
           username: process.env.WORDPRESS_USERNAME || "",
-          password:
-            process.env.WORDPRESS_JWT_PASSWORD ||
-            process.env.WORDPRESS_PASSWORD ||
-            "",
+          password: process.env.WORDPRESS_JWT_PASSWORD || process.env.WORDPRESS_PASSWORD || "",
           secret: process.env.WORDPRESS_JWT_SECRET || "",
         };
 
@@ -52,10 +48,7 @@ export class AuthenticationManager extends BaseManager {
         };
 
       default:
-        throw new AuthenticationError(
-          `Unsupported authentication method: ${method}`,
-          method,
-        );
+        throw new AuthenticationError(`Unsupported authentication method: ${method}`, method);
     }
   }
 
@@ -65,18 +58,17 @@ export class AuthenticationManager extends BaseManager {
   async getAuthHeaders(): Promise<Record<string, string>> {
     const auth = this.config.auth;
 
+    if (!auth) {
+      throw new AuthenticationError("Authentication configuration is required", "app-password");
+    }
+
     switch (auth.method) {
       case "app-password":
         if (!auth.username || !auth.appPassword) {
-          throw new AuthenticationError(
-            "Username and app password are required",
-            auth.method,
-          );
+          throw new AuthenticationError("Username and app password are required", auth.method);
         }
 
-        const credentials = Buffer.from(
-          `${auth.username}:${auth.appPassword}`,
-        ).toString("base64");
+        const credentials = Buffer.from(`${auth.username}:${auth.appPassword}`).toString("base64");
         return { Authorization: `Basic ${credentials}` };
 
       case "jwt":
@@ -87,15 +79,10 @@ export class AuthenticationManager extends BaseManager {
 
       case "basic":
         if (!auth.username || !auth.password) {
-          throw new AuthenticationError(
-            "Username and password are required",
-            auth.method,
-          );
+          throw new AuthenticationError("Username and password are required", auth.method);
         }
 
-        const basicCredentials = Buffer.from(
-          `${auth.username}:${auth.password}`,
-        ).toString("base64");
+        const basicCredentials = Buffer.from(`${auth.username}:${auth.password}`).toString("base64");
         return { Authorization: `Basic ${basicCredentials}` };
 
       case "api-key":
@@ -105,10 +92,7 @@ export class AuthenticationManager extends BaseManager {
         return { "X-API-Key": auth.apiKey };
 
       default:
-        throw new AuthenticationError(
-          `Unsupported authentication method: ${auth.method}`,
-          auth.method,
-        );
+        throw new AuthenticationError(`Unsupported authentication method: ${auth.method}`, auth.method);
     }
   }
 
@@ -119,19 +103,13 @@ export class AuthenticationManager extends BaseManager {
     const auth = this.config.auth;
 
     if (auth.method !== "jwt" || !auth.username || !auth.password) {
-      throw new AuthenticationError(
-        "JWT authentication requires username and password",
-        "jwt",
-      );
+      throw new AuthenticationError("JWT authentication requires username and password", "jwt");
     }
 
     try {
       // This would need the RequestManager instance to make the request
       // For now, we'll throw an error indicating this needs to be implemented
-      throw new AuthenticationError(
-        "JWT authentication requires RequestManager integration",
-        "jwt",
-      );
+      throw new AuthenticationError("JWT authentication requires RequestManager integration", "jwt");
     } catch (error) {
       this.handleError(error, "JWT authentication");
     }
@@ -180,10 +158,7 @@ export class AuthenticationManager extends BaseManager {
     const auth = this.config.auth;
 
     if (!auth.method) {
-      throw new AuthenticationError(
-        "Authentication method is required",
-        "app-password",
-      );
+      throw new AuthenticationError("Authentication method is required", "app-password");
     }
 
     switch (auth.method) {
@@ -198,36 +173,24 @@ export class AuthenticationManager extends BaseManager {
 
       case "jwt":
         if (!auth.username || !auth.password || !auth.secret) {
-          throw new AuthenticationError(
-            "JWT authentication requires username, password, and secret",
-            "jwt",
-          );
+          throw new AuthenticationError("JWT authentication requires username, password, and secret", "jwt");
         }
         break;
 
       case "basic":
         if (!auth.username || !auth.password) {
-          throw new AuthenticationError(
-            "Basic authentication requires username and password",
-            "basic",
-          );
+          throw new AuthenticationError("Basic authentication requires username and password", "basic");
         }
         break;
 
       case "api-key":
         if (!auth.apiKey) {
-          throw new AuthenticationError(
-            "API key authentication requires apiKey",
-            "api-key",
-          );
+          throw new AuthenticationError("API key authentication requires apiKey", "api-key");
         }
         break;
 
       default:
-        throw new AuthenticationError(
-          `Unsupported authentication method: ${auth.method}`,
-          auth.method,
-        );
+        throw new AuthenticationError(`Unsupported authentication method: ${auth.method}`, auth.method);
     }
   }
 }
