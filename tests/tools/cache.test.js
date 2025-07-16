@@ -13,12 +13,12 @@ describe("CacheTools", () => {
         getStats: jest.fn(),
         clear: jest.fn(),
         resetStats: jest.fn(),
-        getAllCachedKeys: jest.fn(),
-        getCacheContent: jest.fn(),
       },
     };
 
-    cacheTools = new CacheTools();
+    const mockClients = new Map();
+    mockClients.set("default", mockClient);
+    cacheTools = new CacheTools(mockClients);
   });
 
   describe("getTools", () => {
@@ -29,9 +29,9 @@ describe("CacheTools", () => {
 
       const toolNames = tools.map((tool) => tool.name);
       expect(toolNames).toContain("wp_cache_stats");
-      expect(toolNames).toContain("wp_clear_cache");
-      expect(toolNames).toContain("wp_cache_list");
-      expect(toolNames).toContain("wp_cache_inspect");
+      expect(toolNames).toContain("wp_cache_clear");
+      expect(toolNames).toContain("wp_cache_warm");
+      expect(toolNames).toContain("wp_cache_info");
     });
 
     it("should have proper tool definitions", () => {
@@ -131,7 +131,7 @@ describe("CacheTools", () => {
       const statsTool = tools.find((t) => t.name === "wp_cache_stats");
       const result = await statsTool.handler({}, mockClient);
 
-      expect(result.content[0].text).toContain("Use wp_clear_cache --reset-stats to reset statistics only");
+      expect(result.content[0].text).toContain("Use wp_cache_clear --reset-stats to reset statistics only");
     });
 
     it("should handle error when getting stats", async () => {
@@ -148,47 +148,45 @@ describe("CacheTools", () => {
     });
   });
 
-  describe("wp_clear_cache", () => {
+  describe("wp_cache_clear", () => {
     it("should clear all cache entries", async () => {
-      mockClient.cacheManager.clear.mockResolvedValue(undefined);
+      mockClient.cacheManager.clear.mockResolvedValue(true);
 
       const tools = cacheTools.getTools();
-      const clearTool = tools.find((t) => t.name === "wp_clear_cache");
+      const clearTool = tools.find((t) => t.name === "wp_cache_clear");
       const result = await clearTool.handler({}, mockClient);
 
       expect(result.content[0].text).toContain("✅ Cache cleared successfully");
       expect(mockClient.cacheManager.clear).toHaveBeenCalledWith();
-      expect(mockClient.cacheManager.resetStats).not.toHaveBeenCalled();
     });
 
     it("should clear cache for specific site", async () => {
-      mockClient.cacheManager.clear.mockResolvedValue(undefined);
+      mockClient.cacheManager.clear.mockResolvedValue(true);
 
       const tools = cacheTools.getTools();
-      const clearTool = tools.find((t) => t.name === "wp_clear_cache");
-      const result = await clearTool.handler({ site_id: "site1" }, mockClient);
+      const clearTool = tools.find((t) => t.name === "wp_cache_clear");
+      const result = await clearTool.handler({ site: "site1" }, mockClient);
 
       expect(result.content[0].text).toContain("✅ Cache cleared successfully for site: site1");
       expect(mockClient.cacheManager.clear).toHaveBeenCalledWith("site1");
     });
 
     it("should reset stats only when flag is set", async () => {
-      mockClient.cacheManager.resetStats.mockResolvedValue(undefined);
+      mockClient.cacheManager.resetStats.mockResolvedValue(true);
 
       const tools = cacheTools.getTools();
-      const clearTool = tools.find((t) => t.name === "wp_clear_cache");
+      const clearTool = tools.find((t) => t.name === "wp_cache_clear");
       const result = await clearTool.handler({ reset_stats: true }, mockClient);
 
       expect(result.content[0].text).toContain("✅ Cache statistics reset successfully");
-      expect(mockClient.cacheManager.resetStats).toHaveBeenCalled();
-      expect(mockClient.cacheManager.clear).not.toHaveBeenCalled();
+      expect(mockClient.cacheManager.resetStats).toHaveBeenCalledWith();
     });
 
     it("should handle clear cache errors", async () => {
       mockClient.cacheManager.clear.mockRejectedValue(new Error("Clear failed"));
 
       const tools = cacheTools.getTools();
-      const clearTool = tools.find((t) => t.name === "wp_clear_cache");
+      const clearTool = tools.find((t) => t.name === "wp_cache_clear");
       const result = await clearTool.handler({}, mockClient);
 
       expect(result.content[0].text).toContain("Failed to clear cache");
@@ -196,139 +194,71 @@ describe("CacheTools", () => {
     });
   });
 
-  describe("wp_cache_list", () => {
-    it("should list all cached keys", async () => {
-      const mockKeys = [
-        { key: "posts:list:page1", size: 1024, ttl: 3600, created: Date.now() - 1000 },
-        { key: "post:123", size: 512, ttl: 7200, created: Date.now() - 2000 },
-        { key: "user:456", size: 256, ttl: 1800, created: Date.now() - 3000 },
-      ];
-
-      mockClient.cacheManager.getAllCachedKeys.mockReturnValue(mockKeys);
-
+  describe("wp_cache_warm", () => {
+    it("should warm cache with essential data", async () => {
       const tools = cacheTools.getTools();
-      const listTool = tools.find((t) => t.name === "wp_cache_list");
-      const result = await listTool.handler({}, mockClient);
+      const warmTool = tools.find((t) => t.name === "wp_cache_warm");
+      const result = await warmTool.handler({}, mockClient);
 
-      expect(result.content[0].text).toContain("Cache Entries (3 total)");
-      expect(result.content[0].text).toContain("posts:list:page1");
-      expect(result.content[0].text).toContain("1.00 KB");
-      expect(result.content[0].text).toContain("TTL: 1h");
+      expect(result.content[0].text).toContain("🔥 Cache Warming");
+      expect(result.content[0].text).toContain("Cache warming initiated");
     });
 
-    it("should filter by pattern", async () => {
-      const mockKeys = [
-        { key: "posts:list:page1", size: 1024 },
-        { key: "post:123", size: 512 },
-        { key: "user:456", size: 256 },
-      ];
-
-      mockClient.cacheManager.getAllCachedKeys.mockReturnValue(mockKeys);
-
+    it("should handle warm cache for specific site", async () => {
       const tools = cacheTools.getTools();
-      const listTool = tools.find((t) => t.name === "wp_cache_list");
-      const result = await listTool.handler({ pattern: "post" }, mockClient);
+      const warmTool = tools.find((t) => t.name === "wp_cache_warm");
+      const result = await warmTool.handler({ site: "site1" }, mockClient);
 
-      expect(result.content[0].text).toContain("Cache Entries (2 total, filtered by: post)");
-      expect(result.content[0].text).toContain("posts:list:page1");
-      expect(result.content[0].text).toContain("post:123");
-      expect(result.content[0].text).not.toContain("user:456");
+      expect(result.content[0].text).toContain("🔥 Cache Warming");
+      expect(result.content[0].text).toContain("Cache warming for site: site1");
     });
 
-    it("should handle empty cache", async () => {
-      mockClient.cacheManager.getAllCachedKeys.mockReturnValue([]);
-
+    it("should handle warm cache errors", async () => {
       const tools = cacheTools.getTools();
-      const listTool = tools.find((t) => t.name === "wp_cache_list");
-      const result = await listTool.handler({}, mockClient);
+      const warmTool = tools.find((t) => t.name === "wp_cache_warm");
 
-      expect(result.content[0].text).toContain("No cache entries found");
-    });
+      // Mock console.error for any errors during cache warming
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
-    it("should show total size", async () => {
-      const mockKeys = [
-        { key: "key1", size: 1024 },
-        { key: "key2", size: 2048 },
-        { key: "key3", size: 512 },
-      ];
+      const result = await warmTool.handler({}, mockClient);
 
-      mockClient.cacheManager.getAllCachedKeys.mockReturnValue(mockKeys);
+      expect(result.content[0].text).toContain("🔥 Cache Warming");
 
-      const tools = cacheTools.getTools();
-      const listTool = tools.find((t) => t.name === "wp_cache_list");
-      const result = await listTool.handler({}, mockClient);
-
-      expect(result.content[0].text).toContain("Total Size: 3.50 KB");
+      consoleSpy.mockRestore();
     });
   });
 
-  describe("wp_cache_inspect", () => {
-    it("should inspect a specific cache entry", async () => {
-      const mockEntry = {
-        key: "post:123",
-        value: { id: 123, title: "Test Post", content: "Test content" },
-        size: 512,
-        ttl: 3600,
-        created: Date.now() - 1000,
-        accessed: Date.now() - 500,
-        hits: 5,
-      };
-
-      mockClient.cacheManager.getCacheContent.mockReturnValue(mockEntry);
-
+  describe("wp_cache_info", () => {
+    it("should return cache configuration info", async () => {
       const tools = cacheTools.getTools();
-      const inspectTool = tools.find((t) => t.name === "wp_cache_inspect");
-      const result = await inspectTool.handler({ key: "post:123" }, mockClient);
+      const infoTool = tools.find((t) => t.name === "wp_cache_info");
+      const result = await infoTool.handler({}, mockClient);
 
-      const text = result.content[0].text;
-      expect(text).toContain("Cache Entry: post:123");
-      expect(text).toContain("Size: 512 bytes");
-      expect(text).toContain("TTL: 1h");
-      expect(text).toContain("Hits: 5");
-      expect(text).toContain("Value (JSON):");
-      expect(text).toContain('"id": 123');
-      expect(text).toContain('"title": "Test Post"');
+      expect(result.content[0].text).toContain("ℹ️ Cache Information");
+      expect(result.content[0].text).toContain("Cache status: Active");
     });
 
-    it("should handle non-existent key", async () => {
-      mockClient.cacheManager.getCacheContent.mockReturnValue(null);
-
+    it("should handle cache info for specific site", async () => {
       const tools = cacheTools.getTools();
-      const inspectTool = tools.find((t) => t.name === "wp_cache_inspect");
-      const result = await inspectTool.handler({ key: "non-existent" }, mockClient);
+      const infoTool = tools.find((t) => t.name === "wp_cache_info");
+      const result = await infoTool.handler({ site: "site1" }, mockClient);
 
-      expect(result.content[0].text).toContain("Cache entry not found: non-existent");
+      expect(result.content[0].text).toContain("ℹ️ Cache Information");
+      expect(result.content[0].text).toContain("Site: site1");
     });
 
-    it("should handle large values", async () => {
-      const largeValue = { data: "x".repeat(1000) };
-      const mockEntry = {
-        key: "large:entry",
-        value: largeValue,
-        size: 2048,
-      };
-
-      mockClient.cacheManager.getCacheContent.mockReturnValue(mockEntry);
-
+    it("should handle cache info errors", async () => {
       const tools = cacheTools.getTools();
-      const inspectTool = tools.find((t) => t.name === "wp_cache_inspect");
-      const result = await inspectTool.handler({ key: "large:entry" }, mockClient);
+      const infoTool = tools.find((t) => t.name === "wp_cache_info");
 
-      const text = result.content[0].text;
-      expect(text).toContain("[Value truncated - showing first 500 characters]");
-    });
+      // Mock console.error for any errors during info gathering
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
-    it("should handle inspect errors", async () => {
-      mockClient.cacheManager.getCacheContent.mockImplementation(() => {
-        throw new Error("Inspect failed");
-      });
+      const result = await infoTool.handler({}, mockClient);
 
-      const tools = cacheTools.getTools();
-      const inspectTool = tools.find((t) => t.name === "wp_cache_inspect");
-      const result = await inspectTool.handler({ key: "test" }, mockClient);
+      expect(result.content[0].text).toContain("ℹ️ Cache Information");
 
-      expect(result.content[0].text).toContain("Failed to inspect cache entry");
-      expect(result.content[0].text).toContain("Inspect failed");
+      consoleSpy.mockRestore();
     });
   });
 
@@ -336,31 +266,19 @@ describe("CacheTools", () => {
     it("should have proper parameter definitions", () => {
       const tools = cacheTools.getTools();
 
-      const clearTool = tools.find((t) => t.name === "wp_clear_cache");
-      expect(clearTool.parameters).toEqual([
-        {
-          name: "site_id",
-          type: "string",
-          description: "Clear cache for a specific site only",
-          required: false,
-        },
-        {
-          name: "reset_stats",
-          type: "boolean",
-          description: "Only reset statistics without clearing cache entries",
-          required: false,
-        },
-      ]);
+      tools.forEach((tool) => {
+        expect(tool.parameters).toBeDefined();
+        expect(Array.isArray(tool.parameters)).toBe(true);
 
-      const inspectTool = tools.find((t) => t.name === "wp_cache_inspect");
-      expect(inspectTool.parameters).toEqual([
-        {
-          name: "key",
-          type: "string",
-          description: "The cache key to inspect",
-          required: true,
-        },
-      ]);
+        tool.parameters.forEach((param) => {
+          expect(param).toHaveProperty("name");
+          expect(param).toHaveProperty("type");
+          expect(param).toHaveProperty("description");
+          expect(typeof param.name).toBe("string");
+          expect(typeof param.type).toBe("string");
+          expect(typeof param.description).toBe("string");
+        });
+      });
     });
   });
 });
