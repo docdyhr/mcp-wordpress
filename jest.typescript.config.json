@@ -14,7 +14,11 @@
     "**/property/**/*.test.js",
     "**/performance/**/*.test.js",
     "**/unit/**/*.test.js",
-    "**/cache/**/*.test.js"
+    "**/cache/**/*.test.js",
+    "**/tools/**/*.test.js",
+    "**/utils/**/*.test.js",
+    "**/managers/**/*.test.js",
+    "**/server/**/*.test.js"
   ],
   "collectCoverage": false,
   "collectCoverageFrom": [
