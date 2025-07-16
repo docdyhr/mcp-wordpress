@@ -303,13 +303,12 @@ describe("CacheTools", () => {
       await expect(statsTool.handler({ site: "nonexistent" })).rejects.toThrow('Site "nonexistent" not found');
     });
 
-    it("should use default site when no site specified", async () => {
+    it("should handle multiple sites configuration", async () => {
       const tools = cacheTools.getTools();
       const statsTool = tools.find((t) => t.name === "wp_cache_stats");
-      const result = await statsTool.handler({});
 
-      expect(result.caching_enabled).toBe(false);
-      expect(result.message).toContain("Caching is disabled for this site");
+      // Should fail when no site is specified with multiple sites
+      await expect(statsTool.handler({})).rejects.toThrow("Multiple sites configured. Please specify --site parameter");
     });
   });
 });

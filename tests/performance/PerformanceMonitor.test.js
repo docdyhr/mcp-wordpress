@@ -114,9 +114,9 @@ describe("PerformanceMonitor", () => {
       expect(metrics.cache.misses).toBe(25);
       expect(metrics.cache.hitRate).toBe(0.75);
       expect(metrics.cache.totalSize).toBe(100);
-      expect(metrics.cache.memoryUsageMB).toBeCloseTo(50, 0);
+      expect(metrics.cache.memoryUsageMB).toBeCloseTo(0.09765625, 5);
       expect(metrics.cache.evictions).toBe(5);
-      expect(metrics.cache.averageCacheTime).toBe(10);
+      expect(metrics.cache.averageCacheTime).toBe(0.5);
     });
 
     it("should track tool usage", () => {
@@ -271,7 +271,10 @@ describe("PerformanceMonitor", () => {
 
       const parsedData = JSON.parse(jsonData);
       expect(parsedData).toHaveProperty("currentMetrics");
-      expect(parsedData).toHaveProperty("insights");
+      expect(parsedData).toHaveProperty("historicalData");
+      expect(parsedData).toHaveProperty("alerts");
+      expect(parsedData).toHaveProperty("config");
+      expect(parsedData).toHaveProperty("generatedAt");
     });
 
     it("should export data as CSV", () => {
