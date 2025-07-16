@@ -37,7 +37,7 @@ export class ServerConfiguration {
 
     // Debug output for DXT troubleshooting (reduced in DXT mode)
     const isDXTMode = process.env.NODE_ENV === "dxt";
-    if (!isDXTMode) {
+    if (!isDXTMode && process.env.DEBUG === "true") {
       console.error("DEBUG: ServerConfiguration initialized");
       console.error(`DEBUG: Root directory: ${this.rootDir}`);
       console.error(`DEBUG: Environment file path: ${this.envPath}`);
