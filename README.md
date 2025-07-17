@@ -9,7 +9,7 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 
 [Quick Start](#-quick-start) • [Features](#-features) • [Installation](#-installation-options) • [Documentation](#-documentation) • [Examples](#-examples)
 
-[![CI/CD Pipeline](https://github.com/docdyhr/mcp-wordpress/workflows/CI/badge.svg)](https://github.com/docdyhr/mcp-wordpress/actions)
+[![CI/CD Pipeline](https://github.com/docdyhr/mcp-wordpress/workflows/%F0%9F%9A%80%20CI%2FCD%20Pipeline/badge.svg)](https://github.com/docdyhr/mcp-wordpress/actions)
 [![NPM Version](https://img.shields.io/npm/v/mcp-wordpress?logo=npm&logoColor=white)](https://www.npmjs.com/package/mcp-wordpress)
 [![NPM Downloads](https://img.shields.io/npm/dm/mcp-wordpress?logo=npm&logoColor=white)](https://www.npmjs.com/package/mcp-wordpress)
 [![Test Coverage](https://img.shields.io/badge/test%20coverage-95%25%2B-brightgreen?logo=jest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
