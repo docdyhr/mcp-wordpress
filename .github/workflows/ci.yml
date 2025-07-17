@@ -42,12 +42,7 @@ jobs:
         run: npm run build
 
       - name: 🧪 Run ${{ matrix.test-suite }} Tests
-        run: |
-          case "${{ matrix.test-suite }}" in
-            "typescript") npm run test:ci ;;
-            "security") npm run test:security ;;
-            "config") npm run test:config ;;
-          esac
+        run: npm run test:${{ matrix.test-suite }}
         env:
           # Mock credentials for testing
           WORDPRESS_SITE_URL: https://example.com

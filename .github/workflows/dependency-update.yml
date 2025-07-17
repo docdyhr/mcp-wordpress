@@ -17,7 +17,7 @@ on:
           - major
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
 
 jobs:
   # 🔍 Security Updates (High Priority)
