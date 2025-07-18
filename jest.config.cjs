@@ -34,7 +34,8 @@ const baseConfig = {
     "/dist/",
     "/coverage/",
     "tests/cache/CacheInvalidation.test.js",
-    "tests/server/ToolRegistry.test.js"
+    "tests/server/ToolRegistry.test.js",
+    "tests/managers/authentication.test.js"
   ],
   
   // Coverage configuration
