@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.3](https://github.com/docdyhr/mcp-wordpress/compare/v2.0.2...v2.0.3) (2025-07-18)
+
+### 🐛 Bug Fixes
+
+* resolve CI/CD pipeline and Docker publishing issues ([fe997cc](https://github.com/docdyhr/mcp-wordpress/commit/fe997cc1e9a6e94c57abe5e48d9d9ab404abfa15)), closes [#14](https://github.com/docdyhr/mcp-wordpress/issues/14) [#15](https://github.com/docdyhr/mcp-wordpress/issues/15) [#16](https://github.com/docdyhr/mcp-wordpress/issues/16)
+* resolve CI/CD pipeline failures by handling test environments ([595df9d](https://github.com/docdyhr/mcp-wordpress/commit/595df9d8138d32bf84c2785c7282d5304f3d42c9))
+* resolve ES module compatibility issues in test suite ([e65c32b](https://github.com/docdyhr/mcp-wordpress/commit/e65c32bcf63693010ce1c72d75ad1a7910543a05))
+
+### ♻️ Refactoring
+
+* comprehensive technical debt cleanup and Jest configuration consolidation ([280da1c](https://github.com/docdyhr/mcp-wordpress/commit/280da1ca95bcf043b1a25a453f56232c99be5976))
+* improve CI/CD workflows ([ed607be](https://github.com/docdyhr/mcp-wordpress/commit/ed607bee701eabbee14025b5449d8e5bb8366efc))
+
+### 📚 Documentation
+
+* update CI/CD badge URL to match renamed workflow ([09d5557](https://github.com/docdyhr/mcp-wordpress/commit/09d55570c43d57816580130db9ee6bed7d39e841))
+
 ## [Unreleased]
 
 ### 🐛 Bug Fixes
