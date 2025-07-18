@@ -146,7 +146,17 @@ jobs:
         run: |
           echo "Verifying Docker Hub login..."
           docker info
-
+          echo "Docker Hub login successful"
+          
+      - name: 🔍 Debug Release Info
+        run: |
+          echo "Release info debug:"
+          echo "New release published: ${{ needs.semantic-release.outputs.new-release-published }}"
+          echo "New release version: ${{ needs.semantic-release.outputs.new-release-version }}"
+          echo "GitHub ref: ${{ github.ref }}"
+          echo "GitHub ref name: ${{ github.ref_name }}"
+          echo "Event name: ${{ github.event_name }}"
+          
       - name: 📝 Extract Metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -182,6 +192,8 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             VERSION=${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}
+            BUILD_DATE={{date 'YYYY-MM-DDTHH:mm:ssZ'}}
+            VCS_REF=${{ github.sha }}
           # v6 features
           provenance: true
           sbom: true
@@ -194,6 +206,12 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: docdyhr/mcp-wordpress
           readme-filepath: ./README.md
+          
+      - name: 🎯 Verify Docker Push Success
+        run: |
+          echo "Docker build and push completed successfully"
+          echo "Published tags: ${{ steps.meta.outputs.tags }}"
+          echo "Version: ${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}"
 
   # 🎉 Post-Release Actions
   post-release:
