@@ -299,6 +299,73 @@ node scripts/test-auth.js       # Comprehensive auth testing
 node scripts/health-check.js    # Full system diagnostics
 ```
 
+### AI-Powered Security Suite (v2.0+)
+
+**Comprehensive Security Analysis**: Advanced AI-powered security scanning and automated remediation.
+
+```bash
+npm run security:scan           # AI-powered vulnerability scanning with ML-based detection
+npm run security:review         # Intelligent code review with security analysis
+npm run security:remediate      # Automated vulnerability remediation with backup
+npm run security:monitor        # Real-time security monitoring and threat detection
+npm run security:config         # Security configuration management and compliance
+npm run security:pipeline       # CI/CD security gate integration
+npm run security:full           # Complete security suite execution
+```
+
+**AI Security Features**:
+
+- **Vulnerability Detection**: 50+ security patterns with ML-based confidence scoring
+- **Automated Remediation**: Smart fixes for SQL injection, XSS, authentication issues, and more
+- **Real-time Monitoring**: Threat detection with anomaly analysis and automated response
+- **Security Gates**: CI/CD integration with blocking/non-blocking security checks
+- **Compliance Management**: OWASP, CWE, and GDPR compliance validation
+- **Code Review**: AI-powered security code review with recommendations
+
+**Security Components** (`src/security/`):
+
+- **AISecurityScanner**: Machine learning-based vulnerability detection
+- **AutomatedRemediation**: Intelligent automated fixes with rollback capability
+- **SecurityReviewer**: AI-powered code security analysis
+- **SecurityConfigManager**: Centralized security policy management
+- **SecurityMonitoring**: Real-time threat detection and alerting
+- **SecurityCIPipeline**: CI/CD security gates and pipeline integration
+
+### Memory Management & Knowledge Persistence
+
+**Claude Memory Integration**: This project supports Claude's memory tools for persistent knowledge management.
+
+When working with this codebase, Claude should use memory tools to:
+
+- **Track Complex Multi-Site Configurations**: Store site-specific settings, authentication methods,
+  and configuration patterns for easy reference across sessions
+- **Remember WordPress Integration Patterns**: Cache knowledge about WordPress REST API quirks,
+  authentication fixes, and common troubleshooting solutions
+- **Document Tool Usage Patterns**: Remember which tools are commonly used together and
+  successful workflow combinations
+- **Store Performance Insights**: Keep track of performance optimization results, cache
+  configuration successes, and monitoring patterns
+- **Maintain Security Context**: Remember security considerations, credential handling patterns,
+  and vulnerability mitigation strategies
+- **Track Development Context**: Store information about recent changes, active development areas,
+  and ongoing improvement initiatives
+
+**Memory Usage Guidelines**:
+
+- Create entities for major architecture components (MCP Server, WordPress Client, Tool System)
+- Store observations about configuration patterns, authentication solutions, and performance optimizations
+- Maintain relationships between tools, configurations, and their use cases
+- Remember successful troubleshooting patterns and their solutions
+- Track evolution of the codebase architecture and design decisions
+
+**Example Memory Entities**:
+
+- WordPress Sites (with their specific configurations and quirks)
+- Authentication Methods (with success patterns and common issues)
+- Tool Categories (with usage patterns and interdependencies)
+- Performance Metrics (with optimization strategies and results)
+- Security Configurations (with best practices and implementation details)
+
 ## Architecture Overview
 
 ### Core Components
