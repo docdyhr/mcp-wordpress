@@ -24,8 +24,10 @@ jobs:
         with:
           # Fail the action if vulnerabilities are found
           fail-on-severity: moderate
+          # Fail if vulnerabilities are found in runtime dependencies
+          fail-on-scopes: runtime
           # License check (allow common open source licenses)
-          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, GPL-3.0, LGPL-2.1, LGPL-3.0
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, CC0-1.0, Unlicense, LGPL-2.1, LGPL-3.0
           # Deny specific licenses
           deny-licenses: AGPL-1.0, AGPL-3.0, GPL-2.0, LGPL-2.0
           # Security advisories configuration
@@ -41,8 +43,9 @@ jobs:
           vulnerability-check: true
           # License compliance check
           license-check: true
-          # Configuration for reporting
-          config-file: .github/dependency-review-config.yml
+          # Show OpenSSF Scorecard information
+          show-openssf-scorecard: true
+          warn-on-openssf-scorecard-level: 3
 
   security-audit:
     name: 🔒 Security Audit
@@ -197,6 +200,12 @@ jobs:
           echo "- **Security Audit:** ${{ needs.security-audit.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- **License Compliance:** ${{ needs.license-compliance.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Supply Chain Security:** ${{ needs.supply-chain-security.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Configuration Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Fail on severity:** moderate and above" >> $GITHUB_STEP_SUMMARY
+          echo "- **Fail on scopes:** runtime dependencies" >> $GITHUB_STEP_SUMMARY
+          echo "- **Allowed licenses:** MIT, Apache-2.0, BSD, ISC, CC0, Unlicense, LGPL" >> $GITHUB_STEP_SUMMARY
+          echo "- **OpenSSF Scorecard:** Enabled with level 3 warnings" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📝 Recommendations" >> $GITHUB_STEP_SUMMARY
           echo "1. **Address any security vulnerabilities** found in the audit" >> $GITHUB_STEP_SUMMARY

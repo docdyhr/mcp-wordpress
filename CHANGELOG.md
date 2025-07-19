@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.1.0...v2.2.0) (2025-07-19)
+
+### 🚀 Features
+
+* Add comprehensive security monitoring workflow ([78b6d0c](https://github.com/docdyhr/mcp-wordpress/commit/78b6d0cc0e19feefd606faf573315b8a0608891d))
+
+## [2.1.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.0.4...v2.1.0) (2025-07-19)
+
+### 🚀 Features
+
+* Add CodeQL security analysis workflow ([897f5f3](https://github.com/docdyhr/mcp-wordpress/commit/897f5f3616017920aacdf0eefc1215fa4358fee1))
+* Add Dependabot configuration for automated dependency updates ([c3e8a80](https://github.com/docdyhr/mcp-wordpress/commit/c3e8a80cc77001e28ad321f0ec4743428777d9a3))
+* Add Dependency Review action for PR security checks ([203d373](https://github.com/docdyhr/mcp-wordpress/commit/203d3734c37c700cc67e8c34b15ed44fe6fa71d3))
+
+## [2.0.4](https://github.com/docdyhr/mcp-wordpress/compare/v2.0.3...v2.0.4) (2025-07-19)
+
+### 🐛 Bug Fixes
+
+* update Trivy security scan configuration ([a114bc6](https://github.com/docdyhr/mcp-wordpress/commit/a114bc66dd10f81b41465c4312dac3b29a4cd6a4))
+
 ## [2.0.3](https://github.com/docdyhr/mcp-wordpress/compare/v2.0.2...v2.0.3) (2025-07-18)
 
 ### 🐛 Bug Fixes

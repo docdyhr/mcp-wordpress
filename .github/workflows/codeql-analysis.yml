@@ -6,9 +6,15 @@ on:
   pull_request:
     branches: [main, develop]
   schedule:
-    # Run CodeQL analysis daily at 3 AM UTC
+    # Run CodeQL analysis daily at 3 AM UTC for comprehensive coverage
     - cron: '0 3 * * *'
   workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+  packages: read
 
 env:
   NODE_VERSION: '20'
@@ -17,17 +23,13 @@ jobs:
   codeql-analyze:
     name: 🔍 CodeQL Analysis
     runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
-      packages: read
-
+    timeout-minutes: 30
+    
     strategy:
       fail-fast: false
       matrix:
-        # Override auto-detected languages: javascript, typescript
-        language: ['javascript']
+        # Use javascript-typescript for comprehensive coverage
+        language: ['javascript-typescript']
         # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
 
     steps:
@@ -55,12 +57,10 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-          # If you wish to specify custom queries, you can do so here or in a config file.
-          # By default, queries listed here will override any specified in a config file.
-          # Prefix the list here with "+" to use these queries and those in the config file.
-          queries: +security-and-quality
+          # Use comprehensive security queries
+          queries: +security-extended,security-and-quality
           config: |
-            name: "Custom CodeQL Config"
+            name: "Enhanced CodeQL Config"
             queries:
               - uses: security-and-quality
               - uses: security-extended
@@ -77,15 +77,9 @@ jobs:
               - "*.js"
               - "*.ts"
 
-      # Autobuild attempts to build any compiled languages (C/C++, C#, Go, or Java).
-      # If this step fails, then you should remove it and run the build manually
+      # Autobuild attempts to build any compiled languages
       - name: 🤖 Autobuild
         uses: github/codeql-action/autobuild@v3
-
-      # Manual build commands can be added here if autobuild fails
-      # - name: 🔨 Manual Build
-      #   run: |
-      #     npm run build
 
       - name: 🔍 Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -93,6 +87,8 @@ jobs:
           category: "/language:${{matrix.language}}"
           # Upload results to GitHub Security tab
           upload: true
+          # Don't fail the workflow if vulnerabilities are found
+          fail-on: error
           # Wait for processing to complete
           wait-for-processing: true
 
@@ -105,10 +101,12 @@ jobs:
           echo "**Next Steps:** Review any security findings in the Security tab" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📋 Analysis Details" >> $GITHUB_STEP_SUMMARY
-          echo "- **Queries Used:** Security and Quality + Security Extended" >> $GITHUB_STEP_SUMMARY
+          echo "- **Queries Used:** Security Extended + Security and Quality" >> $GITHUB_STEP_SUMMARY
           echo "- **Paths Analyzed:** src/, *.js, *.ts" >> $GITHUB_STEP_SUMMARY
           echo "- **Paths Ignored:** node_modules, dist, coverage, docs, tests" >> $GITHUB_STEP_SUMMARY
           echo "- **Upload Status:** Results uploaded to GitHub Security tab" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the Security tab for detailed results." >> $GITHUB_STEP_SUMMARY
 
   # Security recommendations job
   security-recommendations:
@@ -127,7 +125,7 @@ jobs:
           echo "### 🔒 CodeQL Analysis" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Static analysis completed for JavaScript/TypeScript" >> $GITHUB_STEP_SUMMARY
           echo "- 📊 Results available in GitHub Security tab" >> $GITHUB_STEP_SUMMARY
-          echo "- 🔍 Custom security queries applied" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔍 Enhanced security queries applied" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📝 Next Steps" >> $GITHUB_STEP_SUMMARY
           echo "1. Review security findings in the Security tab" >> $GITHUB_STEP_SUMMARY

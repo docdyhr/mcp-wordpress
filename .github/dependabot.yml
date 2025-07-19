@@ -3,7 +3,7 @@
 
 version: 2
 updates:
-  # Enable version updates for npm (Node.js dependencies)
+  # 📦 NPM dependencies
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -24,7 +24,10 @@ updates:
       include: "scope"
     labels:
       - "dependencies"
+      - "javascript"
       - "security"
+    allow:
+      - dependency-type: "all"
     # Group related updates together
     groups:
       security-updates:
@@ -32,30 +35,41 @@ updates:
           - "*"
         update-types:
           - "security-update"
+      production-dependencies:
+        dependency-type: "production"
+        patterns:
+          - "@modelcontextprotocol/*"
+          - "axios"
+          - "express*"
+          - "zod*"
+        exclude-patterns:
+          - "@types/*"
       development-dependencies:
+        dependency-type: "development"
         patterns:
           - "@types/*"
           - "eslint*"
           - "prettier*"
           - "jest*"
           - "typescript*"
-        dependency-type: "development"
-      production-dependencies:
-        dependency-type: "production"
-        exclude-patterns:
-          - "@types/*"
+          - "vitest*"
+          - "@typescript-eslint/*"
+      wordpress-packages:
+        patterns:
+          - "wordpress*"
+          - "@wordpress/*"
     # Rebase strategy for conflicts
     rebase-strategy: "auto"
     # Enable security advisories
     insecure-external-code-execution: "deny"
 
-  # Enable version updates for GitHub Actions
+  # 🔧 GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "10:00"
+      day: "tuesday"
+      time: "09:00"
       timezone: "UTC"
     open-pull-requests-limit: 5
     target-branch: "main"
@@ -67,6 +81,7 @@ updates:
       prefix: "ci"
       include: "scope"
     labels:
+      - "dependencies"
       - "github-actions"
       - "security"
     groups:
@@ -74,12 +89,12 @@ updates:
         patterns:
           - "*"
 
-  # Enable version updates for Docker
+  # 🐳 Docker dependencies
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "tuesday"
+      day: "wednesday"
       time: "09:00"
       timezone: "UTC"
     open-pull-requests-limit: 3
@@ -92,5 +107,9 @@ updates:
       prefix: "docker"
       include: "scope"
     labels:
+      - "dependencies"
       - "docker"
       - "security"
+
+# Security updates are automatically created for all ecosystems
+# and take priority over the schedule defined above
