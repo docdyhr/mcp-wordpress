@@ -195,24 +195,30 @@ jobs:
   security-scan:
     name: 🚨 Security Scan
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
 
       - name: 🔒 Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.29.0
         with:
           scan-type: 'fs'
+          scan-ref: '.'
           ignore-unfixed: true
           format: 'sarif'
           output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
 
       - name: 📤 Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
+          category: 'trivy-fs-scan'
 
   # 📚 Documentation
   docs-check:
