@@ -2,7 +2,14 @@
 
 ![post](https://img.shields.io/badge/category-post-lightgrey)
 
-Creates a new post.
+Creates a new WordPress post with comprehensive validation and detailed success feedback including management links.
+
+**Usage Examples:**
+• Simple post: `wp_create_post --title="My New Post" --content="<p>Hello World!</p>"`
+• Draft post: `wp_create_post --title="Draft Post" --status="draft"`
+• Categorized post: `wp_create_post --title="Tech News" --categories=[1,5] --tags=[10,20]`
+• Scheduled post: `wp_create_post --title="Future Post" --status="future" --date="2024-12-25T10:00:00"`
+• Complete post: `wp_create_post --title="Complete Post" --content="<p>Content</p>" --excerpt="Summary" --status="publish"`
 
 ## Parameters
 
@@ -75,8 +82,7 @@ wp_create_post --title="Example Post Title" --content="This is example content f
 
 **Endpoint:** `/wp-json/wp/v2/posts`
 
-This tool directly interfaces with the WordPress REST API endpoint above. The response format and available
-parameters are determined by WordPress core functionality.
+This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters are determined by WordPress core functionality.
 
 ### WordPress Documentation
 - [WordPress REST API Handbook](https://developer.wordpress.org/rest-api/)

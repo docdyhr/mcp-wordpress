@@ -2,7 +2,7 @@
 
 ![post](https://img.shields.io/badge/category-post-lightgrey)
 
-Retrieves a single post by its ID.
+Retrieves detailed information about a single post including metadata, content statistics, and management links.
 
 ## Parameters
 
@@ -48,8 +48,7 @@ wp_get_post --id="123"
 
 **Endpoint:** `/wp-json/wp/v2/posts/{id}`
 
-This tool directly interfaces with the WordPress REST API endpoint above. The response format and available
-parameters are determined by WordPress core functionality.
+This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters are determined by WordPress core functionality.
 
 ### WordPress Documentation
 - [WordPress REST API Handbook](https://developer.wordpress.org/rest-api/)

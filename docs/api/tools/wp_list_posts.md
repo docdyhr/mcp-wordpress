@@ -2,7 +2,15 @@
 
 ![post](https://img.shields.io/badge/category-post-lightgrey)
 
-Lists posts from a WordPress site, with filters.
+Lists posts from a WordPress site with comprehensive filtering options. Supports search, status filtering, and category/tag filtering with enhanced metadata display.
+
+**Usage Examples:**
+• Basic listing: `wp_list_posts`
+• Search posts: `wp_list_posts --search="AI trends"`
+• Filter by status: `wp_list_posts --status="draft"`
+• Category filtering: `wp_list_posts --categories=[1,2,3]`
+• Paginated results: `wp_list_posts --per_page=20 --page=2`
+• Combined filters: `wp_list_posts --search="WordPress" --status="publish" --per_page=10`
 
 ## Parameters
 
@@ -92,8 +100,7 @@ wp_list_posts --per_page="10" --search="wordpress" --status="publish" --categori
 
 **Endpoint:** `/wp-json/wp/v2/posts`
 
-This tool directly interfaces with the WordPress REST API endpoint above. The response format and available
-parameters are determined by WordPress core functionality.
+This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters are determined by WordPress core functionality.
 
 ### WordPress Documentation
 - [WordPress REST API Handbook](https://developer.wordpress.org/rest-api/)

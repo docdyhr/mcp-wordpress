@@ -2,7 +2,14 @@
 
 ![auth](https://img.shields.io/badge/category-auth-darkblue)
 
-Tests the authentication and connectivity for a configured WordPress site.
+Tests the authentication and connectivity for a configured WordPress site with detailed connection diagnostics.
+
+**Usage Examples:**
+• Test connection: `wp_test_auth`
+• Multi-site test: `wp_test_auth --site="my-site"`
+• Verify setup: Use this after configuring new credentials
+• Troubleshoot: Run when experiencing connection issues
+• Health check: Regular verification of WordPress connectivity
 
 ## Parameters
 

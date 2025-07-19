@@ -2,7 +2,14 @@
 
 ![user](https://img.shields.io/badge/category-user-lightgrey)
 
-Lists users from a WordPress site, with filters.
+Lists users from a WordPress site with comprehensive filtering and detailed user information including roles, registration dates, and activity status.
+
+**Usage Examples:**
+• List all users: `wp_list_users`
+• Search users: `wp_list_users --search="john"`
+• Filter by role: `wp_list_users --roles=["editor","author"]`
+• Find admins: `wp_list_users --roles=["administrator"]`
+• Combined search: `wp_list_users --search="smith" --roles=["subscriber"]`
 
 ## Parameters
 

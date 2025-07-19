@@ -2,7 +2,14 @@
 
 ![site](https://img.shields.io/badge/category-site-lightblue)
 
-Performs a site-wide search for content.
+Performs a site-wide search for content across posts, pages, and media with comprehensive results and metadata.
+
+**Usage Examples:**
+• Search everything: `wp_search_site --term="WordPress"`
+• Search posts only: `wp_search_site --term="tutorial" --type="posts"`
+• Search pages: `wp_search_site --term="about" --type="pages"`
+• Search media: `wp_search_site --term="logo" --type="media"`
+• Find specific content: `wp_search_site --term="contact form"`
 
 ## Parameters
 

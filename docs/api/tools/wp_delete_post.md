@@ -2,7 +2,7 @@
 
 ![post](https://img.shields.io/badge/category-post-lightgrey)
 
-Deletes a post.
+Deletes a WordPress post with option for permanent deletion or moving to trash.
 
 ## Parameters
 
@@ -46,8 +46,7 @@ wp_delete_post --id="123"
 
 **Endpoint:** `/wp-json/wp/v2/posts/{id}`
 
-This tool directly interfaces with the WordPress REST API endpoint above. The response format and available
-parameters are determined by WordPress core functionality.
+This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters are determined by WordPress core functionality.
 
 ### WordPress Documentation
 - [WordPress REST API Handbook](https://developer.wordpress.org/rest-api/)

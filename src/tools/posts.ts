@@ -6,13 +6,45 @@ import { validateId, validatePaginationParams, validatePostParams } from "../uti
 import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "../utils/streaming.js";
 
 /**
- * Provides tools for managing posts on a WordPress site.
- * This class encapsulates tool definitions and their corresponding handlers.
+ * Provides comprehensive tools for managing WordPress posts.
+ * 
+ * This class encapsulates tool definitions and their corresponding handlers for:
+ * - Listing posts with advanced filtering and search capabilities
+ * - Creating new posts with full metadata support
+ * - Updating existing posts with validation
+ * - Deleting posts with trash/permanent options
+ * - Retrieving individual posts with detailed information
+ * - Managing post revisions and history
+ * 
+ * @example
+ * ```typescript
+ * const postTools = new PostTools();
+ * const tools = postTools.getTools();
+ * 
+ * // Use with a WordPress client
+ * const client = new WordPressClient(config);
+ * const result = await postTools.handleListPosts(client, { per_page: 10 });
+ * ```
+ * 
+ * @since 1.0.0
+ * @author MCP WordPress Team
  */
 export class PostTools {
   /**
-   * Retrieves the list of post management tools.
-   * @returns An array of MCPTool definitions.
+   * Retrieves the complete list of post management tools available for MCP.
+   * 
+   * Returns an array of tool definitions that can be registered with an MCP server.
+   * Each tool includes comprehensive parameter validation, error handling, and
+   * detailed documentation with usage examples.
+   * 
+   * @returns {Array<MCPTool>} An array of MCPTool definitions for post management
+   * 
+   * @example
+   * ```typescript
+   * const postTools = new PostTools();
+   * const tools = postTools.getTools();
+   * console.log(tools.length); // 6 tools: list, get, create, update, delete, revisions
+   * ```
    */
   public getTools(): any[] {
     return [
@@ -184,6 +216,42 @@ export class PostTools {
     ];
   }
 
+  /**
+   * Handles listing posts from a WordPress site with comprehensive filtering options.
+   * 
+   * This method provides advanced search capabilities, status filtering, pagination,
+   * and category/tag filtering. Results include enhanced metadata and author information.
+   * For large result sets (>50 posts), it automatically uses streaming for better performance.
+   * 
+   * @param {WordPressClient} client - The WordPress client instance for API communication
+   * @param {PostQueryParams} params - Query parameters for filtering and pagination
+   * @param {number} [params.per_page=10] - Number of posts to return per page (max 100)
+   * @param {string} [params.search] - Search term to filter posts by title/content
+   * @param {string|string[]} [params.status] - Post status filter (publish, draft, etc.)
+   * @param {number[]} [params.categories] - Array of category IDs to filter by
+   * @param {number[]} [params.tags] - Array of tag IDs to filter by
+   * @param {number} [params.page=1] - Page number for pagination
+   * 
+   * @returns {Promise<string>} Formatted list of posts with metadata and context
+   * 
+   * @throws {EnhancedError} When validation fails or API request encounters an error
+   * 
+   * @example
+   * ```typescript
+   * // Basic listing
+   * const result = await handleListPosts(client, {});
+   * 
+   * // Advanced filtering
+   * const filtered = await handleListPosts(client, {
+   *   search: "WordPress tips",
+   *   status: "publish",
+   *   categories: [1, 2],
+   *   per_page: 20
+   * });
+   * ```
+   * 
+   * @since 1.0.0
+   */
   public async handleListPosts(client: WordPressClient, params: PostQueryParams): Promise<any> {
     try {
       // Enhanced input validation and sanitization
@@ -381,6 +449,28 @@ export class PostTools {
     }
   }
 
+  /**
+   * Retrieves a single WordPress post by ID with complete details and metadata.
+   * 
+   * This method fetches a specific post and returns comprehensive information including
+   * content, metadata, author details, categories, tags, and publication status.
+   * 
+   * @param {WordPressClient} client - The WordPress client instance for API communication
+   * @param {Object} params - Parameters for post retrieval
+   * @param {number} params.id - The unique ID of the post to retrieve
+   * 
+   * @returns {Promise<string>} Detailed post information formatted for display
+   * 
+   * @throws {EnhancedError} When post ID is invalid or post is not found
+   * 
+   * @example
+   * ```typescript
+   * // Get a specific post
+   * const post = await handleGetPost(client, { id: 123 });
+   * ```
+   * 
+   * @since 1.0.0
+   */
   public async handleGetPost(client: WordPressClient, params: { id: number }): Promise<any> {
     try {
       // Input validation
@@ -495,6 +585,47 @@ export class PostTools {
     }
   }
 
+  /**
+   * Creates a new WordPress post with comprehensive validation and metadata support.
+   * 
+   * This method handles the creation of new posts with full support for content,
+   * metadata, categories, tags, and publishing options. Includes automatic validation
+   * and sanitization of all input parameters.
+   * 
+   * @param {WordPressClient} client - The WordPress client instance for API communication
+   * @param {CreatePostRequest} params - Post creation parameters
+   * @param {string} params.title - The post title
+   * @param {string} params.content - The post content in HTML format
+   * @param {string} [params.status="draft"] - Post status (publish, draft, pending, private)
+   * @param {string} [params.excerpt] - Post excerpt/summary
+   * @param {number[]} [params.categories] - Array of category IDs to assign
+   * @param {number[]} [params.tags] - Array of tag IDs to assign
+   * 
+   * @returns {Promise<string>} Success message with the new post ID and details
+   * 
+   * @throws {EnhancedError} When validation fails or post creation encounters an error
+   * 
+   * @example
+   * ```typescript
+   * // Create a basic post
+   * const result = await handleCreatePost(client, {
+   *   title: "My New Post",
+   *   content: "<p>This is the post content.</p>",
+   *   status: "publish"
+   * });
+   * 
+   * // Create post with categories and tags
+   * const detailed = await handleCreatePost(client, {
+   *   title: "WordPress Tips",
+   *   content: "<p>Detailed WordPress tips...</p>",
+   *   categories: [1, 2],
+   *   tags: [5, 6],
+   *   excerpt: "Learn essential WordPress tips"
+   * });
+   * ```
+   * 
+   * @since 1.0.0
+   */
   public async handleCreatePost(client: WordPressClient, params: CreatePostRequest): Promise<any> {
     try {
       // Enhanced input validation using new validation utilities
@@ -522,6 +653,45 @@ export class PostTools {
     }
   }
 
+  /**
+   * Updates an existing WordPress post with validation and detailed confirmation.
+   * 
+   * This method allows updating any aspect of a post including title, content, status,
+   * categories, and tags. Only provided fields are updated, leaving others unchanged.
+   * 
+   * @param {WordPressClient} client - The WordPress client instance for API communication
+   * @param {UpdatePostRequest & {id: number}} params - Update parameters
+   * @param {number} params.id - The ID of the post to update
+   * @param {string} [params.title] - New post title
+   * @param {string} [params.content] - New post content in HTML format
+   * @param {string} [params.status] - New post status (publish, draft, pending, private)
+   * @param {string} [params.excerpt] - New post excerpt
+   * @param {number[]} [params.categories] - New category IDs to assign
+   * @param {number[]} [params.tags] - New tag IDs to assign
+   * 
+   * @returns {Promise<string>} Success message confirming the update
+   * 
+   * @throws {EnhancedError} When post ID is invalid or update fails
+   * 
+   * @example
+   * ```typescript
+   * // Update post title and status
+   * const result = await handleUpdatePost(client, {
+   *   id: 123,
+   *   title: "Updated Post Title",
+   *   status: "publish"
+   * });
+   * 
+   * // Update content and categories
+   * const updated = await handleUpdatePost(client, {
+   *   id: 123,
+   *   content: "<p>New content here...</p>",
+   *   categories: [1, 3, 5]
+   * });
+   * ```
+   * 
+   * @since 1.0.0
+   */
   public async handleUpdatePost(client: WordPressClient, params: UpdatePostRequest & { id: number }): Promise<any> {
     try {
       const post = await client.updatePost(params);
@@ -531,6 +701,35 @@ export class PostTools {
     }
   }
 
+  /**
+   * Deletes a WordPress post with options for trash or permanent deletion.
+   * 
+   * This method provides safe deletion with trash option (default) or permanent
+   * deletion when force is specified. Includes confirmation of the deletion action.
+   * 
+   * @param {WordPressClient} client - The WordPress client instance for API communication
+   * @param {Object} params - Deletion parameters
+   * @param {number} params.id - The ID of the post to delete
+   * @param {boolean} [params.force=false] - Whether to permanently delete (true) or move to trash (false)
+   * 
+   * @returns {Promise<string>} Confirmation message of the deletion action
+   * 
+   * @throws {EnhancedError} When post ID is invalid or deletion fails
+   * 
+   * @example
+   * ```typescript
+   * // Move post to trash (safe deletion)
+   * const result = await handleDeletePost(client, { id: 123 });
+   * 
+   * // Permanently delete post (cannot be undone)
+   * const permanent = await handleDeletePost(client, { 
+   *   id: 123, 
+   *   force: true 
+   * });
+   * ```
+   * 
+   * @since 1.0.0
+   */
   public async handleDeletePost(client: WordPressClient, params: { id: number; force?: boolean }): Promise<any> {
     try {
       await client.deletePost(params.id, params.force);
@@ -541,6 +740,28 @@ export class PostTools {
     }
   }
 
+  /**
+   * Retrieves revision history for a specific WordPress post.
+   * 
+   * This method fetches all available revisions for a post, providing a complete
+   * history of changes including dates, authors, and modification details.
+   * 
+   * @param {WordPressClient} client - The WordPress client instance for API communication
+   * @param {Object} params - Parameters for revision retrieval
+   * @param {number} params.id - The ID of the post to get revisions for
+   * 
+   * @returns {Promise<string>} Formatted list of post revisions with details
+   * 
+   * @throws {EnhancedError} When post ID is invalid or revisions cannot be retrieved
+   * 
+   * @example
+   * ```typescript
+   * // Get all revisions for a post
+   * const revisions = await handleGetPostRevisions(client, { id: 123 });
+   * ```
+   * 
+   * @since 1.0.0
+   */
   public async handleGetPostRevisions(client: WordPressClient, params: { id: number }): Promise<any> {
     try {
       const revisions = await client.getPostRevisions(params.id);

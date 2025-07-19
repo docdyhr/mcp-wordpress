@@ -621,6 +621,423 @@ Supports 4 authentication methods with comprehensive testing:
 - **Dummy Data**: Always use placeholder data (like example.com, your_username) in documentation and examples to prevent
   accidental credential exposure.
 
+## Troubleshooting Guide for Developers
+
+### Common Development Issues
+
+#### TypeScript Compilation Errors
+
+**Issue**: `exactOptionalPropertyTypes` compliance errors
+
+```bash
+error TS2375: Duplicate property 'X'.
+error TS2717: Subsequent property declarations must have the same type.
+```
+
+**Solution**: Use explicit `| undefined` for optional properties:
+
+```typescript
+// ❌ Incorrect
+interface Config {
+  file?: string;
+}
+
+// ✅ Correct
+interface Config {
+  file?: string | undefined;
+}
+```
+
+**Issue**: Missing exports for interfaces
+
+```bash
+error TS2749: 'SecurityVulnerability' refers to a value, but is being used as a type.
+```
+
+**Solution**: Add explicit exports:
+
+```typescript
+// Add to your module
+export interface SecurityVulnerability {
+  // interface definition
+}
+```
+
+#### ESLint and Pre-commit Hook Failures
+
+**Issue**: Unused variable errors
+
+```bash
+'variable' is assigned a value but never used
+```
+
+**Solution**: Use underscore prefix for intentionally unused variables:
+
+```typescript
+// ❌ Incorrect
+try {
+  // code
+} catch (error) {
+  // error not used
+}
+
+// ✅ Correct
+try {
+  // code
+} catch (_error) {
+  // clearly marked as intentionally unused
+}
+```
+
+**Issue**: Import/export conflicts
+
+```bash
+'Type' is imported but never used
+```
+
+**Solution**: Use aliased imports when types are needed for re-export:
+
+```typescript
+// Re-export pattern for index files
+import { Type as _Type } from './module';
+export type { Type } from './module';
+```
+
+#### Git and CI/CD Issues
+
+**Issue**: Merge conflicts in workflow files
+
+```bash
+Auto-merging .github/workflows/dependency-review.yml
+CONFLICT (content): Merge conflict in .github/workflows/dependency-review.yml
+```
+
+**Solution**: Manual conflict resolution preserving both feature sets:
+
+```bash
+# Examine conflicts
+git status
+git diff HEAD
+
+# Resolve by manually merging best features from both versions
+# Then stage resolved files
+git add .github/workflows/
+git commit -m "resolve: merge workflow enhancements"
+```
+
+**Issue**: Failed CI tests due to environment configuration
+
+```bash
+npm ERR! ECONNREFUSED Connection refused
+```
+
+**Solution**: Ensure test environment variables are properly set:
+
+```bash
+# Check CI environment detection
+if [ "$CI" = "true" ]; then
+  echo "Running in CI environment"
+  # Skip integration tests that require live WordPress
+fi
+
+# Use mock services for CI testing
+export WORDPRESS_SITE_URL="http://mock-wordpress.local"
+export SKIP_INTEGRATION_TESTS="true"
+```
+
+### WordPress Integration Debugging
+
+#### Authentication Debugging
+
+**Issue**: 401 Unauthorized for POST requests (working GET requests)
+
+```bash
+curl -X POST -u username:password https://site.com/wp-json/wp/v2/posts
+# Returns 401 Unauthorized
+```
+
+**Root Cause**: Apache strips Authorization headers for write operations
+
+**Solution**: Add to WordPress `.htaccess`:
+
+```apache
+# Preserve Authorization headers
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+```
+
+**Verification Commands**:
+
+```bash
+# Test authentication directly
+npm run test:auth
+
+# Debug WordPress REST API
+curl -I https://your-site.com/wp-json/wp/v2/
+
+# Check WordPress configuration
+npm run fix:rest-auth
+```
+
+#### Multi-Site Configuration Issues
+
+**Issue**: Site not found in multi-site setup
+
+```javascript
+Error: Site 'invalid-site' not found in configuration
+```
+
+**Solution**: Verify `mcp-wordpress.config.json` format:
+
+```json
+{
+  "sites": [
+    {
+      "id": "unique-site-id",  // ← Must match --site parameter
+      "name": "Human Readable Name",
+      "config": {
+        "WORDPRESS_SITE_URL": "https://site.com",
+        "WORDPRESS_USERNAME": "username",
+        "WORDPRESS_APP_PASSWORD": "xxxx xxxx xxxx xxxx xxxx xxxx"
+      }
+    }
+  ]
+}
+```
+
+**Debug Commands**:
+
+```bash
+# List configured sites
+npm run status
+
+# Test specific site
+npm run status -- --site="your-site-id"
+
+# Validate configuration
+npm run test:config
+```
+
+### Performance and Caching Issues
+
+#### Cache Performance Problems
+
+**Issue**: Low cache hit rates or memory issues
+
+```bash
+Cache hit rate: 23% (expected: >70%)
+Memory usage: 850MB (high)
+```
+
+**Solution**: Optimize cache configuration:
+
+```typescript
+// Adjust cache settings in src/cache/CacheManager.ts
+const CACHE_CONFIG = {
+  maxItems: 500,           // Reduce if memory constrained
+  ttl: 300,               // 5 minutes (adjust based on content update frequency)
+  checkPeriod: 120,       // Cleanup interval
+  useMemoryLimit: true,   // Enable memory limits
+  maxMemoryMB: 200       // Set appropriate memory limit
+};
+```
+
+**Debug Commands**:
+
+```bash
+# Analyze cache performance
+npm run test:cache
+
+# Monitor cache in real-time
+DEBUG=cache npm run dev
+
+# Clear cache and restart
+rm -rf cache/ && npm run dev
+```
+
+#### Performance Monitoring Issues
+
+**Issue**: Performance tests failing or metrics collection errors
+
+```bash
+Performance test failed: Response time > 2000ms
+```
+
+**Solution**: Check system resources and API responsiveness:
+
+```bash
+# Check WordPress site performance
+curl -w "@curl-format.txt" -o /dev/null -s https://your-site.com/wp-json/wp/v2/
+
+# Monitor system resources
+npm run test:performance
+
+# Analyze bottlenecks
+DEBUG=performance npm run dev
+```
+
+### Security and Dependency Issues
+
+#### Security Scan Failures
+
+**Issue**: Security vulnerabilities detected in dependencies
+
+```bash
+found 3 vulnerabilities (1 moderate, 2 high)
+```
+
+**Solution**: Update dependencies and run security fixes:
+
+```bash
+# Audit and fix
+npm audit fix
+
+# Force update if needed
+npm audit fix --force
+
+# Update specific packages
+npm update package-name
+
+# Run comprehensive security test
+npm run security:full
+```
+
+#### Docker Build Issues
+
+**Issue**: Docker build failures or container startup problems
+
+```bash
+Error: Cannot find module '/app/dist/index.js'
+```
+
+**Solution**: Ensure proper build process in Docker:
+
+```dockerfile
+# Multi-stage build
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine AS runtime
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY package*.json ./
+EXPOSE 3000
+CMD ["node", "dist/index.js"]
+```
+
+**Debug Commands**:
+
+```bash
+# Test local Docker build
+docker build -t mcp-wordpress-test .
+docker run --rm -it mcp-wordpress-test
+
+# Check container logs
+docker logs container-name
+
+# Interactive debugging
+docker run --rm -it --entrypoint sh mcp-wordpress-test
+```
+
+### Development Environment Setup
+
+#### Node.js Version Compatibility
+
+**Issue**: Node.js version mismatch errors
+
+```bash
+error: Unsupported engine: node@18.x.x (required: >=20.8.1)
+```
+
+**Solution**: Use Node Version Manager:
+
+```bash
+# Install and use correct Node.js version
+nvm install 20.8.1
+nvm use 20.8.1
+
+# Set as default
+nvm alias default 20.8.1
+
+# Verify installation
+node --version  # Should be >= 20.8.1
+npm --version
+```
+
+#### Development Dependencies
+
+**Issue**: Missing development tools or broken setup
+
+```bash
+husky: command not found
+```
+
+**Solution**: Reinstall development environment:
+
+```bash
+# Clean installation
+rm -rf node_modules package-lock.json
+npm install
+
+# Reinstall husky hooks
+npm run prepare
+
+# Verify setup
+npm run lint
+npm run format:check
+npm run test:fast
+```
+
+### Quick Diagnostic Commands
+
+**Complete System Check**:
+
+```bash
+# Comprehensive health check
+npm run health
+
+# Connection and authentication test
+npm run status
+
+# Full test suite
+npm test
+
+# Security validation
+npm run security:check
+
+# Performance analysis
+npm run test:performance
+```
+
+**Debug Information Collection**:
+
+```bash
+# Generate debug report
+DEBUG=true npm run status > debug-report.txt 2>&1
+
+# System information
+node --version >> debug-report.txt
+npm --version >> debug-report.txt
+cat package.json | jq '.version' >> debug-report.txt
+```
+
+**Emergency Recovery**:
+
+```bash
+# Reset to clean state
+git status
+git stash  # Save any uncommitted changes
+git pull origin main
+npm ci
+npm run build
+npm run health
+```
+
 #### Repository Maintenance Guidelines
 
 **Keep Repository Clean and Concise**

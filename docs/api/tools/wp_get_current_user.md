@@ -2,7 +2,13 @@
 
 ![user](https://img.shields.io/badge/category-user-lightgrey)
 
-Retrieves the currently authenticated user.
+Retrieves the currently authenticated user with comprehensive profile information including roles, capabilities, and account details.
+
+**Usage Examples:**
+• Get current user: `wp_get_current_user`
+• Check permissions: Use this to verify your current user's capabilities and roles
+• Account verification: Confirm you're authenticated with the correct account
+• Profile details: View registration date, email, and user metadata
 
 ## Parameters
 

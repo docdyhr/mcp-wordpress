@@ -48,6 +48,53 @@ import type {
 } from "../types/wordpress.js";
 import { debug, logError, startTimer } from "../utils/debug.js";
 
+/**
+ * WordPress REST API Client
+ * 
+ * A comprehensive client for interacting with the WordPress REST API v2.
+ * Provides full CRUD operations for posts, pages, media, users, comments,
+ * categories, tags, and site settings with robust error handling and performance optimization.
+ * 
+ * Features:
+ * - Multiple authentication methods (App Passwords, JWT, Basic Auth, API Key)
+ * - Automatic retry logic with exponential backoff
+ * - Request rate limiting and queue management
+ * - Comprehensive error handling with detailed messages
+ * - Performance monitoring and request statistics
+ * - Caching support for improved performance
+ * - Multi-site configuration support
+ * 
+ * @example
+ * ```typescript
+ * // Initialize with app password authentication
+ * const client = new WordPressClient({
+ *   baseUrl: 'https://mysite.com',
+ *   auth: {
+ *     method: 'app-password',
+ *     username: 'admin',
+ *     password: 'xxxx xxxx xxxx xxxx xxxx xxxx'
+ *   }
+ * });
+ * 
+ * // Create a new post
+ * const post = await client.createPost({
+ *   title: 'My New Post',
+ *   content: '<p>This is the content</p>',
+ *   status: 'publish'
+ * });
+ * 
+ * // List posts with filtering
+ * const posts = await client.getPosts({
+ *   search: 'WordPress',
+ *   status: 'publish',
+ *   per_page: 10
+ * });
+ * ```
+ * 
+ * @since 1.0.0
+ * @author MCP WordPress Team
+ * @implements {IWordPressClient}
+ */
 export class WordPressClient implements IWordPressClient {
   private baseUrl: string;
   private apiUrl: string;
@@ -61,6 +108,49 @@ export class WordPressClient implements IWordPressClient {
   private jwtToken: string | null = null;
   private _stats: ClientStats;
 
+  /**
+   * Creates a new WordPress API client instance.
+   * 
+   * Initializes the client with configuration options for connecting to a WordPress site.
+   * Supports multiple authentication methods and automatic environment variable detection.
+   * 
+   * @param {Partial<WordPressClientConfig>} [options={}] - Configuration options for the client
+   * @param {string} [options.baseUrl] - WordPress site URL (falls back to WORDPRESS_SITE_URL env var)
+   * @param {number} [options.timeout=30000] - Request timeout in milliseconds
+   * @param {number} [options.maxRetries=3] - Maximum number of retry attempts for failed requests
+   * @param {AuthConfig} [options.auth] - Authentication configuration (auto-detected from env if not provided)
+   * @param {boolean} [options.enableCache=true] - Whether to enable response caching
+   * @param {number} [options.cacheMaxAge=300000] - Cache max age in milliseconds (5 minutes default)
+   * 
+   * @example
+   * ```typescript
+   * // Basic configuration with app password
+   * const client = new WordPressClient({
+   *   baseUrl: 'https://mysite.com',
+   *   auth: {
+   *     method: 'app-password',
+   *     username: 'admin',
+   *     password: 'xxxx xxxx xxxx xxxx xxxx xxxx'
+   *   }
+   * });
+   * 
+   * // Configuration with environment variables
+   * // Set WORDPRESS_SITE_URL, WORDPRESS_USERNAME, WORDPRESS_APP_PASSWORD
+   * const client = new WordPressClient(); // Auto-detects from env
+   * 
+   * // Custom timeout and retry settings
+   * const client = new WordPressClient({
+   *   baseUrl: 'https://mysite.com',
+   *   timeout: 60000,      // 60 seconds
+   *   maxRetries: 5,       // 5 retry attempts
+   *   auth: { method: 'app-password', username: 'user', password: 'pass' }
+   * });
+   * ```
+   * 
+   * @throws {Error} When required configuration is missing or invalid
+   * 
+   * @since 1.0.0
+   */
   constructor(options: Partial<WordPressClientConfig> = {}) {
     this.baseUrl = options.baseUrl || process.env.WORDPRESS_SITE_URL || "";
     this.apiUrl = "";

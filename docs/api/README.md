@@ -11,7 +11,7 @@
 
 The WordPress MCP Server provides **59 tools** across **10 categories** for comprehensive WordPress management through the Model Context Protocol.
 
-**Last Updated:** 14.7.2025  
+**Last Updated:** 19.7.2025  
 **Version:** 1.2.0  
 **Coverage:** 59/59 tools with examples
 
@@ -66,7 +66,14 @@ wp_get_site_settings --site=production
 | [`wp_create_category`](./tools/wp_create_category.md) | taxonomy | Creates a new category. |
 | [`wp_create_comment`](./tools/wp_create_comment.md) | comment | Creates a new comment on a post. |
 | [`wp_create_page`](./tools/wp_create_page.md) | page | Creates a new page. |
-| [`wp_create_post`](./tools/wp_create_post.md) | post | Creates a new post. |
+| [`wp_create_post`](./tools/wp_create_post.md) | post | Creates a new WordPress post with comprehensive validation and detailed success feedback including management links.
+
+**Usage Examples:**
+• Simple post: `wp_create_post --title="My New Post" --content="<p>Hello World!</p>"`
+• Draft post: `wp_create_post --title="Draft Post" --status="draft"`
+• Categorized post: `wp_create_post --title="Tech News" --categories=[1,5] --tags=[10,20]`
+• Scheduled post: `wp_create_post --title="Future Post" --status="future" --date="2024-12-25T10:00:00"`
+• Complete post: `wp_create_post --title="Complete Post" --content="<p>Content</p>" --excerpt="Summary" --status="publish"` |
 | [`wp_create_tag`](./tools/wp_create_tag.md) | taxonomy | Creates a new tag. |
 | [`wp_create_user`](./tools/wp_create_user.md) | user | Creates a new user. |
 | [`wp_delete_application_password`](./tools/wp_delete_application_password.md) | site | Revokes an existing application password. |
@@ -74,19 +81,25 @@ wp_get_site_settings --site=production
 | [`wp_delete_comment`](./tools/wp_delete_comment.md) | comment | Deletes a comment. |
 | [`wp_delete_media`](./tools/wp_delete_media.md) | media | Deletes a media item. |
 | [`wp_delete_page`](./tools/wp_delete_page.md) | page | Deletes a page. |
-| [`wp_delete_post`](./tools/wp_delete_post.md) | post | Deletes a post. |
+| [`wp_delete_post`](./tools/wp_delete_post.md) | post | Deletes a WordPress post with option for permanent deletion or moving to trash. |
 | [`wp_delete_tag`](./tools/wp_delete_tag.md) | taxonomy | Deletes a tag. |
 | [`wp_delete_user`](./tools/wp_delete_user.md) | user | Deletes a user. |
 | [`wp_get_application_passwords`](./tools/wp_get_application_passwords.md) | site | Lists application passwords for a specific user. |
 | [`wp_get_auth_status`](./tools/wp_get_auth_status.md) | auth | Gets the current authentication status for a configured WordPress site. |
 | [`wp_get_category`](./tools/wp_get_category.md) | taxonomy | Retrieves a single category by its ID. |
 | [`wp_get_comment`](./tools/wp_get_comment.md) | comment | Retrieves a single comment by its ID. |
-| [`wp_get_current_user`](./tools/wp_get_current_user.md) | user | Retrieves the currently authenticated user. |
+| [`wp_get_current_user`](./tools/wp_get_current_user.md) | user | Retrieves the currently authenticated user with comprehensive profile information including roles, capabilities, and account details.
+
+**Usage Examples:**
+• Get current user: `wp_get_current_user`
+• Check permissions: Use this to verify your current user's capabilities and roles
+• Account verification: Confirm you're authenticated with the correct account
+• Profile details: View registration date, email, and user metadata |
 | [`wp_get_media`](./tools/wp_get_media.md) | media | Retrieves a single media item by its ID. |
 | [`wp_get_page`](./tools/wp_get_page.md) | page | Retrieves a single page by its ID. |
 | [`wp_get_page_revisions`](./tools/wp_get_page_revisions.md) | page | Retrieves revisions for a specific page. |
-| [`wp_get_post`](./tools/wp_get_post.md) | post | Retrieves a single post by its ID. |
-| [`wp_get_post_revisions`](./tools/wp_get_post_revisions.md) | post | Retrieves revisions for a specific post. |
+| [`wp_get_post`](./tools/wp_get_post.md) | post | Retrieves detailed information about a single post including metadata, content statistics, and management links. |
+| [`wp_get_post_revisions`](./tools/wp_get_post_revisions.md) | post | Retrieves the revision history for a specific post showing author and modification dates. |
 | [`wp_get_site_settings`](./tools/wp_get_site_settings.md) | site | Retrieves the general settings for a WordPress site. |
 | [`wp_get_tag`](./tools/wp_get_tag.md) | taxonomy | Retrieves a single tag by its ID. |
 | [`wp_get_user`](./tools/wp_get_user.md) | user | Retrieves a single user by their ID. |
@@ -94,24 +107,53 @@ wp_get_site_settings --site=production
 | [`wp_list_comments`](./tools/wp_list_comments.md) | comment | Lists comments from a WordPress site, with filters. |
 | [`wp_list_media`](./tools/wp_list_media.md) | media | Lists media items from a WordPress site, with filters. |
 | [`wp_list_pages`](./tools/wp_list_pages.md) | page | Lists pages from a WordPress site, with filters. |
-| [`wp_list_posts`](./tools/wp_list_posts.md) | post | Lists posts from a WordPress site, with filters. |
+| [`wp_list_posts`](./tools/wp_list_posts.md) | post | Lists posts from a WordPress site with comprehensive filtering options. Supports search, status filtering, and category/tag filtering with enhanced metadata display.
+
+**Usage Examples:**
+• Basic listing: `wp_list_posts`
+• Search posts: `wp_list_posts --search="AI trends"`
+• Filter by status: `wp_list_posts --status="draft"`
+• Category filtering: `wp_list_posts --categories=[1,2,3]`
+• Paginated results: `wp_list_posts --per_page=20 --page=2`
+• Combined filters: `wp_list_posts --search="WordPress" --status="publish" --per_page=10` |
 | [`wp_list_tags`](./tools/wp_list_tags.md) | taxonomy | Lists tags from a WordPress site. |
-| [`wp_list_users`](./tools/wp_list_users.md) | user | Lists users from a WordPress site, with filters. |
+| [`wp_list_users`](./tools/wp_list_users.md) | user | Lists users from a WordPress site with comprehensive filtering and detailed user information including roles, registration dates, and activity status.
+
+**Usage Examples:**
+• List all users: `wp_list_users`
+• Search users: `wp_list_users --search="john"`
+• Filter by role: `wp_list_users --roles=["editor","author"]`
+• Find admins: `wp_list_users --roles=["administrator"]`
+• Combined search: `wp_list_users --search="smith" --roles=["subscriber"]` |
 | [`wp_performance_alerts`](./tools/wp_performance_alerts.md) | performance | Get performance alerts and anomaly detection results |
 | [`wp_performance_benchmark`](./tools/wp_performance_benchmark.md) | performance | Compare current performance against industry benchmarks |
 | [`wp_performance_export`](./tools/wp_performance_export.md) | performance | Export comprehensive performance report |
 | [`wp_performance_history`](./tools/wp_performance_history.md) | performance | Get historical performance data and trends |
 | [`wp_performance_optimize`](./tools/wp_performance_optimize.md) | performance | Get optimization recommendations and insights |
 | [`wp_performance_stats`](./tools/wp_performance_stats.md) | performance | Get real-time performance statistics and metrics |
-| [`wp_search_site`](./tools/wp_search_site.md) | site | Performs a site-wide search for content. |
+| [`wp_search_site`](./tools/wp_search_site.md) | site | Performs a site-wide search for content across posts, pages, and media with comprehensive results and metadata.
+
+**Usage Examples:**
+• Search everything: `wp_search_site --term="WordPress"`
+• Search posts only: `wp_search_site --term="tutorial" --type="posts"`
+• Search pages: `wp_search_site --term="about" --type="pages"`
+• Search media: `wp_search_site --term="logo" --type="media"`
+• Find specific content: `wp_search_site --term="contact form"` |
 | [`wp_spam_comment`](./tools/wp_spam_comment.md) | comment | Marks a comment as spam. |
 | [`wp_switch_auth_method`](./tools/wp_switch_auth_method.md) | auth | Switches the authentication method for a site for the current session. |
-| [`wp_test_auth`](./tools/wp_test_auth.md) | auth | Tests the authentication and connectivity for a configured WordPress site. |
+| [`wp_test_auth`](./tools/wp_test_auth.md) | auth | Tests the authentication and connectivity for a configured WordPress site with detailed connection diagnostics.
+
+**Usage Examples:**
+• Test connection: `wp_test_auth`
+• Multi-site test: `wp_test_auth --site="my-site"`
+• Verify setup: Use this after configuring new credentials
+• Troubleshoot: Run when experiencing connection issues
+• Health check: Regular verification of WordPress connectivity |
 | [`wp_update_category`](./tools/wp_update_category.md) | taxonomy | Updates an existing category. |
 | [`wp_update_comment`](./tools/wp_update_comment.md) | comment | Updates an existing comment. |
 | [`wp_update_media`](./tools/wp_update_media.md) | media | Updates the metadata of an existing media item. |
 | [`wp_update_page`](./tools/wp_update_page.md) | page | Updates an existing page. |
-| [`wp_update_post`](./tools/wp_update_post.md) | post | Updates an existing post. |
+| [`wp_update_post`](./tools/wp_update_post.md) | post | Updates an existing WordPress post with validation and detailed confirmation. |
 | [`wp_update_site_settings`](./tools/wp_update_site_settings.md) | site | Updates one or more general settings for a WordPress site. |
 | [`wp_update_tag`](./tools/wp_update_tag.md) | taxonomy | Updates an existing tag. |
 | [`wp_update_user`](./tools/wp_update_user.md) | user | Updates an existing user. |

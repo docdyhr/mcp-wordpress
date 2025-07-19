@@ -2,7 +2,7 @@
 
 ![post](https://img.shields.io/badge/category-post-lightgrey)
 
-Retrieves revisions for a specific post.
+Retrieves the revision history for a specific post showing author and modification dates.
 
 ## Parameters
 

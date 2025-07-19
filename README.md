@@ -135,6 +135,183 @@ npx -y @smithery/cli install @docdyhr/mcp-wordpress --client claude
 - 📦 **[Smithery Setup](docs/user-guides/SMITHERY_SETUP.md)** - MCP package manager (detailed guide)
 - 🔧 **[Manual Build](docs/developer/BUILD_SYSTEM.md)** - Custom builds
 
+## 📋 Configuration Examples
+
+### Single Site Setup
+
+**Environment Variables (.env)**
+```bash
+WORDPRESS_SITE_URL=https://myblog.com
+WORDPRESS_USERNAME=admin
+WORDPRESS_APP_PASSWORD=xxxx xxxx xxxx xxxx xxxx xxxx
+WORDPRESS_AUTH_METHOD=app-password
+```
+
+**Claude Desktop Config**
+```json
+{
+  "mcpServers": {
+    "mcp-wordpress": {
+      "command": "npx",
+      "args": ["-y", "mcp-wordpress"],
+      "env": {
+        "WORDPRESS_SITE_URL": "https://myblog.com",
+        "WORDPRESS_USERNAME": "admin",
+        "WORDPRESS_APP_PASSWORD": "xxxx xxxx xxxx xxxx xxxx xxxx"
+      }
+    }
+  }
+}
+```
+
+### Multi-Site Agency Setup
+
+**Configuration File (mcp-wordpress.config.json)**
+```json
+{
+  "sites": [
+    {
+      "id": "main-corporate",
+      "name": "Corporate Website",
+      "config": {
+        "WORDPRESS_SITE_URL": "https://company.com",
+        "WORDPRESS_USERNAME": "admin",
+        "WORDPRESS_APP_PASSWORD": "xxxx xxxx xxxx xxxx xxxx xxxx",
+        "WORDPRESS_AUTH_METHOD": "app-password"
+      }
+    },
+    {
+      "id": "client-restaurant",
+      "name": "Restaurant Client",
+      "config": {
+        "WORDPRESS_SITE_URL": "https://bestrestaurant.com",
+        "WORDPRESS_USERNAME": "editor",
+        "WORDPRESS_APP_PASSWORD": "yyyy yyyy yyyy yyyy yyyy yyyy",
+        "WORDPRESS_AUTH_METHOD": "app-password"
+      }
+    },
+    {
+      "id": "client-ecommerce",
+      "name": "E-commerce Client",
+      "config": {
+        "WORDPRESS_SITE_URL": "https://onlinestore.com",
+        "WORDPRESS_USERNAME": "shopmanager",
+        "WORDPRESS_APP_PASSWORD": "zzzz zzzz zzzz zzzz zzzz zzzz",
+        "WORDPRESS_AUTH_METHOD": "app-password"
+      }
+    }
+  ]
+}
+```
+
+### Development Environment
+
+**Local WordPress with Docker**
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  wordpress:
+    image: wordpress:latest
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wordpress_data:/var/www/html
+  
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  wordpress_data:
+  db_data:
+```
+
+**MCP WordPress Development Config**
+```json
+{
+  "sites": [
+    {
+      "id": "local-dev",
+      "name": "Local Development",
+      "config": {
+        "WORDPRESS_SITE_URL": "http://localhost:8080",
+        "WORDPRESS_USERNAME": "admin",
+        "WORDPRESS_APP_PASSWORD": "dev-password-here",
+        "WORDPRESS_AUTH_METHOD": "app-password"
+      }
+    }
+  ]
+}
+```
+
+### Production Deployment
+
+**Server Environment Variables**
+```bash
+# /etc/environment or systemd service
+WORDPRESS_SITE_URL=https://production-site.com
+WORDPRESS_USERNAME=api-user
+WORDPRESS_APP_PASSWORD=secure-production-password
+WORDPRESS_AUTH_METHOD=app-password
+NODE_ENV=production
+CACHE_ENABLED=true
+CACHE_TTL=3600
+RATE_LIMIT_ENABLED=true
+DEBUG=false
+```
+
+**Docker Production Setup**
+```dockerfile
+# Dockerfile.production
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY dist/ ./dist/
+EXPOSE 3000
+USER node
+CMD ["node", "dist/index.js"]
+```
+
+### JWT Authentication Setup
+
+**WordPress Plugin Configuration**
+```php
+// wp-config.php
+define('JWT_AUTH_SECRET_KEY', 'your-secret-key-here');
+define('JWT_AUTH_CORS_ENABLE', true);
+```
+
+**MCP Configuration**
+```json
+{
+  "sites": [
+    {
+      "id": "jwt-site",
+      "name": "JWT Authentication Site",
+      "config": {
+        "WORDPRESS_SITE_URL": "https://site-with-jwt.com",
+        "WORDPRESS_USERNAME": "api-user",
+        "WORDPRESS_PASSWORD": "user-password",
+        "WORDPRESS_AUTH_METHOD": "jwt"
+      }
+    }
+  ]
+}
+```
+
 ## 🌟 What Makes This Special
 
 ### 🏆 Feature Comparison
@@ -359,7 +536,332 @@ You: "Compare traffic between main-site and client-blog"
 Claude: "Here's a comparison of both sites..."
 ```
 
+## 🎨 Real-World Workflows
+
+### Content Marketing Agency Workflow
+
+**Scenario**: Managing 20+ client blogs with consistent SEO optimization
+
+```text
+💬 "Analyze the top 5 performing posts across all sites and create similar content for underperforming clients"
+💬 "Batch update all client sites with the new privacy policy footer"
+💬 "Generate a weekly performance report comparing all client sites"
+💬 "Create social media snippets from the latest blog posts on each site"
+```
+
+### E-commerce Store Management
+
+**Scenario**: Managing product launches and inventory updates
+
+```text
+💬 "Create a product launch post with gallery, specifications, and pricing for the new iPhone case"
+💬 "Update all 'out of stock' products with restock notifications"
+💬 "Generate product comparison pages for similar items"
+💬 "Create seasonal landing pages with current promotions"
+```
+
+### News Website Operations
+
+**Scenario**: Breaking news and content moderation
+
+```text
+💬 "Publish breaking news about the tech merger with social media integration"
+💬 "Moderate comments on controversial articles and flag inappropriate content"
+💬 "Create topic clusters around trending news stories"
+💬 "Schedule social media posts for peak engagement times"
+```
+
+### Educational Institution Portal
+
+**Scenario**: Course management and student communications
+
+```text
+💬 "Create course announcement pages with enrollment forms"
+💬 "Update faculty profiles with new publications and achievements"
+💬 "Generate student newsletter with upcoming events and deadlines"
+💬 "Moderate discussion forums and highlight valuable contributions"
+```
+
+### Non-Profit Organization
+
+**Scenario**: Fundraising campaigns and volunteer coordination
+
+```text
+💬 "Create donation campaign pages with progress tracking"
+💬 "Update volunteer opportunity listings with current needs"
+💬 "Generate impact reports showing donation effectiveness"
+💬 "Create event registration pages with automated confirmations"
+```
+
+## 🚀 Advanced Automation Examples
+
+### Smart Content Workflows
+
+**Automated SEO Optimization**
+```text
+You: "Optimize all posts from the last month for better SEO performance"
+Claude: "I'll analyze and optimize your recent posts...
+- Analyzed 15 posts from the last 30 days
+- Updated meta descriptions for 12 posts
+- Added focus keywords to 8 posts
+- Optimized heading structure in 10 posts
+- Improved internal linking in 15 posts
+- Average SEO score improved from 67% to 89%"
+```
+
+**Content Gap Analysis**
+```text
+You: "Identify content gaps in our blog compared to competitor topics"
+Claude: "After analyzing your content and common industry topics...
+- Missing topics: 'AI in Healthcare', 'Remote Work Security', 'Green Technology'
+- Underperforming categories: 'Tutorials' (only 3 posts vs 15+ needed)
+- Recommended: 8 new posts to fill major gaps
+- Priority topics based on search volume and competition"
+```
+
+### Maintenance Automation
+
+**Site Health Monitoring**
+```text
+You: "Perform a comprehensive site health check and fix any issues"
+Claude: "Running complete site diagnostics...
+- ✅ SSL certificate valid (expires: March 15, 2025)
+- ⚠️ 3 broken internal links found and flagged
+- ✅ All images optimized (average load time: 1.2s)
+- ⚠️ 2 plugins need updates
+- ✅ Database optimized (reduced size by 15%)
+- ✅ Cache performance: 78% hit rate"
+```
+
+**User Management Automation**
+```text
+You: "Clean up user accounts and update permissions for the new team structure"
+Claude: "Updating user management...
+- Deactivated 5 inactive accounts (no login >6 months)
+- Updated 12 user roles to match new org chart
+- Created 3 new editor accounts for content team
+- Set up role-based content access restrictions
+- Configured automated welcome emails for new users"
+```
+
+### Performance Optimization
+
+**Intelligent Cache Management**
+```text
+You: "Analyze site performance and implement optimal caching strategies"
+Claude: "Implementing performance optimizations...
+- Enabled object caching (40% speed improvement)
+- Configured CDN for static assets
+- Optimized database queries (reduced load time by 25%)
+- Set up page caching with smart invalidation
+- Compressed and optimized 47 images
+- Site speed improved from 3.2s to 1.8s average load time"
+```
+
+## 🎯 Industry-Specific Solutions
+
+### Healthcare Practices
+```text
+💬 "Create HIPAA-compliant patient information pages with secure forms"
+💬 "Update doctor profiles with latest certifications and specializations"
+💬 "Generate appointment booking pages with calendar integration"
+💬 "Create health education content with medical disclaimers"
+```
+
+### Legal Firms
+```text
+💬 "Create practice area pages with case study examples"
+💬 "Update attorney profiles with recent wins and bar admissions"
+💬 "Generate client intake forms with confidentiality notices"
+💬 "Create legal blog posts with proper citations and disclaimers"
+```
+
+### Real Estate Agencies
+```text
+💬 "Create property listing pages with virtual tour embeds"
+💬 "Update agent profiles with recent sales and market statistics"
+💬 "Generate neighborhood guide pages with local amenities"
+💬 "Create mortgage calculator pages with current rates"
+```
+
+### Restaurants & Food Service
+```text
+💬 "Create menu pages with dietary restriction filters"
+💬 "Update chef profiles with signature dishes and cooking philosophy"
+💬 "Generate event booking pages for private dining"
+💬 "Create food blog posts with recipe cards and nutritional information"
+```
+
 📖 **[More Examples](docs/examples/)** | **[Use Case Library](docs/use-cases/)**
+
+## 🛠️ Troubleshooting Guide
+
+### Quick Diagnostics
+
+**Connection Issues**
+```bash
+# Test WordPress connection
+npm run status
+
+# Debug mode with detailed logs
+DEBUG=true npm run dev
+
+# Test specific site in multi-site setup
+npm run status -- --site="your-site-id"
+```
+
+**Authentication Problems**
+```bash
+# Verify WordPress application password
+curl -u username:app_password https://your-site.com/wp-json/wp/v2/users/me
+
+# Test authentication with different methods
+npm run test:auth
+
+# Regenerate application password
+npm run setup
+```
+
+**Performance Issues**
+```bash
+# Check cache performance
+npm run test:cache
+
+# Monitor real-time performance
+npm run test:performance
+
+# Clear all caches
+rm -rf cache/ && npm run dev
+```
+
+### Common Error Solutions
+
+| Error | Cause | Solution |
+|-------|--------|----------|
+| `401 Unauthorized` | Invalid credentials | Regenerate application password |
+| `403 Forbidden` | Insufficient permissions | Check user role (Editor+ required) |
+| `404 Not Found` | Wrong site URL | Verify WORDPRESS_SITE_URL |
+| `SSL Certificate Error` | HTTPS issues | Add SSL exception or use HTTP |
+| `Connection Timeout` | Network/firewall | Check WordPress REST API access |
+| `Tools not showing in Claude` | Config file format | Validate JSON syntax |
+| `Plugin conflicts` | WordPress plugins | Disable conflicting plugins |
+| `Rate limiting` | Too many requests | Implement request throttling |
+
+### WordPress-Specific Issues
+
+**REST API Not Available**
+```bash
+# Test REST API directly
+curl https://your-site.com/wp-json/wp/v2/
+
+# Check if REST API is disabled
+grep -r "rest_api" wp-config.php
+
+# Verify permalink structure
+wp-admin → Settings → Permalinks → Post name
+```
+
+**Application Password Issues**
+```text
+1. WordPress Admin → Users → Profile
+2. Scroll to "Application Passwords"
+3. Ensure feature is enabled (WordPress 5.6+)
+4. Generate new password if needed
+5. Copy password exactly (includes spaces)
+```
+
+**Multi-Site Configuration Problems**
+```json
+// Check mcp-wordpress.config.json format
+{
+  "sites": [
+    {
+      "id": "unique-site-id",
+      "name": "Human Readable Name", 
+      "config": {
+        "WORDPRESS_SITE_URL": "https://site.com",
+        "WORDPRESS_USERNAME": "username",
+        "WORDPRESS_APP_PASSWORD": "xxxx xxxx xxxx xxxx xxxx xxxx"
+      }
+    }
+  ]
+}
+```
+
+### Environment-Specific Solutions
+
+**Claude Desktop Integration**
+```json
+// Verify claude_desktop_config.json format
+{
+  "mcpServers": {
+    "mcp-wordpress": {
+      "command": "npx",
+      "args": ["-y", "mcp-wordpress"],
+      "env": {
+        "WORDPRESS_SITE_URL": "https://your-site.com",
+        "WORDPRESS_USERNAME": "your-username",
+        "WORDPRESS_APP_PASSWORD": "your-app-password"
+      }
+    }
+  }
+}
+```
+
+**Docker Deployment Issues**
+```bash
+# Check container logs
+docker logs mcp-wordpress
+
+# Verify environment variables
+docker exec mcp-wordpress env | grep WORDPRESS
+
+# Test network connectivity
+docker exec mcp-wordpress curl https://your-site.com/wp-json/wp/v2/
+```
+
+**NPX Runtime Problems**
+```bash
+# Clear NPX cache
+npx clear-npx-cache
+
+# Use specific version
+npx mcp-wordpress@latest
+
+# Install globally instead
+npm install -g mcp-wordpress
+```
+
+### Getting Help
+
+**Self-Diagnostics**
+```bash
+# Comprehensive health check
+npm run health
+
+# Security validation
+npm run security:check
+
+# Performance analysis
+npm run test:performance
+```
+
+**Debug Information Collection**
+```bash
+# Generate debug report
+DEBUG=true npm run status > debug-report.txt 2>&1
+
+# Include system information
+node --version >> debug-report.txt
+npm --version >> debug-report.txt
+os-info >> debug-report.txt
+```
+
+**Community Support**
+- 🐛 [Report Issues](https://github.com/docdyhr/mcp-wordpress/issues)
+- 💬 [Discussions](https://github.com/docdyhr/mcp-wordpress/discussions)
+- 📧 [Security Issues](mailto:security@docdyhr.com)
+- 📚 [Documentation](docs/TROUBLESHOOTING.md)
 
 ## 🧪 Testing & Status
 

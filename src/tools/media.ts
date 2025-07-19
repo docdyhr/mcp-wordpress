@@ -8,13 +8,52 @@ import {
 import { getErrorMessage } from "../utils/error.js";
 
 /**
- * Provides tools for managing media on a WordPress site.
- * This class encapsulates tool definitions and their corresponding handlers.
+ * Comprehensive media management tools for WordPress sites.
+ * 
+ * This class provides complete media library functionality including:
+ * - Listing media items with advanced filtering and search
+ * - Uploading new media files with validation and optimization
+ * - Retrieving detailed media information and metadata
+ * - Updating media properties like title, description, and alt text
+ * - Deleting media items with safety checks
+ * 
+ * Supports all WordPress media types including images, videos, audio files,
+ * and documents with proper MIME type validation and security checks.
+ * 
+ * @example
+ * ```typescript
+ * const mediaTools = new MediaTools();
+ * const tools = mediaTools.getTools();
+ * 
+ * // Upload an image
+ * const client = new WordPressClient(config);
+ * const result = await mediaTools.handleUploadMedia(client, {
+ *   file_path: "/path/to/image.jpg",
+ *   title: "My Image",
+ *   alt_text: "Description of the image"
+ * });
+ * ```
+ * 
+ * @since 1.0.0
+ * @author MCP WordPress Team
  */
 export class MediaTools {
   /**
-   * Retrieves the list of media management tools.
-   * @returns An array of MCPTool definitions.
+   * Retrieves the complete list of media management tools available for MCP.
+   * 
+   * Returns an array of tool definitions for comprehensive media library management.
+   * Each tool includes parameter validation, security checks, and detailed error handling.
+   * 
+   * @returns {Array<MCPTool>} Array of MCPTool definitions for media management
+   * 
+   * @example
+   * ```typescript
+   * const mediaTools = new MediaTools();
+   * const tools = mediaTools.getTools();
+   * console.log(tools.length); // 5 tools: list, get, upload, update, delete
+   * ```
+   * 
+   * @since 1.0.0
    */
   public getTools(): any[] {
     return [
