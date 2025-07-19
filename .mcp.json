@@ -1,8 +1,0 @@
-{
-  "servers": ["npm-sentinel"],
-  "tasks": [
-    "Analyze NPM dependencies",
-    "Check for malicious packages in package.json",
-    "Audit NPM scripts for suspicious behavior"
-  ]
-}
