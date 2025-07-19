@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.0.4...v2.1.0) (2025-07-19)
+
+### 🚀 Features
+
+* Add CodeQL security analysis workflow ([897f5f3](https://github.com/docdyhr/mcp-wordpress/commit/897f5f3616017920aacdf0eefc1215fa4358fee1))
+* Add Dependabot configuration for automated dependency updates ([c3e8a80](https://github.com/docdyhr/mcp-wordpress/commit/c3e8a80cc77001e28ad321f0ec4743428777d9a3))
+* Add Dependency Review action for PR security checks ([203d373](https://github.com/docdyhr/mcp-wordpress/commit/203d3734c37c700cc67e8c34b15ed44fe6fa71d3))
+
 ## [2.0.4](https://github.com/docdyhr/mcp-wordpress/compare/v2.0.3...v2.0.4) (2025-07-19)
 
 ### 🐛 Bug Fixes
