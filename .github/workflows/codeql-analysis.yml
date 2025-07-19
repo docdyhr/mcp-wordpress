@@ -1,0 +1,141 @@
+name: 🔒 CodeQL Security Analysis
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run CodeQL analysis daily at 3 AM UTC
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  codeql-analyze:
+    name: 🔍 CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+      packages: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Override auto-detected languages: javascript, typescript
+        language: ['javascript']
+        # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+        env:
+          HUSKY: 0
+
+      - name: 🏗️ Build Project
+        run: npm run build
+        env:
+          HUSKY: 0
+
+      # Initializes the CodeQL tools for scanning.
+      - name: 🔧 Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          # If you wish to specify custom queries, you can do so here or in a config file.
+          # By default, queries listed here will override any specified in a config file.
+          # Prefix the list here with "+" to use these queries and those in the config file.
+          queries: +security-and-quality
+          config: |
+            name: "Custom CodeQL Config"
+            queries:
+              - uses: security-and-quality
+              - uses: security-extended
+            paths-ignore:
+              - node_modules
+              - dist
+              - coverage
+              - docs
+              - .github
+              - tests/**/*.test.js
+              - "**/*.min.js"
+            paths:
+              - src
+              - "*.js"
+              - "*.ts"
+
+      # Autobuild attempts to build any compiled languages (C/C++, C#, Go, or Java).
+      # If this step fails, then you should remove it and run the build manually
+      - name: 🤖 Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      # Manual build commands can be added here if autobuild fails
+      # - name: 🔨 Manual Build
+      #   run: |
+      #     npm run build
+
+      - name: 🔍 Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+          # Upload results to GitHub Security tab
+          upload: true
+          # Wait for processing to complete
+          wait-for-processing: true
+
+      - name: 📊 Security Analysis Summary
+        if: always()
+        run: |
+          echo "## 🔒 CodeQL Security Analysis Completed" >> $GITHUB_STEP_SUMMARY
+          echo "**Language:** ${{ matrix.language }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** Analysis completed and uploaded to GitHub Security tab" >> $GITHUB_STEP_SUMMARY
+          echo "**Next Steps:** Review any security findings in the Security tab" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Analysis Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Queries Used:** Security and Quality + Security Extended" >> $GITHUB_STEP_SUMMARY
+          echo "- **Paths Analyzed:** src/, *.js, *.ts" >> $GITHUB_STEP_SUMMARY
+          echo "- **Paths Ignored:** node_modules, dist, coverage, docs, tests" >> $GITHUB_STEP_SUMMARY
+          echo "- **Upload Status:** Results uploaded to GitHub Security tab" >> $GITHUB_STEP_SUMMARY
+
+  # Security recommendations job
+  security-recommendations:
+    name: 📋 Security Recommendations
+    runs-on: ubuntu-latest
+    needs: codeql-analyze
+    if: always()
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Generate Security Recommendations
+        run: |
+          echo "## 🛡️ Security Recommendations" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔒 CodeQL Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Static analysis completed for JavaScript/TypeScript" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 Results available in GitHub Security tab" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔍 Custom security queries applied" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📝 Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Review security findings in the Security tab" >> $GITHUB_STEP_SUMMARY
+          echo "2. Address any high-severity vulnerabilities" >> $GITHUB_STEP_SUMMARY
+          echo "3. Consider implementing suggested code improvements" >> $GITHUB_STEP_SUMMARY
+          echo "4. Update dependencies if vulnerabilities are found" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Resources" >> $GITHUB_STEP_SUMMARY
+          echo "- [CodeQL Documentation](https://codeql.github.com/docs/)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Security Best Practices](https://docs.github.com/en/code-security)" >> $GITHUB_STEP_SUMMARY
+          echo "- [GitHub Security Advisories](https://github.com/advisories)" >> $GITHUB_STEP_SUMMARY

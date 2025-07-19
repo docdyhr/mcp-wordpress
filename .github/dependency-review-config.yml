@@ -1,0 +1,83 @@
+# Dependency Review Configuration
+# Documentation: https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/configuring-dependency-review
+
+# Security vulnerability settings
+vulnerability_check: true
+fail_on_severity: moderate
+
+# License compliance settings
+license_check: true
+allow_licenses:
+  - MIT
+  - Apache-2.0
+  - BSD-2-Clause
+  - BSD-3-Clause
+  - ISC
+  - GPL-3.0
+  - LGPL-2.1
+  - LGPL-3.0
+  - Unlicense
+  - CC0-1.0
+
+deny_licenses:
+  - AGPL-1.0
+  - AGPL-3.0
+  - GPL-2.0
+  - LGPL-2.0
+  - WTFPL
+
+# Package exclusions (typically dev dependencies that don't affect production)
+exclude_packages:
+  - npm:@types/*
+  - npm:eslint*
+  - npm:prettier*
+  - npm:jest*
+  - npm:typescript*
+  - npm:@typescript-eslint/*
+  - npm:husky
+  - npm:lint-staged
+  - npm:nodemon
+  - npm:concurrently
+
+# GitHub Security Advisories settings
+allow_ghsas: []  # Empty array means no advisories are allowed
+
+# Comment settings for pull requests
+comment_summary_in_pr: always
+summarize_in_pr: true
+
+# Base and head references for comparison
+# These are automatically set by GitHub, but can be customized
+# base_ref: main
+# head_ref: feature-branch
+
+# External dependency check
+external_dependencies: warn
+
+# Development dependencies
+exclude_dev_dependencies: false  # Set to true to ignore dev dependencies
+
+# Package manager specific settings
+package_managers:
+  npm:
+    # NPM specific configuration
+    check_licenses: true
+    check_vulnerabilities: true
+    exclude_dev: false
+  
+# Scope-based exclusions
+exclude_scopes:
+  - "@types"
+  - "@typescript-eslint"
+
+# Additional security checks
+security_checks:
+  malware_check: true
+  typosquatting_check: true
+  abandoned_package_check: true
+
+# Reporting settings
+report_format: "detailed"
+include_summary: true
+include_license_info: true
+include_vulnerability_info: true

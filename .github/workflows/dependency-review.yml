@@ -1,0 +1,209 @@
+name: 🔍 Dependency Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+
+jobs:
+  dependency-review:
+    name: 🔍 Dependency Security Review
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          # Fail the action if vulnerabilities are found
+          fail-on-severity: moderate
+          # License check (allow common open source licenses)
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, GPL-3.0, LGPL-2.1, LGPL-3.0
+          # Deny specific licenses
+          deny-licenses: AGPL-1.0, AGPL-3.0, GPL-2.0, LGPL-2.0
+          # Security advisories configuration
+          allow-ghsas: false
+          # Package patterns to exclude from review
+          exclude-packages: |
+            npm:@types/*
+            npm:eslint*
+            npm:prettier*
+          # Comment on PR with results
+          comment-summary-in-pr: always
+          # Vulnerability severity threshold
+          vulnerability-check: true
+          # License compliance check
+          license-check: true
+          # Configuration for reporting
+          config-file: .github/dependency-review-config.yml
+
+  security-audit:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+        env:
+          HUSKY: 0
+
+      - name: 🔍 NPM Security Audit
+        run: |
+          echo "## 🔍 NPM Security Audit Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Run audit and capture results
+          if npm audit --audit-level=moderate --json > audit-results.json 2>/dev/null; then
+            echo "✅ **No moderate or higher vulnerabilities found**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Vulnerabilities detected**" >> $GITHUB_STEP_SUMMARY
+            
+            # Parse and display results
+            if [ -f audit-results.json ]; then
+              CRITICAL=$(cat audit-results.json | jq -r '.metadata.vulnerabilities.critical // 0')
+              HIGH=$(cat audit-results.json | jq -r '.metadata.vulnerabilities.high // 0')
+              MODERATE=$(cat audit-results.json | jq -r '.metadata.vulnerabilities.moderate // 0')
+              LOW=$(cat audit-results.json | jq -r '.metadata.vulnerabilities.low // 0')
+              
+              echo "- 🔴 Critical: $CRITICAL" >> $GITHUB_STEP_SUMMARY
+              echo "- 🟠 High: $HIGH" >> $GITHUB_STEP_SUMMARY
+              echo "- 🟡 Moderate: $MODERATE" >> $GITHUB_STEP_SUMMARY
+              echo "- 🟢 Low: $LOW" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "**Action Required:** Please run \`npm audit fix\` to address vulnerabilities." >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+      - name: 📊 Upload Security Audit Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-results
+          path: audit-results.json
+          retention-days: 30
+
+  license-compliance:
+    name: 📜 License Compliance Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+        env:
+          HUSKY: 0
+
+      - name: 📜 License Checker
+        run: |
+          # Install license checker
+          npm install -g license-checker
+          
+          echo "## 📜 License Compliance Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Generate license report
+          license-checker --json > licenses.json
+          
+          # Check for problematic licenses
+          PROBLEMATIC_LICENSES="GPL-2.0,AGPL-1.0,AGPL-3.0,LGPL-2.0"
+          
+          if license-checker --excludePackages 'dev-dependencies' --restrictLicenses "$PROBLEMATIC_LICENSES" --summary; then
+            echo "✅ **No problematic licenses found**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Problematic licenses detected**" >> $GITHUB_STEP_SUMMARY
+            echo "Please review the licenses and ensure compliance." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Count license types
+          TOTAL_LICENSES=$(cat licenses.json | jq 'keys | length')
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Total packages analyzed:** $TOTAL_LICENSES" >> $GITHUB_STEP_SUMMARY
+
+      - name: 📊 Upload License Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-report
+          path: licenses.json
+          retention-days: 30
+
+  supply-chain-security:
+    name: 🔗 Supply Chain Security
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Package Lock Analysis
+        run: |
+          echo "## 🔗 Supply Chain Security Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check for package-lock.json integrity
+          if [ -f package-lock.json ]; then
+            echo "✅ **package-lock.json found**" >> $GITHUB_STEP_SUMMARY
+            
+            # Check lockfile version
+            LOCKFILE_VERSION=$(cat package-lock.json | jq -r '.lockfileVersion')
+            echo "- Lockfile version: $LOCKFILE_VERSION" >> $GITHUB_STEP_SUMMARY
+            
+            # Count dependencies
+            DEPS_COUNT=$(cat package-lock.json | jq '.dependencies | length // 0')
+            echo "- Total dependencies: $DEPS_COUNT" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **package-lock.json missing**" >> $GITHUB_STEP_SUMMARY
+            echo "Consider using npm ci for reproducible builds." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check for .npmrc security settings
+          if [ -f .npmrc ]; then
+            echo "📄 **.npmrc configuration found**" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  dependency-summary:
+    name: 📊 Dependency Review Summary
+    runs-on: ubuntu-latest
+    needs: [dependency-review, security-audit, license-compliance, supply-chain-security]
+    if: always()
+    steps:
+      - name: 📊 Generate Summary Report
+        run: |
+          echo "## 📊 Dependency Review Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔍 Review Results" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dependency Review:** ${{ needs.dependency-review.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Security Audit:** ${{ needs.security-audit.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **License Compliance:** ${{ needs.license-compliance.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Supply Chain Security:** ${{ needs.supply-chain-security.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📝 Recommendations" >> $GITHUB_STEP_SUMMARY
+          echo "1. **Address any security vulnerabilities** found in the audit" >> $GITHUB_STEP_SUMMARY
+          echo "2. **Review license compliance** for any flagged packages" >> $GITHUB_STEP_SUMMARY
+          echo "3. **Ensure package-lock.json** is committed and up-to-date" >> $GITHUB_STEP_SUMMARY
+          echo "4. **Monitor dependency changes** in this PR carefully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Resources" >> $GITHUB_STEP_SUMMARY
+          echo "- [Dependency Review Documentation](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-dependency-review)" >> $GITHUB_STEP_SUMMARY
+          echo "- [NPM Security Best Practices](https://docs.npmjs.com/security)" >> $GITHUB_STEP_SUMMARY

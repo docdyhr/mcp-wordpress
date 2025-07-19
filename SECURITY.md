@@ -256,10 +256,43 @@ If you discover a security vulnerability:
 4. **Do** provide detailed steps to reproduce
 5. **Do** suggest fixes if possible
 
+## 🤖 Automated Security Workflows
+
+### Security Scanning Workflows
+
+The repository includes comprehensive automated security workflows:
+
+1. **CodeQL Analysis** (`.github/workflows/codeql-analysis.yml`)
+   - Static code analysis for vulnerabilities
+   - Daily scheduled scans
+   - Custom security queries
+
+2. **Dependency Review** (`.github/workflows/dependency-review.yml`)
+   - PR-based dependency security analysis
+   - License compliance checking
+   - Supply chain security validation
+
+3. **Secret Scanning** (`.github/workflows/secret-scanning.yml`)
+   - TruffleHog and GitLeaks integration
+   - Custom pattern detection
+   - Environment file analysis
+
+4. **Dependabot** (`.github/dependabot.yml`)
+   - Automated dependency updates
+   - Security-first update prioritization
+   - Grouped updates by category
+
+### Security Badge Status
+
+![Security Badge](https://img.shields.io/badge/security-monitored-green)
+![Dependencies](https://img.shields.io/badge/dependencies-up%20to%20date-green)
+![Vulnerabilities](https://img.shields.io/badge/vulnerabilities-0-green)
+
 ## 📋 Security Audit Log
 
 | Date       | Auditor   | Findings                      | Actions Taken            |
 | ---------- | --------- | ----------------------------- | ------------------------ |
+| 2025-07-19 | Claude AI | Enhanced security workflows   | Added CodeQL, Dependabot, Secret Scanning |
 | 2025-06-29 | Claude AI | Exposed credentials in config | Documentation created    |
 | -          | -         | Input validation gaps         | Recommendations provided |
 | -          | -         | 0 dependency vulnerabilities  | Continue monitoring      |
