@@ -1,0 +1,74 @@
+name: "🔒 CodeQL Security Analysis"
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+  schedule:
+    - cron: '30 1 * * 1'  # Weekly on Monday at 1:30 AM UTC
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: Analyze Code
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript-typescript' ]
+        # CodeQL supports: 'cpp', 'csharp', 'go', 'java', 'javascript-typescript', 'python', 'ruby', 'swift'
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: 🔧 Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        # Use security-extended for more comprehensive scanning
+        queries: security-extended,security-and-quality
+        # If you wish to specify custom queries, you can do so here or in a config file.
+        # queries: ./path/to/local/query, your-org/your-repo/queries@main
+
+    - name: 🔨 Autobuild
+      uses: github/codeql-action/autobuild@v3
+
+    # ℹ️ Command-line programs to run using the OS shell.
+    # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
+
+    # ✏️ If the Autobuild fails above, remove it and uncomment the following three lines
+    #    and modify them (or add more) to build your code if your project
+    #    uses a compiled language
+
+    #- run: |
+    #   make bootstrap
+    #   make release
+
+    - name: 🔍 Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
+        # Upload results even if the analysis found vulnerabilities
+        upload: true
+        # Don't fail the workflow if vulnerabilities are found
+        # This allows you to see results while fixing issues
+        fail-on: error
+
+    - name: 📊 Generate Security Report
+      if: always()
+      run: |
+        echo "## 🔒 CodeQL Security Analysis Complete" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Analysis Details:" >> $GITHUB_STEP_SUMMARY
+        echo "- Language: ${{ matrix.language }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Queries: security-extended, security-and-quality" >> $GITHUB_STEP_SUMMARY
+        echo "- Status: Analysis completed" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Check the Security tab for detailed results." >> $GITHUB_STEP_SUMMARY
