@@ -1,0 +1,101 @@
+version: 2
+updates:
+  # 📦 NPM dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    assignees:
+      - "docdyhr"
+    reviewers:
+      - "docdyhr"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "javascript"
+    allow:
+      - dependency-type: "all"
+    groups:
+      # Group all production dependencies
+      production-dependencies:
+        dependency-type: "production"
+        patterns:
+          - "@modelcontextprotocol/*"
+          - "axios"
+          - "express*"
+          - "zod*"
+      # Group all development dependencies
+      development-dependencies:
+        dependency-type: "development"
+        patterns:
+          - "@types/*"
+          - "typescript*"
+          - "vitest*"
+          - "eslint*"
+          - "@typescript-eslint/*"
+      # Group all WordPress related packages
+      wordpress-packages:
+        patterns:
+          - "wordpress*"
+          - "@wordpress/*"
+    # Ignore specific dependencies if needed
+    ignore:
+      # Example: Ignore major updates to sensitive packages
+      # - dependency-name: "express"
+      #   update-types: ["version-update:semver-major"]
+
+  # 🔧 GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    assignees:
+      - "docdyhr"
+    reviewers:
+      - "docdyhr"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    groups:
+      # Group all GitHub Actions updates
+      github-actions:
+        patterns:
+          - "*"
+
+  # 🐳 Docker dependencies (if you have a Dockerfile)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    assignees:
+      - "docdyhr"
+    reviewers:
+      - "docdyhr"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"
+    ignore:
+      # Ignore updates to the base Node.js image if you prefer manual control
+      # - dependency-name: "node"
+      #   update-types: ["version-update:semver-major"]
+
+# Security updates are automatically created for all ecosystems
+# and take priority over the schedule defined above
