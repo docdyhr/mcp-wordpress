@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.1.0...v2.2.0) (2025-07-19)
+
+### 🚀 Features
+
+* Add comprehensive security monitoring workflow ([78b6d0c](https://github.com/docdyhr/mcp-wordpress/commit/78b6d0cc0e19feefd606faf573315b8a0608891d))
+
 ## [2.1.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.0.4...v2.1.0) (2025-07-19)
 
 ### 🚀 Features
