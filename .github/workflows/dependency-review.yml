@@ -1,0 +1,58 @@
+name: '🔍 Dependency Review'
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    name: Dependency Review
+    steps:
+      - name: '📥 Checkout Repository'
+        uses: actions/checkout@v4
+
+      - name: '🔍 Dependency Review'
+        uses: actions/dependency-review-action@v4
+        with:
+          # Fail the workflow if vulnerabilities are found
+          fail-on-severity: moderate
+          
+          # Fail if vulnerabilities are found in runtime dependencies
+          fail-on-scopes: runtime
+          
+          # Allow specific licenses (add more as needed)
+          # Common open source licenses that are generally safe
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, CC0-1.0, Unlicense
+          
+          # Deny specific licenses that might be problematic
+          # deny-licenses: GPL-3.0, AGPL-3.0
+          
+          # Create an issue if vulnerabilities are found
+          comment-summary-in-pr: always
+          
+          # Warn about these licenses but don't fail
+          # warn-licenses: LGPL-2.1, LGPL-3.0, MPL-2.0
+          
+          # Show full details in the PR comment
+          show-openssf-scorecard: true
+          
+          # Warn if dependency doesn't have a license
+          warn-on-openssf-scorecard-level: 3
+
+      - name: '📊 Generate Dependency Report'
+        if: always()
+        run: |
+          echo "## 🔍 Dependency Review Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Review Configuration:" >> $GITHUB_STEP_SUMMARY
+          echo "- Fail on severity: moderate and above" >> $GITHUB_STEP_SUMMARY
+          echo "- Fail on scopes: runtime dependencies" >> $GITHUB_STEP_SUMMARY
+          echo "- Allowed licenses: MIT, Apache-2.0, BSD, ISC, CC0, Unlicense" >> $GITHUB_STEP_SUMMARY
+          echo "- OpenSSF Scorecard: Enabled" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the PR comment for detailed results." >> $GITHUB_STEP_SUMMARY
