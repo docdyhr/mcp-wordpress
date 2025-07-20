@@ -995,6 +995,7 @@ npm run setup
 
 ### Deployment & Operations
 - **[Docker Deployment](docs/deployment/docker.md)** - Container deployment
+- **[Publishing Troubleshooting](docs/PUBLISHING-TROUBLESHOOTING.md)** - Fix publishing issues
 - **[Security Best Practices](docs/SECURITY.md)** - Production security
 - **[Performance Tuning](docs/deployment/performance.md)** - Optimization guide
 - **[Monitoring](docs/deployment/monitoring.md)** - Logging and metrics
