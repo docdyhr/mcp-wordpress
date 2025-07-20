@@ -2,7 +2,36 @@
 
 This guide helps resolve Docker Hub publishing failures and provides tools for manual intervention when the automated release process encounters issues.
 
-## 🚨 Common Issues
+## 🚨 Current Status - Multiple Missing Versions
+
+**Investigation Results:**
+- NPM Publishing: ✅ All versions available (2.0.4, 2.1.0, 2.2.0, 2.3.0)
+- Docker Hub Publishing: ❌ Multiple versions missing since v2.0.4
+
+**Missing Docker Hub Versions:**
+- v2.0.4 (original issue)
+- v2.1.0, v2.2.0, v2.3.0 (subsequent failures)
+
+**Root Cause:** Systemic Docker publishing failure in release workflow since v2.0.4 release.
+
+**Available Versions on Docker Hub:**
+- ✅ v2.0.0, v2.0.1, v2.0.2, v2.0.3 (working)
+- ❌ v2.0.4, v2.1.0, v2.2.0, v2.3.0 (missing)
+
+### Bulk Recovery Process
+
+To resolve all missing versions at once:
+
+```bash
+# Fix all missing versions
+for version in 2.0.4 2.1.0 2.2.0 2.3.0; do
+  ./scripts/fix-docker-publishing.sh republish $version
+  sleep 60  # Wait between publishes
+done
+
+# Verify all versions
+./scripts/fix-docker-publishing.sh status
+```
 
 ### Missing Docker Hub Versions
 
