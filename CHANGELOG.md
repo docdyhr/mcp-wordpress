@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.3.0...v2.4.0) (2025-07-20)
+
+### 🚀 Features
+
+* Add comprehensive Docker publishing failure recovery system ([b8e99e3](https://github.com/docdyhr/mcp-wordpress/commit/b8e99e342f9a4cb4a3e76fd6eecf7aef94f8d9da))
+
+### 📚 Documentation
+
+* Add bulk recovery script and update troubleshooting for systemic Docker publishing failures ([5eabee1](https://github.com/docdyhr/mcp-wordpress/commit/5eabee11bdee74dfb360ed17ecc62cc1d4b2dffb))
+* compact CLAUDE.md for enhanced usability ([1f2bf2b](https://github.com/docdyhr/mcp-wordpress/commit/1f2bf2b36e1ee6d006667cf8b6454375452ff1a6))
+* comprehensive documentation enhancement and JSDoc improvements ([dbabdf2](https://github.com/docdyhr/mcp-wordpress/commit/dbabdf24be16cc608094ca5f9d13a67a25af1984))
+
 ## [2.3.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.2.0...v2.3.0) (2025-07-19)
 
 ### 🚀 Features
