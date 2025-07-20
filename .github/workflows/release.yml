@@ -148,6 +148,14 @@ jobs:
           docker info
           echo "Docker Hub login successful"
           
+      - name: 🔄 Setup Docker Build Retry Logic
+        run: |
+          echo "Setting up retry mechanism for Docker operations..."
+          # Verify docker daemon is responsive
+          docker version
+          # Pre-pull base images to cache them
+          docker pull node:20-alpine || echo "Base image pre-pull failed, will try during build"
+          
       - name: 🔍 Debug Release Info
         run: |
           echo "Release info debug:"
@@ -197,6 +205,35 @@ jobs:
           # v6 features
           provenance: true
           sbom: true
+        # Add retry logic for Docker build failures
+        continue-on-error: true
+        id: docker-build-attempt-1
+          
+      - name: 🔄 Retry Docker Build on Failure
+        if: steps.docker-build-attempt-1.outcome == 'failure'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}
+            BUILD_DATE={{date 'YYYY-MM-DDTHH:mm:ssZ'}}
+            VCS_REF=${{ github.sha }}
+          provenance: true
+          sbom: true
+        id: docker-build-attempt-2
+          
+      - name: 🚨 Docker Build Failed After Retries
+        if: steps.docker-build-attempt-1.outcome == 'failure' && steps.docker-build-attempt-2.outcome == 'failure'
+        run: |
+          echo "❌ Docker build failed after 2 attempts"
+          echo "::error title=Docker Build Failed::Both Docker build attempts failed. Check logs for details."
+          exit 1
 
       - name: 📝 Update Docker Hub Description
         uses: peter-evans/dockerhub-description@v3
@@ -209,9 +246,30 @@ jobs:
           
       - name: 🎯 Verify Docker Push Success
         run: |
+          # Check which build attempt succeeded
+          if [ "${{ steps.docker-build-attempt-1.outcome }}" == "success" ]; then
+            echo "✅ Docker build succeeded on first attempt"
+          elif [ "${{ steps.docker-build-attempt-2.outcome }}" == "success" ]; then
+            echo "✅ Docker build succeeded on second attempt (retry)"
+            echo "::warning title=Docker Build Retry::First Docker build attempt failed but retry succeeded"
+          fi
+          
           echo "Docker build and push completed successfully"
           echo "Published tags: ${{ steps.meta.outputs.tags }}"
           echo "Version: ${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}"
+          
+          # Verify tags were actually pushed
+          echo "Verifying pushed tags..."
+          for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n'); do
+            echo "Checking tag: $tag"
+            # Brief delay to allow registry to update
+            sleep 5
+            if docker manifest inspect "$tag" >/dev/null 2>&1; then
+              echo "✅ Tag $tag verified"
+            else
+              echo "⚠️ Tag $tag not immediately available (may need propagation time)"
+            fi
+          done
 
   # 🎉 Post-Release Actions
   post-release:

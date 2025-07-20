@@ -7,8 +7,28 @@ ARG VERSION=dev
 ARG BUILD_DATE
 ARG VCS_REF
 
-# Install security updates and required packages
-RUN apk update && apk upgrade && \
+# Install security updates and required packages with graceful fallback
+RUN set -e; \
+    # Try to update with multiple mirrors, but don't fail the build if all fail
+    update_success=false; \
+    for mirror in "dl-cdn.alpinelinux.org" "mirror.endianness.com" "alpinelinux.global.ssl.fastly.net"; do \
+        echo "Trying mirror: $mirror"; \
+        echo "https://$mirror/alpine/v3.22/main" > /etc/apk/repositories; \
+        echo "https://$mirror/alpine/v3.22/community" >> /etc/apk/repositories; \
+        if timeout 30 apk update --no-cache && timeout 30 apk upgrade --no-cache; then \
+            echo "Successfully updated with mirror: $mirror"; \
+            update_success=true; \
+            break; \
+        else \
+            echo "Failed with mirror: $mirror, trying next..."; \
+            sleep 2; \
+        fi; \
+    done; \
+    if [ "$update_success" = "false" ]; then \
+        echo "⚠️ Warning: All package repository mirrors failed, proceeding with existing packages"; \
+        echo "dl-cdn.alpinelinux.org/alpine/v3.22/main" > /etc/apk/repositories; \
+        echo "dl-cdn.alpinelinux.org/alpine/v3.22/community" >> /etc/apk/repositories; \
+    fi && \
     apk add --no-cache git && \
     rm -rf /var/cache/apk/*
 
@@ -41,8 +61,28 @@ ARG VERSION=dev
 ARG BUILD_DATE
 ARG VCS_REF
 
-# Install security updates only (minimal surface)
-RUN apk update && apk upgrade && \
+# Install security updates only (minimal surface) with graceful fallback
+RUN set -e; \
+    # Try to update with multiple mirrors, but don't fail the build if all fail
+    update_success=false; \
+    for mirror in "dl-cdn.alpinelinux.org" "mirror.endianness.com" "alpinelinux.global.ssl.fastly.net"; do \
+        echo "Trying mirror: $mirror"; \
+        echo "https://$mirror/alpine/v3.22/main" > /etc/apk/repositories; \
+        echo "https://$mirror/alpine/v3.22/community" >> /etc/apk/repositories; \
+        if timeout 30 apk update --no-cache && timeout 30 apk upgrade --no-cache; then \
+            echo "Successfully updated with mirror: $mirror"; \
+            update_success=true; \
+            break; \
+        else \
+            echo "Failed with mirror: $mirror, trying next..."; \
+            sleep 2; \
+        fi; \
+    done; \
+    if [ "$update_success" = "false" ]; then \
+        echo "⚠️ Warning: All package repository mirrors failed, proceeding with existing packages"; \
+        echo "dl-cdn.alpinelinux.org/alpine/v3.22/main" > /etc/apk/repositories; \
+        echo "dl-cdn.alpinelinux.org/alpine/v3.22/community" >> /etc/apk/repositories; \
+    fi && \
     apk add --no-cache tini && \
     rm -rf /var/cache/apk/*
 

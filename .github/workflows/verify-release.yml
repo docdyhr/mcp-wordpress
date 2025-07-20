@@ -45,8 +45,9 @@ jobs:
       - name: ⏱️ Wait for Publishing Propagation
         if: github.event_name == 'workflow_run'
         run: |
-          echo "Waiting 2 minutes for NPM and Docker Hub to propagate..."
-          sleep 120
+          echo "Waiting 3 minutes for NPM and Docker Hub to propagate..."
+          echo "This ensures that newly published packages are available for verification"
+          sleep 180
 
       - name: 📦 Verify NPM Publishing
         id: npm-check
@@ -75,20 +76,36 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           echo "Checking Docker Hub for version $VERSION..."
           
-          # Check Docker Hub API
-          RESPONSE=$(curl -s https://hub.docker.com/v2/repositories/docdyhr/mcp-wordpress/tags)
+          # Try multiple verification methods
+          echo "Method 1: Docker Hub API"
+          RESPONSE=$(curl -s https://hub.docker.com/v2/repositories/docdyhr/mcp-wordpress/tags || echo '{"results":[]}')
+          echo "API Response: $RESPONSE"
           
           # Check for both v-prefixed and non-prefixed versions
           if echo "$RESPONSE" | jq -e ".results[] | select(.name == \"$VERSION\" or .name == \"v$VERSION\")" > /dev/null 2>&1; then
-            echo "✅ Version $VERSION found on Docker Hub"
+            echo "✅ Version $VERSION found on Docker Hub via API"
             echo "status=success" >> $GITHUB_OUTPUT
             
             # Get last updated time
             LAST_UPDATED=$(echo "$RESPONSE" | jq -r ".results[] | select(.name == \"$VERSION\" or .name == \"v$VERSION\") | .last_updated" | head -1)
             echo "last_updated=$LAST_UPDATED" >> $GITHUB_OUTPUT
           else
-            echo "❌ Version $VERSION NOT found on Docker Hub"
-            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "Method 2: Docker manifest inspection"
+            # Try direct manifest inspection as fallback
+            if docker manifest inspect docdyhr/mcp-wordpress:$VERSION >/dev/null 2>&1; then
+              echo "✅ Version $VERSION found on Docker Hub via manifest inspection"
+              echo "status=success" >> $GITHUB_OUTPUT
+              echo "last_updated=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_OUTPUT
+            elif docker manifest inspect docdyhr/mcp-wordpress:v$VERSION >/dev/null 2>&1; then
+              echo "✅ Version v$VERSION found on Docker Hub via manifest inspection"
+              echo "status=success" >> $GITHUB_OUTPUT
+              echo "last_updated=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_OUTPUT
+            else
+              echo "❌ Version $VERSION NOT found on Docker Hub"
+              echo "Available tags from API:"
+              echo "$RESPONSE" | jq -r '.results[]?.name' | head -10 || echo "Could not fetch tags"
+              echo "status=failure" >> $GITHUB_OUTPUT
+            fi
           fi
 
       - name: 📊 Generate Verification Report
@@ -272,15 +289,17 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🔄 Trigger Manual Publishing
+      - name: 🔄 Trigger Retry Workflow
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          echo "Attempting to retry publishing for version $VERSION"
+          echo "Triggering Docker publish retry workflow for version $VERSION"
           
-          # Trigger Docker publishing if it failed
-          if [ "${{ needs.verify-publishing.outputs.docker-status }}" == "failure" ]; then
-            echo "Triggering Docker publishing workflow..."
-            gh workflow run docker-publish.yml -f tag=v$VERSION -f push=true
-          fi
+          gh workflow run docker-publish-retry.yml \
+            -f version="$VERSION" \
+            -f force_rebuild=false \
+            --repo ${{ github.repository }}
           
-          echo "::warning title=Manual Retry::Automated retry triggered for failed publishing targets"
+          echo "::notice title=Retry Triggered::Docker publish retry workflow triggered for version $VERSION"
+          echo "Monitor the retry workflow: ${{ github.server_url }}/${{ github.repository }}/actions/workflows/docker-publish-retry.yml"

@@ -1,0 +1,244 @@
+name: 🔄 Docker Publish Retry
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 2.2.0, without v prefix)'
+        required: true
+        type: string
+      force_rebuild:
+        description: 'Force rebuild even if image exists'
+        required: false
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      force_rebuild:
+        required: false
+        type: boolean
+        default: false
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: docdyhr/mcp-wordpress
+
+jobs:
+  retry-docker-publish:
+    name: 🔄 Retry Docker Publishing
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+      
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          # Check out the specific tag if it exists
+          ref: v${{ inputs.version }}
+
+      - name: 🔍 Verify Version Input
+        run: |
+          VERSION="${{ inputs.version }}"
+          echo "Publishing Docker image for version: $VERSION"
+          
+          # Validate version format
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ Invalid version format. Expected format: X.Y.Z (e.g., 2.2.0)"
+            exit 1
+          fi
+          
+          echo "✅ Version format is valid"
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔐 Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: 🔍 Check if Image Already Exists
+        id: check-image
+        if: inputs.force_rebuild == false
+        continue-on-error: true
+        run: |
+          VERSION="${{ inputs.version }}"
+          
+          # Check if image already exists
+          if docker manifest inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$VERSION >/dev/null 2>&1; then
+            echo "Image already exists for version $VERSION"
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Image does not exist for version $VERSION"
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: ⏭️ Skip Build - Image Exists
+        if: steps.check-image.outputs.exists == 'true' && inputs.force_rebuild == false
+        run: |
+          VERSION="${{ inputs.version }}"
+          echo "🎯 Image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$VERSION already exists"
+          echo "Use 'force_rebuild: true' to rebuild anyway"
+          echo "::notice title=Image Exists::Docker image for v$VERSION already exists on Docker Hub"
+
+      - name: 📝 Extract Metadata
+        if: steps.check-image.outputs.exists != 'true' || inputs.force_rebuild == true
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ inputs.version }}
+            type=raw,value=v${{ inputs.version }}
+            type=raw,value=latest,enable={{is_default_branch}}
+          labels: |
+            org.opencontainers.image.title=MCP WordPress Server
+            org.opencontainers.image.description=Complete WordPress MCP Server with 59 management tools, intelligent caching, and real-time monitoring
+            org.opencontainers.image.version=${{ inputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created={{date 'YYYY-MM-DDTHH:mm:ssZ'}}
+            org.opencontainers.image.source=https://github.com/docdyhr/mcp-wordpress
+            org.opencontainers.image.url=https://github.com/docdyhr/mcp-wordpress
+            org.opencontainers.image.documentation=https://github.com/docdyhr/mcp-wordpress#readme
+            org.opencontainers.image.licenses=MIT
+
+      - name: 🔧 Setup Build Environment
+        if: steps.check-image.outputs.exists != 'true' || inputs.force_rebuild == true
+        run: |
+          # Pre-pull base image to cache it
+          echo "Pre-pulling base image..."
+          docker pull node:20-alpine || echo "Base image pre-pull failed, will try during build"
+          
+          # Verify build context
+          echo "Build context verification:"
+          ls -la
+          echo "Dockerfile exists: $(test -f Dockerfile && echo 'yes' || echo 'no')"
+          echo "Package.json exists: $(test -f package.json && echo 'yes' || echo 'no')"
+
+      - name: 🏗️ Build and Push Docker Image (Attempt 1)
+        if: steps.check-image.outputs.exists != 'true' || inputs.force_rebuild == true
+        id: build-attempt-1
+        continue-on-error: true
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ inputs.version }}
+            BUILD_DATE={{date 'YYYY-MM-DDTHH:mm:ssZ'}}
+            VCS_REF=${{ github.sha }}
+          provenance: true
+          sbom: true
+
+      - name: 🔄 Build and Push Docker Image (Attempt 2)
+        if: (steps.check-image.outputs.exists != 'true' || inputs.force_rebuild == true) && steps.build-attempt-1.outcome == 'failure'
+        id: build-attempt-2
+        continue-on-error: true
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64  # Try single platform first
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          build-args: |
+            VERSION=${{ inputs.version }}
+            BUILD_DATE={{date 'YYYY-MM-DDTHH:mm:ssZ'}}
+            VCS_REF=${{ github.sha }}
+          provenance: false  # Disable for retry
+          sbom: false
+
+      - name: 🔄 Build and Push Docker Image (Attempt 3 - AMD64 only)
+        if: (steps.check-image.outputs.exists != 'true' || inputs.force_rebuild == true) && steps.build-attempt-1.outcome == 'failure' && steps.build-attempt-2.outcome == 'failure'
+        id: build-attempt-3
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ inputs.version }}
+            BUILD_DATE={{date 'YYYY-MM-DDTHH:mm:ssZ'}}
+            VCS_REF=${{ github.sha }}
+
+      - name: 🎯 Verify Successful Build
+        if: steps.check-image.outputs.exists != 'true' || inputs.force_rebuild == true
+        run: |
+          VERSION="${{ inputs.version }}"
+          
+          # Check which build attempt succeeded
+          if [ "${{ steps.build-attempt-1.outcome }}" == "success" ]; then
+            echo "✅ Docker build succeeded on first attempt"
+            platforms="linux/amd64,linux/arm64"
+          elif [ "${{ steps.build-attempt-2.outcome }}" == "success" ]; then
+            echo "✅ Docker build succeeded on second attempt"
+            echo "::warning title=Build Retry::First Docker build attempt failed but retry succeeded"
+            platforms="linux/amd64"
+          elif [ "${{ steps.build-attempt-3.outcome }}" == "success" ]; then
+            echo "✅ Docker build succeeded on third attempt (AMD64 only)"
+            echo "::warning title=Build Retry::Multi-platform build failed, succeeded with AMD64 only"
+            platforms="linux/amd64"
+          else
+            echo "❌ All Docker build attempts failed"
+            exit 1
+          fi
+          
+          echo "Published version: $VERSION"
+          echo "Published tags: ${{ steps.meta.outputs.tags }}"
+          echo "Published platforms: $platforms"
+          
+          # Verify the image exists
+          sleep 10  # Brief delay for registry propagation
+          if docker manifest inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$VERSION >/dev/null 2>&1; then
+            echo "✅ Image verification successful"
+          else
+            echo "⚠️ Image not immediately available (may need propagation time)"
+          fi
+
+      - name: 📝 Update Docker Hub Description
+        if: (steps.check-image.outputs.exists != 'true' || inputs.force_rebuild == true)
+        uses: peter-evans/dockerhub-description@v3
+        continue-on-error: true
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: ${{ env.IMAGE_NAME }}
+          readme-filepath: ./README.md
+          short-description: "🚀 Complete WordPress MCP Server - 59 management tools, intelligent caching, real-time monitoring, multi-site support. TypeScript, Docker ready, 95%+ test coverage."
+
+      - name: 📊 Build Summary
+        run: |
+          VERSION="${{ inputs.version }}"
+          echo "## 🔄 Docker Publish Retry Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Force Rebuild:** ${{ inputs.force_rebuild }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.check-image.outputs.exists }}" == "true" ] && [ "${{ inputs.force_rebuild }}" == "false" ]; then
+            echo "🎯 **Result:** Image already existed, no rebuild needed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "🏗️ **Result:** Image built and published successfully" >> $GITHUB_STEP_SUMMARY
+            echo "📦 **Tags:** ${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **Docker Hub:** https://hub.docker.com/r/${{ env.IMAGE_NAME }}/tags?name=$VERSION" >> $GITHUB_STEP_SUMMARY
