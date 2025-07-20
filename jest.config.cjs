@@ -5,6 +5,7 @@
 
 const isCI = process.env.CI === 'true';
 const isVSCode = process.env.VSCODE_CWD !== undefined;
+const isPerformanceTest = process.env.PERFORMANCE_TEST === 'true';
 
 const baseConfig = {
   testEnvironment: "node",
@@ -65,11 +66,11 @@ const baseConfig = {
 };
 
 // Environment-specific configurations
-const config = isCI ? {
+const config = isCI && !isPerformanceTest ? {
   // CI environment: faster, more conservative
   ...baseConfig,
   
-  // Exclude performance-heavy tests in CI
+  // Exclude performance-heavy tests in CI (unless specifically running performance tests)
   testPathIgnorePatterns: [
     ...baseConfig.testPathIgnorePatterns,
     "/tests/performance/",
@@ -85,6 +86,26 @@ const config = isCI ? {
   maxWorkers: 1,
   cache: false,
   detectOpenHandles: false,
+} : isPerformanceTest ? {
+  // Performance test environment: focus on performance tests
+  ...baseConfig,
+  
+  // Only include performance and contract tests
+  testMatch: [
+    "**/performance/**/*.test.js",
+    "**/contracts/**/*.test.js"
+  ],
+  
+  // Performance test optimizations
+  testTimeout: 60000,
+  verbose: true,
+  maxWorkers: 1,
+  cache: false,
+  detectOpenHandles: true,
+  setupFilesAfterEnv: [
+    "<rootDir>/tests/jest.teardown.js",
+    "<rootDir>/tests/performance/jest.setup.js"
+  ],
 } : {
   // Development environment: full test suite
   ...baseConfig,

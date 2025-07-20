@@ -44,7 +44,7 @@ jobs:
       run: npm run test:performance
       env:
         NODE_ENV: test
-        CI: true
+        PERFORMANCE_TEST: true
     
     - name: Upload performance results
       uses: actions/upload-artifact@v4
@@ -299,7 +299,7 @@ jobs:
         WORDPRESS_TEST_URL: http://localhost:8080
         WORDPRESS_USERNAME: admin
         WORDPRESS_APP_PASSWORD: password
-        CI: true
+        PERFORMANCE_TEST: true
     
     - name: Upload contract test results
       uses: actions/upload-artifact@v4
