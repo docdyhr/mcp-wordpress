@@ -26,11 +26,10 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "exactOptionalPropertyTypes": true,
-    "types": ["node", "jest"]
+    "types": ["node"]
   },
   "include": [
     "src/**/*",
-    "tests/**/*",
     "bin/**/*",
     "scripts/**/*"
   ],
@@ -38,8 +37,12 @@
     "node_modules",
     "dist",
     "coverage",
+    "**/*.test.ts",
+    "**/*.spec.ts",
     "**/*.test.js",
-    "**/*.spec.js"
+    "**/*.spec.js",
+    "**/__tests__/**/*",
+    "tests/**/*"
   ],
   "ts-node": {
     "esm": true,
