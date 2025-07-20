@@ -16,6 +16,11 @@ jobs:
     name: 🔍 Verify NPM & Docker Publishing
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    outputs:
+      npm-status: ${{ steps.npm-check.outputs.status }}
+      docker-status: ${{ steps.docker-check.outputs.status }}
+      overall-status: ${{ steps.report.outputs.overall_status }}
+      version: ${{ steps.version.outputs.version }}
     
     steps:
       - name: 📥 Checkout Code
@@ -45,8 +50,8 @@ jobs:
       - name: ⏱️ Wait for Publishing Propagation
         if: github.event_name == 'workflow_run'
         run: |
-          echo "Waiting 2 minutes for NPM and Docker Hub to propagate..."
-          sleep 120
+          echo "Waiting 3 minutes for NPM and Docker Hub to propagate..."
+          sleep 180
 
       - name: 📦 Verify NPM Publishing
         id: npm-check
@@ -75,21 +80,44 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           echo "Checking Docker Hub for version $VERSION..."
           
-          # Check Docker Hub API
-          RESPONSE=$(curl -s https://hub.docker.com/v2/repositories/docdyhr/mcp-wordpress/tags)
-          
-          # Check for both v-prefixed and non-prefixed versions
-          if echo "$RESPONSE" | jq -e ".results[] | select(.name == \"$VERSION\" or .name == \"v$VERSION\")" > /dev/null 2>&1; then
-            echo "✅ Version $VERSION found on Docker Hub"
-            echo "status=success" >> $GITHUB_OUTPUT
+          # Function to check Docker Hub with retry
+          check_docker_hub() {
+            local version=$1
+            local max_attempts=3
+            local attempt=1
             
-            # Get last updated time
-            LAST_UPDATED=$(echo "$RESPONSE" | jq -r ".results[] | select(.name == \"$VERSION\" or .name == \"v$VERSION\") | .last_updated" | head -1)
-            echo "last_updated=$LAST_UPDATED" >> $GITHUB_OUTPUT
-          else
-            echo "❌ Version $VERSION NOT found on Docker Hub"
+            while [ $attempt -le $max_attempts ]; do
+              echo "Attempt $attempt/$max_attempts: Checking Docker Hub API..."
+              
+              # Check Docker Hub API with timeout
+              RESPONSE=$(curl -s --max-time 30 https://hub.docker.com/v2/repositories/docdyhr/mcp-wordpress/tags || echo '{"results":[]}')
+              
+              # Check for both v-prefixed and non-prefixed versions
+              if echo "$RESPONSE" | jq -e ".results[] | select(.name == \"$version\" or .name == \"v$version\")" > /dev/null 2>&1; then
+                echo "✅ Version $version found on Docker Hub"
+                echo "status=success" >> $GITHUB_OUTPUT
+                
+                # Get last updated time
+                LAST_UPDATED=$(echo "$RESPONSE" | jq -r ".results[] | select(.name == \"$version\" or .name == \"v$version\") | .last_updated" | head -1)
+                echo "last_updated=$LAST_UPDATED" >> $GITHUB_OUTPUT
+                return 0
+              else
+                echo "Version $version not found, attempt $attempt/$max_attempts"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Waiting 30 seconds before retry..."
+                  sleep 30
+                fi
+              fi
+              
+              attempt=$((attempt + 1))
+            done
+            
+            echo "❌ Version $version NOT found on Docker Hub after $max_attempts attempts"
             echo "status=failure" >> $GITHUB_OUTPUT
-          fi
+            return 1
+          }
+          
+          check_docker_hub "$VERSION"
 
       - name: 📊 Generate Verification Report
         id: report
@@ -264,7 +292,7 @@ jobs:
     name: 🔄 Retry Failed Publishing
     runs-on: ubuntu-latest
     needs: verify-publishing
-    if: failure() && github.event_name == 'workflow_run'
+    if: needs.verify-publishing.outputs.docker-status == 'failure' && github.event_name == 'workflow_run'
     
     steps:
       - name: 📥 Checkout Code
@@ -273,14 +301,19 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🔄 Trigger Manual Publishing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION=$(node -p "require('./package.json').version")
+          VERSION="${{ needs.verify-publishing.outputs.version }}"
           echo "Attempting to retry publishing for version $VERSION"
           
           # Trigger Docker publishing if it failed
           if [ "${{ needs.verify-publishing.outputs.docker-status }}" == "failure" ]; then
             echo "Triggering Docker publishing workflow..."
             gh workflow run docker-publish.yml -f tag=v$VERSION -f push=true
+            echo "Docker publishing workflow triggered successfully"
+          else
+            echo "Docker publishing was successful, no retry needed"
           fi
           
-          echo "::warning title=Manual Retry::Automated retry triggered for failed publishing targets"
+          echo "::notice title=Manual Retry::Automated retry triggered for failed publishing targets"
