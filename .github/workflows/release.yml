@@ -156,6 +156,13 @@ jobs:
           echo "GitHub ref: ${{ github.ref }}"
           echo "GitHub ref name: ${{ github.ref_name }}"
           echo "Event name: ${{ github.event_name }}"
+          echo "Is tag: ${{ startsWith(github.ref, 'refs/tags/') }}"
+          echo "Current working directory:"
+          pwd
+          echo "Git status:"
+          git status || true
+          echo "Git tags:"
+          git tag --sort=-version:refname | head -5 || true
           
       - name: 📝 Extract Metadata
         id: meta
@@ -165,9 +172,10 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
+            type=semver,pattern={{version}},enable=${{ github.event_name == 'release' }}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ github.event_name == 'release' }}
+            type=semver,pattern={{major}},enable=${{ github.event_name == 'release' }}
+            type=raw,value=${{ needs.semantic-release.outputs.new-release-version }},enable=${{ needs.semantic-release.outputs.new-release-published == 'true' }}
             type=raw,value=latest,enable={{is_default_branch}}
           labels: |
             org.opencontainers.image.title=MCP WordPress Server
@@ -179,6 +187,17 @@ jobs:
             org.opencontainers.image.url=https://github.com/docdyhr/mcp-wordpress
             org.opencontainers.image.documentation=https://github.com/docdyhr/mcp-wordpress#readme
             org.opencontainers.image.licenses=MIT
+
+      - name: 🔍 Debug Extracted Tags
+        run: |
+          echo "Extracted tags:"
+          echo "${{ steps.meta.outputs.tags }}"
+          echo ""
+          echo "Extracted labels:"
+          echo "${{ steps.meta.outputs.labels }}"
+          echo ""
+          echo "Metadata JSON:"
+          echo "${{ steps.meta.outputs.json }}"
 
       - name: 🏗️ Build and Push Docker Image
         id: docker-build
@@ -230,7 +249,9 @@ jobs:
         id: verify-docker
         run: |
           echo "Docker build and push completed successfully"
-          echo "Published tags: ${{ steps.meta.outputs.tags }}"
+          echo "Published tags:"
+          echo "${{ steps.meta.outputs.tags }}"
+          echo ""
           echo "Version: ${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}"
           
           # Wait for Docker Hub propagation
