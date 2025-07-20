@@ -181,6 +181,27 @@ jobs:
             org.opencontainers.image.licenses=MIT
 
       - name: 🏗️ Build and Push Docker Image
+        id: docker-build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}
+            BUILD_DATE={{date 'YYYY-MM-DDTHH:mm:ssZ'}}
+            VCS_REF=${{ github.sha }}
+          # v6 features
+          provenance: true
+          sbom: true
+        continue-on-error: true
+
+      - name: 🔄 Retry Docker Build on Failure
+        if: steps.docker-build.outcome == 'failure'
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -209,9 +230,25 @@ jobs:
           
       - name: 🎯 Verify Docker Push Success
         run: |
-          echo "Docker build and push completed successfully"
+          echo "Docker build and push completed"
           echo "Published tags: ${{ steps.meta.outputs.tags }}"
           echo "Version: ${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}"
+          
+          # Wait a moment for Docker Hub to process the push
+          echo "Waiting 30 seconds for Docker Hub to process..."
+          sleep 30
+          
+          # Verify the image was pushed successfully
+          VERSION="${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}"
+          echo "Verifying Docker image push for version: $VERSION"
+          
+          # Check if we can pull the image we just pushed
+          if docker pull docdyhr/mcp-wordpress:$VERSION 2>/dev/null; then
+            echo "✅ Successfully verified Docker image: docdyhr/mcp-wordpress:$VERSION"
+          else
+            echo "⚠️ Could not immediately verify Docker image push - this might be due to propagation delay"
+            echo "The verification workflow will perform a more thorough check later"
+          fi
 
   # 🎉 Post-Release Actions
   post-release:

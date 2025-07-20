@@ -954,6 +954,11 @@ npm run security:full
    - Restart Claude Desktop after configuration
    - Check Claude Desktop config file format
 
+4. **"Docker Publishing Failed"** 
+   - Use the fallback Docker publishing workflow for failed releases
+   - Run: `gh workflow run docker-publish-fallback.yml -f version=X.X.X -f push=true`
+   - See [Docker Publishing Fix Documentation](docs/docker-publishing-fix.md)
+
 ### Get Help
 
 ```bash
