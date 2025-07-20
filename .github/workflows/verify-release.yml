@@ -80,44 +80,55 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           echo "Checking Docker Hub for version $VERSION..."
           
-          # Function to check Docker Hub with retry
-          check_docker_hub() {
-            local version=$1
-            local max_attempts=3
-            local attempt=1
-            
-            while [ $attempt -le $max_attempts ]; do
-              echo "Attempt $attempt/$max_attempts: Checking Docker Hub API..."
-              
-              # Check Docker Hub API with timeout
-              RESPONSE=$(curl -s --max-time 30 https://hub.docker.com/v2/repositories/docdyhr/mcp-wordpress/tags || echo '{"results":[]}')
-              
-              # Check for both v-prefixed and non-prefixed versions
-              if echo "$RESPONSE" | jq -e ".results[] | select(.name == \"$version\" or .name == \"v$version\")" > /dev/null 2>&1; then
-                echo "✅ Version $version found on Docker Hub"
-                echo "status=success" >> $GITHUB_OUTPUT
-                
-                # Get last updated time
-                LAST_UPDATED=$(echo "$RESPONSE" | jq -r ".results[] | select(.name == \"$version\" or .name == \"v$version\") | .last_updated" | head -1)
-                echo "last_updated=$LAST_UPDATED" >> $GITHUB_OUTPUT
-                return 0
-              else
-                echo "Version $version not found, attempt $attempt/$max_attempts"
-                if [ $attempt -lt $max_attempts ]; then
-                  echo "Waiting 30 seconds before retry..."
-                  sleep 30
-                fi
-              fi
-              
-              attempt=$((attempt + 1))
-            done
-            
-            echo "❌ Version $version NOT found on Docker Hub after $max_attempts attempts"
-            echo "status=failure" >> $GITHUB_OUTPUT
-            return 1
-          }
+          # Check Docker Hub API with more robust verification
+          echo "Fetching Docker Hub tags..."
+          RESPONSE=$(curl -s "https://hub.docker.com/v2/repositories/docdyhr/mcp-wordpress/tags" || echo '{"results":[]}')
           
-          check_docker_hub "$VERSION"
+          echo "Debug: Raw API response (first 500 chars):"
+          echo "$RESPONSE" | head -c 500
+          echo ""
+          
+          # Extract available tags for debugging
+          echo "Available tags on Docker Hub:"
+          echo "$RESPONSE" | jq -r '.results[]?.name // empty' | sort -V | tail -10 || echo "Failed to parse tags"
+          
+          # Check for both v-prefixed and non-prefixed versions with better error handling
+          FOUND_TAG=""
+          if echo "$RESPONSE" | jq -e ".results[]? | select(.name == \"$VERSION\")" > /dev/null 2>&1; then
+            FOUND_TAG="$VERSION"
+          elif echo "$RESPONSE" | jq -e ".results[]? | select(.name == \"v$VERSION\")" > /dev/null 2>&1; then
+            FOUND_TAG="v$VERSION"
+          fi
+          
+          if [ -n "$FOUND_TAG" ]; then
+            echo "✅ Version $VERSION found on Docker Hub as tag: $FOUND_TAG"
+            echo "status=success" >> $GITHUB_OUTPUT
+            
+            # Get last updated time
+            LAST_UPDATED=$(echo "$RESPONSE" | jq -r ".results[]? | select(.name == \"$FOUND_TAG\") | .last_updated" | head -1)
+            echo "last_updated=$LAST_UPDATED" >> $GITHUB_OUTPUT
+            echo "found_tag=$FOUND_TAG" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Version $VERSION NOT found on Docker Hub"
+            echo "Searched for tags: $VERSION, v$VERSION"
+            echo "status=failure" >> $GITHUB_OUTPUT
+            
+            # Additional verification attempt with docker pull
+            echo "Attempting docker pull verification..."
+            if docker pull "docdyhr/mcp-wordpress:$VERSION" 2>/dev/null; then
+              echo "✅ Docker pull successful - image exists but may not be listed in API"
+              echo "status=success" >> $GITHUB_OUTPUT
+              echo "found_tag=$VERSION" >> $GITHUB_OUTPUT
+              echo "last_updated=verified-via-pull" >> $GITHUB_OUTPUT
+            elif docker pull "docdyhr/mcp-wordpress:v$VERSION" 2>/dev/null; then
+              echo "✅ Docker pull successful - image exists as v$VERSION"
+              echo "status=success" >> $GITHUB_OUTPUT
+              echo "found_tag=v$VERSION" >> $GITHUB_OUTPUT  
+              echo "last_updated=verified-via-pull" >> $GITHUB_OUTPUT
+            else
+              echo "❌ Docker pull also failed - image definitely not available"
+            fi
+          fi
 
       - name: 📊 Generate Verification Report
         id: report
@@ -202,8 +213,15 @@ jobs:
                # For NPM
                npm publish
                
-               # For Docker
+               # For Docker (using manual script)
+               ./scripts/manual-docker-publish.sh ${version}
+               
+               # Or trigger workflow manually
                gh workflow run docker-publish.yml -f tag=v${version} -f push=true
+               \`\`\`
+            4. Run the verification again:
+               \`\`\`bash
+               gh workflow run verify-release.yml -f version=${version}
                \`\`\`
             
             ### 📝 Workflow Details

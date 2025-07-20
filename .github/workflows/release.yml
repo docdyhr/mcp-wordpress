@@ -218,18 +218,23 @@ jobs:
           provenance: true
           sbom: true
 
-      - name: 🚨 Handle Docker Build Failure
-        if: failure() && steps.docker-build.conclusion == 'failure'
-        run: |
-          echo "❌ Docker build and push failed!"
-          echo "This will cause the verification workflow to detect a publishing failure"
-          echo "Check the Docker build logs above for specific errors"
-          echo "Common issues:"
-          echo "1. Docker Hub credentials expired"
-          echo "2. Platform build errors (linux/amd64, linux/arm64)"
-          echo "3. Dockerfile build context issues"
-          echo "4. Docker Hub rate limiting"
-          exit 1
+      - name: 🔄 Retry Docker Build on Failure
+        if: failure() && steps.docker-build.outcome == 'failure'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}
+            BUILD_DATE={{date 'YYYY-MM-DDTHH:mm:ssZ'}}
+            VCS_REF=${{ github.sha }}
+          provenance: true
+          sbom: true
 
       - name: 📝 Update Docker Hub Description
         uses: peter-evans/dockerhub-description@v3
@@ -241,25 +246,37 @@ jobs:
           readme-filepath: ./README.md
           
       - name: 🎯 Verify Docker Push Success
+        id: verify-docker
         run: |
           echo "Docker build and push completed successfully"
           echo "Published tags:"
           echo "${{ steps.meta.outputs.tags }}"
           echo ""
           echo "Version: ${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}"
-          echo ""
-          echo "Verifying Docker Hub..."
-          # Wait a moment for propagation
+          
+          # Wait for Docker Hub propagation
+          echo "Waiting for Docker Hub propagation..."
           sleep 30
-          # Check if the image was actually pushed
-          for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr '\n' ' '); do
-            echo "Checking tag: $tag"
-            if docker manifest inspect "$tag" > /dev/null 2>&1; then
-              echo "✅ Tag $tag verified on Docker Hub"
-            else
-              echo "❌ Tag $tag not found on Docker Hub"
-            fi
-          done
+          
+          # Verify the image was pushed successfully
+          VERSION="${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}"
+          echo "Verifying Docker Hub publishing for version: $VERSION"
+          
+          # Try to pull the image to verify it exists
+          if docker pull docdyhr/mcp-wordpress:$VERSION; then
+            echo "✅ Successfully verified Docker image on Docker Hub"
+            echo "verification_status=success" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Failed to verify Docker image on Docker Hub"
+            echo "verification_status=failure" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+      - name: 🚨 Docker Verification Failed - Create Alert
+        if: failure() && steps.verify-docker.outputs.verification_status == 'failure'
+        run: |
+          echo "::error title=Docker Publishing Verification Failed::Failed to verify Docker image publication"
+          echo "Manual intervention may be required to publish the Docker image"
 
   # 🎉 Post-Release Actions
   post-release:
