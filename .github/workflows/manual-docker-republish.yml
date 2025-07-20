@@ -1,0 +1,238 @@
+name: 🔧 Manual Docker Republish
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to republish (e.g., 2.0.4)'
+        required: true
+        type: string
+      platforms:
+        description: 'Target platforms'
+        required: false
+        type: string
+        default: 'linux/amd64,linux/arm64'
+      verify_only:
+        description: 'Only verify without publishing'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: docdyhr/mcp-wordpress
+
+jobs:
+  republish-docker:
+    name: 🔧 Republish Missing Docker Version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 Validate Version Input
+        id: validate
+        run: |
+          VERSION="${{ inputs.version }}"
+          
+          # Remove v prefix if present for consistency
+          VERSION_CLEAN=${VERSION#v}
+          
+          # Validate version format
+          if ! echo "$VERSION_CLEAN" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "❌ Invalid version format: $VERSION"
+            echo "Expected format: x.y.z (e.g., 2.0.4)"
+            exit 1
+          fi
+          
+          # Check if git tag exists
+          if ! git tag -l | grep -q "^v${VERSION_CLEAN}$"; then
+            echo "❌ Git tag v${VERSION_CLEAN} does not exist"
+            echo "Available recent tags:"
+            git tag -l | grep -E '^v[0-9]' | sort -V | tail -10
+            exit 1
+          fi
+          
+          echo "version_clean=$VERSION_CLEAN" >> $GITHUB_OUTPUT
+          echo "git_tag=v$VERSION_CLEAN" >> $GITHUB_OUTPUT
+          
+          echo "✅ Version validation passed"
+          echo "Version: $VERSION_CLEAN"
+          echo "Git tag: v$VERSION_CLEAN"
+
+      - name: 🔍 Check Current Docker Hub Status
+        id: check-status
+        run: |
+          VERSION="${{ steps.validate.outputs.version_clean }}"
+          echo "Checking current status for version $VERSION..."
+          
+          # Check Docker Hub API
+          RESPONSE=$(curl -s "https://hub.docker.com/v2/repositories/docdyhr/mcp-wordpress/tags" || echo '{"results":[]}')
+          
+          if echo "$RESPONSE" | jq -e ".results[]? | select(.name == \"$VERSION\" or .name == \"v$VERSION\")" > /dev/null 2>&1; then
+            echo "⚠️ Version $VERSION already exists on Docker Hub"
+            echo "exists=true" >> $GITHUB_OUTPUT
+            
+            EXISTING_TAG=$(echo "$RESPONSE" | jq -r ".results[]? | select(.name == \"$VERSION\" or .name == \"v$VERSION\") | .name" | head -1)
+            LAST_UPDATED=$(echo "$RESPONSE" | jq -r ".results[]? | select(.name == \"$VERSION\" or .name == \"v$VERSION\") | .last_updated" | head -1)
+            
+            echo "Existing tag: $EXISTING_TAG"
+            echo "Last updated: $LAST_UPDATED"
+            echo "existing_tag=$EXISTING_TAG" >> $GITHUB_OUTPUT
+            echo "last_updated=$LAST_UPDATED" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Version $VERSION is missing from Docker Hub - proceeding with republish"
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: ✋ Skip Publishing - Already Exists
+        if: steps.check-status.outputs.exists == 'true' && !inputs.verify_only
+        run: |
+          echo "::warning title=Version Already Exists::Version ${{ steps.validate.outputs.version_clean }} already exists on Docker Hub"
+          echo "Existing tag: ${{ steps.check-status.outputs.existing_tag }}"
+          echo "Last updated: ${{ steps.check-status.outputs.last_updated }}"
+          echo ""
+          echo "If you need to force republish, delete the existing tag first or use a different version."
+
+      - name: 📝 Checkout Specific Version
+        if: steps.check-status.outputs.exists == 'false' && !inputs.verify_only
+        run: |
+          echo "Checking out ${{ steps.validate.outputs.git_tag }}..."
+          git checkout ${{ steps.validate.outputs.git_tag }}
+
+      - name: 🐳 Set up Docker Buildx
+        if: steps.check-status.outputs.exists == 'false' && !inputs.verify_only
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔐 Log in to Docker Hub
+        if: steps.check-status.outputs.exists == 'false' && !inputs.verify_only
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: 📝 Extract Metadata
+        if: steps.check-status.outputs.exists == 'false' && !inputs.verify_only
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.validate.outputs.version_clean }}
+            type=raw,value=v${{ steps.validate.outputs.version_clean }}
+          labels: |
+            org.opencontainers.image.title=MCP WordPress Server
+            org.opencontainers.image.description=Complete WordPress MCP Server with 59 management tools, intelligent caching, and real-time monitoring
+            org.opencontainers.image.version=${{ steps.validate.outputs.version_clean }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created={{date 'YYYY-MM-DDTHH:mm:ssZ'}}
+            org.opencontainers.image.source=https://github.com/docdyhr/mcp-wordpress
+            org.opencontainers.image.url=https://github.com/docdyhr/mcp-wordpress
+            org.opencontainers.image.documentation=https://github.com/docdyhr/mcp-wordpress#readme
+            org.opencontainers.image.licenses=MIT
+
+      - name: 🏗️ Build and Push Docker Image
+        if: steps.check-status.outputs.exists == 'false' && !inputs.verify_only
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: ${{ inputs.platforms }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ steps.validate.outputs.version_clean }}
+            BUILD_DATE={{date 'YYYY-MM-DDTHH:mm:ssZ'}}
+            VCS_REF=${{ github.sha }}
+          provenance: true
+          sbom: true
+
+      - name: ⏱️ Wait for Propagation
+        if: steps.check-status.outputs.exists == 'false' && !inputs.verify_only
+        run: |
+          echo "Waiting for Docker Hub propagation..."
+          sleep 30
+
+      - name: 🔍 Verify Republished Image
+        id: verify
+        run: |
+          VERSION="${{ steps.validate.outputs.version_clean }}"
+          echo "Verifying Docker Hub publishing for version: $VERSION"
+          
+          # Check via API
+          RESPONSE=$(curl -s "https://hub.docker.com/v2/repositories/docdyhr/mcp-wordpress/tags" || echo '{"results":[]}')
+          
+          if echo "$RESPONSE" | jq -e ".results[]? | select(.name == \"$VERSION\" or .name == \"v$VERSION\")" > /dev/null 2>&1; then
+            echo "✅ Version $VERSION verified on Docker Hub via API"
+            echo "verification_status=success" >> $GITHUB_OUTPUT
+            
+            FOUND_TAG=$(echo "$RESPONSE" | jq -r ".results[]? | select(.name == \"$VERSION\" or .name == \"v$VERSION\") | .name" | head -1)
+            echo "Found tag: $FOUND_TAG"
+          else
+            echo "⚠️ API verification failed, trying docker pull..."
+            if docker pull "docdyhr/mcp-wordpress:$VERSION" 2>/dev/null; then
+              echo "✅ Version $VERSION verified via docker pull"
+              echo "verification_status=success" >> $GITHUB_OUTPUT
+            else
+              echo "❌ Verification failed via both API and docker pull"
+              echo "verification_status=failure" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: 📊 Generate Summary
+        run: |
+          VERSION="${{ steps.validate.outputs.version_clean }}"
+          
+          echo "## 🔧 Manual Docker Republish Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Git Tag:** \`${{ steps.validate.outputs.git_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Platforms:** \`${{ inputs.platforms }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Verify Only:** ${{ inputs.verify_only }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ inputs.verify_only }}" == "true" ]; then
+            echo "### 🔍 Verification Results" >> $GITHUB_STEP_SUMMARY
+            if [ "${{ steps.check-status.outputs.exists }}" == "true" ]; then
+              echo "✅ **Status:** Version exists on Docker Hub" >> $GITHUB_STEP_SUMMARY
+              echo "📅 **Last Updated:** ${{ steps.check-status.outputs.last_updated }}" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **Status:** Version missing from Docker Hub" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            if [ "${{ steps.check-status.outputs.exists }}" == "true" ]; then
+              echo "### ⚠️ Skipped - Already Exists" >> $GITHUB_STEP_SUMMARY
+              echo "Version already exists on Docker Hub" >> $GITHUB_STEP_SUMMARY
+            elif [ "${{ steps.verify.outputs.verification_status }}" == "success" ]; then
+              echo "### ✅ Republish Successful" >> $GITHUB_STEP_SUMMARY
+              echo "Version successfully republished to Docker Hub" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "### ❌ Republish Failed" >> $GITHUB_STEP_SUMMARY
+              echo "Failed to republish version to Docker Hub" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **Docker Hub:** https://hub.docker.com/r/docdyhr/mcp-wordpress/tags?name=$VERSION" >> $GITHUB_STEP_SUMMARY
+
+      - name: ✅ Success Notification
+        if: steps.verify.outputs.verification_status == 'success'
+        run: |
+          echo "🎉 Manual republish completed successfully!"
+          echo "Version ${{ steps.validate.outputs.version_clean }} is now available on Docker Hub"
+
+      - name: ❌ Failure Notification
+        if: failure() || steps.verify.outputs.verification_status == 'failure'
+        run: |
+          echo "::error title=Manual Republish Failed::Failed to republish version ${{ steps.validate.outputs.version_clean }}"
+          echo "Check the workflow logs for detailed error information"
+          exit 1
