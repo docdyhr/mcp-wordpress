@@ -1057,6 +1057,14 @@ docker pull docdyhr/mcp-wordpress:1.3.1
 
 ---
 
+## 🔗 Similar Projects
+
+Looking for alternatives or complementary tools? Check out these WordPress MCP implementations:
+
+- **[Automattic WordPress MCP](https://github.com/Automattic/wordpress-mcp)** - Official WordPress MCP server by Automattic
+
+---
+
 ## 🙏 Acknowledgments
 
 Special thanks to **[Stephan Ferraro](https://github.com/ferraro)** for the upstream project that inspired this
