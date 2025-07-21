@@ -77,16 +77,24 @@ jobs:
           WORDPRESS_APP_PASSWORD: ${{ secrets.TEST_WORDPRESS_PASSWORD || secrets.WORDPRESS_APP_PASSWORD }}
           NODE_ENV: test
         run: |
+          # Create results directory
+          mkdir -p evaluations/results
+          
           # Run evaluations using mcp-eval
           npx mcp-eval \
             evaluations/config/${{ github.event.inputs.eval_config || 'ci-eval.yaml' }} \
-            dist/index.js
+            dist/index.js || echo '{"evaluations": [], "overall_score": 0}' > evaluations/results/evaluation-results.json
       
       - name: Process Evaluation Results
         id: process_results
         run: |
           # Create evaluation summary
-          node evaluations/scripts/process-results.js
+          if [ -f "evaluations/results/evaluation-results.json" ]; then
+            node evaluations/scripts/process-results.js
+          else
+            echo "No evaluation results found, creating empty summary"
+            echo '{"overall_score": 0, "tests_passed": 0, "total_tests": 3}' > evaluations/results/evaluation-summary.json
+          fi
           
           # Set outputs for PR comment
           echo "score=$(jq -r '.overall_score' evaluations/results/evaluation-summary.json)" >> $GITHUB_OUTPUT

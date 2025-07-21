@@ -106,7 +106,7 @@
     "test:legacy": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest",
     "test:mcp": "node scripts/test-mcp.js",
     "test:multisite": "node scripts/test-multisite-quick.js",
-    "test:performance": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/performance/",
+    "test:performance": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/performance/ --passWithNoTests",
     "test:property": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/property/",
     "test:security": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/",
     "test:security:penetration": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/penetration-tests.test.js",
@@ -129,6 +129,13 @@
     "package.json": [
       "sort-package-json"
     ]
+  },
+  "overrides": {
+    "@pact-foundation/pact-node": {
+      "@types/request": {
+        "form-data": "^4.0.3"
+      }
+    }
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",

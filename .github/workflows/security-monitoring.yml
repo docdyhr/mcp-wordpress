@@ -31,8 +31,8 @@ jobs:
         uses: trufflesecurity/trufflehog@v3.82.11
         with:
           path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
+          base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
+          head: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || '' }}
           extra_args: --debug --only-verified
 
       - name: 🔍 Gitleaks Secret Detection
