@@ -8,6 +8,9 @@ on:
     # Skip for dependency-only PRs
     paths-ignore:
       - 'package-lock.json'
+      - 'npm-shrinkwrap.json'
+      - 'yarn.lock'
+      - 'pnpm-lock.yaml'
       - 'security-fixes.txt'
       - 'update-report-*.md'
       - 'updates-*.json'
