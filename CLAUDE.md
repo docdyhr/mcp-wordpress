@@ -263,6 +263,32 @@ npm run build              # Rebuild
 npm run health             # Verify system
 ```
 
+### GitHub CLI Usage
+
+**Important**: GitHub CLI commands can hang due to interactive pagers. Always use `PAGER=cat` prefix:
+
+```bash
+# ✅ Best - With syntax highlighting and no paging
+PAGER="bat --paging=never" gh pr view 34
+PAGER="bat --paging=never" gh pr list
+PAGER="bat --paging=never" gh pr comment 34 --body "Comment text"
+
+# ✅ Alternative - Plain text, no highlighting
+PAGER=cat gh pr view 34
+PAGER=cat gh pr list
+PAGER=cat gh pr comment 34 --body "Comment text"
+
+# ❌ Avoid - Will hang
+gh pr view 34              # Hangs with interactive pager
+gh pr list                 # Hangs with interactive pager
+```
+
+**Alternative approaches**:
+
+- Use `--json` flag: `gh pr view 34 --json state,title`
+- Set environment variable: `export PAGER="bat --paging=never"` in shell
+- Fallback: `export PAGER=cat` if `bat` is not installed
+
 ### Security Notes
 
 **Vulnerability Fixes**:
