@@ -265,29 +265,59 @@ npm run health             # Verify system
 
 ### GitHub CLI Usage
 
-**Important**: GitHub CLI commands can hang due to interactive pagers. Always use `PAGER=cat` prefix:
+**Important**: GitHub CLI commands can hang due to interactive pagers. Use proper `PAGER` configuration:
+
+#### ✅ Recommended Setup (Enhanced)
+
+Add to your `~/.zshrc` for optimal GitHub CLI experience:
 
 ```bash
-# ✅ Best - With syntax highlighting and no paging
-PAGER="bat --paging=never" gh pr view 34
-PAGER="bat --paging=never" gh pr list
-PAGER="bat --paging=never" gh pr comment 34 --body "Comment text"
+# Enhanced bat function for GitHub CLI and general use
+function safe-bat() {
+  bat --paging=never --plain "$@"
+}
 
-# ✅ Alternative - Plain text, no highlighting
-PAGER=cat gh pr view 34
-PAGER=cat gh pr list
-PAGER=cat gh pr comment 34 --body "Comment text"
+# Set PAGER environment variable with enhanced bat options
+export PAGER="bat --plain --paging=never"
 
-# ❌ Avoid - Will hang
-gh pr view 34              # Hangs with interactive pager
-gh pr list                 # Hangs with interactive pager
+# Fallback if bat is not installed
+if ! command -v bat &> /dev/null; then
+  export PAGER=cat
+fi
 ```
 
-**Alternative approaches**:
+#### Usage Examples
 
-- Use `--json` flag: `gh pr view 34 --json state,title`
-- Set environment variable: `export PAGER="bat --paging=never"` in shell
-- Fallback: `export PAGER=cat` if `bat` is not installed
+```bash
+# ✅ Best - Enhanced syntax highlighting, no paging, clean output
+gh pr view 34              # Uses enhanced PAGER automatically
+gh pr list                 # Clean, highlighted output
+gh pr comment 34 --body "Comment text"
+
+# ✅ Manual override with enhanced options
+PAGER="bat --plain --paging=never" gh pr view 34
+
+# ✅ One-off with safe-bat function
+gh pr view 34 | safe-bat
+
+# ✅ JSON output for scripting
+gh pr view 34 --json state,title,url
+```
+
+#### Benefits of Enhanced Configuration
+
+- `--plain`: Removes line numbers and git decorations for cleaner output
+- `--paging=never`: Prevents interactive pager from hanging CLI commands
+- Auto-detection: `bat` automatically detects syntax highlighting based on content type
+- Fallback to `cat` if `bat` is not available
+
+#### ❌ Avoid These Patterns
+
+```bash
+gh pr view 34              # Without proper PAGER setup - will hang
+bat --paging=auto          # Interactive paging breaks automation
+export PAGER=less          # Interactive pager causes hanging
+```
 
 ### Security Notes
 
