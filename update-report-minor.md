@@ -1,0 +1,21 @@
+## 📦 minor Updates Applied
+
+### Updated Dependencies
+
+- @modelcontextprotocol/sdk: ^1.16.0
+- dotenv: ^16.6.1
+- form-data: ^4.0.4
+- zod: ^3.25.76
+- @eslint/js: ^9.31.0
+- @jest/globals: ^30.0.4
+- @types/node: ^20.19.9
+- @typescript-eslint/parser: ^8.37.0
+- conventional-changelog-conventionalcommits: ^9.1.0
+- eslint: ^9.31.0
+- eslint-config-prettier: ^10.1.8
+- fast-check: ^4.2.0
+- fs-extra: ^11.3.0
+- jest: ^30.0.4
+- nock: ^14.0.6
+- semantic-release: ^24.2.7
+- sort-package-json: ^3.4.0

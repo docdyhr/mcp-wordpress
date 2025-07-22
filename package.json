@@ -1,6 +1,6 @@
 {
   "name": "mcp-wordpress",
-  "version": "2.4.1",
+  "version": "2.4.0",
   "description": "Comprehensive Model Context Protocol server for WordPress management with 59 tools, performance monitoring, intelligent caching, auto-generated documentation, Docker support, TypeScript, and production-ready authentication",
   "keywords": [
     "mcp",
@@ -106,7 +106,7 @@
     "test:legacy": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest",
     "test:mcp": "node scripts/test-mcp.js",
     "test:multisite": "node scripts/test-multisite-quick.js",
-    "test:performance": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/performance/ --passWithNoTests",
+    "test:performance": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/performance/",
     "test:property": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/property/",
     "test:security": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/",
     "test:security:penetration": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/penetration-tests.test.js",
@@ -130,21 +130,14 @@
       "sort-package-json"
     ]
   },
-  "overrides": {
-    "@pact-foundation/pact-node": {
-      "@types/request": {
-        "form-data": "^4.0.3"
-      }
-    }
-  },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.4",
-    "dotenv": "^16.3.2",
+    "@modelcontextprotocol/sdk": "^1.16.0",
+    "dotenv": "^16.6.1",
     "form-data": "^4.0.4",
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@eslint/js": "^9.29.0",
+    "@eslint/js": "^9.31.0",
     "@jest/globals": "^30.0.4",
     "@pact-foundation/pact": "^15.0.1",
     "@pact-foundation/pact-node": "^10.18.0",
@@ -152,15 +145,15 @@
     "@semantic-release/git": "^10.0.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^20.19.9",
-    "@typescript-eslint/parser": "^8.35.1",
+    "@typescript-eslint/parser": "^8.37.0",
     "archiver": "^7.0.1",
-    "conventional-changelog-conventionalcommits": "^9.0.0",
-    "eslint": "^9.29.0",
+    "conventional-changelog-conventionalcommits": "^9.1.0",
+    "eslint": "^9.31.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-jest": "^29.0.1",
     "eslint-plugin-node": "^11.1.0",
-    "fast-check": "^4.1.1",
-    "fs-extra": "^11.2.0",
+    "fast-check": "^4.2.0",
+    "fs-extra": "^11.3.0",
     "husky": "^9.1.7",
     "jest": "^30.0.4",
     "lint-staged": "^16.1.2",
@@ -170,8 +163,8 @@
     "node-fetch": "^3.3.2",
     "open": "^9.1.0",
     "prettier": "^3.6.2",
-    "semantic-release": "^24.0.0",
-    "sort-package-json": "^3.3.1",
+    "semantic-release": "^24.2.7",
+    "sort-package-json": "^3.4.0",
     "typescript": "^5.8.3"
   },
   "engines": {
