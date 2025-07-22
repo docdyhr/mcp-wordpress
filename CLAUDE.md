@@ -18,7 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 **Current Status (v1.2.4+)**: All critical issues resolved ✅
 
-- 207/207 tests passing (100%)
+- 394/394 tests passing (100%)
 - WordPress REST API authentication fixed
 - CI/CD pipeline fully functional
 - Multi-site support with 59 tools across 10 categories
@@ -43,7 +43,7 @@ npm run dev                # Development mode with debug output
 npm run setup              # Interactive setup wizard
 npm run status             # Check connection status
 
-# Testing (207/207 passing ✅)
+# Testing (394/394 passing ✅)
 npm test                   # Main test suite
 npm run test:tools         # Test all 59 MCP tools (14/14 working)
 npm run test:auth          # Authentication tests
@@ -277,7 +277,7 @@ npm run health             # Verify system
 - **Trigger**: Conventional commits to `main` branch
 - **Versioning**: Automatic semantic versioning
 - **Publishing**: NPM + Docker Hub simultaneously
-- **Quality Gates**: All 207 tests must pass, security scans clean
+- **Quality Gates**: All 394 tests must pass, security scans clean
 
 ### Workflow Files
 
@@ -328,7 +328,7 @@ npm run release            # Manual release
 **Project Type**: Model Context Protocol (MCP) Server for WordPress management  
 **Language**: TypeScript with strict type safety  
 **Architecture**: Class-based modular design with manager pattern  
-**Testing**: 207/207 tests passing (100% success rate)  
+**Testing**: 394/394 tests passing (100% success rate)  
 **Authentication**: 4 methods supported (App Passwords recommended)  
 **Multi-Site**: Complete support via configuration file  
 **Tools**: 59 WordPress management tools across 10 categories  
