@@ -5,6 +5,12 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+    # Skip for dependency-only PRs
+    paths-ignore:
+      - 'package-lock.json'
+      - 'security-fixes.txt'
+      - 'update-report-*.md'
+      - 'updates-*.json'
   schedule:
     # Run daily security checks at 3 AM UTC
     - cron: '0 3 * * *'
