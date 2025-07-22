@@ -1,0 +1,33 @@
+# Global Owners
+* @docdyhr
+
+# Security-related files require additional review
+/SECURITY.md @docdyhr
+/.github/workflows/security*.yml @docdyhr
+/.github/workflows/codeql*.yml @docdyhr
+/scripts/security*.js @docdyhr
+/src/security/ @docdyhr
+/tests/security/ @docdyhr
+
+# Configuration files
+/mcp-wordpress.config.json @docdyhr
+/mcp-wordpress.config.json.example @docdyhr
+/docker-compose*.yml @docdyhr
+/Dockerfile @docdyhr
+
+# CI/CD and workflows
+/.github/ @docdyhr
+/scripts/ @docdyhr
+
+# Core source code
+/src/ @docdyhr
+/bin/ @docdyhr
+
+# Documentation that affects API or security
+/docs/SECURITY.md @docdyhr
+/docs/CONFIGURATION.md @docdyhr
+/docs/api/ @docdyhr
+
+# Package and dependency management
+/package.json @docdyhr
+/package-lock.json @docdyhr
