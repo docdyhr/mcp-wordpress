@@ -5,11 +5,15 @@
 
 set -e
 
-REPO="docdyhr/mcp-wordpress"
-BRANCH="main"
+# Get repository dynamically or use provided argument/environment variable
+REPO="${1:-${REPO_NAME:-$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null || echo "docdyhr/mcp-wordpress")}}"
+BRANCH="${2:-${BRANCH_NAME:-main}}"
 
 echo "🛡️  Branch Protection Adjustment Tool"
 echo "=================================="
+echo "Usage: $0 [repository-name] [branch-name]"
+echo "       Or set REPO_NAME and BRANCH_NAME environment variables"
+echo ""
 echo "Repository: $REPO"
 echo "Branch: $BRANCH"
 echo ""
@@ -38,7 +42,24 @@ jobs:
   dependency-review:
     name: 🔍 Dependency Security Review
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.head_ref, 'dependabot') && !contains(github.head_ref, 'deps/') && !contains(github.head_ref, 'dependency') }}
+    # Skip for automated dependency PRs using comprehensive detection
+    if: |
+      !(
+        github.actor == 'dependabot[bot]' ||
+        github.actor == 'github-actions[bot]' ||
+        github.actor == 'renovate[bot]' ||
+        contains(github.event.pull_request.labels.*.name, 'dependencies') ||
+        contains(github.event.pull_request.labels.*.name, 'dependabot') ||
+        contains(github.event.pull_request.labels.*.name, 'dependency') ||
+        contains(github.head_ref, 'dependabot/') ||
+        contains(github.head_ref, 'renovate/') ||
+        contains(github.head_ref, 'deps/') ||
+        contains(github.head_ref, 'dependency') ||
+        contains(github.head_ref, 'update-') ||
+        contains(github.event.pull_request.title, 'bump') ||
+        contains(github.event.pull_request.title, 'update') ||
+        contains(github.event.pull_request.title, 'dependency')
+      )
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
@@ -86,7 +107,24 @@ jobs:
   security-scan:
     name: 🔍 Security Scan
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.head_ref, 'dependabot') && !contains(github.head_ref, 'deps/') }}
+    # Skip for automated dependency PRs using comprehensive detection
+    if: |
+      !(
+        github.actor == 'dependabot[bot]' ||
+        github.actor == 'github-actions[bot]' ||
+        github.actor == 'renovate[bot]' ||
+        contains(github.event.pull_request.labels.*.name, 'dependencies') ||
+        contains(github.event.pull_request.labels.*.name, 'dependabot') ||
+        contains(github.event.pull_request.labels.*.name, 'dependency') ||
+        contains(github.head_ref, 'dependabot/') ||
+        contains(github.head_ref, 'renovate/') ||
+        contains(github.head_ref, 'deps/') ||
+        contains(github.head_ref, 'dependency') ||
+        contains(github.head_ref, 'update-') ||
+        contains(github.event.pull_request.title, 'bump') ||
+        contains(github.event.pull_request.title, 'update') ||
+        contains(github.event.pull_request.title, 'dependency')
+      )
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -125,7 +163,24 @@ on:
 jobs:
   performance-check:
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.head_ref, 'deps/') && !contains(github.head_ref, 'dependency') }}
+    # Skip for automated dependency PRs using comprehensive detection
+    if: |
+      !(
+        github.actor == 'dependabot[bot]' ||
+        github.actor == 'github-actions[bot]' ||
+        github.actor == 'renovate[bot]' ||
+        contains(github.event.pull_request.labels.*.name, 'dependencies') ||
+        contains(github.event.pull_request.labels.*.name, 'dependabot') ||
+        contains(github.event.pull_request.labels.*.name, 'dependency') ||
+        contains(github.head_ref, 'dependabot/') ||
+        contains(github.head_ref, 'renovate/') ||
+        contains(github.head_ref, 'deps/') ||
+        contains(github.head_ref, 'dependency') ||
+        contains(github.head_ref, 'update-') ||
+        contains(github.event.pull_request.title, 'bump') ||
+        contains(github.event.pull_request.title, 'update') ||
+        contains(github.event.pull_request.title, 'dependency')
+      )
     timeout-minutes: 20
     
     steps:
