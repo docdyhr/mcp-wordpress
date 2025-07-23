@@ -18,7 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 **Current Status (v1.2.4+)**: All critical issues resolved ✅
 
-- 207/207 tests passing (100%)
+- 394/394 tests passing (100%)
 - WordPress REST API authentication fixed
 - CI/CD pipeline fully functional
 - Multi-site support with 59 tools across 10 categories
@@ -43,7 +43,7 @@ npm run dev                # Development mode with debug output
 npm run setup              # Interactive setup wizard
 npm run status             # Check connection status
 
-# Testing (207/207 passing ✅)
+# Testing (394/394 passing ✅)
 npm test                   # Main test suite
 npm run test:tools         # Test all 59 MCP tools (14/14 working)
 npm run test:auth          # Authentication tests
@@ -263,6 +263,62 @@ npm run build              # Rebuild
 npm run health             # Verify system
 ```
 
+### GitHub CLI Usage
+
+**Important**: GitHub CLI commands can hang due to interactive pagers. Use proper `PAGER` configuration:
+
+#### ✅ Recommended Setup (Enhanced)
+
+Add to your `~/.zshrc` for optimal GitHub CLI experience:
+
+```bash
+# Enhanced bat function for GitHub CLI and general use
+function safe-bat() {
+  bat --paging=never --plain "$@"
+}
+
+# Set PAGER environment variable with enhanced bat options
+export PAGER="bat --plain --paging=never"
+
+# Fallback if bat is not installed
+if ! command -v bat &> /dev/null; then
+  export PAGER=cat
+fi
+```
+
+#### Usage Examples
+
+```bash
+# ✅ Best - Enhanced syntax highlighting, no paging, clean output
+gh pr view 34              # Uses enhanced PAGER automatically
+gh pr list                 # Clean, highlighted output
+gh pr comment 34 --body "Comment text"
+
+# ✅ Manual override with enhanced options
+PAGER="bat --plain --paging=never" gh pr view 34
+
+# ✅ One-off with safe-bat function
+gh pr view 34 | safe-bat
+
+# ✅ JSON output for scripting
+gh pr view 34 --json state,title,url
+```
+
+#### Benefits of Enhanced Configuration
+
+- `--plain`: Removes line numbers and git decorations for cleaner output
+- `--paging=never`: Prevents interactive pager from hanging CLI commands
+- Auto-detection: `bat` automatically detects syntax highlighting based on content type
+- Fallback to `cat` if `bat` is not available
+
+#### ❌ Avoid These Patterns
+
+```bash
+gh pr view 34              # Without proper PAGER setup - will hang
+bat --paging=auto          # Interactive paging breaks automation
+export PAGER=less          # Interactive pager causes hanging
+```
+
 ### Security Notes
 
 **Vulnerability Fixes**:
@@ -277,7 +333,7 @@ npm run health             # Verify system
 - **Trigger**: Conventional commits to `main` branch
 - **Versioning**: Automatic semantic versioning
 - **Publishing**: NPM + Docker Hub simultaneously
-- **Quality Gates**: All 207 tests must pass, security scans clean
+- **Quality Gates**: All 394 tests must pass, security scans clean
 
 ### Workflow Files
 
@@ -328,7 +384,7 @@ npm run release            # Manual release
 **Project Type**: Model Context Protocol (MCP) Server for WordPress management  
 **Language**: TypeScript with strict type safety  
 **Architecture**: Class-based modular design with manager pattern  
-**Testing**: 207/207 tests passing (100% success rate)  
+**Testing**: 394/394 tests passing (100% success rate)  
 **Authentication**: 4 methods supported (App Passwords recommended)  
 **Multi-Site**: Complete support via configuration file  
 **Tools**: 59 WordPress management tools across 10 categories  

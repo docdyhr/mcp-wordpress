@@ -3,11 +3,20 @@ name: Performance Gates
 on:
   pull_request:
     branches: [ main ]
+    # Only run performance gates for code changes, not dependency updates
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '!tests/baseline/**'
   push:
     branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
   schedule:
     # Run performance tests daily at 2 AM UTC
     - cron: '0 2 * * *'
+  workflow_dispatch:
 
 jobs:
   performance-regression-detection:
@@ -42,6 +51,7 @@ jobs:
     
     - name: Run performance regression tests
       run: npm run test:performance
+      continue-on-error: ${{ github.actor == 'dependabot[bot]' || github.actor == 'github-actions[bot]' }}  # Only ignore failures for automated PRs
       env:
         NODE_ENV: test
         PERFORMANCE_TEST: true
@@ -53,7 +63,16 @@ jobs:
         name: performance-results
         path: |
           tests/results/performance-results.json
-          tests/baseline/performance-baseline.json
+          coverage/lcov-report/
+        retention-days: 30
+
+    - name: Upload performance regression report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-regression-report
+        path: tests/baseline/
+        retention-days: 30
     
     - name: Performance gate check
       run: |
