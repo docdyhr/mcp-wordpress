@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.2](https://github.com/docdyhr/mcp-wordpress/compare/v2.4.1...v2.4.2) (2025-07-23)
+
+### 🐛 Bug Fixes
+
+* improve CI/CD workflow reliability for dependency updates ([#35](https://github.com/docdyhr/mcp-wordpress/issues/35)) ([4be30b5](https://github.com/docdyhr/mcp-wordpress/commit/4be30b54498769c9f1ff95c1e41c5447cdf5c852))
+
 ## [2.4.1](https://github.com/docdyhr/mcp-wordpress/compare/v2.4.0...v2.4.1) (2025-07-21)
 
 ### 🐛 Bug Fixes
