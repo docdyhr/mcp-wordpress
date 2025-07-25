@@ -312,15 +312,12 @@ jobs:
           --path=/var/www/html \
           --allow-root || true
     
-    - name: Run contract tests
-      run: npm run test:contracts
-      continue-on-error: true  # Don't fail if contract tests have mock provider issues
+    - name: Run compatibility tests
+      run: npm run test:compatibility
       env:
         WORDPRESS_TEST_URL: http://localhost:8080
         WORDPRESS_USERNAME: admin
         WORDPRESS_APP_PASSWORD: password
-        ENABLE_CONTRACT_TESTS: true
-        PERFORMANCE_TEST: true
     
     - name: Upload contract test results
       uses: actions/upload-artifact@v4

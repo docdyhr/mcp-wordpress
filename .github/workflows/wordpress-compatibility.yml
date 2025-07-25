@@ -1,0 +1,128 @@
+name: 📜 WordPress Compatibility Testing
+
+on:
+  # Weekly check for WordPress API changes
+  schedule:
+    - cron: '0 3 * * 1'  # Every Monday at 3 AM UTC
+  
+  # Manual trigger
+  workflow_dispatch:
+  
+  # On main branch for important changes
+  push:
+    branches: [main]
+    paths:
+      - 'src/client/**'
+      - 'src/tools/**'
+      - 'src/types/wordpress.ts'
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  compatibility-check:
+    name: 🔍 WordPress API Compatibility
+    runs-on: ubuntu-latest
+    
+    services:
+      wordpress:
+        image: wordpress:latest
+        env:
+          WORDPRESS_DB_HOST: mysql
+          WORDPRESS_DB_USER: wordpress
+          WORDPRESS_DB_PASSWORD: wordpress
+          WORDPRESS_DB_NAME: wordpress
+        ports:
+          - 8080:80
+        options: >-
+          --health-cmd "curl -f http://localhost:80 || exit 1"
+          --health-interval 30s
+          --health-timeout 10s
+          --health-retries 5
+      
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: wordpress
+          MYSQL_USER: wordpress
+          MYSQL_PASSWORD: wordpress
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🏗️ Build Project
+        run: npm run build
+
+      - name: ⏳ Wait for WordPress
+        run: |
+          echo "Waiting for WordPress to be ready..."
+          timeout 300 bash -c 'until curl -f http://localhost:8080; do sleep 5; done'
+          echo "WordPress is ready!"
+
+      - name: 🧪 Run Compatibility Tests
+        run: |
+          WORDPRESS_TEST_URL=http://localhost:8080 \
+          WORDPRESS_USERNAME=admin \
+          WORDPRESS_APP_PASSWORD=password \
+          npm run test:compatibility
+        id: tests
+
+      - name: 📊 Compatibility Report
+        if: always()
+        run: |
+          echo "## 📜 WordPress Compatibility Test Results"
+          echo ""
+          echo "- Date: $(date)"
+          echo "- Trigger: ${{ github.event_name }}"
+          echo "- Test Result: ${{ steps.tests.outcome }}"
+          echo ""
+          if [ "${{ steps.tests.outcome }}" = "success" ]; then
+            echo "✅ All WordPress API endpoints are compatible"
+          else
+            echo "❌ Compatibility issues detected"
+          fi
+
+      - name: 🚨 Create Issue on Failure
+        if: failure() && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 WordPress API Compatibility Issue Detected',
+              body: `## Weekly Compatibility Check Failed
+              
+              The weekly WordPress compatibility test has detected issues.
+              
+              **Details:**
+              - Date: ${new Date().toISOString()}
+              - Workflow: [Run #${context.runNumber}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+              
+              **Action Required:**
+              1. Review the test failures
+              2. Check if WordPress API has changed
+              3. Update client code if needed
+              
+              cc @${context.repo.owner}`,
+              labels: ['compatibility', 'automated']
+            });
+            console.log(`Created issue #${issue.data.number}`);
