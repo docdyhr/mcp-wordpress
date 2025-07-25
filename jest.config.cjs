@@ -26,7 +26,8 @@ const baseConfig = {
     "**/unit/**/*.test.js",
     "**/utils/**/*.test.js",
     "**/managers/**/*.test.js",
-    "**/server/**/*.test.js"
+    "**/server/**/*.test.js",
+    "**/contracts/**/*.test.js"
   ],
   
   // Common ignores
@@ -115,7 +116,8 @@ const config = isCI && !isPerformanceTest ? {
     ...baseConfig.testMatch,
     "**/performance/**/*.test.js",
     "**/cache/**/*.test.js",
-    "**/tools/**/*.test.js"
+    "**/tools/**/*.test.js",
+    "**/contracts/**/*.test.js"
   ],
   
   // Development optimizations
