@@ -3,12 +3,12 @@
  * Provides security checks and gates for continuous integration and deployment
  */
 
-import { AISecurityScanner } from "./AISecurityScanner";
-import { AutomatedRemediation } from "./AutomatedRemediation";
-import { SecurityReviewer } from "./SecurityReviewer";
-import { SecurityConfigManager } from "./SecurityConfigManager";
-import { SecurityUtils } from "./SecurityConfig";
-import { SecurityValidationError } from "./InputValidator";
+import { AISecurityScanner } from "./AISecurityScanner.js";
+import { AutomatedRemediation } from "./AutomatedRemediation.js";
+import { SecurityReviewer } from "./SecurityReviewer.js";
+import { SecurityConfigManager } from "./SecurityConfigManager.js";
+import { SecurityUtils } from "./SecurityConfig.js";
+import { SecurityValidationError } from "./InputValidator.js";
 
 interface SecurityGate {
   id: string;

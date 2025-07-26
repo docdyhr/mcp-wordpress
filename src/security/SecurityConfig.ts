@@ -3,6 +3,7 @@
  */
 
 import { randomBytes } from "crypto";
+import * as path from "path";
 
 export const SecurityConfig = {
   // Rate limiting
@@ -189,11 +190,7 @@ export class SecurityUtils {
     const redacted = Array.isArray(obj) ? [...obj] : { ...obj };
 
     for (const key in redacted) {
-      if (
-        SecurityConfig.logging.excludeFields.some((field) =>
-          key.toLowerCase().includes(field.toLowerCase()),
-        )
-      ) {
+      if (SecurityConfig.logging.excludeFields.some((field) => key.toLowerCase().includes(field.toLowerCase()))) {
         redacted[key] = "[REDACTED]";
       } else if (typeof redacted[key] === "object") {
         redacted[key] = SecurityUtils.redactSensitiveData(redacted[key]);
@@ -220,8 +217,7 @@ export class SecurityUtils {
    * Generate secure random strings
    */
   static generateSecureToken(length: number = 32): string {
-    const chars =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     const array = new Uint8Array(length);
 
     if (typeof crypto !== "undefined" && crypto.getRandomValues) {
@@ -279,9 +275,6 @@ export function createSecureError(
 
   return secureError;
 }
-
-// Import path for file extension checking
-import * as path from "path";
 
 /**
  * Environment-specific security settings

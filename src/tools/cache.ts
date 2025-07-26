@@ -43,8 +43,7 @@ export class CacheTools {
           {
             name: "pattern",
             type: "string",
-            description:
-              'Optional pattern to clear specific cache entries (e.g., "posts", "categories").',
+            description: 'Optional pattern to clear specific cache entries (e.g., "posts", "categories").',
           },
         ],
         handler: this.handleClearCache.bind(this),
@@ -86,8 +85,7 @@ export class CacheTools {
       if (!(client instanceof CachedWordPressClient)) {
         return {
           caching_enabled: false,
-          message:
-            "Caching is disabled for this site. Set DISABLE_CACHE=false to enable caching.",
+          message: "Caching is disabled for this site. Set DISABLE_CACHE=false to enable caching.",
         };
       }
 
@@ -168,12 +166,7 @@ export class CacheTools {
         success: true,
         message: "Cache warmed with essential WordPress data.",
         cache_entries_after_warming: stats.cache.totalSize,
-        warmed_data: [
-          "Current user information",
-          "Categories",
-          "Tags",
-          "Site settings",
-        ],
+        warmed_data: ["Current user information", "Categories", "Tags", "Site settings"],
       };
     });
   }
@@ -189,8 +182,7 @@ export class CacheTools {
         return {
           caching_enabled: false,
           message: "Caching is disabled for this site.",
-          how_to_enable:
-            "Remove DISABLE_CACHE=true from environment variables or set it to false.",
+          how_to_enable: "Remove DISABLE_CACHE=true from environment variables or set it to false.",
         };
       }
 
@@ -251,9 +243,7 @@ export class CacheTools {
 
     const client = this.clients.get(siteId);
     if (!client) {
-      throw new Error(
-        `Site "${siteId}" not found. Available sites: ${Array.from(this.clients.keys()).join(", ")}`,
-      );
+      throw new Error(`Site "${siteId}" not found. Available sites: ${Array.from(this.clients.keys()).join(", ")}`);
     }
 
     return client;

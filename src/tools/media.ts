@@ -1,30 +1,26 @@
 import * as fs from "fs";
 import { WordPressClient } from "../client/api.js";
-import {
-  MediaQueryParams,
-  UpdateMediaRequest,
-  UploadMediaRequest,
-} from "../types/wordpress.js";
+import { MediaQueryParams, UpdateMediaRequest, UploadMediaRequest } from "../types/wordpress.js";
 import { getErrorMessage } from "../utils/error.js";
 
 /**
  * Comprehensive media management tools for WordPress sites.
- * 
+ *
  * This class provides complete media library functionality including:
  * - Listing media items with advanced filtering and search
  * - Uploading new media files with validation and optimization
  * - Retrieving detailed media information and metadata
  * - Updating media properties like title, description, and alt text
  * - Deleting media items with safety checks
- * 
+ *
  * Supports all WordPress media types including images, videos, audio files,
  * and documents with proper MIME type validation and security checks.
- * 
+ *
  * @example
  * ```typescript
  * const mediaTools = new MediaTools();
  * const tools = mediaTools.getTools();
- * 
+ *
  * // Upload an image
  * const client = new WordPressClient(config);
  * const result = await mediaTools.handleUploadMedia(client, {
@@ -33,26 +29,26 @@ import { getErrorMessage } from "../utils/error.js";
  *   alt_text: "Description of the image"
  * });
  * ```
- * 
+ *
  * @since 1.0.0
  * @author MCP WordPress Team
  */
 export class MediaTools {
   /**
    * Retrieves the complete list of media management tools available for MCP.
-   * 
+   *
    * Returns an array of tool definitions for comprehensive media library management.
    * Each tool includes parameter validation, security checks, and detailed error handling.
-   * 
+   *
    * @returns {Array<MCPTool>} Array of MCPTool definitions for media management
-   * 
+   *
    * @example
    * ```typescript
    * const mediaTools = new MediaTools();
    * const tools = mediaTools.getTools();
    * console.log(tools.length); // 5 tools: list, get, upload, update, delete
    * ```
-   * 
+   *
    * @since 1.0.0
    */
   public getTools(): any[] {
@@ -111,8 +107,7 @@ export class MediaTools {
           {
             name: "alt_text",
             type: "string",
-            description:
-              "Alternative text for the media item (for accessibility).",
+            description: "Alternative text for the media item (for accessibility).",
           },
           {
             name: "caption",
@@ -178,8 +173,7 @@ export class MediaTools {
           {
             name: "force",
             type: "boolean",
-            description:
-              "If true, permanently delete. If false, move to trash. Defaults to false.",
+            description: "If true, permanently delete. If false, move to trash. Defaults to false.",
           },
         ],
         handler: this.handleDeleteMedia.bind(this),
@@ -187,10 +181,7 @@ export class MediaTools {
     ];
   }
 
-  public async handleListMedia(
-    client: WordPressClient,
-    params: MediaQueryParams,
-  ): Promise<any> {
+  public async handleListMedia(client: WordPressClient, params: MediaQueryParams): Promise<any> {
     try {
       const media = await client.getMedia(params);
       if (media.length === 0) {
@@ -198,22 +189,14 @@ export class MediaTools {
       }
       const content =
         `Found ${media.length} media items:\n\n` +
-        media
-          .map(
-            (m) =>
-              `- ID ${m.id}: **${m.title.rendered}** (${m.mime_type})\n  Link: ${m.source_url}`,
-          )
-          .join("\n");
+        media.map((m) => `- ID ${m.id}: **${m.title.rendered}** (${m.mime_type})\n  Link: ${m.source_url}`).join("\n");
       return content;
     } catch (error) {
       throw new Error(`Failed to list media: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleGetMedia(
-    client: WordPressClient,
-    params: { id: number },
-  ): Promise<any> {
+  public async handleGetMedia(client: WordPressClient, params: { id: number }): Promise<any> {
     try {
       const media = await client.getMediaItem(params.id);
       const content =
@@ -223,9 +206,7 @@ export class MediaTools {
         `- **Type:** ${media.media_type} (${media.mime_type})\n` +
         `- **Date:** ${new Date(media.date).toLocaleString()}\n` +
         (media.alt_text ? `- **Alt Text:** ${media.alt_text}\n` : "") +
-        (media.caption.rendered
-          ? `- **Caption:** ${media.caption.rendered}\n`
-          : "");
+        (media.caption.rendered ? `- **Caption:** ${media.caption.rendered}\n` : "");
       return content;
     } catch (error) {
       throw new Error(`Failed to get media item: ${getErrorMessage(error)}`);
@@ -248,10 +229,7 @@ export class MediaTools {
     }
   }
 
-  public async handleUpdateMedia(
-    client: WordPressClient,
-    params: UpdateMediaRequest & { id: number },
-  ): Promise<any> {
+  public async handleUpdateMedia(client: WordPressClient, params: UpdateMediaRequest & { id: number }): Promise<any> {
     try {
       const media = await client.updateMedia(params);
       return `✅ Media ${media.id} updated successfully.`;
@@ -260,10 +238,7 @@ export class MediaTools {
     }
   }
 
-  public async handleDeleteMedia(
-    client: WordPressClient,
-    params: { id: number; force?: boolean },
-  ): Promise<any> {
+  public async handleDeleteMedia(client: WordPressClient, params: { id: number; force?: boolean }): Promise<any> {
     try {
       await client.deleteMedia(params.id, params.force);
       const action = params.force ? "permanently deleted" : "moved to trash";

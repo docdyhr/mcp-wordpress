@@ -177,11 +177,7 @@ export class PerformanceMonitor {
   /**
    * Record a request performance metric
    */
-  recordRequest(
-    responseTime: number,
-    success: boolean,
-    toolName?: string,
-  ): void {
+  recordRequest(responseTime: number, success: boolean, toolName?: string): void {
     this.metrics.requests.total++;
 
     if (success) {
@@ -246,10 +242,7 @@ export class PerformanceMonitor {
   /**
    * Get historical performance data
    */
-  getHistoricalData(
-    startTime?: number,
-    endTime?: number,
-  ): PerformanceMetrics[] {
+  getHistoricalData(startTime?: number, endTime?: number): PerformanceMetrics[] {
     if (!this.config.enableHistoricalData) {
       return [];
     }
@@ -349,14 +342,9 @@ export class PerformanceMonitor {
   /**
    * Record tool usage and performance
    */
-  private recordToolUsage(
-    toolName: string,
-    responseTime: number,
-    success: boolean,
-  ): void {
+  private recordToolUsage(toolName: string, responseTime: number, success: boolean): void {
     // Update usage count
-    this.metrics.tools.toolUsageCount[toolName] =
-      (this.metrics.tools.toolUsageCount[toolName] || 0) + 1;
+    this.metrics.tools.toolUsageCount[toolName] = (this.metrics.tools.toolUsageCount[toolName] || 0) + 1;
 
     // Update performance metrics
     if (!this.metrics.tools.toolPerformance[toolName]) {
@@ -370,12 +358,10 @@ export class PerformanceMonitor {
       const totalCalls = perf.callCount + 1;
 
       // Update average time
-      perf.averageTime =
-        (perf.averageTime * perf.callCount + responseTime) / totalCalls;
+      perf.averageTime = (perf.averageTime * perf.callCount + responseTime) / totalCalls;
 
       // Update success rate
-      const totalSuccess =
-        perf.successRate * perf.callCount + (success ? 1 : 0);
+      const totalSuccess = perf.successRate * perf.callCount + (success ? 1 : 0);
       perf.successRate = totalSuccess / totalCalls;
 
       perf.callCount = totalCalls;
@@ -398,8 +384,7 @@ export class PerformanceMonitor {
     const total = this.metrics.requests.total;
 
     this.metrics.requests.averageResponseTime =
-      this.responseTimes.reduce((sum, time) => sum + time, 0) /
-      this.responseTimes.length;
+      this.responseTimes.reduce((sum, time) => sum + time, 0) / this.responseTimes.length;
 
     this.metrics.requests.minResponseTime = sorted[0];
     this.metrics.requests.maxResponseTime = sorted[sorted.length - 1];
@@ -464,8 +449,7 @@ export class PerformanceMonitor {
     }
 
     // Error rate alert
-    const errorRate =
-      this.metrics.requests.failed / this.metrics.requests.total;
+    const errorRate = this.metrics.requests.failed / this.metrics.requests.total;
     if (errorRate > thresholds.errorRate) {
       this.addAlert(
         "error",
@@ -527,9 +511,7 @@ export class PerformanceMonitor {
   /**
    * Calculate overall system health
    */
-  private calculateOverallHealth(
-    metrics: PerformanceMetrics,
-  ): "excellent" | "good" | "warning" | "critical" {
+  private calculateOverallHealth(metrics: PerformanceMetrics): "excellent" | "good" | "warning" | "critical" {
     let score = 100;
 
     // Response time impact
@@ -560,9 +542,7 @@ export class PerformanceMonitor {
    */
   private generateSummary(metrics: PerformanceMetrics): string {
     const errorRate =
-      metrics.requests.total > 0
-        ? ((metrics.requests.failed / metrics.requests.total) * 100).toFixed(1)
-        : "0";
+      metrics.requests.total > 0 ? ((metrics.requests.failed / metrics.requests.total) * 100).toFixed(1) : "0";
 
     return (
       `Performance Summary: ${metrics.requests.total} requests processed with ${errorRate}% error rate. ` +
@@ -587,9 +567,7 @@ export class PerformanceMonitor {
     }
 
     if (metrics.system.memoryUsage > 80) {
-      recommendations.push(
-        "Consider increasing memory allocation or cache size limits",
-      );
+      recommendations.push("Consider increasing memory allocation or cache size limits");
     }
 
     const errorRate = metrics.requests.failed / metrics.requests.total;
@@ -676,8 +654,6 @@ export class PerformanceMonitor {
    */
   private cleanupOldData(): void {
     const cutoff = Date.now() - this.config.retentionPeriod;
-    this.historicalData = this.historicalData.filter(
-      (data) => data.system.uptime > cutoff,
-    );
+    this.historicalData = this.historicalData.filter((data) => data.system.uptime > cutoff);
   }
 }

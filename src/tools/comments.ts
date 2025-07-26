@@ -1,9 +1,5 @@
 import { WordPressClient } from "../client/api.js";
-import {
-  CommentQueryParams,
-  CreateCommentRequest,
-  UpdateCommentRequest,
-} from "../types/wordpress.js";
+import { CommentQueryParams, CreateCommentRequest, UpdateCommentRequest } from "../types/wordpress.js";
 import { getErrorMessage } from "../utils/error.js";
 
 /**
@@ -24,8 +20,7 @@ export class CommentTools {
           {
             name: "post",
             type: "number",
-            description:
-              "Limit results to comments assigned to a specific post ID.",
+            description: "Limit results to comments assigned to a specific post ID.",
           },
           {
             name: "status",
@@ -115,8 +110,7 @@ export class CommentTools {
           {
             name: "force",
             type: "boolean",
-            description:
-              "If true, the comment will be permanently deleted. Defaults to false (moved to trash).",
+            description: "If true, the comment will be permanently deleted. Defaults to false (moved to trash).",
           },
         ],
         handler: this.handleDeleteComment.bind(this),
@@ -150,10 +144,7 @@ export class CommentTools {
     ];
   }
 
-  public async handleListComments(
-    client: WordPressClient,
-    params: CommentQueryParams,
-  ): Promise<any> {
+  public async handleListComments(client: WordPressClient, params: CommentQueryParams): Promise<any> {
     try {
       const comments = await client.getComments(params);
       if (comments.length === 0) {
@@ -173,10 +164,7 @@ export class CommentTools {
     }
   }
 
-  public async handleGetComment(
-    client: WordPressClient,
-    params: { id: number },
-  ): Promise<any> {
+  public async handleGetComment(client: WordPressClient, params: { id: number }): Promise<any> {
     try {
       const comment = await client.getComment(params.id);
       const content =
@@ -192,10 +180,7 @@ export class CommentTools {
     }
   }
 
-  public async handleCreateComment(
-    client: WordPressClient,
-    params: CreateCommentRequest,
-  ): Promise<any> {
+  public async handleCreateComment(client: WordPressClient, params: CreateCommentRequest): Promise<any> {
     try {
       const comment = await client.createComment(params);
       return `✅ Comment created successfully with ID: ${comment.id}`;
@@ -216,10 +201,7 @@ export class CommentTools {
     }
   }
 
-  public async handleDeleteComment(
-    client: WordPressClient,
-    params: { id: number; force?: boolean },
-  ): Promise<any> {
+  public async handleDeleteComment(client: WordPressClient, params: { id: number; force?: boolean }): Promise<any> {
     try {
       await client.deleteComment(params.id, params.force);
       const action = params.force ? "permanently deleted" : "moved to trash";
@@ -229,10 +211,7 @@ export class CommentTools {
     }
   }
 
-  public async handleApproveComment(
-    client: WordPressClient,
-    params: { id: number },
-  ): Promise<any> {
+  public async handleApproveComment(client: WordPressClient, params: { id: number }): Promise<any> {
     try {
       const comment = await client.updateComment({
         id: params.id,
@@ -244,10 +223,7 @@ export class CommentTools {
     }
   }
 
-  public async handleSpamComment(
-    client: WordPressClient,
-    params: { id: number },
-  ): Promise<any> {
+  public async handleSpamComment(client: WordPressClient, params: { id: number }): Promise<any> {
     try {
       const comment = await client.updateComment({
         id: params.id,
@@ -255,9 +231,7 @@ export class CommentTools {
       });
       return `✅ Comment ${comment.id} has been marked as spam.`;
     } catch (error) {
-      throw new Error(
-        `Failed to mark comment as spam: ${getErrorMessage(error)}`,
-      );
+      throw new Error(`Failed to mark comment as spam: ${getErrorMessage(error)}`);
     }
   }
 }

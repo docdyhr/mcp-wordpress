@@ -4,18 +4,18 @@ Complete guide for installing and configuring MCP WordPress Server using Smither
 
 ## 🎯 What is Smithery?
 
-Smithery is a dedicated package manager for Model Context Protocol (MCP) servers, designed to simplify the
-installation, configuration, and management of MCP tools.
+Smithery is a dedicated package manager for Model Context Protocol (MCP) servers, designed to simplify the installation,
+configuration, and management of MCP tools.
 
 ### Why Choose Smithery?
 
-| Feature | Smithery | Manual Setup |
-|---------|----------|--------------|
-| **Installation** | One command | Multiple steps |
-| **Updates** | Automatic | Manual process |
-| **Configuration** | GUI wizard | Config file editing |
-| **Claude Integration** | Automatic | Manual config |
-| **Package Management** | Built-in | Manual tracking |
+| Feature                | Smithery    | Manual Setup        |
+| ---------------------- | ----------- | ------------------- |
+| **Installation**       | One command | Multiple steps      |
+| **Updates**            | Automatic   | Manual process      |
+| **Configuration**      | GUI wizard  | Config file editing |
+| **Claude Integration** | Automatic   | Manual config       |
+| **Package Management** | Built-in    | Manual tracking     |
 
 ## 📋 Prerequisites
 
@@ -363,7 +363,7 @@ smithery backup list
    ```bash
    # View security audit
    smithery audit mcp-wordpress
-   
+
    # Update to security patches
    smithery update mcp-wordpress --security-only
    ```

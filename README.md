@@ -7,7 +7,8 @@
 
 Manage WordPress sites with natural language through AI tools like Claude Desktop
 
-[Quick Start](#-quick-start) • [Features](#-features) • [Installation](#-installation-options) • [Documentation](#-documentation) • [Examples](#-examples)
+[Quick Start](#-quick-start) • [Features](#-features) • [Installation](#-installation-options) •
+[Documentation](#-documentation) • [Examples](#-examples)
 
 [![CI/CD Pipeline](https://github.com/docdyhr/mcp-wordpress/workflows/%F0%9F%9A%80%20CI%2FCD%20Pipeline/badge.svg)](https://github.com/docdyhr/mcp-wordpress/actions)
 [![NPM Version](https://img.shields.io/npm/v/mcp-wordpress?logo=npm&logoColor=white)](https://www.npmjs.com/package/mcp-wordpress)
@@ -36,6 +37,7 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 ```
 
 **Key Advantages:**
+
 - 🏆 **Most Complete**: 59 tools vs 20-30 in alternatives
 - ⚡ **Fastest Setup**: 2-click Claude Desktop installation via DXT
 - 🔒 **Production Ready**: 207 tests, security audited, battle-tested
@@ -47,6 +49,7 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 Get up and running in **under 5 minutes**:
 
 ### Prerequisites
+
 - **WordPress**: Version 5.6+ with REST API enabled
 - **Claude Desktop**: Latest version installed
 - **Application Password**: Generated from WordPress admin panel
@@ -54,6 +57,7 @@ Get up and running in **under 5 minutes**:
 ### 3-Step Setup
 
 **1️⃣ Generate WordPress Application Password**
+
 ```text
 WordPress Admin → Users → Profile → Application Passwords → Add New
 ```
@@ -61,6 +65,7 @@ WordPress Admin → Users → Profile → Application Passwords → Add New
 **2️⃣ Install MCP Server (Choose One)**
 
 **Option A: DXT Extension (Easiest)**
+
 ```bash
 # Download and install in Claude Desktop
 curl -L https://github.com/docdyhr/mcp-wordpress/raw/main/mcp-wordpress.dxt -o mcp-wordpress.dxt
@@ -68,17 +73,20 @@ curl -L https://github.com/docdyhr/mcp-wordpress/raw/main/mcp-wordpress.dxt -o m
 ```
 
 **Option B: NPM Global Install**
+
 ```bash
 npm install -g mcp-wordpress
 ```
 
 **3️⃣ Test Your Connection**
+
 ```text
 In Claude: "Test my WordPress connection"
 Response: "✅ Authentication successful! Connected to: Your Site Name"
 ```
 
-📺 **[Watch 2-minute Setup Video](https://github.com/docdyhr/mcp-wordpress/wiki/setup-video)** | 📖 **[Detailed Setup Guide](docs/INSTALLATION.md)**
+📺 **[Watch 2-minute Setup Video](https://github.com/docdyhr/mcp-wordpress/wiki/setup-video)** | 📖
+**[Detailed Setup Guide](docs/INSTALLATION.md)**
 
 ## ⚡ Installation Options
 
@@ -92,7 +100,7 @@ Response: "✅ Authentication successful! Connected to: Your Site Name"
 
 ✅ **Zero command line required**  
 ✅ **Automatic updates**  
-✅ **Built-in security**  
+✅ **Built-in security**
 
 **[📖 Complete DXT Setup Guide →](docs/integrations/claude-desktop.md)**
 
@@ -118,11 +126,12 @@ smithery configure mcp-wordpress
 
 ✅ **Package management**  
 ✅ **Version control**  
-✅ **Easy updates**  
+✅ **Easy updates**
 
 ### Installing via Smithery
 
-To install mcp-wordpress for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@docdyhr/mcp-wordpress):
+To install mcp-wordpress for Claude Desktop automatically via
+[Smithery](https://smithery.ai/server/@docdyhr/mcp-wordpress):
 
 ```bash
 npx -y @smithery/cli install @docdyhr/mcp-wordpress --client claude
@@ -140,6 +149,7 @@ npx -y @smithery/cli install @docdyhr/mcp-wordpress --client claude
 ### Single Site Setup
 
 **Environment Variables (.env)**
+
 ```bash
 WORDPRESS_SITE_URL=https://myblog.com
 WORDPRESS_USERNAME=admin
@@ -148,6 +158,7 @@ WORDPRESS_AUTH_METHOD=app-password
 ```
 
 **Claude Desktop Config**
+
 ```json
 {
   "mcpServers": {
@@ -167,6 +178,7 @@ WORDPRESS_AUTH_METHOD=app-password
 ### Multi-Site Agency Setup
 
 **Configuration File (mcp-wordpress.config.json)**
+
 ```json
 {
   "sites": [
@@ -207,9 +219,10 @@ WORDPRESS_AUTH_METHOD=app-password
 ### Development Environment
 
 **Local WordPress with Docker**
+
 ```yaml
 # docker-compose.yml
-version: '3.8'
+version: "3.8"
 services:
   wordpress:
     image: wordpress:latest
@@ -222,7 +235,7 @@ services:
       WORDPRESS_DB_NAME: wordpress
     volumes:
       - wordpress_data:/var/www/html
-  
+
   db:
     image: mysql:8.0
     environment:
@@ -239,6 +252,7 @@ volumes:
 ```
 
 **MCP WordPress Development Config**
+
 ```json
 {
   "sites": [
@@ -259,6 +273,7 @@ volumes:
 ### Production Deployment
 
 **Server Environment Variables**
+
 ```bash
 # /etc/environment or systemd service
 WORDPRESS_SITE_URL=https://production-site.com
@@ -273,6 +288,7 @@ DEBUG=false
 ```
 
 **Docker Production Setup**
+
 ```dockerfile
 # Dockerfile.production
 FROM node:20-alpine
@@ -288,6 +304,7 @@ CMD ["node", "dist/index.js"]
 ### JWT Authentication Setup
 
 **WordPress Plugin Configuration**
+
 ```php
 // wp-config.php
 define('JWT_AUTH_SECRET_KEY', 'your-secret-key-here');
@@ -295,6 +312,7 @@ define('JWT_AUTH_CORS_ENABLE', true);
 ```
 
 **MCP Configuration**
+
 ```json
 {
   "sites": [
@@ -316,31 +334,34 @@ define('JWT_AUTH_CORS_ENABLE', true);
 
 ### 🏆 Feature Comparison
 
-| Feature | This Server | Competition |
-|---------|-------------|-------------|
-| **Tools Available** | 59 tools | 20-30 tools |
-| **Claude Desktop DXT** | ✅ 2-click install | ❌ Manual setup |
-| **Multi-Site Support** | ✅ Unlimited sites | ❌ Single site |
-| **TypeScript** | ✅ 100% coverage | ⚠️ Partial/None |
-| **Performance Monitoring** | ✅ Real-time analytics | ❌ Basic only |
-| **Test Coverage** | ✅ 207 tests (100%) | ⚠️ Limited |
-| **Production Ready** | ✅ Security audited | ⚠️ Unknown |
+| Feature                    | This Server            | Competition     |
+| -------------------------- | ---------------------- | --------------- |
+| **Tools Available**        | 59 tools               | 20-30 tools     |
+| **Claude Desktop DXT**     | ✅ 2-click install     | ❌ Manual setup |
+| **Multi-Site Support**     | ✅ Unlimited sites     | ❌ Single site  |
+| **TypeScript**             | ✅ 100% coverage       | ⚠️ Partial/None |
+| **Performance Monitoring** | ✅ Real-time analytics | ❌ Basic only   |
+| **Test Coverage**          | ✅ 207 tests (100%)    | ⚠️ Limited      |
+| **Production Ready**       | ✅ Security audited    | ⚠️ Unknown      |
 
 ### 🚀 Core Capabilities
 
 #### WordPress Management
+
 - **59 WordPress Tools** across 10 categories
 - **Multi-Site Support** - Manage unlimited WordPress installations
 - **Flexible Authentication** - App Passwords, JWT, Basic Auth, API Key
 - **Real-Time Sync** - Instant updates across all connected tools
 
 #### Performance & Reliability
+
 - **⚡ Intelligent Caching** - 50-70% performance improvement
 - **📊 Real-Time Monitoring** - Performance metrics and optimization insights
 - **🔒 Production Ready** - Security-reviewed, 95%+ test coverage
 - **🔄 Zero Downtime** - Graceful error handling and automatic recovery
 
 #### Developer Experience
+
 - **100% TypeScript** - Complete type safety and IntelliSense
 - **🐳 Docker Support** - Production-ready containerization
 - **📚 Auto-Generated Docs** - API documentation with live examples
@@ -425,6 +446,7 @@ Use with site parameter: `wp_list_posts --site="main-site"`
 ### 🎯 Real-World Use Cases
 
 **Content Creation & Management:**
+
 ```text
 💬 "Analyze my top 10 blog posts and create a new post about emerging trends"
 💬 "Upload these 5 images and create a photo gallery page with SEO optimization"
@@ -432,6 +454,7 @@ Use with site parameter: `wp_list_posts --site="main-site"`
 ```
 
 **Site Management & Analytics:**
+
 ```text
 💬 "Check my WordPress site performance and provide optimization recommendations"
 💬 "Create a new user account for my freelance writer with editor permissions"
@@ -439,6 +462,7 @@ Use with site parameter: `wp_list_posts --site="main-site"`
 ```
 
 **Bulk Operations:**
+
 ```text
 💬 "Update all posts from 2023 to include my new author bio"
 💬 "Find all images over 1MB and suggest compression strategies"
@@ -448,9 +472,11 @@ Use with site parameter: `wp_list_posts --site="main-site"`
 ### ⚙️ Configuration Methods
 
 #### Option 1: DXT Extension (Recommended)
+
 **No configuration needed** - built-in secure credential management!
 
 #### Option 2: NPX in Claude Desktop
+
 ```json
 {
   "mcpServers": {
@@ -474,6 +500,7 @@ Use with site parameter: `wp_list_posts --site="main-site"`
 ### Basic Content Management
 
 **Create and Publish a Blog Post**
+
 ```text
 You: "Create a new blog post titled 'AI Revolution in 2024' with content about recent AI breakthroughs"
 Claude: "I'll create that blog post for you..."
@@ -481,6 +508,7 @@ Result: ✅ Post "AI Revolution in 2024" created successfully (ID: 123)
 ```
 
 **Media Management**
+
 ```text
 You: "Upload the image at /path/to/image.jpg and set it as featured image for post 123"
 Claude: "I'll upload that image and set it as the featured image..."
@@ -490,17 +518,19 @@ Result: ✅ Image uploaded (ID: 456) and set as featured image
 ### Advanced Workflows
 
 **SEO-Optimized Content Creation**
+
 ```text
 You: "Create an SEO-optimized blog post about 'WordPress Security Best Practices' with:
      - Focus keyword: 'WordPress security'
      - Meta description
      - Proper heading structure
      - At least 1500 words"
-     
+
 Claude: "I'll create a comprehensive SEO-optimized post on WordPress security..."
 ```
 
 **Bulk Operations**
+
 ```text
 You: "Find all draft posts older than 30 days and provide a summary"
 You: "Update all posts in category 'News' to include a disclaimer at the end"
@@ -510,6 +540,7 @@ You: "Delete all spam comments from the last week"
 ### Site Management
 
 **Performance Monitoring**
+
 ```text
 You: "Analyze my site's performance and suggest optimizations"
 Claude: "Let me check your site's performance metrics...
@@ -519,6 +550,7 @@ Claude: "Let me check your site's performance metrics...
 ```
 
 **User Management**
+
 ```text
 You: "Create a new editor account for john@example.com with a secure password"
 You: "List all users who haven't logged in for 90 days"
@@ -528,6 +560,7 @@ You: "Update Sarah's role from Author to Editor"
 ### Multi-Site Management
 
 **Working with Multiple Sites**
+
 ```text
 You: "List all posts from my client-blog site"
 Claude: "I'll list the posts from the client-blog site..."
@@ -598,6 +631,7 @@ Claude: "Here's a comparison of both sites..."
 ### Smart Content Workflows
 
 **Automated SEO Optimization**
+
 ```text
 You: "Optimize all posts from the last month for better SEO performance"
 Claude: "I'll analyze and optimize your recent posts...
@@ -610,6 +644,7 @@ Claude: "I'll analyze and optimize your recent posts...
 ```
 
 **Content Gap Analysis**
+
 ```text
 You: "Identify content gaps in our blog compared to competitor topics"
 Claude: "After analyzing your content and common industry topics...
@@ -622,6 +657,7 @@ Claude: "After analyzing your content and common industry topics...
 ### Maintenance Automation
 
 **Site Health Monitoring**
+
 ```text
 You: "Perform a comprehensive site health check and fix any issues"
 Claude: "Running complete site diagnostics...
@@ -634,6 +670,7 @@ Claude: "Running complete site diagnostics...
 ```
 
 **User Management Automation**
+
 ```text
 You: "Clean up user accounts and update permissions for the new team structure"
 Claude: "Updating user management...
@@ -647,6 +684,7 @@ Claude: "Updating user management...
 ### Performance Optimization
 
 **Intelligent Cache Management**
+
 ```text
 You: "Analyze site performance and implement optimal caching strategies"
 Claude: "Implementing performance optimizations...
@@ -661,6 +699,7 @@ Claude: "Implementing performance optimizations...
 ## 🎯 Industry-Specific Solutions
 
 ### Healthcare Practices
+
 ```text
 💬 "Create HIPAA-compliant patient information pages with secure forms"
 💬 "Update doctor profiles with latest certifications and specializations"
@@ -669,6 +708,7 @@ Claude: "Implementing performance optimizations...
 ```
 
 ### Legal Firms
+
 ```text
 💬 "Create practice area pages with case study examples"
 💬 "Update attorney profiles with recent wins and bar admissions"
@@ -677,6 +717,7 @@ Claude: "Implementing performance optimizations...
 ```
 
 ### Real Estate Agencies
+
 ```text
 💬 "Create property listing pages with virtual tour embeds"
 💬 "Update agent profiles with recent sales and market statistics"
@@ -685,6 +726,7 @@ Claude: "Implementing performance optimizations...
 ```
 
 ### Restaurants & Food Service
+
 ```text
 💬 "Create menu pages with dietary restriction filters"
 💬 "Update chef profiles with signature dishes and cooking philosophy"
@@ -699,6 +741,7 @@ Claude: "Implementing performance optimizations...
 ### Quick Diagnostics
 
 **Connection Issues**
+
 ```bash
 # Test WordPress connection
 npm run status
@@ -711,6 +754,7 @@ npm run status -- --site="your-site-id"
 ```
 
 **Authentication Problems**
+
 ```bash
 # Verify WordPress application password
 curl -u username:app_password https://your-site.com/wp-json/wp/v2/users/me
@@ -723,6 +767,7 @@ npm run setup
 ```
 
 **Performance Issues**
+
 ```bash
 # Check cache performance
 npm run test:cache
@@ -736,20 +781,21 @@ rm -rf cache/ && npm run dev
 
 ### Common Error Solutions
 
-| Error | Cause | Solution |
-|-------|--------|----------|
-| `401 Unauthorized` | Invalid credentials | Regenerate application password |
-| `403 Forbidden` | Insufficient permissions | Check user role (Editor+ required) |
-| `404 Not Found` | Wrong site URL | Verify WORDPRESS_SITE_URL |
-| `SSL Certificate Error` | HTTPS issues | Add SSL exception or use HTTP |
-| `Connection Timeout` | Network/firewall | Check WordPress REST API access |
-| `Tools not showing in Claude` | Config file format | Validate JSON syntax |
-| `Plugin conflicts` | WordPress plugins | Disable conflicting plugins |
-| `Rate limiting` | Too many requests | Implement request throttling |
+| Error                         | Cause                    | Solution                           |
+| ----------------------------- | ------------------------ | ---------------------------------- |
+| `401 Unauthorized`            | Invalid credentials      | Regenerate application password    |
+| `403 Forbidden`               | Insufficient permissions | Check user role (Editor+ required) |
+| `404 Not Found`               | Wrong site URL           | Verify WORDPRESS_SITE_URL          |
+| `SSL Certificate Error`       | HTTPS issues             | Add SSL exception or use HTTP      |
+| `Connection Timeout`          | Network/firewall         | Check WordPress REST API access    |
+| `Tools not showing in Claude` | Config file format       | Validate JSON syntax               |
+| `Plugin conflicts`            | WordPress plugins        | Disable conflicting plugins        |
+| `Rate limiting`               | Too many requests        | Implement request throttling       |
 
 ### WordPress-Specific Issues
 
 **REST API Not Available**
+
 ```bash
 # Test REST API directly
 curl https://your-site.com/wp-json/wp/v2/
@@ -762,6 +808,7 @@ wp-admin → Settings → Permalinks → Post name
 ```
 
 **Application Password Issues**
+
 ```text
 1. WordPress Admin → Users → Profile
 2. Scroll to "Application Passwords"
@@ -771,13 +818,14 @@ wp-admin → Settings → Permalinks → Post name
 ```
 
 **Multi-Site Configuration Problems**
+
 ```json
 // Check mcp-wordpress.config.json format
 {
   "sites": [
     {
       "id": "unique-site-id",
-      "name": "Human Readable Name", 
+      "name": "Human Readable Name",
       "config": {
         "WORDPRESS_SITE_URL": "https://site.com",
         "WORDPRESS_USERNAME": "username",
@@ -791,6 +839,7 @@ wp-admin → Settings → Permalinks → Post name
 ### Environment-Specific Solutions
 
 **Claude Desktop Integration**
+
 ```json
 // Verify claude_desktop_config.json format
 {
@@ -809,6 +858,7 @@ wp-admin → Settings → Permalinks → Post name
 ```
 
 **Docker Deployment Issues**
+
 ```bash
 # Check container logs
 docker logs mcp-wordpress
@@ -821,6 +871,7 @@ docker exec mcp-wordpress curl https://your-site.com/wp-json/wp/v2/
 ```
 
 **NPX Runtime Problems**
+
 ```bash
 # Clear NPX cache
 npx clear-npx-cache
@@ -835,6 +886,7 @@ npm install -g mcp-wordpress
 ### Getting Help
 
 **Self-Diagnostics**
+
 ```bash
 # Comprehensive health check
 npm run health
@@ -847,6 +899,7 @@ npm run test:performance
 ```
 
 **Debug Information Collection**
+
 ```bash
 # Generate debug report
 DEBUG=true npm run status > debug-report.txt 2>&1
@@ -858,6 +911,7 @@ os-info >> debug-report.txt
 ```
 
 **Community Support**
+
 - 🐛 [Report Issues](https://github.com/docdyhr/mcp-wordpress/issues)
 - 💬 [Discussions](https://github.com/docdyhr/mcp-wordpress/discussions)
 - 📧 [Security Issues](mailto:security@docdyhr.com)
@@ -891,16 +945,16 @@ npm run test:fast
 
 Our security posture is continuously monitored through automated testing and vulnerability scanning:
 
-| **Security Area** | **Status** | **Tests** | **Coverage** |
-|-------------------|------------|-----------|--------------|
-| **XSS Protection** | ✅ Secure | 6/6 passing | Script injection, URL validation, HTML sanitization |
-| **SQL Injection** | ✅ Secure | 3/3 passing | Query parameterization, input validation |
-| **Path Traversal** | ✅ Secure | 3/3 passing | File path validation, directory restrictions |
-| **Input Validation** | ✅ Secure | 9/9 passing | Length limits, format validation, sanitization |
-| **Authentication** | ✅ Secure | 7/7 passing | Bypass prevention, token validation |
-| **Rate Limiting** | ✅ Secure | 3/3 passing | DoS protection, request throttling |
-| **Information Disclosure** | ✅ Secure | 2/2 passing | Error sanitization, sensitive data protection |
-| **Penetration Testing** | ✅ Secure | 12/12 passing | Comprehensive attack simulation |
+| **Security Area**          | **Status** | **Tests**     | **Coverage**                                        |
+| -------------------------- | ---------- | ------------- | --------------------------------------------------- |
+| **XSS Protection**         | ✅ Secure  | 6/6 passing   | Script injection, URL validation, HTML sanitization |
+| **SQL Injection**          | ✅ Secure  | 3/3 passing   | Query parameterization, input validation            |
+| **Path Traversal**         | ✅ Secure  | 3/3 passing   | File path validation, directory restrictions        |
+| **Input Validation**       | ✅ Secure  | 9/9 passing   | Length limits, format validation, sanitization      |
+| **Authentication**         | ✅ Secure  | 7/7 passing   | Bypass prevention, token validation                 |
+| **Rate Limiting**          | ✅ Secure  | 3/3 passing   | DoS protection, request throttling                  |
+| **Information Disclosure** | ✅ Secure  | 2/2 passing   | Error sanitization, sensitive data protection       |
+| **Penetration Testing**    | ✅ Secure  | 12/12 passing | Comprehensive attack simulation                     |
 
 ### Security Features
 
@@ -970,36 +1024,40 @@ npm run setup
 ## 📚 Documentation
 
 ### Getting Started
+
 - **[Quick Start Guide](#-quick-start)** - Get running in 5 minutes
 - **[Installation Guide](docs/INSTALLATION.md)** - Detailed setup instructions
 - **[Configuration Guide](docs/CONFIGURATION.md)** - All configuration options
 - **[Authentication Setup](docs/SECURITY.md#authentication)** - WordPress auth methods
 
 ### User Guides
+
 - **[Basic Usage](docs/examples/basic-usage.md)** - Common tasks and workflows
 - **[Advanced Workflows](docs/examples/advanced-workflows.md)** - Complex automation
 - **[Multi-Site Management](docs/user-guides/multi-site.md)** - Managing multiple sites
 - **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues and solutions
 
 ### Integration Guides
+
 - **[Claude Desktop](docs/integrations/claude-desktop.md)** - Complete Claude integration
 - **[VS Code](docs/integrations/vs-code.md)** - VS Code extension setup
 - **[Cline](docs/integrations/cline.md)** - Cline AI assistant integration
 - **[Custom Clients](docs/developer/custom-clients.md)** - Build your own MCP client
 
 ### Developer Documentation
+
 - **[API Reference](docs/API_REFERENCE.md)** - Complete tool documentation
 - **[Architecture](docs/ARCHITECTURE.md)** - System design and decisions
 - **[Contributing](CONTRIBUTING.md)** - Development guidelines
 - **[Plugin Development](docs/developer/plugins.md)** - Extend functionality
 
 ### Deployment & Operations
+
 - **[Docker Deployment](docs/deployment/docker.md)** - Container deployment
 - **[Publishing Troubleshooting](docs/PUBLISHING-TROUBLESHOOTING.md)** - Fix publishing issues
 - **[Security Best Practices](docs/SECURITY.md)** - Production security
 - **[Performance Tuning](docs/deployment/performance.md)** - Optimization guide
 - **[Monitoring](docs/deployment/monitoring.md)** - Logging and metrics
-
 
 ## 🔧 Requirements
 
@@ -1050,7 +1108,8 @@ docker pull docdyhr/mcp-wordpress:1.3.1
 
 **Ready to transform your WordPress management?**
 
-1. **🏆 [Download DXT Extension](https://github.com/docdyhr/mcp-wordpress/raw/main/mcp-wordpress.dxt)** - Easiest setup (2 minutes)
+1. **🏆 [Download DXT Extension](https://github.com/docdyhr/mcp-wordpress/raw/main/mcp-wordpress.dxt)** - Easiest setup
+   (2 minutes)
 2. **⚡ [Try NPX Method](docs/user-guides/NPX_SETUP.md)** - Power user setup (5 minutes)
 3. **📚 [Explore All Tools](docs/api/README.md)** - See what's possible
 4. **💬 [Join Discussions](https://github.com/docdyhr/mcp-wordpress/discussions)** - Get help and share ideas
@@ -1061,7 +1120,8 @@ docker pull docdyhr/mcp-wordpress:1.3.1
 
 Looking for alternatives or complementary tools? Check out these WordPress MCP implementations:
 
-- **[Automattic WordPress MCP](https://github.com/Automattic/wordpress-mcp)** - Official WordPress MCP server by Automattic
+- **[Automattic WordPress MCP](https://github.com/Automattic/wordpress-mcp)** - Official WordPress MCP server by
+  Automattic
 
 ---
 

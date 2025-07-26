@@ -171,10 +171,7 @@ export class TaxonomyTools {
     ];
   }
 
-  public async handleListCategories(
-    client: WordPressClient,
-    params: any,
-  ): Promise<any> {
+  public async handleListCategories(client: WordPressClient, params: any): Promise<any> {
     try {
       const categories = await client.getCategories(params);
       if (categories.length === 0) {
@@ -182,19 +179,14 @@ export class TaxonomyTools {
       }
       const content =
         `Found ${categories.length} categories:\n\n` +
-        categories
-          .map((c) => `- ID ${c.id}: **${c.name}** (Posts: ${c.count})`)
-          .join("\n");
+        categories.map((c) => `- ID ${c.id}: **${c.name}** (Posts: ${c.count})`).join("\n");
       return content;
     } catch (error) {
       throw new Error(`Failed to list categories: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleGetCategory(
-    client: WordPressClient,
-    params: { id: number },
-  ): Promise<any> {
+  public async handleGetCategory(client: WordPressClient, params: { id: number }): Promise<any> {
     try {
       const category = await client.getCategory(params.id);
       const content =
@@ -209,10 +201,7 @@ export class TaxonomyTools {
     }
   }
 
-  public async handleCreateCategory(
-    client: WordPressClient,
-    params: CreateCategoryRequest,
-  ): Promise<any> {
+  public async handleCreateCategory(client: WordPressClient, params: CreateCategoryRequest): Promise<any> {
     try {
       const category = await client.createCategory(params);
       return `✅ Category "${category.name}" created successfully with ID: ${category.id}.`;
@@ -233,10 +222,7 @@ export class TaxonomyTools {
     }
   }
 
-  public async handleDeleteCategory(
-    client: WordPressClient,
-    params: { id: number },
-  ): Promise<any> {
+  public async handleDeleteCategory(client: WordPressClient, params: { id: number }): Promise<any> {
     try {
       await client.deleteCategory(params.id);
       return `✅ Category ${params.id} has been deleted.`;
@@ -245,10 +231,7 @@ export class TaxonomyTools {
     }
   }
 
-  public async handleListTags(
-    client: WordPressClient,
-    params: any,
-  ): Promise<any> {
+  public async handleListTags(client: WordPressClient, params: any): Promise<any> {
     try {
       const tags = await client.getTags(params);
       if (tags.length === 0) {
@@ -256,19 +239,14 @@ export class TaxonomyTools {
       }
       const content =
         `Found ${tags.length} tags:\n\n` +
-        tags
-          .map((t) => `- ID ${t.id}: **${t.name}** (Posts: ${t.count})`)
-          .join("\n");
+        tags.map((t) => `- ID ${t.id}: **${t.name}** (Posts: ${t.count})`).join("\n");
       return content;
     } catch (error) {
       throw new Error(`Failed to list tags: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleGetTag(
-    client: WordPressClient,
-    params: { id: number },
-  ): Promise<any> {
+  public async handleGetTag(client: WordPressClient, params: { id: number }): Promise<any> {
     try {
       const tag = await client.getTag(params.id);
       const content =
@@ -282,10 +260,7 @@ export class TaxonomyTools {
     }
   }
 
-  public async handleCreateTag(
-    client: WordPressClient,
-    params: CreateTagRequest,
-  ): Promise<any> {
+  public async handleCreateTag(client: WordPressClient, params: CreateTagRequest): Promise<any> {
     try {
       const tag = await client.createTag(params);
       return `✅ Tag "${tag.name}" created successfully with ID: ${tag.id}.`;
@@ -294,10 +269,7 @@ export class TaxonomyTools {
     }
   }
 
-  public async handleUpdateTag(
-    client: WordPressClient,
-    params: UpdateTagRequest & { id: number },
-  ): Promise<any> {
+  public async handleUpdateTag(client: WordPressClient, params: UpdateTagRequest & { id: number }): Promise<any> {
     try {
       const tag = await client.updateTag(params);
       return `✅ Tag ${tag.id} updated successfully.`;
@@ -306,10 +278,7 @@ export class TaxonomyTools {
     }
   }
 
-  public async handleDeleteTag(
-    client: WordPressClient,
-    params: { id: number },
-  ): Promise<any> {
+  public async handleDeleteTag(client: WordPressClient, params: { id: number }): Promise<any> {
     try {
       await client.deleteTag(params.id);
       return `✅ Tag ${params.id} has been deleted.`;

@@ -64,9 +64,7 @@ export class WordPressAuth {
     // Test the credentials by attempting to get current user
     try {
       const user = await this.client.getCurrentUser();
-      logger.log(
-        `✅ Application Password authentication successful for user: ${user.name} (${user.username})`,
-      );
+      logger.log(`✅ Application Password authentication successful for user: ${user.name} (${user.username})`);
       return true;
     } catch (error) {
       const message =
@@ -83,20 +81,15 @@ export class WordPressAuth {
     const { username, password } = this.client.config.auth;
 
     if (!username || !password) {
-      throw new Error(
-        "Basic authentication requires WORDPRESS_USERNAME and WORDPRESS_PASSWORD",
-      );
+      throw new Error("Basic authentication requires WORDPRESS_USERNAME and WORDPRESS_PASSWORD");
     }
 
     try {
       const user = await this.client.getCurrentUser();
-      logger.log(
-        `✅ Basic authentication successful for user: ${user.name} (${user.username})`,
-      );
+      logger.log(`✅ Basic authentication successful for user: ${user.name} (${user.username})`);
       return true;
     } catch (error) {
-      const message =
-        "Basic authentication failed. Please check your username and password.";
+      const message = "Basic authentication failed. Please check your username and password.";
       logger.error(message, error);
       throw new Error(message);
     }
@@ -118,9 +111,7 @@ export class WordPressAuth {
     try {
       // The JWT token should be obtained during client authentication
       const user = await this.client.getCurrentUser();
-      logger.log(
-        `✅ JWT authentication successful for user: ${user.name} (${user.username})`,
-      );
+      logger.log(`✅ JWT authentication successful for user: ${user.name} (${user.username})`);
       return true;
     } catch (error) {
       const message =
@@ -146,8 +137,7 @@ export class WordPressAuth {
       logger.log("✅ API Key authentication successful");
       return true;
     } catch (error) {
-      const message =
-        "API Key authentication failed. Please check your API key.";
+      const message = "API Key authentication failed. Please check your API key.";
       logger.error(message, error);
       throw new Error(message);
     }
@@ -160,21 +150,16 @@ export class WordPressAuth {
     const { nonce } = this.client.config.auth;
 
     if (!nonce) {
-      logger.warn(
-        "Cookie authentication: No nonce provided, authentication may fail for write operations",
-      );
+      logger.warn("Cookie authentication: No nonce provided, authentication may fail for write operations");
     }
 
     try {
       // Test with a simple read operation
       await this.client.getSiteInfo();
-      logger.log(
-        "✅ Cookie authentication configured (note: write operations may require valid nonce)",
-      );
+      logger.log("✅ Cookie authentication configured (note: write operations may require valid nonce)");
       return true;
     } catch (error) {
-      const message =
-        "Cookie authentication failed. Please ensure you are properly logged into WordPress.";
+      const message = "Cookie authentication failed. Please ensure you are properly logged into WordPress.";
       logger.error(message, error);
       throw new Error(message);
     }
@@ -295,8 +280,7 @@ export class WordPressAuth {
    * Generate random state for OAuth
    */
   private generateRandomState(length = 32): string {
-    const chars =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let result = "";
     for (let i = 0; i < length; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -314,17 +298,13 @@ export class WordPressAuth {
     switch (this.authType) {
       case "app-password":
         if (auth.username && auth.appPassword) {
-          const credentials = Buffer.from(
-            `${auth.username}:${auth.appPassword}`,
-          ).toString("base64");
+          const credentials = Buffer.from(`${auth.username}:${auth.appPassword}`).toString("base64");
           headers["Authorization"] = `Basic ${credentials}`;
         }
         break;
       case "basic":
         if (auth.username && auth.password) {
-          const credentials = Buffer.from(
-            `${auth.username}:${auth.password}`,
-          ).toString("base64");
+          const credentials = Buffer.from(`${auth.username}:${auth.password}`).toString("base64");
           headers["Authorization"] = `Basic ${credentials}`;
         }
         break;
@@ -361,14 +341,9 @@ export class WordPressAuth {
       case "api-key":
         return !this.client.config.auth.apiKey;
       case "app-password":
-        return (
-          !this.client.config.auth.username ||
-          !this.client.config.auth.appPassword
-        );
+        return !this.client.config.auth.username || !this.client.config.auth.appPassword;
       case "basic":
-        return (
-          !this.client.config.auth.username || !this.client.config.auth.password
-        );
+        return !this.client.config.auth.username || !this.client.config.auth.password;
       case "cookie":
         return false; // Cookie auth can work without additional setup
       default:

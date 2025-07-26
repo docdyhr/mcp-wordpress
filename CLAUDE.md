@@ -323,8 +323,8 @@ export PAGER=less          # Interactive pager causes hanging
 
 **Vulnerability Fixes**:
 
-- **form-data vulnerability (SNYK-JS-FORMDATA-10841150)**: Fixed by using npm overrides in
-  package.json to force all dependencies to use form-data@^4.0.3 instead of vulnerable versions
+- **form-data vulnerability (SNYK-JS-FORMDATA-10841150)**: Fixed by using npm overrides in package.json to force all
+  dependencies to use form-data@^4.0.3 instead of vulnerable versions
 
 ## CI/CD Pipeline
 

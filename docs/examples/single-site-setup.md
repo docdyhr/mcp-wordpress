@@ -292,7 +292,7 @@ define('JWT_AUTH_CORS_ENABLE', true);
 
 ```yaml
 # docker-compose.yml
-version: '3.8'
+version: "3.8"
 services:
   wordpress:
     image: wordpress:latest
@@ -365,9 +365,8 @@ curl -u username:password http://localhost:8080/wp-json/wp/v2/users/me
 
 ### Configuration File Location
 
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-**Linux**: `~/.config/Claude/claude_desktop_config.json`
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json` **Windows**:
+`%APPDATA%\Claude\claude_desktop_config.json` **Linux**: `~/.config/Claude/claude_desktop_config.json`
 
 ### Common Fixes
 

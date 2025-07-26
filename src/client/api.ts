@@ -50,11 +50,11 @@ import { debug, logError, startTimer } from "../utils/debug.js";
 
 /**
  * WordPress REST API Client
- * 
+ *
  * A comprehensive client for interacting with the WordPress REST API v2.
  * Provides full CRUD operations for posts, pages, media, users, comments,
  * categories, tags, and site settings with robust error handling and performance optimization.
- * 
+ *
  * Features:
  * - Multiple authentication methods (App Passwords, JWT, Basic Auth, API Key)
  * - Automatic retry logic with exponential backoff
@@ -63,7 +63,7 @@ import { debug, logError, startTimer } from "../utils/debug.js";
  * - Performance monitoring and request statistics
  * - Caching support for improved performance
  * - Multi-site configuration support
- * 
+ *
  * @example
  * ```typescript
  * // Initialize with app password authentication
@@ -75,14 +75,14 @@ import { debug, logError, startTimer } from "../utils/debug.js";
  *     password: 'xxxx xxxx xxxx xxxx xxxx xxxx'
  *   }
  * });
- * 
+ *
  * // Create a new post
  * const post = await client.createPost({
  *   title: 'My New Post',
  *   content: '<p>This is the content</p>',
  *   status: 'publish'
  * });
- * 
+ *
  * // List posts with filtering
  * const posts = await client.getPosts({
  *   search: 'WordPress',
@@ -90,7 +90,7 @@ import { debug, logError, startTimer } from "../utils/debug.js";
  *   per_page: 10
  * });
  * ```
- * 
+ *
  * @since 1.0.0
  * @author MCP WordPress Team
  * @implements {IWordPressClient}
@@ -110,10 +110,10 @@ export class WordPressClient implements IWordPressClient {
 
   /**
    * Creates a new WordPress API client instance.
-   * 
+   *
    * Initializes the client with configuration options for connecting to a WordPress site.
    * Supports multiple authentication methods and automatic environment variable detection.
-   * 
+   *
    * @param {Partial<WordPressClientConfig>} [options={}] - Configuration options for the client
    * @param {string} [options.baseUrl] - WordPress site URL (falls back to WORDPRESS_SITE_URL env var)
    * @param {number} [options.timeout=30000] - Request timeout in milliseconds
@@ -121,7 +121,7 @@ export class WordPressClient implements IWordPressClient {
    * @param {AuthConfig} [options.auth] - Authentication configuration (auto-detected from env if not provided)
    * @param {boolean} [options.enableCache=true] - Whether to enable response caching
    * @param {number} [options.cacheMaxAge=300000] - Cache max age in milliseconds (5 minutes default)
-   * 
+   *
    * @example
    * ```typescript
    * // Basic configuration with app password
@@ -133,11 +133,11 @@ export class WordPressClient implements IWordPressClient {
    *     password: 'xxxx xxxx xxxx xxxx xxxx xxxx'
    *   }
    * });
-   * 
+   *
    * // Configuration with environment variables
    * // Set WORDPRESS_SITE_URL, WORDPRESS_USERNAME, WORDPRESS_APP_PASSWORD
    * const client = new WordPressClient(); // Auto-detects from env
-   * 
+   *
    * // Custom timeout and retry settings
    * const client = new WordPressClient({
    *   baseUrl: 'https://mysite.com',
@@ -146,13 +146,16 @@ export class WordPressClient implements IWordPressClient {
    *   auth: { method: 'app-password', username: 'user', password: 'pass' }
    * });
    * ```
-   * 
+   *
    * @throws {Error} When required configuration is missing or invalid
-   * 
+   *
    * @since 1.0.0
    */
   constructor(options: Partial<WordPressClientConfig> = {}) {
-    this.baseUrl = options.baseUrl || process.env.WORDPRESS_SITE_URL || "";
+    const baseUrl = options.baseUrl || process.env.WORDPRESS_SITE_URL || "";
+
+    // Validate and sanitize base URL
+    this.baseUrl = this.validateAndSanitizeUrl(baseUrl);
     this.apiUrl = "";
     this.timeout = options.timeout || parseInt(process.env.WORDPRESS_TIMEOUT || "30000");
     this.maxRetries = options.maxRetries || parseInt(process.env.WORDPRESS_MAX_RETRIES || "3");
@@ -196,6 +199,47 @@ export class WordPressClient implements IWordPressClient {
 
   getSiteUrl(): string {
     return this.baseUrl;
+  }
+
+  /**
+   * Validate and sanitize URL for security
+   */
+  private validateAndSanitizeUrl(url: string): string {
+    if (!url) {
+      throw new Error("WordPress site URL is required");
+    }
+
+    try {
+      const parsed = new URL(url);
+
+      // Only allow HTTP/HTTPS protocols
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        throw new Error("Only HTTP and HTTPS protocols are allowed");
+      }
+
+      // Prevent localhost/private IP access in production
+      if (process.env.NODE_ENV === "production") {
+        const hostname = parsed.hostname.toLowerCase();
+        if (
+          hostname === "localhost" ||
+          hostname === "127.0.0.1" ||
+          hostname === "::1" ||
+          hostname.match(/^10\./) ||
+          hostname.match(/^172\.(1[6-9]|2[0-9]|3[01])\./) ||
+          hostname.match(/^192\.168\./)
+        ) {
+          throw new Error("Private/localhost URLs not allowed in production");
+        }
+      }
+
+      // Return clean URL without query parameters or fragments
+      return `${parsed.protocol}//${parsed.host}${parsed.pathname}`.replace(/\/$/, "");
+    } catch (error) {
+      if (error instanceof TypeError) {
+        throw new Error("Invalid WordPress site URL format");
+      }
+      throw error;
+    }
   }
 
   private getAuthFromEnv(): AuthConfig {
@@ -548,6 +592,54 @@ export class WordPressClient implements IWordPressClient {
                 "User has sufficient permissions but WordPress/plugins are blocking the upload.",
               this.auth.method,
             );
+          }
+
+          // Fallback for 404 errors - try index.php approach for REST API
+          if (response.status === 404 && attempt === 0 && url.includes("/wp-json/wp/v2")) {
+            debug.log(`404 on pretty permalinks, trying index.php approach`);
+
+            // Parse the URL to handle query parameters correctly
+            const urlObj = new URL(url);
+            const endpoint = urlObj.pathname.replace("/wp-json/wp/v2", "");
+            const queryParams = urlObj.searchParams.toString();
+
+            let fallbackUrl = `${urlObj.origin}/index.php?rest_route=/wp/v2${endpoint}`;
+            if (queryParams) {
+              fallbackUrl += `&${queryParams}`;
+            }
+
+            try {
+              // Create a new timeout for the fallback request
+              const fallbackController = new AbortController();
+              const fallbackTimeoutId = setTimeout(() => {
+                fallbackController.abort();
+              }, requestTimeout);
+
+              const fallbackOptions = { ...fetchOptions, signal: fallbackController.signal };
+              const fallbackResponse = await fetch(fallbackUrl, fallbackOptions);
+              clearTimeout(fallbackTimeoutId);
+
+              if (fallbackResponse.ok) {
+                const responseText = await fallbackResponse.text();
+                if (!responseText) {
+                  this._stats.successfulRequests++;
+                  const duration = timer.end();
+                  this.updateAverageResponseTime(duration);
+                  return null as T;
+                }
+
+                const result = JSON.parse(responseText);
+                this._stats.successfulRequests++;
+                const duration = timer.end();
+                this.updateAverageResponseTime(duration);
+                return result;
+              } else {
+                // If fallback also fails, continue with original error
+                debug.log(`Fallback also failed with status ${fallbackResponse.status}`);
+              }
+            } catch (fallbackError) {
+              debug.log(`Fallback request failed: ${(fallbackError as Error).message}`);
+            }
           }
 
           throw new WordPressAPIError(errorMessage, response.status);

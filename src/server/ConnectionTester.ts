@@ -9,31 +9,21 @@ export class ConnectionTester {
   /**
    * Test connections to all configured WordPress sites
    */
-  public static async testClientConnections(
-    wordpressClients: Map<string, WordPressClient>,
-  ): Promise<void> {
-    console.error(
-      "INFO: Testing connections to all configured WordPress sites...",
-    );
+  public static async testClientConnections(wordpressClients: Map<string, WordPressClient>): Promise<void> {
+    console.error("INFO: Testing connections to all configured WordPress sites...");
 
-    const connectionPromises = Array.from(wordpressClients.entries()).map(
-      async ([siteId, client]) => {
-        try {
-          await client.ping();
-          console.error(`SUCCESS: Connection to site '${siteId}' successful.`);
-        } catch (error) {
-          console.error(
-            `ERROR: Failed to connect to site '${siteId}': ${getErrorMessage(error)}`,
-          );
+    const connectionPromises = Array.from(wordpressClients.entries()).map(async ([siteId, client]) => {
+      try {
+        await client.ping();
+        console.error(`SUCCESS: Connection to site '${siteId}' successful.`);
+      } catch (error) {
+        console.error(`ERROR: Failed to connect to site '${siteId}': ${getErrorMessage(error)}`);
 
-          if (ConnectionTester.isAuthenticationError(error)) {
-            console.error(
-              `Authentication may have failed for site '${siteId}'. Please check credentials.`,
-            );
-          }
+        if (ConnectionTester.isAuthenticationError(error)) {
+          console.error(`Authentication may have failed for site '${siteId}'. Please check credentials.`);
         }
-      },
-    );
+      }
+    });
 
     await Promise.all(connectionPromises);
     console.error("INFO: Connection tests complete.");
@@ -65,9 +55,7 @@ export class ConnectionTester {
   /**
    * Perform health checks for all clients
    */
-  public static async healthCheckAll(
-    wordpressClients: Map<string, WordPressClient>,
-  ): Promise<Map<string, boolean>> {
+  public static async healthCheckAll(wordpressClients: Map<string, WordPressClient>): Promise<Map<string, boolean>> {
     const results = new Map<string, boolean>();
 
     for (const [siteId, client] of wordpressClients.entries()) {

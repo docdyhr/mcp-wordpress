@@ -2,148 +2,200 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.4.2](https://github.com/docdyhr/mcp-wordpress/compare/v2.4.1...v2.4.2) (2025-07-23)
 
 ### 🐛 Bug Fixes
 
-* improve CI/CD workflow reliability for dependency updates ([#35](https://github.com/docdyhr/mcp-wordpress/issues/35)) ([4be30b5](https://github.com/docdyhr/mcp-wordpress/commit/4be30b54498769c9f1ff95c1e41c5447cdf5c852))
+- improve CI/CD workflow reliability for dependency updates ([#35](https://github.com/docdyhr/mcp-wordpress/issues/35))
+  ([4be30b5](https://github.com/docdyhr/mcp-wordpress/commit/4be30b54498769c9f1ff95c1e41c5447cdf5c852))
 
 ## [2.4.1](https://github.com/docdyhr/mcp-wordpress/compare/v2.4.0...v2.4.1) (2025-07-21)
 
 ### 🐛 Bug Fixes
 
-* resolve CI/CD workflow failures and form-data vulnerability ([1d2b807](https://github.com/docdyhr/mcp-wordpress/commit/1d2b80732ab2171b6fee72c0abad4c712e8a1325))
-* resolve Performance Gates workflow Jest configuration conflict ([5306e4f](https://github.com/docdyhr/mcp-wordpress/commit/5306e4fe1c5d92665c9264b725228c0fde2bfe5c))
+- resolve CI/CD workflow failures and form-data vulnerability
+  ([1d2b807](https://github.com/docdyhr/mcp-wordpress/commit/1d2b80732ab2171b6fee72c0abad4c712e8a1325))
+- resolve Performance Gates workflow Jest configuration conflict
+  ([5306e4f](https://github.com/docdyhr/mcp-wordpress/commit/5306e4fe1c5d92665c9264b725228c0fde2bfe5c))
 
 ### 📚 Documentation
 
-* add Automattic WordPress MCP to Similar Projects section ([d90505e](https://github.com/docdyhr/mcp-wordpress/commit/d90505e73a8bcb5b63c12175400574f37d300ca7))
+- add Automattic WordPress MCP to Similar Projects section
+  ([d90505e](https://github.com/docdyhr/mcp-wordpress/commit/d90505e73a8bcb5b63c12175400574f37d300ca7))
 
 ## [2.4.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.3.0...v2.4.0) (2025-07-20)
 
 ### 🚀 Features
 
-* Add comprehensive Docker publishing failure recovery system ([b8e99e3](https://github.com/docdyhr/mcp-wordpress/commit/b8e99e342f9a4cb4a3e76fd6eecf7aef94f8d9da))
+- Add comprehensive Docker publishing failure recovery system
+  ([b8e99e3](https://github.com/docdyhr/mcp-wordpress/commit/b8e99e342f9a4cb4a3e76fd6eecf7aef94f8d9da))
 
 ### 📚 Documentation
 
-* Add bulk recovery script and update troubleshooting for systemic Docker publishing failures ([5eabee1](https://github.com/docdyhr/mcp-wordpress/commit/5eabee11bdee74dfb360ed17ecc62cc1d4b2dffb))
-* compact CLAUDE.md for enhanced usability ([1f2bf2b](https://github.com/docdyhr/mcp-wordpress/commit/1f2bf2b36e1ee6d006667cf8b6454375452ff1a6))
-* comprehensive documentation enhancement and JSDoc improvements ([dbabdf2](https://github.com/docdyhr/mcp-wordpress/commit/dbabdf24be16cc608094ca5f9d13a67a25af1984))
+- Add bulk recovery script and update troubleshooting for systemic Docker publishing failures
+  ([5eabee1](https://github.com/docdyhr/mcp-wordpress/commit/5eabee11bdee74dfb360ed17ecc62cc1d4b2dffb))
+- compact CLAUDE.md for enhanced usability
+  ([1f2bf2b](https://github.com/docdyhr/mcp-wordpress/commit/1f2bf2b36e1ee6d006667cf8b6454375452ff1a6))
+- comprehensive documentation enhancement and JSDoc improvements
+  ([dbabdf2](https://github.com/docdyhr/mcp-wordpress/commit/dbabdf24be16cc608094ca5f9d13a67a25af1984))
 
 ## [2.3.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.2.0...v2.3.0) (2025-07-19)
 
 ### 🚀 Features
 
-* add comprehensive AI-powered security system ([9aedfab](https://github.com/docdyhr/mcp-wordpress/commit/9aedfabd0995656f78b3e8606f8a25329334de37))
-* add comprehensive security workflow suite ([d16d31c](https://github.com/docdyhr/mcp-wordpress/commit/d16d31cd1eb923b3bc0501596d62480a11ef5ad4))
+- add comprehensive AI-powered security system
+  ([9aedfab](https://github.com/docdyhr/mcp-wordpress/commit/9aedfabd0995656f78b3e8606f8a25329334de37))
+- add comprehensive security workflow suite
+  ([d16d31c](https://github.com/docdyhr/mcp-wordpress/commit/d16d31cd1eb923b3bc0501596d62480a11ef5ad4))
 
 ## [2.2.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.1.0...v2.2.0) (2025-07-19)
 
 ### 🚀 Features
 
-* Add comprehensive security monitoring workflow ([78b6d0c](https://github.com/docdyhr/mcp-wordpress/commit/78b6d0cc0e19feefd606faf573315b8a0608891d))
+- Add comprehensive security monitoring workflow
+  ([78b6d0c](https://github.com/docdyhr/mcp-wordpress/commit/78b6d0cc0e19feefd606faf573315b8a0608891d))
 
 ## [2.1.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.0.4...v2.1.0) (2025-07-19)
 
 ### 🚀 Features
 
-* Add CodeQL security analysis workflow ([897f5f3](https://github.com/docdyhr/mcp-wordpress/commit/897f5f3616017920aacdf0eefc1215fa4358fee1))
-* Add Dependabot configuration for automated dependency updates ([c3e8a80](https://github.com/docdyhr/mcp-wordpress/commit/c3e8a80cc77001e28ad321f0ec4743428777d9a3))
-* Add Dependency Review action for PR security checks ([203d373](https://github.com/docdyhr/mcp-wordpress/commit/203d3734c37c700cc67e8c34b15ed44fe6fa71d3))
+- Add CodeQL security analysis workflow
+  ([897f5f3](https://github.com/docdyhr/mcp-wordpress/commit/897f5f3616017920aacdf0eefc1215fa4358fee1))
+- Add Dependabot configuration for automated dependency updates
+  ([c3e8a80](https://github.com/docdyhr/mcp-wordpress/commit/c3e8a80cc77001e28ad321f0ec4743428777d9a3))
+- Add Dependency Review action for PR security checks
+  ([203d373](https://github.com/docdyhr/mcp-wordpress/commit/203d3734c37c700cc67e8c34b15ed44fe6fa71d3))
 
 ## [2.0.4](https://github.com/docdyhr/mcp-wordpress/compare/v2.0.3...v2.0.4) (2025-07-19)
 
 ### 🐛 Bug Fixes
 
-* update Trivy security scan configuration ([a114bc6](https://github.com/docdyhr/mcp-wordpress/commit/a114bc66dd10f81b41465c4312dac3b29a4cd6a4))
+- update Trivy security scan configuration
+  ([a114bc6](https://github.com/docdyhr/mcp-wordpress/commit/a114bc66dd10f81b41465c4312dac3b29a4cd6a4))
 
 ## [2.0.3](https://github.com/docdyhr/mcp-wordpress/compare/v2.0.2...v2.0.3) (2025-07-18)
 
 ### 🐛 Bug Fixes
 
-* resolve CI/CD pipeline and Docker publishing issues ([fe997cc](https://github.com/docdyhr/mcp-wordpress/commit/fe997cc1e9a6e94c57abe5e48d9d9ab404abfa15)), closes [#14](https://github.com/docdyhr/mcp-wordpress/issues/14) [#15](https://github.com/docdyhr/mcp-wordpress/issues/15) [#16](https://github.com/docdyhr/mcp-wordpress/issues/16)
-* resolve CI/CD pipeline failures by handling test environments ([595df9d](https://github.com/docdyhr/mcp-wordpress/commit/595df9d8138d32bf84c2785c7282d5304f3d42c9))
-* resolve ES module compatibility issues in test suite ([e65c32b](https://github.com/docdyhr/mcp-wordpress/commit/e65c32bcf63693010ce1c72d75ad1a7910543a05))
+- resolve CI/CD pipeline and Docker publishing issues
+  ([fe997cc](https://github.com/docdyhr/mcp-wordpress/commit/fe997cc1e9a6e94c57abe5e48d9d9ab404abfa15)), closes
+  [#14](https://github.com/docdyhr/mcp-wordpress/issues/14) [#15](https://github.com/docdyhr/mcp-wordpress/issues/15)
+  [#16](https://github.com/docdyhr/mcp-wordpress/issues/16)
+- resolve CI/CD pipeline failures by handling test environments
+  ([595df9d](https://github.com/docdyhr/mcp-wordpress/commit/595df9d8138d32bf84c2785c7282d5304f3d42c9))
+- resolve ES module compatibility issues in test suite
+  ([e65c32b](https://github.com/docdyhr/mcp-wordpress/commit/e65c32bcf63693010ce1c72d75ad1a7910543a05))
 
 ### ♻️ Refactoring
 
-* comprehensive technical debt cleanup and Jest configuration consolidation ([280da1c](https://github.com/docdyhr/mcp-wordpress/commit/280da1ca95bcf043b1a25a453f56232c99be5976))
-* improve CI/CD workflows ([ed607be](https://github.com/docdyhr/mcp-wordpress/commit/ed607bee701eabbee14025b5449d8e5bb8366efc))
+- comprehensive technical debt cleanup and Jest configuration consolidation
+  ([280da1c](https://github.com/docdyhr/mcp-wordpress/commit/280da1ca95bcf043b1a25a453f56232c99be5976))
+- improve CI/CD workflows
+  ([ed607be](https://github.com/docdyhr/mcp-wordpress/commit/ed607bee701eabbee14025b5449d8e5bb8366efc))
 
 ### 📚 Documentation
 
-* update CI/CD badge URL to match renamed workflow ([09d5557](https://github.com/docdyhr/mcp-wordpress/commit/09d55570c43d57816580130db9ee6bed7d39e841))
+- update CI/CD badge URL to match renamed workflow
+  ([09d5557](https://github.com/docdyhr/mcp-wordpress/commit/09d55570c43d57816580130db9ee6bed7d39e841))
 
 ## [Unreleased]
 
 ### 🐛 Bug Fixes
 
-* fix ES module compatibility issues in server and utils tests
-* remove experimental decorator syntax from toolWrapper tests
-* correct MCPWordPressServer method names in tests (run/shutdown)
-* improve test reliability by simplifying mock implementations
+- fix ES module compatibility issues in server and utils tests
+- remove experimental decorator syntax from toolWrapper tests
+- correct MCPWordPressServer method names in tests (run/shutdown)
+- improve test reliability by simplifying mock implementations
 
 ## [2.0.2](https://github.com/docdyhr/mcp-wordpress/compare/v2.0.1...v2.0.2) (2025-07-16)
 
 ### 🐛 Bug Fixes
 
-* convert evaluation scripts to ES modules to resolve workflow failures ([c8728eb](https://github.com/docdyhr/mcp-wordpress/commit/c8728ebb83ea49dbdf0292ef49adc881177c4029))
+- convert evaluation scripts to ES modules to resolve workflow failures
+  ([c8728eb](https://github.com/docdyhr/mcp-wordpress/commit/c8728ebb83ea49dbdf0292ef49adc881177c4029))
 
 ## [2.0.1](https://github.com/docdyhr/mcp-wordpress/compare/v2.0.0...v2.0.1) (2025-07-16)
 
 ### 🐛 Bug Fixes
 
-* resolve CI/CD workflow issues and performance test stability ([ed034a8](https://github.com/docdyhr/mcp-wordpress/commit/ed034a885c87436deeb99e8113d2f0da07e0492f))
+- resolve CI/CD workflow issues and performance test stability
+  ([ed034a8](https://github.com/docdyhr/mcp-wordpress/commit/ed034a885c87436deeb99e8113d2f0da07e0492f))
 
 ## [2.0.0](https://github.com/docdyhr/mcp-wordpress/compare/v1.5.2...v2.0.0) (2025-07-16)
 
 ### ⚠ BREAKING CHANGES
 
-* Removed individual claude-desktop-config-*.json files.
-Configuration examples are now consolidated in docs/examples/claude-desktop-config.md
+- Removed individual claude-desktop-config-\*.json files. Configuration examples are now consolidated in
+  docs/examples/claude-desktop-config.md
 
 ### 🚀 Features
 
-* add comprehensive MCP evaluation system with CI/CD integration ([8cd940c](https://github.com/docdyhr/mcp-wordpress/commit/8cd940cf1c4e0e386a548f4d8d8bcd9fd92e4c30))
-* add comprehensive MCP tools evaluation system with mcp-evals ([953400d](https://github.com/docdyhr/mcp-wordpress/commit/953400d0d9130bcd9f2c8c69c5c1a62069f622b3))
-* add comprehensive WordPress test credentials configuration ([ef25153](https://github.com/docdyhr/mcp-wordpress/commit/ef25153675fc19ac7b733cfd1178cf08d596edb5))
-* add official DXT package with JSON response fixes ([64e18b4](https://github.com/docdyhr/mcp-wordpress/commit/64e18b48d6104f791d04fe7cf88439678896f7ae))
-* add Smithery package manager as secondary installation option ([0c0868c](https://github.com/docdyhr/mcp-wordpress/commit/0c0868c8540f6697eb4fccdf4a88ba755f07fa67))
-* implement comprehensive WordPress MCP tool improvements ([6e2ff33](https://github.com/docdyhr/mcp-wordpress/commit/6e2ff3338c57f782e54807159eb5f19b3eb0b975))
+- add comprehensive MCP evaluation system with CI/CD integration
+  ([8cd940c](https://github.com/docdyhr/mcp-wordpress/commit/8cd940cf1c4e0e386a548f4d8d8bcd9fd92e4c30))
+- add comprehensive MCP tools evaluation system with mcp-evals
+  ([953400d](https://github.com/docdyhr/mcp-wordpress/commit/953400d0d9130bcd9f2c8c69c5c1a62069f622b3))
+- add comprehensive WordPress test credentials configuration
+  ([ef25153](https://github.com/docdyhr/mcp-wordpress/commit/ef25153675fc19ac7b733cfd1178cf08d596edb5))
+- add official DXT package with JSON response fixes
+  ([64e18b4](https://github.com/docdyhr/mcp-wordpress/commit/64e18b48d6104f791d04fe7cf88439678896f7ae))
+- add Smithery package manager as secondary installation option
+  ([0c0868c](https://github.com/docdyhr/mcp-wordpress/commit/0c0868c8540f6697eb4fccdf4a88ba755f07fa67))
+- implement comprehensive WordPress MCP tool improvements
+  ([6e2ff33](https://github.com/docdyhr/mcp-wordpress/commit/6e2ff3338c57f782e54807159eb5f19b3eb0b975))
 
 ### 🐛 Bug Fixes
 
-* adjust cache performance test memory variation threshold ([bfa94f4](https://github.com/docdyhr/mcp-wordpress/commit/bfa94f4acce87b459283e8b066ac9c1463d188dc))
-* convert evaluation script to ES modules ([fa188d6](https://github.com/docdyhr/mcp-wordpress/commit/fa188d6c9bdcc836c905ea248909b90b7d6939bb))
-* correct mcp-evals command syntax and add simplified test config ([1fbec17](https://github.com/docdyhr/mcp-wordpress/commit/1fbec17ab38222d4594697c8a9a2ca3a84de7c18))
-* **dxt:** resolve DXT package installation and timeout issues ([6fa6468](https://github.com/docdyhr/mcp-wordpress/commit/6fa64684bdb645cfd4e92e32de7d4bb1d53d051b))
-* improve Jest configuration and coverage script for CI/CD ([4a6027f](https://github.com/docdyhr/mcp-wordpress/commit/4a6027f36ac193551a7fe3b6efab6fcae75fb3e7))
-* improve performance test resilience in CI environments ([1801460](https://github.com/docdyhr/mcp-wordpress/commit/18014601e246ee0357bc0da1d458d1fe5cc429ec))
-* improve release workflow configuration and add best practices ([34a963d](https://github.com/docdyhr/mcp-wordpress/commit/34a963d652013dcfa6f42ac2214ce7813aeebabe))
-* replace 'eval' variable name in evaluation results processing ([06d8fdb](https://github.com/docdyhr/mcp-wordpress/commit/06d8fdb9739f604969e7c123390a872a7cac3a46))
-* resolve authentication manager runtime error and test mocking ([e56d5ac](https://github.com/docdyhr/mcp-wordpress/commit/e56d5acbac0fb5d142b263daf916b3347e0f4b67))
-* resolve JSON-RPC protocol violations in MCP communication ([593412c](https://github.com/docdyhr/mcp-wordpress/commit/593412c7dd22b8f55556aa6967a4b46c378b655b))
-* resolve markdown line length violations ([8f32240](https://github.com/docdyhr/mcp-wordpress/commit/8f322407d53f61e0f2c283ca666481b810882023))
-* resolve test import issues and update assertions ([b04ab74](https://github.com/docdyhr/mcp-wordpress/commit/b04ab7422c73486bcb34c9ccb0bf88828a3f256d))
-* resolve TypeScript errors in posts.ts ([c11f1bb](https://github.com/docdyhr/mcp-wordpress/commit/c11f1bb4bb028746b0ba47c642560f37c147536c))
-* **security:** replace hardcoded password with placeholder in smithery.yaml ([dce19ff](https://github.com/docdyhr/mcp-wordpress/commit/dce19fffcb7f40da34776e44be8d591d2ce77364))
-* update CI evaluation to handle missing WordPress credentials gracefully ([713c261](https://github.com/docdyhr/mcp-wordpress/commit/713c261efb86ab49ae3434e3814381f97acba13d))
-* update MCP evaluation workflow to use CI-compatible configuration ([83aed55](https://github.com/docdyhr/mcp-wordpress/commit/83aed5557f9dd05485534760bc6e419988cbf20f))
+- adjust cache performance test memory variation threshold
+  ([bfa94f4](https://github.com/docdyhr/mcp-wordpress/commit/bfa94f4acce87b459283e8b066ac9c1463d188dc))
+- convert evaluation script to ES modules
+  ([fa188d6](https://github.com/docdyhr/mcp-wordpress/commit/fa188d6c9bdcc836c905ea248909b90b7d6939bb))
+- correct mcp-evals command syntax and add simplified test config
+  ([1fbec17](https://github.com/docdyhr/mcp-wordpress/commit/1fbec17ab38222d4594697c8a9a2ca3a84de7c18))
+- **dxt:** resolve DXT package installation and timeout issues
+  ([6fa6468](https://github.com/docdyhr/mcp-wordpress/commit/6fa64684bdb645cfd4e92e32de7d4bb1d53d051b))
+- improve Jest configuration and coverage script for CI/CD
+  ([4a6027f](https://github.com/docdyhr/mcp-wordpress/commit/4a6027f36ac193551a7fe3b6efab6fcae75fb3e7))
+- improve performance test resilience in CI environments
+  ([1801460](https://github.com/docdyhr/mcp-wordpress/commit/18014601e246ee0357bc0da1d458d1fe5cc429ec))
+- improve release workflow configuration and add best practices
+  ([34a963d](https://github.com/docdyhr/mcp-wordpress/commit/34a963d652013dcfa6f42ac2214ce7813aeebabe))
+- replace 'eval' variable name in evaluation results processing
+  ([06d8fdb](https://github.com/docdyhr/mcp-wordpress/commit/06d8fdb9739f604969e7c123390a872a7cac3a46))
+- resolve authentication manager runtime error and test mocking
+  ([e56d5ac](https://github.com/docdyhr/mcp-wordpress/commit/e56d5acbac0fb5d142b263daf916b3347e0f4b67))
+- resolve JSON-RPC protocol violations in MCP communication
+  ([593412c](https://github.com/docdyhr/mcp-wordpress/commit/593412c7dd22b8f55556aa6967a4b46c378b655b))
+- resolve markdown line length violations
+  ([8f32240](https://github.com/docdyhr/mcp-wordpress/commit/8f322407d53f61e0f2c283ca666481b810882023))
+- resolve test import issues and update assertions
+  ([b04ab74](https://github.com/docdyhr/mcp-wordpress/commit/b04ab7422c73486bcb34c9ccb0bf88828a3f256d))
+- resolve TypeScript errors in posts.ts
+  ([c11f1bb](https://github.com/docdyhr/mcp-wordpress/commit/c11f1bb4bb028746b0ba47c642560f37c147536c))
+- **security:** replace hardcoded password with placeholder in smithery.yaml
+  ([dce19ff](https://github.com/docdyhr/mcp-wordpress/commit/dce19fffcb7f40da34776e44be8d591d2ce77364))
+- update CI evaluation to handle missing WordPress credentials gracefully
+  ([713c261](https://github.com/docdyhr/mcp-wordpress/commit/713c261efb86ab49ae3434e3814381f97acba13d))
+- update MCP evaluation workflow to use CI-compatible configuration
+  ([83aed55](https://github.com/docdyhr/mcp-wordpress/commit/83aed5557f9dd05485534760bc6e419988cbf20f))
 
 ### ♻️ Refactoring
 
-* clean up technical debt and improve repository organization ([8d54ea3](https://github.com/docdyhr/mcp-wordpress/commit/8d54ea33ce37404eb25de154c64412bf2c5c8cd6))
+- clean up technical debt and improve repository organization
+  ([8d54ea3](https://github.com/docdyhr/mcp-wordpress/commit/8d54ea33ce37404eb25de154c64412bf2c5c8cd6))
 
 ### 📚 Documentation
 
-* add eye-catching badges to README header ([3c78c53](https://github.com/docdyhr/mcp-wordpress/commit/3c78c5376ad81a734fc1e535a4fc616f0463b68b))
-* comprehensive documentation updates and project maintenance ([beeb1b1](https://github.com/docdyhr/mcp-wordpress/commit/beeb1b1b303aa3478e26cd6009266a6a7c3fbb96))
-* implement comprehensive documentation restructure ([53dc3b1](https://github.com/docdyhr/mcp-wordpress/commit/53dc3b1c342bb45293221ef7c77aec13ad5fffed))
-* move Acknowledgments section to bottom of README ([1dfebfe](https://github.com/docdyhr/mcp-wordpress/commit/1dfebfe31550f6f37fc4d8cd3e9d83ec34ee43ac))
+- add eye-catching badges to README header
+  ([3c78c53](https://github.com/docdyhr/mcp-wordpress/commit/3c78c5376ad81a734fc1e535a4fc616f0463b68b))
+- comprehensive documentation updates and project maintenance
+  ([beeb1b1](https://github.com/docdyhr/mcp-wordpress/commit/beeb1b1b303aa3478e26cd6009266a6a7c3fbb96))
+- implement comprehensive documentation restructure
+  ([53dc3b1](https://github.com/docdyhr/mcp-wordpress/commit/53dc3b1c342bb45293221ef7c77aec13ad5fffed))
+- move Acknowledgments section to bottom of README
+  ([1dfebfe](https://github.com/docdyhr/mcp-wordpress/commit/1dfebfe31550f6f37fc4d8cd3e9d83ec34ee43ac))
 
 # Changelog
 

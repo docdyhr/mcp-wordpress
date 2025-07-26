@@ -14,8 +14,8 @@
 
 ### Overview
 
-[Cline](https://github.com/cline/cline) is a VS Code extension that brings AI assistance directly to your editor.
-It supports MCP servers for extended functionality.
+[Cline](https://github.com/cline/cline) is a VS Code extension that brings AI assistance directly to your editor. It
+supports MCP servers for extended functionality.
 
 ### Installation
 
@@ -180,10 +180,10 @@ GitHub Copilot can work with MCP servers through workspace configuration and cus
 // Copilot will suggest WordPress-aware code
 const createPost = async (title: string, content: string) => {
   // @copilot: Use WordPress MCP server to create post
-  const result = await mcpClient.call('wp_create_post', {
+  const result = await mcpClient.call("wp_create_post", {
     title,
     content,
-    status: 'publish'
+    status: "publish",
   });
   return result;
 };
@@ -193,11 +193,11 @@ const createPost = async (title: string, content: string) => {
 
 ```typescript
 // @copilot: Generate WordPress content management script
-import { WordPressMCP } from 'mcp-wordpress';
+import { WordPressMCP } from "mcp-wordpress";
 
 const managePosts = async () => {
   // Copilot will suggest WordPress-specific operations
-  const posts = await wordpress.listPosts({ status: 'draft' });
+  const posts = await wordpress.listPosts({ status: "draft" });
   // Process draft posts...
 };
 ```
@@ -510,6 +510,7 @@ npx mcp-wordpress wp_test_auth
 
 ---
 
-*This guide is regularly updated. Last updated: 2024-01-15*
+_This guide is regularly updated. Last updated: 2024-01-15_
 
-*For VS Code integration questions, visit our [GitHub Discussions](https://github.com/docdyhr/mcp-wordpress/discussions)*
+_For VS Code integration questions, visit our
+[GitHub Discussions](https://github.com/docdyhr/mcp-wordpress/discussions)_

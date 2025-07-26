@@ -1,6 +1,7 @@
 # Multi-Site Configuration Examples
 
-This guide provides comprehensive examples for managing multiple WordPress sites with a single MCP WordPress server instance.
+This guide provides comprehensive examples for managing multiple WordPress sites with a single MCP WordPress server
+instance.
 
 ## Basic Multi-Site Configuration
 
@@ -407,7 +408,7 @@ npx mcp-wordpress --list-sites
 npx mcp-wordpress --test-site="main-site"
 
 # Use specific site in Claude
-"List all posts from the blog site" 
+"List all posts from the blog site"
 # Uses: wp_list_posts --site="blog"
 
 "Create a new user on the main-site"
@@ -571,5 +572,5 @@ done
 echo "✅ Multi-site configuration validated"
 ```
 
-This comprehensive multi-site setup allows you to manage unlimited WordPress sites
-efficiently through a single Claude Desktop configuration.
+This comprehensive multi-site setup allows you to manage unlimited WordPress sites efficiently through a single Claude
+Desktop configuration.

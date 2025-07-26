@@ -26,8 +26,7 @@ export interface StructuredLogger extends Logger {
 
 // Check if debug mode is enabled
 const isDebugMode = (): boolean =>
-  (process.env.DEBUG === "true" || process.env.NODE_ENV === "development") &&
-  process.env.NODE_ENV !== "test";
+  (process.env.DEBUG === "true" || process.env.NODE_ENV === "development") && process.env.NODE_ENV !== "test";
 
 // Get current timestamp
 const getTimestamp = (): string => new Date().toISOString();
@@ -37,9 +36,7 @@ const formatMessage = (level: LogLevel, args: any[]): string => {
   const timestamp = getTimestamp();
   const prefix = `[${timestamp}] [${level.toUpperCase()}]`;
   return `${prefix} ${args
-    .map((arg) =>
-      typeof arg === "object" ? JSON.stringify(arg, null, 2) : String(arg),
-    )
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg, null, 2) : String(arg)))
     .join(" ")}`;
 };
 
@@ -122,11 +119,7 @@ class StructuredLoggerImpl implements StructuredLogger {
     const debugInfo: DebugInfo = {
       timestamp: Date.now(),
       level,
-      message: args
-        .map((arg) =>
-          typeof arg === "object" ? safeStringify(arg) : String(arg),
-        )
-        .join(" "),
+      message: args.map((arg) => (typeof arg === "object" ? safeStringify(arg) : String(arg))).join(" "),
       ...(Object.keys(this.context).length > 0 && { context: this.context }),
     };
 
@@ -161,19 +154,14 @@ class StructuredLoggerImpl implements StructuredLogger {
   }
 
   child(context: Record<string, any>): StructuredLogger {
-    return new StructuredLoggerImpl(
-      { ...this.context, ...context },
-      this.enabled,
-    );
+    return new StructuredLoggerImpl({ ...this.context, ...context }, this.enabled);
   }
 }
 
 /**
  * Create a structured logger instance
  */
-export const createStructuredLogger = (
-  context: Record<string, any> = {},
-): StructuredLogger => {
+export const createStructuredLogger = (context: Record<string, any> = {}): StructuredLogger => {
   return new StructuredLoggerImpl(context);
 };
 
@@ -185,9 +173,7 @@ export const logger: Logger = debug;
 /**
  * Create a logger with context
  */
-export const createLogger = (
-  context: Record<string, any> = {},
-): StructuredLogger => {
+export const createLogger = (context: Record<string, any> = {}): StructuredLogger => {
   return createStructuredLogger(context);
 };
 
@@ -209,9 +195,7 @@ export const startTimer = (label?: string): PerformanceTimer => {
 
     endWithLog(message = "Operation"): number {
       const duration = Date.now() - start;
-      debug.info(
-        `${message} completed in ${duration}ms${label ? ` [${label}]` : ""}`,
-      );
+      debug.info(`${message} completed in ${duration}ms${label ? ` [${label}]` : ""}`);
       return duration;
     },
   };
@@ -220,10 +204,7 @@ export const startTimer = (label?: string): PerformanceTimer => {
 /**
  * Log error with stack trace
  */
-export const logError = (
-  error: Error | string,
-  context?: Record<string, any>,
-): void => {
+export const logError = (error: Error | string, context?: Record<string, any>): void => {
   if (typeof error === "string") {
     debug.error(error, context);
   } else {
@@ -251,32 +232,68 @@ export const logIf = (condition: boolean, level: LogLevel = "debug") => {
 };
 
 /**
- * Type-safe environment variable getter
+ * Type-safe environment variable getter with security logging
  */
-export const getEnvVar = (
-  key: string,
-  defaultValue?: string,
-): string | undefined => {
+export const getEnvVar = (key: string, defaultValue?: string): string | undefined => {
   const value = process.env[key];
   if (value === undefined && defaultValue !== undefined) {
-    debug.warn(
-      `Environment variable ${key} not found, using default: ${defaultValue}`,
-    );
+    // Don't log sensitive environment variable names in production
+    const isSecretVar = /password|secret|token|key|auth/i.test(key);
+    if (!isSecretVar || process.env.NODE_ENV !== "production") {
+      debug.warn(`Environment variable ${key} not found, using default`);
+    }
     return defaultValue;
   }
   return value;
 };
 
 /**
- * Validate required environment variables
+ * Validate required environment variables with secure error messages
  */
 export const validateEnvVars = (required: string[]): void => {
   const missing = required.filter((key) => !process.env[key]);
   if (missing.length > 0) {
-    const error = new Error(
-      `Missing required environment variables: ${missing.join(", ")}`,
-    );
+    // In production, don't expose which specific env vars are missing
+    const errorMessage =
+      process.env.NODE_ENV === "production"
+        ? `Missing ${missing.length} required environment variable(s)`
+        : `Missing required environment variables: ${missing.join(", ")}`;
+    const error = new Error(errorMessage);
     logError(error);
     throw error;
   }
+};
+
+/**
+ * Sanitize environment variable for logging
+ */
+export const sanitizeEnvValue = (key: string, value: string): string => {
+  const sensitiveKeys = /password|secret|token|key|auth|credential/i;
+
+  if (sensitiveKeys.test(key)) {
+    if (!value || value.length === 0) {
+      return "[EMPTY]";
+    }
+    return `[REDACTED:${value.length}chars]`;
+  }
+
+  return value;
+};
+
+/**
+ * Get sanitized environment summary for debugging
+ */
+export const getEnvSummary = (keys: string[]): Record<string, string> => {
+  const summary: Record<string, string> = {};
+
+  for (const key of keys) {
+    const value = process.env[key];
+    if (value !== undefined) {
+      summary[key] = sanitizeEnvValue(key, value);
+    } else {
+      summary[key] = "[NOT_SET]";
+    }
+  }
+
+  return summary;
 };

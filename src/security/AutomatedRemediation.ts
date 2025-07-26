@@ -5,9 +5,9 @@
 
 import * as fs from "fs/promises";
 import * as path from "path";
-import { SecurityVulnerability, SecurityScanResult } from "./AISecurityScanner";
-import { SecurityUtils } from "./SecurityConfig";
-import { SecurityValidationError } from "./InputValidator";
+import { SecurityVulnerability, SecurityScanResult } from "./AISecurityScanner.js";
+import { SecurityUtils } from "./SecurityConfig.js";
+import { SecurityValidationError } from "./InputValidator.js";
 
 interface RemediationAction {
   id: string;

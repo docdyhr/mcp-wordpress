@@ -35,12 +35,7 @@ import type {
 } from "./wordpress.js";
 
 // Authentication Configuration
-export type AuthMethod =
-  | "app-password"
-  | "jwt"
-  | "basic"
-  | "api-key"
-  | "cookie";
+export type AuthMethod = "app-password" | "jwt" | "basic" | "api-key" | "cookie";
 
 export interface AuthConfig {
   method: AuthMethod;
@@ -120,64 +115,32 @@ export interface IWordPressClient {
   disconnect(): Promise<void>;
 
   // Generic HTTP Methods
-  request<T = any>(
-    method: HTTPMethod,
-    endpoint: string,
-    data?: any,
-    options?: RequestOptions,
-  ): Promise<T>;
+  request<T = any>(method: HTTPMethod, endpoint: string, data?: any, options?: RequestOptions): Promise<T>;
   get<T = any>(endpoint: string, options?: RequestOptions): Promise<T>;
-  post<T = any>(
-    endpoint: string,
-    data?: any,
-    options?: RequestOptions,
-  ): Promise<T>;
-  put<T = any>(
-    endpoint: string,
-    data?: any,
-    options?: RequestOptions,
-  ): Promise<T>;
-  patch<T = any>(
-    endpoint: string,
-    data?: any,
-    options?: RequestOptions,
-  ): Promise<T>;
+  post<T = any>(endpoint: string, data?: any, options?: RequestOptions): Promise<T>;
+  put<T = any>(endpoint: string, data?: any, options?: RequestOptions): Promise<T>;
+  patch<T = any>(endpoint: string, data?: any, options?: RequestOptions): Promise<T>;
   delete<T = any>(endpoint: string, options?: RequestOptions): Promise<T>;
 
   // Posts
   getPosts(params?: PostQueryParams): Promise<WordPressPost[]>;
-  getPost(
-    id: number,
-    context?: "view" | "embed" | "edit",
-  ): Promise<WordPressPost>;
+  getPost(id: number, context?: "view" | "embed" | "edit"): Promise<WordPressPost>;
   createPost(data: CreatePostRequest): Promise<WordPressPost>;
   updatePost(data: UpdatePostRequest): Promise<WordPressPost>;
-  deletePost(
-    id: number,
-    force?: boolean,
-  ): Promise<{ deleted: boolean; previous?: WordPressPost }>;
+  deletePost(id: number, force?: boolean): Promise<{ deleted: boolean; previous?: WordPressPost }>;
   getPostRevisions(id: number): Promise<WordPressPost[]>;
 
   // Pages
   getPages(params?: PostQueryParams): Promise<WordPressPage[]>;
-  getPage(
-    id: number,
-    context?: "view" | "embed" | "edit",
-  ): Promise<WordPressPage>;
+  getPage(id: number, context?: "view" | "embed" | "edit"): Promise<WordPressPage>;
   createPage(data: CreatePageRequest): Promise<WordPressPage>;
   updatePage(data: UpdatePageRequest): Promise<WordPressPage>;
-  deletePage(
-    id: number,
-    force?: boolean,
-  ): Promise<{ deleted: boolean; previous?: WordPressPage }>;
+  deletePage(id: number, force?: boolean): Promise<{ deleted: boolean; previous?: WordPressPage }>;
   getPageRevisions(id: number): Promise<WordPressPage[]>;
 
   // Media
   getMedia(params?: MediaQueryParams): Promise<WordPressMedia[]>;
-  getMediaItem(
-    id: number,
-    context?: "view" | "embed" | "edit",
-  ): Promise<WordPressMedia>;
+  getMediaItem(id: number, context?: "view" | "embed" | "edit"): Promise<WordPressMedia>;
   uploadMedia(data: UploadMediaRequest): Promise<WordPressMedia>;
   uploadFile(
     fileData: Buffer,
@@ -187,37 +150,22 @@ export interface IWordPressClient {
     options?: RequestOptions,
   ): Promise<WordPressMedia>;
   updateMedia(data: UpdateMediaRequest): Promise<WordPressMedia>;
-  deleteMedia(
-    id: number,
-    force?: boolean,
-  ): Promise<{ deleted: boolean; previous?: WordPressMedia }>;
+  deleteMedia(id: number, force?: boolean): Promise<{ deleted: boolean; previous?: WordPressMedia }>;
 
   // Users
   getUsers(params?: UserQueryParams): Promise<WordPressUser[]>;
-  getUser(
-    id: number | "me",
-    context?: "view" | "embed" | "edit",
-  ): Promise<WordPressUser>;
+  getUser(id: number | "me", context?: "view" | "embed" | "edit"): Promise<WordPressUser>;
   createUser(data: CreateUserRequest): Promise<WordPressUser>;
   updateUser(data: UpdateUserRequest): Promise<WordPressUser>;
-  deleteUser(
-    id: number,
-    reassign?: number,
-  ): Promise<{ deleted: boolean; previous?: WordPressUser }>;
+  deleteUser(id: number, reassign?: number): Promise<{ deleted: boolean; previous?: WordPressUser }>;
   getCurrentUser(): Promise<WordPressUser>;
 
   // Comments
   getComments(params?: CommentQueryParams): Promise<WordPressComment[]>;
-  getComment(
-    id: number,
-    context?: "view" | "embed" | "edit",
-  ): Promise<WordPressComment>;
+  getComment(id: number, context?: "view" | "embed" | "edit"): Promise<WordPressComment>;
   createComment(data: CreateCommentRequest): Promise<WordPressComment>;
   updateComment(data: UpdateCommentRequest): Promise<WordPressComment>;
-  deleteComment(
-    id: number,
-    force?: boolean,
-  ): Promise<{ deleted: boolean; previous?: WordPressComment }>;
+  deleteComment(id: number, force?: boolean): Promise<{ deleted: boolean; previous?: WordPressComment }>;
   approveComment(id: number): Promise<WordPressComment>;
   rejectComment(id: number): Promise<WordPressComment>;
   spamComment(id: number): Promise<WordPressComment>;
@@ -237,10 +185,7 @@ export interface IWordPressClient {
   getCategory(id: number): Promise<WordPressCategory>;
   createCategory(data: CreateCategoryRequest): Promise<WordPressCategory>;
   updateCategory(data: UpdateCategoryRequest): Promise<WordPressCategory>;
-  deleteCategory(
-    id: number,
-    force?: boolean,
-  ): Promise<{ deleted: boolean; previous?: WordPressCategory }>;
+  deleteCategory(id: number, force?: boolean): Promise<{ deleted: boolean; previous?: WordPressCategory }>;
 
   getTags(params?: {
     search?: string;
@@ -255,16 +200,11 @@ export interface IWordPressClient {
   getTag(id: number): Promise<WordPressTag>;
   createTag(data: CreateTagRequest): Promise<WordPressTag>;
   updateTag(data: UpdateTagRequest): Promise<WordPressTag>;
-  deleteTag(
-    id: number,
-    force?: boolean,
-  ): Promise<{ deleted: boolean; previous?: WordPressTag }>;
+  deleteTag(id: number, force?: boolean): Promise<{ deleted: boolean; previous?: WordPressTag }>;
 
   // Site Management
   getSiteSettings(): Promise<WordPressSiteSettings>;
-  updateSiteSettings(
-    settings: Partial<WordPressSiteSettings>,
-  ): Promise<WordPressSiteSettings>;
+  updateSiteSettings(settings: Partial<WordPressSiteSettings>): Promise<WordPressSiteSettings>;
   getSiteInfo(): Promise<{
     name: string;
     description: string;
@@ -278,18 +218,9 @@ export interface IWordPressClient {
   }>;
 
   // Application Passwords
-  getApplicationPasswords(
-    userId?: number | "me",
-  ): Promise<WordPressApplicationPassword[]>;
-  createApplicationPassword(
-    userId: number | "me",
-    name: string,
-    appId?: string,
-  ): Promise<WordPressApplicationPassword>;
-  deleteApplicationPassword(
-    userId: number | "me",
-    uuid: string,
-  ): Promise<{ deleted: boolean }>;
+  getApplicationPasswords(userId?: number | "me"): Promise<WordPressApplicationPassword[]>;
+  createApplicationPassword(userId: number | "me", name: string, appId?: string): Promise<WordPressApplicationPassword>;
+  deleteApplicationPassword(userId: number | "me", uuid: string): Promise<{ deleted: boolean }>;
 
   // Search
   search(
@@ -366,9 +297,7 @@ export function isWordPressAPIError(error: any): error is WordPressAPIError {
   return error instanceof WordPressAPIError;
 }
 
-export function isAuthenticationError(
-  error: any,
-): error is AuthenticationError {
+export function isAuthenticationError(error: any): error is AuthenticationError {
   return error instanceof AuthenticationError;
 }
 
