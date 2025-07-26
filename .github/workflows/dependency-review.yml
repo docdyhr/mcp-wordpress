@@ -39,6 +39,7 @@ jobs:
 
       - name: 🔍 Dependency Review
         uses: actions/dependency-review-action@v4
+        continue-on-error: true  # Don't fail if GitHub Advanced Security not enabled
         with:
           # Make less strict for dependency updates
           fail-on-severity: high  # Changed from 'moderate' to 'high'
