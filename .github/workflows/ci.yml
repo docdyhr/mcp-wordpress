@@ -188,18 +188,33 @@ jobs:
         run: |
           echo "Installing WordPress and setting up test user..."
           
-          # Wait for WordPress to be responsive
-          timeout 60 bash -c 'until curl -s http://localhost:8080/wp-admin/install.php; do sleep 2; done'
+          # Get WordPress container ID
+          WP_CONTAINER=$(docker ps --filter "ancestor=wordpress:${{ matrix.wordpress-version }}" --format "{{.ID}}")
+          echo "WordPress container: $WP_CONTAINER"
           
-          # Install WP-CLI
-          docker exec $(docker ps --filter "ancestor=wordpress:${{ matrix.wordpress-version }}" --format "{{.ID}}") bash -c "
+          # Wait for WordPress container to be ready
+          echo "Waiting for WordPress container to be ready..."
+          timeout 60 bash -c "until docker exec $WP_CONTAINER php -v >/dev/null 2>&1; do sleep 2; echo -n '.'; done"
+          echo "Container ready"
+          
+          # Install WP-CLI in container
+          echo "Installing WP-CLI..."
+          docker exec $WP_CONTAINER bash -c "
+            cd /tmp &&
             curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar &&
             chmod +x wp-cli.phar &&
-            mv wp-cli.phar /usr/local/bin/wp
+            mv wp-cli.phar /usr/local/bin/wp &&
+            wp --version
           "
           
+          # Wait for WordPress to be accessible
+          echo "Waiting for WordPress to be accessible..."
+          timeout 120 bash -c 'until curl -f http://localhost:8080/ >/dev/null 2>&1; do sleep 2; echo -n "."; done'
+          echo "WordPress accessible"
+          
           # Install WordPress
-          docker exec $(docker ps --filter "ancestor=wordpress:${{ matrix.wordpress-version }}" --format "{{.ID}}") bash -c "
+          echo "Installing WordPress..."
+          docker exec $WP_CONTAINER bash -c "
             cd /var/www/html &&
             wp core install \
               --url='http://localhost:8080' \
@@ -207,24 +222,35 @@ jobs:
               --admin_user='test_user' \
               --admin_password='test_password' \
               --admin_email='test@example.com' \
-              --allow-root
+              --allow-root --quiet
           "
           
-          # Configure REST API and permissions
-          docker exec $(docker ps --filter "ancestor=wordpress:${{ matrix.wordpress-version }}" --format "{{.ID}}") bash -c "
+          # Configure WordPress for API testing
+          echo "Configuring WordPress for API testing..."
+          docker exec $WP_CONTAINER bash -c "
             cd /var/www/html &&
-            wp rewrite structure '/%postname%/' --allow-root &&
-            wp rewrite flush --allow-root &&
-            wp user update test_user --role=administrator --allow-root &&
-            wp post create --post_title='Test Post' --post_content='Test content' --post_status=publish --allow-root
+            wp rewrite structure '/%postname%/' --allow-root --quiet &&
+            wp rewrite flush --allow-root --quiet &&
+            wp user update test_user --role=administrator --allow-root --quiet &&
+            wp post create --post_title='Test Post' --post_content='Test content for API' --post_status=publish --allow-root --quiet
           "
           
-          echo "WordPress setup completed"
+          # Verify installation
+          echo "Verifying WordPress installation..."
+          if curl -s http://localhost:8080/wp-json/wp/v2/ | grep -q 'namespace'; then
+            echo "✅ WordPress REST API is working"
+          else
+            echo "❌ WordPress REST API not working"
+            curl -s http://localhost:8080/wp-json/wp/v2/ || true
+            exit 1
+          fi
+          
+          echo "WordPress setup completed successfully"
 
       - name: 🧪 Test WordPress ${{ matrix.wordpress-version }} Compatibility
-        run: npm run test:integration
+        run: npm run test:compatibility
         env:
-          WORDPRESS_SITE_URL: http://localhost:8080
+          WORDPRESS_TEST_URL: http://localhost:8080
           WORDPRESS_USERNAME: test_user
           WORDPRESS_PASSWORD: test_password
           WORDPRESS_AUTH_METHOD: basic
