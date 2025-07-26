@@ -6,8 +6,8 @@
 import * as fs from "fs/promises";
 import * as path from "path";
 import { z } from "zod";
-import { SecurityUtils } from "./SecurityConfig";
-import { SecurityValidationError } from "./InputValidator";
+import { SecurityUtils } from "./SecurityConfig.js";
+import { SecurityValidationError } from "./InputValidator.js";
 
 interface SecurityPolicy {
   id: string;

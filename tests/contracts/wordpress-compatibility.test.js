@@ -7,16 +7,19 @@ import { WordPressClient } from "../../dist/client/api.js";
  */
 describe("WordPress API Compatibility", () => {
   const testConfig = {
-    baseUrl: process.env.WORDPRESS_TEST_URL || "http://localhost:8080",
+    baseUrl: process.env.WORDPRESS_TEST_URL || "http://localhost:8081",
     auth: {
-      method: "app-password",
-      username: process.env.WORDPRESS_USERNAME || "admin",
-      appPassword: process.env.WORDPRESS_APP_PASSWORD || "password",
+      method: "basic",
+      username: process.env.WORDPRESS_USERNAME || "testuser",
+      password: process.env.WORDPRESS_PASSWORD || "test-password-123",
     },
   };
 
   // Skip in CI unless we have a test WordPress instance
-  const skipTests = process.env.CI && !process.env.WORDPRESS_TEST_URL;
+  // Also skip in local development if no WordPress instance is configured
+  const skipTests =
+    (process.env.CI && !process.env.WORDPRESS_TEST_URL) ||
+    (!process.env.CI && !process.env.WORDPRESS_TEST_URL && !process.env.SKIP_LIVE_TESTS);
 
   // Note: These tests require a running WordPress instance at WORDPRESS_TEST_URL
   // In local development, tests will fail if WordPress is not available
@@ -51,9 +54,16 @@ describe("WordPress API Compatibility", () => {
     it("should handle authentication errors", async () => {
       const badClient = new WordPressClient({
         baseUrl: testConfig.baseUrl,
-        auth: { method: "app-password", username: "bad", appPassword: "bad" },
+        auth: { method: "basic", username: "bad", password: "bad" },
       });
-      await expect(badClient.getPosts()).rejects.toThrow();
+      // Use a POST operation that requires authentication instead of GET
+      await expect(
+        badClient.createPost({
+          title: "Test Post",
+          content: "This should fail due to bad credentials",
+          status: "draft",
+        }),
+      ).rejects.toThrow();
     });
   });
 

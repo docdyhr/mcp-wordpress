@@ -4,8 +4,8 @@
  */
 
 // Core Security Components
-export { SecurityConfig, SecurityUtils, createSecureError, getEnvironmentSecurity } from "./SecurityConfig";
-import { SecurityValidationError } from "./InputValidator";
+export { SecurityConfig, SecurityUtils, createSecureError, getEnvironmentSecurity } from "./SecurityConfig.js";
+import { SecurityValidationError } from "./InputValidator.js";
 export {
   InputSanitizer,
   SecuritySchemas,
@@ -13,31 +13,31 @@ export {
   SecurityValidationError,
   validateSecurity,
   ToolSchemas,
-} from "./InputValidator";
+} from "./InputValidator.js";
 
 // AI-Powered Security Scanner
-import { AISecurityScanner } from "./AISecurityScanner";
-export { AISecurityScanner } from "./AISecurityScanner";
+import { AISecurityScanner } from "./AISecurityScanner.js";
+export { AISecurityScanner } from "./AISecurityScanner.js";
 
 // Automated Remediation System
-import { AutomatedRemediation, RemediationResult as _RemediationResult } from "./AutomatedRemediation";
-export { AutomatedRemediation, RemediationResult } from "./AutomatedRemediation";
+import { AutomatedRemediation, RemediationResult as _RemediationResult } from "./AutomatedRemediation.js";
+export { AutomatedRemediation, RemediationResult } from "./AutomatedRemediation.js";
 
 // Security Code Reviewer
-import { SecurityReviewer, CodeReviewResult as _CodeReviewResult } from "./SecurityReviewer";
-export { SecurityReviewer, CodeReviewResult } from "./SecurityReviewer";
+import { SecurityReviewer, CodeReviewResult as _CodeReviewResult } from "./SecurityReviewer.js";
+export { SecurityReviewer, CodeReviewResult } from "./SecurityReviewer.js";
 
 // Security Configuration Manager
-import { SecurityConfigManager } from "./SecurityConfigManager";
-export { SecurityConfigManager } from "./SecurityConfigManager";
+import { SecurityConfigManager } from "./SecurityConfigManager.js";
+export { SecurityConfigManager } from "./SecurityConfigManager.js";
 
 // Security Monitoring and Alerting
-import { SecurityMonitor, SecurityEvent as _SecurityEvent } from "./SecurityMonitoring";
-export { SecurityMonitor, SecurityEvent } from "./SecurityMonitoring";
+import { SecurityMonitor, SecurityEvent as _SecurityEvent } from "./SecurityMonitoring.js";
+export { SecurityMonitor, SecurityEvent } from "./SecurityMonitoring.js";
 
 // CI/CD Pipeline Integration
-import { SecurityCIPipeline, PipelineSecurityReport as _PipelineSecurityReport } from "./SecurityCIPipeline";
-export { SecurityCIPipeline, PipelineSecurityReport } from "./SecurityCIPipeline";
+import { SecurityCIPipeline, PipelineSecurityReport as _PipelineSecurityReport } from "./SecurityCIPipeline.js";
+export { SecurityCIPipeline, PipelineSecurityReport } from "./SecurityCIPipeline.js";
 
 // Type definitions for external use
 export interface SecurityScanOptions {

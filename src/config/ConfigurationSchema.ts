@@ -6,7 +6,7 @@ import { z } from "zod";
 const AuthMethodSchema = z.enum(["app-password", "jwt", "basic", "api-key", "cookie"] as const);
 
 /**
- * Zod schema for URL validation
+ * Zod schema for URL validation with security checks
  */
 const UrlSchema = z
   .string()
@@ -14,7 +14,28 @@ const UrlSchema = z
   .refine((url) => {
     const parsed = new URL(url);
     return parsed.protocol === "http:" || parsed.protocol === "https:";
-  }, "URL must use http or https protocol");
+  }, "URL must use http or https protocol")
+  .refine((url) => {
+    // Additional security checks
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.toLowerCase();
+
+    // In production, block localhost and private IPs
+    if (process.env.NODE_ENV === "production") {
+      if (
+        hostname === "localhost" ||
+        hostname === "127.0.0.1" ||
+        hostname === "::1" ||
+        hostname.match(/^10\./) ||
+        hostname.match(/^172\.(1[6-9]|2[0-9]|3[01])\./) ||
+        hostname.match(/^192\.168\./)
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  }, "Private/localhost URLs not allowed in production");
 
 /**
  * Zod schema for WordPress site configuration

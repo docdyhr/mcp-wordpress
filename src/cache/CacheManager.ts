@@ -106,13 +106,7 @@ export class CacheManager {
   /**
    * Set value in cache with TTL
    */
-  set<T>(
-    key: string,
-    value: T,
-    ttl: number = this.config.defaultTTL,
-    etag?: string,
-    lastModified?: string,
-  ): void {
+  set<T>(key: string, value: T, ttl: number = this.config.defaultTTL, etag?: string, lastModified?: string): void {
     // Check if we need to evict entries
     if (this.cache.size >= this.config.maxSize && !this.cache.has(key)) {
       this.evictLRU();

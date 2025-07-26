@@ -31,15 +31,7 @@ export interface WordPressLinks {
 }
 
 // Post Types
-export type PostStatus =
-  | "publish"
-  | "future"
-  | "draft"
-  | "pending"
-  | "private"
-  | "trash"
-  | "auto-draft"
-  | "inherit";
+export type PostStatus = "publish" | "future" | "draft" | "pending" | "private" | "trash" | "auto-draft" | "inherit";
 export type PostFormat =
   | "standard"
   | "aside"
@@ -169,12 +161,7 @@ export interface WordPressMedia {
 }
 
 // User Types
-export type UserRole =
-  | "administrator"
-  | "editor"
-  | "author"
-  | "contributor"
-  | "subscriber";
+export type UserRole = "administrator" | "editor" | "author" | "contributor" | "subscriber";
 
 export interface WordPressUser {
   id: number;
@@ -446,8 +433,7 @@ export interface CreateUserRequest {
   meta?: Record<string, any>;
 }
 
-export interface UpdateUserRequest
-  extends Partial<Omit<CreateUserRequest, "username">> {
+export interface UpdateUserRequest extends Partial<Omit<CreateUserRequest, "username">> {
   id: number;
 }
 
@@ -465,8 +451,7 @@ export interface CreateCommentRequest {
   meta?: Record<string, any>;
 }
 
-export interface UpdateCommentRequest
-  extends Partial<Omit<CreateCommentRequest, "status">> {
+export interface UpdateCommentRequest extends Partial<Omit<CreateCommentRequest, "status">> {
   id: number;
   status?: "approved" | "unapproved" | "spam" | "trash";
 }

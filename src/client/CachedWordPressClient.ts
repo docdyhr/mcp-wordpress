@@ -8,11 +8,7 @@ import { CacheManager } from "../cache/CacheManager.js";
 import { HttpCacheWrapper } from "../cache/HttpCacheWrapper.js";
 import { CacheInvalidation } from "../cache/CacheInvalidation.js";
 import { SecurityConfig } from "../security/SecurityConfig.js";
-import type {
-  WordPressClientConfig,
-  HTTPMethod,
-  RequestOptions,
-} from "../types/client.js";
+import type { WordPressClientConfig, HTTPMethod, RequestOptions } from "../types/client.js";
 import type {
   WordPressPost,
   WordPressUser,
@@ -147,10 +143,7 @@ export class CachedWordPressClient extends WordPressClient {
   /**
    * Delete post with cache invalidation
    */
-  async deletePost(
-    id: number,
-    force?: boolean,
-  ): Promise<{ deleted: boolean; previous?: WordPressPost }> {
+  async deletePost(id: number, force?: boolean): Promise<{ deleted: boolean; previous?: WordPressPost }> {
     const result = await super.deletePost(id, force);
 
     // Invalidate related caches
@@ -239,11 +232,7 @@ export class CachedWordPressClient extends WordPressClient {
   /**
    * Handle cache invalidation for write operations
    */
-  private async handleCacheInvalidation(
-    method: string,
-    endpoint: string,
-    data: any,
-  ): Promise<void> {
+  private async handleCacheInvalidation(method: string, endpoint: string, data: any): Promise<void> {
     const resource = this.extractResourceFromEndpoint(endpoint);
     const id = this.extractIdFromEndpoint(endpoint);
 
@@ -264,11 +253,7 @@ export class CachedWordPressClient extends WordPressClient {
         return;
     }
 
-    await this.cacheInvalidation.invalidateResource(
-      resource,
-      id,
-      operationType,
-    );
+    await this.cacheInvalidation.invalidateResource(resource, id, operationType);
   }
 
   /**

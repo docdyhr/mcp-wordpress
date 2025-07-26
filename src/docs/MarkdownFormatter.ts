@@ -256,25 +256,20 @@ ${type.examples.length > 1 ? this.generateAdditionalExamples(type.examples.slice
   /**
    * Generate parameters table
    */
-  private generateParametersTable(
-    parameters: ParameterDocumentation[],
-  ): string {
+  private generateParametersTable(parameters: ParameterDocumentation[]): string {
     if (parameters.length === 0) {
       return "*No parameters required.*";
     }
 
-    const headers =
-      "| Parameter | Type | Required | Description | Default | Examples |";
-    const separator =
-      "|-----------|------|----------|-------------|---------|----------|";
+    const headers = "| Parameter | Type | Required | Description | Default | Examples |";
+    const separator = "|-----------|------|----------|-------------|---------|----------|";
 
     const rows = parameters.map((param) => {
       const examples = param.examples
         .slice(0, 2)
         .map((ex) => `\`${ex}\``)
         .join(", ");
-      const defaultVal =
-        param.defaultValue !== undefined ? `\`${param.defaultValue}\`` : "-";
+      const defaultVal = param.defaultValue !== undefined ? `\`${param.defaultValue}\`` : "-";
       const required = param.required ? "✅" : "❌";
 
       return `| \`${param.name}\` | \`${param.type}\` | ${required} | ${param.description} | ${defaultVal} | ${examples || "-"} |`;
@@ -316,10 +311,7 @@ ${example.errorExample ? this.generateErrorExample(example.errorExample) : ""}
   /**
    * Generate error example
    */
-  private generateErrorExample(errorExample: {
-    scenario: string;
-    error: any;
-  }): string {
+  private generateErrorExample(errorExample: { scenario: string; error: any }): string {
     return `**Error Example (${errorExample.scenario}):**
 \`\`\`json
 ${JSON.stringify(errorExample.error, null, 2)}
@@ -420,8 +412,7 @@ ${relatedTools.map((tool) => `- [\`${tool}\`](./${tool}.md)`).join("\n")}
     const separator = "|----------|-------|-------------|";
 
     const rows = categories.map(
-      (cat) =>
-        `| [${cat.name}](./categories/${cat.name.toLowerCase()}.md) | ${cat.toolCount} | ${cat.description} |`,
+      (cat) => `| [${cat.name}](./categories/${cat.name.toLowerCase()}.md) | ${cat.toolCount} | ${cat.description} |`,
     );
 
     return [headers, separator, ...rows].join("\n");
@@ -435,8 +426,7 @@ ${relatedTools.map((tool) => `- [\`${tool}\`](./${tool}.md)`).join("\n")}
     const separator = "|------|----------|-------------|";
 
     const rows = tools.map(
-      (tool) =>
-        `| [\`${tool.name}\`](./tools/${tool.name}.md) | ${tool.category} | ${tool.description} |`,
+      (tool) => `| [\`${tool.name}\`](./tools/${tool.name}.md) | ${tool.category} | ${tool.description} |`,
     );
 
     return [headers, separator, ...rows].join("\n");
@@ -486,8 +476,7 @@ ${relatedTools.map((tool) => `- [\`${tool}\`](./${tool}.md)`).join("\n")}
       performance: "brightgreen",
     };
 
-    const color =
-      colors[category.toLowerCase() as keyof typeof colors] || "lightgrey";
+    const color = colors[category.toLowerCase() as keyof typeof colors] || "lightgrey";
     return `![${category}](https://img.shields.io/badge/category-${category}-${color})`;
   }
 

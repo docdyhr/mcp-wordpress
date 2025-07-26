@@ -67,8 +67,7 @@ export class HttpCacheWrapper {
 
     // Check for conditional request support
     if (cachedEntry && this.cacheManager.supportsConditionalRequest(cacheKey)) {
-      const conditionalHeaders =
-        this.cacheManager.getConditionalHeaders(cacheKey);
+      const conditionalHeaders = this.cacheManager.getConditionalHeaders(cacheKey);
 
       // Add conditional headers to request
       const requestWithHeaders = {
@@ -80,10 +79,7 @@ export class HttpCacheWrapper {
       };
 
       try {
-        const response = await this.executeRequestWithHeaders(
-          requestFn,
-          requestWithHeaders,
-        );
+        const response = await this.executeRequestWithHeaders(requestFn, requestWithHeaders);
 
         // 304 Not Modified - return cached data
         if (response.status === 304) {
@@ -99,10 +95,7 @@ export class HttpCacheWrapper {
         return await this.cacheAndReturn(response, cacheKey, cacheOptions);
       } catch (error) {
         // If conditional request fails, try without conditions
-        console.warn(
-          "Conditional request failed, falling back to regular request:",
-          error,
-        );
+        console.warn("Conditional request failed, falling back to regular request:", error);
       }
     }
 
@@ -126,11 +119,7 @@ export class HttpCacheWrapper {
    * Invalidate cache for specific endpoint
    */
   invalidate(endpoint: string, params?: any): void {
-    const cacheKey = this.cacheManager.generateKey(
-      this.siteId,
-      endpoint,
-      params,
-    );
+    const cacheKey = this.cacheManager.generateKey(this.siteId, endpoint, params);
     this.cacheManager.delete(cacheKey);
   }
 
@@ -152,17 +141,8 @@ export class HttpCacheWrapper {
   /**
    * Pre-warm cache with data
    */
-  warm<T>(
-    endpoint: string,
-    data: T,
-    params?: any,
-    cacheOptions?: HttpCacheOptions,
-  ): void {
-    const cacheKey = this.cacheManager.generateKey(
-      this.siteId,
-      endpoint,
-      params,
-    );
+  warm<T>(endpoint: string, data: T, params?: any, cacheOptions?: HttpCacheOptions): void {
+    const cacheKey = this.cacheManager.generateKey(this.siteId, endpoint, params);
     const ttl = cacheOptions?.ttl || this.getDefaultTTL(endpoint);
 
     const cachedResponse: CachedResponse = {
@@ -171,17 +151,10 @@ export class HttpCacheWrapper {
       headers: this.generateCacheHeaders(cacheOptions, endpoint),
       etag: this.generateETag(data),
       lastModified: new Date().toUTCString(),
-      cacheControl:
-        cacheOptions?.cacheControl || this.getDefaultCacheControl(endpoint),
+      cacheControl: cacheOptions?.cacheControl || this.getDefaultCacheControl(endpoint),
     };
 
-    this.cacheManager.set(
-      cacheKey,
-      cachedResponse,
-      ttl,
-      cachedResponse.etag,
-      cachedResponse.lastModified,
-    );
+    this.cacheManager.set(cacheKey, cachedResponse, ttl, cachedResponse.etag, cachedResponse.lastModified);
   }
 
   /**
@@ -215,9 +188,7 @@ export class HttpCacheWrapper {
   /**
    * Extract headers that affect caching
    */
-  private extractCacheableHeaders(
-    headers?: Record<string, string>,
-  ): Record<string, string> {
+  private extractCacheableHeaders(headers?: Record<string, string>): Record<string, string> {
     if (!headers) return {};
 
     const cacheableHeaders: Record<string, string> = {};
@@ -272,8 +243,7 @@ export class HttpCacheWrapper {
     // Generate ETags and cache headers
     const etag = this.generateETag(response.data);
     const lastModified = new Date().toUTCString();
-    const cacheControl =
-      cacheOptions?.cacheControl || this.getDefaultCacheControl(endpoint);
+    const cacheControl = cacheOptions?.cacheControl || this.getDefaultCacheControl(endpoint);
 
     const cachedResponse: CachedResponse = {
       data: response.data,
@@ -304,10 +274,7 @@ export class HttpCacheWrapper {
    * Generate ETag for response data
    */
   private generateETag(data: any): string {
-    const hash = crypto
-      .createHash("md5")
-      .update(JSON.stringify(data))
-      .digest("hex");
+    const hash = crypto.createHash("md5").update(JSON.stringify(data)).digest("hex");
     return `"${hash}"`;
   }
 
@@ -356,10 +323,7 @@ export class HttpCacheWrapper {
   /**
    * Generate cache headers
    */
-  private generateCacheHeaders(
-    options?: HttpCacheOptions,
-    endpoint?: string,
-  ): Record<string, string> {
+  private generateCacheHeaders(options?: HttpCacheOptions, endpoint?: string): Record<string, string> {
     const headers: Record<string, string> = {};
 
     if (options?.cacheControl) {

@@ -65,22 +65,19 @@ export default class PerformanceTools {
           {
             name: "site",
             type: "string",
-            description:
-              "Specific site ID for multi-site setups (optional for single site)",
+            description: "Specific site ID for multi-site setups (optional for single site)",
             required: false,
           },
           {
             name: "category",
             type: "string",
-            description:
-              "Category of metrics to return (overview, requests, cache, system, tools, all)",
+            description: "Category of metrics to return (overview, requests, cache, system, tools, all)",
             required: false,
           },
           {
             name: "format",
             type: "string",
-            description:
-              "Detail level of the response (summary, detailed, raw)",
+            description: "Detail level of the response (summary, detailed, raw)",
             required: false,
           },
         ],
@@ -93,15 +90,13 @@ export default class PerformanceTools {
           {
             name: "site",
             type: "string",
-            description:
-              "Specific site ID for multi-site setups (optional for single site)",
+            description: "Specific site ID for multi-site setups (optional for single site)",
             required: false,
           },
           {
             name: "timeframe",
             type: "string",
-            description:
-              "Time period for historical data (1h, 6h, 12h, 24h, 7d)",
+            description: "Time period for historical data (1h, 6h, 12h, 24h, 7d)",
             required: false,
           },
           {
@@ -127,15 +122,13 @@ export default class PerformanceTools {
           {
             name: "site",
             type: "string",
-            description:
-              "Specific site ID for multi-site setups (optional for single site)",
+            description: "Specific site ID for multi-site setups (optional for single site)",
             required: false,
           },
           {
             name: "category",
             type: "string",
-            description:
-              "Benchmark category (response_time, cache_performance, error_rate, system_resources, all)",
+            description: "Benchmark category (response_time, cache_performance, error_rate, system_resources, all)",
             required: false,
           },
           {
@@ -154,22 +147,19 @@ export default class PerformanceTools {
           {
             name: "site",
             type: "string",
-            description:
-              "Specific site ID for multi-site setups (optional for single site)",
+            description: "Specific site ID for multi-site setups (optional for single site)",
             required: false,
           },
           {
             name: "severity",
             type: "string",
-            description:
-              "Filter alerts by severity level (info, warning, error, critical)",
+            description: "Filter alerts by severity level (info, warning, error, critical)",
             required: false,
           },
           {
             name: "category",
             type: "string",
-            description:
-              "Filter alerts by category (performance, cache, system, wordpress)",
+            description: "Filter alerts by category (performance, cache, system, wordpress)",
             required: false,
           },
           {
@@ -194,22 +184,19 @@ export default class PerformanceTools {
           {
             name: "site",
             type: "string",
-            description:
-              "Specific site ID for multi-site setups (optional for single site)",
+            description: "Specific site ID for multi-site setups (optional for single site)",
             required: false,
           },
           {
             name: "focus",
             type: "string",
-            description:
-              "Optimization focus area (speed, reliability, efficiency, scaling)",
+            description: "Optimization focus area (speed, reliability, efficiency, scaling)",
             required: false,
           },
           {
             name: "priority",
             type: "string",
-            description:
-              "Implementation timeline (quick_wins, medium_term, long_term, all)",
+            description: "Implementation timeline (quick_wins, medium_term, long_term, all)",
             required: false,
           },
           {
@@ -234,8 +221,7 @@ export default class PerformanceTools {
           {
             name: "site",
             type: "string",
-            description:
-              "Specific site ID for multi-site setups (optional for single site)",
+            description: "Specific site ID for multi-site setups (optional for single site)",
             required: false,
           },
           {
@@ -338,8 +324,7 @@ export default class PerformanceTools {
             .sort(([, a], [, b]) => (b as number) - (a as number))
             .slice(0, 5)
             .map(([tool, count]) => ({ tool, count })),
-          toolPerformance:
-            format === "detailed" ? metrics.tools.toolPerformance : undefined,
+          toolPerformance: format === "detailed" ? metrics.tools.toolPerformance : undefined,
         };
       }
 
@@ -373,12 +358,7 @@ export default class PerformanceTools {
    */
   private async getPerformanceHistory(params: any): Promise<any> {
     return toolWrapper(async () => {
-      const {
-        site,
-        timeframe = "24h",
-        metrics: requestedMetrics,
-        includeTrends = true,
-      } = params;
+      const { site, timeframe = "24h", metrics: requestedMetrics, includeTrends = true } = params;
 
       // Convert timeframe to milliseconds
       const timeframMs = this.parseTimeframe(timeframe);
@@ -396,17 +376,12 @@ export default class PerformanceTools {
 
         // Filter trends by requested metrics
         if (requestedMetrics && Array.isArray(requestedMetrics)) {
-          trends = trends.filter((trend) =>
-            requestedMetrics.includes(trend.metric),
-          );
+          trends = trends.filter((trend) => requestedMetrics.includes(trend.metric));
         }
       }
 
       // Process historical data for charting
-      const chartData = this.processHistoricalDataForChart(
-        historicalData,
-        requestedMetrics,
-      );
+      const chartData = this.processHistoricalDataForChart(historicalData, requestedMetrics);
 
       return {
         success: true,
@@ -416,21 +391,12 @@ export default class PerformanceTools {
           historicalData: chartData,
           trends: trends || [],
           summary: {
-            averageResponseTime: this.calculateAverage(
-              historicalData.map((d) => d.requests.averageResponseTime),
-            ),
-            averageCacheHitRate: this.calculateAverage(
-              historicalData.map((d) => d.cache.hitRate),
-            ),
+            averageResponseTime: this.calculateAverage(historicalData.map((d) => d.requests.averageResponseTime)),
+            averageCacheHitRate: this.calculateAverage(historicalData.map((d) => d.cache.hitRate)),
             averageErrorRate: this.calculateAverage(
-              historicalData.map((d) =>
-                d.requests.total > 0 ? d.requests.failed / d.requests.total : 0,
-              ),
+              historicalData.map((d) => (d.requests.total > 0 ? d.requests.failed / d.requests.total : 0)),
             ),
-            totalRequests: historicalData.reduce(
-              (sum, d) => sum + d.requests.total,
-              0,
-            ),
+            totalRequests: historicalData.reduce((sum, d) => sum + d.requests.total, 0),
           },
           metadata: {
             timestamp: new Date().toISOString(),
@@ -463,9 +429,7 @@ export default class PerformanceTools {
         };
         const targetCategory = categoryMap[category];
         if (targetCategory) {
-          filteredBenchmarks = benchmarks.filter(
-            (b) => b.category === targetCategory,
-          );
+          filteredBenchmarks = benchmarks.filter((b) => b.category === targetCategory);
         }
       }
 
@@ -494,8 +458,7 @@ export default class PerformanceTools {
               benchmark.improvement > 0
                 ? {
                     needed: benchmark.improvement,
-                    description:
-                      this.getBenchmarkImprovementDescription(benchmark),
+                    description: this.getBenchmarkImprovementDescription(benchmark),
                   }
                 : null,
           })),
@@ -517,13 +480,7 @@ export default class PerformanceTools {
    */
   private async getPerformanceAlerts(params: any): Promise<any> {
     return toolWrapper(async () => {
-      const {
-        site,
-        severity,
-        category,
-        limit = 20,
-        includeAnomalies = true,
-      } = params;
+      const { site, severity, category, limit = 20, includeAnomalies = true } = params;
 
       // Get alerts from monitor
       let alerts = this.monitor.getAlerts(severity);
@@ -575,10 +532,7 @@ export default class PerformanceTools {
           summary: {
             alerts: alertSummary,
             anomalies: anomalySummary,
-            overallStatus: this.calculateAlertStatus(
-              alertSummary,
-              anomalySummary,
-            ),
+            overallStatus: this.calculateAlertStatus(alertSummary, anomalySummary),
           },
           metadata: {
             timestamp: new Date().toISOString(),
@@ -595,13 +549,7 @@ export default class PerformanceTools {
    */
   private async getOptimizationRecommendations(params: any): Promise<any> {
     return toolWrapper(async () => {
-      const {
-        site,
-        focus = "speed",
-        priority = "all",
-        includeROI = true,
-        includePredictions = true,
-      } = params;
+      const { site, focus = "speed", priority = "all", includeROI = true, includePredictions = true } = params;
 
       // Generate optimization plan
       const optimizationPlan = this.analytics.generateOptimizationPlan();
@@ -641,9 +589,7 @@ export default class PerformanceTools {
           scaling: ["performance", "reliability"],
         };
         const targetImpacts = focusMap[focus] || [];
-        recommendations = recommendations.filter((r) =>
-          targetImpacts.includes(r.impact),
-        );
+        recommendations = recommendations.filter((r) => targetImpacts.includes(r.impact));
       }
 
       // Get predictions if requested
@@ -685,13 +631,7 @@ export default class PerformanceTools {
    */
   private async exportPerformanceReport(params: any): Promise<any> {
     return toolWrapper(async () => {
-      const {
-        site,
-        format = "json",
-        includeHistorical = true,
-        includeAnalytics = true,
-        timeRange = "24h",
-      } = params;
+      const { site, format = "json", includeHistorical = true, includeAnalytics = true, timeRange = "24h" } = params;
 
       // Generate comprehensive analytics report
       const report = this.analytics.exportAnalyticsReport();
@@ -768,8 +708,7 @@ export default class PerformanceTools {
     if (metrics.requests.averageResponseTime > 2000) score -= 30;
     else if (metrics.requests.averageResponseTime > 1000) score -= 15;
 
-    const errorRate =
-      metrics.requests.failed / Math.max(metrics.requests.total, 1);
+    const errorRate = metrics.requests.failed / Math.max(metrics.requests.total, 1);
     if (errorRate > 0.05) score -= 30;
     else if (errorRate > 0.02) score -= 15;
 
@@ -794,8 +733,7 @@ export default class PerformanceTools {
     else if (metrics.requests.averageResponseTime > 800) score -= 10;
 
     // Error rate scoring
-    const errorRate =
-      metrics.requests.failed / Math.max(metrics.requests.total, 1);
+    const errorRate = metrics.requests.failed / Math.max(metrics.requests.total, 1);
     if (errorRate > 0.1) score -= 30;
     else if (errorRate > 0.05) score -= 20;
     else if (errorRate > 0.02) score -= 10;
@@ -814,9 +752,7 @@ export default class PerformanceTools {
 
   private calculateCacheEfficiency(cacheMetrics: any): string {
     const efficiency =
-      cacheMetrics.hitRate * 100 +
-      (cacheMetrics.totalSize > 0 ? 10 : 0) -
-      (cacheMetrics.evictions > 100 ? 10 : 0);
+      cacheMetrics.hitRate * 100 + (cacheMetrics.totalSize > 0 ? 10 : 0) - (cacheMetrics.evictions > 100 ? 10 : 0);
 
     if (efficiency >= 95) return "Excellent";
     if (efficiency >= 85) return "Good";
@@ -848,19 +784,10 @@ export default class PerformanceTools {
     return map[timeframe] || map["24h"];
   }
 
-  private processHistoricalDataForChart(
-    data: any[],
-    requestedMetrics?: string[],
-  ): any {
+  private processHistoricalDataForChart(data: any[], requestedMetrics?: string[]): any {
     if (!data.length) return {};
 
-    const allMetrics = [
-      "responseTime",
-      "cacheHitRate",
-      "errorRate",
-      "memoryUsage",
-      "requestVolume",
-    ];
+    const allMetrics = ["responseTime", "cacheHitRate", "errorRate", "memoryUsage", "requestVolume"];
     const metricsToProcess = requestedMetrics || allMetrics;
 
     const result: any = {};
@@ -883,10 +810,7 @@ export default class PerformanceTools {
       case "cacheHitRate":
         return dataPoint.cache.hitRate * 100;
       case "errorRate":
-        return (
-          (dataPoint.requests.failed / Math.max(dataPoint.requests.total, 1)) *
-          100
-        );
+        return (dataPoint.requests.failed / Math.max(dataPoint.requests.total, 1)) * 100;
       case "memoryUsage":
         return dataPoint.system.memoryUsage;
       case "requestVolume":
@@ -919,9 +843,7 @@ export default class PerformanceTools {
       "Error Rate": `Reduce by ${benchmark.improvement.toFixed(2)}%`,
       "Memory Usage": `Reduce by ${benchmark.improvement.toFixed(0)}%`,
     };
-    return (
-      improvements[benchmark.category] || `Improve by ${benchmark.improvement}`
-    );
+    return improvements[benchmark.category] || `Improve by ${benchmark.improvement}`;
   }
 
   private calculateOverallRanking(benchmarks: any[]): {
@@ -932,8 +854,7 @@ export default class PerformanceTools {
     const excellentCount = statuses.filter((s) => s === "excellent").length;
     const goodCount = statuses.filter((s) => s === "good").length;
 
-    const percentile =
-      ((excellentCount + goodCount * 0.8) / statuses.length) * 100;
+    const percentile = ((excellentCount + goodCount * 0.8) / statuses.length) * 100;
 
     let status = "Needs Improvement";
     if (percentile >= 90) status = "Top Performer";
@@ -948,8 +869,7 @@ export default class PerformanceTools {
   }
 
   private formatAnomalyDescription(anomaly: any): string {
-    const direction =
-      anomaly.actualValue > anomaly.expectedValue ? "higher" : "lower";
+    const direction = anomaly.actualValue > anomaly.expectedValue ? "higher" : "lower";
     return `${anomaly.metric} is ${Math.abs(anomaly.deviation).toFixed(1)}% ${direction} than expected (${anomaly.expectedValue.toFixed(2)} vs ${anomaly.actualValue.toFixed(2)})`;
   }
 
@@ -959,8 +879,7 @@ export default class PerformanceTools {
 
     if (critical > 0) return "Critical Issues Detected";
     if (high > 2) return "High Priority Issues";
-    if (alertSummary.warning + anomalySummary.moderate > 5)
-      return "Performance Warnings";
+    if (alertSummary.warning + anomalySummary.moderate > 5) return "Performance Warnings";
     return "System Healthy";
   }
 
@@ -984,9 +903,7 @@ export default class PerformanceTools {
   }
 
   private calculateEstimatedImpact(recommendations: any[]): string {
-    const highImpact = recommendations.filter((r) =>
-      ["critical", "high"].includes(r.priority),
-    ).length;
+    const highImpact = recommendations.filter((r) => ["critical", "high"].includes(r.priority)).length;
     const totalImpact = recommendations.length;
 
     if (highImpact >= 3) return "Significant Performance Gains Expected";
@@ -1024,8 +941,7 @@ export default class PerformanceTools {
         errorRate: `${((metrics.requests.failed / Math.max(metrics.requests.total, 1)) * 100).toFixed(2)}%`,
       },
       recommendations: data.analytics?.insights?.slice(0, 3) || [],
-      nextSteps:
-        "Review detailed metrics and implement high-priority optimizations",
+      nextSteps: "Review detailed metrics and implement high-priority optimizations",
     };
   }
 

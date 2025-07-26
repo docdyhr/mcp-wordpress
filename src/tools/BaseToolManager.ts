@@ -10,11 +10,7 @@ export class BaseToolUtils {
    */
   static validateParams(params: Record<string, any>, required: string[]): void {
     for (const field of required) {
-      if (
-        !(field in params) ||
-        params[field] === undefined ||
-        params[field] === null
-      ) {
+      if (!(field in params) || params[field] === undefined || params[field] === null) {
         throw new Error(`Missing required parameter: ${field}`);
       }
     }
@@ -42,10 +38,7 @@ export class BaseToolUtils {
   /**
    * Cache key generation helper
    */
-  static generateCacheKey(
-    operation: string,
-    params: Record<string, unknown>,
-  ): string {
+  static generateCacheKey(operation: string, params: Record<string, unknown>): string {
     const site = params.site || "default";
     const paramStr = Object.entries(params)
       .filter(([key]) => key !== "site")
@@ -59,8 +52,6 @@ export class BaseToolUtils {
    * Format consistent response messages
    */
   static formatSuccessMessage(operation: string, details?: string): string {
-    return details
-      ? `${operation}: ${details}`
-      : `${operation} completed successfully`;
+    return details ? `${operation}: ${details}` : `${operation} completed successfully`;
   }
 }

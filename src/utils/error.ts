@@ -30,11 +30,7 @@ export function logAndReturn<T>(error: unknown, defaultValue: T): T {
 /**
  * Enhanced error handler for consistent tool error handling
  */
-export function handleToolError(
-  error: unknown,
-  operation: string,
-  context?: Record<string, unknown>,
-): never {
+export function handleToolError(error: unknown, operation: string, context?: Record<string, unknown>): never {
   console.error(`Error in ${operation}:`, error);
 
   if (context) {
@@ -51,21 +47,15 @@ export function handleToolError(
   }
 
   if (message.includes("401") || message.includes("Unauthorized")) {
-    throw new Error(
-      `Authentication failed during ${operation}. Please check your WordPress credentials.`,
-    );
+    throw new Error(`Authentication failed during ${operation}. Please check your WordPress credentials.`);
   }
 
   if (message.includes("403") || message.includes("Forbidden")) {
-    throw new Error(
-      `Permission denied during ${operation}. Please check your user permissions.`,
-    );
+    throw new Error(`Permission denied during ${operation}. Please check your user permissions.`);
   }
 
   if (message.includes("429") || message.includes("Too Many Requests")) {
-    throw new Error(
-      `Rate limit exceeded during ${operation}. Please try again later.`,
-    );
+    throw new Error(`Rate limit exceeded during ${operation}. Please try again later.`);
   }
 
   throw new Error(`Failed to ${operation}: ${message}`);
@@ -74,10 +64,7 @@ export function handleToolError(
 /**
  * Validates required parameters
  */
-export function validateRequired(
-  params: Record<string, unknown>,
-  required: string[],
-): void {
+export function validateRequired(params: Record<string, unknown>, required: string[]): void {
   const missing = required.filter((key) => !params[key]);
   if (missing.length > 0) {
     throw new Error(`Missing required parameters: ${missing.join(", ")}`);
@@ -87,10 +74,7 @@ export function validateRequired(
 /**
  * Validates site parameter for multi-site configurations
  */
-export function validateSite(
-  site: string | undefined,
-  availableSites: string[],
-): string {
+export function validateSite(site: string | undefined, availableSites: string[]): string {
   if (!site) {
     if (availableSites.length === 1) {
       return availableSites[0];
@@ -101,9 +85,7 @@ export function validateSite(
   }
 
   if (!availableSites.includes(site)) {
-    throw new Error(
-      `Site '${site}' not found. Available sites: ${availableSites.join(", ")}`,
-    );
+    throw new Error(`Site '${site}' not found. Available sites: ${availableSites.join(", ")}`);
   }
 
   return site;

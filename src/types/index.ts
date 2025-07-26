@@ -104,16 +104,7 @@ export interface Environment {
 
 // Validation Schema Types
 export interface ValidationRule {
-  type:
-    | "required"
-    | "string"
-    | "number"
-    | "boolean"
-    | "email"
-    | "url"
-    | "enum"
-    | "array"
-    | "object";
+  type: "required" | "string" | "number" | "boolean" | "email" | "url" | "enum" | "array" | "object";
   message?: string;
   min?: number;
   max?: number;
@@ -208,12 +199,8 @@ export type CategoryID = Brand<number, "CategoryID">;
 export type TagID = Brand<number, "TagID">;
 
 // Function Types
-export type AsyncFunction<TArgs extends any[] = any[], TReturn = any> = (
-  ...args: TArgs
-) => Promise<TReturn>;
-export type SyncFunction<TArgs extends any[] = any[], TReturn = any> = (
-  ...args: TArgs
-) => TReturn;
+export type AsyncFunction<TArgs extends any[] = any[], TReturn = any> = (...args: TArgs) => Promise<TReturn>;
+export type SyncFunction<TArgs extends any[] = any[], TReturn = any> = (...args: TArgs) => TReturn;
 export type AnyFunction<TArgs extends any[] = any[], TReturn = any> =
   | SyncFunction<TArgs, TReturn>
   | AsyncFunction<TArgs, TReturn>;
@@ -222,8 +209,4 @@ export type AnyFunction<TArgs extends any[] = any[], TReturn = any> =
 export type If<C extends boolean, T, F> = C extends true ? T : F;
 export type IsEqual<T, U> = T extends U ? (U extends T ? true : false) : false;
 export type IsArray<T> = T extends any[] ? true : false;
-export type IsObject<T> = T extends object
-  ? T extends any[]
-    ? false
-    : true
-  : false;
+export type IsObject<T> = T extends object ? (T extends any[] ? false : true) : false;

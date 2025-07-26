@@ -184,12 +184,50 @@ jobs:
           echo "Waiting for WordPress to be ready..."
           timeout 300 bash -c 'until curl -f http://localhost:8080; do sleep 5; done'
 
+      - name: 🔧 Setup WordPress for Testing
+        run: |
+          echo "Installing WordPress and setting up test user..."
+          
+          # Wait for WordPress to be responsive
+          timeout 60 bash -c 'until curl -s http://localhost:8080/wp-admin/install.php; do sleep 2; done'
+          
+          # Install WP-CLI
+          docker exec $(docker ps --filter "ancestor=wordpress:${{ matrix.wordpress-version }}" --format "{{.ID}}") bash -c "
+            curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar &&
+            chmod +x wp-cli.phar &&
+            mv wp-cli.phar /usr/local/bin/wp
+          "
+          
+          # Install WordPress
+          docker exec $(docker ps --filter "ancestor=wordpress:${{ matrix.wordpress-version }}" --format "{{.ID}}") bash -c "
+            cd /var/www/html &&
+            wp core install \
+              --url='http://localhost:8080' \
+              --title='CI Test Site' \
+              --admin_user='test_user' \
+              --admin_password='test_password' \
+              --admin_email='test@example.com' \
+              --allow-root
+          "
+          
+          # Configure REST API and permissions
+          docker exec $(docker ps --filter "ancestor=wordpress:${{ matrix.wordpress-version }}" --format "{{.ID}}") bash -c "
+            cd /var/www/html &&
+            wp rewrite structure '/%postname%/' --allow-root &&
+            wp rewrite flush --allow-root &&
+            wp user update test_user --role=administrator --allow-root &&
+            wp post create --post_title='Test Post' --post_content='Test content' --post_status=publish --allow-root
+          "
+          
+          echo "WordPress setup completed"
+
       - name: 🧪 Test WordPress ${{ matrix.wordpress-version }} Compatibility
         run: npm run test:integration
         env:
           WORDPRESS_SITE_URL: http://localhost:8080
           WORDPRESS_USERNAME: test_user
-          WORDPRESS_APP_PASSWORD: test_password
+          WORDPRESS_PASSWORD: test_password
+          WORDPRESS_AUTH_METHOD: basic
 
   # 🚨 Security Scanning
   security-scan:

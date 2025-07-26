@@ -4,10 +4,7 @@
  * TypeScript definitions for MCP tools, requests, and responses
  */
 
-import type {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+import type { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 
 // MCP Tool Schema Types
 export interface MCPToolSchema {
@@ -77,16 +74,13 @@ export interface MCPErrorResponse extends MCPToolResponse {
 }
 
 // MCP Tool Handler Type
-export type MCPToolHandler<TArgs = any, TResponse = MCPToolResponse> = (
-  args: TArgs,
-) => Promise<TResponse>;
+export type MCPToolHandler<TArgs = any, TResponse = MCPToolResponse> = (args: TArgs) => Promise<TResponse>;
 
 // Generic MCP Tool Handler with Client
-export type MCPToolHandlerWithClient<
-  TClient,
-  TArgs = any,
-  TResponse = MCPToolResponse,
-> = (client: TClient, args: TArgs) => Promise<TResponse>;
+export type MCPToolHandlerWithClient<TClient, TArgs = any, TResponse = MCPToolResponse> = (
+  client: TClient,
+  args: TArgs,
+) => Promise<TResponse>;
 
 // MCP Request Types (based on SDK)
 export type MCPListToolsRequest = typeof ListToolsRequestSchema;
@@ -112,10 +106,7 @@ export interface CategorizedMCPTool extends MCPTool {
 export type MCPToolRegistry = Record<string, CategorizedMCPTool>;
 
 // Handler Registry Type
-export type MCPHandlerRegistry<TClient> = Record<
-  string,
-  MCPToolHandlerWithClient<TClient>
->;
+export type MCPHandlerRegistry<TClient> = Record<string, MCPToolHandlerWithClient<TClient>>;
 
 // Tool Validation Result
 export interface ToolValidationResult {
@@ -125,14 +116,8 @@ export interface ToolValidationResult {
 }
 
 // Common Response Helpers
-export type CreateSuccessResponse = (
-  text: string,
-  additionalContent?: MCPContent[],
-) => MCPSuccessResponse;
-export type CreateErrorResponse = (
-  error: string | Error,
-  additionalContent?: MCPContent[],
-) => MCPErrorResponse;
+export type CreateSuccessResponse = (text: string, additionalContent?: MCPContent[]) => MCPSuccessResponse;
+export type CreateErrorResponse = (error: string | Error, additionalContent?: MCPContent[]) => MCPErrorResponse;
 
 // Authentication Response Types
 export interface AuthenticationResult {
@@ -203,15 +188,8 @@ export type MCPMiddleware<_TClient = any> = (
 export interface MCPExecutionPipeline<TClient> {
   validate: (toolName: string, args: any) => Promise<ToolValidationResult>;
   authenticate: (client: TClient) => Promise<boolean>;
-  execute: (
-    toolName: string,
-    client: TClient,
-    args: any,
-  ) => Promise<MCPToolResponse>;
-  postProcess: (
-    response: MCPToolResponse,
-    context: MCPToolContext,
-  ) => Promise<MCPToolResponse>;
+  execute: (toolName: string, client: TClient, args: any) => Promise<MCPToolResponse>;
+  postProcess: (response: MCPToolResponse, context: MCPToolContext) => Promise<MCPToolResponse>;
 }
 
 // Tool Documentation

@@ -66,7 +66,7 @@ CMD ["node", "dist/index.js"]
 
 ```yaml
 # docker-compose.prod.yml
-version: '3.8'
+version: "3.8"
 
 services:
   mcp-wordpress:
@@ -96,13 +96,20 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 512M
         reservations:
-          cpus: '0.25'
+          cpus: "0.25"
           memory: 256M
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1)
+          })",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -168,7 +175,7 @@ CONNECTION_TIMEOUT=10000
 
 ```yaml
 # docker-compose.loadbalanced.yml
-version: '3.8'
+version: "3.8"
 
 services:
   nginx:
@@ -263,7 +270,7 @@ http {
     upstream mcp-backend {
         server mcp-wordpress-1:3000;
         server mcp-wordpress-2:3000;
-        
+
         # Health checks
         keepalive 32;
     }
@@ -274,7 +281,7 @@ http {
     server {
         listen 80;
         server_name your-domain.com;
-        
+
         # Redirect to HTTPS
         return 301 https://$server_name$request_uri;
     }
@@ -304,7 +311,7 @@ http {
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
-            
+
             # Timeouts
             proxy_connect_timeout 5s;
             proxy_send_timeout 60s;
@@ -325,7 +332,7 @@ http {
 
 ```yaml
 # docker-compose.multisite.yml
-version: '3.8'
+version: "3.8"
 
 services:
   mcp-wordpress:
@@ -348,10 +355,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 1G
         reservations:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 512M
 
 networks:
@@ -470,44 +477,44 @@ spec:
         app: mcp-wordpress
     spec:
       containers:
-      - name: mcp-wordpress
-        image: docdyhr/mcp-wordpress:latest
-        ports:
-        - containerPort: 3000
-        envFrom:
-        - configMapRef:
-            name: mcp-wordpress-config
-        - secretRef:
-            name: mcp-wordpress-secret
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 5
-          periodSeconds: 5
-        volumeMounts:
-        - name: cache-volume
-          mountPath: /app/cache
-        - name: logs-volume
-          mountPath: /app/logs
+        - name: mcp-wordpress
+          image: docdyhr/mcp-wordpress:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: mcp-wordpress-config
+            - secretRef:
+                name: mcp-wordpress-secret
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: cache-volume
+              mountPath: /app/cache
+            - name: logs-volume
+              mountPath: /app/logs
       volumes:
-      - name: cache-volume
-        emptyDir: {}
-      - name: logs-volume
-        emptyDir: {}
+        - name: cache-volume
+          emptyDir: {}
+        - name: logs-volume
+          emptyDir: {}
 ```
 
 **Service**
@@ -523,9 +530,9 @@ spec:
   selector:
     app: mcp-wordpress
   ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 3000
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
   type: ClusterIP
 ```
 
@@ -544,20 +551,20 @@ metadata:
     nginx.ingress.kubernetes.io/rate-limit: "10"
 spec:
   tls:
-  - hosts:
-    - api.company.com
-    secretName: mcp-wordpress-tls
+    - hosts:
+        - api.company.com
+      secretName: mcp-wordpress-tls
   rules:
-  - host: api.company.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: mcp-wordpress-service
-            port:
-              number: 80
+    - host: api.company.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mcp-wordpress-service
+                port:
+                  number: 80
 ```
 
 ## Monitoring and Logging
@@ -570,9 +577,9 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'mcp-wordpress'
+  - job_name: "mcp-wordpress"
     static_configs:
-      - targets: ['mcp-wordpress:3000']
+      - targets: ["mcp-wordpress:3000"]
     metrics_path: /metrics
     scrape_interval: 30s
 ```
@@ -581,7 +588,7 @@ scrape_configs:
 
 ```yaml
 # docker-compose.monitoring.yml
-version: '3.8'
+version: "3.8"
 
 services:
   mcp-wordpress:
@@ -632,12 +639,12 @@ volumes:
 ```yaml
 # filebeat.yml
 filebeat.inputs:
-- type: log
-  enabled: true
-  paths:
-    - /app/logs/*.log
-  json.keys_under_root: true
-  json.add_error_key: true
+  - type: log
+    enabled: true
+    paths:
+      - /app/logs/*.log
+    json.keys_under_root: true
+    json.add_error_key: true
 
 output.elasticsearch:
   hosts: ["elasticsearch:9200"]
@@ -773,29 +780,29 @@ spec:
     runAsGroup: 1001
     fsGroup: 1001
   containers:
-  - name: mcp-wordpress
-    image: docdyhr/mcp-wordpress:latest
-    securityContext:
-      allowPrivilegeEscalation: false
-      readOnlyRootFilesystem: true
-      capabilities:
-        drop:
-        - ALL
-    volumeMounts:
-    - name: tmp-volume
-      mountPath: /tmp
-    - name: cache-volume
-      mountPath: /app/cache
-    - name: logs-volume
-      mountPath: /app/logs
+    - name: mcp-wordpress
+      image: docdyhr/mcp-wordpress:latest
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+            - ALL
+      volumeMounts:
+        - name: tmp-volume
+          mountPath: /tmp
+        - name: cache-volume
+          mountPath: /app/cache
+        - name: logs-volume
+          mountPath: /app/logs
   volumes:
-  - name: tmp-volume
-    emptyDir: {}
-  - name: cache-volume
-    emptyDir: {}
-  - name: logs-volume
-    emptyDir: {}
+    - name: tmp-volume
+      emptyDir: {}
+    - name: cache-volume
+      emptyDir: {}
+    - name: logs-volume
+      emptyDir: {}
 ```
 
-This comprehensive Docker production setup provides scalable, secure, and monitored
-deployment options for MCP WordPress in production environments.
+This comprehensive Docker production setup provides scalable, secure, and monitored deployment options for MCP WordPress
+in production environments.

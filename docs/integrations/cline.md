@@ -13,8 +13,8 @@
 
 ## Overview
 
-[Cline](https://github.com/cline/cline) is a powerful VS Code extension that brings AI assistance directly to your editor.
-With MCP server support, Cline can interact with your WordPress sites through natural language commands.
+[Cline](https://github.com/cline/cline) is a powerful VS Code extension that brings AI assistance directly to your
+editor. With MCP server support, Cline can interact with your WordPress sites through natural language commands.
 
 ### Benefits
 
@@ -532,6 +532,6 @@ Solution:
 
 ---
 
-*This guide is regularly updated. Last updated: 2024-01-15*
+_This guide is regularly updated. Last updated: 2024-01-15_
 
-*For Cline-specific questions, visit the [Cline GitHub repository](https://github.com/cline/cline)*
+_For Cline-specific questions, visit the [Cline GitHub repository](https://github.com/cline/cline)_

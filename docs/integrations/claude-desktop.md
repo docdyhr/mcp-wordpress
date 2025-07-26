@@ -4,18 +4,18 @@ Complete guide for integrating MCP WordPress Server with Claude Desktop using th
 
 ## 🎯 Overview
 
-The WordPress MCP DXT extension provides the **easiest way** to integrate WordPress management with Claude
-Desktop. No command line, no configuration files - just click and configure.
+The WordPress MCP DXT extension provides the **easiest way** to integrate WordPress management with Claude Desktop. No
+command line, no configuration files - just click and configure.
 
 ### Why Choose DXT Extension?
 
-| Feature | DXT Extension | NPX Method |
-|---------|---------------|------------|
-| **Installation** | 2 clicks | Command line setup |
-| **Configuration** | Built-in UI | Manual JSON editing |
-| **Updates** | Automatic | Manual |
-| **Security** | Encrypted storage | Environment variables |
-| **Multi-site** | Single site only | Unlimited sites |
+| Feature           | DXT Extension     | NPX Method            |
+| ----------------- | ----------------- | --------------------- |
+| **Installation**  | 2 clicks          | Command line setup    |
+| **Configuration** | Built-in UI       | Manual JSON editing   |
+| **Updates**       | Automatic         | Manual                |
+| **Security**      | Encrypted storage | Environment variables |
+| **Multi-site**    | Single site only  | Unlimited sites       |
 
 ## 🚀 Quick Installation
 
@@ -89,13 +89,13 @@ curl -L -o mcp-wordpress.dxt https://github.com/docdyhr/mcp-wordpress/raw/main/m
 
 The DXT extension provides these configuration options:
 
-| Field | Required | Description | Example |
-|-------|----------|-------------|---------|
-| **WordPress Site URL** | Yes | Full URL to your WordPress site | `https://mysite.com` |
-| **WordPress Username** | Yes | Your WordPress username | `admin` |
-| **WordPress Application Password** | Yes | Generated app password | `AbCd EfGh IjKl MnOp QrSt UvWx` |
-| **Authentication Method** | No | Auth method (default: app-password) | `app-password` |
-| **Debug Mode** | No | Enable verbose logging | `false` |
+| Field                              | Required | Description                         | Example                         |
+| ---------------------------------- | -------- | ----------------------------------- | ------------------------------- |
+| **WordPress Site URL**             | Yes      | Full URL to your WordPress site     | `https://mysite.com`            |
+| **WordPress Username**             | Yes      | Your WordPress username             | `admin`                         |
+| **WordPress Application Password** | Yes      | Generated app password              | `AbCd EfGh IjKl MnOp QrSt UvWx` |
+| **Authentication Method**          | No       | Auth method (default: app-password) | `app-password`                  |
+| **Debug Mode**                     | No       | Enable verbose logging              | `false`                         |
 
 ### Advanced Configuration
 
@@ -114,8 +114,7 @@ For advanced users, the DXT extension supports:
    - Close and reopen Claude Desktop after configuration
    - This ensures the extension loads properly
 
-2. **Test with Simple Command**
-   Try typing in Claude:
+2. **Test with Simple Command** Try typing in Claude:
 
    ```text
    "List my recent WordPress posts"
@@ -252,13 +251,13 @@ curl -L -o mcp-wordpress.dxt https://github.com/docdyhr/mcp-wordpress/raw/main/m
 
 2. **WordPress User Role Requirements**
 
-   | Tool Category | Minimum Role |
-   |---------------|--------------|
-   | **Read Operations** | Subscriber |
-   | **Posts/Pages** | Author |
-   | **Media** | Author |
-   | **Users** | Editor |
-   | **Site Settings** | Administrator |
+   | Tool Category       | Minimum Role  |
+   | ------------------- | ------------- |
+   | **Read Operations** | Subscriber    |
+   | **Posts/Pages**     | Author        |
+   | **Media**           | Author        |
+   | **Users**           | Editor        |
+   | **Site Settings**   | Administrator |
 
 #### 4. Performance Issues
 
@@ -316,10 +315,10 @@ To manually update:
 ### Version Compatibility
 
 | DXT Version | Claude Desktop | WordPress |
-|-------------|----------------|-----------|
-| **v1.5.3+** | Latest | 5.0+ |
-| **v1.4.x** | 0.8+ | 5.0+ |
-| **v1.3.x** | 0.7+ | 5.0+ |
+| ----------- | -------------- | --------- |
+| **v1.5.3+** | Latest         | 5.0+      |
+| **v1.4.x**  | 0.8+           | 5.0+      |
+| **v1.3.x**  | 0.7+           | 5.0+      |
 
 ## 🆚 DXT vs Alternative Methods
 
@@ -422,5 +421,6 @@ When reporting DXT-related issues, include:
 
 ---
 
-**Ready to get started?** [Download the DXT extension](https://github.com/docdyhr/mcp-wordpress/raw/main/mcp-wordpress.dxt)
-and transform your WordPress management experience!
+**Ready to get started?**
+[Download the DXT extension](https://github.com/docdyhr/mcp-wordpress/raw/main/mcp-wordpress.dxt) and transform your
+WordPress management experience!

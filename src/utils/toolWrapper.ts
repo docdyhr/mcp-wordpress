@@ -74,11 +74,7 @@ export const validators = {
  * Decorator for class methods to add error handling
  */
 export function errorHandler(operation: string) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {

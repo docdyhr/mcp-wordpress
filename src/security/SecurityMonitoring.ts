@@ -4,7 +4,7 @@
  */
 
 import { EventEmitter } from "events";
-import { SecurityUtils } from "./SecurityConfig";
+import { SecurityUtils } from "./SecurityConfig.js";
 
 export interface SecurityEvent {
   id: string;

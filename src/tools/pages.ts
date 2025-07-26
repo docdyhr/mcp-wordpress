@@ -1,9 +1,5 @@
 import { WordPressClient } from "../client/api.js";
-import {
-  CreatePostRequest,
-  PostQueryParams,
-  UpdatePostRequest,
-} from "../types/wordpress.js";
+import { CreatePostRequest, PostQueryParams, UpdatePostRequest } from "../types/wordpress.js";
 import { getErrorMessage } from "../utils/error.js";
 
 /**
@@ -119,8 +115,7 @@ export class PageTools {
           {
             name: "force",
             type: "boolean",
-            description:
-              "If true, permanently delete. If false, move to trash. Defaults to false.",
+            description: "If true, permanently delete. If false, move to trash. Defaults to false.",
           },
         ],
         handler: this.handleDeletePage.bind(this),
@@ -141,10 +136,7 @@ export class PageTools {
     ];
   }
 
-  public async handleListPages(
-    client: WordPressClient,
-    params: PostQueryParams,
-  ): Promise<any> {
+  public async handleListPages(client: WordPressClient, params: PostQueryParams): Promise<any> {
     try {
       const pages = await client.getPages(params);
       if (pages.length === 0) {
@@ -152,22 +144,14 @@ export class PageTools {
       }
       const content =
         `Found ${pages.length} pages:\n\n` +
-        pages
-          .map(
-            (p) =>
-              `- ID ${p.id}: **${p.title.rendered}** (${p.status})\n  Link: ${p.link}`,
-          )
-          .join("\n");
+        pages.map((p) => `- ID ${p.id}: **${p.title.rendered}** (${p.status})\n  Link: ${p.link}`).join("\n");
       return content;
     } catch (error) {
       throw new Error(`Failed to list pages: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleGetPage(
-    client: WordPressClient,
-    params: { id: number },
-  ): Promise<any> {
+  public async handleGetPage(client: WordPressClient, params: { id: number }): Promise<any> {
     try {
       const page = await client.getPage(params.id);
       const content =
@@ -182,10 +166,7 @@ export class PageTools {
     }
   }
 
-  public async handleCreatePage(
-    client: WordPressClient,
-    params: CreatePostRequest,
-  ): Promise<any> {
+  public async handleCreatePage(client: WordPressClient, params: CreatePostRequest): Promise<any> {
     try {
       const page = await client.createPage(params);
       return `✅ Page created successfully!\n- ID: ${page.id}\n- Title: ${page.title.rendered}\n- Link: ${page.link}`;
@@ -194,10 +175,7 @@ export class PageTools {
     }
   }
 
-  public async handleUpdatePage(
-    client: WordPressClient,
-    params: UpdatePostRequest & { id: number },
-  ): Promise<any> {
+  public async handleUpdatePage(client: WordPressClient, params: UpdatePostRequest & { id: number }): Promise<any> {
     try {
       const page = await client.updatePage(params);
       return `✅ Page ${page.id} updated successfully.`;
@@ -206,10 +184,7 @@ export class PageTools {
     }
   }
 
-  public async handleDeletePage(
-    client: WordPressClient,
-    params: { id: number; force?: boolean },
-  ): Promise<any> {
+  public async handleDeletePage(client: WordPressClient, params: { id: number; force?: boolean }): Promise<any> {
     try {
       await client.deletePage(params.id, params.force);
       const action = params.force ? "permanently deleted" : "moved to trash";
@@ -219,10 +194,7 @@ export class PageTools {
     }
   }
 
-  public async handleGetPageRevisions(
-    client: WordPressClient,
-    params: { id: number },
-  ): Promise<any> {
+  public async handleGetPageRevisions(client: WordPressClient, params: { id: number }): Promise<any> {
     try {
       const revisions = await client.getPageRevisions(params.id);
       if (revisions.length === 0) {
@@ -231,16 +203,11 @@ export class PageTools {
       const content =
         `Found ${revisions.length} revisions for page ${params.id}:\n\n` +
         revisions
-          .map(
-            (r) =>
-              `- Revision by user ID ${r.author} at ${new Date(r.modified).toLocaleString()}`,
-          )
+          .map((r) => `- Revision by user ID ${r.author} at ${new Date(r.modified).toLocaleString()}`)
           .join("\n");
       return content;
     } catch (error) {
-      throw new Error(
-        `Failed to get page revisions: ${getErrorMessage(error)}`,
-      );
+      throw new Error(`Failed to get page revisions: ${getErrorMessage(error)}`);
     }
   }
 }

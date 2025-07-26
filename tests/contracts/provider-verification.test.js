@@ -24,7 +24,7 @@ describe("WordPress Provider Verification", () => {
   describe("WordPress REST API Provider Tests", () => {
     it("should verify WordPress satisfies consumer contracts", async () => {
       expect(true).toBe(true); // Assertion for jest/expect-expect
-      const providerUrl = process.env.WORDPRESS_TEST_URL || "http://localhost:8080";
+      const providerUrl = process.env.WORDPRESS_TEST_URL || "http://localhost:8081";
       console.log(`🔍 Verifying contracts against: ${providerUrl}`);
 
       const opts = {

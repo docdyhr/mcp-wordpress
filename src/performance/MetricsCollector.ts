@@ -3,10 +3,7 @@
  * Integrates with existing client and cache systems
  */
 
-import {
-  PerformanceMonitor,
-  PerformanceMetrics,
-} from "./PerformanceMonitor.js";
+import { PerformanceMonitor, PerformanceMetrics } from "./PerformanceMonitor.js";
 import type { CacheStats } from "../cache/CacheManager.js";
 import type { ClientStats } from "../types/client.js";
 
@@ -46,10 +43,7 @@ export class MetricsCollector {
   private clientInstances: Map<string, any> = new Map();
   private cacheManagers: Map<string, any> = new Map();
 
-  constructor(
-    monitor: PerformanceMonitor,
-    config: Partial<CollectorConfig> = {},
-  ) {
+  constructor(monitor: PerformanceMonitor, config: Partial<CollectorConfig> = {}) {
     this.monitor = monitor;
     this.config = {
       enableRealTime: true,
@@ -87,11 +81,7 @@ export class MetricsCollector {
   /**
    * Start tracking a tool execution
    */
-  startToolExecution(
-    toolName: string,
-    parameters: any,
-    siteId?: string,
-  ): string {
+  startToolExecution(toolName: string, parameters: any, siteId?: string): string {
     const executionId = `${toolName}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     this.activeTools.set(executionId, {
@@ -122,12 +112,7 @@ export class MetricsCollector {
   /**
    * Record a raw request (bypass tool tracking)
    */
-  recordRawRequest(
-    responseTime: number,
-    success: boolean,
-    endpoint: string,
-    fromCache: boolean = false,
-  ): void {
+  recordRawRequest(responseTime: number, success: boolean, endpoint: string, fromCache: boolean = false): void {
     this.monitor.recordRequest(responseTime, success);
   }
 
@@ -206,9 +191,7 @@ export class MetricsCollector {
 
     // Calculate overall average response time
     if (responseTimes.length > 0) {
-      aggregated.averageResponseTime =
-        responseTimes.reduce((sum, time) => sum + time, 0) /
-        responseTimes.length;
+      aggregated.averageResponseTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
     }
 
     return aggregated;
@@ -266,18 +249,11 @@ export class MetricsCollector {
 
       const responseTime = metrics.client?.averageResponseTime || 0;
       const cacheHitRate = metrics.cache?.hitRate || 0;
-      const errorRate = metrics.client
-        ? metrics.client.failedRequests /
-          Math.max(metrics.client.totalRequests, 1)
-        : 0;
+      const errorRate = metrics.client ? metrics.client.failedRequests / Math.max(metrics.client.totalRequests, 1) : 0;
       const requestCount = metrics.client?.totalRequests || 0;
 
       // Calculate performance score (lower is better for response time and error rate)
-      const score =
-        responseTime / 1000 +
-        errorRate * 100 -
-        cacheHitRate * 50 +
-        requestCount * 0.001;
+      const score = responseTime / 1000 + errorRate * 100 - cacheHitRate * 50 + requestCount * 0.001;
 
       comparison[siteId] = {
         responseTime,
@@ -321,49 +297,34 @@ export class MetricsCollector {
 
     // Critical issues
     if (metrics.requests.averageResponseTime > 5000) {
-      critical.push(
-        "Response times are critically high (>5s). Enable caching immediately.",
-      );
+      critical.push("Response times are critically high (>5s). Enable caching immediately.");
     }
 
-    const errorRate =
-      metrics.requests.failed / Math.max(metrics.requests.total, 1);
+    const errorRate = metrics.requests.failed / Math.max(metrics.requests.total, 1);
     if (errorRate > 0.1) {
-      critical.push(
-        "Error rate is critically high (>10%). Check WordPress connectivity.",
-      );
+      critical.push("Error rate is critically high (>10%). Check WordPress connectivity.");
     }
 
     // Recommended optimizations
     if (metrics.cache.hitRate < 0.8) {
-      recommended.push(
-        "Cache hit rate is below 80%. Consider cache warming or TTL adjustment.",
-      );
+      recommended.push("Cache hit rate is below 80%. Consider cache warming or TTL adjustment.");
     }
 
     if (metrics.requests.averageResponseTime > 2000) {
-      recommended.push(
-        "Response times could be improved. Consider enabling more aggressive caching.",
-      );
+      recommended.push("Response times could be improved. Consider enabling more aggressive caching.");
     }
 
     if (metrics.system.memoryUsage > 80) {
-      recommended.push(
-        "Memory usage is high. Consider increasing cache size limits or server resources.",
-      );
+      recommended.push("Memory usage is high. Consider increasing cache size limits or server resources.");
     }
 
     // Optional optimizations
     if (metrics.cache.totalSize < 100) {
-      optional.push(
-        "Cache utilization is low. Consider pre-warming with frequently accessed data.",
-      );
+      optional.push("Cache utilization is low. Consider pre-warming with frequently accessed data.");
     }
 
     if (Object.keys(metrics.tools.toolUsageCount).length > 10) {
-      optional.push(
-        "Many tools are being used. Consider creating custom workflows for common operations.",
-      );
+      optional.push("Many tools are being used. Consider creating custom workflows for common operations.");
     }
 
     return { critical, recommended, optional };
