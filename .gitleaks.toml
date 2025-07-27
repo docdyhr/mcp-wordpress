@@ -1,55 +1,38 @@
-# Gitleaks configuration file
+# Gitleaks configuration file  
 title = "gitleaks config for mcp-wordpress"
 
 [extend]
 # useDefault will extend the base configuration with the default gitleaks config
 useDefault = true
 
-# Paths to exclude from scanning
+# Global allowlist - files and patterns to completely ignore
 [allowlist]
+# Files and directories to exclude from scanning
 paths = [
-    '''tests\/.*''',
+    '''tests/.*''',
     '''.*\.test\.(js|ts)$''',
     '''.*\.spec\.(js|ts)$''',
-    '''^docs\/.*''',
-    '''.*\.md$''',
-    '''\.github\/ISSUE_TEMPLATE\/.*''',
-    '''^dist\/.*''',
-    '''^build\/.*''',
-    '''^coverage\/.*''',
-    '''package-lock\.json''',
-    '''yarn\.lock''',
-    '''\.vscode\/.*''',
-    '''\.idea\/.*'''
+    '''docs/.*\.md$''',
+    '''README\.md''',
+    '''\.github/ISSUE_TEMPLATE/.*''',
+    '''dist/.*''',
+    '''build/.*''',
+    '''coverage/.*''',
+    '''node_modules/.*''',
+    '''package-lock\.json$''',
+    '''yarn\.lock$''',
+    '''\.vscode/.*''',
+    '''\.idea/.*'''
 ]
 
-# Specific commits to ignore
+# Regular expressions for content to ignore
+regexes = [
+    '''username:app_password''',
+    '''username:password''',
+    '''curl -u username:''',
+    '''const encryptionKey = "test1234567890"''',
+    '''WORDPRESS_APP_PASSWORD=xxxx\s+xxxx\s+xxxx\s+xxxx\s+xxxx\s+xxxx'''
+]
+
+# Specific commits to ignore (if needed)
 commits = []
-
-# Additional allowlist patterns for known false positives
-[[rules]]
-id = "allow-test-passwords"
-description = "Allow test passwords in test files"
-regex = '''test1234567890|xxxx xxxx xxxx xxxx xxxx xxxx'''
-path = '''.*'''
-
-[[rules]]
-id = "allow-example-credentials"
-description = "Allow example credentials in documentation"
-regex = '''username:app_password'''
-path = '''.*\.md$'''
-
-# Extend existing rules to exclude test files
-[[rules]]
-id = "generic-api-key"
-description = "Generic API Key"
-regex = '''(?i)(api[_\-\s]?key|apikey)[\s]*=[\s]*['"]?([a-zA-Z0-9_\-]{20,})['"]?'''
-secretGroup = 2
-paths = [
-    '''tests\/.*''',
-    '''.*\.test\.(js|ts)$''',
-    '''.*\.spec\.(js|ts)$'''
-]
-allowlist = [
-    regex = '''test.*|example.*|sample.*|demo.*'''
-]
