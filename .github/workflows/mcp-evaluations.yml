@@ -80,10 +80,62 @@ jobs:
           # Create results directory
           mkdir -p evaluations/results
           
-          # Run evaluations using mcp-eval
+          # Run evaluations using mcp-eval and capture output
           npx mcp-eval \
             evaluations/config/${{ github.event.inputs.eval_config || 'ci-eval.yaml' }} \
-            dist/index.js || echo '{"evaluations": [], "overall_score": 0}' > evaluations/results/evaluation-results.json
+            dist/index.js > evaluations/results/raw-output.txt 2>&1 || true
+          
+          # Extract evaluation results from the output
+          if [ -f "evaluations/results/raw-output.txt" ]; then
+            # Extract JSON evaluations from the output
+            node -e "
+              const fs = require('fs');
+              const content = fs.readFileSync('evaluations/results/raw-output.txt', 'utf8');
+              const lines = content.split('\\n');
+              
+              const evaluations = [];
+              let currentEval = null;
+              let inJson = false;
+              let jsonContent = '';
+              
+              for (const line of lines) {
+                if (line.includes(':') && line.match(/^[a-zA-Z_]+:$/)) {
+                  if (currentEval && jsonContent) {
+                    try {
+                      const parsed = JSON.parse(jsonContent);
+                      evaluations.push({ name: currentEval, ...parsed });
+                    } catch (e) {}
+                  }
+                  currentEval = line.replace(':', '').trim();
+                  jsonContent = '';
+                  inJson = false;
+                } else if (line.trim() === '{') {
+                  inJson = true;
+                  jsonContent = '{';
+                } else if (inJson) {
+                  jsonContent += line + '\\n';
+                  if (line.trim() === '}') {
+                    inJson = false;
+                    if (currentEval) {
+                      try {
+                        const parsed = JSON.parse(jsonContent);
+                        evaluations.push({ name: currentEval, ...parsed });
+                      } catch (e) {}
+                    }
+                  }
+                }
+              }
+              
+              fs.writeFileSync('evaluations/results/evaluation-results.json', 
+                JSON.stringify({ evaluations }, null, 2));
+            " || {
+              echo "Failed to parse evaluations, creating fallback results"
+              echo '{"evaluations": [], "overall_score": 0}' > evaluations/results/evaluation-results.json
+            }
+          else
+            echo "No output from mcp-eval, creating fallback results"
+            echo '{"evaluations": [], "overall_score": 0}' > evaluations/results/evaluation-results.json
+          fi
       
       - name: Process Evaluation Results
         id: process_results
@@ -153,11 +205,16 @@ jobs:
             });
       
       - name: Fail if Score Too Low
-        if: github.event_name != 'pull_request' && steps.process_results.outputs.score < 3.5
+        if: github.event_name != 'pull_request'
         run: |
-          echo "❌ Evaluation score too low: ${{ steps.process_results.outputs.score }}/5.0"
-          echo "Minimum required score: 3.5/5.0"
-          exit 1
+          score="${{ steps.process_results.outputs.score }}"
+          if (( $(echo "$score < 3.5" | bc -l) )); then
+            echo "❌ Evaluation score too low: $score/5.0"
+            echo "Minimum required score: 3.5/5.0"
+            exit 1
+          else
+            echo "✅ Evaluation score: $score/5.0 (passed)"
+          fi
       
       - name: Generate Performance Trends
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

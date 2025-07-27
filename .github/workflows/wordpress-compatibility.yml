@@ -77,11 +77,44 @@ jobs:
           timeout 300 bash -c 'until curl -f http://localhost:8080; do sleep 5; done'
           echo "WordPress is ready!"
 
+      - name: 🔧 Setup WordPress
+        run: |
+          # Install wp-cli in the container and set up WordPress
+          docker exec $(docker ps -q --filter "ancestor=wordpress:latest") bash -c "
+            cd /tmp &&
+            curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar &&
+            chmod +x wp-cli.phar &&
+            mv wp-cli.phar /usr/local/bin/wp &&
+            
+            # Install WordPress
+            cd /var/www/html &&
+            wp core install \
+              --url='http://localhost:8080' \
+              --title='Test Site' \
+              --admin_user='admin' \
+              --admin_password='password' \
+              --admin_email='admin@example.com' \
+              --allow-root &&
+            
+            # Create test user
+            wp user create testuser test@example.com \
+              --user_pass='test-password-123' \
+              --role='administrator' \
+              --allow-root &&
+            
+            # Set up permalinks
+            wp rewrite structure '/%postname%/' --allow-root &&
+            wp rewrite flush --allow-root &&
+            
+            # Create test content
+            wp post create --post_title='Test Post' --post_content='Test content' --post_status='publish' --allow-root
+          " || echo "WordPress setup may have failed - continuing anyway"
+
       - name: 🧪 Run Compatibility Tests
         run: |
           WORDPRESS_TEST_URL=http://localhost:8080 \
-          WORDPRESS_USERNAME=admin \
-          WORDPRESS_APP_PASSWORD=password \
+          WORDPRESS_USERNAME=testuser \
+          WORDPRESS_PASSWORD=test-password-123 \
           npm run test:compatibility
         id: tests
 

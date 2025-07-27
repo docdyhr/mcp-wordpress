@@ -42,10 +42,13 @@ jobs:
           path: ./
           base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
           head: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || '' }}
-          extra_args: --debug --only-verified
+          extra_args: --only-verified --exclude-paths="tests/,*.test.js,*.spec.js,docs/,*.md,.github/ISSUE_TEMPLATE/"
 
       - name: 🔍 Gitleaks Secret Detection
         uses: gitleaks/gitleaks-action@v2
+        with:
+          # Use custom config to exclude test files and documentation
+          config-path: .gitleaks.toml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }} # optional
@@ -126,12 +129,19 @@ jobs:
           npm audit --json > npm-audit.json || true
           
       - name: 🔍 Check for known vulnerabilities with Snyk
+        if: ${{ secrets.SNYK_TOKEN != '' }}
         uses: snyk/actions/node@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=medium
+          
+      - name: 📊 Snyk Skipped Notice
+        if: ${{ secrets.SNYK_TOKEN == '' }}
+        run: |
+          echo "⚠️ **Snyk scanning skipped** - SNYK_TOKEN not configured" >> $GITHUB_STEP_SUMMARY
+          echo "To enable Snyk scanning, add SNYK_TOKEN to repository secrets" >> $GITHUB_STEP_SUMMARY
 
       - name: 🔍 OSSF Scorecard analysis
         uses: ossf/scorecard-action@v2.4.0

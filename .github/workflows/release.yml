@@ -1,5 +1,12 @@
 name: 🚀 Release & Publish
 
+# NOTE: This workflow requires a RELEASE_TOKEN secret to bypass branch protection rules
+# The token needs the following permissions:
+# - repo (full control)
+# - workflow
+# - write:packages (for npm publishing)
+# Without RELEASE_TOKEN, the workflow will fail if branch protection rules are enabled
+
 on:
   push:
     branches: [main]
@@ -29,7 +36,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # Use RELEASE_TOKEN if available for bypassing branch protection rules
+          # Falls back to GITHUB_TOKEN if RELEASE_TOKEN is not set
+          token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
@@ -67,7 +76,8 @@ jobs:
             @semantic-release/changelog@6.0.3
             @semantic-release/git@10.0.1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Use RELEASE_TOKEN if available for bypassing branch protection rules
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           HUSKY: 0
           NODE_OPTIONS: "--max-old-space-size=4096"
