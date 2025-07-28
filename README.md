@@ -11,8 +11,11 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 [Documentation](#-documentation) • [Examples](#-examples)
 
 [![CI/CD Pipeline](https://github.com/docdyhr/mcp-wordpress/workflows/%F0%9F%9A%80%20CI%2FCD%20Pipeline/badge.svg)](https://github.com/docdyhr/mcp-wordpress/actions)
+[![GitHub Stars](https://img.shields.io/github/stars/docdyhr/mcp-wordpress?style=social)](https://github.com/docdyhr/mcp-wordpress/stargazers)
 [![NPM Version](https://img.shields.io/npm/v/mcp-wordpress?logo=npm&logoColor=white)](https://www.npmjs.com/package/mcp-wordpress)
 [![NPM Downloads](https://img.shields.io/npm/dm/mcp-wordpress?logo=npm&logoColor=white)](https://www.npmjs.com/package/mcp-wordpress)
+[![NPM Total Downloads](https://img.shields.io/npm/dt/mcp-wordpress?logo=npm&logoColor=white&label=total%20downloads)](https://www.npmjs.com/package/mcp-wordpress)
+[![Docker Pulls](https://img.shields.io/docker/pulls/docdyhr/mcp-wordpress?logo=docker&logoColor=white)](https://hub.docker.com/r/docdyhr/mcp-wordpress)
 [![Test Coverage](https://img.shields.io/badge/test%20coverage-95%25%2B-brightgreen?logo=jest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
 [![Test Results](https://img.shields.io/badge/tests-207%2F207%20passing-brightgreen?logo=checkmarx&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
 [![MCP Evaluation](https://img.shields.io/badge/mcp%20evaluation-4.5%2F5.0-brightgreen?logo=openai&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/mcp-evaluations.yml)
