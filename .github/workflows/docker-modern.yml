@@ -60,12 +60,11 @@ jobs:
           context: .
           platforms: linux/amd64  # Single platform for faster testing
           push: false
-          load: true  # Load into local Docker for testing
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          # v6 features enabled for testing
+          # v6 features enabled for testing  
           provenance: true
           sbom: true
           outputs: type=oci,dest=/tmp/image.tar
