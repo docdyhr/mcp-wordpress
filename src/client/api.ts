@@ -522,7 +522,10 @@ export class WordPressClient implements IWordPressClient {
 
     // Add body for POST/PUT/PATCH requests
     if (data && ["POST", "PUT", "PATCH"].includes(method)) {
-      if (data instanceof FormData || typeof data.append === "function") {
+      if (
+        data instanceof FormData ||
+        (typeof data === "object" && data && "append" in data && typeof data.append === "function")
+      ) {
         // For FormData, check if it has getHeaders method (form-data package)
         if (typeof data.getHeaders === "function") {
           // Use headers from form-data package

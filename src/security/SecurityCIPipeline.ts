@@ -268,7 +268,7 @@ export class SecurityCIPipeline {
   ): Promise<CheckResult> {
     const startTime = Date.now();
     const findings: SecurityFinding[] = [];
-    let score: number;
+    let score: number = 100; // Initialize with safe default
     let details = "";
 
     if (options.dryRun) {

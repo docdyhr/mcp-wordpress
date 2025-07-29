@@ -119,7 +119,10 @@ export class RequestManager extends BaseManager {
       };
 
       if (data && method !== "GET") {
-        if (data instanceof FormData || typeof data.append === "function") {
+        if (
+          data instanceof FormData ||
+          (typeof data === "object" && data && "append" in data && typeof data.append === "function")
+        ) {
           // For FormData, don't set Content-Type (let fetch set it with boundary)
           delete fetchOptions.headers["Content-Type"];
           fetchOptions.body = data;
