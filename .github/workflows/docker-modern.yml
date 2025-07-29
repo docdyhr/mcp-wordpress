@@ -68,27 +68,26 @@ jobs:
           # v6 features enabled for testing
           provenance: true
           sbom: true
-          record: true
-          outputs: type=docker,dest=/tmp/image.tar
+          outputs: type=oci,dest=/tmp/image.tar
 
       - name: 🧪 Test Image Structure
         run: |
-          # Load the image and test basic functionality
-          docker load -i /tmp/image.tar
+          # Import OCI image and test basic functionality
+          docker import /tmp/image.tar test-image:latest
           
           # Test image runs
           IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
           echo "Testing image: $IMAGE_TAG"
           
-          # Basic smoke test
-          docker run --rm $IMAGE_TAG --version || echo "Version command not available"
+          # Basic smoke test - check that container starts and has expected structure
+          docker run --rm test-image:latest node --version || echo "Node version check failed"
           
           # Check image size
-          docker images $IMAGE_TAG --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"
+          docker images test-image:latest --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"
           
           # Security scan (if trivy is available)
           if command -v trivy &> /dev/null; then
-            trivy image --exit-code 0 --severity HIGH,CRITICAL $IMAGE_TAG
+            trivy image --exit-code 0 --severity HIGH,CRITICAL test-image:latest
           fi
 
       - name: 📊 Test Summary
@@ -179,17 +178,14 @@ jobs:
           # v6 Enhanced Features
           provenance: true  # Generate provenance attestation
           sbom: true        # Generate Software Bill of Materials
-          record: true      # Enable build record for debugging
           # Annotations for OCI spec compliance
           annotations: |
             org.opencontainers.image.title=MCP WordPress Server
             org.opencontainers.image.description=Complete WordPress MCP Server with 59 management tools
             org.opencontainers.image.authors=docdyhr
             org.opencontainers.image.vendor=docdyhr
-          # Output configuration
-          outputs: |
-            type=image,push=${{ inputs.push }}
-            type=docker,dest=/tmp/image.tar
+          # Output configuration for multi-platform
+          outputs: ${{ inputs.push && 'type=image,push=true' || 'type=oci,dest=/tmp/image.tar' }}
 
       - name: 📊 Build Analysis
         run: |
@@ -204,8 +200,7 @@ jobs:
           echo "### v6 Features Enabled" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ **Provenance Attestation**: Cryptographic proof of build integrity" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ **SBOM Generation**: Software Bill of Materials for security auditing" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **Build Record**: Detailed build logs for debugging" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **Multi-level Caching**: GitHub Actions + Registry cache" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Advanced Caching**: Multi-level GitHub Actions + Registry cache" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ **OCI Annotations**: Enhanced metadata compliance" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ **Multi-platform**: AMD64, ARM64, ARM64v8 support" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
