@@ -321,7 +321,6 @@ export class StreamingUtils {
 
     const results: T[] = [];
     let offset = 0;
-    let hasMore = true;
 
     // Initial load
     const initialBatch = await fetcher(offset, initialLoad);
@@ -333,11 +332,10 @@ export class StreamingUtils {
     }
 
     // Progressive loading
-    while (hasMore && results.length < maxItems) {
+    while (results.length < maxItems) {
       const batch = await fetcher(offset, batchSize);
 
       if (batch.length === 0) {
-        hasMore = false;
         break;
       }
 

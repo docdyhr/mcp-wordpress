@@ -66,7 +66,7 @@ export interface RemediationResult {
 const SECURITY_PATTERNS = {
   // SQL Injection patterns
   sqlInjection: [
-    /['"\-\-;]|\/\*|\*\//g,
+    /['"\-\-;]|\/\*|\*\//g, // Match quotes, double hyphens, semicolons, and SQL comments
     /(union|select|insert|update|delete|drop|create|alter)\s+/gi,
     /\b(or|and)\s+['"]?\d+['"]?\s*=\s*['"]?\d+['"]?/gi,
     /\b(char|ascii|substring|length|concat)\s*\(/gi,
@@ -74,7 +74,7 @@ const SECURITY_PATTERNS = {
 
   // XSS patterns
   xss: [
-    /<script[^>]*>.*?<\/script>/gis,
+    /<script[^>]*>.*?<\/script>/gis, // Match script tags with any attributes
     /javascript\s*:/gi,
     /on\w+\s*=\s*['"][^'"]*['"]?/gi,
     /eval\s*\(/gi,
