@@ -4,12 +4,7 @@
  */
 
 // Use native fetch in Node.js 18+
-import type {
-  HTTPMethod,
-  RequestOptions,
-  ClientStats,
-  WordPressClientConfig,
-} from "../../types/client.js";
+import type { HTTPMethod, RequestOptions, ClientStats, WordPressClientConfig } from "../../types/client.js";
 import { WordPressAPIError, RateLimitError } from "../../types/client.js";
 import { BaseManager } from "./BaseManager.js";
 import { AuthenticationManager } from "./AuthenticationManager.js";
@@ -21,10 +16,7 @@ export class RequestManager extends BaseManager {
   private requestInterval: number;
   private authManager: AuthenticationManager;
 
-  constructor(
-    config: WordPressClientConfig,
-    authManager: AuthenticationManager,
-  ) {
+  constructor(config: WordPressClientConfig, authManager: AuthenticationManager) {
     super(config);
 
     this.authManager = authManager;
@@ -42,23 +34,13 @@ export class RequestManager extends BaseManager {
   /**
    * Make HTTP request with retry logic and rate limiting
    */
-  async request<T>(
-    method: HTTPMethod,
-    endpoint: string,
-    data?: any,
-    options: RequestOptions = {},
-  ): Promise<T> {
+  async request<T>(method: HTTPMethod, endpoint: string, data?: any, options: RequestOptions = {}): Promise<T> {
     const timer = startTimer();
 
     try {
       await this.enforceRateLimit();
 
-      const response = await this.makeRequestWithRetry(
-        method,
-        endpoint,
-        data,
-        options,
-      );
+      const response = await this.makeRequestWithRetry(method, endpoint, data, options);
 
       this.stats.successfulRequests++;
       this.updateAverageResponseTime(timer.end());
@@ -95,10 +77,7 @@ export class RequestManager extends BaseManager {
           throw error;
         }
 
-        debug.log(
-          `Request failed (attempt ${attempt}/${maxRetries}):`,
-          error.message,
-        );
+        debug.log(`Request failed (attempt ${attempt}/${maxRetries}):`, error.message);
 
         // Exponential backoff
         const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
@@ -140,10 +119,7 @@ export class RequestManager extends BaseManager {
       };
 
       if (data && method !== "GET") {
-        if (
-          data instanceof FormData ||
-          (data && typeof data.append === "function")
-        ) {
+        if (data instanceof FormData || typeof data.append === "function") {
           // For FormData, don't set Content-Type (let fetch set it with boundary)
           delete fetchOptions.headers["Content-Type"];
           fetchOptions.body = data;
@@ -184,8 +160,7 @@ export class RequestManager extends BaseManager {
       // Ignore JSON parsing errors
     }
 
-    const message =
-      errorData.message || `HTTP ${response.status}: ${response.statusText}`;
+    const message = errorData.message || `HTTP ${response.status}: ${response.statusText}`;
     const code = errorData.code || "http_error";
 
     if (response.status === 429) {
@@ -233,8 +208,7 @@ export class RequestManager extends BaseManager {
     const totalRequests = this.stats.successfulRequests;
     const currentAverage = this.stats.averageResponseTime;
 
-    this.stats.averageResponseTime =
-      (currentAverage * (totalRequests - 1) + responseTime) / totalRequests;
+    this.stats.averageResponseTime = (currentAverage * (totalRequests - 1) + responseTime) / totalRequests;
   }
 
   /**
