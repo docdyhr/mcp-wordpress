@@ -31,7 +31,16 @@ regexes = [
     '''username:password''',
     '''curl -u username:''',
     '''const encryptionKey = "test1234567890"''',
-    '''WORDPRESS_APP_PASSWORD=xxxx\s+xxxx\s+xxxx\s+xxxx\s+xxxx\s+xxxx'''
+    '''WORDPRESS_APP_PASSWORD=xxxx\s+xxxx\s+xxxx\s+xxxx\s+xxxx\s+xxxx''',
+    '''GPG key: `[A-F0-9]{40}`''',
+    '''F41410131B6F78543A3F215943569F605BBEA4DC'''
+]
+
+# Stop words that should not trigger secret detection
+stopwords = [
+    "1234567890abcdef",
+    "test1234567890",
+    "F41410131B6F78543A3F215943569F605BBEA4DC"
 ]
 
 # Specific commits to ignore (if needed)
