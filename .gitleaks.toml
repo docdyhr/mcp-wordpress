@@ -32,8 +32,7 @@ regexes = [
     '''curl -u username:''',
     '''const encryptionKey = "test1234567890"''',
     '''WORDPRESS_APP_PASSWORD=xxxx\s+xxxx\s+xxxx\s+xxxx\s+xxxx\s+xxxx''',
-    '''GPG key: `[A-F0-9]{40}`''',
-    '''F41410131B6F78543A3F215943569F605BBEA4DC'''
+    '''GPG key: [A-F0-9]{40}'''
 ]
 
 # Stop words that should not trigger secret detection
