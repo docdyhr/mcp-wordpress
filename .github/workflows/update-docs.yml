@@ -118,14 +118,7 @@ jobs:
         TIMESTAMP=$(cat docs/api/summary.json | jq -r '.lastUpdated')
         
         git add docs/api/
-        git commit -m "docs: auto-update API documentation
-
-📚 Automated documentation update
-🔧 Tools documented: $TOOL_COUNT
-📅 Generated: $TIMESTAMP
-🤖 Updated by GitHub Actions
-
-[skip ci]"
+        git commit -m "docs: auto-update API documentation - Tools: $TOOL_COUNT - Generated: $TIMESTAMP [skip ci]"
 
     - name: 🚀 Push Documentation Changes
       if: steps.changes.outputs.changed == 'true' && github.event_name == 'push'
