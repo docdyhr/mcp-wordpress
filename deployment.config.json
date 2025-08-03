@@ -1,0 +1,38 @@
+{
+  "environments": {
+    "production": {
+      "load_balancer": {
+        "type": "nginx",
+        "config_path": "/etc/nginx/conf.d/mcp-wordpress.conf",
+        "reload_command": "nginx -s reload"
+      },
+      "blue": {
+        "port": 3001,
+        "health_url": "http://localhost:3001/health",
+        "container_name": "mcp-wordpress-blue",
+        "image_tag": "blue"
+      },
+      "green": {
+        "port": 3002,
+        "health_url": "http://localhost:3002/health",
+        "container_name": "mcp-wordpress-green",
+        "image_tag": "green"
+      }
+    }
+  },
+  "monitoring": {
+    "metrics_endpoint": "/metrics",
+    "alert_webhook": "",
+    "performance_thresholds": {
+      "response_time_ms": 2000,
+      "error_rate_percent": 5,
+      "cpu_percent": 80,
+      "memory_percent": 85
+    }
+  },
+  "rollback": {
+    "auto_rollback": true,
+    "rollback_triggers": ["health_check_failure", "performance_degradation", "error_spike"],
+    "monitoring_duration": 300
+  }
+}

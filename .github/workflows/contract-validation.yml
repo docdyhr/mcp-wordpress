@@ -1,0 +1,335 @@
+name: 🔄 Continuous API Contract Validation
+
+on:
+  schedule:
+    # Run daily at 3 AM UTC to check for WordPress API changes
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      wordpress_versions:
+        description: 'WordPress versions to test (comma-separated)'
+        required: false
+        default: '6.0,6.1,6.2,6.3,6.4,6.5,latest'
+      notification_level:
+        description: 'Notification level for contract violations'
+        required: false
+        default: 'high'
+        type: choice
+        options:
+          - low
+          - medium
+          - high
+  push:
+    branches: [main]
+    paths:
+      - 'src/client/**'
+      - 'tests/contracts/**'
+      - '.github/workflows/contract-validation.yml'
+
+env:
+  NODE_VERSION: '20'
+  NODE_OPTIONS: '--experimental-vm-modules'
+
+jobs:
+  # 🔍 Contract Validation Matrix
+  contract-validation:
+    name: 🔍 Contract Validation - WordPress ${{ matrix.wordpress-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        wordpress-version: ['6.0', '6.1', '6.2', '6.3', '6.4', '6.5', 'latest']
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: wp_contract_test
+          MYSQL_USER: wp_user
+          MYSQL_PASSWORD: wp_password
+          MYSQL_ROOT_PASSWORD: root_password
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🏗️ Build Project
+        run: npm run build
+
+      - name: 🐳 Start WordPress ${{ matrix.wordpress-version }}
+        run: |
+          # Create custom Docker network
+          docker network create wp-contract-network || true
+          
+          # Start WordPress container
+          docker run -d \
+            --name wp-contract-${{ matrix.wordpress-version }} \
+            --network wp-contract-network \
+            -p 8080:80 \
+            -e WORDPRESS_DB_HOST=mysql:3306 \
+            -e WORDPRESS_DB_NAME=wp_contract_test \
+            -e WORDPRESS_DB_USER=wp_user \
+            -e WORDPRESS_DB_PASSWORD=wp_password \
+            -e WORDPRESS_CONFIG_EXTRA="
+              define('WP_DEBUG', true);
+              define('WP_DEBUG_LOG', true);
+              define('FORCE_SSL_ADMIN', false);
+              define('WP_AUTO_UPDATE_CORE', false);
+            " \
+            wordpress:${{ matrix.wordpress-version }}
+          
+          # Connect MySQL to the network
+          docker network connect wp-contract-network mysql || true
+
+      - name: ⏳ Wait for WordPress Setup
+        run: |
+          echo "Waiting for WordPress to be accessible..."
+          timeout 300 bash -c 'until curl -f http://localhost:8080/ >/dev/null 2>&1; do sleep 3; echo -n "."; done'
+          echo "WordPress is accessible"
+
+      - name: 🔧 Configure WordPress for Contract Testing
+        run: |
+          # Install WP-CLI in WordPress container
+          docker exec wp-contract-${{ matrix.wordpress-version }} bash -c "
+            curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar &&
+            chmod +x wp-cli.phar &&
+            mv wp-cli.phar /usr/local/bin/wp
+          "
+          
+          # Install and configure WordPress
+          docker exec wp-contract-${{ matrix.wordpress-version }} bash -c "
+            cd /var/www/html &&
+            wp core install \
+              --url='http://localhost:8080' \
+              --title='Contract Validation Site' \
+              --admin_user='contract_admin' \
+              --admin_password='ContractTest123!' \
+              --admin_email='contracts@example.com' \
+              --allow-root --quiet &&
+            
+            wp rewrite structure '/%postname%/' --allow-root --quiet &&
+            wp rewrite flush --allow-root --quiet &&
+            
+            # Create test content for contract validation
+            wp post create \
+              --post_title='Contract Test Post' \
+              --post_content='This post is used for API contract validation' \
+              --post_status=publish \
+              --allow-root --quiet &&
+            
+            wp media import https://via.placeholder.com/150 \
+              --title='Contract Test Image' \
+              --allow-root --quiet || true &&
+            
+            wp user create contract_user contract_user@example.com \
+              --role=editor \
+              --user_pass='UserTest123!' \
+              --allow-root --quiet &&
+            
+            # Enable Application Passwords (WordPress 5.6+)
+            wp config set APPLICATION_PASSWORD_AUTH_ENABLED true --allow-root --quiet || true
+          "
+
+      - name: 🔐 Setup API Authentication
+        id: auth-setup
+        run: |
+          # Create application password for testing
+          APP_PASSWORD=$(docker exec wp-contract-${{ matrix.wordpress-version }} bash -c "
+            cd /var/www/html &&
+            wp user application-password create contract_admin 'Contract Validation' \
+              --porcelain --allow-root 2>/dev/null || echo 'fallback_password_123'
+          ")
+          
+          echo "::add-mask::$APP_PASSWORD"
+          echo "app_password=$APP_PASSWORD" >> $GITHUB_OUTPUT
+          
+          # Test API access
+          echo "Testing API authentication..."
+          AUTH_HEADER=$(echo -n "contract_admin:$APP_PASSWORD" | base64)
+          
+          if curl -s -H "Authorization: Basic $AUTH_HEADER" http://localhost:8080/wp-json/wp/v2/posts | grep -q '"id"'; then
+            echo "✅ API authentication successful"
+          else
+            echo "⚠️ App Password auth failed, falling back to basic auth"
+          fi
+
+      - name: 🧪 Run Contract Validation Tests
+        env:
+          WORDPRESS_TEST_URL: http://localhost:8080
+          WORDPRESS_USERNAME: contract_admin
+          WORDPRESS_APP_PASSWORD: ${{ steps.auth-setup.outputs.app_password }}
+          WORDPRESS_AUTH_METHOD: app-password
+          WORDPRESS_VERSION: ${{ matrix.wordpress-version }}
+          CONTRACT_VALIDATION_MODE: true
+        run: |
+          echo "🔍 Running contract validation for WordPress ${{ matrix.wordpress-version }}"
+          
+          # Run enhanced contract tests
+          npm run test:contracts:enhanced || {
+            echo "❌ Contract validation failed for WordPress ${{ matrix.wordpress-version }}"
+            exit 1
+          }
+
+      - name: 📊 Generate Contract Report
+        if: always()
+        run: |
+          # Create contract validation report
+          cat > contract-report-${{ matrix.wordpress-version }}.json << EOF
+          {
+            "wordpress_version": "${{ matrix.wordpress-version }}",
+            "test_timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "test_status": "${{ job.status }}",
+            "api_endpoints_tested": $(grep -c "should" tests/contracts/wordpress-compatibility.test.js || echo 0),
+            "repository": "${{ github.repository }}",
+            "commit_sha": "${{ github.sha }}",
+            "workflow_run": "${{ github.run_id }}"
+          }
+          EOF
+
+      - name: 📤 Upload Contract Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: contract-report-${{ matrix.wordpress-version }}
+          path: contract-report-${{ matrix.wordpress-version }}.json
+
+      - name: 🧹 Cleanup WordPress Container
+        if: always()
+        run: |
+          docker stop wp-contract-${{ matrix.wordpress-version }} || true
+          docker rm wp-contract-${{ matrix.wordpress-version }} || true
+
+  # 📋 Contract Validation Summary
+  validation-summary:
+    name: 📋 Contract Validation Summary
+    runs-on: ubuntu-latest
+    needs: contract-validation
+    if: always()
+    steps:
+      - name: 📥 Download All Reports
+        uses: actions/download-artifact@v4
+        with:
+          path: contract-reports
+
+      - name: 📊 Generate Summary Report
+        run: |
+          echo "# 🔄 WordPress API Contract Validation Summary" > summary.md
+          echo "" >> summary.md
+          echo "**Test Run:** $(date -u)" >> summary.md
+          echo "**Repository:** ${{ github.repository }}" >> summary.md
+          echo "**Commit:** ${{ github.sha }}" >> summary.md
+          echo "" >> summary.md
+          
+          # Process individual reports
+          echo "## 📊 Results by WordPress Version" >> summary.md
+          echo "" >> summary.md
+          
+          for report_dir in contract-reports/*/; do
+            if [ -d "$report_dir" ]; then
+              report_file=$(find "$report_dir" -name "*.json" | head -1)
+              if [ -f "$report_file" ]; then
+                version=$(jq -r '.wordpress_version' "$report_file")
+                status=$(jq -r '.test_status' "$report_file")
+                endpoints=$(jq -r '.api_endpoints_tested' "$report_file")
+                
+                if [ "$status" = "success" ]; then
+                  echo "- ✅ **WordPress $version**: $endpoints endpoints validated successfully" >> summary.md
+                else
+                  echo "- ❌ **WordPress $version**: Contract validation failed" >> summary.md
+                fi
+              fi
+            fi
+          done
+          
+          echo "" >> summary.md
+          echo "## 🔗 Detailed Reports" >> summary.md
+          echo "Individual contract reports are available in the workflow artifacts." >> summary.md
+
+      - name: 📤 Upload Summary Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-validation-summary
+          path: summary.md
+
+      - name: 💬 Comment on PR (if applicable)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            try {
+              const summary = fs.readFileSync('summary.md', 'utf8');
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## 🔄 Contract Validation Results\n\n${summary}`
+              });
+            } catch (error) {
+              console.log('Could not post comment:', error.message);
+            }
+
+  # 🚨 Contract Violation Alert
+  contract-alert:
+    name: 🚨 Contract Violation Alert
+    runs-on: ubuntu-latest
+    needs: contract-validation
+    if: failure() && (github.event_name == 'schedule' || github.event.inputs.notification_level == 'high')
+    steps:
+      - name: 🚨 Create Contract Violation Issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `🚨 WordPress API Contract Violation Detected - ${new Date().toISOString().split('T')[0]}`;
+            const body = `
+            ## 🚨 Contract Validation Failure
+            
+            **Detection Time:** ${new Date().toISOString()}
+            **Workflow Run:** [#${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            **Commit:** ${{ github.sha }}
+            
+            ## 📋 Summary
+            
+            One or more WordPress versions failed contract validation. This could indicate:
+            
+            - Breaking changes in WordPress REST API
+            - Changes in response format or structure
+            - New authentication requirements
+            - Plugin conflicts affecting API behavior
+            
+            ## 🔧 Recommended Actions
+            
+            1. Review the detailed workflow logs
+            2. Check for WordPress core updates that might affect the API
+            3. Validate against specific WordPress versions that failed
+            4. Update contract tests if changes are expected
+            5. Review and update authentication mechanisms if needed
+            
+            ## 📊 Detailed Reports
+            
+            Check the workflow artifacts for detailed contract validation reports.
+            
+            **Priority:** High
+            **Component:** WordPress API Integration
+            `;
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['bug', 'api-contract', 'high-priority', 'automated']
+            });

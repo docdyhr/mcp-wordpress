@@ -1,0 +1,235 @@
+version: '3.8'
+
+# Blue-Green Deployment Docker Compose Configuration
+# This configuration supports zero-downtime deployments with traffic switching
+
+services:
+  # Nginx Load Balancer / Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: mcp-wordpress-lb
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - blue
+      - green
+    networks:
+      - mcp-network
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mcp-wordpress.rule=Host(`mcp-wordpress.local`)"
+
+  # Blue Environment
+  blue:
+    image: mcp-wordpress:blue
+    container_name: mcp-wordpress-blue
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - NODE_OPTIONS=--experimental-vm-modules
+      - MCP_ENVIRONMENT=blue
+      - MCP_INSTANCE_ID=blue-${DEPLOYMENT_ID:-1}
+    volumes:
+      # Configuration
+      - ./mcp-wordpress.config.json:/app/mcp-wordpress.config.json:ro
+      - ./deployment.config.json:/app/deployment.config.json:ro
+      # Logs
+      - blue_logs:/app/logs
+      # Cache (if using file-based cache)
+      - blue_cache:/app/cache
+    networks:
+      - mcp-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    labels:
+      - "mcp.environment=blue"
+      - "mcp.service=wordpress"
+
+  # Green Environment  
+  green:
+    image: mcp-wordpress:green
+    container_name: mcp-wordpress-green
+    restart: unless-stopped
+    ports:
+      - "3002:3000"
+    environment:
+      - NODE_ENV=production
+      - NODE_OPTIONS=--experimental-vm-modules
+      - MCP_ENVIRONMENT=green
+      - MCP_INSTANCE_ID=green-${DEPLOYMENT_ID:-1}
+    volumes:
+      # Configuration
+      - ./mcp-wordpress.config.json:/app/mcp-wordpress.config.json:ro
+      - ./deployment.config.json:/app/deployment.config.json:ro
+      # Logs
+      - green_logs:/app/logs
+      # Cache (if using file-based cache)
+      - green_cache:/app/cache
+    networks:
+      - mcp-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    labels:
+      - "mcp.environment=green"
+      - "mcp.service=wordpress"
+
+  # Redis (Shared Cache/Session Store)
+  redis:
+    image: redis:7-alpine
+    container_name: mcp-wordpress-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - mcp-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    command: redis-server /usr/local/etc/redis/redis.conf
+    labels:
+      - "mcp.service=redis"
+
+  # Prometheus (Metrics Collection)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: mcp-wordpress-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - mcp-network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    labels:
+      - "mcp.service=monitoring"
+
+  # Grafana (Metrics Visualization)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: mcp-wordpress-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - mcp-network
+    depends_on:
+      - prometheus
+    labels:
+      - "mcp.service=monitoring"
+
+  # Deployment Controller (Manages Blue-Green Switches)
+  controller:
+    build:
+      context: .
+      dockerfile: Dockerfile.controller
+    container_name: mcp-wordpress-controller
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - MONITORING_ENABLED=true
+      - AUTO_ROLLBACK=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./deployment.config.json:/app/deployment.config.json:ro
+      - controller_logs:/app/logs
+    networks:
+      - mcp-network
+    depends_on:
+      - prometheus
+      - redis
+    labels:
+      - "mcp.service=controller"
+
+networks:
+  mcp-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  # Environment-specific logs
+  blue_logs:
+    driver: local
+  green_logs: 
+    driver: local
+  controller_logs:
+    driver: local
+
+  # Environment-specific cache  
+  blue_cache:
+    driver: local
+  green_cache:
+    driver: local
+
+  # Shared data
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+# Health check for the entire stack
+x-healthcheck-config: &healthcheck
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 60s
