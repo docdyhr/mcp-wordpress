@@ -1,0 +1,8 @@
+# GitHub Sponsors funding configuration
+# Uncomment and configure the platforms you want to use for funding
+github: docdyhr
+# github: [username1, username2]  # Up to 4 GitHub Sponsors usernames
+# patreon: username               # Patreon username
+# open_collective: project        # Open Collective project name
+# ko_fi: username                 # Ko-fi username
+# custom: ["https://example.com"] # Up to 4 custom URLs
