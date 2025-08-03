@@ -46,11 +46,9 @@ jobs:
 
       - name: 🔍 Gitleaks Secret Detection
         uses: gitleaks/gitleaks-action@v2
-        with:
-          # Use custom config to exclude test files and documentation
-          config-path: .gitleaks.toml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }} # optional
 
       - name: 📊 Secret Scanning Report
