@@ -13,6 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 - [Troubleshooting](#troubleshooting)
 - [CI/CD Pipeline](#cicd-pipeline)
 - [Claude Memory Integration](#claude-memory-integration)
+- [Next Steps for Development](#next-steps-for-development)
 
 ## Quick Start
 
@@ -397,3 +398,112 @@ npm run release            # Manual release
 - `src/tools/` - Tool implementations
 - `mcp-wordpress.config.json` - Multi-site configuration
 - `.env` - Single-site environment variables
+
+## Next Steps for Development
+
+**Repository Clean Slate Achieved** ✅ (August 7, 2025)
+
+### 🔐 **Security-First Development Workflow**
+
+The repository maintains **excellent security posture** with proper branch protection rules:
+
+- ✅ **No direct pushes to main** (branch protection enforced)
+- ✅ **Pull requests required** for all changes  
+- ✅ **Status checks must pass** (CI/CD validation)
+- ✅ **No merge commits allowed** (clean history)
+- ✅ **CodeQL security scanning** enabled
+
+### 🎯 **Development Best Practices**
+
+#### **Branch Strategy**
+
+```bash
+# Create focused feature branches
+git checkout -b feature/specific-improvement
+git checkout -b fix/specific-bug  
+git checkout -b chore/maintenance-task
+
+# Never work directly on main branch
+```
+
+#### **Commit Standards**
+
+```bash
+# Use conventional commits with single responsibility
+git commit -m "feat: add new WordPress tool for custom fields"
+git commit -m "fix: resolve authentication header issue"
+git commit -m "chore: update dependencies to latest versions"
+git commit -m "docs: improve multi-site configuration examples"
+```
+
+#### **Pull Request Workflow**
+
+1. **Create focused feature branch** from latest main
+2. **Make atomic commits** with clear, descriptive messages
+3. **Run full test suite** locally before pushing
+4. **Create PR** with clear description and context
+5. **Wait for CI/CD validation** (all 394 tests must pass)
+6. **Address any review feedback**
+7. **Merge via GitHub interface** (respects branch protection)
+
+#### **Quality Gates**
+
+```bash
+# Before creating PR, ensure:
+npm test                 # All 394 tests pass (100%)
+npm run lint            # ESLint validation clean
+npm run security:scan   # Security audit clean  
+npm run build          # TypeScript compilation successful
+```
+
+### 🚀 **Development Commands Reference**
+
+#### **Starting New Work**
+
+```bash
+git checkout main && git pull origin main    # Sync with latest
+git checkout -b feature/my-new-feature      # Create feature branch
+npm test                                    # Verify starting state
+```
+
+#### **During Development**
+
+```bash
+npm run dev                    # Development mode with hot reload
+npm run test:watch            # Run tests in watch mode
+DEBUG=true npm run dev        # Enable debug logging
+```
+
+#### **Before Committing**
+
+```bash
+npm run lint:fix              # Auto-fix linting issues
+npm test                      # Verify all tests pass
+npm run build                 # Ensure clean build
+```
+
+#### **Creating Pull Request**
+
+```bash
+git push -u origin feature/my-new-feature   # Push feature branch  
+gh pr create --title "feat: descriptive title" --body "Clear description"
+```
+
+### ⚠️ **Important Reminders**
+
+- **Never bypass branch protection** - it's there for security
+- **One concern per PR** - avoid mixing features/fixes/chores
+- **Test locally first** - don't rely on CI to catch basic issues
+- **Follow semantic versioning** in commit messages
+- **Update CLAUDE.md** if adding significant features or changing workflows
+
+### 🔄 **Emergency Procedures**
+
+If you encounter issues with branch protection or need to make urgent fixes:
+
+1. **Never use force push** to main branch
+2. **Create hotfix branch** for urgent fixes: `git checkout -b hotfix/critical-issue`
+3. **Follow normal PR process** even for urgent changes
+4. **Contact repository maintainer** if branch protection needs temporary adjustment
+
+**Repository Status**: Clean slate maintained with robust development workflow ✨
