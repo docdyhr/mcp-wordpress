@@ -41,8 +41,10 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
+    "check:ci": "npm run typecheck && npm run lint && npm run test:coverage",
     "check:ignore": "node scripts/sync-ignore-files.js",
     "check:npm": "node scripts/test-npm-config.js",
+    "check:workflows": "node scripts/validate-ci.cjs",
     "dev": "npm run build && DEBUG=true node dist/index.js",
     "docker:build": "docker build -t docdyhr/mcp-wordpress:latest .",
     "docker:publish": "./scripts/manual-docker-publish.sh",
