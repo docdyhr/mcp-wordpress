@@ -41,15 +41,56 @@ const baseConfig = {
   ],
   
   // Coverage configuration
-  collectCoverage: false,
+  collectCoverage: false, // Enable via --coverage flag or CI
   collectCoverageFrom: [
-    "dist/**/*.js",
-    "!dist/**/*.test.js",
-    "!dist/**/node_modules/**",
-    "!dist/coverage/**"
+    "src/**/*.ts",
+    "!src/**/*.d.ts",
+    "!src/**/__mocks__/**",
+    "!src/**/*.test.ts",
+    "!src/types/**",
+    "!src/**/index.ts"
   ],
-  coverageReporters: ["text", "lcov", "html"],
+  coverageReporters: ["text-summary", "lcov", "html", "json", "cobertura"],
   coverageDirectory: "coverage",
+  coveragePathIgnorePatterns: [
+    "/node_modules/",
+    "/dist/", 
+    "/tests/",
+    "/docs/",
+    "src/types/",
+    "src/.*\\.d\\.ts$",
+    "src/.*/index.ts$"
+  ],
+  // Coverage thresholds - Phase 1 implementation
+  coverageThreshold: {
+    global: {
+      branches: 30,
+      functions: 35,
+      lines: 40,
+      statements: 38
+    },
+    // Critical components - higher standards
+    'src/utils/validation.ts': {
+      branches: 80, functions: 90, lines: 85, statements: 85
+    },
+    'src/utils/error.ts': {
+      branches: 100, functions: 100, lines: 100, statements: 100
+    },
+    'src/utils/toolWrapper.ts': {
+      branches: 75, functions: 80, lines: 78, statements: 78
+    },
+    // Core business logic - medium standards  
+    'src/client/api.ts': {
+      branches: 40, functions: 50, lines: 45, statements: 45
+    },
+    'src/tools/': {
+      branches: 20, functions: 25, lines: 25, statements: 25
+    },
+    // Configuration and setup - medium standards
+    'src/config/': {
+      branches: 50, functions: 60, lines: 55, statements: 55
+    }
+  },
   
   // Basic timeouts and performance
   testTimeout: 30000,

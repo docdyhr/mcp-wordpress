@@ -1,14 +1,22 @@
 import * as path from "path";
 import { WordPressAPIError } from "../types/client.js";
+import { 
+  WordPressId, 
+  createWordPressId
+} from "../types/enhanced.js";
 
 /**
- * Security-focused validation utilities for MCP WordPress
+ * Enhanced security-focused validation utilities for MCP WordPress
+ * 
+ * This module provides type-safe validation functions with proper error handling
+ * and strong typing to prevent common validation issues.
  */
 
 /**
  * Validates and sanitizes numeric IDs with comprehensive edge case handling
+ * Returns branded WordPress ID type for enhanced type safety
  */
-export function validateId(id: any, fieldName: string = "id"): number {
+export function validateId(id: unknown, fieldName: string = "id"): WordPressId {
   // Handle null/undefined
   if (id === null || id === undefined) {
     throw new WordPressAPIError(`${fieldName} is required`, 400, "MISSING_PARAMETER");
@@ -52,13 +60,13 @@ export function validateId(id: any, fieldName: string = "id"): number {
     );
   }
 
-  return numId;
+  return createWordPressId(numId);
 }
 
 /**
  * Validates string length within bounds
  */
-export function validateString(value: any, fieldName: string, minLength: number = 1, maxLength: number = 1000): string {
+export function validateString(value: unknown, fieldName: string, minLength: number = 1, maxLength: number = 1000): string {
   if (typeof value !== "string") {
     throw new WordPressAPIError(`Invalid ${fieldName}: must be a string`, 400, "INVALID_PARAMETER");
   }
@@ -218,7 +226,7 @@ export function sanitizeHtml(html: string): string {
 /**
  * Validates array input
  */
-export function validateArray<T>(value: any, fieldName: string, minItems: number = 0, maxItems: number = 100): T[] {
+export function validateArray<T>(value: unknown, fieldName: string, minItems: number = 0, maxItems: number = 100): T[] {
   if (!Array.isArray(value)) {
     throw new WordPressAPIError(`Invalid ${fieldName}: must be an array`, 400, "INVALID_PARAMETER");
   }
@@ -356,7 +364,7 @@ export function validateSearchQuery(query: string): string {
 /**
  * Validates pagination parameters as a set
  */
-export function validatePaginationParams(params: { page?: any; per_page?: any; offset?: any }): {
+export function validatePaginationParams(params: { page?: unknown; per_page?: unknown; offset?: unknown }): {
   page?: number;
   per_page?: number;
   offset?: number;
@@ -414,55 +422,65 @@ export function validatePaginationParams(params: { page?: any; per_page?: any; o
 /**
  * Validates complex post creation parameters
  */
-export function validatePostParams(params: any): any {
-  const validated: any = {};
+export function validatePostParams(params: unknown): Record<string, unknown> {
+  const validated: Record<string, unknown> = {};
+  
+  // Type guard to ensure params is an object
+  if (typeof params !== 'object' || params === null || Array.isArray(params)) {
+    throw new WordPressAPIError('Post parameters must be an object', 400, 'INVALID_PARAMETER');
+  }
+  
+  const typedParams = params as Record<string, unknown>;
 
   // Title validation
-  if (!params.title || typeof params.title !== "string") {
+  if (!typedParams.title || typeof typedParams.title !== "string") {
     throw new WordPressAPIError("Post title is required and must be a string", 400, "INVALID_PARAMETER");
   }
-  validated.title = validateString(params.title, "title", 1, 200);
+  validated.title = validateString(typedParams.title, "title", 1, 200);
 
   // Content validation
-  if (params.content !== undefined) {
-    validated.content = sanitizeHtml(String(params.content));
+  if (typedParams.content !== undefined) {
+    validated.content = sanitizeHtml(String(typedParams.content));
   }
 
   // Status validation with context
-  if (params.status) {
-    validated.status = validatePostStatus(params.status);
+  if (typedParams.status) {
+    if (typeof typedParams.status !== 'string') {
+      throw new WordPressAPIError('Status must be a string', 400, 'INVALID_PARAMETER');
+    }
+    validated.status = validatePostStatus(typedParams.status);
 
     // Future posts need a date
-    if (validated.status === "future" && !params.date) {
+    if (validated.status === "future" && !typedParams.date) {
       throw new WordPressAPIError("Future posts require a 'date' parameter", 400, "MISSING_PARAMETER");
     }
   }
 
   // Categories and tags validation
-  if (params.categories) {
-    validated.categories = validateArray(params.categories, "categories", 0, 50);
-    validated.categories = validated.categories.map((id: any) => validateId(id, "category ID"));
+  if (typedParams.categories) {
+    const categories = validateArray<unknown>(typedParams.categories, "categories", 0, 50);
+    validated.categories = categories.map((id: unknown) => validateId(id, "category ID"));
   }
 
-  if (params.tags) {
-    validated.tags = validateArray(params.tags, "tags", 0, 100);
-    validated.tags = validated.tags.map((id: any) => validateId(id, "tag ID"));
+  if (typedParams.tags) {
+    const tags = validateArray<unknown>(typedParams.tags, "tags", 0, 100);
+    validated.tags = tags.map((id: unknown) => validateId(id, "tag ID"));
   }
 
   // Featured media validation
-  if (params.featured_media !== undefined) {
-    if (params.featured_media === null || params.featured_media === 0) {
+  if (typedParams.featured_media !== undefined) {
+    if (typedParams.featured_media === null || typedParams.featured_media === 0) {
       // Allow null or 0 to remove featured media
       validated.featured_media = 0;
     } else {
-      validated.featured_media = validateId(params.featured_media, "featured_media");
+      validated.featured_media = validateId(typedParams.featured_media, "featured_media");
     }
   }
 
   // Date validation for scheduled posts
-  if (params.date) {
+  if (typedParams.date) {
     try {
-      const date = new Date(params.date);
+      const date = new Date(String(typedParams.date));
       if (isNaN(date.getTime())) {
         throw new Error("Invalid date");
       }

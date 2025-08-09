@@ -47,6 +47,7 @@ import type {
   UpdateMediaRequest,
 } from "../types/wordpress.js";
 import { debug, logError, startTimer } from "../utils/debug.js";
+import type { QueuedRequest } from '../types/requests.js';
 
 /**
  * WordPress REST API Client
@@ -101,7 +102,7 @@ export class WordPressClient implements IWordPressClient {
   private timeout: number;
   private maxRetries: number;
   private auth: AuthConfig;
-  private requestQueue: any[] = [];
+  private requestQueue: QueuedRequest[] = [];
   private lastRequestTime: number = 0;
   private requestInterval: number;
   private authenticated: boolean = false;
@@ -489,7 +490,7 @@ export class WordPressClient implements IWordPressClient {
   async request<T = any>(
     method: HTTPMethod,
     endpoint: string,
-    data: any = null,
+    data: unknown = null,
     options: RequestOptions = {},
   ): Promise<T> {
     const timer = startTimer();
@@ -513,7 +514,7 @@ export class WordPressClient implements IWordPressClient {
     const requestTimeout = options.timeout || this.timeout;
     const timeoutId = setTimeout(() => controller.abort(), requestTimeout);
 
-    const fetchOptions: any = {
+    const fetchOptions: RequestInit & { headers: Record<string, string> } = {
       ...options, // Spread options first
       method,
       headers, // Headers come after to ensure auth headers aren't overridden
@@ -527,15 +528,15 @@ export class WordPressClient implements IWordPressClient {
         (typeof data === "object" && data && "append" in data && typeof data.append === "function")
       ) {
         // For FormData, check if it has getHeaders method (form-data package)
-        if (typeof data.getHeaders === "function") {
+        if (typeof (data as any).getHeaders === "function") {
           // Use headers from form-data package
-          const formHeaders = data.getHeaders();
+          const formHeaders = (data as any).getHeaders();
           Object.assign(headers, formHeaders);
         } else {
           // For native FormData, don't set Content-Type (let fetch set it with boundary)
           delete headers["Content-Type"];
         }
-        fetchOptions.body = data;
+        fetchOptions.body = data as any;
       } else if (Buffer.isBuffer(data)) {
         // For Buffer data (manual multipart), keep Content-Type from headers
         fetchOptions.body = data;
@@ -722,15 +723,15 @@ export class WordPressClient implements IWordPressClient {
     return this.request<T>("GET", endpoint, null, options);
   }
 
-  async post<T = any>(endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
+  async post<T = unknown>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T> {
     return this.request<T>("POST", endpoint, data, options);
   }
 
-  async put<T = any>(endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
+  async put<T = unknown>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T> {
     return this.request<T>("PUT", endpoint, data, options);
   }
 
-  async patch<T = any>(endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
+  async patch<T = unknown>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T> {
     return this.request<T>("PATCH", endpoint, data, options);
   }
 
@@ -940,8 +941,8 @@ export class WordPressClient implements IWordPressClient {
   }
 
   // Taxonomies
-  async getCategories(params?: any): Promise<WordPressCategory[]> {
-    const queryString = params ? "?" + new URLSearchParams(params).toString() : "";
+  async getCategories(params?: Record<string, string | number | boolean>): Promise<WordPressCategory[]> {
+    const queryString = params ? "?" + new URLSearchParams(params as Record<string, string>).toString() : "";
     return this.get<WordPressCategory[]>(`categories${queryString}`);
   }
 
@@ -962,8 +963,8 @@ export class WordPressClient implements IWordPressClient {
     return this.delete(`categories/${id}?force=${force}`);
   }
 
-  async getTags(params?: any): Promise<WordPressTag[]> {
-    const queryString = params ? "?" + new URLSearchParams(params).toString() : "";
+  async getTags(params?: Record<string, string | number | boolean>): Promise<WordPressTag[]> {
+    const queryString = params ? "?" + new URLSearchParams(params as Record<string, string>).toString() : "";
     return this.get<WordPressTag[]>(`tags${queryString}`);
   }
 
@@ -1007,7 +1008,7 @@ export class WordPressClient implements IWordPressClient {
     name: string,
     appId?: string,
   ): Promise<WordPressApplicationPassword> {
-    const data: any = { name };
+    const data: Record<string, unknown> = { name };
     if (appId) data.app_id = appId;
     return this.post<WordPressApplicationPassword>(`users/${userId}/application-passwords`, data);
   }

@@ -13,6 +13,44 @@ export * from "./mcp.js";
 // Client Types
 export * from "./client.js";
 
+// Enhanced Types (New) - Selective exports to avoid conflicts
+export type { 
+  WordPressId, 
+  PostId, 
+  UserId, 
+  MediaId, 
+  CommentId, 
+  CategoryId, 
+  TagId,
+  Result,
+  DeepReadonly,
+  ToolResult,
+  NonEmptyArray,
+  createWordPressId,
+  createSuccess,
+  createError
+} from "./enhanced.js";
+
+// Request Types (New)
+export * from "./requests.js";
+
+// Tool Types (New) - Selective exports to avoid conflicts
+export type { 
+  BaseToolParams,
+  CreatePostParams,
+  UpdatePostParams,
+  GetPostParams,
+  ListPostsParams,
+  DeletePostParams,
+  CreatePageParams,
+  UpdatePageParams,
+  GetPageParams,
+  ListPagesParams,
+  DeletePageParams,
+  ToolDefinition as EnhancedToolDefinition,
+  ToolRegistry as EnhancedToolRegistry
+} from "./tools.js";
+
 // Common Utility Types
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type RequiredKeys<T, K extends keyof T> = T & Required<Pick<T, K>>;

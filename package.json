@@ -118,6 +118,10 @@
     "test:watch": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --watch",
     "test:weekly": "npm run test:compatibility",
     "test:with-env": "bash scripts/start-test-env.sh && npm run test:typescript",
+    "test:coverage": "NODE_OPTIONS=\"--experimental-vm-modules\" npx jest --config=jest.typescript.config.json --coverage",
+    "test:coverage:report": "npm run test:coverage && node scripts/coverage-guardrail.js",
+    "coverage:check": "node scripts/coverage-guardrail.js",
+    "coverage:strict": "COVERAGE_STRICT=true node scripts/coverage-guardrail.js",
     "typecheck": "tsc --noEmit",
     "verify-claude": "node scripts/verify-claude-integration.js"
   },

@@ -20,18 +20,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 **Current Status (v1.2.4+)**: All critical issues resolved ✅
 
 - 394/394 tests passing (100%)
-- WordPress REST API authentication fixed
+- WordPress REST API authentication fixed  
 - CI/CD pipeline fully functional
 - Multi-site support with 59 tools across 10 categories
+- **Comprehensive testing strategy** with Phase 1 coverage targets (40% lines)
 
 **Essential Commands**:
 
 ```bash
 npm test                   # Run main test suite
+npm run test:coverage      # Run tests with coverage analysis
+npm run coverage:check     # Validate coverage thresholds
 npm run health             # System health check
 npm run dev                # Development mode
 npm run fix:rest-auth      # Fix WordPress authentication issues
 ```
+
+**📚 Testing Resources**:
+- [Testing Guidelines & Best Practices](TESTING_GUIDELINES.md) - Comprehensive testing standards
+- [Coverage Strategy](COVERAGE_STRATEGY.md) - 3-phase coverage improvement plan
+- [Quick Reference](tests/QUICK_REFERENCE.md) - Essential commands and patterns
 
 ## Development Commands
 
@@ -46,6 +54,10 @@ npm run status             # Check connection status
 
 # Testing (394/394 passing ✅)
 npm test                   # Main test suite
+npm run test:coverage      # Tests with coverage analysis
+npm run test:coverage:report # Coverage + detailed analysis
+npm run coverage:check     # Validate coverage thresholds
+npm run coverage:strict    # Enforce component-specific thresholds
 npm run test:tools         # Test all 59 MCP tools (14/14 working)
 npm run test:auth          # Authentication tests
 npm run test:security      # Security validation (40/40 passing)

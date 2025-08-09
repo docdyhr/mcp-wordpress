@@ -4,6 +4,7 @@ import { getErrorMessage } from "../utils/error.js";
 import { ErrorHandlers, EnhancedError } from "../utils/enhancedError.js";
 import { validateId, validatePaginationParams, validatePostParams } from "../utils/validation.js";
 import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "../utils/streaming.js";
+// import type { MCPTool } from \"../types/mcp.js\";"
 
 /**
  * Provides comprehensive tools for managing WordPress posts.
@@ -46,7 +47,7 @@ export class PostTools {
    * console.log(tools.length); // 6 tools: list, get, create, update, delete, revisions
    * ```
    */
-  public getTools(): any[] {
+  public getTools(): unknown[] {
     return [
       {
         name: "wp_list_posts",
