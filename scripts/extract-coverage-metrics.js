@@ -19,7 +19,7 @@ let data;
 try {
   data = JSON.parse(fs.readFileSync(reportPath, "utf-8"));
 } catch (e) {
-  console.error("# failed to parse coverage-final.json", e.message);
+  console.error("# failed to parse coverage-final.json", e.stack || e.message);
   process.exit(1);
 }
 let linesTotal = 0,

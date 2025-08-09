@@ -74,7 +74,7 @@ jobs:
       - name: Tests with coverage
         env:
           NODE_OPTIONS: --experimental-vm-modules
-        run: npm run test:coverage || true
+        run: npm run test:coverage
       - name: Wait for WordPress health
         run: |
           echo "Waiting for WordPress to become healthy..."
@@ -95,7 +95,7 @@ jobs:
         run: |
           SUMMARY=$(grep -E "Tests:.*total" -R . | tail -1)
           TESTS_TOTAL=$(echo "$SUMMARY" | grep -oE '[0-9]+ total' | awk '{print $1}')
-            TESTS_PASSED=$(echo "$SUMMARY" | grep -oE '[0-9]+ passed' | awk '{print $1}')
+          TESTS_PASSED=$(echo "$SUMMARY" | grep -oE '[0-9]+ passed' | awk '{print $1}')
           [ -z "$TESTS_TOTAL" ] && TESTS_TOTAL=0
           [ -z "$TESTS_PASSED" ] && TESTS_PASSED=0
           if [ -f coverage/coverage-final.json ]; then
@@ -113,7 +113,7 @@ jobs:
           BRANCH_COLOR=red; BINT=${BRANCH_COV%.*}
           if [ "$BINT" -ge 90 ]; then BRANCH_COLOR=brightgreen; elif [ "$BINT" -ge 75 ]; then BRANCH_COLOR=green; elif [ "$BINT" -ge 50 ]; then BRANCH_COLOR=yellow; elif [ "$BINT" -ge 30 ]; then BRANCH_COLOR=orange; fi
           FUNC_COLOR=red; FINT=${FUNC_COV%.*}
-            if [ "$FINT" -ge 90 ]; then FUNC_COLOR=brightgreen; elif [ "$FINT" -ge 75 ]; then FUNC_COLOR=green; elif [ "$FINT" -ge 50 ]; then FUNC_COLOR=yellow; elif [ "$FINT" -ge 30 ]; then FUNC_COLOR=orange; fi
+          if [ "$FINT" -ge 90 ]; then FUNC_COLOR=brightgreen; elif [ "$FINT" -ge 75 ]; then FUNC_COLOR=green; elif [ "$FINT" -ge 50 ]; then FUNC_COLOR=yellow; elif [ "$FINT" -ge 30 ]; then FUNC_COLOR=orange; fi
           TEST_COLOR=red
           if [ "$TESTS_TOTAL" -gt 0 ]; then
             PASS_PCT=$((100*TESTS_PASSED/TESTS_TOTAL))
