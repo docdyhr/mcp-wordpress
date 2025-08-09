@@ -35,7 +35,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -prootpassword || exit 1" \
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -prootpassword || exit 1"
           --health-interval=10s --health-timeout=5s --health-retries=15
       wordpress:
         image: wordpress:latest
@@ -47,7 +47,7 @@ jobs:
         ports:
           - 8081:80
         options: >-
-          --health-cmd="curl --silent --fail http://localhost:80/wp-json/wp/v2/posts || exit 1" \
+          --health-cmd="curl --silent --fail http://localhost:80/wp-json/wp/v2/posts || exit 1"
           --health-interval=15s --health-timeout=5s --health-retries=25
     permissions:
       contents: write

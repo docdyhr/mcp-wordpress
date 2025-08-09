@@ -333,6 +333,29 @@ describe("validation utilities", () => {
       expect(result.tags).toEqual([4, 5, 6]);
     });
 
+    it("should validate featured_media parameters", () => {
+      // Valid featured_media ID
+      const withFeaturedMedia = validatePostParams({
+        title: "Test Post",
+        featured_media: 42,
+      });
+      expect(withFeaturedMedia.featured_media).toBe(42);
+
+      // Featured media set to 0 (remove featured image)
+      const removeFeaturedMedia = validatePostParams({
+        title: "Test Post",
+        featured_media: 0,
+      });
+      expect(removeFeaturedMedia.featured_media).toBe(0);
+
+      // Featured media set to null (remove featured image)
+      const nullFeaturedMedia = validatePostParams({
+        title: "Test Post",
+        featured_media: null,
+      });
+      expect(nullFeaturedMedia.featured_media).toBe(0);
+    });
+
     it("should reject invalid post parameters", () => {
       expect(() => validatePostParams({ title: "" })).toThrow(WordPressAPIError);
       expect(() => validatePostParams({ status: "invalid" })).toThrow(WordPressAPIError);
