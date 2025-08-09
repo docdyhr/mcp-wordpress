@@ -113,6 +113,8 @@ export class PostTools {
           '• Simple post: `wp_create_post --title="My New Post" --content="<p>Hello World!</p>"`\n' +
           '• Draft post: `wp_create_post --title="Draft Post" --status="draft"`\n' +
           '• Categorized post: `wp_create_post --title="Tech News" --categories=[1,5] --tags=[10,20]`\n' +
+          '• Post with featured image: `wp_create_post --title="My Post" --content="<p>Content</p>" --featured_media=42`\n' +
+          '• Remove featured image: `wp_create_post --title="My Post" --featured_media=0`\n' +
           '• Scheduled post: `wp_create_post --title="Future Post" --status="future" --date="2024-12-25T10:00:00"`\n' +
           '• Complete post: `wp_create_post --title="Complete Post" --content="<p>Content</p>" --excerpt="Summary" --status="publish"`',
         parameters: [
@@ -149,6 +151,12 @@ export class PostTools {
             type: "array",
             items: { type: "number" },
             description: "An array of tag IDs to assign to the post.",
+          },
+          {
+            name: "featured_media",
+            type: "number",
+            description:
+              "The ID of the featured media (image) for the post. Use wp_upload_media first to get a media ID. Set to 0 or null to remove the featured image.",
           },
         ],
         handler: this.handleCreatePost.bind(this),

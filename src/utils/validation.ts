@@ -449,6 +449,16 @@ export function validatePostParams(params: any): any {
     validated.tags = validated.tags.map((id: any) => validateId(id, "tag ID"));
   }
 
+  // Featured media validation
+  if (params.featured_media !== undefined) {
+    if (params.featured_media === null || params.featured_media === 0) {
+      // Allow null or 0 to remove featured media
+      validated.featured_media = 0;
+    } else {
+      validated.featured_media = validateId(params.featured_media, "featured_media");
+    }
+  }
+
   // Date validation for scheduled posts
   if (params.date) {
     try {
