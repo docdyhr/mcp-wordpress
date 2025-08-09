@@ -8,6 +8,8 @@ Creates a new WordPress post with comprehensive validation and detailed success 
 • Simple post: `wp_create_post --title="My New Post" --content="<p>Hello World!</p>"`
 • Draft post: `wp_create_post --title="Draft Post" --status="draft"`
 • Categorized post: `wp_create_post --title="Tech News" --categories=[1,5] --tags=[10,20]`
+• Post with featured image: `wp_create_post --title="My Post" --content="<p>Content</p>" --featured_media=42`
+• Remove featured image: `wp_create_post --title="My Post" --featured_media=0`
 • Scheduled post: `wp_create_post --title="Future Post" --status="future" --date="2024-12-25T10:00:00"`
 • Complete post: `wp_create_post --title="Complete Post" --content="<p>Content</p>" --excerpt="Summary" --status="publish"`
 
@@ -21,6 +23,7 @@ Creates a new WordPress post with comprehensive validation and detailed success 
 | `excerpt` | `string` | ❌ | The excerpt for the post. | - | `example` |
 | `categories` | `array` | ❌ | An array of category IDs to assign to the post. | - | `example` |
 | `tags` | `array` | ❌ | An array of tag IDs to assign to the post. | - | `example` |
+| `featured_media` | `number` | ❌ | The ID of the featured media (image) for the post. Use wp_upload_media first to get a media ID. Set to 0 or null to remove the featured image. | - | `example` |
 
 ## Examples
 
@@ -29,11 +32,13 @@ Creates a new WordPress post with comprehensive validation and detailed success 
 Simple example of using wp_create_post
 
 **Command:**
+
 ```bash
 wp_create_post --title="Example Post Title"
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -46,6 +51,7 @@ wp_create_post --title="Example Post Title"
 ```
 
 **Error Example (Authentication failure):**
+
 ```json
 {
   "error": "Authentication failed",
@@ -53,17 +59,18 @@ wp_create_post --title="Example Post Title"
 }
 ```
 
-
 ### Advanced post Configuration
 
 Comprehensive example using all available parameters
 
 **Command:**
+
 ```bash
-wp_create_post --title="Example Post Title" --content="This is example content for the post." --status="publish" --excerpt="example_value" --categories="example_value" --tags="example_value"
+wp_create_post --title="Example Post Title" --content="This is example content for the post." --status="publish" --excerpt="example_value" --categories="example_value" --tags="example_value" --featured_media="example_value"
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -75,19 +82,17 @@ wp_create_post --title="Example Post Title" --content="This is example content f
 }
 ```
 
-
-
-
 ## WordPress REST API Mapping
 
 **Endpoint:** `/wp-json/wp/v2/posts`
 
-This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters are determined by WordPress core functionality.
+This tool directly interfaces with the WordPress REST API endpoint above. The response format and available
+parameters are determined by WordPress core functionality.
 
 ### WordPress Documentation
+
 - [WordPress REST API Handbook](https://developer.wordpress.org/rest-api/)
 - [Endpoint Reference](https://developer.wordpress.org/rest-api/reference/)
-
 
 ## Required Permissions
 
@@ -97,7 +102,6 @@ This tool requires the following WordPress user capabilities:
 - `edit_posts`
 
 **Note:** The authenticated user must have these capabilities to successfully execute this tool.
-
 
 ## Response Format
 
@@ -125,13 +129,11 @@ This tool requires the following WordPress user capabilities:
 **Description:** Invalid credentials or insufficient permissions  
 **Resolution:** Check your authentication credentials and user permissions
 
-
 ### VALIDATION_ERROR
 
 **Message:** Parameter validation failed  
 **Description:** One or more required parameters are missing or invalid  
 **Resolution:** Review the required parameters and their formats
-
 
 ### NOT_FOUND
 
@@ -139,15 +141,11 @@ This tool requires the following WordPress user capabilities:
 **Description:** The requested resource does not exist  
 **Resolution:** Verify the resource ID and ensure it exists
 
-
 ### PERMISSION_DENIED
 
 **Message:** Insufficient permissions  
 **Description:** The user does not have permission to perform this action  
 **Resolution:** Contact an administrator to grant the necessary permissions
-
-
-
 
 ---
 
