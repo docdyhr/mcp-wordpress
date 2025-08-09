@@ -58,10 +58,30 @@ if (linePct < lineThreshold) failures.push(`Lines ${linePct.toFixed(2)}% < ${lin
 if (branchPct < branchThreshold) failures.push(`Branches ${branchPct.toFixed(2)}% < ${branchThreshold}%`);
 if (funcPct < functionThreshold) failures.push(`Functions ${funcPct.toFixed(2)}% < ${functionThreshold}%`);
 
+const result = {
+  status: failures.length ? "failed" : "passed",
+  thresholds: {
+    lines: lineThreshold,
+    branches: branchThreshold,
+    functions: functionThreshold,
+  },
+  coverage: {
+    lines: parseFloat(linePct.toFixed(2)),
+    branches: parseFloat(branchPct.toFixed(2)),
+    functions: parseFloat(funcPct.toFixed(2)),
+  },
+  failures,
+};
+
 if (failures.length) {
   console.error("❌ Coverage guardrail failed:", failures.join("; "));
+  // Structured JSON (single line) for downstream parsing
+  console.error(JSON.stringify(result));
   process.exit(1);
 }
+
 console.log(
   `✅ Coverage guardrail passed: Lines ${linePct.toFixed(2)}% ≥ ${lineThreshold}%, Branches ${branchPct.toFixed(2)}% ≥ ${branchThreshold}%, Functions ${funcPct.toFixed(2)}% ≥ ${functionThreshold}%`,
 );
+// Structured JSON (single line) for downstream parsing
+console.log(JSON.stringify(result));
