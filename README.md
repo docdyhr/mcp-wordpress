@@ -7,8 +7,8 @@
 
 Manage WordPress sites with natural language through AI tools like Claude Desktop
 
-[Quick Start](#-quick-start) • [Features](#-features) • [Installation](#-installation-options) •
-[Documentation](#-documentation) • [Examples](#-examples)
+[Quick Start](#-quick-start) • [Why This MCP Server?](#-why-this-mcp-server)
+[Installation Options](#-installation-options) • [Documentation](#-documentation) • [Examples](#-examples)
 
 [![CI/CD Pipeline](https://github.com/docdyhr/mcp-wordpress/workflows/%F0%9F%9A%80%20CI%2FCD%20Pipeline/badge.svg)](https://github.com/docdyhr/mcp-wordpress/actions)
 [![GitHub Stars](https://img.shields.io/github/stars/docdyhr/mcp-wordpress?style=social)](https://github.com/docdyhr/mcp-wordpress/stargazers)
@@ -16,8 +16,10 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 [![NPM Downloads](https://img.shields.io/npm/dm/mcp-wordpress?logo=npm&logoColor=white)](https://www.npmjs.com/package/mcp-wordpress)
 [![NPM Total Downloads](https://img.shields.io/npm/dt/mcp-wordpress?logo=npm&logoColor=white&label=total%20downloads)](https://www.npmjs.com/package/mcp-wordpress)
 [![Docker Pulls](https://img.shields.io/docker/pulls/docdyhr/mcp-wordpress?logo=docker&logoColor=white)](https://hub.docker.com/r/docdyhr/mcp-wordpress)
-[![Test Coverage](https://img.shields.io/badge/test%20coverage-95%25%2B-brightgreen?logo=jest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
-[![Test Results](https://img.shields.io/badge/tests-207%2F207%20passing-brightgreen?logo=checkmarx&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
+[![Line Coverage](https://img.shields.io/badge/lines%20coverage-30.97%25-orange?logo=jest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
+[![Branch Coverage](https://img.shields.io/badge/branch%20coverage-23.84%25-red?logo=jest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
+[![Function Coverage](https://img.shields.io/badge/function%20coverage-27.69%25-orange?logo=jest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
+[![Test Results](https://img.shields.io/badge/tests-404%2F404%20passing-brightgreen?logo=checkmarx&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
 [![MCP Evaluation](https://img.shields.io/badge/mcp%20evaluation-4.5%2F5.0-brightgreen?logo=openai&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/mcp-evaluations.yml)
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue?logo=typescript&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
@@ -43,7 +45,7 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 
 - 🏆 **Most Complete**: 59 tools vs 20-30 in alternatives
 - ⚡ **Fastest Setup**: 2-click Claude Desktop installation via DXT
-- 🔒 **Production Ready**: 207 tests, security audited, battle-tested
+- 🔒 **Production Ready**: 404 tests (expanding), security audited, battle-tested
 - 🎯 **TypeScript Native**: 100% type safety, best-in-class developer experience
 - 🌐 **Multi-Site**: Manage unlimited WordPress sites from one place
 
@@ -344,7 +346,7 @@ define('JWT_AUTH_CORS_ENABLE', true);
 | **Multi-Site Support**     | ✅ Unlimited sites     | ❌ Single site  |
 | **TypeScript**             | ✅ 100% coverage       | ⚠️ Partial/None |
 | **Performance Monitoring** | ✅ Real-time analytics | ❌ Basic only   |
-| **Test Coverage**          | ✅ 207 tests (100%)    | ⚠️ Limited      |
+| **Test Coverage**          | ✅ 404 tests (100% pass / 30% lines) | ⚠️ Limited      |
 | **Production Ready**       | ✅ Security audited    | ⚠️ Unknown      |
 
 ### 🚀 Core Capabilities
@@ -360,7 +362,7 @@ define('JWT_AUTH_CORS_ENABLE', true);
 
 - **⚡ Intelligent Caching** - 50-70% performance improvement
 - **📊 Real-Time Monitoring** - Performance metrics and optimization insights
-- **🔒 Production Ready** - Security-reviewed, 95%+ test coverage
+- **🔒 Production Ready** - Security-reviewed, growing coverage (30% lines) after expanding test suite
 - **🔄 Zero Downtime** - Graceful error handling and automatic recovery
 
 #### Developer Experience
@@ -435,7 +437,7 @@ Use with site parameter: `wp_list_posts --site="main-site"`
 - **💬 Comments** (7 tools) - Comment moderation and management
 - **🏷️ Taxonomies** (10 tools) - Categories and tags management
 
-### Site Management
+### Site Management (Monitoring & Admin)
 
 - **⚙️ Site Settings** (7 tools) - Site configuration and statistics
 - **🔐 Authentication** (6 tools) - Auth testing and management
@@ -924,7 +926,7 @@ os-info >> debug-report.txt
 
 ### Current Test Status ✅
 
-- **Main Test Suite**: 207/207 passed (100%)
+- **Main Test Suite**: 404/404 passed (100%)
 - **Security Tests**: 40/40 passed (100%)
 - **Performance Tests**: 8/8 passed (100%)
 - **CI/CD Pipeline**: Fully functional
