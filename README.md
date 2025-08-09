@@ -1056,6 +1056,7 @@ npm run setup
 - **[Contributing](CONTRIBUTING.md)** - Development guidelines
 - **[Plugin Development](docs/developer/plugins.md)** - Extend functionality
 
+
 ### Deployment & Operations
 
 - **[Docker Deployment](docs/deployment/docker.md)** - Container deployment
