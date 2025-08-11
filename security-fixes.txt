@@ -60,7 +60,7 @@ add undici 5.29.0
 add underscore 1.13.7
 add uglify-js 3.19.3
 add uc.micro 2.1.0
-add typescript 5.8.3
+add typescript 5.9.2
 add type-is 1.6.18
 add mime-types 2.1.35
 add mime-db 1.52.0
@@ -342,7 +342,7 @@ add node-gyp-build 4.8.4
 add node-fetch 3.3.2
 add node-emoji 2.2.0
 add node-domexception 1.0.0
-add nock 14.0.7
+add nock 14.0.8
 add nerf-dart 1.0.0
 add neo-async 2.6.2
 add negotiator 1.0.0
@@ -442,14 +442,14 @@ add locate-path 6.0.0
 add load-json-file 4.0.0
 add strip-bom 3.0.0
 add parse-json 4.0.0
-add listr2 8.3.3
+add listr2 9.0.1
 add wrap-ansi 9.0.0
 add string-width 7.2.0
 add eventemitter3 5.0.1
 add emoji-regex 10.4.0
 add ansi-styles 6.2.1
 add listenercount 1.0.1
-add lint-staged 16.1.2
+add lint-staged 16.1.4
 add chalk 5.4.1
 add linkify-it 5.0.0
 add lines-and-columns 1.2.4
@@ -689,9 +689,14 @@ add semver 6.3.1
 add minimatch 3.1.2
 add brace-expansion 1.1.12
 add eslint-plugin-jest 29.0.1
+add typescript 5.8.3
+add @typescript-eslint/utils 8.38.0
+add @typescript-eslint/typescript-estree 8.38.0
+add @typescript-eslint/tsconfig-utils 8.38.0
+add @typescript-eslint/project-service 8.38.0
 add eslint-plugin-es 3.0.1
 add eslint-config-prettier 10.1.8
-add eslint 9.31.0
+add eslint 9.32.0
 add minimatch 3.1.2
 add brace-expansion 1.1.12
 add escape-string-regexp 4.0.0
@@ -917,13 +922,18 @@ add @unrs/resolver-binding-android-arm64 1.11.1
 add @unrs/resolver-binding-android-arm-eabi 1.11.1
 add @ungap/structured-clone 1.3.0
 add @typescript-eslint/visitor-keys 8.38.0
-add @typescript-eslint/utils 8.38.0
-add @typescript-eslint/typescript-estree 8.38.0
+add @typescript-eslint/typescript-estree 8.39.0
+add @typescript-eslint/visitor-keys 8.39.0
+add @typescript-eslint/types 8.39.0
 add @typescript-eslint/types 8.38.0
-add @typescript-eslint/tsconfig-utils 8.38.0
+add @typescript-eslint/tsconfig-utils 8.39.0
 add @typescript-eslint/scope-manager 8.38.0
-add @typescript-eslint/project-service 8.38.0
-add @typescript-eslint/parser 8.38.0
+add @typescript-eslint/project-service 8.39.0
+add @typescript-eslint/types 8.39.0
+add @typescript-eslint/parser 8.39.0
+add @typescript-eslint/visitor-keys 8.39.0
+add @typescript-eslint/types 8.39.0
+add @typescript-eslint/scope-manager 8.39.0
 add @types/yargs-parser 21.0.3
 add @types/yargs 17.0.33
 add @types/unist 2.0.11
@@ -1110,8 +1120,8 @@ add @nodelib/fs.walk 1.2.8
 add @nodelib/fs.stat 2.0.5
 add @nodelib/fs.scandir 2.1.5
 add @napi-rs/wasm-runtime 0.2.12
-add @mswjs/interceptors 0.39.3
-add @modelcontextprotocol/sdk 1.16.0
+add @mswjs/interceptors 0.39.5
+add @modelcontextprotocol/sdk 1.17.1
 add @js-sdsl/ordered-map 4.4.2
 add @jridgewell/trace-mapping 0.3.29
 add @jridgewell/sourcemap-codec 1.5.4
@@ -1157,7 +1167,7 @@ add @grpc/grpc-js 1.13.4
 add @fastify/busboy 2.1.1
 add @eslint/plugin-kit 0.3.4
 add @eslint/object-schema 2.1.6
-add @eslint/js 9.31.0
+add @eslint/js 9.32.0
 add @eslint/eslintrc 3.3.1
 add minimatch 3.1.2
 add brace-expansion 1.1.12
@@ -1252,9 +1262,9 @@ add @actions/http-client 2.2.3
 add @actions/exec 1.1.1
 add @actions/core 1.11.1
 
-added 1253 packages, and audited 1462 packages in 1s
+added 1263 packages, and audited 1472 packages in 1s
 
-267 packages are looking for funding
+273 packages are looking for funding
   run `npm fund` for details
 
 found 0 vulnerabilities
