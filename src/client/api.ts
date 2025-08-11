@@ -943,7 +943,10 @@ export class WordPressClient implements IWordPressClient {
 
   // Taxonomies
   async getCategories(params?: Record<string, string | number | boolean>): Promise<WordPressCategory[]> {
-    const queryString = params ? "?" + new URLSearchParams(params as Record<string, string>).toString() : "";
+    const normalizedParams = params
+      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
+      : undefined;
+    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
     return this.get<WordPressCategory[]>(`categories${queryString}`);
   }
 
@@ -965,7 +968,10 @@ export class WordPressClient implements IWordPressClient {
   }
 
   async getTags(params?: Record<string, string | number | boolean>): Promise<WordPressTag[]> {
-    const queryString = params ? "?" + new URLSearchParams(params as Record<string, string>).toString() : "";
+    const normalizedParams = params
+      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
+      : undefined;
+    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
     return this.get<WordPressTag[]>(`tags${queryString}`);
   }
 

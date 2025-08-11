@@ -120,13 +120,8 @@ function outputLog(entry: LogEntry): void {
   
   const formatted = formatLogEntry(entry);
   
-  // Use stderr for errors and warnings to avoid STDIO interference
-  if (LOG_LEVELS[entry.level] >= LOG_LEVELS.warn) {
-    console.error(formatted);
-  } else {
-    // Use stderr for all logging to avoid MCP STDIO interference
-    console.error(formatted);
-  }
+  // Use stderr for all log output to avoid STDIO interference
+  console.error(formatted);
 }
 
 /**
@@ -234,7 +229,7 @@ export class Logger {
     try {
       const result = fn();
       
-      if (result instanceof Promise) {
+      if (result && typeof result.then === "function") {
         return result
           .then((value) => {
             const duration = Date.now() - start;

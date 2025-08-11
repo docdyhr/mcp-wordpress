@@ -46,9 +46,11 @@ jobs:
           cp coverage-baseline.json coverage-baseline-${{ github.sha }}.json
 
       - name: 🔄 Switch back to PR branch
+        env:
+          HEAD_REF: ${{ github.head_ref }}
         run: |
           echo "🔄 Switching back to PR branch..."
-          git checkout ${{ github.head_ref }}
+          git checkout "$HEAD_REF"
 
       - name: 🧪 Run PR tests with coverage
         run: |

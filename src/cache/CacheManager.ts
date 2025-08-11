@@ -300,12 +300,17 @@ export class CacheManager {
       return params;
     }
 
+    if (Array.isArray(params)) {
+      // Recursively normalize each item in the array
+      return params.map((item) => this.normalizeParams(item));
+    }
+
     // Sort object keys for consistent hashing
-    const normalized: Record<string, unknown> | unknown[] = Array.isArray(params) ? [] : {};
+    const normalized: Record<string, unknown> = {};
     const keys = Object.keys(params).sort();
 
     for (const key of keys) {
-      (normalized as Record<string, unknown>)[key] = this.normalizeParams((params as Record<string, unknown>)[key]);
+      normalized[key] = this.normalizeParams((params as Record<string, unknown>)[key]);
     }
 
     return normalized;
