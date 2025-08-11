@@ -487,7 +487,7 @@ export class WordPressClient implements IWordPressClient {
   /**
    * Make authenticated request to WordPress REST API
    */
-  async request<T = any>(
+  async request<T = unknown>(
     method: HTTPMethod,
     endpoint: string,
     data: unknown = null,
@@ -528,15 +528,16 @@ export class WordPressClient implements IWordPressClient {
         (typeof data === "object" && data && "append" in data && typeof data.append === "function")
       ) {
         // For FormData, check if it has getHeaders method (form-data package)
-        if (typeof (data as any).getHeaders === "function") {
+        if (typeof (data as { getHeaders?: () => Record<string, string> }).getHeaders === "function") {
           // Use headers from form-data package
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const formHeaders = (data as any).getHeaders();
           Object.assign(headers, formHeaders);
         } else {
           // For native FormData, don't set Content-Type (let fetch set it with boundary)
           delete headers["Content-Type"];
         }
-        fetchOptions.body = data as any;
+        fetchOptions.body = data as FormData;
       } else if (Buffer.isBuffer(data)) {
         // For Buffer data (manual multipart), keep Content-Type from headers
         fetchOptions.body = data;
@@ -679,7 +680,7 @@ export class WordPressClient implements IWordPressClient {
         lastError = error as Error;
 
         // Handle timeout errors
-        if ((error as any).name === "AbortError") {
+        if ((error as Error & { name?: string }).name === "AbortError") {
           lastError = new Error(`Request timeout after ${requestTimeout}ms`);
         }
 
@@ -719,7 +720,7 @@ export class WordPressClient implements IWordPressClient {
   }
 
   // HTTP method helpers
-  async get<T = any>(endpoint: string, options?: RequestOptions): Promise<T> {
+  async get<T = unknown>(endpoint: string, options?: RequestOptions): Promise<T> {
     return this.request<T>("GET", endpoint, null, options);
   }
 
@@ -735,7 +736,7 @@ export class WordPressClient implements IWordPressClient {
     return this.request<T>("PATCH", endpoint, data, options);
   }
 
-  async delete<T = any>(endpoint: string, options?: RequestOptions): Promise<T> {
+  async delete<T = unknown>(endpoint: string, options?: RequestOptions): Promise<T> {
     return this.request<T>("DELETE", endpoint, null, options);
   }
 
@@ -743,7 +744,7 @@ export class WordPressClient implements IWordPressClient {
 
   // Posts
   async getPosts(params?: PostQueryParams): Promise<WordPressPost[]> {
-    const queryString = params ? "?" + new URLSearchParams(params as any).toString() : "";
+    const queryString = params ? "?" + new URLSearchParams(params as Record<string, string>).toString() : "";
     return this.get<WordPressPost[]>(`posts${queryString}`);
   }
 

@@ -8,6 +8,8 @@ import { PerformanceMonitor } from "../performance/PerformanceMonitor.js";
 import { MetricsCollector } from "../performance/MetricsCollector.js";
 import { PerformanceAnalytics } from "../performance/PerformanceAnalytics.js";
 import { toolWrapper } from "../utils/toolWrapper.js";
+import { ConfigHelpers } from "../config/Config.js";
+import { LoggerFactory } from "../utils/logger.js";
 
 /**
  * Performance Tools Class
@@ -16,6 +18,8 @@ export default class PerformanceTools {
   private monitor: PerformanceMonitor;
   private collector: MetricsCollector;
   private analytics: PerformanceAnalytics;
+  private logger = LoggerFactory.performance();
+  private historicalDataInterval?: NodeJS.Timeout | undefined;
 
   constructor(clients?: Map<string, any>) {
     // Initialize performance monitoring system
@@ -49,8 +53,10 @@ export default class PerformanceTools {
       }
     }
 
-    // Start collecting metrics from historical data for analytics
-    this.startHistoricalDataCollection();
+    // Only start historical data collection in production environments
+    if (ConfigHelpers.isProd() || ConfigHelpers.isDev()) {
+      this.startHistoricalDataCollection();
+    }
   }
 
   /**
@@ -946,10 +952,43 @@ export default class PerformanceTools {
   }
 
   private startHistoricalDataCollection(): void {
-    // Collect metrics every 30 seconds for analytics
-    setInterval(() => {
-      const currentMetrics = this.collector.collectCurrentMetrics();
-      this.analytics.addDataPoint(currentMetrics);
-    }, 30000);
+    // Skip in test environments to prevent performance issues
+    if (ConfigHelpers.isTest() || ConfigHelpers.isCI()) {
+      this.logger.debug("Skipping historical data collection in test/CI environment");
+      return;
+    }
+
+    // Adjust collection frequency based on environment
+    const interval = ConfigHelpers.isDev() ? 60000 : 30000; // 1 minute in dev, 30 seconds in prod
+    
+    this.logger.info("Starting historical data collection", { 
+      interval: `${interval/1000}s`,
+      environment: ConfigHelpers.get().get().app.nodeEnv
+    });
+
+    this.historicalDataInterval = setInterval(() => {
+      try {
+        const currentMetrics = this.collector.collectCurrentMetrics();
+        this.analytics.addDataPoint(currentMetrics);
+        this.logger.debug("Historical metrics collected", { 
+          timestamp: new Date().toISOString() 
+        });
+      } catch (error) {
+        this.logger.error("Failed to collect historical metrics", {
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
+    }, interval);
+  }
+
+  /**
+   * Stop historical data collection and cleanup resources
+   */
+  public destroy(): void {
+    if (this.historicalDataInterval) {
+      clearInterval(this.historicalDataInterval);
+      this.historicalDataInterval = undefined;
+      this.logger.info("Historical data collection stopped");
+    }
   }
 }

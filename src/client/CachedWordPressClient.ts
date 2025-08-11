@@ -49,10 +49,10 @@ export class CachedWordPressClient extends WordPressClient {
   /**
    * Override request method to add caching
    */
-  async request<T = any>(
+  async request<T = unknown>(
     method: HTTPMethod,
     endpoint: string,
-    data: any = null,
+    data: unknown = null,
     options: RequestOptions = {},
   ): Promise<T> {
     // Only cache GET requests
@@ -162,7 +162,7 @@ export class CachedWordPressClient extends WordPressClient {
   /**
    * Get categories with semi-static caching
    */
-  async getCategories(params: any = {}): Promise<WordPressCategory[]> {
+  async getCategories(params: Record<string, unknown> = {}): Promise<WordPressCategory[]> {
     return await this.request<WordPressCategory[]>("GET", "categories", null, {
       params,
     });
@@ -171,7 +171,7 @@ export class CachedWordPressClient extends WordPressClient {
   /**
    * Get tags with semi-static caching
    */
-  async getTags(params: any = {}): Promise<WordPressTag[]> {
+  async getTags(params: Record<string, unknown> = {}): Promise<WordPressTag[]> {
     return await this.request<WordPressTag[]>("GET", "tags", null, { params });
   }
 

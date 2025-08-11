@@ -262,9 +262,10 @@ describe("HttpCacheWrapper", () => {
 
       expect(cached).toBeDefined();
       if (cached && typeof cached === "object" && "data" in cached) {
-        expect((cached as any).data).toEqual(data);
-        expect((cached as any).etag).toBeDefined();
-        expect((cached as any).lastModified).toBeDefined();
+        const cachedEntry = cached as { data: unknown; etag?: string; lastModified?: string };
+        expect(cachedEntry.data).toEqual(data);
+        expect(cachedEntry.etag).toBeDefined();
+        expect(cachedEntry.lastModified).toBeDefined();
       }
     });
 

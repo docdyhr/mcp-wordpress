@@ -6,6 +6,8 @@
 import { PerformanceMonitor, PerformanceMetrics } from "./PerformanceMonitor.js";
 import type { CacheStats } from "../cache/CacheManager.js";
 import type { ClientStats } from "../types/client.js";
+import { ConfigHelpers } from "../config/Config.js";
+import { LoggerFactory } from "../utils/logger.js";
 
 export interface CollectorConfig {
   enableRealTime: boolean;
@@ -42,6 +44,8 @@ export class MetricsCollector {
   private activeTools: Map<string, ToolExecutionContext> = new Map();
   private clientInstances: Map<string, any> = new Map();
   private cacheManagers: Map<string, any> = new Map();
+  private logger = LoggerFactory.performance();
+  private realTimeInterval?: NodeJS.Timeout | undefined;
 
   constructor(monitor: PerformanceMonitor, config: Partial<CollectorConfig> = {}) {
     this.monitor = monitor;
@@ -55,8 +59,11 @@ export class MetricsCollector {
       ...config,
     };
 
-    if (this.config.enableRealTime) {
+    // Only enable real-time collection in appropriate environments
+    if (this.config.enableRealTime && (ConfigHelpers.isDev() || ConfigHelpers.isProd())) {
       this.startRealTimeCollection();
+    } else if (ConfigHelpers.isTest() || ConfigHelpers.isCI()) {
+      this.logger.debug("Skipping real-time metrics collection in test/CI environment");
     }
   }
 
@@ -361,10 +368,43 @@ export class MetricsCollector {
    * Start real-time metric collection
    */
   private startRealTimeCollection(): void {
-    setInterval(() => {
-      this.updateCacheMetrics();
-      this.updateClientMetrics();
-    }, this.config.collectInterval);
+    // Skip in test/CI environments to prevent performance issues
+    if (ConfigHelpers.isTest() || ConfigHelpers.isCI()) {
+      return;
+    }
+
+    // Adjust collection frequency based on environment
+    const interval = ConfigHelpers.isDev() 
+      ? Math.max(this.config.collectInterval * 2, 60000) // Longer intervals in dev
+      : this.config.collectInterval;
+    
+    this.logger.info("Starting real-time metrics collection", { 
+      interval: `${interval/1000}s`,
+      environment: ConfigHelpers.get().get().app.nodeEnv
+    });
+
+    this.realTimeInterval = setInterval(() => {
+      try {
+        this.updateCacheMetrics();
+        this.updateClientMetrics();
+        this.logger.debug("Real-time metrics updated");
+      } catch (error) {
+        this.logger.error("Failed to update real-time metrics", {
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
+    }, interval);
+  }
+
+  /**
+   * Stop real-time collection and cleanup resources
+   */
+  public destroy(): void {
+    if (this.realTimeInterval) {
+      clearInterval(this.realTimeInterval);
+      this.realTimeInterval = undefined;
+      this.logger.info("Real-time metrics collection stopped");
+    }
   }
 
   /**

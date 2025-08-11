@@ -5,7 +5,7 @@
 
 import * as crypto from "crypto";
 
-export interface CacheEntry<T = any> {
+export interface CacheEntry<T = unknown> {
   value: T;
   timestamp: number;
   ttl: number;
@@ -54,7 +54,7 @@ export class CacheManager {
   /**
    * Generate cache key with site prefix and parameter hash
    */
-  generateKey(siteId: string, endpoint: string, params?: any): string {
+  generateKey(siteId: string, endpoint: string, params?: Record<string, unknown>): string {
     const baseKey = `${siteId}:${endpoint}`;
 
     if (!params || Object.keys(params).length === 0) {
@@ -100,7 +100,7 @@ export class CacheManager {
     this.stats.hits++;
     this.updateHitRate();
 
-    return entry.value;
+    return entry.value as T;
   }
 
   /**
@@ -295,17 +295,17 @@ export class CacheManager {
   /**
    * Normalize parameters for consistent hashing
    */
-  private normalizeParams(params: any): any {
+  private normalizeParams(params: unknown): unknown {
     if (typeof params !== "object" || params === null) {
       return params;
     }
 
     // Sort object keys for consistent hashing
-    const normalized: any = Array.isArray(params) ? [] : {};
+    const normalized: Record<string, unknown> | unknown[] = Array.isArray(params) ? [] : {};
     const keys = Object.keys(params).sort();
 
     for (const key of keys) {
-      normalized[key] = this.normalizeParams(params[key]);
+      (normalized as Record<string, unknown>)[key] = this.normalizeParams((params as Record<string, unknown>)[key]);
     }
 
     return normalized;

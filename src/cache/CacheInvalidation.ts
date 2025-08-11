@@ -4,6 +4,7 @@
  */
 
 import { HttpCacheWrapper } from "./HttpCacheWrapper.js";
+import { LoggerFactory } from "../utils/logger.js";
 
 export interface InvalidationRule {
   trigger: string;
@@ -28,6 +29,7 @@ export class CacheInvalidation {
   private invalidationRules: Map<string, InvalidationRule[]> = new Map();
   private eventQueue: InvalidationEvent[] = [];
   private processing = false;
+  private logger = LoggerFactory.cache();
 
   constructor(private httpCache: HttpCacheWrapper) {
     this.setupDefaultRules();
@@ -308,7 +310,10 @@ export class CacheInvalidation {
       const invalidated = this.httpCache.invalidatePattern(invalidationPattern);
 
       if (invalidated > 0) {
-        console.error(`INFO: Invalidated ${invalidated} cache entries for pattern: ${invalidationPattern}`);
+        this.logger.info("Cache entries invalidated", {
+          count: invalidated,
+          pattern: invalidationPattern
+        });
       }
     }
   }
@@ -391,6 +396,8 @@ export class WordPressCachePatterns {
  * Cache warming strategies for common WordPress data
  */
 export class CacheWarmer {
+  private logger = LoggerFactory.cache();
+
   constructor(private httpCache: HttpCacheWrapper) {}
 
   /**
@@ -399,20 +406,20 @@ export class CacheWarmer {
   async warmEssentials(): Promise<void> {
     // Implementation would depend on your specific WordPress client
     // This is a placeholder for the structure
-    console.error("INFO: Warming essential caches...");
+    this.logger.info("Warming essential caches");
   }
 
   /**
    * Warm cache with taxonomy data
    */
   async warmTaxonomies(): Promise<void> {
-    console.error("INFO: Warming taxonomy caches...");
+    this.logger.info("Warming taxonomy caches");
   }
 
   /**
    * Warm cache with user data
    */
   async warmUsers(): Promise<void> {
-    console.error("INFO: Warming user caches...");
+    this.logger.info("Warming user caches");
   }
 }

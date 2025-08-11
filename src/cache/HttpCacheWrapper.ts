@@ -5,6 +5,7 @@
 
 import { CacheManager, CachePresets } from "./CacheManager.js";
 import * as crypto from "crypto";
+import { LoggerFactory } from "../utils/logger.js";
 
 export interface HttpCacheOptions {
   ttl?: number;
@@ -15,7 +16,7 @@ export interface HttpCacheOptions {
 }
 
 export interface CachedResponse {
-  data: any;
+  data: unknown;
   status: number;
   headers: Record<string, string>;
   etag?: string;
@@ -27,14 +28,16 @@ export interface RequestOptions {
   method: string;
   url: string;
   headers?: Record<string, string>;
-  params?: any;
-  data?: any;
+  params?: Record<string, unknown>;
+  data?: unknown;
 }
 
 /**
  * HTTP caching wrapper that adds intelligent caching to HTTP requests
  */
 export class HttpCacheWrapper {
+  private logger = LoggerFactory.cache();
+
   constructor(
     private cacheManager: CacheManager,
     private siteId: string,
@@ -43,7 +46,7 @@ export class HttpCacheWrapper {
   /**
    * Execute request with intelligent caching
    */
-  async request<T = any>(
+  async request<T = unknown>(
     requestFn: () => Promise<{
       data: T;
       status: number;
@@ -84,18 +87,22 @@ export class HttpCacheWrapper {
         // 304 Not Modified - return cached data
         if (response.status === 304) {
           return {
-            data: cachedEntry.value.data,
+            data: (cachedEntry.value as CachedResponse).data as T,
             status: 200,
-            headers: cachedEntry.value.headers,
+            headers: (cachedEntry.value as CachedResponse).headers,
             cached: true,
           };
         }
 
         // Content changed - update cache
-        return await this.cacheAndReturn(response, cacheKey, cacheOptions);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return await this.cacheAndReturn(response, cacheKey, cacheOptions) as any;
       } catch (error) {
         // If conditional request fails, try without conditions
-        console.warn("Conditional request failed, falling back to regular request:", error);
+        this.logger.warn("Conditional request failed, falling back to regular request", {
+          error: error instanceof Error ? error.message : String(error),
+          siteId: this.siteId
+        });
       }
     }
 
@@ -103,7 +110,7 @@ export class HttpCacheWrapper {
     const cached = this.cacheManager.get<CachedResponse>(cacheKey);
     if (cached) {
       return {
-        data: cached.data,
+        data: cached.data as T,
         status: cached.status,
         headers: cached.headers,
         cached: true,
@@ -118,7 +125,7 @@ export class HttpCacheWrapper {
   /**
    * Invalidate cache for specific endpoint
    */
-  invalidate(endpoint: string, params?: any): void {
+  invalidate(endpoint: string, params?: Record<string, unknown>): void {
     const cacheKey = this.cacheManager.generateKey(this.siteId, endpoint, params);
     this.cacheManager.delete(cacheKey);
   }
@@ -141,7 +148,7 @@ export class HttpCacheWrapper {
   /**
    * Pre-warm cache with data
    */
-  warm<T>(endpoint: string, data: T, params?: any, cacheOptions?: HttpCacheOptions): void {
+  warm<T>(endpoint: string, data: T, params?: Record<string, unknown>, cacheOptions?: HttpCacheOptions): void {
     const cacheKey = this.cacheManager.generateKey(this.siteId, endpoint, params);
     const ttl = cacheOptions?.ttl || this.getDefaultTTL(endpoint);
 
@@ -208,7 +215,7 @@ export class HttpCacheWrapper {
    */
   private async executeRequestWithHeaders(
     requestFn: () => Promise<{
-      data: any;
+      data: unknown;
       status: number;
       headers: Record<string, string>;
     }>,
@@ -273,7 +280,7 @@ export class HttpCacheWrapper {
   /**
    * Generate ETag for response data
    */
-  private generateETag(data: any): string {
+  private generateETag(data: unknown): string {
     const hash = crypto.createHash("md5").update(JSON.stringify(data)).digest("hex");
     return `"${hash}"`;
   }

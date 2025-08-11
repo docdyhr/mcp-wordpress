@@ -1,6 +1,9 @@
 /**
  * Error handling utilities
  */
+import { LoggerFactory } from "./logger.js";
+
+const logger = LoggerFactory.server().child({ component: "ErrorUtils" });
 
 export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
@@ -23,7 +26,9 @@ export function isError(error: unknown): error is Error {
 }
 
 export function logAndReturn<T>(error: unknown, defaultValue: T): T {
-  console.error("Error occurred:", getErrorMessage(error));
+  logger.warn("Error occurred - returning default value", { 
+    error: getErrorMessage(error)
+  });
   return defaultValue;
 }
 
@@ -31,10 +36,13 @@ export function logAndReturn<T>(error: unknown, defaultValue: T): T {
  * Enhanced error handler for consistent tool error handling
  */
 export function handleToolError(error: unknown, operation: string, context?: Record<string, unknown>): never {
-  console.error(`Error in ${operation}:`, error);
+  logger.error(`Error in ${operation}`, { 
+    error: getErrorMessage(error),
+    ...(context && { context })
+  });
 
-  if (context) {
-    console.error("Context:", context);
+  if (error instanceof Error && error.stack) {
+    logger.debug("Error stack trace", { stack: error.stack });
   }
 
   const message = getErrorMessage(error);

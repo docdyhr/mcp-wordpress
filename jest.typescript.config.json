@@ -1,9 +1,11 @@
 {
-  "testEnvironment": "node", 
-  "roots": ["<rootDir>/tests"],
+  "testEnvironment": "node",
+  "roots": [
+    "<rootDir>/tests"
+  ],
   "testMatch": [
     "**/typescript-build.test.js",
-    "**/server.test.js", 
+    "**/server.test.js",
     "**/env-loading.test.js",
     "**/api-upload-timeout.test.js",
     "**/auth-headers-fix.test.js",
@@ -31,12 +33,17 @@
   "collectCoverageFrom": [
     "src/**/*.ts",
     "!src/**/*.d.ts",
-    "!src/**/__mocks__/**",
     "!src/**/*.test.ts",
     "!src/types/**",
     "!src/**/index.ts"
   ],
-  "coverageReporters": ["text-summary", "lcov", "html", "json", "cobertura"],
+  "coverageReporters": [
+    "text-summary",
+    "lcov",
+    "html",
+    "json",
+    "cobertura"
+  ],
   "coverageDirectory": "coverage",
   "coveragePathIgnorePatterns": [
     "/node_modules/",
@@ -50,7 +57,7 @@
   "coverageThreshold": {
     "global": {
       "branches": 30,
-      "functions": 35, 
+      "functions": 35,
       "lines": 40,
       "statements": 38
     }
@@ -59,8 +66,28 @@
   "verbose": true,
   "forceExit": true,
   "detectOpenHandles": true,
-  "setupFilesAfterEnv": ["<rootDir>/tests/jest.teardown.js"],
+  "setupFilesAfterEnv": [
+    "<rootDir>/tests/jest.teardown.js"
+  ],
   "globals": {
     "__EXECUTION_CONTEXT__": "jest"
+  },
+  "transform": {
+    "^.+\\.ts$": [
+      "babel-jest",
+      {
+        "presets": [
+          [
+            "@babel/preset-env",
+            {
+              "targets": {
+                "node": "current"
+              }
+            }
+          ],
+          "@babel/preset-typescript"
+        ]
+      }
+    ]
   }
 }
