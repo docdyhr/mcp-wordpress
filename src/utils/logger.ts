@@ -228,26 +228,21 @@ export class Logger {
     try {
       const result = fn();
 
-      // Type guard for Promise-like objects
-      const isPromiseLike = (obj: unknown): obj is Promise<T> => {
-        return obj !== null && 
-               typeof obj === "object" && 
-               "then" in obj && 
-               typeof (obj as { then: unknown }).then === "function";
-      };
-
-      if (isPromiseLike(result)) {
-        return result
+      // Check if result is a Promise by checking for then method
+      if (result && typeof result === "object" && "then" in result) {
+        // Cast to Promise<T> since we know it has a then method
+        const promiseResult = result as Promise<T>;
+        return promiseResult
           .then((value: T) => {
             const duration = Date.now() - start;
             this.debug(`Completed: ${message}`, { duration: `${duration}ms` });
             return value;
           })
-          .catch((error: Error) => {
+          .catch((error: unknown) => {
             const duration = Date.now() - start;
             this.error(`Failed: ${message}`, {
               duration: `${duration}ms`,
-              error: error.message,
+              error: error instanceof Error ? error.message : String(error),
             });
             throw error;
           });
