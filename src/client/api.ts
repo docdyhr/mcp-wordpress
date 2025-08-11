@@ -47,7 +47,7 @@ import type {
   UpdateMediaRequest,
 } from "../types/wordpress.js";
 import { debug, logError, startTimer } from "../utils/debug.js";
-import type { QueuedRequest } from '../types/requests.js';
+import type { QueuedRequest } from "../types/requests.js";
 
 /**
  * WordPress REST API Client
@@ -771,7 +771,10 @@ export class WordPressClient implements IWordPressClient {
 
   // Pages
   async getPages(params?: PostQueryParams): Promise<WordPressPage[]> {
-    const queryString = params ? "?" + new URLSearchParams(params as any).toString() : "";
+    const normalizedParams = params
+      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
+      : undefined;
+    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
     return this.get<WordPressPage[]>(`pages${queryString}`);
   }
 
@@ -798,7 +801,10 @@ export class WordPressClient implements IWordPressClient {
 
   // Media
   async getMedia(params?: MediaQueryParams): Promise<WordPressMedia[]> {
-    const queryString = params ? "?" + new URLSearchParams(params as any).toString() : "";
+    const normalizedParams = params
+      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
+      : undefined;
+    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
     return this.get<WordPressMedia[]>(`media${queryString}`);
   }
 
@@ -878,7 +884,10 @@ export class WordPressClient implements IWordPressClient {
 
   // Users
   async getUsers(params?: UserQueryParams): Promise<WordPressUser[]> {
-    const queryString = params ? "?" + new URLSearchParams(params as any).toString() : "";
+    const normalizedParams = params
+      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
+      : undefined;
+    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
     return this.get<WordPressUser[]>(`users${queryString}`);
   }
 
@@ -906,7 +915,10 @@ export class WordPressClient implements IWordPressClient {
 
   // Comments
   async getComments(params?: CommentQueryParams): Promise<WordPressComment[]> {
-    const queryString = params ? "?" + new URLSearchParams(params as any).toString() : "";
+    const normalizedParams = params
+      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
+      : undefined;
+    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
     return this.get<WordPressComment[]>(`comments${queryString}`);
   }
 
@@ -1001,7 +1013,7 @@ export class WordPressClient implements IWordPressClient {
     return this.post<WordPressSiteSettings>("settings", settings);
   }
 
-  async getSiteInfo(): Promise<any> {
+  async getSiteInfo(): Promise<Record<string, unknown>> {
     return this.get("");
   }
 
@@ -1025,12 +1037,12 @@ export class WordPressClient implements IWordPressClient {
   }
 
   // Search
-  async search(query: string, types?: string[], subtype?: string): Promise<any[]> {
+  async search(query: string, types?: string[], subtype?: string): Promise<Record<string, unknown>[]> {
     const params = new URLSearchParams({ search: query });
     if (types) params.append("type", types.join(","));
     if (subtype) params.append("subtype", subtype);
 
-    return this.get<any[]>(`search?${params.toString()}`);
+    return this.get<Record<string, unknown>[]>(`search?${params.toString()}`);
   }
 
   // Utility Methods
@@ -1043,7 +1055,7 @@ export class WordPressClient implements IWordPressClient {
     }
   }
 
-  async getServerInfo(): Promise<Record<string, any>> {
+  async getServerInfo(): Promise<Record<string, unknown>> {
     return this.get("");
   }
 
@@ -1051,7 +1063,7 @@ export class WordPressClient implements IWordPressClient {
     return /^[a-zA-Z0-9\/\-_]+$/.test(endpoint);
   }
 
-  buildUrl(endpoint: string, params?: Record<string, any>): string {
+  buildUrl(endpoint: string, params?: Record<string, unknown>): string {
     const url = `${this.apiUrl}/${endpoint.replace(/^\/+/, "")}`;
     if (params) {
       const searchParams = new URLSearchParams(params);

@@ -1,6 +1,6 @@
 /**
  * Centralized Logging System
- * 
+ *
  * Replaces scattered console.log usage with structured, configurable logging.
  * Integrates with the centralized Config system for environment-aware behavior.
  */
@@ -47,9 +47,7 @@ function getMinLogLevel(): LogLevel {
   const configInstance = ConfigHelpers.get();
   const appConfig = configInstance.get();
   const configLevel = appConfig.debug.logLevel.toLowerCase();
-  return LOG_LEVELS[configLevel as LogLevel] !== undefined 
-    ? (configLevel as LogLevel) 
-    : "info";
+  return LOG_LEVELS[configLevel as LogLevel] !== undefined ? (configLevel as LogLevel) : "info";
 }
 
 /**
@@ -69,14 +67,14 @@ function formatLogEntry(entry: LogEntry): string {
   const component = entry.component ? `[${entry.component}]` : "";
   const siteId = entry.siteId ? `{site:${entry.siteId}}` : "";
   const requestId = entry.requestId ? `{req:${entry.requestId.slice(0, 8)}}` : "";
-  
+
   let message = `${timestamp} ${level} ${component}${siteId}${requestId} ${entry.message}`;
-  
+
   if (entry.context && Object.keys(entry.context).length > 0) {
     const contextStr = JSON.stringify(entry.context);
     message += ` ${contextStr}`;
   }
-  
+
   return message;
 }
 
@@ -85,22 +83,23 @@ function formatLogEntry(entry: LogEntry): string {
  */
 function sanitizeContext(context: LogContext): LogContext {
   const sanitized: LogContext = {};
-  
+
   for (const [key, value] of Object.entries(context)) {
     const keyLower = key.toLowerCase();
-    const isSensitive = keyLower.includes('password') || 
-                       keyLower.includes('secret') || 
-                       keyLower.includes('token') || 
-                       keyLower.includes('key') || 
-                       keyLower.includes('credential');
-    
-    if (isSensitive && typeof value === 'string') {
-      sanitized[key] = value.length > 0 ? `[REDACTED:${value.length}chars]` : '[EMPTY]';
+    const isSensitive =
+      keyLower.includes("password") ||
+      keyLower.includes("secret") ||
+      keyLower.includes("token") ||
+      keyLower.includes("key") ||
+      keyLower.includes("credential");
+
+    if (isSensitive && typeof value === "string") {
+      sanitized[key] = value.length > 0 ? `[REDACTED:${value.length}chars]` : "[EMPTY]";
     } else {
       sanitized[key] = value;
     }
   }
-  
+
   return sanitized;
 }
 
@@ -112,14 +111,14 @@ function outputLog(entry: LogEntry): void {
   if (ConfigHelpers.isTest() && LOG_LEVELS[entry.level] < LOG_LEVELS.error) {
     return;
   }
-  
+
   // In DXT mode, suppress most logging
   if (ConfigHelpers.isDXT() && LOG_LEVELS[entry.level] < LOG_LEVELS.warn) {
     return;
   }
-  
+
   const formatted = formatLogEntry(entry);
-  
+
   // Use stderr for all log output to avoid STDIO interference
   console.error(formatted);
 }
@@ -129,11 +128,11 @@ function outputLog(entry: LogEntry): void {
  */
 export class Logger {
   private readonly options: LoggerOptions;
-  
+
   constructor(options: LoggerOptions = {}) {
     this.options = options;
   }
-  
+
   /**
    * Create child logger with additional context
    */
@@ -148,7 +147,7 @@ export class Logger {
       },
     });
   }
-  
+
   /**
    * Log at specific level
    */
@@ -156,9 +155,9 @@ export class Logger {
     if (!shouldLog(level)) {
       return;
     }
-    
+
     const mergedContext = context ? sanitizeContext({ ...this.options.context, ...context }) : this.options.context;
-    
+
     const entry: LogEntry = {
       timestamp: new Date().toISOString(),
       level,
@@ -168,27 +167,27 @@ export class Logger {
       ...(this.options.requestId && { requestId: this.options.requestId }),
       ...(this.options.siteId && { siteId: this.options.siteId }),
     };
-    
+
     outputLog(entry);
   }
-  
+
   // Convenience methods
   trace(message: string, context?: LogContext): void {
     this.log("trace", message, context);
   }
-  
+
   debug(message: string, context?: LogContext): void {
     this.log("debug", message, context);
   }
-  
+
   info(message: string, context?: LogContext): void {
     this.log("info", message, context);
   }
-  
+
   warn(message: string, context?: LogContext): void {
     this.log("warn", message, context);
   }
-  
+
   error(message: string, context?: LogContext): void;
   error(error: Error, context?: LogContext): void;
   error(messageOrError: string | Error, context?: LogContext): void {
@@ -202,7 +201,7 @@ export class Logger {
       this.log("error", messageOrError, context);
     }
   }
-  
+
   fatal(message: string, context?: LogContext): void;
   fatal(error: Error, context?: LogContext): void;
   fatal(messageOrError: string | Error, context?: LogContext): void {
@@ -216,7 +215,7 @@ export class Logger {
       this.log("fatal", messageOrError, context);
     }
   }
-  
+
   /**
    * Time a function execution
    */
@@ -225,22 +224,27 @@ export class Logger {
   time<T>(message: string, fn: () => T | Promise<T>): T | Promise<T> {
     const start = Date.now();
     this.debug(`Starting: ${message}`);
-    
+
     try {
       const result = fn();
-      
-      if (result && typeof result.then === "function") {
-        return result
-          .then((value) => {
+
+      if (
+        result &&
+        typeof result === "object" &&
+        "then" in result &&
+        typeof (result as Record<string, unknown>).then === "function"
+      ) {
+        return (result as Promise<T>)
+          .then((value: T) => {
             const duration = Date.now() - start;
             this.debug(`Completed: ${message}`, { duration: `${duration}ms` });
             return value;
           })
-          .catch((error) => {
+          .catch((error: Error) => {
             const duration = Date.now() - start;
-            this.error(`Failed: ${message}`, { 
+            this.error(`Failed: ${message}`, {
               duration: `${duration}ms`,
-              error: error.message 
+              error: error.message,
             });
             throw error;
           });
@@ -251,9 +255,9 @@ export class Logger {
       }
     } catch (error) {
       const duration = Date.now() - start;
-      this.error(`Failed: ${message}`, { 
+      this.error(`Failed: ${message}`, {
         duration: `${duration}ms`,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -268,7 +272,7 @@ export const logger = new Logger();
 /**
  * Create component-specific logger
  */
-export function createLogger(component: string, options: Omit<LoggerOptions, 'component'> = {}): Logger {
+export function createLogger(component: string, options: Omit<LoggerOptions, "component"> = {}): Logger {
   return new Logger({ ...options, component });
 }
 
@@ -276,20 +280,24 @@ export function createLogger(component: string, options: Omit<LoggerOptions, 'co
  * Create site-specific logger
  */
 export function createSiteLogger(siteId: string, component?: string | undefined): Logger {
-  return new Logger({ 
-    siteId, 
-    ...(component && { component })
+  return new Logger({
+    siteId,
+    ...(component && { component }),
   });
 }
 
 /**
  * Create request-specific logger
  */
-export function createRequestLogger(requestId: string, component?: string | undefined, siteId?: string | undefined): Logger {
-  return new Logger({ 
-    requestId, 
+export function createRequestLogger(
+  requestId: string,
+  component?: string | undefined,
+  siteId?: string | undefined,
+): Logger {
+  return new Logger({
+    requestId,
     ...(component && { component }),
-    ...(siteId && { siteId })
+    ...(siteId && { siteId }),
   });
 }
 
@@ -301,37 +309,37 @@ export const LoggerFactory = {
    * Create logger for WordPress API operations
    */
   api: (siteId?: string | undefined) => createLogger("API", siteId ? { siteId } : {}),
-  
+
   /**
    * Create logger for cache operations
    */
   cache: (siteId?: string | undefined) => createLogger("CACHE", siteId ? { siteId } : {}),
-  
+
   /**
    * Create logger for tool operations
    */
   tool: (toolName: string, siteId?: string | undefined) => createLogger(`TOOL:${toolName}`, siteId ? { siteId } : {}),
-  
+
   /**
    * Create logger for authentication
    */
   auth: (siteId?: string | undefined) => createLogger("AUTH", siteId ? { siteId } : {}),
-  
+
   /**
    * Create logger for configuration
    */
   config: () => createLogger("CONFIG"),
-  
+
   /**
    * Create logger for security operations
    */
   security: () => createLogger("SECURITY"),
-  
+
   /**
    * Create logger for performance monitoring
    */
   performance: () => createLogger("PERF"),
-  
+
   /**
    * Create logger for server operations
    */

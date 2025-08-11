@@ -334,7 +334,7 @@ export class MockWordPressClient extends WordPressClient {
   /**
    * Mock search
    */
-  async search(query: string, types?: string[], subtype?: string): Promise<any[]> {
+  async search(query: string, types?: string[], subtype?: string): Promise<Record<string, unknown>[]> {
     if (!query) {
       return [];
     }

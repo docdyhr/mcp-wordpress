@@ -4,7 +4,7 @@
  */
 
 import { WordPressClient } from "./api.js";
-import { CacheManager } from "../cache/CacheManager.js";
+import { CacheManager, type CacheStats } from "../cache/CacheManager.js";
 import { HttpCacheWrapper } from "../cache/HttpCacheWrapper.js";
 import { CacheInvalidation } from "../cache/CacheInvalidation.js";
 import { SecurityConfig } from "../security/SecurityConfig.js";
@@ -232,7 +232,7 @@ export class CachedWordPressClient extends WordPressClient {
   /**
    * Handle cache invalidation for write operations
    */
-  private async handleCacheInvalidation(method: string, endpoint: string, data: any): Promise<void> {
+  private async handleCacheInvalidation(method: string, endpoint: string, data: unknown): Promise<void> {
     const resource = this.extractResourceFromEndpoint(endpoint);
     const id = this.extractIdFromEndpoint(endpoint);
 
@@ -303,7 +303,7 @@ export class CachedWordPressClient extends WordPressClient {
   /**
    * Get cache statistics for performance monitoring
    */
-  getCacheStats(): any {
+  getCacheStats(): CacheStats {
     return this.cacheManager.getStats();
   }
 
@@ -389,7 +389,7 @@ export class CachedWordPressClient extends WordPressClient {
     maxSize: number;
     defaultTTL: number;
     currentSize: number;
-    ttlPresets: any;
+    ttlPresets: Record<string, unknown>;
   } {
     const stats = this.cacheManager.getStats();
 
@@ -416,9 +416,9 @@ export class CachedWordPressClient extends WordPressClient {
    * Get detailed cache performance metrics
    */
   getDetailedCacheMetrics(): {
-    statistics: any;
-    efficiency: any;
-    configuration: any;
+    statistics: CacheStats;
+    efficiency: Record<string, unknown>;
+    configuration: Record<string, unknown>;
     siteInfo: {
       siteId: string;
       baseUrl: string;

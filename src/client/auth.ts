@@ -234,7 +234,7 @@ export class WordPressAuth {
    */
   async switchAuthMethod(newConfig: AuthConfig): Promise<boolean> {
     // Update client configuration
-    (this.client.config as any).auth = newConfig;
+    (this.client.config as { auth: AuthConfig }).auth = newConfig;
     this.authType = newConfig.method;
 
     // Re-authenticate with new method

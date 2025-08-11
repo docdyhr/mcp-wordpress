@@ -19,7 +19,7 @@ export interface InvalidationEvent {
   id?: number | undefined;
   siteId: string;
   timestamp: number;
-  data?: any;
+  data?: unknown;
 }
 
 /**
@@ -312,7 +312,7 @@ export class CacheInvalidation {
       if (invalidated > 0) {
         this.logger.info("Cache entries invalidated", {
           count: invalidated,
-          pattern: invalidationPattern
+          pattern: invalidationPattern,
         });
       }
     }

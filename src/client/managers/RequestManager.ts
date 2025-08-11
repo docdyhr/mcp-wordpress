@@ -34,7 +34,7 @@ export class RequestManager extends BaseManager {
   /**
    * Make HTTP request with retry logic and rate limiting
    */
-  async request<T>(method: HTTPMethod, endpoint: string, data?: any, options: RequestOptions = {}): Promise<T> {
+  async request<T>(method: HTTPMethod, endpoint: string, data?: unknown, options: RequestOptions = {}): Promise<T> {
     const timer = startTimer();
 
     try {
@@ -60,16 +60,16 @@ export class RequestManager extends BaseManager {
   private async makeRequestWithRetry<T>(
     method: HTTPMethod,
     endpoint: string,
-    data?: any,
+    data?: unknown,
     options: RequestOptions = {},
   ): Promise<T> {
-    let lastError: any;
+    let lastError: unknown;
     const maxRetries = options.retries ?? this.config.maxRetries ?? 3;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         return await this.makeRequest<T>(method, endpoint, data, options);
-      } catch (error: any) {
+      } catch (error: unknown) {
         lastError = error;
 
         // Don't retry on authentication errors or client errors
@@ -94,7 +94,7 @@ export class RequestManager extends BaseManager {
   private async makeRequest<T>(
     method: HTTPMethod,
     endpoint: string,
-    data?: any,
+    data?: unknown,
     options: RequestOptions = {},
   ): Promise<T> {
     const url = this.buildUrl(endpoint);
@@ -107,7 +107,7 @@ export class RequestManager extends BaseManager {
       // Get authentication headers
       const authHeaders = await this.authManager.getAuthHeaders();
 
-      const fetchOptions: any = {
+      const fetchOptions: RequestInit = {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -154,8 +154,8 @@ export class RequestManager extends BaseManager {
   /**
    * Handle HTTP error responses
    */
-  private async handleErrorResponse(response: any): Promise<never> {
-    let errorData: any = {};
+  private async handleErrorResponse(response: Response): Promise<never> {
+    let errorData: Record<string, unknown> = {};
 
     try {
       errorData = await response.json();
