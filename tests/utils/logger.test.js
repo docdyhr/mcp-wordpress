@@ -2,8 +2,8 @@
  * Tests for the centralized logging system
  */
 import { jest } from "@jest/globals";
-import { Logger, LoggerFactory, createLogger, createSiteLogger, createRequestLogger } from "../../dist/utils/logger.js";
-import { Config } from "../../dist/config/Config.js";
+import { Logger, LoggerFactory, createLogger, createSiteLogger, createRequestLogger } from "../../src/utils/logger.ts";
+import { Config } from "../../src/config/Config.ts";
 
 // Mock console methods
 const originalConsoleError = console.error;

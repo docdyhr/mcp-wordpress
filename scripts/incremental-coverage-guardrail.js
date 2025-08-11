@@ -26,7 +26,7 @@ const COVERAGE_TOLERANCE = parseFloat(process.env.COVERAGE_TOLERANCE || '1.0');
 const BASELINE_FILE = process.env.BASELINE_FILE || 'coverage-baseline.json';
 const IS_CI = process.env.CI === 'true';
 const COVERAGE_REPORT_PATH = path.resolve("coverage/coverage-final.json");
-const BACKUP_COVERAGE_PATH = path.resolve("coverage/lcov.info");
+const _BACKUP_COVERAGE_PATH = path.resolve("coverage/lcov.info");
 
 /**
  * Calculate coverage percentages from coverage-final.json

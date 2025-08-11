@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import dotenv from "dotenv";
 import * as fs from "fs";
 import * as path from "path";
@@ -38,9 +39,13 @@ export class ServerConfiguration {
 
     // Debug output for DXT troubleshooting (reduced in DXT mode)
     if (ConfigHelpers.shouldDebug()) {
+      // eslint-disable-next-line no-console
       console.error("DEBUG: ServerConfiguration initialized");
+      // eslint-disable-next-line no-console
       console.error(`DEBUG: Root directory: ${this.rootDir}`);
+      // eslint-disable-next-line no-console
       console.error(`DEBUG: Environment file path: ${this.envPath}`);
+      // eslint-disable-next-line no-console
       console.error(`DEBUG: Environment file exists: ${fs.existsSync(this.envPath)}`);
     }
   }

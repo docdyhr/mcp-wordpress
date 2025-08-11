@@ -9,11 +9,11 @@ import {
   handleToolError,
   validateRequired,
   validateSite
-} from "../../dist/utils/error.js";
-import { Logger } from "../../dist/utils/logger.js";
+} from "../../src/utils/error.ts";
+// import { Logger } from "../../dist/utils/logger.js";
 
 // Mock the logger
-jest.mock("../../dist/utils/logger.js", () => {
+jest.mock("../../src/utils/logger.ts", () => {
   const mockLogger = {
     warn: jest.fn(),
     error: jest.fn(),
@@ -179,7 +179,7 @@ describe("Enhanced Error Utilities", () => {
       
       try {
         handleToolError(new Error("Test error"), "test operation", { id: 123 });
-      } catch (e) {
+      } catch (_e) {
         // Expected to throw
       }
       
@@ -201,7 +201,7 @@ describe("Enhanced Error Utilities", () => {
       
       try {
         handleToolError(error, "test");
-      } catch (e) {
+      } catch (_e) {
         // Expected to throw
       }
       
@@ -330,7 +330,7 @@ describe("Enhanced Error Utilities", () => {
       
       try {
         handleToolError(error, "test");
-      } catch (e) {
+      } catch (_e) {
         // Expected to throw
       }
       
