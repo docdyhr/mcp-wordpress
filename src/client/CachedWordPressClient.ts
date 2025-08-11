@@ -303,8 +303,18 @@ export class CachedWordPressClient extends WordPressClient {
   /**
    * Get cache statistics for performance monitoring
    */
-  getCacheStats(): CacheStats {
-    return this.cacheManager.getStats();
+  getCacheStats(): {
+    cache: CacheStats;
+    invalidation: {
+      queueSize: number;
+      rulesCount: number;
+      processing: boolean;
+    };
+  } {
+    return {
+      cache: this.cacheManager.getStats(),
+      invalidation: this.cacheInvalidation.getStats(),
+    };
   }
 
   /**
@@ -416,7 +426,14 @@ export class CachedWordPressClient extends WordPressClient {
    * Get detailed cache performance metrics
    */
   getDetailedCacheMetrics(): {
-    statistics: CacheStats;
+    statistics: {
+      cache: CacheStats;
+      invalidation: {
+        queueSize: number;
+        rulesCount: number;
+        processing: boolean;
+      };
+    };
     efficiency: Record<string, unknown>;
     configuration: Record<string, unknown>;
     siteInfo: {

@@ -45,6 +45,8 @@ import type {
   UpdateTagRequest,
   UploadMediaRequest,
   UpdateMediaRequest,
+  WordPressSiteInfo,
+  WordPressSearchResult,
 } from "../types/wordpress.js";
 import { debug, logError, startTimer } from "../utils/debug.js";
 import type { QueuedRequest } from "../types/requests.js";
@@ -1013,7 +1015,7 @@ export class WordPressClient implements IWordPressClient {
     return this.post<WordPressSiteSettings>("settings", settings);
   }
 
-  async getSiteInfo(): Promise<Record<string, unknown>> {
+  async getSiteInfo(): Promise<WordPressSiteInfo> {
     return this.get("");
   }
 
@@ -1037,12 +1039,12 @@ export class WordPressClient implements IWordPressClient {
   }
 
   // Search
-  async search(query: string, types?: string[], subtype?: string): Promise<Record<string, unknown>[]> {
+  async search(query: string, types?: string[], subtype?: string): Promise<WordPressSearchResult[]> {
     const params = new URLSearchParams({ search: query });
     if (types) params.append("type", types.join(","));
     if (subtype) params.append("subtype", subtype);
 
-    return this.get<Record<string, unknown>[]>(`search?${params.toString()}`);
+    return this.get<WordPressSearchResult[]>(`search?${params.toString()}`);
   }
 
   // Utility Methods
@@ -1066,7 +1068,10 @@ export class WordPressClient implements IWordPressClient {
   buildUrl(endpoint: string, params?: Record<string, unknown>): string {
     const url = `${this.apiUrl}/${endpoint.replace(/^\/+/, "")}`;
     if (params) {
-      const searchParams = new URLSearchParams(params);
+      const normalizedParams = Object.fromEntries(
+        Object.entries(params).map(([k, v]) => [k, String(v)])
+      );
+      const searchParams = new URLSearchParams(normalizedParams);
       return `${url}?${searchParams.toString()}`;
     }
     return url;

@@ -19,18 +19,25 @@ export abstract class BaseManager {
    * Standardized error handling for all managers
    */
   protected handleError(error: unknown, operation: string): never {
-    logError(`${operation} failed:`, error);
+    logError(`${operation} failed:`, error as Record<string, unknown>);
 
     if (error instanceof WordPressAPIError) {
       throw error;
     }
 
-    if (error.name === "AbortError" || error.code === "ABORT_ERR") {
-      throw new WordPressAPIError(`Request timeout after ${this.config.timeout}ms`, 408, "timeout");
-    }
+    // Type guard for error-like objects
+    const isErrorLike = (err: unknown): err is { name?: string; code?: string; message?: string } => {
+      return typeof err === "object" && err !== null;
+    };
 
-    if (error.code === "ECONNREFUSED" || error.code === "ENOTFOUND") {
-      throw new WordPressAPIError(`Cannot connect to WordPress site: ${this.config.baseUrl}`, 503, "connection_failed");
+    if (isErrorLike(error)) {
+      if (error.name === "AbortError" || error.code === "ABORT_ERR") {
+        throw new WordPressAPIError(`Request timeout after ${this.config.timeout}ms`, 408, "timeout");
+      }
+
+      if (error.code === "ECONNREFUSED" || error.code === "ENOTFOUND") {
+        throw new WordPressAPIError(`Cannot connect to WordPress site: ${this.config.baseUrl}`, 503, "connection_failed");
+      }
     }
 
     const message = getErrorMessage(error);

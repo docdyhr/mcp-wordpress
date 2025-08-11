@@ -228,13 +228,16 @@ export class Logger {
     try {
       const result = fn();
 
-      if (
-        result &&
-        typeof result === "object" &&
-        "then" in result &&
-        typeof (result as Record<string, unknown>).then === "function"
-      ) {
-        return (result as Promise<T>)
+      // Type guard for Promise-like objects
+      const isPromiseLike = (obj: unknown): obj is Promise<T> => {
+        return obj !== null && 
+               typeof obj === "object" && 
+               "then" in obj && 
+               typeof (obj as { then: unknown }).then === "function";
+      };
+
+      if (isPromiseLike(result)) {
+        return result
           .then((value: T) => {
             const duration = Date.now() - start;
             this.debug(`Completed: ${message}`, { duration: `${duration}ms` });

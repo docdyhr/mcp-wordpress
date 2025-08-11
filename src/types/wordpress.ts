@@ -502,3 +502,25 @@ export interface UpdateMediaRequest {
   status?: PostStatus;
   author?: number;
 }
+
+// Site Information
+export interface WordPressSiteInfo {
+  name: string;
+  description: string;
+  url: string;
+  home: string;
+  gmt_offset: number;
+  timezone_string: string;
+  namespaces: string[];
+  authentication: Record<string, unknown>;
+  routes: Record<string, unknown>;
+}
+
+// Search Results
+export interface WordPressSearchResult {
+  id: number;
+  title: string;
+  url: string;
+  type: string;
+  subtype: string;
+}
