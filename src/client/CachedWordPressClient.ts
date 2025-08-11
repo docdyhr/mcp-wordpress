@@ -4,7 +4,7 @@
  */
 
 import { WordPressClient } from "./api.js";
-import { CacheManager } from "../cache/CacheManager.js";
+import { CacheManager, type CacheStats } from "../cache/CacheManager.js";
 import { HttpCacheWrapper } from "../cache/HttpCacheWrapper.js";
 import { CacheInvalidation } from "../cache/CacheInvalidation.js";
 import { SecurityConfig } from "../security/SecurityConfig.js";
@@ -49,10 +49,10 @@ export class CachedWordPressClient extends WordPressClient {
   /**
    * Override request method to add caching
    */
-  async request<T = any>(
+  async request<T = unknown>(
     method: HTTPMethod,
     endpoint: string,
-    data: any = null,
+    data: unknown = null,
     options: RequestOptions = {},
   ): Promise<T> {
     // Only cache GET requests
@@ -162,7 +162,7 @@ export class CachedWordPressClient extends WordPressClient {
   /**
    * Get categories with semi-static caching
    */
-  async getCategories(params: any = {}): Promise<WordPressCategory[]> {
+  async getCategories(params: Record<string, unknown> = {}): Promise<WordPressCategory[]> {
     return await this.request<WordPressCategory[]>("GET", "categories", null, {
       params,
     });
@@ -171,7 +171,7 @@ export class CachedWordPressClient extends WordPressClient {
   /**
    * Get tags with semi-static caching
    */
-  async getTags(params: any = {}): Promise<WordPressTag[]> {
+  async getTags(params: Record<string, unknown> = {}): Promise<WordPressTag[]> {
     return await this.request<WordPressTag[]>("GET", "tags", null, { params });
   }
 
@@ -232,7 +232,7 @@ export class CachedWordPressClient extends WordPressClient {
   /**
    * Handle cache invalidation for write operations
    */
-  private async handleCacheInvalidation(method: string, endpoint: string, data: any): Promise<void> {
+  private async handleCacheInvalidation(method: string, endpoint: string, data: unknown): Promise<void> {
     const resource = this.extractResourceFromEndpoint(endpoint);
     const id = this.extractIdFromEndpoint(endpoint);
 
@@ -303,8 +303,18 @@ export class CachedWordPressClient extends WordPressClient {
   /**
    * Get cache statistics for performance monitoring
    */
-  getCacheStats(): any {
-    return this.cacheManager.getStats();
+  getCacheStats(): {
+    cache: CacheStats;
+    invalidation: {
+      queueSize: number;
+      rulesCount: number;
+      processing: boolean;
+    };
+  } {
+    return {
+      cache: this.cacheManager.getStats(),
+      invalidation: this.cacheInvalidation.getStats(),
+    };
   }
 
   /**
@@ -389,7 +399,7 @@ export class CachedWordPressClient extends WordPressClient {
     maxSize: number;
     defaultTTL: number;
     currentSize: number;
-    ttlPresets: any;
+    ttlPresets: Record<string, unknown>;
   } {
     const stats = this.cacheManager.getStats();
 
@@ -416,9 +426,16 @@ export class CachedWordPressClient extends WordPressClient {
    * Get detailed cache performance metrics
    */
   getDetailedCacheMetrics(): {
-    statistics: any;
-    efficiency: any;
-    configuration: any;
+    statistics: {
+      cache: CacheStats;
+      invalidation: {
+        queueSize: number;
+        rulesCount: number;
+        processing: boolean;
+      };
+    };
+    efficiency: Record<string, unknown>;
+    configuration: Record<string, unknown>;
     siteInfo: {
       siteId: string;
       baseUrl: string;

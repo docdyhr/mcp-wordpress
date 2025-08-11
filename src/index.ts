@@ -6,6 +6,9 @@ import { ServerConfiguration, SiteConfig } from "./config/ServerConfiguration.js
 import { ToolRegistry } from "./server/ToolRegistry.js";
 import { ConnectionTester } from "./server/ConnectionTester.js";
 import { getErrorMessage } from "./utils/error.js";
+import { LoggerFactory } from "./utils/logger.js";
+import { ConfigHelpers } from "./config/Config.js";
+import { McpConfigType } from "./config/ServerConfiguration.js";
 
 // --- Constants ---
 const SERVER_VERSION = "1.1.8"; // Technical debt resolution and modular architecture
@@ -17,28 +20,25 @@ class MCPWordPressServer {
   private initialized: boolean = false;
   private siteConfigs: SiteConfig[] = [];
   private toolRegistry: ToolRegistry;
+  private logger = LoggerFactory.server();
 
-  constructor(mcpConfig?: any) {
+  constructor(mcpConfig?: McpConfigType) {
     this.loadConfiguration(mcpConfig);
 
     if (this.wordpressClients.size === 0) {
       // In test environments, don't exit the process
-      if (
-        process.env.NODE_ENV === "test" ||
-        process.env.CI === "true" ||
-        (globalThis as any).__EXECUTION_CONTEXT__ === "jest"
-      ) {
-        console.error("WARNING: No WordPress sites configured in test environment");
+      if (ConfigHelpers.isCI() || ConfigHelpers.isTest() || (globalThis as Record<string, unknown>).__EXECUTION_CONTEXT__ === "jest") {
+        this.logger.warn("No WordPress sites configured in test environment");
         // Create a dummy client for testing
-        this.wordpressClients.set("test", {} as any);
+        this.wordpressClients.set("test", {} as WordPressClient);
       } else {
-        console.error(
-          "ERROR: No WordPress sites were configured. Please check that environment variables are set correctly.",
-        );
-        console.error("Expected environment variables:");
-        console.error("  - WORDPRESS_SITE_URL");
-        console.error("  - WORDPRESS_USERNAME");
-        console.error("  - WORDPRESS_APP_PASSWORD");
+        this.logger.fatal("No WordPress sites configured. Server cannot start.", {
+          expectedEnvVars: [
+            "WORDPRESS_SITE_URL",
+            "WORDPRESS_USERNAME", 
+            "WORDPRESS_APP_PASSWORD"
+          ]
+        });
         process.exit(1);
       }
     }
@@ -52,7 +52,7 @@ class MCPWordPressServer {
     this.setupTools();
   }
 
-  private loadConfiguration(mcpConfig?: any) {
+  private loadConfiguration(mcpConfig?: McpConfigType) {
     const serverConfig = ServerConfiguration.getInstance();
     const { clients, configs } = serverConfig.loadClientConfigurations(mcpConfig);
 
@@ -65,35 +65,45 @@ class MCPWordPressServer {
   }
 
   private async testClientConnections(): Promise<void> {
-    await ConnectionTester.testClientConnections(this.wordpressClients);
+    // Use optimized connection testing with timeouts and concurrency control
+    await ConnectionTester.testClientConnections(this.wordpressClients, {
+      timeout: ConfigHelpers.getTimeout("test"),
+      maxConcurrent: ConfigHelpers.isCI() ? 2 : 3 // Reduce concurrency in CI
+    });
     this.initialized = true;
   }
 
   async run() {
     // Skip connection testing in DXT environment to prevent timeouts
-    const isDXTMode = process.env.NODE_ENV === "dxt" || process.argv[0]?.includes("dxt-entry");
+    const isDXTMode = ConfigHelpers.isDXT() || process.argv[0]?.includes("dxt-entry");
 
     if (!this.initialized && !isDXTMode) {
-      console.error("INFO: Testing connections to configured WordPress sites...");
+      this.logger.info("Testing connections to configured WordPress sites...", {
+        siteCount: this.wordpressClients.size
+      });
       try {
         await this.testClientConnections();
       } catch (error) {
-        console.error(`WARNING: Connection test failed: ${getErrorMessage(error)}`);
-        console.error("INFO: Continuing with server startup. Tools will be available but connections may fail.");
+        this.logger.warn("Connection test failed - continuing with server startup", {
+          error: getErrorMessage(error)
+        });
       }
     } else if (isDXTMode) {
-      console.error("INFO: DXT mode detected - skipping connection tests for faster startup");
+      this.logger.info("DXT mode detected - skipping connection tests for faster startup");
       this.initialized = true;
     }
 
-    console.error("INFO: Starting MCP WordPress Server...");
+    this.logger.info("Starting MCP WordPress Server...", {
+      version: SERVER_VERSION,
+      sites: this.wordpressClients.size
+    });
 
     // Connect to stdio transport with timeout
     const transport = new StdioServerTransport();
 
     // Add timeout protection for server connection
     const connectionTimeout = setTimeout(() => {
-      console.error("ERROR: Server connection timed out after 30 seconds");
+      this.logger.fatal("Server connection timed out", { timeoutMs: 30000 });
       process.exit(1);
     }, 30000);
 
@@ -101,7 +111,9 @@ class MCPWordPressServer {
       await this.server.connect(transport);
       clearTimeout(connectionTimeout);
 
-      console.error(`INFO: Server started and connected. Tools available for ${this.wordpressClients.size} site(s).`);
+      this.logger.info("Server started and connected successfully", {
+        sites: this.wordpressClients.size
+      });
 
       // Keep the process alive
       process.stdin.resume();
@@ -112,14 +124,16 @@ class MCPWordPressServer {
   }
 
   async shutdown() {
-    console.error("INFO: Shutting down MCP WordPress Server...");
+    this.logger.info("Shutting down MCP WordPress Server...");
     await this.server.close();
-    console.error("INFO: Server stopped.");
+    this.logger.info("Server stopped");
   }
 }
 
 // --- Main Execution ---
 async function main() {
+  const mainLogger = LoggerFactory.server();
+  
   try {
     const mcpServer = new MCPWordPressServer();
     await mcpServer.run();
@@ -132,7 +146,7 @@ async function main() {
     process.on("SIGINT", shutdown);
     process.on("SIGTERM", shutdown);
   } catch (error) {
-    console.error(`FATAL: Failed to start server: ${getErrorMessage(error)}`);
+    mainLogger.fatal("Failed to start server", { error: getErrorMessage(error) });
     process.exit(1);
   }
 }

@@ -45,8 +45,11 @@ import type {
   UpdateTagRequest,
   UploadMediaRequest,
   UpdateMediaRequest,
+  WordPressSiteInfo,
+  WordPressSearchResult,
 } from "../types/wordpress.js";
 import { debug, logError, startTimer } from "../utils/debug.js";
+import type { QueuedRequest } from "../types/requests.js";
 
 /**
  * WordPress REST API Client
@@ -101,7 +104,7 @@ export class WordPressClient implements IWordPressClient {
   private timeout: number;
   private maxRetries: number;
   private auth: AuthConfig;
-  private requestQueue: any[] = [];
+  private requestQueue: QueuedRequest[] = [];
   private lastRequestTime: number = 0;
   private requestInterval: number;
   private authenticated: boolean = false;
@@ -486,10 +489,10 @@ export class WordPressClient implements IWordPressClient {
   /**
    * Make authenticated request to WordPress REST API
    */
-  async request<T = any>(
+  async request<T = unknown>(
     method: HTTPMethod,
     endpoint: string,
-    data: any = null,
+    data: unknown = null,
     options: RequestOptions = {},
   ): Promise<T> {
     const timer = startTimer();
@@ -513,7 +516,7 @@ export class WordPressClient implements IWordPressClient {
     const requestTimeout = options.timeout || this.timeout;
     const timeoutId = setTimeout(() => controller.abort(), requestTimeout);
 
-    const fetchOptions: any = {
+    const fetchOptions: RequestInit & { headers: Record<string, string> } = {
       ...options, // Spread options first
       method,
       headers, // Headers come after to ensure auth headers aren't overridden
@@ -527,15 +530,16 @@ export class WordPressClient implements IWordPressClient {
         (typeof data === "object" && data && "append" in data && typeof data.append === "function")
       ) {
         // For FormData, check if it has getHeaders method (form-data package)
-        if (typeof data.getHeaders === "function") {
+        if (typeof (data as { getHeaders?: () => Record<string, string> }).getHeaders === "function") {
           // Use headers from form-data package
-          const formHeaders = data.getHeaders();
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const formHeaders = (data as any).getHeaders();
           Object.assign(headers, formHeaders);
         } else {
           // For native FormData, don't set Content-Type (let fetch set it with boundary)
           delete headers["Content-Type"];
         }
-        fetchOptions.body = data;
+        fetchOptions.body = data as FormData;
       } else if (Buffer.isBuffer(data)) {
         // For Buffer data (manual multipart), keep Content-Type from headers
         fetchOptions.body = data;
@@ -678,7 +682,7 @@ export class WordPressClient implements IWordPressClient {
         lastError = error as Error;
 
         // Handle timeout errors
-        if ((error as any).name === "AbortError") {
+        if ((error as Error & { name?: string }).name === "AbortError") {
           lastError = new Error(`Request timeout after ${requestTimeout}ms`);
         }
 
@@ -718,23 +722,23 @@ export class WordPressClient implements IWordPressClient {
   }
 
   // HTTP method helpers
-  async get<T = any>(endpoint: string, options?: RequestOptions): Promise<T> {
+  async get<T = unknown>(endpoint: string, options?: RequestOptions): Promise<T> {
     return this.request<T>("GET", endpoint, null, options);
   }
 
-  async post<T = any>(endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
+  async post<T = unknown>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T> {
     return this.request<T>("POST", endpoint, data, options);
   }
 
-  async put<T = any>(endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
+  async put<T = unknown>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T> {
     return this.request<T>("PUT", endpoint, data, options);
   }
 
-  async patch<T = any>(endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
+  async patch<T = unknown>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T> {
     return this.request<T>("PATCH", endpoint, data, options);
   }
 
-  async delete<T = any>(endpoint: string, options?: RequestOptions): Promise<T> {
+  async delete<T = unknown>(endpoint: string, options?: RequestOptions): Promise<T> {
     return this.request<T>("DELETE", endpoint, null, options);
   }
 
@@ -742,7 +746,7 @@ export class WordPressClient implements IWordPressClient {
 
   // Posts
   async getPosts(params?: PostQueryParams): Promise<WordPressPost[]> {
-    const queryString = params ? "?" + new URLSearchParams(params as any).toString() : "";
+    const queryString = params ? "?" + new URLSearchParams(params as Record<string, string>).toString() : "";
     return this.get<WordPressPost[]>(`posts${queryString}`);
   }
 
@@ -769,7 +773,10 @@ export class WordPressClient implements IWordPressClient {
 
   // Pages
   async getPages(params?: PostQueryParams): Promise<WordPressPage[]> {
-    const queryString = params ? "?" + new URLSearchParams(params as any).toString() : "";
+    const normalizedParams = params
+      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
+      : undefined;
+    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
     return this.get<WordPressPage[]>(`pages${queryString}`);
   }
 
@@ -796,7 +803,10 @@ export class WordPressClient implements IWordPressClient {
 
   // Media
   async getMedia(params?: MediaQueryParams): Promise<WordPressMedia[]> {
-    const queryString = params ? "?" + new URLSearchParams(params as any).toString() : "";
+    const normalizedParams = params
+      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
+      : undefined;
+    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
     return this.get<WordPressMedia[]>(`media${queryString}`);
   }
 
@@ -876,7 +886,10 @@ export class WordPressClient implements IWordPressClient {
 
   // Users
   async getUsers(params?: UserQueryParams): Promise<WordPressUser[]> {
-    const queryString = params ? "?" + new URLSearchParams(params as any).toString() : "";
+    const normalizedParams = params
+      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
+      : undefined;
+    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
     return this.get<WordPressUser[]>(`users${queryString}`);
   }
 
@@ -904,7 +917,10 @@ export class WordPressClient implements IWordPressClient {
 
   // Comments
   async getComments(params?: CommentQueryParams): Promise<WordPressComment[]> {
-    const queryString = params ? "?" + new URLSearchParams(params as any).toString() : "";
+    const normalizedParams = params
+      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
+      : undefined;
+    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
     return this.get<WordPressComment[]>(`comments${queryString}`);
   }
 
@@ -940,8 +956,11 @@ export class WordPressClient implements IWordPressClient {
   }
 
   // Taxonomies
-  async getCategories(params?: any): Promise<WordPressCategory[]> {
-    const queryString = params ? "?" + new URLSearchParams(params).toString() : "";
+  async getCategories(params?: Record<string, string | number | boolean>): Promise<WordPressCategory[]> {
+    const normalizedParams = params
+      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
+      : undefined;
+    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
     return this.get<WordPressCategory[]>(`categories${queryString}`);
   }
 
@@ -962,8 +981,11 @@ export class WordPressClient implements IWordPressClient {
     return this.delete(`categories/${id}?force=${force}`);
   }
 
-  async getTags(params?: any): Promise<WordPressTag[]> {
-    const queryString = params ? "?" + new URLSearchParams(params).toString() : "";
+  async getTags(params?: Record<string, string | number | boolean>): Promise<WordPressTag[]> {
+    const normalizedParams = params
+      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
+      : undefined;
+    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
     return this.get<WordPressTag[]>(`tags${queryString}`);
   }
 
@@ -993,7 +1015,7 @@ export class WordPressClient implements IWordPressClient {
     return this.post<WordPressSiteSettings>("settings", settings);
   }
 
-  async getSiteInfo(): Promise<any> {
+  async getSiteInfo(): Promise<WordPressSiteInfo> {
     return this.get("");
   }
 
@@ -1007,7 +1029,7 @@ export class WordPressClient implements IWordPressClient {
     name: string,
     appId?: string,
   ): Promise<WordPressApplicationPassword> {
-    const data: any = { name };
+    const data: Record<string, unknown> = { name };
     if (appId) data.app_id = appId;
     return this.post<WordPressApplicationPassword>(`users/${userId}/application-passwords`, data);
   }
@@ -1017,12 +1039,12 @@ export class WordPressClient implements IWordPressClient {
   }
 
   // Search
-  async search(query: string, types?: string[], subtype?: string): Promise<any[]> {
+  async search(query: string, types?: string[], subtype?: string): Promise<WordPressSearchResult[]> {
     const params = new URLSearchParams({ search: query });
     if (types) params.append("type", types.join(","));
     if (subtype) params.append("subtype", subtype);
 
-    return this.get<any[]>(`search?${params.toString()}`);
+    return this.get<WordPressSearchResult[]>(`search?${params.toString()}`);
   }
 
   // Utility Methods
@@ -1035,7 +1057,7 @@ export class WordPressClient implements IWordPressClient {
     }
   }
 
-  async getServerInfo(): Promise<Record<string, any>> {
+  async getServerInfo(): Promise<Record<string, unknown>> {
     return this.get("");
   }
 
@@ -1043,10 +1065,13 @@ export class WordPressClient implements IWordPressClient {
     return /^[a-zA-Z0-9\/\-_]+$/.test(endpoint);
   }
 
-  buildUrl(endpoint: string, params?: Record<string, any>): string {
+  buildUrl(endpoint: string, params?: Record<string, unknown>): string {
     const url = `${this.apiUrl}/${endpoint.replace(/^\/+/, "")}`;
     if (params) {
-      const searchParams = new URLSearchParams(params);
+      const normalizedParams = Object.fromEntries(
+        Object.entries(params).map(([k, v]) => [k, String(v)])
+      );
+      const searchParams = new URLSearchParams(normalizedParams);
       return `${url}?${searchParams.toString()}`;
     }
     return url;

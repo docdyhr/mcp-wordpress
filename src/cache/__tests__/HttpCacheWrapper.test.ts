@@ -261,11 +261,12 @@ describe("HttpCacheWrapper", () => {
       const cached = cacheManager.get(cacheKey);
 
       expect(cached).toBeDefined();
-      if (cached && typeof cached === "object" && "data" in cached) {
-        expect((cached as any).data).toEqual(data);
-        expect((cached as any).etag).toBeDefined();
-        expect((cached as any).lastModified).toBeDefined();
-      }
+      // Test cache structure without conditional expects
+      const cachedEntry = cached as { data: unknown; etag?: string; lastModified?: string };
+      expect(cachedEntry).toHaveProperty("data");
+      expect(cachedEntry).toHaveProperty("etag");
+      expect(cachedEntry).toHaveProperty("lastModified");
+      expect(cachedEntry.data).toEqual(data);
     });
 
     test("should use warmed cache for requests", async () => {

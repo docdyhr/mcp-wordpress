@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import dotenv from "dotenv";
 import * as fs from "fs";
 import * as path from "path";
@@ -7,6 +8,7 @@ import { CachedWordPressClient } from "../client/CachedWordPressClient.js";
 import { MockWordPressClient } from "../client/MockWordPressClient.js";
 import { WordPressClientConfig } from "../types/client.js";
 import { getErrorMessage } from "../utils/error.js";
+import { ConfigHelpers } from "./Config.js";
 import {
   ConfigurationValidator,
   type SiteType as SiteConfig,
@@ -15,7 +17,7 @@ import {
 } from "./ConfigurationSchema.js";
 
 // Re-export types from schema for backward compatibility
-export type { SiteConfig, MultiSiteConfig };
+export type { SiteConfig, MultiSiteConfig, McpConfigType };
 
 /**
  * Configuration loader for MCP WordPress Server
@@ -36,11 +38,14 @@ export class ServerConfiguration {
     dotenv.config({ path: this.envPath });
 
     // Debug output for DXT troubleshooting (reduced in DXT mode)
-    const isDXTMode = process.env.NODE_ENV === "dxt";
-    if (!isDXTMode && process.env.DEBUG === "true") {
+    if (ConfigHelpers.shouldDebug()) {
+      // eslint-disable-next-line no-console
       console.error("DEBUG: ServerConfiguration initialized");
+      // eslint-disable-next-line no-console
       console.error(`DEBUG: Root directory: ${this.rootDir}`);
+      // eslint-disable-next-line no-console
       console.error(`DEBUG: Environment file path: ${this.envPath}`);
+      // eslint-disable-next-line no-console
       console.error(`DEBUG: Environment file exists: ${fs.existsSync(this.envPath)}`);
     }
   }
@@ -66,12 +71,12 @@ export class ServerConfiguration {
     const configPath = path.resolve(this.rootDir, "mcp-wordpress.config.json");
 
     if (fs.existsSync(configPath)) {
-      if (process.env.NODE_ENV !== "test") {
+      if (ConfigHelpers.shouldLogInfo()) {
         console.error("INFO: Found mcp-wordpress.config.json, loading multi-site configuration.");
       }
       return this.loadMultiSiteConfig(configPath);
     } else {
-      if (process.env.NODE_ENV !== "test") {
+      if (ConfigHelpers.shouldLogInfo()) {
         console.error(
           "INFO: mcp-wordpress.config.json not found, falling back to environment variables for single-site mode.",
         );
@@ -108,14 +113,13 @@ export class ServerConfiguration {
         };
 
         // Use cached client for better performance
-        const client =
-          process.env.DISABLE_CACHE === "true"
-            ? new WordPressClient(clientConfig)
-            : new CachedWordPressClient(clientConfig, site.id);
+        const client = ConfigHelpers.shouldUseCache()
+          ? new CachedWordPressClient(clientConfig, site.id)
+          : new WordPressClient(clientConfig);
         clients.set(site.id, client);
         validConfigs.push(site);
 
-        if (process.env.NODE_ENV !== "test") {
+        if (ConfigHelpers.shouldLogInfo()) {
           console.error(`INFO: Initialized client for site: ${site.name} (ID: ${site.id})`);
         }
       }
@@ -131,14 +135,7 @@ export class ServerConfiguration {
    * Check if we're in CI environment
    */
   private isCIEnvironment(): boolean {
-    return (
-      process.env.CI === "true" ||
-      process.env.NODE_ENV === "ci" ||
-      process.env.NODE_ENV === "test" ||
-      process.env.GITHUB_ACTIONS === "true" ||
-      process.env.TRAVIS === "true" ||
-      process.env.CIRCLECI === "true"
-    );
+    return ConfigHelpers.isCI();
   }
 
   /**

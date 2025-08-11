@@ -34,7 +34,7 @@ export class RequestManager extends BaseManager {
   /**
    * Make HTTP request with retry logic and rate limiting
    */
-  async request<T>(method: HTTPMethod, endpoint: string, data?: any, options: RequestOptions = {}): Promise<T> {
+  async request<T>(method: HTTPMethod, endpoint: string, data?: unknown, options: RequestOptions = {}): Promise<T> {
     const timer = startTimer();
 
     try {
@@ -60,24 +60,30 @@ export class RequestManager extends BaseManager {
   private async makeRequestWithRetry<T>(
     method: HTTPMethod,
     endpoint: string,
-    data?: any,
+    data?: unknown,
     options: RequestOptions = {},
   ): Promise<T> {
-    let lastError: any;
+    let lastError: unknown;
     const maxRetries = options.retries ?? this.config.maxRetries ?? 3;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         return await this.makeRequest<T>(method, endpoint, data, options);
-      } catch (error: any) {
+      } catch (error: unknown) {
         lastError = error;
 
+        // Type guard for error-like objects
+        const isErrorLike = (err: unknown): err is { statusCode?: number; message?: string } => {
+          return typeof err === "object" && err !== null;
+        };
+
         // Don't retry on authentication errors or client errors
-        if (error.statusCode < 500 || attempt === maxRetries) {
+        if (isErrorLike(error) && (error.statusCode && error.statusCode < 500) || attempt === maxRetries) {
           throw error;
         }
 
-        debug.log(`Request failed (attempt ${attempt}/${maxRetries}):`, error.message);
+        const errorMessage = isErrorLike(error) && error.message ? error.message : String(error);
+        debug.log(`Request failed (attempt ${attempt}/${maxRetries}):`, errorMessage);
 
         // Exponential backoff
         const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
@@ -94,7 +100,7 @@ export class RequestManager extends BaseManager {
   private async makeRequest<T>(
     method: HTTPMethod,
     endpoint: string,
-    data?: any,
+    data?: unknown,
     options: RequestOptions = {},
   ): Promise<T> {
     const url = this.buildUrl(endpoint);
@@ -107,7 +113,7 @@ export class RequestManager extends BaseManager {
       // Get authentication headers
       const authHeaders = await this.authManager.getAuthHeaders();
 
-      const fetchOptions: any = {
+      const fetchOptions: RequestInit = {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -124,8 +130,10 @@ export class RequestManager extends BaseManager {
           (typeof data === "object" && data && "append" in data && typeof data.append === "function")
         ) {
           // For FormData, don't set Content-Type (let fetch set it with boundary)
-          delete fetchOptions.headers["Content-Type"];
-          fetchOptions.body = data;
+          if (fetchOptions.headers && typeof fetchOptions.headers === "object" && "Content-Type" in fetchOptions.headers) {
+            delete (fetchOptions.headers as Record<string, string>)["Content-Type"];
+          }
+          fetchOptions.body = data as FormData;
         } else if (Buffer.isBuffer(data)) {
           // For Buffer data, keep Content-Type from headers
           fetchOptions.body = data;
@@ -154,17 +162,21 @@ export class RequestManager extends BaseManager {
   /**
    * Handle HTTP error responses
    */
-  private async handleErrorResponse(response: any): Promise<never> {
-    let errorData: any = {};
+  private async handleErrorResponse(response: Response): Promise<never> {
+    let errorData: Record<string, unknown> = {};
 
     try {
-      errorData = await response.json();
+      const jsonData = await response.json();
+      if (typeof jsonData === "object" && jsonData !== null) {
+        errorData = jsonData as Record<string, unknown>;
+      }
     } catch {
       // Ignore JSON parsing errors
     }
 
-    const message = errorData.message || `HTTP ${response.status}: ${response.statusText}`;
-    const code = errorData.code || "http_error";
+    const message = (typeof errorData.message === "string" ? errorData.message : undefined) || 
+                    `HTTP ${response.status}: ${response.statusText}`;
+    const code = (typeof errorData.code === "string" ? errorData.code : undefined) || "http_error";
 
     if (response.status === 429) {
       this.stats.rateLimitHits++;

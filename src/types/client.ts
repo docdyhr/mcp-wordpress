@@ -205,17 +205,7 @@ export interface IWordPressClient {
   // Site Management
   getSiteSettings(): Promise<WordPressSiteSettings>;
   updateSiteSettings(settings: Partial<WordPressSiteSettings>): Promise<WordPressSiteSettings>;
-  getSiteInfo(): Promise<{
-    name: string;
-    description: string;
-    url: string;
-    home: string;
-    gmt_offset: number;
-    timezone_string: string;
-    namespaces: string[];
-    authentication: Record<string, any>;
-    routes: Record<string, any>;
-  }>;
+  getSiteInfo(): Promise<import("./wordpress.js").WordPressSiteInfo>;
 
   // Application Passwords
   getApplicationPasswords(userId?: number | "me"): Promise<WordPressApplicationPassword[]>;
@@ -227,21 +217,13 @@ export interface IWordPressClient {
     query: string,
     types?: string[],
     subtype?: string,
-  ): Promise<
-    Array<{
-      id: number;
-      title: string;
-      url: string;
-      type: string;
-      subtype: string;
-    }>
-  >;
+  ): Promise<import("./wordpress.js").WordPressSearchResult[]>;
 
   // Utility Methods
   ping(): Promise<boolean>;
-  getServerInfo(): Promise<Record<string, any>>;
+  getServerInfo(): Promise<Record<string, unknown>>;
   validateEndpoint(endpoint: string): boolean;
-  buildUrl(endpoint: string, params?: Record<string, any>): string;
+  buildUrl(endpoint: string, params?: Record<string, unknown>): string;
 }
 
 // Authentication Provider Interface

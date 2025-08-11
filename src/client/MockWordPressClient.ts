@@ -1,5 +1,6 @@
 import { WordPressClient } from "./api.js";
 import { WordPressClientConfig } from "../types/client.js";
+import { LoggerFactory } from "../utils/logger.js";
 import type {
   WordPressPost,
   WordPressUser,
@@ -15,6 +16,7 @@ import type {
  */
 export class MockWordPressClient extends WordPressClient {
   private isMockMode = true;
+  private logger = LoggerFactory.api("mock");
 
   constructor(config: WordPressClientConfig) {
     super(config);
@@ -24,7 +26,7 @@ export class MockWordPressClient extends WordPressClient {
    * Override authenticate to not make actual requests
    */
   async authenticate(): Promise<boolean> {
-    console.log("INFO: Mock authentication - skipping actual connection");
+    this.logger.info("Mock authentication - skipping actual connection");
     return true;
   }
 
@@ -332,7 +334,7 @@ export class MockWordPressClient extends WordPressClient {
   /**
    * Mock search
    */
-  async search(query: string, types?: string[], subtype?: string): Promise<any[]> {
+  async search(query: string, types?: string[], subtype?: string): Promise<import("../types/wordpress.js").WordPressSearchResult[]> {
     if (!query) {
       return [];
     }

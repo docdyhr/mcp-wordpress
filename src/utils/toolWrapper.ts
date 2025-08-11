@@ -4,11 +4,13 @@
  */
 
 import { getErrorMessage } from "./error.js";
+import type { IWordPressClient } from '../types/client.js';
+import type { BaseToolParams } from '../types/tools.js';
 
 /**
  * Wrapper for tool methods that standardizes error handling
  */
-export function withErrorHandling<T extends any[], R>(
+export function withErrorHandling<T extends readonly unknown[], R>(
   operation: string,
   fn: (...args: T) => Promise<R>,
 ): (...args: T) => Promise<R> {
@@ -24,7 +26,7 @@ export function withErrorHandling<T extends any[], R>(
 /**
  * Wrapper for tool methods with validation
  */
-export function withValidation<T extends any[], R>(
+export function withValidation<T extends readonly unknown[], R>(
   operation: string,
   validator: (...args: T) => void,
   fn: (...args: T) => Promise<R>,
@@ -43,7 +45,7 @@ export function withValidation<T extends any[], R>(
  * Common validation functions
  */
 export const validators = {
-  requireSite: (client: any, params: any) => {
+  requireSite: (client: IWordPressClient | null | undefined, params: BaseToolParams) => {
     if (!client) {
       throw new Error("WordPress client is required");
     }
@@ -55,13 +57,13 @@ export const validators = {
     }
   },
 
-  requireNonEmpty: (value: any, fieldName: string) => {
+  requireNonEmpty: (value: unknown, fieldName: string) => {
     if (!value || (typeof value === "string" && value.trim() === "")) {
       throw new Error(`${fieldName} cannot be empty`);
     }
   },
 
-  requireFields: (params: any, fields: string[]) => {
+  requireFields: (params: Record<string, unknown>, fields: readonly string[]) => {
     for (const field of fields) {
       if (params[field] === undefined || params[field] === null) {
         throw new Error(`${field} is required`);
@@ -74,10 +76,10 @@ export const validators = {
  * Decorator for class methods to add error handling
  */
 export function errorHandler(operation: string) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       try {
         return await originalMethod.apply(this, args);
       } catch (error) {
@@ -99,7 +101,7 @@ export function formatSuccessResponse(content: string): string {
 /**
  * Helper to format error responses consistently
  */
-export function formatErrorResponse(operation: string, error: any): never {
+export function formatErrorResponse(operation: string, error: unknown): never {
   const message = getErrorMessage(error);
   throw new Error(`${operation}: ${message}`);
 }

@@ -24,9 +24,10 @@ export interface StructuredLogger extends Logger {
   child(context: Record<string, any>): StructuredLogger;
 }
 
+import { ConfigHelpers } from "../config/Config.js";
+
 // Check if debug mode is enabled
-const isDebugMode = (): boolean =>
-  (process.env.DEBUG === "true" || process.env.NODE_ENV === "development") && process.env.NODE_ENV !== "test";
+const isDebugMode = (): boolean => ConfigHelpers.shouldDebug();
 
 // Get current timestamp
 const getTimestamp = (): string => new Date().toISOString();

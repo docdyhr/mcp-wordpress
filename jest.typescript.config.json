@@ -1,0 +1,93 @@
+{
+  "testEnvironment": "node",
+  "roots": [
+    "<rootDir>/tests"
+  ],
+  "testMatch": [
+    "**/typescript-build.test.js",
+    "**/server.test.js",
+    "**/env-loading.test.js",
+    "**/api-upload-timeout.test.js",
+    "**/auth-headers-fix.test.js",
+    "**/config-loading.test.js",
+    "**/tool-validation.test.js",
+    "**/security/**/*.test.js",
+    "**/config/**/*.test.js",
+    "**/property/**/*.test.js",
+    "**/unit/**/*.test.js",
+    "**/utils/**/*.test.js",
+    "**/managers/**/*.test.js",
+    "**/server/**/*.test.js",
+    "**/tools/**/*.test.js",
+    "**/cache/**/*.test.js"
+  ],
+  "testPathIgnorePatterns": [
+    "/node_modules/",
+    "/dist/",
+    "/coverage/",
+    "tests/cache/CacheInvalidation.test.js",
+    "tests/server/ToolRegistry.test.js",
+    "tests/managers/authentication.test.js"
+  ],
+  "collectCoverage": false,
+  "collectCoverageFrom": [
+    "src/**/*.ts",
+    "!src/**/*.d.ts",
+    "!src/**/*.test.ts",
+    "!src/types/**",
+    "!src/**/index.ts"
+  ],
+  "coverageReporters": [
+    "text-summary",
+    "lcov",
+    "html",
+    "json",
+    "cobertura"
+  ],
+  "coverageDirectory": "coverage",
+  "coveragePathIgnorePatterns": [
+    "/node_modules/",
+    "/dist/",
+    "/tests/",
+    "/docs/",
+    "src/types/",
+    "src/.*\\.d\\.ts$",
+    "src/.*/index.ts$"
+  ],
+  "coverageThreshold": {
+    "global": {
+      "branches": 30,
+      "functions": 35,
+      "lines": 40,
+      "statements": 38
+    }
+  },
+  "testTimeout": 30000,
+  "verbose": true,
+  "forceExit": true,
+  "detectOpenHandles": true,
+  "setupFilesAfterEnv": [
+    "<rootDir>/tests/jest.teardown.js"
+  ],
+  "globals": {
+    "__EXECUTION_CONTEXT__": "jest"
+  },
+  "transform": {
+    "^.+\\.ts$": [
+      "babel-jest",
+      {
+        "presets": [
+          [
+            "@babel/preset-env",
+            {
+              "targets": {
+                "node": "current"
+              }
+            }
+          ],
+          "@babel/preset-typescript"
+        ]
+      }
+    ]
+  }
+}

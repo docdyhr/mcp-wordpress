@@ -63,7 +63,7 @@ export class AuthenticationManager extends BaseManager {
       if (
         process.env.NODE_ENV === "test" ||
         process.env.CI === "true" ||
-        (globalThis as any).__EXECUTION_CONTEXT__ === "jest"
+        (globalThis as { __EXECUTION_CONTEXT__?: string }).__EXECUTION_CONTEXT__ === "jest"
       ) {
         debug.log("Warning: No authentication configuration in test environment, returning empty headers");
         return {};
