@@ -12,7 +12,11 @@ export class UserTools {
    * Retrieves the list of user management tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): any[] {
+  public getTools(): Array<{
+    name: string;
+    description: string;
+    handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
+  }> {
     return [
       {
         name: "wp_list_users",
@@ -139,7 +143,7 @@ export class UserTools {
     ];
   }
 
-  public async handleListUsers(client: WordPressClient, params: UserQueryParams): Promise<any> {
+  public async handleListUsers(client: WordPressClient, params: UserQueryParams): Promise<unknown> {
     try {
       const users = await client.getUsers(params);
       if (users.length === 0) {
@@ -148,7 +152,7 @@ export class UserTools {
 
       // Use streaming for large user result sets (>30 users)
       if (users.length > 30) {
-        const streamResults: StreamingResult<any>[] = [];
+        const streamResults: StreamingResult<unknown>[] = [];
 
         for await (const result of WordPressDataStreamer.streamUsers(users, {
           includeRoles: true,
@@ -218,7 +222,7 @@ export class UserTools {
     }
   }
 
-  public async handleGetUser(client: WordPressClient, params: { id: number }): Promise<any> {
+  public async handleGetUser(client: WordPressClient, params: { id: number }): Promise<unknown> {
     try {
       const user = await client.getUser(params.id);
       const content =
@@ -233,7 +237,10 @@ export class UserTools {
     }
   }
 
-  public async handleGetCurrentUser(client: WordPressClient, params: any): Promise<any> {
+  public async handleGetCurrentUser(
+    client: WordPressClient,
+    params: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     try {
       const user = await client.getCurrentUser();
       const siteUrl = client.getSiteUrl();
@@ -296,7 +303,7 @@ export class UserTools {
     }
   }
 
-  public async handleCreateUser(client: WordPressClient, params: CreateUserRequest): Promise<any> {
+  public async handleCreateUser(client: WordPressClient, params: CreateUserRequest): Promise<unknown> {
     try {
       const user = await client.createUser(params);
       return `✅ User "${user.name}" created successfully with ID: ${user.id}.`;
@@ -305,7 +312,7 @@ export class UserTools {
     }
   }
 
-  public async handleUpdateUser(client: WordPressClient, params: UpdateUserRequest & { id: number }): Promise<any> {
+  public async handleUpdateUser(client: WordPressClient, params: UpdateUserRequest & { id: number }): Promise<unknown> {
     try {
       const user = await client.updateUser(params);
       return `✅ User ${user.id} updated successfully.`;
@@ -314,7 +321,7 @@ export class UserTools {
     }
   }
 
-  public async handleDeleteUser(client: WordPressClient, params: { id: number; reassign?: number }): Promise<any> {
+  public async handleDeleteUser(client: WordPressClient, params: { id: number; reassign?: number }): Promise<unknown> {
     try {
       await client.deleteUser(params.id, params.reassign);
       let content = `✅ User ${params.id} has been deleted.`;

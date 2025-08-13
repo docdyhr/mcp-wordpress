@@ -349,7 +349,7 @@ export class PerformanceAnalytics {
     }
 
     const trends = this.analyzeTrends();
-    const predictions: any[] = [];
+    const predictions: unknown[] = [];
     const alerts: string[] = [];
 
     for (const trend of trends) {
@@ -449,8 +449,8 @@ export class PerformanceAnalytics {
     benchmarks: BenchmarkComparison[];
     insights: PerformanceInsight[];
     anomalies: PerformanceAnomaly[];
-    predictions: any;
-    optimizationPlan: any;
+    predictions: unknown;
+    optimizationPlan: Record<string, unknown>;
   } {
     const currentMetrics = this.collector.collectCurrentMetrics();
     const performanceScore = this.calculatePerformanceScore(currentMetrics);
@@ -647,7 +647,7 @@ export class PerformanceAnalytics {
   private createBenchmarkComparison(
     category: string,
     currentValue: number,
-    benchmarks: any,
+    benchmarks: Record<string, unknown>,
     higherIsBetter: boolean,
   ): BenchmarkComparison {
     let status: "excellent" | "good" | "average" | "below_average" | "poor" = "poor";

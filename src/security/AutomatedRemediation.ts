@@ -8,6 +8,7 @@ import * as path from "path";
 import { SecurityVulnerability, SecurityScanResult } from "./AISecurityScanner.js";
 import { SecurityUtils } from "./SecurityConfig.js";
 import { SecurityValidationError } from "./InputValidator.js";
+import { LoggerFactory } from "../utils/logger.js";
 
 interface RemediationAction {
   id: string;
@@ -20,7 +21,7 @@ interface RemediationAction {
   };
   replacement: {
     content?: string;
-    config?: Record<string, any>;
+    config?: Record<string, unknown>;
     action?: string;
   };
   backup: {
@@ -29,7 +30,7 @@ interface RemediationAction {
   };
   validation: {
     test?: string;
-    expected?: any;
+    expected?: unknown;
   };
 }
 
@@ -97,6 +98,7 @@ const REMEDIATION_PATTERNS = {
  * Automated Security Remediation Engine
  */
 export class AutomatedRemediation {
+  private readonly logger = LoggerFactory.security();
   private remediationHistory: RemediationResult[] = [];
   private backupDirectory = "security-backups";
 
@@ -107,7 +109,11 @@ export class AutomatedRemediation {
     const planId = SecurityUtils.generateSecureToken(16);
     const remediableVulns = scanResult.vulnerabilities.filter((v) => v.remediation.automated);
 
-    console.log(`[Remediation] Creating plan for ${remediableVulns.length} remediable vulnerabilities`);
+    this.logger.info("Creating remediation plan", {
+      planId,
+      remediableVulnerabilities: remediableVulns.length,
+      totalVulnerabilities: scanResult.vulnerabilities.length,
+    });
 
     const actions: RemediationAction[] = [];
     let estimatedDuration = 0;
@@ -338,10 +344,14 @@ export class AutomatedRemediation {
       requireConfirmation?: boolean;
     } = {},
   ): Promise<RemediationResult[]> {
-    console.log(`[Remediation] Executing plan ${plan.planId} with ${plan.actions.length} actions`);
+    this.logger.info("Executing remediation plan", {
+      planId: plan.planId,
+      actionCount: plan.actions.length,
+      dryRun,
+    });
 
     if (options.dryRun) {
-      console.log("[Remediation] DRY RUN MODE - No changes will be made");
+      this.logger.info("Running in dry-run mode - no changes will be made");
       return this.simulateRemediationActions(plan.actions);
     }
 
@@ -352,16 +362,26 @@ export class AutomatedRemediation {
 
     for (const action of plan.actions) {
       try {
-        console.log(`[Remediation] Executing action ${action.id} of type ${action.type}`);
+        this.logger.debug("Executing remediation action", {
+          actionId: action.id,
+          actionType: action.type,
+          targetFile: action.target.file,
+        });
 
         const result = await this.executeRemediationAction(action);
         results.push(result);
 
         if (!result.success) {
-          console.error(`[Remediation] Action ${action.id} failed: ${result.details}`);
+          this.logger.error("Remediation action failed", {
+            actionId: action.id,
+            details: result.details,
+          });
         }
       } catch (error) {
-        console.error(`[Remediation] Action ${action.id} threw error:`, error);
+        this.logger.error("Remediation action threw error", {
+          actionId: action.id,
+          error: String(error),
+        });
         results.push({
           vulnerabilityId: action.id,
           success: false,
@@ -375,7 +395,12 @@ export class AutomatedRemediation {
     this.remediationHistory.push(...results);
 
     const successCount = results.filter((r) => r.success).length;
-    console.log(`[Remediation] Plan completed: ${successCount}/${results.length} actions successful`);
+    this.logger.info("Remediation plan completed", {
+      planId: plan.planId,
+      successCount,
+      totalActions: results.length,
+      successRate: `${Math.round((successCount / results.length) * 100)}%`,
+    });
 
     return results;
   }
@@ -561,7 +586,7 @@ export class AutomatedRemediation {
     const content = await fs.readFile(filePath, "utf-8");
     await fs.writeFile(backupPath, content, "utf-8");
 
-    console.log(`[Remediation] Created backup: ${backupPath}`);
+    this.logger.debug("Created backup file", { backupPath });
     return backupPath;
   }
 
@@ -573,7 +598,7 @@ export class AutomatedRemediation {
       await fs.access(this.backupDirectory);
     } catch {
       await fs.mkdir(this.backupDirectory, { recursive: true });
-      console.log(`[Remediation] Created backup directory: ${this.backupDirectory}`);
+      this.logger.info("Created backup directory", { directory: this.backupDirectory });
     }
   }
 
@@ -597,7 +622,10 @@ export class AutomatedRemediation {
 
       return true;
     } catch (error) {
-      console.warn(`[Remediation] Validation failed for action ${action.id}:`, error);
+      this.logger.warn("Validation failed for action", {
+        actionId: action.id,
+        error: String(error),
+      });
       return false;
     }
   }
@@ -635,7 +663,10 @@ export class AutomatedRemediation {
     try {
       const backupContent = await fs.readFile(backupPath, "utf-8");
       await fs.writeFile(targetFile, backupContent, "utf-8");
-      console.log(`[Remediation] Rolled back ${targetFile} from ${backupPath}`);
+      this.logger.info("Rolled back file from backup", {
+        targetFile,
+        backupPath,
+      });
     } catch (error) {
       throw new SecurityValidationError(`Rollback failed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -655,11 +686,11 @@ export class AutomatedRemediation {
 
         if (now - stats.mtime.getTime() > maxAge) {
           await fs.unlink(filePath);
-          console.log(`[Remediation] Cleaned up old backup: ${file}`);
+          this.logger.debug("Cleaned up old backup", { file });
         }
       }
     } catch (error) {
-      console.warn("[Remediation] Backup cleanup failed:", error);
+      this.logger.warn("Backup cleanup failed", { error: String(error) });
     }
   }
 }

@@ -11,7 +11,11 @@ export class PageTools {
    * Retrieves the list of page management tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): any[] {
+  public getTools(): Array<{
+    name: string;
+    description: string;
+    handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
+  }> {
     return [
       {
         name: "wp_list_pages",
@@ -136,7 +140,7 @@ export class PageTools {
     ];
   }
 
-  public async handleListPages(client: WordPressClient, params: PostQueryParams): Promise<any> {
+  public async handleListPages(client: WordPressClient, params: PostQueryParams): Promise<unknown> {
     try {
       const pages = await client.getPages(params);
       if (pages.length === 0) {
@@ -151,7 +155,7 @@ export class PageTools {
     }
   }
 
-  public async handleGetPage(client: WordPressClient, params: { id: number }): Promise<any> {
+  public async handleGetPage(client: WordPressClient, params: { id: number }): Promise<unknown> {
     try {
       const page = await client.getPage(params.id);
       const content =
@@ -166,7 +170,7 @@ export class PageTools {
     }
   }
 
-  public async handleCreatePage(client: WordPressClient, params: CreatePostRequest): Promise<any> {
+  public async handleCreatePage(client: WordPressClient, params: CreatePostRequest): Promise<unknown> {
     try {
       const page = await client.createPage(params);
       return `✅ Page created successfully!\n- ID: ${page.id}\n- Title: ${page.title.rendered}\n- Link: ${page.link}`;
@@ -175,7 +179,7 @@ export class PageTools {
     }
   }
 
-  public async handleUpdatePage(client: WordPressClient, params: UpdatePostRequest & { id: number }): Promise<any> {
+  public async handleUpdatePage(client: WordPressClient, params: UpdatePostRequest & { id: number }): Promise<unknown> {
     try {
       const page = await client.updatePage(params);
       return `✅ Page ${page.id} updated successfully.`;
@@ -184,7 +188,7 @@ export class PageTools {
     }
   }
 
-  public async handleDeletePage(client: WordPressClient, params: { id: number; force?: boolean }): Promise<any> {
+  public async handleDeletePage(client: WordPressClient, params: { id: number; force?: boolean }): Promise<unknown> {
     try {
       await client.deletePage(params.id, params.force);
       const action = params.force ? "permanently deleted" : "moved to trash";
@@ -194,7 +198,7 @@ export class PageTools {
     }
   }
 
-  public async handleGetPageRevisions(client: WordPressClient, params: { id: number }): Promise<any> {
+  public async handleGetPageRevisions(client: WordPressClient, params: { id: number }): Promise<unknown> {
     try {
       const revisions = await client.getPageRevisions(params.id);
       if (revisions.length === 0) {

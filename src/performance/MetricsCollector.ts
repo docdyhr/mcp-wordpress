@@ -29,7 +29,7 @@ export interface RequestMetadata {
 
 export interface ToolExecutionContext {
   toolName: string;
-  parameters: any;
+  parameters: Record<string, unknown>;
   startTime: number;
   siteId: string | undefined;
 }
@@ -42,8 +42,8 @@ export class MetricsCollector {
   private config: CollectorConfig;
   private activeRequests: Map<string, RequestMetadata> = new Map();
   private activeTools: Map<string, ToolExecutionContext> = new Map();
-  private clientInstances: Map<string, any> = new Map();
-  private cacheManagers: Map<string, any> = new Map();
+  private clientInstances: Map<string, unknown> = new Map();
+  private cacheManagers: Map<string, unknown> = new Map();
   private logger = LoggerFactory.performance();
   private realTimeInterval?: NodeJS.Timeout | undefined;
 
@@ -70,7 +70,7 @@ export class MetricsCollector {
   /**
    * Register a WordPress client for monitoring
    */
-  registerClient(siteId: string, client: any): void {
+  registerClient(siteId: string, client: unknown): void {
     this.clientInstances.set(siteId, client);
 
     if (this.config.enableRequestInterception) {
@@ -81,14 +81,14 @@ export class MetricsCollector {
   /**
    * Register a cache manager for monitoring
    */
-  registerCacheManager(siteId: string, cacheManager: any): void {
+  registerCacheManager(siteId: string, cacheManager: unknown): void {
     this.cacheManagers.set(siteId, cacheManager);
   }
 
   /**
    * Start tracking a tool execution
    */
-  startToolExecution(toolName: string, parameters: any, siteId?: string): string {
+  startToolExecution(toolName: string, parameters: Record<string, unknown>, siteId?: string): string {
     const executionId = `${toolName}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     this.activeTools.set(executionId, {
@@ -212,7 +212,7 @@ export class MetricsCollector {
     client?: ClientStats;
     isActive: boolean;
   } {
-    const result: any = { isActive: false };
+    const result: Record<string, unknown> = { isActive: false };
 
     const cacheManager = this.cacheManagers.get(siteId);
     if (cacheManager && typeof cacheManager.getStats === "function") {
@@ -248,7 +248,7 @@ export class MetricsCollector {
     worstPerforming: string;
   } {
     const sites = Array.from(this.clientInstances.keys());
-    const comparison: any = {};
+    const comparison: Record<string, unknown> = {};
     const rankings: Array<{ site: string; score: number }> = [];
 
     for (const siteId of sites) {
@@ -343,13 +343,13 @@ export class MetricsCollector {
   exportDetailedReport(): {
     timestamp: string;
     overview: PerformanceMetrics;
-    siteComparison: any;
+    siteComparison: Record<string, unknown>;
     aggregatedStats: {
       cache: CacheStats;
       client: ClientStats;
     };
-    optimizations: any;
-    alerts: any[];
+    optimizations: Record<string, unknown>;
+    alerts: unknown[];
   } {
     return {
       timestamp: new Date().toISOString(),
@@ -374,13 +374,13 @@ export class MetricsCollector {
     }
 
     // Adjust collection frequency based on environment
-    const interval = ConfigHelpers.isDev() 
+    const interval = ConfigHelpers.isDev()
       ? Math.max(this.config.collectInterval * 2, 60000) // Longer intervals in dev
       : this.config.collectInterval;
-    
-    this.logger.info("Starting real-time metrics collection", { 
-      interval: `${interval/1000}s`,
-      environment: ConfigHelpers.get().get().app.nodeEnv
+
+    this.logger.info("Starting real-time metrics collection", {
+      interval: `${interval / 1000}s`,
+      environment: ConfigHelpers.get().get().app.nodeEnv,
     });
 
     this.realTimeInterval = setInterval(() => {
@@ -390,7 +390,7 @@ export class MetricsCollector {
         this.logger.debug("Real-time metrics updated");
       } catch (error) {
         this.logger.error("Failed to update real-time metrics", {
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }, interval);
@@ -426,14 +426,21 @@ export class MetricsCollector {
   /**
    * Intercept client requests for automatic tracking
    */
-  private interceptClientRequests(siteId: string, client: any): void {
+  private interceptClientRequests(siteId: string, client: Record<string, unknown>): void {
     if (!client.request || typeof client.request !== "function") {
       return;
     }
 
     const originalRequest = client.request.bind(client);
 
-    client.request = async (...args: any[]) => {
+    const clientObj = client as {
+      request?: (...args: unknown[]) => Promise<unknown>;
+      originalRequest?: (...args: unknown[]) => Promise<unknown>;
+    };
+    if (!clientObj.request) return;
+
+    clientObj.originalRequest = clientObj.request;
+    clientObj.request = async (...args: unknown[]) => {
       const startTime = Date.now();
       const requestId = `${siteId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 

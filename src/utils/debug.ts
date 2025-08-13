@@ -12,16 +12,16 @@ export type LogLevel = "debug" | "info" | "warn" | "error";
 
 // Logger interface
 export interface Logger {
-  log(...args: any[]): void;
-  info(...args: any[]): void;
-  warn(...args: any[]): void;
-  error(...args: any[]): void;
+  log(...args: unknown[]): void;
+  info(...args: unknown[]): void;
+  warn(...args: unknown[]): void;
+  error(...args: unknown[]): void;
 }
 
 // Enhanced logger with structured logging
 export interface StructuredLogger extends Logger {
   logStructured(info: DebugInfo): void;
-  child(context: Record<string, any>): StructuredLogger;
+  child(context: Record<string, unknown>): StructuredLogger;
 }
 
 import { ConfigHelpers } from "../config/Config.js";
@@ -33,7 +33,7 @@ const isDebugMode = (): boolean => ConfigHelpers.shouldDebug();
 const getTimestamp = (): string => new Date().toISOString();
 
 // Format log message with timestamp and level
-const formatMessage = (level: LogLevel, args: any[]): string => {
+const formatMessage = (level: LogLevel, args: unknown[]): string => {
   const timestamp = getTimestamp();
   const prefix = `[${timestamp}] [${level.toUpperCase()}]`;
   return `${prefix} ${args
@@ -42,7 +42,7 @@ const formatMessage = (level: LogLevel, args: any[]): string => {
 };
 
 // Handle circular references in objects
-const safeStringify = (obj: any): string => {
+const safeStringify = (obj: unknown): string => {
   try {
     return JSON.stringify(
       obj,
@@ -67,26 +67,30 @@ const safeStringify = (obj: any): string => {
  * Debug logger that only outputs in debug mode
  */
 export const debug: Logger = {
-  log: (...args: any[]): void => {
+  log: (...args: unknown[]): void => {
     if (isDebugMode()) {
+      // eslint-disable-next-line no-console
       console.error(formatMessage("debug", args)); // Use stderr for debug to avoid STDIO interference
     }
   },
 
-  info: (...args: any[]): void => {
+  info: (...args: unknown[]): void => {
     if (isDebugMode()) {
+      // eslint-disable-next-line no-console
       console.error(formatMessage("info", args));
     }
   },
 
-  warn: (...args: any[]): void => {
+  warn: (...args: unknown[]): void => {
     if (isDebugMode()) {
+      // eslint-disable-next-line no-console
       console.error(formatMessage("warn", args));
     }
   },
 
-  error: (...args: any[]): void => {
+  error: (...args: unknown[]): void => {
     if (isDebugMode()) {
+      // eslint-disable-next-line no-console
       console.error(formatMessage("error", args));
     }
   },
@@ -106,15 +110,15 @@ export const silent: Logger = {
  * Enhanced structured logger
  */
 class StructuredLoggerImpl implements StructuredLogger {
-  private context: Record<string, any>;
+  private context: Record<string, unknown>;
   private enabled: boolean;
 
-  constructor(context: Record<string, any> = {}, enabled = isDebugMode()) {
+  constructor(context: Record<string, unknown> = {}, enabled = isDebugMode()) {
     this.context = context;
     this.enabled = enabled;
   }
 
-  private output(level: LogLevel, args: any[]): void {
+  private output(level: LogLevel, args: unknown[]): void {
     if (!this.enabled) return;
 
     const debugInfo: DebugInfo = {
@@ -124,22 +128,23 @@ class StructuredLoggerImpl implements StructuredLogger {
       ...(Object.keys(this.context).length > 0 && { context: this.context }),
     };
 
+    // eslint-disable-next-line no-console
     console.error(safeStringify(debugInfo));
   }
 
-  log(...args: any[]): void {
+  log(...args: unknown[]): void {
     this.output("debug", args);
   }
 
-  info(...args: any[]): void {
+  info(...args: unknown[]): void {
     this.output("info", args);
   }
 
-  warn(...args: any[]): void {
+  warn(...args: unknown[]): void {
     this.output("warn", args);
   }
 
-  error(...args: any[]): void {
+  error(...args: unknown[]): void {
     this.output("error", args);
   }
 
@@ -151,10 +156,11 @@ class StructuredLoggerImpl implements StructuredLogger {
       context: { ...this.context, ...info.context },
     };
 
+    // eslint-disable-next-line no-console
     console.error(safeStringify(enhancedInfo));
   }
 
-  child(context: Record<string, any>): StructuredLogger {
+  child(context: Record<string, unknown>): StructuredLogger {
     return new StructuredLoggerImpl({ ...this.context, ...context }, this.enabled);
   }
 }
@@ -162,7 +168,7 @@ class StructuredLoggerImpl implements StructuredLogger {
 /**
  * Create a structured logger instance
  */
-export const createStructuredLogger = (context: Record<string, any> = {}): StructuredLogger => {
+export const createStructuredLogger = (context: Record<string, unknown> = {}): StructuredLogger => {
   return new StructuredLoggerImpl(context);
 };
 
@@ -174,7 +180,7 @@ export const logger: Logger = debug;
 /**
  * Create a logger with context
  */
-export const createLogger = (context: Record<string, any> = {}): StructuredLogger => {
+export const createLogger = (context: Record<string, unknown> = {}): StructuredLogger => {
   return createStructuredLogger(context);
 };
 
@@ -205,7 +211,7 @@ export const startTimer = (label?: string): PerformanceTimer => {
 /**
  * Log error with stack trace
  */
-export const logError = (error: Error | string, context?: Record<string, any>): void => {
+export const logError = (error: Error | string, context?: Record<string, unknown>): void => {
   if (typeof error === "string") {
     debug.error(error, context);
   } else {

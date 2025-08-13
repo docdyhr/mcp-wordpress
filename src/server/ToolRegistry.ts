@@ -17,7 +17,7 @@ export interface ToolDefinition {
     description?: string;
     required?: boolean;
   }>;
-  handler: (client: WordPressClient, args: any) => Promise<any>;
+  handler: (client: WordPressClient, args: Record<string, unknown>) => Promise<unknown>;
 }
 
 /**
@@ -39,13 +39,13 @@ export class ToolRegistry {
   public registerAllTools(): void {
     // Register all tools from the tools directory
     Object.values(Tools).forEach((ToolClass) => {
-      let toolInstance: any;
+      let toolInstance: { getTools(): ToolDefinition[] };
 
       // Cache and Performance tools need the clients map
       if (ToolClass.name === "CacheTools" || ToolClass.name === "PerformanceTools") {
         toolInstance = new ToolClass(this.wordpressClients);
       } else {
-        toolInstance = new (ToolClass as new () => any)();
+        toolInstance = new (ToolClass as new () => { getTools(): ToolDefinition[] })();
       }
 
       const tools = toolInstance.getTools();
@@ -84,7 +84,7 @@ export class ToolRegistry {
       tool.name,
       tool.description || `WordPress tool: ${tool.name}`,
       parameterSchema,
-      async (args: any) => {
+      async (args: Record<string, unknown>) => {
         try {
           let siteId = args.site;
 
@@ -178,10 +178,13 @@ export class ToolRegistry {
   /**
    * Build Zod parameter schema from tool definition
    */
-  private buildParameterSchema(tool: ToolDefinition, baseSchema: any): any {
+  private buildParameterSchema(tool: ToolDefinition, baseSchema: Record<string, unknown>): Record<string, unknown> {
     return (
       tool.parameters?.reduce(
-        (schema: any, param: any) => {
+        (
+          schema: Record<string, unknown>,
+          param: { name: string; type?: string; required?: boolean; [key: string]: unknown },
+        ) => {
           let zodType = this.getZodTypeForParameter(param);
 
           if (param.description) {
@@ -203,7 +206,7 @@ export class ToolRegistry {
   /**
    * Get appropriate Zod type for parameter definition
    */
-  private getZodTypeForParameter(param: any): z.ZodType {
+  private getZodTypeForParameter(param: { type?: string; required?: boolean; [key: string]: unknown }): z.ZodType {
     switch (param.type) {
       case "string":
         return z.string();
@@ -223,7 +226,7 @@ export class ToolRegistry {
   /**
    * Intelligent site selection based on context
    */
-  private selectBestSite(toolName: string, args: any): string {
+  private selectBestSite(toolName: string, args: Record<string, unknown>): string {
     const availableSites = Array.from(this.wordpressClients.keys());
 
     // Single site scenario - use it directly
@@ -269,7 +272,7 @@ export class ToolRegistry {
   /**
    * Check if error is authentication-related
    */
-  private isAuthenticationError(error: any): boolean {
+  private isAuthenticationError(error: unknown): boolean {
     if (error?.response?.status && [401, 403].includes(error.response.status)) {
       return true;
     }

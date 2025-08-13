@@ -11,7 +11,11 @@ export class SiteTools {
    * Retrieves the list of site management tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): any[] {
+  public getTools(): Array<{
+    name: string;
+    description: string;
+    handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
+  }> {
     return [
       {
         name: "wp_get_site_settings",
@@ -121,7 +125,10 @@ export class SiteTools {
     ];
   }
 
-  public async handleGetSiteSettings(client: WordPressClient, params: any): Promise<any> {
+  public async handleGetSiteSettings(
+    client: WordPressClient,
+    params: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     try {
       const settings = await client.getSiteSettings();
       const siteUrl = client.getSiteUrl();
@@ -179,7 +186,10 @@ export class SiteTools {
     }
   }
 
-  public async handleUpdateSiteSettings(client: WordPressClient, params: any): Promise<any> {
+  public async handleUpdateSiteSettings(
+    client: WordPressClient,
+    params: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     try {
       const updatedSettings = await client.updateSiteSettings(params);
       return `✅ Site settings updated successfully. New title: ${updatedSettings.title}`;
@@ -191,7 +201,7 @@ export class SiteTools {
   public async handleSearchSite(
     client: WordPressClient,
     params: { term: string; type?: "posts" | "pages" | "media" },
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       const results = await client.search(params.term, params.type ? [params.type] : undefined);
       if (results.length === 0) {
@@ -206,7 +216,7 @@ export class SiteTools {
     }
   }
 
-  public async handleGetApplicationPasswords(client: WordPressClient, params: { user_id: number }): Promise<any> {
+  public async handleGetApplicationPasswords(client: WordPressClient, params: { user_id: number }): Promise<unknown> {
     try {
       const passwords = await client.getApplicationPasswords(params.user_id);
       if (passwords.length === 0) {
@@ -229,7 +239,7 @@ export class SiteTools {
   public async handleCreateApplicationPassword(
     client: WordPressClient,
     params: { user_id: number; app_name: string },
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       const result = await client.createApplicationPassword(params.user_id, params.app_name);
       const content =
@@ -246,7 +256,7 @@ export class SiteTools {
   public async handleDeleteApplicationPassword(
     client: WordPressClient,
     params: { user_id: number; uuid: string },
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       await client.deleteApplicationPassword(params.user_id, params.uuid);
       return `✅ Application password with UUID ${params.uuid} has been revoked.`;

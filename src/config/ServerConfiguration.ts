@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import dotenv from "dotenv";
 import * as fs from "fs";
 import * as path from "path";
@@ -8,6 +7,7 @@ import { CachedWordPressClient } from "../client/CachedWordPressClient.js";
 import { MockWordPressClient } from "../client/MockWordPressClient.js";
 import { WordPressClientConfig } from "../types/client.js";
 import { getErrorMessage } from "../utils/error.js";
+import { LoggerFactory } from "../utils/logger.js";
 import { ConfigHelpers } from "./Config.js";
 import {
   ConfigurationValidator,
@@ -25,6 +25,7 @@ export type { SiteConfig, MultiSiteConfig, McpConfigType };
  */
 export class ServerConfiguration {
   private static instance: ServerConfiguration;
+  private readonly logger = LoggerFactory.server();
   private rootDir: string;
   private envPath: string;
 
@@ -39,14 +40,11 @@ export class ServerConfiguration {
 
     // Debug output for DXT troubleshooting (reduced in DXT mode)
     if (ConfigHelpers.shouldDebug()) {
-      // eslint-disable-next-line no-console
-      console.error("DEBUG: ServerConfiguration initialized");
-      // eslint-disable-next-line no-console
-      console.error(`DEBUG: Root directory: ${this.rootDir}`);
-      // eslint-disable-next-line no-console
-      console.error(`DEBUG: Environment file path: ${this.envPath}`);
-      // eslint-disable-next-line no-console
-      console.error(`DEBUG: Environment file exists: ${fs.existsSync(this.envPath)}`);
+      this.logger.debug("ServerConfiguration initialized", {
+        rootDir: this.rootDir,
+        envPath: this.envPath,
+        envFileExists: fs.existsSync(this.envPath),
+      });
     }
   }
 
@@ -72,14 +70,14 @@ export class ServerConfiguration {
 
     if (fs.existsSync(configPath)) {
       if (ConfigHelpers.shouldLogInfo()) {
-        console.error("INFO: Found mcp-wordpress.config.json, loading multi-site configuration.");
+        this.logger.info("Found multi-site configuration file", { configPath });
       }
       return this.loadMultiSiteConfig(configPath);
     } else {
       if (ConfigHelpers.shouldLogInfo()) {
-        console.error(
-          "INFO: mcp-wordpress.config.json not found, falling back to environment variables for single-site mode.",
-        );
+        this.logger.info("Multi-site config not found, using environment variables for single-site mode", {
+          configPath,
+        });
       }
       return this.loadSingleSiteFromEnv(mcpConfig);
     }
@@ -120,13 +118,20 @@ export class ServerConfiguration {
         validConfigs.push(site);
 
         if (ConfigHelpers.shouldLogInfo()) {
-          console.error(`INFO: Initialized client for site: ${site.name} (ID: ${site.id})`);
+          this.logger.info("Initialized site client", {
+            siteName: site.name,
+            siteId: site.id,
+            authMethod: site.config.WORDPRESS_AUTH_METHOD,
+          });
         }
       }
 
       return { clients, configs: validConfigs };
     } catch (error) {
-      console.error(`FATAL: Error reading or parsing mcp-wordpress.config.json: ${getErrorMessage(error)}`);
+      this.logger.fatal("Failed to load multi-site configuration", {
+        configPath,
+        error: getErrorMessage(error),
+      });
       process.exit(1);
     }
   }
@@ -172,7 +177,7 @@ export class ServerConfiguration {
       config: mockConfig,
     };
 
-    console.error("INFO: Using mock configuration for CI environment.");
+    this.logger.info("Using mock configuration for CI environment");
     return { clients, configs: [siteConfig] };
   }
 
@@ -186,14 +191,14 @@ export class ServerConfiguration {
     try {
       // Debug output for DXT troubleshooting (reduced in DXT mode)
       const isDXTMode = process.env.NODE_ENV === "dxt";
-      if (!isDXTMode) {
-        console.error("DEBUG: loadSingleSiteFromEnv called");
-        console.error(`DEBUG: mcpConfig provided: ${mcpConfig ? "YES" : "NO"}`);
-        console.error("DEBUG: Current environment variables:");
-        console.error(`  WORDPRESS_SITE_URL: ${process.env.WORDPRESS_SITE_URL || "NOT SET"}`);
-        console.error(`  WORDPRESS_USERNAME: ${process.env.WORDPRESS_USERNAME || "NOT SET"}`);
-        console.error(`  WORDPRESS_APP_PASSWORD: ${process.env.WORDPRESS_APP_PASSWORD ? "SET" : "NOT SET"}`);
-        console.error(`  WORDPRESS_AUTH_METHOD: ${process.env.WORDPRESS_AUTH_METHOD || "NOT SET"}`);
+      if (!isDXTMode && ConfigHelpers.shouldDebug()) {
+        this.logger.debug("Loading single-site configuration from environment", {
+          mcpConfigProvided: Boolean(mcpConfig),
+          siteUrl: process.env.WORDPRESS_SITE_URL || "NOT SET",
+          username: process.env.WORDPRESS_USERNAME || "NOT SET",
+          appPasswordSet: Boolean(process.env.WORDPRESS_APP_PASSWORD),
+          authMethod: process.env.WORDPRESS_AUTH_METHOD || "NOT SET",
+        });
       }
 
       // Check if we're in CI environment and credentials are missing
@@ -217,12 +222,13 @@ export class ServerConfiguration {
         LOG_LEVEL: process.env.LOG_LEVEL,
       };
 
-      if (!isDXTMode) {
-        console.error("DEBUG: Final envConfig for validation:");
-        console.error(`  WORDPRESS_SITE_URL: ${envConfig.WORDPRESS_SITE_URL || "NOT SET"}`);
-        console.error(`  WORDPRESS_USERNAME: ${envConfig.WORDPRESS_USERNAME || "NOT SET"}`);
-        console.error(`  WORDPRESS_APP_PASSWORD: ${envConfig.WORDPRESS_APP_PASSWORD ? "SET" : "NOT SET"}`);
-        console.error(`  WORDPRESS_AUTH_METHOD: ${envConfig.WORDPRESS_AUTH_METHOD || "NOT SET"}`);
+      if (!isDXTMode && ConfigHelpers.shouldDebug()) {
+        this.logger.debug("Final environment configuration for validation", {
+          siteUrl: envConfig.WORDPRESS_SITE_URL || "NOT SET",
+          username: envConfig.WORDPRESS_USERNAME || "NOT SET",
+          appPasswordSet: Boolean(envConfig.WORDPRESS_APP_PASSWORD),
+          authMethod: envConfig.WORDPRESS_AUTH_METHOD || "NOT SET",
+        });
       }
 
       // Validate environment configuration using Zod schema
@@ -257,14 +263,15 @@ export class ServerConfiguration {
       };
 
       if (!isDXTMode) {
-        console.error("INFO: Initialized client for default site in single-site mode.");
+        this.logger.info("Initialized default site client in single-site mode");
       }
 
       return { clients, configs: [siteConfig] };
     } catch (error) {
-      console.error("ERROR: Configuration validation failed for single-site mode.");
-      console.error(`Details: ${getErrorMessage(error)}`);
-      console.error("Please check your environment variables or MCP configuration.");
+      this.logger.error("Configuration validation failed for single-site mode", {
+        error: getErrorMessage(error),
+        suggestion: "Please check your environment variables or MCP configuration",
+      });
       return { clients: new Map(), configs: [] };
     }
   }

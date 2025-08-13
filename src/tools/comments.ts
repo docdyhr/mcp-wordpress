@@ -11,7 +11,11 @@ export class CommentTools {
    * Retrieves the list of comment management tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): any[] {
+  public getTools(): Array<{
+    name: string;
+    description: string;
+    handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
+  }> {
     return [
       {
         name: "wp_list_comments",
@@ -144,7 +148,7 @@ export class CommentTools {
     ];
   }
 
-  public async handleListComments(client: WordPressClient, params: CommentQueryParams): Promise<any> {
+  public async handleListComments(client: WordPressClient, params: CommentQueryParams): Promise<unknown> {
     try {
       const comments = await client.getComments(params);
       if (comments.length === 0) {
@@ -164,7 +168,7 @@ export class CommentTools {
     }
   }
 
-  public async handleGetComment(client: WordPressClient, params: { id: number }): Promise<any> {
+  public async handleGetComment(client: WordPressClient, params: { id: number }): Promise<unknown> {
     try {
       const comment = await client.getComment(params.id);
       const content =
@@ -180,7 +184,7 @@ export class CommentTools {
     }
   }
 
-  public async handleCreateComment(client: WordPressClient, params: CreateCommentRequest): Promise<any> {
+  public async handleCreateComment(client: WordPressClient, params: CreateCommentRequest): Promise<unknown> {
     try {
       const comment = await client.createComment(params);
       return `✅ Comment created successfully with ID: ${comment.id}`;
@@ -192,7 +196,7 @@ export class CommentTools {
   public async handleUpdateComment(
     client: WordPressClient,
     params: UpdateCommentRequest & { id: number },
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       const comment = await client.updateComment(params);
       return `✅ Comment ${comment.id} updated successfully. New status: ${comment.status}.`;
@@ -201,7 +205,7 @@ export class CommentTools {
     }
   }
 
-  public async handleDeleteComment(client: WordPressClient, params: { id: number; force?: boolean }): Promise<any> {
+  public async handleDeleteComment(client: WordPressClient, params: { id: number; force?: boolean }): Promise<unknown> {
     try {
       await client.deleteComment(params.id, params.force);
       const action = params.force ? "permanently deleted" : "moved to trash";
@@ -211,7 +215,7 @@ export class CommentTools {
     }
   }
 
-  public async handleApproveComment(client: WordPressClient, params: { id: number }): Promise<any> {
+  public async handleApproveComment(client: WordPressClient, params: { id: number }): Promise<unknown> {
     try {
       const comment = await client.updateComment({
         id: params.id,
@@ -223,7 +227,7 @@ export class CommentTools {
     }
   }
 
-  public async handleSpamComment(client: WordPressClient, params: { id: number }): Promise<any> {
+  public async handleSpamComment(client: WordPressClient, params: { id: number }): Promise<unknown> {
     try {
       const comment = await client.updateComment({
         id: params.id,

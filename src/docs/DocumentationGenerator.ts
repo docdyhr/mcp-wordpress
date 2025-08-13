@@ -7,6 +7,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as Tools from "../tools/index.js";
 import type { ToolDefinition } from "../server/ToolRegistry.js";
+import { LoggerFactory } from "../utils/logger.js";
 
 export interface DocumentationConfig {
   outputDir: string;
@@ -35,7 +36,7 @@ export interface ParameterDocumentation {
   type: string;
   required: boolean;
   description: string;
-  defaultValue: any;
+  defaultValue: unknown;
   allowedValues: string[] | undefined;
   examples: string[];
 }
@@ -44,11 +45,11 @@ export interface ExampleUsage {
   title: string;
   description: string;
   command: string;
-  parameters: Record<string, any>;
-  expectedResponse: any;
+  parameters: Record<string, unknown>;
+  expectedResponse: unknown;
   errorExample?: {
     scenario: string;
-    error: any;
+    error: unknown;
   };
 }
 
@@ -79,7 +80,7 @@ export interface TypeDocumentation {
   name: string;
   description: string;
   properties: PropertyDocumentation[];
-  examples: any[];
+  examples: unknown[];
   wordpressSource?: string;
 }
 
@@ -93,9 +94,9 @@ export interface PropertyDocumentation {
 
 export interface OpenAPISpecification {
   openapi: string;
-  info: any;
-  paths: Record<string, any>;
-  components: Record<string, any>;
+  info: Record<string, unknown>;
+  paths: Record<string, unknown>;
+  components: Record<string, unknown>;
 }
 
 export interface DocumentationSummary {
@@ -118,6 +119,7 @@ export class DocumentationGenerator {
   private config: DocumentationConfig;
   private toolCategories: Map<string, string[]> = new Map();
   private wordpressEndpoints: Map<string, string> = new Map();
+  private logger = LoggerFactory.api();
 
   constructor(config: Partial<DocumentationConfig> = {}) {
     this.config = {
@@ -138,7 +140,7 @@ export class DocumentationGenerator {
    * Generate complete documentation for all tools and types
    */
   async generateFullDocumentation(): Promise<DocumentationOutput> {
-    console.error("🚀 Starting API documentation generation...");
+    this.logger.info("🚀 Starting API documentation generation...");
 
     const tools = await this.extractAllToolDocumentation();
     const categories = this.generateCategoryDocumentation(tools);
@@ -162,7 +164,7 @@ export class DocumentationGenerator {
     // Write documentation to files
     await this.writeDocumentationFiles(output);
 
-    console.error(`✅ Documentation generation complete! ${tools.length} tools documented.`);
+    this.logger.info(`✅ Documentation generation complete! ${tools.length} tools documented.`);
     return output;
   }
 
@@ -176,12 +178,12 @@ export class DocumentationGenerator {
     for (const [className, ToolClass] of Object.entries(Tools)) {
       try {
         // Create tool instance
-        let toolInstance: any;
+        let toolInstance: { getTools(): unknown[] };
         if (className === "CacheTools" || className === "PerformanceTools") {
           // These tools need client map - use empty map for doc generation
           toolInstance = new ToolClass(new Map());
         } else {
-          toolInstance = new (ToolClass as new () => any)();
+          toolInstance = new (ToolClass as new () => { getTools(): unknown[] })();
         }
 
         const toolDefinitions = toolInstance.getTools();
@@ -192,7 +194,7 @@ export class DocumentationGenerator {
           toolDocs.push(doc);
         }
       } catch (error) {
-        console.warn(`⚠️ Failed to extract documentation for ${className}:`, error);
+        this.logger.warn(`⚠️ Failed to extract documentation for ${className}:`, error);
       }
     }
 
@@ -231,7 +233,15 @@ export class DocumentationGenerator {
   /**
    * Extract parameter documentation
    */
-  private extractParameterDocumentation(parameters: any[]): ParameterDocumentation[] {
+  private extractParameterDocumentation(
+    parameters: Array<{
+      name: string;
+      type?: string;
+      description?: string;
+      required?: boolean;
+      [key: string]: unknown;
+    }>,
+  ): ParameterDocumentation[] {
     return parameters.map((param) => ({
       name: param.name,
       type: param.type || "string",
@@ -277,7 +287,7 @@ export class DocumentationGenerator {
    */
   private generateBasicExample(toolDef: ToolDefinition, category: string): ExampleUsage | null {
     const toolName = toolDef.name;
-    const basicParams: Record<string, any> = {};
+    const basicParams: Record<string, unknown> = {};
 
     // Add essential parameters
     const requiredParams = (toolDef.parameters || []).filter((p) => p.required);
@@ -406,8 +416,8 @@ export class DocumentationGenerator {
    * Generate OpenAPI specification
    */
   private generateOpenAPISpecification(tools: ToolDocumentation[], types: TypeDocumentation[]): OpenAPISpecification {
-    const paths: Record<string, any> = {};
-    const components: Record<string, any> = {
+    const paths: Record<string, unknown> = {};
+    const components: Record<string, unknown> = {
       schemas: {},
       parameters: {},
       responses: {},
@@ -520,7 +530,7 @@ export class DocumentationGenerator {
     // Write summary
     await fs.promises.writeFile(path.join(outputDir, "summary.json"), JSON.stringify(output.summary, null, 2));
 
-    console.error(`📁 Documentation written to ${outputDir}/`);
+    this.logger.info(`📁 Documentation written to ${outputDir}/`);
   }
 
   // Helper methods for specific documentation tasks...
@@ -582,8 +592,8 @@ export class DocumentationGenerator {
    * Helper methods for documentation generation
    */
 
-  private getDefaultValue(param: any): any {
-    const defaults: Record<string, any> = {
+  private getDefaultValue(param: { [key: string]: unknown }): unknown {
+    const defaults: Record<string, unknown> = {
       per_page: 10,
       page: 1,
       order: "desc",
@@ -597,7 +607,7 @@ export class DocumentationGenerator {
     return defaults[param.name];
   }
 
-  private getAllowedValues(param: any): string[] | undefined {
+  private getAllowedValues(param: { [key: string]: unknown }): string[] | undefined {
     const allowedValues: Record<string, string[]> = {
       status: ["publish", "draft", "private", "pending", "future"],
       order: ["asc", "desc"],
@@ -611,7 +621,7 @@ export class DocumentationGenerator {
     return allowedValues[param.name];
   }
 
-  private generateParameterExamples(param: any): string[] {
+  private generateParameterExamples(param: { name: string; type?: string; [key: string]: unknown }): string[] {
     const examples: Record<string, string[]> = {
       id: ["123", "456"],
       title: ["My Blog Post", "Hello World"],
@@ -633,8 +643,8 @@ export class DocumentationGenerator {
     return toolDef.parameters?.some((p) => p.name === "site") ?? true;
   }
 
-  private generateExampleValue(param: any): any {
-    const exampleValues: Record<string, any> = {
+  private generateExampleValue(param: { name: string; type?: string; [key: string]: unknown }): unknown {
+    const exampleValues: Record<string, unknown> = {
       id: 123,
       title: "Example Post Title",
       content: "This is example content for the post.",
@@ -656,7 +666,7 @@ export class DocumentationGenerator {
     return exampleValues[param.name] || "example_value";
   }
 
-  private generateExpectedResponse(toolName: string, category: string, type: string): any {
+  private generateExpectedResponse(toolName: string, category: string, type: string): unknown {
     if (toolName.includes("list")) {
       return {
         success: true,
@@ -724,8 +734,8 @@ export class DocumentationGenerator {
     };
   }
 
-  private getExampleParameters(toolDef: ToolDefinition, type: string | number): Record<string, any> {
-    const params: Record<string, any> = {};
+  private getExampleParameters(toolDef: ToolDefinition, type: string | number): Record<string, unknown> {
+    const params: Record<string, unknown> = {};
     const parameters = toolDef.parameters || [];
 
     if (type === "all") {
@@ -795,7 +805,7 @@ export class DocumentationGenerator {
     );
   }
 
-  private generateWordPressPostExample(): any {
+  private generateWordPressPostExample(): Record<string, unknown> {
     return {
       id: 123,
       title: "Welcome to WordPress",
@@ -811,8 +821,8 @@ export class DocumentationGenerator {
     };
   }
 
-  private generateParameterSchema(parameters: ParameterDocumentation[]): any {
-    const properties: Record<string, any> = {};
+  private generateParameterSchema(parameters: ParameterDocumentation[]): Record<string, unknown> {
+    const properties: Record<string, unknown> = {};
     const required: string[] = [];
 
     for (const param of parameters) {
@@ -841,8 +851,8 @@ export class DocumentationGenerator {
     };
   }
 
-  private convertTypeToJsonSchema(type: TypeDocumentation): any {
-    const properties: Record<string, any> = {};
+  private convertTypeToJsonSchema(type: TypeDocumentation): Record<string, unknown> {
+    const properties: Record<string, unknown> = {};
     const required: string[] = [];
 
     for (const prop of type.properties) {

@@ -11,7 +11,11 @@ export class AuthTools {
    * Retrieves the list of authentication tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): any[] {
+  public getTools(): Array<{
+    name: string;
+    description: string;
+    handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
+  }> {
     return [
       {
         name: "wp_test_auth",
@@ -71,7 +75,10 @@ export class AuthTools {
    * @param params - The parameters for the tool request.
    * @returns A promise that resolves to an MCPToolResponse.
    */
-  public async handleTestAuth(client: WordPressClient, params: any): Promise<any> {
+  public async handleTestAuth(
+    client: WordPressClient,
+    params: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     try {
       await client.ping();
       const user = await client.getCurrentUser();
@@ -98,7 +105,10 @@ export class AuthTools {
    * @param params - The parameters for the tool request.
    * @returns A promise that resolves to an MCPToolResponse.
    */
-  public async handleGetAuthStatus(client: WordPressClient, params: any): Promise<any> {
+  public async handleGetAuthStatus(
+    client: WordPressClient,
+    params: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     try {
       const isAuthenticated = client.isAuthenticated;
       const config = client.config;
@@ -135,7 +145,7 @@ export class AuthTools {
       password?: string;
       jwt_token?: string;
     },
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       // This functionality is not currently supported as the client
       // doesn't have an updateAuthConfig method

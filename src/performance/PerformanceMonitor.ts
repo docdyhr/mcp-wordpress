@@ -204,7 +204,7 @@ export class PerformanceMonitor {
   /**
    * Update cache metrics from cache manager
    */
-  updateCacheMetrics(cacheStats: any): void {
+  updateCacheMetrics(cacheStats: Record<string, unknown>): void {
     this.metrics.cache = {
       hits: cacheStats.hits || 0,
       misses: cacheStats.misses || 0,
@@ -631,7 +631,7 @@ export class PerformanceMonitor {
   /**
    * Convert data to CSV format
    */
-  private convertToCSV(data: any): string {
+  private convertToCSV(data: Record<string, unknown>[]): string {
     // Simplified CSV conversion for metrics
     const metrics = data.currentMetrics;
     const csv = [

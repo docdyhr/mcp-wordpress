@@ -51,7 +51,11 @@ export class MediaTools {
    *
    * @since 1.0.0
    */
-  public getTools(): any[] {
+  public getTools(): Array<{
+    name: string;
+    description: string;
+    handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
+  }> {
     return [
       {
         name: "wp_list_media",
@@ -181,7 +185,7 @@ export class MediaTools {
     ];
   }
 
-  public async handleListMedia(client: WordPressClient, params: MediaQueryParams): Promise<any> {
+  public async handleListMedia(client: WordPressClient, params: MediaQueryParams): Promise<unknown> {
     try {
       const media = await client.getMedia(params);
       if (media.length === 0) {
@@ -196,7 +200,7 @@ export class MediaTools {
     }
   }
 
-  public async handleGetMedia(client: WordPressClient, params: { id: number }): Promise<any> {
+  public async handleGetMedia(client: WordPressClient, params: { id: number }): Promise<unknown> {
     try {
       const media = await client.getMediaItem(params.id);
       const content =
@@ -216,7 +220,7 @@ export class MediaTools {
   public async handleUploadMedia(
     client: WordPressClient,
     params: UploadMediaRequest & { file_path: string },
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       if (!fs.existsSync(params.file_path)) {
         throw new Error(`File not found at path: ${params.file_path}`);
@@ -229,7 +233,10 @@ export class MediaTools {
     }
   }
 
-  public async handleUpdateMedia(client: WordPressClient, params: UpdateMediaRequest & { id: number }): Promise<any> {
+  public async handleUpdateMedia(
+    client: WordPressClient,
+    params: UpdateMediaRequest & { id: number },
+  ): Promise<unknown> {
     try {
       const media = await client.updateMedia(params);
       return `✅ Media ${media.id} updated successfully.`;
@@ -238,7 +245,7 @@ export class MediaTools {
     }
   }
 
-  public async handleDeleteMedia(client: WordPressClient, params: { id: number; force?: boolean }): Promise<any> {
+  public async handleDeleteMedia(client: WordPressClient, params: { id: number; force?: boolean }): Promise<unknown> {
     try {
       await client.deleteMedia(params.id, params.force);
       const action = params.force ? "permanently deleted" : "moved to trash";
