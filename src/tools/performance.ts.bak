@@ -10,7 +10,6 @@ import { PerformanceAnalytics } from "../performance/PerformanceAnalytics.js";
 import { toolWrapper } from "../utils/toolWrapper.js";
 import { ConfigHelpers } from "../config/Config.js";
 import { LoggerFactory } from "../utils/logger.js";
-import type { WordPressClient } from "../client/api.js";
 
 /**
  * Performance Tools Class
@@ -264,7 +263,7 @@ export default class PerformanceTools {
   /**
    * Get real-time performance statistics
    */
-  private async getPerformanceStats(_client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+  private async getPerformanceStats(params: Record<string, unknown>): Promise<Record<string, unknown>> {
     return toolWrapper(async () => {
       const { site, category = "overview", format = "summary" } = params;
 
@@ -363,7 +362,7 @@ export default class PerformanceTools {
   /**
    * Get historical performance data and trends
    */
-  private async getPerformanceHistory(_client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+  private async getPerformanceHistory(params: Record<string, unknown>): Promise<Record<string, unknown>> {
     return toolWrapper(async () => {
       const { site, timeframe = "24h", metrics: requestedMetrics, includeTrends = true } = params;
 
@@ -418,7 +417,7 @@ export default class PerformanceTools {
   /**
    * Get benchmark comparison
    */
-  private async getBenchmarkComparison(_client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+  private async getBenchmarkComparison(params: Record<string, unknown>): Promise<Record<string, unknown>> {
     return toolWrapper(async () => {
       const { site, category = "all", includeRecommendations = true } = params;
 
@@ -485,7 +484,7 @@ export default class PerformanceTools {
   /**
    * Get performance alerts and anomalies
    */
-  private async getPerformanceAlerts(_client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+  private async getPerformanceAlerts(params: Record<string, unknown>): Promise<Record<string, unknown>> {
     return toolWrapper(async () => {
       const { site, severity, category, limit = 20, includeAnomalies = true } = params;
 
@@ -554,7 +553,7 @@ export default class PerformanceTools {
   /**
    * Get optimization recommendations
    */
-  private async getOptimizationRecommendations(_client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+  private async getOptimizationRecommendations(params: Record<string, unknown>): Promise<Record<string, unknown>> {
     return toolWrapper(async () => {
       const { site, focus = "speed", priority = "all", includeROI = true, includePredictions = true } = params;
 
@@ -636,7 +635,7 @@ export default class PerformanceTools {
   /**
    * Export comprehensive performance report
    */
-  private async exportPerformanceReport(_client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+  private async exportPerformanceReport(params: Record<string, unknown>): Promise<Record<string, unknown>> {
     return toolWrapper(async () => {
       const { site, format = "json", includeHistorical = true, includeAnalytics = true, timeRange = "24h" } = params;
 

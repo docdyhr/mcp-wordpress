@@ -4,6 +4,9 @@
 
 import { randomBytes } from "crypto";
 import * as path from "path";
+import { LoggerFactory } from "../utils/logger.js";
+
+const logger = LoggerFactory.security();
 
 export const SecurityConfig = {
   // Rate limiting
@@ -182,7 +185,7 @@ export class SecurityUtils {
   /**
    * Redact sensitive information from objects
    */
-  static redactSensitiveData(obj: any): any {
+  static redactSensitiveData(obj: unknown): unknown {
     if (typeof obj !== "object" || obj === null) {
       return obj;
     }
@@ -242,7 +245,7 @@ export class SecurityUtils {
   /**
    * Sanitize log output
    */
-  static sanitizeForLog(data: any): any {
+  static sanitizeForLog(data: unknown): unknown {
     if (typeof data === "string") {
       return SecurityUtils.redactString(data);
     }
@@ -257,12 +260,12 @@ export class SecurityUtils {
  * Secure error handler that prevents information disclosure
  */
 export function createSecureError(
-  error: any,
+  error: unknown,
   fallbackMessage: string = SecurityConfig.errorMessages.serverError,
 ): Error {
   // Log the actual error for debugging (with sanitization)
   if (process.env.NODE_ENV !== "production") {
-    console.error("Secure Error:", SecurityUtils.sanitizeForLog(error));
+    logger.error("Secure Error", { error: SecurityUtils.sanitizeForLog(error) });
   }
 
   // Return generic error to prevent information disclosure
@@ -270,7 +273,7 @@ export function createSecureError(
 
   // Preserve error code if it's safe
   if (error && typeof error.code === "string" && !error.code.includes("_")) {
-    (secureError as any).code = error.code;
+    (secureError as Record<string, unknown>).code = (error as { code?: unknown }).code;
   }
 
   return secureError;

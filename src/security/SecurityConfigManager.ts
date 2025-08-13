@@ -8,6 +8,9 @@ import * as path from "path";
 import { z } from "zod";
 import { SecurityUtils } from "./SecurityConfig.js";
 import { SecurityValidationError } from "./InputValidator.js";
+import { LoggerFactory } from "../utils/logger.js";
+
+const logger = LoggerFactory.security();
 
 interface SecurityPolicy {
   id: string;
@@ -40,7 +43,7 @@ interface SecurityPolicyRule {
     paths?: string[];
     userRoles?: string[];
   };
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   exceptions: string[];
 }
 
@@ -58,7 +61,7 @@ interface SecurityConfiguration {
     logging: LoggingSettings;
     monitoring: MonitoringSettings;
   };
-  overrides: Record<string, any>;
+  overrides: Record<string, unknown>;
   metadata: {
     lastUpdated: Date;
     checksum: string;
@@ -244,7 +247,7 @@ const SecurityPolicySchema = z.object({
         paths: z.array(z.string()).optional(),
         userRoles: z.array(z.string()).optional(),
       }),
-      parameters: z.record(z.any()),
+      parameters: z.record(z.unknown()),
       exceptions: z.array(z.string()),
     }),
   ),
@@ -276,15 +279,16 @@ export class SecurityConfigManager {
    * Initialize security configuration manager
    */
   async initialize(): Promise<void> {
-    console.log("[Security Config] Initializing security configuration manager");
+    logger.info("Initializing security configuration manager");
 
     await this.ensureConfigDirectory();
     await this.loadConfigurations();
     await this.loadPolicies();
 
-    console.log(
-      `[Security Config] Loaded ${this.configurations.size} configurations and ${this.policies.size} policies`,
-    );
+    logger.info("Loaded configurations and policies", {
+      configurationCount: this.configurations.size,
+      policyCount: this.policies.size
+    });
   }
 
   /**
@@ -312,7 +316,7 @@ export class SecurityConfigManager {
     this.policies.set(policy.id, policy);
     await this.savePolicyToFile(policy);
 
-    console.log(`[Security Config] Created policy: ${policy.name} (${policy.id})`);
+    logger.info(`Created policy: ${policy.name}`, { policyId: policy.id });
     return policy;
   }
 
@@ -345,7 +349,7 @@ export class SecurityConfigManager {
     this.policies.set(policyId, updatedPolicy);
     await this.savePolicyToFile(updatedPolicy);
 
-    console.log(`[Security Config] Updated policy: ${updatedPolicy.name} (${policyId})`);
+    logger.info(`Updated policy: ${updatedPolicy.name}`, { policyId });
     return updatedPolicy;
   }
 
@@ -375,7 +379,7 @@ export class SecurityConfigManager {
     this.configurations.set(environment, config);
     await this.saveConfigurationToFile(config);
 
-    console.log(`[Security Config] Created configuration for environment: ${environment}`);
+    logger.info(`Created configuration for environment: ${environment}`, { environment });
     return config;
   }
 
@@ -411,7 +415,7 @@ export class SecurityConfigManager {
         throw new SecurityValidationError("Policy not found", [{ message: `Policy ${policyId} not found` }]);
       }
       if (!policy.enabled) {
-        console.warn(`[Security Config] Skipping disabled policy: ${policy.name}`);
+        logger.warn(`Skipping disabled policy: ${policy.name}`, { policyName: policy.name });
         continue;
       }
       policies.push(policy);
@@ -424,7 +428,7 @@ export class SecurityConfigManager {
     this.configurations.set(environment, config);
     await this.saveConfigurationToFile(config);
 
-    console.log(`[Security Config] Applied ${policies.length} policies to ${environment}`);
+    logger.info(`Applied policies to ${environment}`, { policyCount: policies.length, environment });
     return config;
   }
 
@@ -673,7 +677,7 @@ export class SecurityConfigManager {
         }
       }
     } catch (_error) {
-      console.log("[Security Config] No existing configurations found, will create new ones");
+      logger.info("No existing configurations found, will create new ones");
     }
   }
 
@@ -701,7 +705,7 @@ export class SecurityConfigManager {
         }
       }
     } catch (_error) {
-      console.log("[Security Config] No existing policies found");
+      logger.info("No existing policies found");
     }
   }
 
@@ -780,10 +784,10 @@ export class SecurityConfigManager {
     try {
       const filePath = path.join(this.configPath, "policies", `${policyId}.json`);
       await fs.unlink(filePath);
-      console.log(`[Security Config] Deleted policy: ${policy.name} (${policyId})`);
+      logger.info(`Deleted policy: ${policy.name}`, { policyId });
       return true;
     } catch (error) {
-      console.warn(`[Security Config] Failed to delete policy file: ${error}`);
+      logger.warn("Failed to delete policy file", { error });
       return false;
     }
   }
@@ -820,7 +824,7 @@ export class SecurityConfigManager {
       this.configurations.set(config.environment, config);
       await this.saveConfigurationToFile(config);
 
-      console.log(`[Security Config] Imported configuration for environment: ${config.environment}`);
+      logger.info(`Imported configuration for environment: ${config.environment}`, { environment: config.environment });
       return config;
     } catch (error) {
       throw new SecurityValidationError("Failed to import configuration", [{ message: String(error) }]);
