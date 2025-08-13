@@ -15,6 +15,7 @@ export class UserTools {
   public getTools(): Array<{
     name: string;
     description: string;
+    parameters?: Array<{ name: string; type?: string; description?: string; required?: boolean; enum?: string[]; items?: any }>;
     handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
   }> {
     return [

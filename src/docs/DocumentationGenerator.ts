@@ -190,11 +190,11 @@ export class DocumentationGenerator {
         const category = this.extractCategoryFromClassName(className);
 
         for (const toolDef of toolDefinitions) {
-          const doc = await this.extractToolDocumentation(toolDef, category, className);
+          const doc = await this.extractToolDocumentation(toolDef as ToolDefinition, category, className);
           toolDocs.push(doc);
         }
       } catch (error) {
-        this.logger.warn(`⚠️ Failed to extract documentation for ${className}:`, error);
+        this.logger.warn(`⚠️ Failed to extract documentation for ${className}:`, { error: String(error) });
       }
     }
 
@@ -463,8 +463,9 @@ export class DocumentationGenerator {
     }
 
     // Add type schemas to components
+    const schemas = components.schemas as Record<string, unknown>;
     for (const type of types) {
-      components.schemas[type.name] = this.convertTypeToJsonSchema(type);
+      schemas[type.name] = this.convertTypeToJsonSchema(type);
     }
 
     return {
@@ -604,7 +605,7 @@ export class DocumentationGenerator {
       includeExamples: true,
       includeTrends: true,
     };
-    return defaults[param.name];
+    return defaults[String(param.name)];
   }
 
   private getAllowedValues(param: { [key: string]: unknown }): string[] | undefined {
@@ -618,7 +619,7 @@ export class DocumentationGenerator {
       priority: ["quick_wins", "medium_term", "long_term", "all"],
       focus: ["speed", "reliability", "efficiency", "scaling"],
     };
-    return allowedValues[param.name];
+    return allowedValues[String(param.name)];
   }
 
   private generateParameterExamples(param: { name: string; type?: string; [key: string]: unknown }): string[] {
@@ -832,11 +833,11 @@ export class DocumentationGenerator {
       };
 
       if (param.allowedValues) {
-        properties[param.name].enum = param.allowedValues;
+        (properties[param.name] as Record<string, unknown>).enum = param.allowedValues;
       }
 
       if (param.defaultValue !== undefined) {
-        properties[param.name].default = param.defaultValue;
+        (properties[param.name] as Record<string, unknown>).default = param.defaultValue;
       }
 
       if (param.required) {
@@ -862,7 +863,7 @@ export class DocumentationGenerator {
       };
 
       if (prop.format) {
-        properties[prop.name].format = prop.format;
+        (properties[prop.name] as Record<string, unknown>).format = prop.format;
       }
 
       if (prop.required) {

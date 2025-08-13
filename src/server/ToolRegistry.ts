@@ -39,18 +39,18 @@ export class ToolRegistry {
   public registerAllTools(): void {
     // Register all tools from the tools directory
     Object.values(Tools).forEach((ToolClass) => {
-      let toolInstance: { getTools(): ToolDefinition[] };
+      let toolInstance: { getTools(): any[] };
 
       // Cache and Performance tools need the clients map
       if (ToolClass.name === "CacheTools" || ToolClass.name === "PerformanceTools") {
         toolInstance = new ToolClass(this.wordpressClients);
       } else {
-        toolInstance = new (ToolClass as new () => { getTools(): ToolDefinition[] })();
+        toolInstance = new (ToolClass as new () => { getTools(): any[] })();
       }
 
       const tools = toolInstance.getTools();
 
-      tools.forEach((tool: ToolDefinition) => {
+      tools.forEach((tool: any) => {
         this.registerTool(tool);
       });
     });
@@ -74,8 +74,8 @@ export class ToolRegistry {
     const parameterSchema = this.buildParameterSchema(tool, baseSchema);
 
     // Make site parameter required if multiple sites are configured
-    if (this.wordpressClients.size > 1) {
-      parameterSchema.site = parameterSchema.site.describe(
+    if (this.wordpressClients.size > 1 && parameterSchema.site && typeof parameterSchema.site === 'object' && 'describe' in parameterSchema.site) {
+      parameterSchema.site = (parameterSchema.site as any).describe(
         "The ID of the WordPress site to target (from mcp-wordpress.config.json). Required when multiple sites are configured.",
       );
     }
@@ -108,11 +108,11 @@ export class ToolRegistry {
             siteId = this.selectBestSite(tool.name, args);
           }
 
-          const client = this.wordpressClients.get(siteId);
+          const client = this.wordpressClients.get(siteId as string);
 
           if (!client) {
             const availableSites = Array.from(this.wordpressClients.keys());
-            const error = ErrorHandlers.siteNotFound(siteId, availableSites);
+            const error = ErrorHandlers.siteNotFound(siteId as string, availableSites);
             return {
               content: [
                 {
@@ -188,7 +188,7 @@ export class ToolRegistry {
           let zodType = this.getZodTypeForParameter(param);
 
           if (param.description) {
-            zodType = zodType.describe(param.description);
+            zodType = zodType.describe(param.description as string);
           }
 
           if (!param.required) {
@@ -273,9 +273,10 @@ export class ToolRegistry {
    * Check if error is authentication-related
    */
   private isAuthenticationError(error: unknown): boolean {
-    if (error?.response?.status && [401, 403].includes(error.response.status)) {
+    const errorObj = error as { response?: { status?: number }; code?: string };
+    if (errorObj?.response?.status && [401, 403].includes(errorObj.response.status)) {
       return true;
     }
-    return error?.code === "WORDPRESS_AUTH_ERROR";
+    return errorObj?.code === "WORDPRESS_AUTH_ERROR";
   }
 }

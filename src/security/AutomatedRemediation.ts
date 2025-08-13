@@ -347,7 +347,7 @@ export class AutomatedRemediation {
     this.logger.info("Executing remediation plan", {
       planId: plan.planId,
       actionCount: plan.actions.length,
-      dryRun,
+      dryRun: options.dryRun,
     });
 
     if (options.dryRun) {

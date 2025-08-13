@@ -349,7 +349,13 @@ export class PerformanceAnalytics {
     }
 
     const trends = this.analyzeTrends();
-    const predictions: unknown[] = [];
+    const predictions: Array<{
+      metric: string;
+      currentValue: number;
+      predictedValue: number;
+      confidence: number;
+      trend: "improving" | "declining" | "stable";
+    }> = [];
     const alerts: string[] = [];
 
     for (const trend of trends) {
@@ -449,7 +455,13 @@ export class PerformanceAnalytics {
     benchmarks: BenchmarkComparison[];
     insights: PerformanceInsight[];
     anomalies: PerformanceAnomaly[];
-    predictions: unknown;
+    predictions: Array<{
+      metric: string;
+      currentValue: number;
+      predictedValue: number;
+      confidence: number;
+      trend: "improving" | "declining" | "stable";
+    }>;
     optimizationPlan: Record<string, unknown>;
   } {
     const currentMetrics = this.collector.collectCurrentMetrics();
@@ -467,7 +479,7 @@ export class PerformanceAnalytics {
       benchmarks: this.benchmarkPerformance(),
       insights: this.generateInsights(),
       anomalies: this.getAnomalies(),
-      predictions: this.predictPerformance(),
+      predictions: this.predictPerformance().predictions,
       optimizationPlan: this.generateOptimizationPlan(),
     };
   }
@@ -655,28 +667,28 @@ export class PerformanceAnalytics {
     let improvement = 0;
 
     if (higherIsBetter) {
-      if (currentValue >= benchmarks.excellent) status = "excellent";
-      else if (currentValue >= benchmarks.good) status = "good";
-      else if (currentValue >= benchmarks.average) status = "average";
-      else if (currentValue >= benchmarks.below_average) status = "below_average";
+      if (currentValue >= (benchmarks.excellent as number)) status = "excellent";
+      else if (currentValue >= (benchmarks.good as number)) status = "good";
+      else if (currentValue >= (benchmarks.average as number)) status = "average";
+      else if (currentValue >= (benchmarks.below_average as number)) status = "below_average";
 
       // Calculate improvement needed
       if (status !== "excellent") {
         const nextTier =
           status === "good"
-            ? benchmarks.excellent
+            ? (benchmarks.excellent as number)
             : status === "average"
-              ? benchmarks.good
+              ? (benchmarks.good as number)
               : status === "below_average"
-                ? benchmarks.average
-                : benchmarks.below_average;
+                ? (benchmarks.average as number)
+                : (benchmarks.below_average as number);
         improvement = nextTier - currentValue;
       }
     } else {
-      if (currentValue <= benchmarks.excellent) status = "excellent";
-      else if (currentValue <= benchmarks.good) status = "good";
-      else if (currentValue <= benchmarks.average) status = "average";
-      else if (currentValue <= benchmarks.below_average) status = "below_average";
+      if (currentValue <= (benchmarks.excellent as number)) status = "excellent";
+      else if (currentValue <= (benchmarks.good as number)) status = "good";
+      else if (currentValue <= (benchmarks.average as number)) status = "average";
+      else if (currentValue <= (benchmarks.below_average as number)) status = "below_average";
 
       // Calculate improvement needed
       if (status !== "excellent") {
@@ -688,7 +700,7 @@ export class PerformanceAnalytics {
               : status === "below_average"
                 ? benchmarks.average
                 : benchmarks.below_average;
-        improvement = currentValue - nextTier;
+        improvement = currentValue - (nextTier as number);
       }
     }
 
@@ -707,7 +719,7 @@ export class PerformanceAnalytics {
     return {
       category,
       currentValue,
-      benchmarkValue: benchmarks.excellent,
+      benchmarkValue: benchmarks.excellent as number,
       percentile,
       status,
       improvement,

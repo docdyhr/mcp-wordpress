@@ -74,7 +74,7 @@ export class MetricsCollector {
     this.clientInstances.set(siteId, client);
 
     if (this.config.enableRequestInterception) {
-      this.interceptClientRequests(siteId, client);
+      this.interceptClientRequests(siteId, client as Record<string, unknown>);
     }
   }
 
@@ -150,8 +150,9 @@ export class MetricsCollector {
     };
 
     for (const [_siteId, cacheManager] of this.cacheManagers) {
-      if (cacheManager && typeof cacheManager.getStats === "function") {
-        const stats = cacheManager.getStats();
+      const manager = cacheManager as { getStats?: () => CacheStats };
+      if (manager && typeof manager.getStats === "function") {
+        const stats = manager.getStats();
         aggregated.hits += stats.hits || 0;
         aggregated.misses += stats.misses || 0;
         aggregated.evictions += stats.evictions || 0;
@@ -182,8 +183,9 @@ export class MetricsCollector {
     const responseTimes: number[] = [];
 
     for (const [_siteId, client] of this.clientInstances) {
-      if (client && typeof client.getStats === "function") {
-        const stats = client.getStats();
+      const clientObj = client as { getStats?: () => ClientStats };
+      if (clientObj && typeof clientObj.getStats === "function") {
+        const stats = clientObj.getStats();
         aggregated.totalRequests += stats.totalRequests || 0;
         aggregated.successfulRequests += stats.successfulRequests || 0;
         aggregated.failedRequests += stats.failedRequests || 0;
@@ -215,18 +217,20 @@ export class MetricsCollector {
     const result: Record<string, unknown> = { isActive: false };
 
     const cacheManager = this.cacheManagers.get(siteId);
-    if (cacheManager && typeof cacheManager.getStats === "function") {
-      result.cache = cacheManager.getStats();
+    const cacheObj = cacheManager as { getStats?: () => CacheStats } | undefined;
+    if (cacheObj && typeof cacheObj.getStats === "function") {
+      result.cache = cacheObj.getStats();
       result.isActive = true;
     }
 
     const client = this.clientInstances.get(siteId);
-    if (client && typeof client.getStats === "function") {
-      result.client = client.getStats();
+    const clientObj = client as { getStats?: () => ClientStats } | undefined;
+    if (clientObj && typeof clientObj.getStats === "function") {
+      result.client = clientObj.getStats();
       result.isActive = true;
     }
 
-    return result;
+    return result as { cache?: CacheStats; client?: ClientStats; isActive: boolean };
   }
 
   /**
@@ -248,7 +252,13 @@ export class MetricsCollector {
     worstPerforming: string;
   } {
     const sites = Array.from(this.clientInstances.keys());
-    const comparison: Record<string, unknown> = {};
+    const comparison: Record<string, {
+      responseTime: number;
+      cacheHitRate: number;
+      errorRate: number;
+      requestCount: number;
+      ranking: number;
+    }> = {};
     const rankings: Array<{ site: string; score: number }> = [];
 
     for (const siteId of sites) {
@@ -278,7 +288,10 @@ export class MetricsCollector {
 
     // Assign rankings
     rankings.forEach((item, index) => {
-      comparison[item.site].ranking = index + 1;
+      const siteData = comparison[item.site];
+      if (siteData) {
+        siteData.ranking = index + 1;
+      }
     });
 
     return {
@@ -412,7 +425,8 @@ export class MetricsCollector {
    */
   private updateCacheMetrics(): void {
     const aggregatedStats = this.getAggregatedCacheStats();
-    this.monitor.updateCacheMetrics(aggregatedStats);
+    // Type assertion: convert CacheStats to Record<string, unknown> via unknown
+    this.monitor.updateCacheMetrics(aggregatedStats as unknown as Record<string, unknown>);
   }
 
   /**
@@ -444,11 +458,11 @@ export class MetricsCollector {
       const startTime = Date.now();
       const requestId = `${siteId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-      // Extract metadata
+      // Extract metadata with proper type assertions
       const metadata: RequestMetadata = {
         siteId,
-        endpoint: args[0] || "unknown",
-        method: args[1] || "GET",
+        endpoint: (args[0] as string) || "unknown",
+        method: (args[1] as string) || "GET",
         startTime,
         fromCache: false,
       };
