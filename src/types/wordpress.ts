@@ -4,8 +4,8 @@
  * Comprehensive TypeScript definitions for WordPress REST API v2 responses
  */
 
-// WordPress metadata type - can contain various primitive values and nested objects  
-export type WordPressMeta = Record<string, unknown>;
+// WordPress metadata type - can contain various primitive values and nested objects
+export type WordPressMeta = Record<string, unknown> | unknown[];
 
 // Common WordPress API response patterns
 export interface WordPressRendered {
@@ -323,6 +323,7 @@ export interface PostQueryParams extends PaginationParams {
   tags?: number[];
   tags_exclude?: number[];
   sticky?: boolean;
+  [key: string]: unknown;
 }
 
 export interface MediaQueryParams extends PaginationParams {

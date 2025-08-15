@@ -2,13 +2,14 @@
  * Error handling utilities
  */
 import { LoggerFactory } from "./logger.js";
+import { config } from "../config/Config.js";
 
 const logger = LoggerFactory.server().child({ component: "ErrorUtils" });
 
 // Environment flag to control legacy console logging noise. Default enabled to preserve
 // backward compatibility and existing test expectations. Set LEGACY_ERROR_LOGS=0 to disable
 // the direct console.error side-channel (structured logger still emits).
-const LEGACY_ERROR_LOGS_ENABLED = process.env.LEGACY_ERROR_LOGS !== "0";
+const LEGACY_ERROR_LOGS_ENABLED = config().error.legacyLogsEnabled;
 
 // Internal helper to avoid sprinkling conditionals
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

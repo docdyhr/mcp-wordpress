@@ -213,11 +213,7 @@ export interface IWordPressClient {
   deleteApplicationPassword(userId: number | "me", uuid: string): Promise<{ deleted: boolean }>;
 
   // Search
-  search(
-    query: string,
-    types?: string[],
-    subtype?: string,
-  ): Promise<import("./wordpress.js").WordPressSearchResult[]>;
+  search(query: string, types?: string[], subtype?: string): Promise<import("./wordpress.js").WordPressSearchResult[]>;
 
   // Utility Methods
   ping(): Promise<boolean>;
@@ -293,26 +289,56 @@ export function isValidationError(error: unknown): error is ValidationError {
 
 // Response Type Guards
 export function isWordPressPost(obj: unknown): obj is WordPressPost {
-  return obj !== null && typeof obj === "object" && "id" in obj && "type" in obj && 
-         typeof (obj as Record<string, unknown>).id === "number" && (obj as Record<string, unknown>).type === "post";
+  return (
+    obj !== null &&
+    typeof obj === "object" &&
+    "id" in obj &&
+    "type" in obj &&
+    typeof (obj as Record<string, unknown>).id === "number" &&
+    (obj as Record<string, unknown>).type === "post"
+  );
 }
 
 export function isWordPressPage(obj: unknown): obj is WordPressPage {
-  return obj !== null && typeof obj === "object" && "id" in obj && "type" in obj &&
-         typeof (obj as Record<string, unknown>).id === "number" && (obj as Record<string, unknown>).type === "page";
+  return (
+    obj !== null &&
+    typeof obj === "object" &&
+    "id" in obj &&
+    "type" in obj &&
+    typeof (obj as Record<string, unknown>).id === "number" &&
+    (obj as Record<string, unknown>).type === "page"
+  );
 }
 
 export function isWordPressMedia(obj: unknown): obj is WordPressMedia {
-  return obj !== null && typeof obj === "object" && "id" in obj && "media_type" in obj &&
-         typeof (obj as Record<string, unknown>).id === "number" && (obj as Record<string, unknown>).media_type;
+  return (
+    obj !== null &&
+    typeof obj === "object" &&
+    "id" in obj &&
+    "media_type" in obj &&
+    typeof (obj as Record<string, unknown>).id === "number" &&
+    Boolean((obj as Record<string, unknown>).media_type)
+  );
 }
 
 export function isWordPressUser(obj: unknown): obj is WordPressUser {
-  return obj !== null && typeof obj === "object" && "id" in obj && "username" in obj &&
-         typeof (obj as Record<string, unknown>).id === "number" && (obj as Record<string, unknown>).username;
+  return (
+    obj !== null &&
+    typeof obj === "object" &&
+    "id" in obj &&
+    "username" in obj &&
+    typeof (obj as Record<string, unknown>).id === "number" &&
+    Boolean((obj as Record<string, unknown>).username)
+  );
 }
 
 export function isWordPressComment(obj: unknown): obj is WordPressComment {
-  return obj !== null && typeof obj === "object" && "id" in obj && "post" in obj &&
-         typeof (obj as Record<string, unknown>).id === "number" && typeof (obj as Record<string, unknown>).post === "number";
+  return (
+    obj !== null &&
+    typeof obj === "object" &&
+    "id" in obj &&
+    "post" in obj &&
+    typeof (obj as Record<string, unknown>).id === "number" &&
+    typeof (obj as Record<string, unknown>).post === "number"
+  );
 }

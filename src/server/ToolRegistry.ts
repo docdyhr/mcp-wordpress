@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WordPressClient } from "../client/api.js";
 import { getErrorMessage } from "../utils/error.js";
 import { EnhancedError, ErrorHandlers } from "../utils/enhancedError.js";
+import { config } from "../config/Config.js";
 import * as Tools from "../tools/index.js";
 import { z } from "zod";
 
@@ -51,7 +52,7 @@ export class ToolRegistry {
       const tools = toolInstance.getTools();
 
       tools.forEach((tool: unknown) => {
-        this.registerTool(tool);
+        this.registerTool(tool as ToolDefinition);
       });
     });
   }
@@ -74,7 +75,12 @@ export class ToolRegistry {
     const parameterSchema = this.buildParameterSchema(tool, baseSchema);
 
     // Make site parameter required if multiple sites are configured
-    if (this.wordpressClients.size > 1 && parameterSchema.site && typeof parameterSchema.site === 'object' && 'describe' in parameterSchema.site) {
+    if (
+      this.wordpressClients.size > 1 &&
+      parameterSchema.site &&
+      typeof parameterSchema.site === "object" &&
+      "describe" in parameterSchema.site
+    ) {
       parameterSchema.site = (parameterSchema.site as z.ZodString).describe(
         "The ID of the WordPress site to target (from mcp-wordpress.config.json). Required when multiple sites are configured.",
       );
@@ -252,7 +258,7 @@ export class ToolRegistry {
       }
 
       // 3. For development/test operations, prefer dev sites
-      if (toolName.includes("test") || process.env.NODE_ENV === "development") {
+      if (toolName.includes("test") || config().app.isDevelopment) {
         const devSites = availableSites.filter((site) =>
           ["dev", "test", "staging", "local"].includes(site.toLowerCase()),
         );

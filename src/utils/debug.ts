@@ -6,6 +6,7 @@
  */
 
 import type { DebugInfo } from "../types/index.js";
+import { config } from "../config/Config.js";
 
 // Log levels
 export type LogLevel = "debug" | "info" | "warn" | "error";
@@ -246,7 +247,7 @@ export const getEnvVar = (key: string, defaultValue?: string): string | undefine
   if (value === undefined && defaultValue !== undefined) {
     // Don't log sensitive environment variable names in production
     const isSecretVar = /password|secret|token|key|auth/i.test(key);
-    if (!isSecretVar || process.env.NODE_ENV !== "production") {
+    if (!isSecretVar || !config().app.isProduction) {
       debug.warn(`Environment variable ${key} not found, using default`);
     }
     return defaultValue;
@@ -261,10 +262,9 @@ export const validateEnvVars = (required: string[]): void => {
   const missing = required.filter((key) => !process.env[key]);
   if (missing.length > 0) {
     // In production, don't expose which specific env vars are missing
-    const errorMessage =
-      process.env.NODE_ENV === "production"
-        ? `Missing ${missing.length} required environment variable(s)`
-        : `Missing required environment variables: ${missing.join(", ")}`;
+    const errorMessage = config().app.isProduction
+      ? `Missing ${missing.length} required environment variable(s)`
+      : `Missing required environment variables: ${missing.join(", ")}`;
     const error = new Error(errorMessage);
     logError(error);
     throw error;

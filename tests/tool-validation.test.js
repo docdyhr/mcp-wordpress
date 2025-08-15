@@ -26,10 +26,12 @@ describe("Tool Validation", () => {
       tools.forEach((tool) => {
         expect(tool).toHaveProperty("name");
         expect(tool).toHaveProperty("description");
-        expect(tool).toHaveProperty("parameters");
+        expect(tool).toHaveProperty("inputSchema");
         expect(typeof tool.name).toBe("string");
         expect(typeof tool.description).toBe("string");
-        expect(Array.isArray(tool.parameters)).toBe(true);
+        expect(typeof tool.inputSchema).toBe("object");
+        expect(tool.inputSchema).toHaveProperty("type");
+        expect(tool.inputSchema).toHaveProperty("properties");
       });
     });
 
@@ -69,27 +71,27 @@ describe("Tool Validation", () => {
 
       const createPostTool = tools.find((tool) => tool.name === "wp_create_post");
       expect(createPostTool).toBeDefined();
-      expect(Array.isArray(createPostTool.parameters)).toBe(true);
-      expect(createPostTool.parameters.length).toBeGreaterThan(0);
+      expect(typeof createPostTool.inputSchema).toBe("object");
+      expect(createPostTool.inputSchema).toHaveProperty("properties");
+      expect(Object.keys(createPostTool.inputSchema.properties).length).toBeGreaterThan(0);
 
-      // Check for title and content parameters
-      const hasTitle = createPostTool.parameters.some((p) => p.name === "title");
-      const hasContent = createPostTool.parameters.some((p) => p.name === "content");
-      expect(hasTitle).toBe(true);
-      expect(hasContent).toBe(true);
+      // Check for title and content parameters in inputSchema.properties
+      expect(createPostTool.inputSchema.properties).toHaveProperty("title");
+      expect(createPostTool.inputSchema.properties).toHaveProperty("content");
     });
 
-    test("should have parameters array for all tools", () => {
+    test("should have inputSchema for all tools", () => {
       const postTools = new PostTools();
       const tools = postTools.getTools();
 
       tools.forEach((tool) => {
-        expect(Array.isArray(tool.parameters)).toBe(true);
-        // Each parameter should have name, type, and description
-        tool.parameters.forEach((param) => {
-          expect(param).toHaveProperty("name");
-          expect(param).toHaveProperty("type");
-          expect(param).toHaveProperty("description");
+        expect(typeof tool.inputSchema).toBe("object");
+        expect(tool.inputSchema).toHaveProperty("type");
+        expect(tool.inputSchema).toHaveProperty("properties");
+        // Each property should have type and description
+        Object.values(tool.inputSchema.properties).forEach((prop) => {
+          expect(prop).toHaveProperty("type");
+          expect(prop).toHaveProperty("description");
         });
       });
     });
@@ -101,11 +103,10 @@ describe("Tool Validation", () => {
       const createPostTool = tools.find((tool) => tool.name === "wp_create_post");
       expect(createPostTool).toBeDefined();
 
-      // Check that required parameters exist
-      const titleParam = createPostTool.parameters.find((p) => p.name === "title");
-      const contentParam = createPostTool.parameters.find((p) => p.name === "content");
-      expect(titleParam).toBeDefined();
-      expect(contentParam).toBeDefined();
+      // Check that required parameters exist in inputSchema
+      expect(createPostTool.inputSchema.properties).toHaveProperty("title");
+      expect(createPostTool.inputSchema.properties).toHaveProperty("content");
+      expect(createPostTool.inputSchema.required).toContain("title");
     });
   });
 

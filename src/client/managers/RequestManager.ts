@@ -6,6 +6,7 @@
 // Use native fetch in Node.js 18+
 import type { HTTPMethod, RequestOptions, ClientStats, WordPressClientConfig } from "../../types/client.js";
 import { WordPressAPIError, RateLimitError } from "../../types/client.js";
+import { config } from "../../config/Config.js";
 import { BaseManager } from "./BaseManager.js";
 import { AuthenticationManager } from "./AuthenticationManager.js";
 import { debug, startTimer } from "../../utils/debug.js";
@@ -16,11 +17,11 @@ export class RequestManager extends BaseManager {
   private requestInterval: number;
   private authManager: AuthenticationManager;
 
-  constructor(config: WordPressClientConfig, authManager: AuthenticationManager) {
-    super(config);
+  constructor(clientConfig: WordPressClientConfig, authManager: AuthenticationManager) {
+    super(clientConfig);
 
     this.authManager = authManager;
-    this.requestInterval = 60000 / parseInt(process.env.RATE_LIMIT || "60");
+    this.requestInterval = 60000 / config().security.rateLimit;
     this.stats = {
       totalRequests: 0,
       successfulRequests: 0,
@@ -78,7 +79,7 @@ export class RequestManager extends BaseManager {
         };
 
         // Don't retry on authentication errors or client errors
-        if (isErrorLike(error) && (error.statusCode && error.statusCode < 500) || attempt === maxRetries) {
+        if ((isErrorLike(error) && error.statusCode && error.statusCode < 500) || attempt === maxRetries) {
           throw error;
         }
 
@@ -130,7 +131,11 @@ export class RequestManager extends BaseManager {
           (typeof data === "object" && data && "append" in data && typeof data.append === "function")
         ) {
           // For FormData, don't set Content-Type (let fetch set it with boundary)
-          if (fetchOptions.headers && typeof fetchOptions.headers === "object" && "Content-Type" in fetchOptions.headers) {
+          if (
+            fetchOptions.headers &&
+            typeof fetchOptions.headers === "object" &&
+            "Content-Type" in fetchOptions.headers
+          ) {
             delete (fetchOptions.headers as Record<string, string>)["Content-Type"];
           }
           fetchOptions.body = data as FormData;
@@ -174,8 +179,9 @@ export class RequestManager extends BaseManager {
       // Ignore JSON parsing errors
     }
 
-    const message = (typeof errorData.message === "string" ? errorData.message : undefined) || 
-                    `HTTP ${response.status}: ${response.statusText}`;
+    const message =
+      (typeof errorData.message === "string" ? errorData.message : undefined) ||
+      `HTTP ${response.status}: ${response.statusText}`;
     const code = (typeof errorData.code === "string" ? errorData.code : undefined) || "http_error";
 
     if (response.status === 429) {
