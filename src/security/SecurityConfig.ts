@@ -190,17 +190,21 @@ export class SecurityUtils {
       return obj;
     }
 
-    const redacted = Array.isArray(obj) ? [...obj] : { ...obj };
+    const working: Record<string, unknown> | unknown[] = Array.isArray(obj) ? [...obj] : { ...(obj as Record<string, unknown>) };
 
-    for (const key in redacted) {
+    if (Array.isArray(working)) {
+      return working.map((val) => (typeof val === "object" ? SecurityUtils.redactSensitiveData(val) : val));
+    }
+
+    for (const key in working) {
       if (SecurityConfig.logging.excludeFields.some((field) => key.toLowerCase().includes(field.toLowerCase()))) {
-        redacted[key] = "[REDACTED]";
-      } else if (typeof redacted[key] === "object") {
-        redacted[key] = SecurityUtils.redactSensitiveData(redacted[key]);
+        working[key] = "[REDACTED]";
+      } else if (typeof working[key] === "object" && working[key] !== null) {
+        working[key] = SecurityUtils.redactSensitiveData(working[key]);
       }
     }
 
-    return redacted;
+    return working;
   }
 
   /**
@@ -272,8 +276,8 @@ export function createSecureError(
   const secureError = new Error(fallbackMessage);
 
   // Preserve error code if it's safe
-  if (error && typeof error.code === "string" && !error.code.includes("_")) {
-    (secureError as Record<string, unknown>).code = (error as { code?: unknown }).code;
+  if (error && typeof (error as { code?: unknown }).code === "string" && !(error as { code: string }).code.includes("_")) {
+  (secureError as unknown as Record<string, unknown>).code = (error as { code: string }).code;
   }
 
   return secureError;

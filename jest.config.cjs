@@ -10,6 +10,9 @@ const isPerformanceTest = process.env.PERFORMANCE_TEST === 'true';
 const baseConfig = {
   testEnvironment: "node",
   roots: ["<rootDir>/tests"],
+  // Ensure Jest treats TypeScript files as ESM and applies transforms
+  extensionsToTreatAsEsm: [".ts"],
+  moduleFileExtensions: ["ts", "js", "json", "node"],
   
   // Common test patterns
   testMatch: [
@@ -44,11 +47,9 @@ const baseConfig = {
   collectCoverage: false, // Enable via --coverage flag or CI
   collectCoverageFrom: [
     "src/**/*.ts",
-    "!src/**/*.d.ts",
+    "!src/**/*.d.ts", 
     "!src/**/__mocks__/**",
-    "!src/**/*.test.ts",
-    "!src/types/**",
-    "!src/**/index.ts"
+    "!src/**/*.test.ts"
   ],
   coverageReporters: ["text-summary", "lcov", "html", "json", "cobertura"],
   coverageDirectory: "coverage",
@@ -104,6 +105,29 @@ const baseConfig = {
   // Globals
   globals: {
     "__EXECUTION_CONTEXT__": "jest"
+  },
+
+  // Ensure TypeScript source files imported directly from tests are transformed.
+  // Some tests import .ts files (e.g. src/utils/logger.ts) using explicit extensions.
+  // The previous configuration only handled this in the typescript-specific Jest config.
+  // Adding the transform here resolves parse errors for `export type` and other TS syntax.
+  transform: {
+    "^.+\\.ts$": [
+      "babel-jest",
+      {
+        presets: [
+          [
+            "@babel/preset-env",
+            {
+              targets: {
+                node: "current"
+              }
+            }
+          ],
+          "@babel/preset-typescript"
+        ]
+      }
+    ]
   }
 };
 

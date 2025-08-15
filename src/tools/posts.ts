@@ -1,5 +1,5 @@
 import { WordPressClient } from "../client/api.js";
-import { CreatePostRequest, PostQueryParams, UpdatePostRequest } from "../types/wordpress.js";
+import { CreatePostRequest, PostQueryParams, UpdatePostRequest, WordPressPost } from "../types/wordpress.js";
 import { getErrorMessage } from "../utils/error.js";
 import { ErrorHandlers, EnhancedError } from "../utils/enhancedError.js";
 import { validateId, validatePaginationParams, validatePostParams } from "../utils/validation.js";
@@ -261,7 +261,7 @@ export class PostTools {
    *
    * @since 1.0.0
    */
-  public async handleListPosts(client: WordPressClient, params: PostQueryParams): Promise<any> {
+  public async handleListPosts(client: WordPressClient, params: PostQueryParams): Promise<WordPressPost[] | string> {
     try {
       // Enhanced input validation and sanitization
       const paginationValidated = validatePaginationParams({
@@ -320,7 +320,7 @@ export class PostTools {
 
       // Use streaming for large result sets (>50 posts)
       if (posts.length > 50) {
-        const streamResults: StreamingResult<any>[] = [];
+        const streamResults: StreamingResult<unknown>[] = [];
 
         for await (const result of WordPressDataStreamer.streamPosts(posts, {
           includeAuthor: true,
@@ -480,7 +480,7 @@ export class PostTools {
    *
    * @since 1.0.0
    */
-  public async handleGetPost(client: WordPressClient, params: { id: number }): Promise<any> {
+  public async handleGetPost(client: WordPressClient, params: { id: number }): Promise<WordPressPost | string> {
     try {
       // Input validation
       if (!params.id || typeof params.id !== "number" || params.id <= 0) {
@@ -635,7 +635,7 @@ export class PostTools {
    *
    * @since 1.0.0
    */
-  public async handleCreatePost(client: WordPressClient, params: CreatePostRequest): Promise<any> {
+  public async handleCreatePost(client: WordPressClient, params: CreatePostRequest): Promise<WordPressPost | string> {
     try {
       // Enhanced input validation using new validation utilities
       const validatedParams = validatePostParams(params);
@@ -701,7 +701,7 @@ export class PostTools {
    *
    * @since 1.0.0
    */
-  public async handleUpdatePost(client: WordPressClient, params: UpdatePostRequest & { id: number }): Promise<any> {
+  public async handleUpdatePost(client: WordPressClient, params: UpdatePostRequest & { id: number }): Promise<WordPressPost | string> {
     try {
       const post = await client.updatePost(params);
       return `✅ Post ${post.id} updated successfully.`;
@@ -739,7 +739,7 @@ export class PostTools {
    *
    * @since 1.0.0
    */
-  public async handleDeletePost(client: WordPressClient, params: { id: number; force?: boolean }): Promise<any> {
+  public async handleDeletePost(client: WordPressClient, params: { id: number; force?: boolean }): Promise<{ deleted: boolean; previous?: WordPressPost } | string> {
     try {
       await client.deletePost(params.id, params.force);
       const action = params.force ? "permanently deleted" : "moved to trash";
@@ -771,7 +771,7 @@ export class PostTools {
    *
    * @since 1.0.0
    */
-  public async handleGetPostRevisions(client: WordPressClient, params: { id: number }): Promise<any> {
+  public async handleGetPostRevisions(client: WordPressClient, params: { id: number }): Promise<WordPressPost[] | string> {
     try {
       const revisions = await client.getPostRevisions(params.id);
       if (revisions.length === 0) {

@@ -13,7 +13,7 @@ export interface ToolDefinition {
   description?: string;
   parameters?: Array<{
     name: string;
-    type: string;
+    type?: string;
     description?: string;
     required?: boolean;
   }>;
@@ -39,18 +39,18 @@ export class ToolRegistry {
   public registerAllTools(): void {
     // Register all tools from the tools directory
     Object.values(Tools).forEach((ToolClass) => {
-      let toolInstance: { getTools(): any[] };
+      let toolInstance: { getTools(): unknown[] };
 
       // Cache and Performance tools need the clients map
       if (ToolClass.name === "CacheTools" || ToolClass.name === "PerformanceTools") {
         toolInstance = new ToolClass(this.wordpressClients);
       } else {
-        toolInstance = new (ToolClass as new () => { getTools(): any[] })();
+        toolInstance = new (ToolClass as new () => { getTools(): unknown[] })();
       }
 
       const tools = toolInstance.getTools();
 
-      tools.forEach((tool: any) => {
+      tools.forEach((tool: unknown) => {
         this.registerTool(tool);
       });
     });
@@ -75,7 +75,7 @@ export class ToolRegistry {
 
     // Make site parameter required if multiple sites are configured
     if (this.wordpressClients.size > 1 && parameterSchema.site && typeof parameterSchema.site === 'object' && 'describe' in parameterSchema.site) {
-      parameterSchema.site = (parameterSchema.site as any).describe(
+      parameterSchema.site = (parameterSchema.site as z.ZodString).describe(
         "The ID of the WordPress site to target (from mcp-wordpress.config.json). Required when multiple sites are configured.",
       );
     }
@@ -217,7 +217,7 @@ export class ToolRegistry {
       case "array":
         return z.array(z.string());
       case "object":
-        return z.record(z.any());
+        return z.record(z.unknown());
       default:
         return z.string();
     }

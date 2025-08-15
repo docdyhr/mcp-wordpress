@@ -1,5 +1,5 @@
 import { WordPressClient } from "../client/api.js";
-import { CreatePageRequest, PageQueryParams, UpdatePageRequest } from "../types/wordpress.js";
+import { CreatePageRequest, PostQueryParams as PageQueryParams, UpdatePageRequest } from "../types/wordpress.js";
 import { getErrorMessage } from "../utils/error.js";
 
 /**

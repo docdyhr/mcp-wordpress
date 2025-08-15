@@ -614,9 +614,9 @@ export class SecurityMonitor extends EventEmitter {
   /**
    * Group array by property
    */
-  private groupBy(array: unknown[], property: string): Record<string, number> {
-    return array.reduce((acc, item) => {
-      const key = item[property] || "unknown";
+  private groupBy(array: Array<Record<string, any>>, property: string): Record<string, number> { // eslint-disable-line @typescript-eslint/no-explicit-any
+    return array.reduce<Record<string, number>>((acc, item) => {
+      const key = (item && item[property]) || "unknown";
       acc[key] = (acc[key] || 0) + 1;
       return acc;
     }, {});

@@ -5,6 +5,13 @@
 import { getErrorMessage } from "../utils/error.js";
 import { WordPressId, createWordPressId, DeepReadonly, Result, createSuccess, createError } from "../types/enhanced.js";
 
+interface EnhancedError extends Error {
+  originalError?: unknown;
+  operation?: string;
+  context?: Record<string, unknown> | undefined;
+  timestamp?: Date;
+}
+
 export interface ParameterValidationRule<T = unknown> {
   readonly key: string;
   readonly required: boolean;
@@ -138,15 +145,15 @@ export class BaseToolUtils {
   /**
    * Handle errors consistently with enhanced error context
    */
-  static handleError(error: unknown, operation: string, context?: Record<string, unknown>): Error {
+  static handleError(error: unknown, operation: string, context?: Record<string, unknown> | undefined): Error {
     const errorMessage = getErrorMessage(error);
     const enhancedMessage = `Error in ${operation}: ${errorMessage}`;
     
-    const enhancedError = new Error(enhancedMessage);
-    (enhancedError as any).originalError = error;
-    (enhancedError as any).operation = operation;
-    (enhancedError as any).context = context;
-    (enhancedError as any).timestamp = new Date();
+    const enhancedError = new Error(enhancedMessage) as EnhancedError;
+    enhancedError.originalError = error;
+    enhancedError.operation = operation;
+    enhancedError.context = context;
+    enhancedError.timestamp = new Date();
     
     return enhancedError;
   }

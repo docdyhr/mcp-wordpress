@@ -376,11 +376,17 @@ export class SecurityCIPipeline {
     score: number;
     details: string;
   }> {
+    const scanParams = check.parameters as {
+      targets?: string[];
+      depth?: "shallow" | "deep" | "comprehensive";
+      includeRuntime?: boolean;
+      includeFileSystem?: boolean;
+    };
     const scanResult = await this.scanner.performScan({
-      targets: check.parameters.targets || ["src/"],
-      depth: check.parameters.depth || "deep",
-      includeRuntime: check.parameters.includeRuntime || false,
-      includeFileSystem: check.parameters.includeFileSystem || true,
+      targets: scanParams.targets ?? ["src/"],
+      depth: scanParams.depth ?? "deep",
+      includeRuntime: scanParams.includeRuntime ?? false,
+      includeFileSystem: scanParams.includeFileSystem ?? true,
     });
 
     const findings: SecurityFinding[] = scanResult.vulnerabilities.map((vuln) => ({
@@ -416,11 +422,12 @@ export class SecurityCIPipeline {
     score: number;
     details: string;
   }> {
+    const reviewParams = check.parameters as { rules?: string[]; excludeRules?: string[]; aiAnalysis?: boolean };
     const reviewResults = await this.reviewer.reviewDirectory("src/", {
       recursive: true,
-      rules: check.parameters.rules,
-      excludeRules: check.parameters.excludeRules,
-      aiAnalysis: check.parameters.aiAnalysis || false,
+      rules: reviewParams.rules ?? [],
+      excludeRules: reviewParams.excludeRules ?? [],
+      aiAnalysis: reviewParams.aiAnalysis ?? false,
     });
 
     const allFindings: SecurityFinding[] = [];
@@ -533,7 +540,8 @@ export class SecurityCIPipeline {
     score: number;
     details: string;
   }> {
-    const frameworks = check.parameters.frameworks || ["OWASP", "CWE"];
+  const complianceParams = check.parameters as { frameworks?: string[] };
+  const frameworks: string[] = complianceParams.frameworks ?? ["OWASP", "CWE"];
     const findings: SecurityFinding[] = [];
 
     // Check for compliance with security frameworks
@@ -552,13 +560,11 @@ export class SecurityCIPipeline {
   /**
    * Calculate security score for file findings
    */
-  private calculateFileScore(findings: unknown[]): number {
-    const severityWeights = { critical: 20, high: 10, medium: 5, low: 2, info: 1 };
-
-    const penalty = findings.reduce((sum, finding) => {
-      return sum + (severityWeights[finding.severity as keyof typeof severityWeights] || 0);
+  private calculateFileScore(findings: Array<{ severity: string }>): number {
+    const severityWeights: Record<string, number> = { critical: 20, high: 10, medium: 5, low: 2, info: 1 };
+    const penalty = findings.reduce((sum: number, finding) => {
+      return sum + (severityWeights[finding.severity] || 0);
     }, 0);
-
     return Math.max(0, 100 - penalty);
   }
 
@@ -671,7 +677,10 @@ export class SecurityCIPipeline {
   /**
    * Generate recommendations based on results
    */
-  private generateRecommendations(gateResults: GateResult[], summary: Record<string, unknown>): string[] {
+  private generateRecommendations(
+    gateResults: GateResult[],
+    summary: { criticalIssues: number; highIssues: number; securityScore: number; [key: string]: unknown },
+  ): string[] {
     const recommendations: string[] = [];
 
     if (summary.criticalIssues > 0) {

@@ -4,6 +4,9 @@
  * Comprehensive TypeScript definitions for WordPress REST API v2 responses
  */
 
+// WordPress metadata type - can contain various primitive values and nested objects  
+export type WordPressMeta = Record<string, unknown>;
+
 // Common WordPress API response patterns
 export interface WordPressRendered {
   rendered: string;
@@ -67,7 +70,7 @@ export interface WordPressPost {
   sticky: boolean;
   template: string;
   format: PostFormat;
-  meta: Record<string, any>;
+  meta: WordPressMeta;
   categories: number[];
   tags: number[];
   _links?: WordPressLinks;
@@ -92,7 +95,7 @@ export interface WordPressPage {
   comment_status: CommentStatus;
   ping_status: PingStatus;
   menu_order: number;
-  meta: Record<string, any>;
+  meta: WordPressMeta;
   template: string;
   parent: number;
   _links?: WordPressLinks;
@@ -148,7 +151,7 @@ export interface WordPressMedia {
   comment_status: CommentStatus;
   ping_status: PingStatus;
   template: string;
-  meta: Record<string, any>;
+  meta: WordPressMeta;
   description: WordPressRendered;
   caption: WordPressRendered;
   alt_text: string;
@@ -181,7 +184,7 @@ export interface WordPressUser {
   capabilities: Record<string, boolean>;
   extra_capabilities: Record<string, boolean>;
   avatar_urls: Record<string, string>;
-  meta: Record<string, any>;
+  meta: WordPressMeta;
   _links?: WordPressLinks;
 }
 
@@ -205,7 +208,7 @@ export interface WordPressComment {
   status: "approved" | "unapproved" | "spam" | "trash";
   type: CommentType;
   author_avatar_urls: Record<string, string>;
-  meta: Record<string, any>;
+  meta: WordPressMeta;
   _links?: WordPressLinks;
 }
 
@@ -219,7 +222,7 @@ export interface WordPressCategory {
   slug: string;
   taxonomy: string;
   parent: number;
-  meta: Record<string, any>;
+  meta: WordPressMeta;
   _links?: WordPressLinks;
 }
 
@@ -231,7 +234,7 @@ export interface WordPressTag {
   name: string;
   slug: string;
   taxonomy: string;
-  meta: Record<string, any>;
+  meta: WordPressMeta;
   _links?: WordPressLinks;
 }
 
@@ -291,8 +294,8 @@ export interface WordPressAPIErrorResponse {
   message: string;
   data?: {
     status: number;
-    params?: Record<string, any>;
-    details?: Record<string, any>;
+    params?: Record<string, unknown>;
+    details?: Record<string, unknown>;
   };
 }
 
@@ -379,7 +382,7 @@ export interface CreatePostRequest {
   comment_status?: CommentStatus;
   ping_status?: PingStatus;
   format?: PostFormat;
-  meta?: Record<string, any>;
+  meta?: WordPressMeta;
   sticky?: boolean;
   template?: string;
   categories?: number[];
@@ -403,7 +406,7 @@ export interface CreatePageRequest {
   comment_status?: CommentStatus;
   ping_status?: PingStatus;
   menu_order?: number;
-  meta?: Record<string, any>;
+  meta?: WordPressMeta;
   parent?: number;
   template?: string;
   date?: string;
@@ -430,7 +433,7 @@ export interface CreateUserRequest {
   url?: string;
   locale?: string;
   roles?: UserRole[];
-  meta?: Record<string, any>;
+  meta?: WordPressMeta;
 }
 
 export interface UpdateUserRequest extends Partial<Omit<CreateUserRequest, "username">> {
@@ -448,7 +451,7 @@ export interface CreateCommentRequest {
   date?: string;
   date_gmt?: string;
   status?: "approved" | "unapproved";
-  meta?: Record<string, any>;
+  meta?: WordPressMeta;
 }
 
 export interface UpdateCommentRequest extends Partial<Omit<CreateCommentRequest, "status">> {
@@ -461,7 +464,7 @@ export interface CreateCategoryRequest {
   description?: string;
   slug?: string;
   parent?: number;
-  meta?: Record<string, any>;
+  meta?: WordPressMeta;
 }
 
 export interface UpdateCategoryRequest extends Partial<CreateCategoryRequest> {
@@ -472,7 +475,7 @@ export interface CreateTagRequest {
   name: string;
   description?: string;
   slug?: string;
-  meta?: Record<string, any>;
+  meta?: WordPressMeta;
 }
 
 export interface UpdateTagRequest extends Partial<CreateTagRequest> {

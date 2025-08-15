@@ -2,6 +2,16 @@ import { WordPressClient } from "../client/api.js";
 import { getErrorMessage } from "../utils/error.js";
 import { LoggerFactory } from "../utils/logger.js";
 
+interface ErrorWithResponse {
+  response?: {
+    status?: number;
+  };
+}
+
+interface ErrorWithCode {
+  code?: string;
+}
+
 /**
  * Service for testing WordPress client connections
  * Handles connection validation and health checks
@@ -50,6 +60,10 @@ export class ConnectionTester {
           const duration = Date.now() - startTime;
           const errorMessage = getErrorMessage(error);
           
+          // Legacy console output for test compatibility (structured logging still used)
+          // eslint-disable-next-line no-console
+          console.error(`Connection failed for site ${siteId}:`, errorMessage);
+
           this.logger.warn("Connection failed", { 
             siteId, 
             error: errorMessage, 
@@ -82,7 +96,7 @@ export class ConnectionTester {
   private static isAuthenticationError(error: unknown): boolean {
     // Check for HTTP response status
     if (error && typeof error === 'object' && 'response' in error) {
-      const response = (error as any).response;
+      const response = (error as ErrorWithResponse).response;
       if (response?.status && [401, 403].includes(response.status)) {
         return true;
       }
@@ -90,7 +104,7 @@ export class ConnectionTester {
     const errorMessage = getErrorMessage(error);
     return errorMessage.includes('401') || errorMessage.includes('403') || 
            errorMessage.includes('Unauthorized') || errorMessage.includes('Forbidden') ||
-           (error as any)?.code === "WORDPRESS_AUTH_ERROR";
+           (error as ErrorWithCode)?.code === "WORDPRESS_AUTH_ERROR";
   }
 
   /**
@@ -134,7 +148,7 @@ export class ConnectionTester {
         // Just test basic connectivity, not full auth
         const isHealthy = await this.healthCheck(client, siteId, 1000);
         results.set(siteId, isHealthy);
-      } catch (error) {
+      } catch (_error) {
         results.set(siteId, false);
       }
     });

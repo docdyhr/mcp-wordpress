@@ -65,11 +65,11 @@ export interface ErrorResponse {
   error: true;
   message: string;
   code?: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 // Generic Success Response
-export interface SuccessResponse<T = any> {
+export interface SuccessResponse<T = unknown> {
   success: true;
   data: T;
   message?: string;
@@ -147,8 +147,8 @@ export interface ValidationRule {
   min?: number;
   max?: number;
   pattern?: RegExp;
-  enum_values?: any[];
-  custom?: (value: any) => boolean | string;
+  enum_values?: unknown[];
+  custom?: (value: unknown) => boolean | string;
 }
 
 export interface ValidationSchema {
@@ -172,7 +172,7 @@ export interface CacheOptions {
 export interface EventData {
   type: string;
   timestamp: number;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 export type EventHandler<T = EventData> = (event: T) => void | Promise<void>;
@@ -182,7 +182,7 @@ export interface PerformanceMetric {
   name: string;
   duration: number;
   timestamp: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // Health Check Types
@@ -206,7 +206,7 @@ export interface DebugInfo {
   timestamp: number;
   level: "debug" | "info" | "warn" | "error";
   message: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   stack?: string;
 }
 
@@ -237,14 +237,14 @@ export type CategoryID = Brand<number, "CategoryID">;
 export type TagID = Brand<number, "TagID">;
 
 // Function Types
-export type AsyncFunction<TArgs extends any[] = any[], TReturn = any> = (...args: TArgs) => Promise<TReturn>;
-export type SyncFunction<TArgs extends any[] = any[], TReturn = any> = (...args: TArgs) => TReturn;
-export type AnyFunction<TArgs extends any[] = any[], TReturn = any> =
+export type AsyncFunction<TArgs extends unknown[] = unknown[], TReturn = unknown> = (...args: TArgs) => Promise<TReturn>;
+export type SyncFunction<TArgs extends unknown[] = unknown[], TReturn = unknown> = (...args: TArgs) => TReturn;
+export type AnyFunction<TArgs extends unknown[] = unknown[], TReturn = unknown> =
   | SyncFunction<TArgs, TReturn>
   | AsyncFunction<TArgs, TReturn>;
 
 // Conditional Types
 export type If<C extends boolean, T, F> = C extends true ? T : F;
 export type IsEqual<T, U> = T extends U ? (U extends T ? true : false) : false;
-export type IsArray<T> = T extends any[] ? true : false;
-export type IsObject<T> = T extends object ? (T extends any[] ? false : true) : false;
+export type IsArray<T> = T extends unknown[] ? true : false;
+export type IsObject<T> = T extends object ? (T extends unknown[] ? false : true) : false;
