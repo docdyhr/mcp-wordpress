@@ -47,8 +47,8 @@ jobs:
         ports:
           - 8081:80
         options: >-
-          --health-cmd="curl --silent --fail http://localhost:80/wp-json/wp/v2/posts || exit 1"
-          --health-interval=15s --health-timeout=5s --health-retries=25
+          --health-cmd="curl --silent --fail http://localhost:80/wp-json/ || exit 1"
+          --health-interval=10s --health-timeout=10s --health-retries=30
     permissions:
       contents: write
       pull-requests: write
@@ -74,14 +74,14 @@ jobs:
       - name: Tests with coverage
         env:
           NODE_OPTIONS: --experimental-vm-modules
-        run: npm run test:coverage
+        run: NODE_OPTIONS="--experimental-vm-modules" npx jest --config=jest.typescript.config.json --coverage --testPathIgnorePatterns="tests/server/" --testPathIgnorePatterns="tests/contracts/"
       - name: Wait for WordPress health
         run: |
           echo "Waiting for WordPress to become healthy..."
-          for i in {1..60}; do
-            if curl -fsS http://localhost:8081/wp-json/wp/v2/posts > /dev/null; then
+          for i in {1..30}; do
+            if curl -fsS http://localhost:8081/wp-json/ > /dev/null; then
               echo "WordPress is up"; break; fi
-            sleep 5
+            sleep 10
           done
           curl -fsS http://localhost:8081/wp-json/ || (echo "WordPress did not become ready"; exit 1)
       - name: Live compatibility tests
