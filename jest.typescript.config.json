@@ -19,7 +19,8 @@
     "**/managers/**/*.test.js",
     "**/server/**/*.test.js",
     "**/tools/**/*.test.js",
-    "**/cache/**/*.test.js"
+    "**/cache/**/*.test.js",
+    "**/client/**/*.test.js"
   ],
   "testPathIgnorePatterns": [
     "/node_modules/",
