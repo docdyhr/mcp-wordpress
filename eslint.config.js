@@ -81,12 +81,12 @@ export default [
       // TypeScript specific rules
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-unused-vars": [
-        "error", 
+        "error",
         {
           args: "none",
           varsIgnorePattern: "^_",
           caughtErrorsIgnorePattern: "^_",
-        }
+        },
       ],
     },
   },
@@ -119,9 +119,16 @@ export default [
     },
   },
   {
-    files: ["src/utils/logger.ts", "scripts/**/*.js", "scripts/**/*.cjs"],
+    files: [
+      "src/utils/logger.ts",
+      "src/utils/debug.ts",
+      "src/utils/error.ts",
+      "src/dxt-entry.cjs",
+      "scripts/**/*.js",
+      "scripts/**/*.cjs",
+    ],
     rules: {
-      "no-console": "off", // Logger utility and scripts need console access
+      "no-console": "off", // Logger utility, debug, error handlers and scripts need console access
     },
   },
   {
