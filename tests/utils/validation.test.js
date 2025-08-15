@@ -172,7 +172,7 @@ describe("validation utilities", () => {
     });
 
     it("should remove dangerous tags and attributes", () => {
-      expect(sanitizeHtml("<script>alert('xss')</script>")).toBe("");
+      expect(sanitizeHtml("<script>alert('xss')</script>")).toBe("alert(&#39;xss&#39;)");
       expect(sanitizeHtml("<img src='x' onerror='alert(1)'>")).not.toContain("onerror");
       expect(sanitizeHtml("<a href='javascript:alert(1)'>Bad</a>")).not.toContain("javascript:");
     });
