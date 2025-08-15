@@ -20,7 +20,8 @@
     "**/server/**/*.test.js",
     "**/tools/**/*.test.js",
     "**/cache/**/*.test.js",
-    "**/client/**/*.test.js"
+    "**/client/**/*.test.js",
+    "**/performance/**/*.test.js"
   ],
   "testPathIgnorePatterns": [
     "/node_modules/",
