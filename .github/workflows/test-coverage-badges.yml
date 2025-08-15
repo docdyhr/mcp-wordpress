@@ -47,8 +47,8 @@ jobs:
         ports:
           - 8081:80
         options: >-
-          --health-cmd="curl --silent --fail http://localhost:80/wp-json/ || exit 1"
-          --health-interval=10s --health-timeout=10s --health-retries=30
+          --health-cmd="curl --silent --fail http://localhost:80 || exit 1"
+          --health-interval=15s --health-timeout=10s --health-retries=20
     permissions:
       contents: write
       pull-requests: write
@@ -79,11 +79,11 @@ jobs:
         run: |
           echo "Waiting for WordPress to become healthy..."
           for i in {1..30}; do
-            if curl -fsS http://localhost:8081/wp-json/ > /dev/null; then
+            if curl -fsS http://localhost:8081 > /dev/null 2>&1; then
               echo "WordPress is up"; break; fi
             sleep 10
           done
-          curl -fsS http://localhost:8081/wp-json/ || (echo "WordPress did not become ready"; exit 1)
+          curl -fsS http://localhost:8081 > /dev/null || (echo "WordPress did not become ready"; exit 1)
       - name: Live compatibility tests
         env:
           WORDPRESS_TEST_URL: http://localhost:8081
