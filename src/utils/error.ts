@@ -15,7 +15,6 @@ const LEGACY_ERROR_LOGS_ENABLED = config().error.legacyLogsEnabled;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function legacyConsoleError(...args: any[]) {
   if (LEGACY_ERROR_LOGS_ENABLED) {
-    // eslint-disable-next-line no-console
     console.error(...args);
   }
 }

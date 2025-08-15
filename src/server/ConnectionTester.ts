@@ -24,14 +24,14 @@ export class ConnectionTester {
    */
   public static async testClientConnections(
     wordpressClients: Map<string, WordPressClient>,
-    options: { timeout?: number; maxConcurrent?: number } = {}
+    options: { timeout?: number; maxConcurrent?: number } = {},
   ): Promise<void> {
     const { timeout = 5000, maxConcurrent = 3 } = options;
-    
+
     this.logger.info("Testing connections to WordPress sites", {
       siteCount: wordpressClients.size,
       timeout,
-      maxConcurrent
+      maxConcurrent,
     });
 
     const entries = Array.from(wordpressClients.entries());
@@ -40,37 +40,30 @@ export class ConnectionTester {
     // Process sites in batches to control concurrency
     for (let i = 0; i < entries.length; i += maxConcurrent) {
       const batch = entries.slice(i, i + maxConcurrent);
-      
+
       const batchPromises = batch.map(async ([siteId, client]) => {
         const startTime = Date.now();
         try {
           // Add timeout to ping operation
           await Promise.race([
             client.ping(),
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Connection timeout')), timeout)
-            )
+            new Promise((_, reject) => setTimeout(() => reject(new Error("Connection timeout")), timeout)),
           ]);
-          
+
           const duration = Date.now() - startTime;
           this.logger.info("Connection successful", { siteId, duration: `${duration}ms` });
           results.push({ siteId, success: true });
-          
         } catch (error) {
           const duration = Date.now() - startTime;
           const errorMessage = getErrorMessage(error);
-          
-          // Legacy console output for test compatibility (structured logging still used)
-          // eslint-disable-next-line no-console
-          console.error(`Connection failed for site ${siteId}:`, errorMessage);
 
-          this.logger.warn("Connection failed", { 
-            siteId, 
-            error: errorMessage, 
+          this.logger.warn("Connection failed", {
+            siteId,
+            error: errorMessage,
             duration: `${duration}ms`,
-            isAuthError: ConnectionTester.isAuthenticationError(error)
+            isAuthError: ConnectionTester.isAuthenticationError(error),
           });
-          
+
           results.push({ siteId, success: false, error: errorMessage });
         }
       });
@@ -79,14 +72,14 @@ export class ConnectionTester {
     }
 
     // Log summary
-    const successful = results.filter(r => r.success).length;
+    const successful = results.filter((r) => r.success).length;
     const failed = results.length - successful;
-    
+
     this.logger.info("Connection tests complete", {
       total: results.length,
       successful,
       failed,
-      successRate: `${((successful / results.length) * 100).toFixed(1)}%`
+      successRate: `${((successful / results.length) * 100).toFixed(1)}%`,
     });
   }
 
@@ -95,41 +88,38 @@ export class ConnectionTester {
    */
   private static isAuthenticationError(error: unknown): boolean {
     // Check for HTTP response status
-    if (error && typeof error === 'object' && 'response' in error) {
+    if (error && typeof error === "object" && "response" in error) {
       const response = (error as ErrorWithResponse).response;
       if (response?.status && [401, 403].includes(response.status)) {
         return true;
       }
     }
     const errorMessage = getErrorMessage(error);
-    return errorMessage.includes('401') || errorMessage.includes('403') || 
-           errorMessage.includes('Unauthorized') || errorMessage.includes('Forbidden') ||
-           (error as ErrorWithCode)?.code === "WORDPRESS_AUTH_ERROR";
+    return (
+      errorMessage.includes("401") ||
+      errorMessage.includes("403") ||
+      errorMessage.includes("Unauthorized") ||
+      errorMessage.includes("Forbidden") ||
+      (error as ErrorWithCode)?.code === "WORDPRESS_AUTH_ERROR"
+    );
   }
 
   /**
    * Perform health check for a specific client with timeout
    */
-  public static async healthCheck(
-    client: WordPressClient, 
-    siteId?: string,
-    timeout: number = 3000
-  ): Promise<boolean> {
+  public static async healthCheck(client: WordPressClient, siteId?: string, timeout: number = 3000): Promise<boolean> {
     try {
       await Promise.race([
         client.ping(),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Health check timeout')), timeout)
-        )
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Health check timeout")), timeout)),
       ]);
-      
+
       this.logger.debug("Health check passed", { siteId });
       return true;
-      
     } catch (error) {
-      this.logger.warn("Health check failed", { 
-        siteId, 
-        error: getErrorMessage(error) 
+      this.logger.warn("Health check failed", {
+        siteId,
+        error: getErrorMessage(error),
       });
       return false;
     }
@@ -139,10 +129,10 @@ export class ConnectionTester {
    * Quick connectivity test without full authentication
    */
   public static async quickConnectivityTest(
-    wordpressClients: Map<string, WordPressClient>
+    wordpressClients: Map<string, WordPressClient>,
   ): Promise<Map<string, boolean>> {
     const results = new Map<string, boolean>();
-    
+
     const promises = Array.from(wordpressClients.entries()).map(async ([siteId, client]) => {
       try {
         // Just test basic connectivity, not full auth

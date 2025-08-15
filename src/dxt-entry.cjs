@@ -8,37 +8,45 @@
 try {
     require('./ajv-patch.js');
 } catch (error) {
-    console.error("DEBUG: AJV patch failed to load:", error.message);
+    // Use stderr to avoid interfering with STDIO
+    process.stderr.write(`[DXT] AJV patch failed to load: ${error.message}\n`);
 }
 
-console.error("DEBUG: DXT CommonJS entry point starting...");
-console.error(`DEBUG: Current working directory: ${process.cwd()}`);
-console.error(`DEBUG: __dirname: ${__dirname}`);
-console.error(`DEBUG: Node version: ${process.version}`);
+// Use stderr for debug output to avoid interfering with STDIO
+const debug = (message) => {
+    if (process.env.DEBUG || process.env.NODE_ENV === 'development') {
+        process.stderr.write(`[DXT] ${message}\n`);
+    }
+};
+
+debug("CommonJS entry point starting...");
+debug(`Current working directory: ${process.cwd()}`);
+debug(`__dirname: ${__dirname}`);
+debug(`Node version: ${process.version}`);
 
 // Set DXT mode environment variable
 process.env.NODE_ENV = "dxt";
 
-console.error("DEBUG: Environment variables passed from DXT:");
-console.error(`  WORDPRESS_SITE_URL: ${process.env.WORDPRESS_SITE_URL ? 'SET' : 'NOT SET'}`);
-console.error(`  WORDPRESS_USERNAME: ${process.env.WORDPRESS_USERNAME ? 'SET' : 'NOT SET'}`);
-console.error(`  WORDPRESS_APP_PASSWORD: ${process.env.WORDPRESS_APP_PASSWORD ? 'SET' : 'NOT SET'}`);
+debug("Environment variables passed from DXT:");
+debug(`  WORDPRESS_SITE_URL: ${process.env.WORDPRESS_SITE_URL ? 'SET' : 'NOT SET'}`);
+debug(`  WORDPRESS_USERNAME: ${process.env.WORDPRESS_USERNAME ? 'SET' : 'NOT SET'}`);
+debug(`  WORDPRESS_APP_PASSWORD: ${process.env.WORDPRESS_APP_PASSWORD ? 'SET' : 'NOT SET'}`);
 
 // Import and run the main server using dynamic import
 async function startDXTServer() {
     try {
-        console.error("DEBUG: Attempting to import ES module...");
+        debug("Attempting to import ES module...");
         const { MCPWordPressServer } = await import("./index.js");
         
-        console.error("DEBUG: Creating MCPWordPressServer instance from DXT entry point...");
+        debug("Creating MCPWordPressServer instance from DXT entry point...");
         const server = new MCPWordPressServer();
         
-        console.error("DEBUG: Starting server (DXT mode - fast startup)...");
+        debug("Starting server (DXT mode - fast startup)...");
         await server.run();
         
         // Handle graceful shutdown
         const shutdown = async () => {
-            console.error("DEBUG: Received shutdown signal in DXT entry point");
+            debug("Received shutdown signal in DXT entry point");
             await server.shutdown();
             process.exit(0);
         };
@@ -47,12 +55,14 @@ async function startDXTServer() {
         process.on("SIGTERM", shutdown);
         
     } catch (error) {
-        console.error(`FATAL: DXT server failed to start: ${error instanceof Error ? error.message : String(error)}`);
-        console.error(`FATAL: Stack trace: ${error instanceof Error ? error.stack : 'No stack trace available'}`);
+        process.stderr.write(`[DXT] FATAL: Server failed to start: ${error instanceof Error ? error.message : String(error)}\n`);
+        if (error instanceof Error && error.stack) {
+            process.stderr.write(`[DXT] Stack trace: ${error.stack}\n`);
+        }
         process.exit(1);
     }
 }
 
 // Always run when loaded as DXT entry point
-console.error("DEBUG: Calling startDXTServer...");
+debug("Calling startDXTServer...");
 startDXTServer();

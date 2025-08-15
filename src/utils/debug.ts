@@ -70,28 +70,24 @@ const safeStringify = (obj: unknown): string => {
 export const debug: Logger = {
   log: (...args: unknown[]): void => {
     if (isDebugMode()) {
-      // eslint-disable-next-line no-console
       console.error(formatMessage("debug", args)); // Use stderr for debug to avoid STDIO interference
     }
   },
 
   info: (...args: unknown[]): void => {
     if (isDebugMode()) {
-      // eslint-disable-next-line no-console
       console.error(formatMessage("info", args));
     }
   },
 
   warn: (...args: unknown[]): void => {
     if (isDebugMode()) {
-      // eslint-disable-next-line no-console
       console.error(formatMessage("warn", args));
     }
   },
 
   error: (...args: unknown[]): void => {
     if (isDebugMode()) {
-      // eslint-disable-next-line no-console
       console.error(formatMessage("error", args));
     }
   },
@@ -129,7 +125,6 @@ class StructuredLoggerImpl implements StructuredLogger {
       ...(Object.keys(this.context).length > 0 && { context: this.context }),
     };
 
-    // eslint-disable-next-line no-console
     console.error(safeStringify(debugInfo));
   }
 
@@ -157,7 +152,6 @@ class StructuredLoggerImpl implements StructuredLogger {
       context: { ...this.context, ...info.context },
     };
 
-    // eslint-disable-next-line no-console
     console.error(safeStringify(enhancedInfo));
   }
 
