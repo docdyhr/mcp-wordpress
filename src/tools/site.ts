@@ -11,7 +11,12 @@ export class SiteTools {
    * Retrieves the list of site management tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): any[] {
+  public getTools(): Array<{
+    name: string;
+    description: string;
+    parameters?: Array<{ name: string; type?: string; description?: string; required?: boolean; enum?: string[]; items?: unknown }>;
+    handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
+  }> {
     return [
       {
         name: "wp_get_site_settings",
@@ -121,7 +126,10 @@ export class SiteTools {
     ];
   }
 
-  public async handleGetSiteSettings(client: WordPressClient, params: any): Promise<any> {
+  public async handleGetSiteSettings(
+    client: WordPressClient,
+    _params: Record<string, unknown>,
+  ): Promise<unknown> {
     try {
       const settings = await client.getSiteSettings();
       const siteUrl = client.getSiteUrl();
@@ -179,7 +187,10 @@ export class SiteTools {
     }
   }
 
-  public async handleUpdateSiteSettings(client: WordPressClient, params: any): Promise<any> {
+  public async handleUpdateSiteSettings(
+    client: WordPressClient,
+    params: Record<string, unknown>,
+  ): Promise<unknown> {
     try {
       const updatedSettings = await client.updateSiteSettings(params);
       return `✅ Site settings updated successfully. New title: ${updatedSettings.title}`;
@@ -190,15 +201,16 @@ export class SiteTools {
 
   public async handleSearchSite(
     client: WordPressClient,
-    params: { term: string; type?: "posts" | "pages" | "media" },
-  ): Promise<any> {
+    params: Record<string, unknown>,
+  ): Promise<unknown> {
     try {
-      const results = await client.search(params.term, params.type ? [params.type] : undefined);
+      const { term, type } = params as { term: string; type?: "posts" | "pages" | "media" };
+      const results = await client.search(term, type ? [type] : undefined);
       if (results.length === 0) {
-        return `No results found for "${params.term}".`;
+        return `No results found for "${term}".`;
       }
       const content =
-        `Found ${results.length} results for "${params.term}":\n\n` +
+        `Found ${results.length} results for "${term}":\n\n` +
         results.map((r) => `- [${r.type}] **${r.title}**\n  Link: ${r.url}`).join("\n");
       return content;
     } catch (error) {
@@ -206,14 +218,15 @@ export class SiteTools {
     }
   }
 
-  public async handleGetApplicationPasswords(client: WordPressClient, params: { user_id: number }): Promise<any> {
+  public async handleGetApplicationPasswords(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     try {
-      const passwords = await client.getApplicationPasswords(params.user_id);
+      const { user_id } = params as { user_id: number };
+      const passwords = await client.getApplicationPasswords(user_id);
       if (passwords.length === 0) {
-        return `No application passwords found for user ID ${params.user_id}.`;
+        return `No application passwords found for user ID ${user_id}.`;
       }
       const content =
-        `Found ${passwords.length} application passwords for user ID ${params.user_id}:\n\n` +
+        `Found ${passwords.length} application passwords for user ID ${user_id}:\n\n` +
         passwords
           .map(
             (p: WordPressApplicationPassword) =>
@@ -228,10 +241,11 @@ export class SiteTools {
 
   public async handleCreateApplicationPassword(
     client: WordPressClient,
-    params: { user_id: number; app_name: string },
-  ): Promise<any> {
+    params: Record<string, unknown>,
+  ): Promise<unknown> {
     try {
-      const result = await client.createApplicationPassword(params.user_id, params.app_name);
+      const { user_id, app_name } = params as { user_id: number; app_name: string };
+      const result = await client.createApplicationPassword(user_id, app_name);
       const content =
         "✅ **Application password created successfully!**\n\n" +
         `**Name:** ${result.name}\n` +
@@ -245,11 +259,12 @@ export class SiteTools {
 
   public async handleDeleteApplicationPassword(
     client: WordPressClient,
-    params: { user_id: number; uuid: string },
-  ): Promise<any> {
+    params: Record<string, unknown>,
+  ): Promise<unknown> {
     try {
-      await client.deleteApplicationPassword(params.user_id, params.uuid);
-      return `✅ Application password with UUID ${params.uuid} has been revoked.`;
+      const { user_id, uuid } = params as { user_id: number; uuid: string };
+      await client.deleteApplicationPassword(user_id, uuid);
+      return `✅ Application password with UUID ${uuid} has been revoked.`;
     } catch (error) {
       throw new Error(`Failed to delete application password: ${getErrorMessage(error)}`);
     }

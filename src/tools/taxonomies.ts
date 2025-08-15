@@ -16,7 +16,12 @@ export class TaxonomyTools {
    * Retrieves the list of taxonomy management tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): any[] {
+  public getTools(): Array<{
+    name: string;
+    description: string;
+    parameters?: Array<{ name: string; type?: string; description?: string; required?: boolean; enum?: string[]; items?: unknown }>;
+    handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
+  }> {
     return [
       // Categories
       {
@@ -171,9 +176,10 @@ export class TaxonomyTools {
     ];
   }
 
-  public async handleListCategories(client: WordPressClient, params: any): Promise<any> {
+  public async handleListCategories(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const queryParams = params as Record<string, string | number | boolean>;
     try {
-      const categories = await client.getCategories(params);
+      const categories = await client.getCategories(queryParams);
       if (categories.length === 0) {
         return "No categories found.";
       }
@@ -186,9 +192,10 @@ export class TaxonomyTools {
     }
   }
 
-  public async handleGetCategory(client: WordPressClient, params: { id: number }): Promise<any> {
+  public async handleGetCategory(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const { id } = params as { id: number };
     try {
-      const category = await client.getCategory(params.id);
+      const category = await client.getCategory(id);
       const content =
         `**Category Details (ID: ${category.id})**\n\n` +
         `- **Name:** ${category.name}\n` +
@@ -201,9 +208,10 @@ export class TaxonomyTools {
     }
   }
 
-  public async handleCreateCategory(client: WordPressClient, params: CreateCategoryRequest): Promise<any> {
+  public async handleCreateCategory(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const createParams = params as unknown as CreateCategoryRequest;
     try {
-      const category = await client.createCategory(params);
+      const category = await client.createCategory(createParams);
       return `✅ Category "${category.name}" created successfully with ID: ${category.id}.`;
     } catch (error) {
       throw new Error(`Failed to create category: ${getErrorMessage(error)}`);
@@ -212,28 +220,31 @@ export class TaxonomyTools {
 
   public async handleUpdateCategory(
     client: WordPressClient,
-    params: UpdateCategoryRequest & { id: number },
-  ): Promise<any> {
+    params: Record<string, unknown>,
+  ): Promise<unknown> {
+    const updateParams = params as unknown as UpdateCategoryRequest;
     try {
-      const category = await client.updateCategory(params);
+      const category = await client.updateCategory(updateParams);
       return `✅ Category ${category.id} updated successfully.`;
     } catch (error) {
       throw new Error(`Failed to update category: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleDeleteCategory(client: WordPressClient, params: { id: number }): Promise<any> {
+  public async handleDeleteCategory(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const { id } = params as { id: number };
     try {
-      await client.deleteCategory(params.id);
-      return `✅ Category ${params.id} has been deleted.`;
+      await client.deleteCategory(id);
+      return `✅ Category ${id} has been deleted.`;
     } catch (error) {
       throw new Error(`Failed to delete category: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleListTags(client: WordPressClient, params: any): Promise<any> {
+  public async handleListTags(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const queryParams = params as Record<string, string | number | boolean>;
     try {
-      const tags = await client.getTags(params);
+      const tags = await client.getTags(queryParams);
       if (tags.length === 0) {
         return "No tags found.";
       }
@@ -246,9 +257,10 @@ export class TaxonomyTools {
     }
   }
 
-  public async handleGetTag(client: WordPressClient, params: { id: number }): Promise<any> {
+  public async handleGetTag(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const { id } = params as { id: number };
     try {
-      const tag = await client.getTag(params.id);
+      const tag = await client.getTag(id);
       const content =
         `**Tag Details (ID: ${tag.id})**\n\n` +
         `- **Name:** ${tag.name}\n` +
@@ -260,28 +272,31 @@ export class TaxonomyTools {
     }
   }
 
-  public async handleCreateTag(client: WordPressClient, params: CreateTagRequest): Promise<any> {
+  public async handleCreateTag(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const createParams = params as unknown as CreateTagRequest;
     try {
-      const tag = await client.createTag(params);
+      const tag = await client.createTag(createParams);
       return `✅ Tag "${tag.name}" created successfully with ID: ${tag.id}.`;
     } catch (error) {
       throw new Error(`Failed to create tag: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleUpdateTag(client: WordPressClient, params: UpdateTagRequest & { id: number }): Promise<any> {
+  public async handleUpdateTag(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const updateParams = params as unknown as UpdateTagRequest;
     try {
-      const tag = await client.updateTag(params);
+      const tag = await client.updateTag(updateParams);
       return `✅ Tag ${tag.id} updated successfully.`;
     } catch (error) {
       throw new Error(`Failed to update tag: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleDeleteTag(client: WordPressClient, params: { id: number }): Promise<any> {
+  public async handleDeleteTag(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const { id } = params as { id: number };
     try {
-      await client.deleteTag(params.id);
-      return `✅ Tag ${params.id} has been deleted.`;
+      await client.deleteTag(id);
+      return `✅ Tag ${id} has been deleted.`;
     } catch (error) {
       throw new Error(`Failed to delete tag: ${getErrorMessage(error)}`);
     }

@@ -7,6 +7,7 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import { SecurityUtils } from "./SecurityConfig.js";
 import { SecurityValidationError } from "./InputValidator.js";
+import { LoggerFactory } from "../utils/logger.js";
 
 export interface SecurityVulnerability {
   id: string;
@@ -114,6 +115,7 @@ const SECURITY_PATTERNS = {
  * AI Security Scanner with machine learning capabilities
  */
 export class AISecurityScanner {
+  private readonly logger = LoggerFactory.security();
   private vulnerabilities: SecurityVulnerability[] = [];
   private scanHistory: SecurityScanResult[] = [];
   private remediationHistory: RemediationResult[] = [];
@@ -132,7 +134,7 @@ export class AISecurityScanner {
     const scanId = SecurityUtils.generateSecureToken(16);
     const startTime = Date.now();
 
-    console.log(`[Security Scanner] Starting AI-powered security scan ${scanId}`);
+    this.logger.info("Starting AI-powered security scan", { scanId });
 
     try {
       this.vulnerabilities = [];
@@ -157,11 +159,19 @@ export class AISecurityScanner {
 
       this.scanHistory.push(result);
 
-      console.log(`[Security Scanner] Scan completed: ${result.summary.total} vulnerabilities found`);
+      this.logger.info("Security scan completed", {
+        scanId,
+        vulnerabilities: result.summary.total,
+        duration,
+        critical: result.summary.critical,
+        high: result.summary.high,
+        medium: result.summary.medium,
+        low: result.summary.low,
+      });
 
       return result;
     } catch (error) {
-      console.error("[Security Scanner] Scan failed:", error);
+      this.logger.error("Security scan failed", { scanId, error: String(error) });
       throw new SecurityValidationError("Security scan failed", [{ message: String(error) }]);
     }
   }
@@ -196,7 +206,7 @@ export class AISecurityScanner {
       }
     } catch (error) {
       // Directory might not exist or be accessible
-      console.warn(`[Security Scanner] Cannot scan directory ${dirPath}:`, error);
+      this.logger.warn("Cannot scan directory", { dirPath, error: String(error) });
     }
   }
 
@@ -229,7 +239,7 @@ export class AISecurityScanner {
       this.scanForInfoDisclosure(filePath, content, lines);
       this.scanForInsecureConfiguration(filePath, content, lines);
     } catch (error) {
-      console.warn(`[Security Scanner] Cannot scan file ${filePath}:`, error);
+      this.logger.warn("Cannot scan file", { filePath, error: String(error) });
     }
   }
 
@@ -679,7 +689,7 @@ export class AISecurityScanner {
    */
   private async scanConfigurations(): Promise<void> {
     // This would scan various config files for insecure settings
-    console.log("[Security Scanner] Scanning configurations...");
+    this.logger.debug("Scanning configurations for security issues");
   }
 
   /**
@@ -687,7 +697,7 @@ export class AISecurityScanner {
    */
   private async scanDependencies(): Promise<void> {
     // This would integrate with npm audit or similar tools
-    console.log("[Security Scanner] Scanning dependencies...");
+    this.logger.debug("Scanning dependencies for vulnerabilities");
   }
 
   /**
@@ -695,7 +705,7 @@ export class AISecurityScanner {
    */
   private async performAIAnalysis(): Promise<void> {
     // Advanced AI analysis would go here
-    console.log("[Security Scanner] Performing AI analysis...");
+    this.logger.debug("Performing AI-powered security analysis");
   }
 
   /**

@@ -5,6 +5,7 @@
 
 import type { AuthConfig, AuthMethod } from "../../types/client.js";
 import { AuthenticationError } from "../../types/client.js";
+import { config } from "../../config/Config.js";
 import { BaseManager } from "./BaseManager.js";
 import { debug } from "../../utils/debug.js";
 
@@ -16,35 +17,37 @@ export class AuthenticationManager extends BaseManager {
    * Get authentication from environment variables
    */
   static getAuthFromEnv(): AuthConfig {
-    const method: AuthMethod = (process.env.WORDPRESS_AUTH_METHOD as AuthMethod) || "app-password";
+    const cfg = config();
+    const wp = cfg.wordpress;
+    const method: AuthMethod = (wp.authMethod as AuthMethod) || "app-password";
 
     switch (method) {
       case "app-password":
         return {
           method: "app-password",
-          username: process.env.WORDPRESS_USERNAME || "",
-          appPassword: process.env.WORDPRESS_APP_PASSWORD || "",
+          username: wp.username || "",
+          appPassword: wp.appPassword || "",
         };
 
       case "jwt":
         return {
           method: "jwt",
-          username: process.env.WORDPRESS_USERNAME || "",
-          password: process.env.WORDPRESS_JWT_PASSWORD || process.env.WORDPRESS_PASSWORD || "",
-          secret: process.env.WORDPRESS_JWT_SECRET || "",
+          username: wp.username || "",
+          password: wp.jwtPassword || wp.password || "",
+          secret: wp.jwtSecret || "",
         };
 
       case "basic":
         return {
           method: "basic",
-          username: process.env.WORDPRESS_USERNAME || "",
-          password: process.env.WORDPRESS_PASSWORD || "",
+          username: wp.username || "",
+          password: wp.password || "",
         };
 
       case "api-key":
         return {
           method: "api-key",
-          apiKey: process.env.WORDPRESS_API_KEY || "",
+          apiKey: wp.apiKey || "",
         };
 
       default:
@@ -61,8 +64,8 @@ export class AuthenticationManager extends BaseManager {
     if (!auth) {
       // In test environments, return empty headers instead of throwing
       if (
-        process.env.NODE_ENV === "test" ||
-        process.env.CI === "true" ||
+        config().app.isTest ||
+        config().app.isCI ||
         (globalThis as { __EXECUTION_CONTEXT__?: string }).__EXECUTION_CONTEXT__ === "jest"
       ) {
         debug.log("Warning: No authentication configuration in test environment, returning empty headers");

@@ -51,7 +51,12 @@ export class MediaTools {
    *
    * @since 1.0.0
    */
-  public getTools(): any[] {
+  public getTools(): Array<{
+    name: string;
+    description: string;
+    parameters?: Array<{ name: string; type?: string; description?: string; required?: boolean; enum?: string[]; items?: unknown }>;
+    handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
+  }> {
     return [
       {
         name: "wp_list_media",
@@ -181,9 +186,10 @@ export class MediaTools {
     ];
   }
 
-  public async handleListMedia(client: WordPressClient, params: MediaQueryParams): Promise<any> {
+  public async handleListMedia(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const queryParams = params as MediaQueryParams;
     try {
-      const media = await client.getMedia(params);
+      const media = await client.getMedia(queryParams);
       if (media.length === 0) {
         return "No media items found matching the criteria.";
       }
@@ -196,9 +202,10 @@ export class MediaTools {
     }
   }
 
-  public async handleGetMedia(client: WordPressClient, params: { id: number }): Promise<any> {
+  public async handleGetMedia(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const { id } = params as { id: number };
     try {
-      const media = await client.getMediaItem(params.id);
+      const media = await client.getMediaItem(id);
       const content =
         `**Media Details (ID: ${media.id})**\n\n` +
         `- **Title:** ${media.title.rendered}\n` +
@@ -215,34 +222,40 @@ export class MediaTools {
 
   public async handleUploadMedia(
     client: WordPressClient,
-    params: UploadMediaRequest & { file_path: string },
-  ): Promise<any> {
+    params: Record<string, unknown>,
+  ): Promise<unknown> {
+    const uploadParams = params as unknown as UploadMediaRequest & { file_path: string };
     try {
-      if (!fs.existsSync(params.file_path)) {
-        throw new Error(`File not found at path: ${params.file_path}`);
+      if (!fs.existsSync(uploadParams.file_path)) {
+        throw new Error(`File not found at path: ${uploadParams.file_path}`);
       }
 
-      const media = await client.uploadMedia(params);
+      const media = await client.uploadMedia(uploadParams);
       return `✅ Media uploaded successfully!\n- ID: ${media.id}\n- Title: ${media.title.rendered}\n- URL: ${media.source_url}`;
     } catch (error) {
       throw new Error(`Failed to upload media: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleUpdateMedia(client: WordPressClient, params: UpdateMediaRequest & { id: number }): Promise<any> {
+  public async handleUpdateMedia(
+    client: WordPressClient,
+    params: Record<string, unknown>,
+  ): Promise<unknown> {
+    const updateParams = params as unknown as UpdateMediaRequest & { id: number };
     try {
-      const media = await client.updateMedia(params);
+      const media = await client.updateMedia(updateParams);
       return `✅ Media ${media.id} updated successfully.`;
     } catch (error) {
       throw new Error(`Failed to update media: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleDeleteMedia(client: WordPressClient, params: { id: number; force?: boolean }): Promise<any> {
+  public async handleDeleteMedia(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const { id, force } = params as { id: number; force?: boolean };
     try {
-      await client.deleteMedia(params.id, params.force);
-      const action = params.force ? "permanently deleted" : "moved to trash";
-      return `✅ Media item ${params.id} has been ${action}.`;
+      await client.deleteMedia(id, force);
+      const action = force ? "permanently deleted" : "moved to trash";
+      return `✅ Media item ${id} has been ${action}`;
     } catch (error) {
       throw new Error(`Failed to delete media: ${getErrorMessage(error)}`);
     }

@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 🔧 Technical Debt Resolution
+
+- **Code Quality Improvements**
+  - Remove 104 ESLint violations (89 explicit `any` types, 25 console statements)
+  - Fix unused variable violations in catch blocks
+  - Replace console statements with structured logging via LoggerFactory
+  - Add proper TypeScript interfaces and type guards
+
+- **Dependency Management**
+  - Update 12 outdated dependencies to latest versions
+  - Migrate to Node.js v22 type definitions
+  - Evaluate Zod v4 migration for improved validation
+
+- **Testing & Coverage**
+  - Fix test coverage reporting configuration
+  - Add missing unit tests for improved coverage
+  - Set coverage thresholds for CI pipeline
+
+- **Code Organization**
+  - Refactor large files (>500 lines) into focused modules
+  - Split posts.ts into smaller, single-responsibility modules
+  - Extract validation utilities for better reusability
+
+### 📊 Metrics Improvements
+
+- ESLint errors reduced from 104 to 0
+- Type safety improved with removal of all explicit `any` types
+- Test coverage reporting functional with >80% target
+- All dependencies up-to-date with automated updates
+
 ## [2.4.2](https://github.com/docdyhr/mcp-wordpress/compare/v2.4.1...v2.4.2) (2025-07-23)
 
 ### 🐛 Bug Fixes
@@ -109,6 +141,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - remove experimental decorator syntax from toolWrapper tests
 - correct MCPWordPressServer method names in tests (run/shutdown)
 - improve test reliability by simplifying mock implementations
+
+### ♻️ Refactoring
+
+- gate legacy console.error error utility logs behind `LEGACY_ERROR_LOGS` env flag (set to `0` to disable)
+
+### ⚠️ Behavior Changes
+
+- `validateRequired` now treats only `null` and `undefined` as missing; falsy values like `""`, `0`, and `false` are considered present. Tests updated accordingly.
 
 ## [2.0.2](https://github.com/docdyhr/mcp-wordpress/compare/v2.0.1...v2.0.2) (2025-07-16)
 

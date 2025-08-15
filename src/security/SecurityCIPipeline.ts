@@ -9,6 +9,9 @@ import { SecurityReviewer } from "./SecurityReviewer.js";
 import { SecurityConfigManager } from "./SecurityConfigManager.js";
 import { SecurityUtils } from "./SecurityConfig.js";
 import { SecurityValidationError } from "./InputValidator.js";
+import { LoggerFactory } from "../utils/logger.js";
+
+const logger = LoggerFactory.security();
 
 interface SecurityGate {
   id: string;
@@ -33,7 +36,7 @@ interface SecurityCheck {
   enabled: boolean;
   timeout: number;
   retries: number;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 export interface PipelineSecurityReport {
@@ -126,9 +129,9 @@ export class SecurityCIPipeline {
    * Initialize the security pipeline
    */
   async initialize(): Promise<void> {
-    console.log("[Security Pipeline] Initializing security CI/CD pipeline");
+    logger.info("Initializing security CI/CD pipeline");
     await this.configManager.initialize();
-    console.log("[Security Pipeline] Security pipeline ready");
+    logger.info("Security pipeline ready");
   }
 
   /**
@@ -146,12 +149,16 @@ export class SecurityCIPipeline {
     const reportId = SecurityUtils.generateSecureToken(16);
     const startTime = Date.now();
 
-    console.log(`[Security Pipeline] Executing ${stage} security gates for ${context.branch}@${context.commit}`);
+    logger.info(`Executing ${stage} security gates`, {
+      stage,
+      branch: context.branch,
+      commit: context.commit
+    });
 
     const applicableGates = Array.from(this.gates.values()).filter((gate) => gate.stage === stage && gate.enabled);
 
     if (applicableGates.length === 0) {
-      console.log(`[Security Pipeline] No security gates configured for stage: ${stage}`);
+      logger.warn(`No security gates configured for stage: ${stage}`, { stage });
       return this.createEmptyReport(reportId, stage, startTime);
     }
 
@@ -159,7 +166,7 @@ export class SecurityCIPipeline {
     let overallStatus: "passed" | "failed" | "warning" = "passed";
 
     for (const gate of applicableGates) {
-      console.log(`[Security Pipeline] Executing gate: ${gate.name}`);
+      logger.info(`Executing gate: ${gate.name}`, { gateName: gate.name });
 
       try {
         const gateResult = await this.executeSecurityGate(gate, context, options);
@@ -174,11 +181,11 @@ export class SecurityCIPipeline {
 
         // Stop on blocking failure unless continuing on failure
         if (gateResult.status === "failed" && gate.blocking && !options.continueOnFailure) {
-          console.log(`[Security Pipeline] Stopping pipeline due to blocking gate failure: ${gate.name}`);
+          logger.error(`Stopping pipeline due to blocking gate failure: ${gate.name}`, { gateName: gate.name });
           break;
         }
       } catch (error) {
-        console.error(`[Security Pipeline] Gate execution error: ${gate.name}`, error);
+        logger.error(`Gate execution error: ${gate.name}`, { gateName: gate.name, error });
 
         const errorResult: GateResult = {
           gateId: gate.id,
@@ -203,7 +210,7 @@ export class SecurityCIPipeline {
 
     this.reports.push(report);
 
-    console.log(`[Security Pipeline] ${stage} gates completed with status: ${overallStatus}`);
+    logger.info(`${stage} gates completed`, { stage, status: overallStatus });
 
     return report;
   }
@@ -224,13 +231,13 @@ export class SecurityCIPipeline {
         continue;
       }
 
-      console.log(`[Security Pipeline] Running check: ${check.name}`);
+      logger.info(`Running check: ${check.name}`, { checkName: check.name });
 
       try {
         const checkResult = await this.executeSecurityCheck(check, context, options);
         checkResults.push(checkResult);
       } catch (error) {
-        console.error(`[Security Pipeline] Check execution error: ${check.name}`, error);
+        logger.error(`Check execution error: ${check.name}`, { checkName: check.name, error });
 
         checkResults.push({
           checkId: check.id,
@@ -369,11 +376,17 @@ export class SecurityCIPipeline {
     score: number;
     details: string;
   }> {
+    const scanParams = check.parameters as {
+      targets?: string[];
+      depth?: "shallow" | "deep" | "comprehensive";
+      includeRuntime?: boolean;
+      includeFileSystem?: boolean;
+    };
     const scanResult = await this.scanner.performScan({
-      targets: check.parameters.targets || ["src/"],
-      depth: check.parameters.depth || "deep",
-      includeRuntime: check.parameters.includeRuntime || false,
-      includeFileSystem: check.parameters.includeFileSystem || true,
+      targets: scanParams.targets ?? ["src/"],
+      depth: scanParams.depth ?? "deep",
+      includeRuntime: scanParams.includeRuntime ?? false,
+      includeFileSystem: scanParams.includeFileSystem ?? true,
     });
 
     const findings: SecurityFinding[] = scanResult.vulnerabilities.map((vuln) => ({
@@ -409,11 +422,12 @@ export class SecurityCIPipeline {
     score: number;
     details: string;
   }> {
+    const reviewParams = check.parameters as { rules?: string[]; excludeRules?: string[]; aiAnalysis?: boolean };
     const reviewResults = await this.reviewer.reviewDirectory("src/", {
       recursive: true,
-      rules: check.parameters.rules,
-      excludeRules: check.parameters.excludeRules,
-      aiAnalysis: check.parameters.aiAnalysis || false,
+      rules: reviewParams.rules ?? [],
+      excludeRules: reviewParams.excludeRules ?? [],
+      aiAnalysis: reviewParams.aiAnalysis ?? false,
     });
 
     const allFindings: SecurityFinding[] = [];
@@ -455,7 +469,7 @@ export class SecurityCIPipeline {
     details: string;
   }> {
     // This would integrate with npm audit, Snyk, or similar tools
-    console.log("[Security Pipeline] Dependency check - integration with external tools required");
+    logger.info("Dependency check - integration with external tools required");
 
     return {
       findings: [],
@@ -506,7 +520,7 @@ export class SecurityCIPipeline {
     details: string;
   }> {
     // This would integrate with tools like TruffleHog, GitLeaks, etc.
-    console.log("[Security Pipeline] Secrets check - integration with secret scanning tools required");
+    logger.info("Secrets check - integration with secret scanning tools required");
 
     return {
       findings: [],
@@ -526,13 +540,14 @@ export class SecurityCIPipeline {
     score: number;
     details: string;
   }> {
-    const frameworks = check.parameters.frameworks || ["OWASP", "CWE"];
+  const complianceParams = check.parameters as { frameworks?: string[] };
+  const frameworks: string[] = complianceParams.frameworks ?? ["OWASP", "CWE"];
     const findings: SecurityFinding[] = [];
 
     // Check for compliance with security frameworks
     for (const framework of frameworks) {
       // This would integrate with compliance checking tools
-      console.log(`[Security Pipeline] Checking ${framework} compliance`);
+      logger.info(`Checking ${framework} compliance`, { framework });
     }
 
     return {
@@ -545,13 +560,11 @@ export class SecurityCIPipeline {
   /**
    * Calculate security score for file findings
    */
-  private calculateFileScore(findings: any[]): number {
-    const severityWeights = { critical: 20, high: 10, medium: 5, low: 2, info: 1 };
-
-    const penalty = findings.reduce((sum, finding) => {
-      return sum + (severityWeights[finding.severity as keyof typeof severityWeights] || 0);
+  private calculateFileScore(findings: Array<{ severity: string }>): number {
+    const severityWeights: Record<string, number> = { critical: 20, high: 10, medium: 5, low: 2, info: 1 };
+    const penalty = findings.reduce((sum: number, finding) => {
+      return sum + (severityWeights[finding.severity] || 0);
     }, 0);
-
     return Math.max(0, 100 - penalty);
   }
 
@@ -664,7 +677,10 @@ export class SecurityCIPipeline {
   /**
    * Generate recommendations based on results
    */
-  private generateRecommendations(gateResults: GateResult[], summary: any): string[] {
+  private generateRecommendations(
+    gateResults: GateResult[],
+    summary: { criticalIssues: number; highIssues: number; securityScore: number; [key: string]: unknown },
+  ): string[] {
     const recommendations: string[] = [];
 
     if (summary.criticalIssues > 0) {
@@ -861,7 +877,7 @@ export class SecurityCIPipeline {
     const updatedGate = { ...gate, ...updates, id: gateId };
     this.gates.set(gateId, updatedGate);
 
-    console.log(`[Security Pipeline] Updated security gate: ${updatedGate.name}`);
+    logger.info(`Updated security gate: ${updatedGate.name}`, { gateName: updatedGate.name });
     return true;
   }
 

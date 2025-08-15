@@ -2,14 +2,21 @@
  * Performance Monitoring MCP Tools for WordPress Server
  * Provides comprehensive performance insights and management
  */
+/**
+ * Performance Monitoring MCP Tools for WordPress Server
+ * Provides comprehensive performance insights and management
+ */
 
 import type { ToolDefinition } from "../server/ToolRegistry.js";
-import { PerformanceMonitor } from "../performance/PerformanceMonitor.js";
+import { PerformanceMonitor, type PerformanceMetrics, type PerformanceAlert } from "../performance/PerformanceMonitor.js";
 import { MetricsCollector } from "../performance/MetricsCollector.js";
-import { PerformanceAnalytics } from "../performance/PerformanceAnalytics.js";
+import { PerformanceAnalytics, type BenchmarkComparison, type PerformanceAnomaly } from "../performance/PerformanceAnalytics.js";
 import { toolWrapper } from "../utils/toolWrapper.js";
 import { ConfigHelpers } from "../config/Config.js";
 import { LoggerFactory } from "../utils/logger.js";
+import type { WordPressClient } from "../client/api.js";
+
+// Using existing performance interfaces from PerformanceMonitor/PerformanceAnalytics
 
 /**
  * Performance Tools Class
@@ -21,7 +28,7 @@ export default class PerformanceTools {
   private logger = LoggerFactory.performance();
   private historicalDataInterval?: NodeJS.Timeout | undefined;
 
-  constructor(clients?: Map<string, any>) {
+  constructor(clients?: Map<string, unknown>) {
     // Initialize performance monitoring system
     this.monitor = new PerformanceMonitor({
       enableRealTimeMonitoring: true,
@@ -47,8 +54,9 @@ export default class PerformanceTools {
         this.collector.registerClient(siteId, client);
 
         // Register cache manager if client has one
-        if (client.cacheManager) {
-          this.collector.registerCacheManager(siteId, client.cacheManager);
+        const possibleCacheMgr = (client as Record<string, unknown>)?.cacheManager as unknown;
+        if (possibleCacheMgr) {
+          this.collector.registerCacheManager(siteId, possibleCacheMgr);
         }
       }
     }
@@ -263,21 +271,21 @@ export default class PerformanceTools {
   /**
    * Get real-time performance statistics
    */
-  private async getPerformanceStats(params: any): Promise<any> {
+  private async getPerformanceStats(_client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     return toolWrapper(async () => {
-      const { site, category = "overview", format = "summary" } = params;
+      const { site, category = "overview", format = "summary" } = params as { site?: string; category?: string; format?: string };
 
       // Get current metrics
-      const metrics = this.collector.collectCurrentMetrics();
+  const metrics = this.collector.collectCurrentMetrics();
 
       // Get site-specific metrics if requested
       let siteMetrics = null;
       if (site) {
-        siteMetrics = this.collector.getSiteMetrics(site);
+  siteMetrics = this.collector.getSiteMetrics(site as string);
       }
 
       // Filter by category
-      const result: any = {};
+      const result: Record<string, unknown> = {};
 
       if (category === "overview" || category === "all") {
         result.overview = {
@@ -323,7 +331,7 @@ export default class PerformanceTools {
         result.tools = {
           mostUsedTool: metrics.tools.mostUsedTool,
           totalToolCalls: Object.values(metrics.tools.toolUsageCount).reduce(
-            (sum: number, count: any) => sum + count,
+            (sum: number, count: unknown) => sum + (typeof count === "number" ? count : 0),
             0,
           ),
           topTools: Object.entries(metrics.tools.toolUsageCount)
@@ -362,22 +370,22 @@ export default class PerformanceTools {
   /**
    * Get historical performance data and trends
    */
-  private async getPerformanceHistory(params: any): Promise<any> {
+  private async getPerformanceHistory(_client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     return toolWrapper(async () => {
-      const { site, timeframe = "24h", metrics: requestedMetrics, includeTrends = true } = params;
+      const { site, timeframe = "24h", metrics: requestedMetrics, includeTrends = true } = params as { site?: string; timeframe?: string; metrics?: string[]; includeTrends?: boolean };
 
       // Convert timeframe to milliseconds
       const timeframMs = this.parseTimeframe(timeframe);
       const startTime = Date.now() - timeframMs;
 
       // Get historical data
-      const historicalData = this.monitor.getHistoricalData(startTime);
+  const historicalData = this.monitor.getHistoricalData(startTime);
 
       // Analyze trends if requested
       let trends = null;
       if (includeTrends) {
         // Add current data for trend analysis
-        this.analytics.addDataPoint(this.collector.collectCurrentMetrics());
+  this.analytics.addDataPoint(this.collector.collectCurrentMetrics());
         trends = this.analytics.analyzeTrends();
 
         // Filter trends by requested metrics
@@ -387,7 +395,7 @@ export default class PerformanceTools {
       }
 
       // Process historical data for charting
-      const chartData = this.processHistoricalDataForChart(historicalData, requestedMetrics);
+  const chartData = this.processHistoricalDataForChart(historicalData, requestedMetrics as string[] | undefined);
 
       return {
         success: true,
@@ -417,12 +425,12 @@ export default class PerformanceTools {
   /**
    * Get benchmark comparison
    */
-  private async getBenchmarkComparison(params: any): Promise<any> {
+  private async getBenchmarkComparison(_client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     return toolWrapper(async () => {
-      const { site, category = "all", includeRecommendations = true } = params;
+      const { site, category = "all", includeRecommendations = true } = params as { site?: string; category?: string; includeRecommendations?: boolean };
 
       // Get benchmark comparisons
-      const benchmarks = this.analytics.benchmarkPerformance();
+  const benchmarks = this.analytics.benchmarkPerformance() as BenchmarkComparison[];
 
       // Filter by category if specified
       let filteredBenchmarks = benchmarks;
@@ -433,7 +441,7 @@ export default class PerformanceTools {
           error_rate: "Error Rate",
           system_resources: "Memory Usage",
         };
-        const targetCategory = categoryMap[category];
+  const targetCategory = categoryMap[category as string];
         if (targetCategory) {
           filteredBenchmarks = benchmarks.filter((b) => b.category === targetCategory);
         }
@@ -484,12 +492,12 @@ export default class PerformanceTools {
   /**
    * Get performance alerts and anomalies
    */
-  private async getPerformanceAlerts(params: any): Promise<any> {
+  private async getPerformanceAlerts(_client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     return toolWrapper(async () => {
-      const { site, severity, category, limit = 20, includeAnomalies = true } = params;
+      const { site, severity, category, limit = 20, includeAnomalies = true } = params as { site?: string; severity?: string; category?: string; limit?: number; includeAnomalies?: boolean };
 
       // Get alerts from monitor
-      let alerts = this.monitor.getAlerts(severity);
+  let alerts = this.monitor.getAlerts(severity) as PerformanceAlert[];
 
       // Filter by category if specified
       if (category) {
@@ -497,12 +505,12 @@ export default class PerformanceTools {
       }
 
       // Limit results
-      alerts = alerts.slice(-limit);
+  alerts = alerts.slice(-(limit as number));
 
       // Get anomalies if requested
-      let anomalies: any[] = [];
+      let anomalies: PerformanceAnomaly[] = [];
       if (includeAnomalies) {
-        anomalies = this.analytics.getAnomalies(severity);
+        anomalies = this.analytics.getAnomalies(severity) as PerformanceAnomaly[];
       }
 
       // Calculate alert summary
@@ -553,15 +561,15 @@ export default class PerformanceTools {
   /**
    * Get optimization recommendations
    */
-  private async getOptimizationRecommendations(params: any): Promise<any> {
+  private async getOptimizationRecommendations(_client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     return toolWrapper(async () => {
-      const { site, focus = "speed", priority = "all", includeROI = true, includePredictions = true } = params;
+      const { site, focus = "speed", priority = "all", includeROI = true, includePredictions = true } = params as { site?: string; focus?: string; priority?: string; includeROI?: boolean; includePredictions?: boolean };
 
       // Generate optimization plan
       const optimizationPlan = this.analytics.generateOptimizationPlan();
 
       // Filter by priority
-      let recommendations = [];
+  let recommendations: Array<{ priority: string; impact: string; implementationEffort: string; [key: string]: unknown }> = [];
       if (priority === "quick_wins" || priority === "all") {
         recommendations.push(
           ...optimizationPlan.quickWins.map((r) => ({
@@ -588,7 +596,7 @@ export default class PerformanceTools {
       }
 
       // Filter by focus area
-      if (focus !== "speed") {
+  if (focus !== "speed") {
         const focusMap: Record<string, string[]> = {
           reliability: ["reliability"],
           efficiency: ["cost", "performance"],
@@ -599,7 +607,7 @@ export default class PerformanceTools {
       }
 
       // Get predictions if requested
-      let predictions = null;
+  let predictions: Record<string, unknown> | null = null;
       if (includePredictions) {
         predictions = this.analytics.predictPerformance(60); // 1 hour prediction
       }
@@ -635,15 +643,15 @@ export default class PerformanceTools {
   /**
    * Export comprehensive performance report
    */
-  private async exportPerformanceReport(params: any): Promise<any> {
+  private async exportPerformanceReport(_client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     return toolWrapper(async () => {
-      const { site, format = "json", includeHistorical = true, includeAnalytics = true, timeRange = "24h" } = params;
+      const { site, format = "json", includeHistorical = true, includeAnalytics = true, timeRange = "24h" } = params as { site?: string; format?: string; includeHistorical?: boolean; includeAnalytics?: boolean; timeRange?: string };
 
       // Generate comprehensive analytics report
       const report = this.analytics.exportAnalyticsReport();
 
       // Add additional data based on parameters
-      const exportData: any = {
+  const exportData: { currentMetrics: PerformanceMetrics; [key: string]: unknown } = {
         metadata: {
           generatedAt: new Date().toISOString(),
           site: site || "all",
@@ -652,7 +660,7 @@ export default class PerformanceTools {
           version: "1.0.0",
         },
         summary: report.summary,
-        currentMetrics: this.collector.collectCurrentMetrics(),
+  currentMetrics: this.collector.collectCurrentMetrics(),
       };
 
       if (includeHistorical) {
@@ -684,7 +692,7 @@ export default class PerformanceTools {
       }
 
       // Format output based on requested format
-      let formattedOutput: any;
+      let formattedOutput: unknown;
       if (format === "csv") {
         formattedOutput = this.convertToCSV(exportData);
       } else if (format === "summary") {
@@ -708,7 +716,7 @@ export default class PerformanceTools {
 
   // Helper methods
 
-  private calculateHealthStatus(metrics: any): string {
+  private calculateHealthStatus(metrics: PerformanceMetrics): string {
     let score = 100;
 
     if (metrics.requests.averageResponseTime > 2000) score -= 30;
@@ -730,7 +738,7 @@ export default class PerformanceTools {
     return "Critical";
   }
 
-  private calculatePerformanceScore(metrics: any): number {
+  private calculatePerformanceScore(metrics: PerformanceMetrics): number {
     let score = 100;
 
     // Response time scoring
@@ -756,7 +764,7 @@ export default class PerformanceTools {
     return Math.max(0, Math.min(100, score));
   }
 
-  private calculateCacheEfficiency(cacheMetrics: any): string {
+  private calculateCacheEfficiency(cacheMetrics: PerformanceMetrics["cache"]): string {
     const efficiency =
       cacheMetrics.hitRate * 100 + (cacheMetrics.totalSize > 0 ? 10 : 0) - (cacheMetrics.evictions > 100 ? 10 : 0);
 
@@ -790,13 +798,13 @@ export default class PerformanceTools {
     return map[timeframe] || map["24h"];
   }
 
-  private processHistoricalDataForChart(data: any[], requestedMetrics?: string[]): any {
+  private processHistoricalDataForChart(data: PerformanceMetrics[], requestedMetrics?: string[]): Record<string, unknown> {
     if (!data.length) return {};
 
     const allMetrics = ["responseTime", "cacheHitRate", "errorRate", "memoryUsage", "requestVolume"];
     const metricsToProcess = requestedMetrics || allMetrics;
 
-    const result: any = {};
+    const result: Record<string, unknown> = {};
 
     for (const metric of metricsToProcess) {
       result[metric] = data.map((point, index) => ({
@@ -809,7 +817,7 @@ export default class PerformanceTools {
     return result;
   }
 
-  private extractMetricValue(dataPoint: any, metric: string): number {
+  private extractMetricValue(dataPoint: PerformanceMetrics, metric: string): number {
     switch (metric) {
       case "responseTime":
         return dataPoint.requests.averageResponseTime;
@@ -842,7 +850,7 @@ export default class PerformanceTools {
     return statusMap[status] || status;
   }
 
-  private getBenchmarkImprovementDescription(benchmark: any): string {
+  private getBenchmarkImprovementDescription(benchmark: BenchmarkComparison): string {
     const improvements: Record<string, string> = {
       "Response Time": `Reduce by ${benchmark.improvement.toFixed(0)}ms`,
       "Cache Hit Rate": `Increase by ${benchmark.improvement.toFixed(1)}%`,
@@ -852,7 +860,7 @@ export default class PerformanceTools {
     return improvements[benchmark.category] || `Improve by ${benchmark.improvement}`;
   }
 
-  private calculateOverallRanking(benchmarks: any[]): {
+  private calculateOverallRanking(benchmarks: BenchmarkComparison[]): {
     percentile: number;
     status: string;
   } {
@@ -870,16 +878,16 @@ export default class PerformanceTools {
     return { percentile: Math.round(percentile), status };
   }
 
-  private formatAlertMessage(alert: any): string {
+  private formatAlertMessage(alert: PerformanceAlert): string {
     return `${alert.severity.toUpperCase()}: ${alert.message} (${alert.metric}: ${alert.actualValue} vs threshold: ${alert.threshold})`;
   }
 
-  private formatAnomalyDescription(anomaly: any): string {
+  private formatAnomalyDescription(anomaly: PerformanceAnomaly): string {
     const direction = anomaly.actualValue > anomaly.expectedValue ? "higher" : "lower";
     return `${anomaly.metric} is ${Math.abs(anomaly.deviation).toFixed(1)}% ${direction} than expected (${anomaly.expectedValue.toFixed(2)} vs ${anomaly.actualValue.toFixed(2)})`;
   }
 
-  private calculateAlertStatus(alertSummary: any, anomalySummary: any): string {
+  private calculateAlertStatus(alertSummary: { critical: number; error: number; warning: number }, anomalySummary: { critical: number; major: number; moderate: number; minor: number }): string {
     const critical = alertSummary.critical + anomalySummary.critical;
     const high = alertSummary.error + anomalySummary.major;
 
@@ -908,7 +916,9 @@ export default class PerformanceTools {
     return map[effort] || effort;
   }
 
-  private calculateEstimatedImpact(recommendations: any[]): string {
+  private calculateEstimatedImpact(
+    recommendations: Array<{ priority: string }>,
+  ): string {
     const highImpact = recommendations.filter((r) => ["critical", "high"].includes(r.priority)).length;
     const totalImpact = recommendations.length;
 
@@ -918,7 +928,7 @@ export default class PerformanceTools {
     return "System Already Optimized";
   }
 
-  private convertToCSV(data: any): string {
+  private convertToCSV(data: { currentMetrics: PerformanceMetrics }): string {
     // Simplified CSV conversion for current metrics
     const metrics = data.currentMetrics;
     const csv = [
@@ -935,7 +945,7 @@ export default class PerformanceTools {
     return csv.join("\n");
   }
 
-  private createSummaryReport(data: any): any {
+  private createSummaryReport(data: { currentMetrics: PerformanceMetrics; analytics?: { insights?: unknown[] } }): Record<string, unknown> {
     const metrics = data.currentMetrics;
     return {
       summary: `Performance Report - ${new Date().toISOString()}`,
@@ -960,22 +970,22 @@ export default class PerformanceTools {
 
     // Adjust collection frequency based on environment
     const interval = ConfigHelpers.isDev() ? 60000 : 30000; // 1 minute in dev, 30 seconds in prod
-    
-    this.logger.info("Starting historical data collection", { 
-      interval: `${interval/1000}s`,
-      environment: ConfigHelpers.get().get().app.nodeEnv
+
+    this.logger.info("Starting historical data collection", {
+      interval: `${interval / 1000}s`,
+      environment: ConfigHelpers.get().get().app.nodeEnv,
     });
 
     this.historicalDataInterval = setInterval(() => {
       try {
         const currentMetrics = this.collector.collectCurrentMetrics();
         this.analytics.addDataPoint(currentMetrics);
-        this.logger.debug("Historical metrics collected", { 
-          timestamp: new Date().toISOString() 
+        this.logger.debug("Historical metrics collected", {
+          timestamp: new Date().toISOString(),
         });
       } catch (error) {
         this.logger.error("Failed to collect historical metrics", {
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }, interval);

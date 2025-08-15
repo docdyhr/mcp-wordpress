@@ -1,5 +1,5 @@
 import { WordPressClient } from "../client/api.js";
-import { CreatePostRequest, PostQueryParams, UpdatePostRequest } from "../types/wordpress.js";
+import { CreatePageRequest, PostQueryParams as PageQueryParams, UpdatePageRequest } from "../types/wordpress.js";
 import { getErrorMessage } from "../utils/error.js";
 
 /**
@@ -11,7 +11,12 @@ export class PageTools {
    * Retrieves the list of page management tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): any[] {
+  public getTools(): Array<{
+    name: string;
+    description: string;
+    parameters?: Array<{ name: string; type?: string; description?: string; required?: boolean; enum?: string[]; items?: unknown }>;
+    handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
+  }> {
     return [
       {
         name: "wp_list_pages",
@@ -136,9 +141,10 @@ export class PageTools {
     ];
   }
 
-  public async handleListPages(client: WordPressClient, params: PostQueryParams): Promise<any> {
+  public async handleListPages(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const queryParams = params as unknown as PageQueryParams;
     try {
-      const pages = await client.getPages(params);
+      const pages = await client.getPages(queryParams);
       if (pages.length === 0) {
         return "No pages found matching the criteria.";
       }
@@ -151,9 +157,10 @@ export class PageTools {
     }
   }
 
-  public async handleGetPage(client: WordPressClient, params: { id: number }): Promise<any> {
+  public async handleGetPage(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const { id } = params as { id: number };
     try {
-      const page = await client.getPage(params.id);
+      const page = await client.getPage(id);
       const content =
         `**Page Details (ID: ${page.id})**\n\n` +
         `- **Title:** ${page.title.rendered}\n` +
@@ -166,42 +173,46 @@ export class PageTools {
     }
   }
 
-  public async handleCreatePage(client: WordPressClient, params: CreatePostRequest): Promise<any> {
+  public async handleCreatePage(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const createParams = params as unknown as CreatePageRequest;
     try {
-      const page = await client.createPage(params);
+      const page = await client.createPage(createParams);
       return `✅ Page created successfully!\n- ID: ${page.id}\n- Title: ${page.title.rendered}\n- Link: ${page.link}`;
     } catch (error) {
       throw new Error(`Failed to create page: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleUpdatePage(client: WordPressClient, params: UpdatePostRequest & { id: number }): Promise<any> {
+  public async handleUpdatePage(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const updateParams = params as unknown as UpdatePageRequest & { id: number };
     try {
-      const page = await client.updatePage(params);
+      const page = await client.updatePage(updateParams);
       return `✅ Page ${page.id} updated successfully.`;
     } catch (error) {
       throw new Error(`Failed to update page: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleDeletePage(client: WordPressClient, params: { id: number; force?: boolean }): Promise<any> {
+  public async handleDeletePage(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const { id, force } = params as { id: number; force?: boolean };
     try {
-      await client.deletePage(params.id, params.force);
+      await client.deletePage(id, force);
       const action = params.force ? "permanently deleted" : "moved to trash";
-      return `✅ Page ${params.id} has been ${action}.`;
+      return `✅ Page ${id} has been ${action}.`;
     } catch (error) {
       throw new Error(`Failed to delete page: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleGetPageRevisions(client: WordPressClient, params: { id: number }): Promise<any> {
+  public async handleGetPageRevisions(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const { id } = params as { id: number };
     try {
-      const revisions = await client.getPageRevisions(params.id);
+      const revisions = await client.getPageRevisions(id);
       if (revisions.length === 0) {
-        return `No revisions found for page ${params.id}.`;
+        return `No revisions found for page ${id}.`;
       }
       const content =
-        `Found ${revisions.length} revisions for page ${params.id}:\n\n` +
+        `Found ${revisions.length} revisions for page ${id}:\n\n` +
         revisions
           .map((r) => `- Revision by user ID ${r.author} at ${new Date(r.modified).toLocaleString()}`)
           .join("\n");

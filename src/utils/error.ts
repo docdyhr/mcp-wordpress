@@ -2,8 +2,27 @@
  * Error handling utilities
  */
 import { LoggerFactory } from "./logger.js";
+import { config } from "../config/Config.js";
 
 const logger = LoggerFactory.server().child({ component: "ErrorUtils" });
+
+// Environment flag to control legacy console logging noise. Default enabled to preserve
+// backward compatibility and existing test expectations. Set LEGACY_ERROR_LOGS=0 to disable
+// the direct console.error side-channel (structured logger still emits).
+const LEGACY_ERROR_LOGS_ENABLED = config().error.legacyLogsEnabled;
+
+// Internal helper to avoid sprinkling conditionals
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function legacyConsoleError(...args: any[]) {
+  if (LEGACY_ERROR_LOGS_ENABLED) {
+    // eslint-disable-next-line no-console
+    console.error(...args);
+  }
+}
+
+// Test hook: exported only for instrumentation in unit tests (tree-shakeable)
+// @__PURE__ This constant has no side effects and can be dropped in production builds
+export const __errorUtilsLogger = logger;
 
 export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
@@ -26,8 +45,11 @@ export function isError(error: unknown): error is Error {
 }
 
 export function logAndReturn<T>(error: unknown, defaultValue: T): T {
-  logger.warn("Error occurred - returning default value", { 
-    error: getErrorMessage(error)
+  const message = getErrorMessage(error);
+  // Legacy console logging (can be disabled via LEGACY_ERROR_LOGS=0)
+  legacyConsoleError("Error occurred:", message);
+  logger.warn("Error occurred - returning default value", {
+    error: message,
   });
   return defaultValue;
 }
@@ -36,16 +58,21 @@ export function logAndReturn<T>(error: unknown, defaultValue: T): T {
  * Enhanced error handler for consistent tool error handling
  */
 export function handleToolError(error: unknown, operation: string, context?: Record<string, unknown>): never {
-  logger.error(`Error in ${operation}`, { 
-    error: getErrorMessage(error),
-    ...(context && { context })
+  const message = getErrorMessage(error);
+  const errObj = error instanceof Error ? error : new Error(message);
+  // Legacy console logging (can be disabled via LEGACY_ERROR_LOGS=0)
+  legacyConsoleError(`Error in ${operation}:`, errObj);
+  if (context) {
+    legacyConsoleError("Context:", context);
+  }
+  logger.error(`Error in ${operation}`, {
+    error: message,
+    ...(context && { context }),
   });
 
   if (error instanceof Error && error.stack) {
     logger.debug("Error stack trace", { stack: error.stack });
   }
-
-  const message = getErrorMessage(error);
 
   // Provide more specific error messages based on error content
   if (message.includes("ECONNREFUSED") || message.includes("ENOTFOUND")) {
@@ -72,8 +99,14 @@ export function handleToolError(error: unknown, operation: string, context?: Rec
 /**
  * Validates required parameters
  */
-export function validateRequired(params: Record<string, unknown>, required: string[]): void {
-  const missing = required.filter((key) => !params[key]);
+export function validateRequired(params: Record<string, unknown> | unknown, required: string[]): void {
+  // Runtime guard: ensure params is a non-null object (tests expect throw on invalid input)
+  if (params === null || typeof params !== "object") {
+    throw new Error("Parameters must be an object");
+  }
+  // Only treat undefined or null as missing; accept legitimate falsy values: 0, false, ""
+  const obj = params as Record<string, unknown>;
+  const missing = required.filter((key) => obj[key] === undefined || obj[key] === null);
   if (missing.length > 0) {
     throw new Error(`Missing required parameters: ${missing.join(", ")}`);
   }

@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WordPressClient } from "../client/api.js";
 import { getErrorMessage } from "../utils/error.js";
 import { EnhancedError, ErrorHandlers } from "../utils/enhancedError.js";
+import { config } from "../config/Config.js";
 import * as Tools from "../tools/index.js";
 import { z } from "zod";
 
@@ -13,11 +14,11 @@ export interface ToolDefinition {
   description?: string;
   parameters?: Array<{
     name: string;
-    type: string;
+    type?: string;
     description?: string;
     required?: boolean;
   }>;
-  handler: (client: WordPressClient, args: any) => Promise<any>;
+  handler: (client: WordPressClient, args: Record<string, unknown>) => Promise<unknown>;
 }
 
 /**
@@ -39,19 +40,19 @@ export class ToolRegistry {
   public registerAllTools(): void {
     // Register all tools from the tools directory
     Object.values(Tools).forEach((ToolClass) => {
-      let toolInstance: any;
+      let toolInstance: { getTools(): unknown[] };
 
       // Cache and Performance tools need the clients map
       if (ToolClass.name === "CacheTools" || ToolClass.name === "PerformanceTools") {
         toolInstance = new ToolClass(this.wordpressClients);
       } else {
-        toolInstance = new (ToolClass as new () => any)();
+        toolInstance = new (ToolClass as new () => { getTools(): unknown[] })();
       }
 
       const tools = toolInstance.getTools();
 
-      tools.forEach((tool: ToolDefinition) => {
-        this.registerTool(tool);
+      tools.forEach((tool: unknown) => {
+        this.registerTool(tool as ToolDefinition);
       });
     });
   }
@@ -74,8 +75,13 @@ export class ToolRegistry {
     const parameterSchema = this.buildParameterSchema(tool, baseSchema);
 
     // Make site parameter required if multiple sites are configured
-    if (this.wordpressClients.size > 1) {
-      parameterSchema.site = parameterSchema.site.describe(
+    if (
+      this.wordpressClients.size > 1 &&
+      parameterSchema.site &&
+      typeof parameterSchema.site === "object" &&
+      "describe" in parameterSchema.site
+    ) {
+      parameterSchema.site = (parameterSchema.site as z.ZodString).describe(
         "The ID of the WordPress site to target (from mcp-wordpress.config.json). Required when multiple sites are configured.",
       );
     }
@@ -84,7 +90,7 @@ export class ToolRegistry {
       tool.name,
       tool.description || `WordPress tool: ${tool.name}`,
       parameterSchema,
-      async (args: any) => {
+      async (args: Record<string, unknown>) => {
         try {
           let siteId = args.site;
 
@@ -108,11 +114,11 @@ export class ToolRegistry {
             siteId = this.selectBestSite(tool.name, args);
           }
 
-          const client = this.wordpressClients.get(siteId);
+          const client = this.wordpressClients.get(siteId as string);
 
           if (!client) {
             const availableSites = Array.from(this.wordpressClients.keys());
-            const error = ErrorHandlers.siteNotFound(siteId, availableSites);
+            const error = ErrorHandlers.siteNotFound(siteId as string, availableSites);
             return {
               content: [
                 {
@@ -178,14 +184,17 @@ export class ToolRegistry {
   /**
    * Build Zod parameter schema from tool definition
    */
-  private buildParameterSchema(tool: ToolDefinition, baseSchema: any): any {
+  private buildParameterSchema(tool: ToolDefinition, baseSchema: Record<string, unknown>): Record<string, unknown> {
     return (
       tool.parameters?.reduce(
-        (schema: any, param: any) => {
+        (
+          schema: Record<string, unknown>,
+          param: { name: string; type?: string; required?: boolean; [key: string]: unknown },
+        ) => {
           let zodType = this.getZodTypeForParameter(param);
 
           if (param.description) {
-            zodType = zodType.describe(param.description);
+            zodType = zodType.describe(param.description as string);
           }
 
           if (!param.required) {
@@ -203,7 +212,7 @@ export class ToolRegistry {
   /**
    * Get appropriate Zod type for parameter definition
    */
-  private getZodTypeForParameter(param: any): z.ZodType {
+  private getZodTypeForParameter(param: { type?: string; required?: boolean; [key: string]: unknown }): z.ZodType {
     switch (param.type) {
       case "string":
         return z.string();
@@ -214,7 +223,7 @@ export class ToolRegistry {
       case "array":
         return z.array(z.string());
       case "object":
-        return z.record(z.any());
+        return z.record(z.unknown());
       default:
         return z.string();
     }
@@ -223,7 +232,7 @@ export class ToolRegistry {
   /**
    * Intelligent site selection based on context
    */
-  private selectBestSite(toolName: string, args: any): string {
+  private selectBestSite(toolName: string, args: Record<string, unknown>): string {
     const availableSites = Array.from(this.wordpressClients.keys());
 
     // Single site scenario - use it directly
@@ -249,7 +258,7 @@ export class ToolRegistry {
       }
 
       // 3. For development/test operations, prefer dev sites
-      if (toolName.includes("test") || process.env.NODE_ENV === "development") {
+      if (toolName.includes("test") || config().app.isDevelopment) {
         const devSites = availableSites.filter((site) =>
           ["dev", "test", "staging", "local"].includes(site.toLowerCase()),
         );
@@ -269,10 +278,11 @@ export class ToolRegistry {
   /**
    * Check if error is authentication-related
    */
-  private isAuthenticationError(error: any): boolean {
-    if (error?.response?.status && [401, 403].includes(error.response.status)) {
+  private isAuthenticationError(error: unknown): boolean {
+    const errorObj = error as { response?: { status?: number }; code?: string };
+    if (errorObj?.response?.status && [401, 403].includes(errorObj.response.status)) {
       return true;
     }
-    return error?.code === "WORDPRESS_AUTH_ERROR";
+    return errorObj?.code === "WORDPRESS_AUTH_ERROR";
   }
 }

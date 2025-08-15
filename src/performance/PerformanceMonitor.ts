@@ -204,14 +204,14 @@ export class PerformanceMonitor {
   /**
    * Update cache metrics from cache manager
    */
-  updateCacheMetrics(cacheStats: any): void {
+  updateCacheMetrics(cacheStats: Record<string, unknown>): void {
     this.metrics.cache = {
-      hits: cacheStats.hits || 0,
-      misses: cacheStats.misses || 0,
-      hitRate: cacheStats.hitRate || 0,
-      totalSize: cacheStats.totalSize || 0,
-      memoryUsageMB: this.estimateCacheMemoryUsage(cacheStats.totalSize),
-      evictions: cacheStats.evictions || 0,
+      hits: (cacheStats.hits as number) || 0,
+      misses: (cacheStats.misses as number) || 0,
+      hitRate: (cacheStats.hitRate as number) || 0,
+      totalSize: (cacheStats.totalSize as number) || 0,
+      memoryUsageMB: this.estimateCacheMemoryUsage((cacheStats.totalSize as number) || 0),
+      evictions: (cacheStats.evictions as number) || 0,
       averageCacheTime: 0.5, // Sub-millisecond average
     };
   }
@@ -310,7 +310,7 @@ export class PerformanceMonitor {
     };
 
     if (format === "csv") {
-      return this.convertToCSV(data);
+      return this.convertToCSV([data] as Record<string, unknown>[]);
     }
 
     return JSON.stringify(data, null, 2);
@@ -631,9 +631,14 @@ export class PerformanceMonitor {
   /**
    * Convert data to CSV format
    */
-  private convertToCSV(data: any): string {
+  private convertToCSV(data: Record<string, unknown>[]): string {
     // Simplified CSV conversion for metrics
-    const metrics = data.currentMetrics;
+    const reportData = data[0];
+    const metrics = reportData?.currentMetrics as {
+      requests: { total: number; successful: number; failed: number; averageResponseTime: number };
+      cache: { hitRate: number; totalSize: number };
+      system: { memoryUsage: number; uptime: number };
+    };
     const csv = [
       "Metric,Value",
       `Total Requests,${metrics.requests.total}`,

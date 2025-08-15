@@ -26,7 +26,7 @@ export interface JSONSchemaProperty {
   maxLength?: number;
   pattern?: string;
   format?: string;
-  default?: any;
+  default?: unknown;
 }
 
 // MCP Tool Definition
@@ -74,10 +74,10 @@ export interface MCPErrorResponse extends MCPToolResponse {
 }
 
 // MCP Tool Handler Type
-export type MCPToolHandler<TArgs = any, TResponse = MCPToolResponse> = (args: TArgs) => Promise<TResponse>;
+export type MCPToolHandler<TArgs = unknown, TResponse = MCPToolResponse> = (args: TArgs) => Promise<TResponse>;
 
 // Generic MCP Tool Handler with Client
-export type MCPToolHandlerWithClient<TClient, TArgs = any, TResponse = MCPToolResponse> = (
+export type MCPToolHandlerWithClient<TClient, TArgs = unknown, TResponse = MCPToolResponse> = (
   client: TClient,
   args: TArgs,
 ) => Promise<TResponse>;
@@ -124,7 +124,7 @@ export interface AuthenticationResult {
   success: boolean;
   method: string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 // Tool Execution Context
@@ -151,7 +151,7 @@ export interface MCPToolError extends Error {
   category: MCPToolCategory;
   code?: string;
   statusCode?: number;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 // Tool Configuration
@@ -173,22 +173,22 @@ export interface MCPServerConfig {
   name: string;
   version: string;
   tools: MCPToolRegistry;
-  handlers: MCPHandlerRegistry<any>;
+  handlers: MCPHandlerRegistry<unknown>;
   middleware?: MCPMiddleware[];
   config?: MCPToolConfig;
 }
 
 // Middleware Type
-export type MCPMiddleware<_TClient = any> = (
+export type MCPMiddleware<_TClient = unknown> = (
   context: MCPToolContext,
   next: () => Promise<MCPToolResponse>,
 ) => Promise<MCPToolResponse>;
 
 // Tool Execution Pipeline
 export interface MCPExecutionPipeline<TClient> {
-  validate: (toolName: string, args: any) => Promise<ToolValidationResult>;
+  validate: (toolName: string, args: unknown) => Promise<ToolValidationResult>;
   authenticate: (client: TClient) => Promise<boolean>;
-  execute: (toolName: string, client: TClient, args: any) => Promise<MCPToolResponse>;
+  execute: (toolName: string, client: TClient, args: unknown) => Promise<MCPToolResponse>;
   postProcess: (response: MCPToolResponse, context: MCPToolContext) => Promise<MCPToolResponse>;
 }
 
@@ -201,7 +201,7 @@ export interface MCPToolDocumentation {
   examples: Array<{
     title: string;
     description: string;
-    input: Record<string, any>;
+    input: Record<string, unknown>;
     output: string;
   }>;
   parameters: Array<{
@@ -209,7 +209,7 @@ export interface MCPToolDocumentation {
     type: string;
     required: boolean;
     description: string;
-    example?: any;
+    example?: unknown;
   }>;
   errors: Array<{
     code: string;
@@ -222,7 +222,7 @@ export interface MCPToolDocumentation {
 export interface MCPBatchRequest {
   operations: Array<{
     toolName: string;
-    args: Record<string, any>;
+    args: Record<string, unknown>;
     id?: string;
   }>;
   parallel?: boolean;

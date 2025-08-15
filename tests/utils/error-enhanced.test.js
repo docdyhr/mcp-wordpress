@@ -2,18 +2,9 @@
  * Enhanced tests for error handling utilities
  */
 import { jest } from "@jest/globals";
-import { 
-  getErrorMessage, 
-  isError, 
-  logAndReturn, 
-  handleToolError,
-  validateRequired,
-  validateSite
-} from "../../src/utils/error.ts";
-// import { Logger } from "../../dist/utils/logger.js";
 
-// Mock the logger
-jest.mock("../../src/utils/logger.ts", () => {
+// ESM-friendly module mocking: must occur before dynamic imports
+jest.unstable_mockModule("../../dist/utils/logger.js", () => {
   const mockLogger = {
     warn: jest.fn(),
     error: jest.fn(),
@@ -21,7 +12,6 @@ jest.mock("../../src/utils/logger.ts", () => {
     info: jest.fn(),
     child: jest.fn(() => mockLogger)
   };
-  
   return {
     Logger: jest.fn(() => mockLogger),
     LoggerFactory: {
@@ -31,6 +21,20 @@ jest.mock("../../src/utils/logger.ts", () => {
       tool: jest.fn(() => mockLogger)
     }
   };
+});
+
+let getErrorMessage;
+let isError;
+let logAndReturn;
+let handleToolError;
+let validateRequired;
+let validateSite;
+let __errorUtilsLogger;
+
+beforeAll(async () => {
+  await import("../../dist/utils/logger.js");
+  ({ getErrorMessage, isError, logAndReturn, handleToolError, validateRequired, validateSite, __errorUtilsLogger } =
+    await import("../../dist/utils/error.js"));
 });
 
 describe("Enhanced Error Utilities", () => {
@@ -89,32 +93,20 @@ describe("Enhanced Error Utilities", () => {
 
   describe("logAndReturn", () => {
     it("should log warning and return default value", () => {
-      const { LoggerFactory } = require("../../dist/utils/logger.js");
-      const mockLogger = LoggerFactory.server();
-      
       const result = logAndReturn(new Error("Test error"), "default");
-      
       expect(result).toBe("default");
-      expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect(__errorUtilsLogger.warn).toHaveBeenCalledWith(
         "Error occurred - returning default value",
-        expect.objectContaining({
-          error: "Test error"
-        })
+        expect.objectContaining({ error: "Test error" })
       );
     });
 
     it("should handle non-Error objects", () => {
-      const { LoggerFactory } = require("../../dist/utils/logger.js");
-      const mockLogger = LoggerFactory.server();
-      
       const result = logAndReturn("String error", 42);
-      
       expect(result).toBe(42);
-      expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect(__errorUtilsLogger.warn).toHaveBeenCalledWith(
         "Error occurred - returning default value",
-        expect.objectContaining({
-          error: "String error"
-        })
+        expect.objectContaining({ error: "String error" })
       );
     });
 
@@ -174,42 +166,28 @@ describe("Enhanced Error Utilities", () => {
     });
 
     it("should log error details", () => {
-      const { LoggerFactory } = require("../../dist/utils/logger.js");
-      const mockLogger = LoggerFactory.server();
-      
       try {
         handleToolError(new Error("Test error"), "test operation", { id: 123 });
       } catch (_e) {
-        // Expected to throw
+        // expected throw
       }
-      
-      expect(mockLogger.error).toHaveBeenCalledWith(
+      expect(__errorUtilsLogger.error).toHaveBeenCalledWith(
         "Error in test operation",
-        expect.objectContaining({
-          error: "Test error",
-          context: { id: 123 }
-        })
+        expect.objectContaining({ error: "Test error", context: { id: 123 } })
       );
     });
 
     it("should log stack trace for Error objects", () => {
-      const { LoggerFactory } = require("../../dist/utils/logger.js");
-      const mockLogger = LoggerFactory.server();
-      
       const error = new Error("Test");
       error.stack = "Error: Test\n    at test.js:1:1";
-      
       try {
         handleToolError(error, "test");
       } catch (_e) {
-        // Expected to throw
+        // expected throw
       }
-      
-      expect(mockLogger.debug).toHaveBeenCalledWith(
+      expect(__errorUtilsLogger.debug).toHaveBeenCalledWith(
         "Error stack trace",
-        expect.objectContaining({
-          stack: error.stack
-        })
+        expect.objectContaining({ stack: error.stack })
       );
     });
   });
@@ -324,18 +302,12 @@ describe("Enhanced Error Utilities", () => {
     it("should handle errors with no stack trace", () => {
       const error = new Error("No stack");
       delete error.stack;
-      
-      const { LoggerFactory } = require("../../dist/utils/logger.js");
-      const mockLogger = LoggerFactory.server();
-      
       try {
         handleToolError(error, "test");
       } catch (_e) {
-        // Expected to throw
+        // expected throw
       }
-      
-      // Should not call debug since no stack
-      expect(mockLogger.debug).not.toHaveBeenCalled();
+      expect(__errorUtilsLogger.debug).not.toHaveBeenCalled();
     });
 
     it("should handle validateRequired with non-object params", () => {

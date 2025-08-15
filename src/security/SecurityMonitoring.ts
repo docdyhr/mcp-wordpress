@@ -5,6 +5,9 @@
 
 import { EventEmitter } from "events";
 import { SecurityUtils } from "./SecurityConfig.js";
+import { LoggerFactory } from "../utils/logger.js";
+
+const logger = LoggerFactory.security();
 
 export interface SecurityEvent {
   id: string;
@@ -19,9 +22,9 @@ export interface SecurityEvent {
     userAgent?: string;
     endpoint?: string;
     method?: string;
-    payload?: any;
+    payload?: unknown;
     error?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   };
   description: string;
   riskScore: number;
@@ -131,12 +134,12 @@ export class SecurityMonitor extends EventEmitter {
    */
   start(): void {
     if (this.isMonitoring) {
-      console.warn("[Security Monitor] Already monitoring");
+      logger.warn("Already monitoring");
       return;
     }
 
     this.isMonitoring = true;
-    console.log("[Security Monitor] Starting security monitoring");
+    logger.info("Starting security monitoring");
 
     // Start metrics collection
     this.metricsInterval = setInterval(() => {
@@ -151,7 +154,7 @@ export class SecurityMonitor extends EventEmitter {
    */
   stop(): void {
     if (!this.isMonitoring) {
-      console.warn("[Security Monitor] Not currently monitoring");
+      logger.warn("Not currently monitoring");
       return;
     }
 
@@ -162,7 +165,7 @@ export class SecurityMonitor extends EventEmitter {
       this.metricsInterval = undefined;
     }
 
-    console.log("[Security Monitor] Stopped security monitoring");
+    logger.info("Stopped security monitoring");
     this.emit("monitoring-stopped");
   }
 
@@ -191,7 +194,7 @@ export class SecurityMonitor extends EventEmitter {
     // Emit event for real-time processing
     this.emit("security-event", event);
 
-    console.log(`[Security Monitor] Logged ${event.severity} event: ${event.type} - ${event.description}`);
+    logger.info(`Logged ${event.severity} event: ${event.type} - ${event.description}`);
 
     return event;
   }
@@ -274,7 +277,7 @@ export class SecurityMonitor extends EventEmitter {
           await this.executeLogAction(event);
           break;
         default:
-          console.log(`[Security Monitor] Action ${type} queued for manual processing`);
+          logger.info(`Action ${type} queued for manual processing`, { type });
       }
 
       action.result = "success";
@@ -282,7 +285,7 @@ export class SecurityMonitor extends EventEmitter {
     } catch (error) {
       action.result = "failure";
       action.details += ` - failed: ${error instanceof Error ? error.message : String(error)}`;
-      console.error(`[Security Monitor] Action ${type} failed:`, error);
+      logger.error(`Action ${type} failed`, { type, error });
     }
 
     return action;
@@ -293,7 +296,7 @@ export class SecurityMonitor extends EventEmitter {
    */
   private async executeBlockAction(event: SecurityEvent): Promise<void> {
     if (event.details.ipAddress) {
-      console.log(`[Security Monitor] Blocking IP: ${event.details.ipAddress}`);
+      logger.info(`Blocking IP: ${event.details.ipAddress}`);
       // In a real implementation, this would interface with firewall/load balancer
       this.emit("ip-blocked", { ip: event.details.ipAddress, reason: event.description });
     }
@@ -304,7 +307,7 @@ export class SecurityMonitor extends EventEmitter {
    */
   private async executeThrottleAction(event: SecurityEvent): Promise<void> {
     if (event.details.userId) {
-      console.log(`[Security Monitor] Throttling user: ${event.details.userId}`);
+      logger.info(`Throttling user: ${event.details.userId}`);
       // In a real implementation, this would apply rate limiting
       this.emit("user-throttled", { userId: event.details.userId, reason: event.description });
     }
@@ -314,7 +317,7 @@ export class SecurityMonitor extends EventEmitter {
    * Execute alert action
    */
   private async executeAlertAction(event: SecurityEvent): Promise<void> {
-    console.log(`[Security Monitor] Alert triggered for event: ${event.id}`);
+    logger.info(`Alert triggered for event: ${event.id}`);
     this.emit("security-alert", event);
   }
 
@@ -322,7 +325,7 @@ export class SecurityMonitor extends EventEmitter {
    * Execute log action
    */
   private async executeLogAction(event: SecurityEvent): Promise<void> {
-    console.log(`[Security Monitor] Enhanced logging for event: ${event.id}`);
+    logger.info(`Enhanced logging for event: ${event.id}`);
     // Additional detailed logging would go here
   }
 
@@ -346,7 +349,7 @@ export class SecurityMonitor extends EventEmitter {
 
     this.alerts.push(alert);
 
-    console.log(`[Security Monitor] Created ${alert.severity} alert: ${alert.title}`);
+    logger.info(`Created ${alert.severity} alert: ${alert.title}`);
     this.emit("alert-created", alert);
 
     return alert;
@@ -611,9 +614,9 @@ export class SecurityMonitor extends EventEmitter {
   /**
    * Group array by property
    */
-  private groupBy(array: any[], property: string): Record<string, number> {
-    return array.reduce((acc, item) => {
-      const key = item[property] || "unknown";
+  private groupBy(array: Array<Record<string, any>>, property: string): Record<string, number> { // eslint-disable-line @typescript-eslint/no-explicit-any
+    return array.reduce<Record<string, number>>((acc, item) => {
+      const key = (item && item[property]) || "unknown";
       acc[key] = (acc[key] || 0) + 1;
       return acc;
     }, {});
@@ -664,7 +667,7 @@ export class SecurityMonitor extends EventEmitter {
    */
   addThreatIntelligence(threat: ThreatIntelligence): void {
     this.threatIntel.set(threat.value, threat);
-    console.log(`[Security Monitor] Added threat intelligence: ${threat.type} - ${threat.value}`);
+    logger.info(`Added threat intelligence: ${threat.type} - ${threat.value}`);
   }
 
   /**
@@ -673,7 +676,7 @@ export class SecurityMonitor extends EventEmitter {
   removeThreatIntelligence(value: string): boolean {
     const removed = this.threatIntel.delete(value);
     if (removed) {
-      console.log(`[Security Monitor] Removed threat intelligence: ${value}`);
+      logger.info(`Removed threat intelligence: ${value}`);
     }
     return removed;
   }
@@ -700,7 +703,7 @@ export class SecurityMonitor extends EventEmitter {
       };
     }
 
-    console.log(`[Security Monitor] Updated alert ${alertId} status to ${status}`);
+    logger.info(`Updated alert ${alertId} status to ${status}`);
     this.emit("alert-updated", alert);
     return true;
   }

@@ -12,7 +12,12 @@ export class UserTools {
    * Retrieves the list of user management tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): any[] {
+  public getTools(): Array<{
+    name: string;
+    description: string;
+    parameters?: Array<{ name: string; type?: string; description?: string; required?: boolean; enum?: string[]; items?: unknown }>;
+    handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
+  }> {
     return [
       {
         name: "wp_list_users",
@@ -139,7 +144,7 @@ export class UserTools {
     ];
   }
 
-  public async handleListUsers(client: WordPressClient, params: UserQueryParams): Promise<any> {
+  public async handleListUsers(client: WordPressClient, params: UserQueryParams): Promise<unknown> {
     try {
       const users = await client.getUsers(params);
       if (users.length === 0) {
@@ -148,7 +153,7 @@ export class UserTools {
 
       // Use streaming for large user result sets (>30 users)
       if (users.length > 30) {
-        const streamResults: StreamingResult<any>[] = [];
+        const streamResults: StreamingResult<unknown>[] = [];
 
         for await (const result of WordPressDataStreamer.streamUsers(users, {
           includeRoles: true,
@@ -218,9 +223,10 @@ export class UserTools {
     }
   }
 
-  public async handleGetUser(client: WordPressClient, params: { id: number }): Promise<any> {
+  public async handleGetUser(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const { id } = params as { id: number };
     try {
-      const user = await client.getUser(params.id);
+      const user = await client.getUser(id);
       const content =
         `**User Details (ID: ${user.id})**\n\n` +
         `- **Name:** ${user.name}\n` +
@@ -233,7 +239,10 @@ export class UserTools {
     }
   }
 
-  public async handleGetCurrentUser(client: WordPressClient, params: any): Promise<any> {
+  public async handleGetCurrentUser(
+    client: WordPressClient,
+    params: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     try {
       const user = await client.getCurrentUser();
       const siteUrl = client.getSiteUrl();
@@ -290,36 +299,39 @@ export class UserTools {
         `- **Key Capabilities:** ${userCapabilities || "None"}\n` +
         `- **Profile Link:** ${user.link || `${siteUrl}/wp-admin/profile.php`}`;
 
-      return content;
+      return { content };
     } catch (error) {
       throw new Error(`Failed to get current user: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleCreateUser(client: WordPressClient, params: CreateUserRequest): Promise<any> {
+  public async handleCreateUser(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const createParams = params as unknown as CreateUserRequest;
     try {
-      const user = await client.createUser(params);
+      const user = await client.createUser(createParams);
       return `✅ User "${user.name}" created successfully with ID: ${user.id}.`;
     } catch (error) {
       throw new Error(`Failed to create user: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleUpdateUser(client: WordPressClient, params: UpdateUserRequest & { id: number }): Promise<any> {
+  public async handleUpdateUser(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const updateParams = params as unknown as UpdateUserRequest;
     try {
-      const user = await client.updateUser(params);
+      const user = await client.updateUser(updateParams);
       return `✅ User ${user.id} updated successfully.`;
     } catch (error) {
       throw new Error(`Failed to update user: ${getErrorMessage(error)}`);
     }
   }
 
-  public async handleDeleteUser(client: WordPressClient, params: { id: number; reassign?: number }): Promise<any> {
+  public async handleDeleteUser(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const { id, reassign } = params as { id: number; reassign?: number };
     try {
-      await client.deleteUser(params.id, params.reassign);
-      let content = `✅ User ${params.id} has been deleted.`;
-      if (params.reassign) {
-        content += ` Their content has been reassigned to user ID ${params.reassign}.`;
+      await client.deleteUser(id, reassign);
+      let content = `✅ User ${id} has been deleted.`;
+      if (reassign) {
+        content += ` Their content has been reassigned to user ID ${reassign}.`;
       }
       return content;
     } catch (error) {

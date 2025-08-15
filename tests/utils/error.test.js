@@ -207,12 +207,11 @@ describe("error utilities", () => {
       expect(() => validateRequired(params, required)).not.toThrow();
     });
 
-    it("should handle falsy values as missing", () => {
-      const params = { username: "", password: null, email: undefined };
-      const required = ["username", "password", "email"];
-
+    it("should treat only null/undefined as missing (allow empty string/0/false)", () => {
+      const params = { username: "", password: null, email: undefined, attempts: 0, active: false };
+      const required = ["username", "password", "email", "attempts", "active"];
       expect(() => validateRequired(params, required)).toThrow(
-        "Missing required parameters: username, password, email",
+        "Missing required parameters: password, email",
       );
     });
   });

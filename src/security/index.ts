@@ -6,6 +6,7 @@
 // Core Security Components
 export { SecurityConfig, SecurityUtils, createSecureError, getEnvironmentSecurity } from "./SecurityConfig.js";
 import { SecurityValidationError } from "./InputValidator.js";
+import { LoggerFactory } from "../utils/logger.js";
 export {
   InputSanitizer,
   SecuritySchemas,
@@ -17,6 +18,7 @@ export {
 
 // AI-Powered Security Scanner
 import { AISecurityScanner } from "./AISecurityScanner.js";
+import type { SecurityScanResult } from "./AISecurityScanner.js";
 export { AISecurityScanner } from "./AISecurityScanner.js";
 
 // Automated Remediation System
@@ -87,11 +89,13 @@ export class SecuritySystem {
    */
   async initialize(): Promise<void> {
     if (this.initialized) {
-      console.log("[Security System] Already initialized");
+      const logger = LoggerFactory.security();
+      logger.info("Security system already initialized");
       return;
     }
 
-    console.log("[Security System] Initializing comprehensive security system...");
+    const logger = LoggerFactory.security();
+    logger.info("Initializing comprehensive security system");
 
     try {
       // Initialize all components
@@ -102,9 +106,11 @@ export class SecuritySystem {
       this.monitor.start();
 
       this.initialized = true;
-      console.log("[Security System] Security system initialized successfully");
+      logger.info("Security system initialized successfully");
     } catch (error) {
-      console.error("[Security System] Initialization failed:", error);
+      logger.error("Security system initialization failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new SecurityValidationError("Security system initialization failed", [{ message: String(error) }]);
     }
   }
@@ -128,26 +134,54 @@ export class SecuritySystem {
   /**
    * Create and execute remediation plan
    */
-  async remediate(scanResult: any, dryRun = false): Promise<_RemediationResult[]> {
+  async remediate(scanResult: unknown, dryRun = false): Promise<_RemediationResult[]> {
     this.ensureInitialized();
-    const plan = await this.remediation.createRemediationPlan(scanResult);
+    const plan = await this.remediation.createRemediationPlan(scanResult as SecurityScanResult);
     return await this.remediation.executeRemediationPlan(plan, { dryRun });
   }
 
   /**
    * Execute security gates for CI/CD
    */
-  async executeGates(stage: string, context: any, options?: SecurityGateOptions): Promise<_PipelineSecurityReport> {
+  async executeGates(stage: string, context: unknown, options?: SecurityGateOptions): Promise<_PipelineSecurityReport> {
     this.ensureInitialized();
-    return await this.pipeline.executeSecurityGates(stage as any, context, options);
+    const validStages = ["pre-commit", "pre-build", "pre-deploy", "post-deploy"] as const;
+    type ValidStage = (typeof validStages)[number];
+    const validStage = validStages.includes(stage as ValidStage) ? (stage as ValidStage) : "pre-commit";
+
+    // Create a minimal PipelineContext from unknown input
+    const pipelineContext = {
+      repositoryUrl: "",
+      branch: "",
+      commit: "",
+      author: "",
+      environment: "development",
+      buildNumber: "",
+      artifacts: [],
+      ...(typeof context === "object" && context !== null ? context : {}),
+    };
+
+    return await this.pipeline.executeSecurityGates(validStage, pipelineContext, options);
   }
 
   /**
    * Log security event
    */
-  async logEvent(eventData: any): Promise<_SecurityEvent> {
+  async logEvent(eventData: unknown): Promise<_SecurityEvent> {
     this.ensureInitialized();
-    return await this.monitor.logSecurityEvent(eventData);
+
+    // Create a minimal SecurityEvent from unknown input
+    const securityEventData = {
+      type: "system" as const,
+      description: "Security event",
+      severity: "low" as const,
+      source: "unknown",
+      details: {},
+      riskScore: 0,
+      ...(typeof eventData === "object" && eventData !== null ? eventData : {}),
+    };
+
+    return await this.monitor.logSecurityEvent(securityEventData);
   }
 
   /**
@@ -171,12 +205,13 @@ export class SecuritySystem {
       return;
     }
 
-    console.log("[Security System] Shutting down security system...");
+    const logger = LoggerFactory.security();
+    logger.info("Shutting down security system");
 
     this.monitor.stop();
     this.initialized = false;
 
-    console.log("[Security System] Security system shutdown complete");
+    logger.info("Security system shutdown complete");
   }
 
   /**
@@ -225,12 +260,12 @@ export const security = {
   /**
    * Quick remediation
    */
-  remediate: (scanResult: any, dryRun = true) => securitySystem.remediate(scanResult, dryRun),
+  remediate: (scanResult: unknown, dryRun = true) => securitySystem.remediate(scanResult, dryRun),
 
   /**
    * Log security event
    */
-  logEvent: (eventData: any) => securitySystem.logEvent(eventData),
+  logEvent: (eventData: unknown) => securitySystem.logEvent(eventData),
 
   /**
    * Get security status

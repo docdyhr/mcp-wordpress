@@ -4,6 +4,9 @@
  */
 
 import { z } from "zod";
+import { LoggerFactory } from "../utils/logger.js";
+
+const logger = LoggerFactory.security();
 
 // Common validation patterns
 const URL_PATTERN = /^https?:\/\/[^\s<>'"{}|\\^`\[\]]+$/;
@@ -159,17 +162,17 @@ export class InputSanitizer {
  * Security validation decorator for tool methods
  */
 export function validateSecurity(schema: z.ZodSchema) {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (target: unknown, propertyName: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value;
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       try {
         // Validate input parameters
         const params = args[0] || {};
         const validatedParams = schema.parse(params);
 
         // Log security validation (without sensitive data)
-        console.error(`Security validation passed for ${propertyName}`, {
+        logger.info(`Security validation passed for ${propertyName}`, {
           timestamp: new Date().toISOString(),
           method: propertyName,
           paramCount: Object.keys(validatedParams).length,
@@ -179,7 +182,7 @@ export function validateSecurity(schema: z.ZodSchema) {
         return await method.call(this, validatedParams, ...args.slice(1));
       } catch (error) {
         // Log security validation failure
-        console.error(`Security validation failed for ${propertyName}`, {
+        logger.error(`Security validation failed for ${propertyName}`, {
           timestamp: new Date().toISOString(),
           method: propertyName,
           error: error instanceof z.ZodError ? error.errors : error instanceof Error ? error.message : String(error),
@@ -206,9 +209,9 @@ export function validateSecurity(schema: z.ZodSchema) {
  * Custom security validation error
  */
 export class SecurityValidationError extends Error {
-  public readonly errors: any[];
+  public readonly errors: Array<z.ZodIssue | { message: string }>;
 
-  constructor(message: string, errors: any[] = []) {
+  constructor(message: string, errors: Array<z.ZodIssue | { message: string }> = []) {
     super(message);
     this.name = "SecurityValidationError";
     this.errors = errors;

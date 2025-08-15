@@ -7,6 +7,7 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import { SecurityUtils } from "./SecurityConfig.js";
 import { SecurityValidationError } from "./InputValidator.js";
+import { LoggerFactory } from "../utils/logger.js";
 
 interface SecurityReviewRule {
   id: string;
@@ -345,7 +346,8 @@ export class SecurityReviewer {
     } = {},
   ): Promise<CodeReviewResult> {
     const reviewId = SecurityUtils.generateSecureToken(16);
-    console.log(`[Security Reviewer] Reviewing file: ${filePath}`);
+    const logger = LoggerFactory.security();
+    logger.info("Reviewing file", { filePath, reviewId });
 
     try {
       const content = await fs.readFile(filePath, "utf-8");
@@ -376,11 +378,11 @@ export class SecurityReviewer {
       };
 
       this.reviewHistory.push(result);
-      console.log(`[Security Reviewer] Review completed: ${findings.length} findings`);
+      logger.info("Review completed", { filePath, findingsCount: findings.length, reviewId });
 
       return result;
     } catch (error) {
-      console.error(`[Security Reviewer] Review failed for ${filePath}:`, error);
+      logger.error("Review failed", { filePath, reviewId, error: error instanceof Error ? error.message : String(error) });
       throw new SecurityValidationError("Security review failed", [{ message: String(error) }]);
     }
   }
@@ -398,7 +400,8 @@ export class SecurityReviewer {
       aiAnalysis?: boolean;
     } = {},
   ): Promise<CodeReviewResult[]> {
-    console.log(`[Security Reviewer] Reviewing directory: ${dirPath}`);
+    const logger = LoggerFactory.security();
+    logger.info("Reviewing directory", { dirPath });
 
     const results: CodeReviewResult[] = [];
     const filePattern = options.filePattern || /\.(ts|js|jsx|tsx)$/;
@@ -420,7 +423,7 @@ export class SecurityReviewer {
 
       return results;
     } catch (error) {
-      console.error(`[Security Reviewer] Directory review failed for ${dirPath}:`, error);
+      logger.error("Directory review failed", { dirPath, error: error instanceof Error ? error.message : String(error) });
       throw new SecurityValidationError("Directory review failed", [{ message: String(error) }]);
     }
   }

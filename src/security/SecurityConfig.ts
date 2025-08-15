@@ -4,6 +4,9 @@
 
 import { randomBytes } from "crypto";
 import * as path from "path";
+import { LoggerFactory } from "../utils/logger.js";
+
+const logger = LoggerFactory.security();
 
 export const SecurityConfig = {
   // Rate limiting
@@ -182,22 +185,26 @@ export class SecurityUtils {
   /**
    * Redact sensitive information from objects
    */
-  static redactSensitiveData(obj: any): any {
+  static redactSensitiveData(obj: unknown): unknown {
     if (typeof obj !== "object" || obj === null) {
       return obj;
     }
 
-    const redacted = Array.isArray(obj) ? [...obj] : { ...obj };
+    const working: Record<string, unknown> | unknown[] = Array.isArray(obj) ? [...obj] : { ...(obj as Record<string, unknown>) };
 
-    for (const key in redacted) {
+    if (Array.isArray(working)) {
+      return working.map((val) => (typeof val === "object" ? SecurityUtils.redactSensitiveData(val) : val));
+    }
+
+    for (const key in working) {
       if (SecurityConfig.logging.excludeFields.some((field) => key.toLowerCase().includes(field.toLowerCase()))) {
-        redacted[key] = "[REDACTED]";
-      } else if (typeof redacted[key] === "object") {
-        redacted[key] = SecurityUtils.redactSensitiveData(redacted[key]);
+        working[key] = "[REDACTED]";
+      } else if (typeof working[key] === "object" && working[key] !== null) {
+        working[key] = SecurityUtils.redactSensitiveData(working[key]);
       }
     }
 
-    return redacted;
+    return working;
   }
 
   /**
@@ -242,7 +249,7 @@ export class SecurityUtils {
   /**
    * Sanitize log output
    */
-  static sanitizeForLog(data: any): any {
+  static sanitizeForLog(data: unknown): unknown {
     if (typeof data === "string") {
       return SecurityUtils.redactString(data);
     }
@@ -257,20 +264,20 @@ export class SecurityUtils {
  * Secure error handler that prevents information disclosure
  */
 export function createSecureError(
-  error: any,
+  error: unknown,
   fallbackMessage: string = SecurityConfig.errorMessages.serverError,
 ): Error {
   // Log the actual error for debugging (with sanitization)
   if (process.env.NODE_ENV !== "production") {
-    console.error("Secure Error:", SecurityUtils.sanitizeForLog(error));
+    logger.error("Secure Error", { error: SecurityUtils.sanitizeForLog(error) });
   }
 
   // Return generic error to prevent information disclosure
   const secureError = new Error(fallbackMessage);
 
   // Preserve error code if it's safe
-  if (error && typeof error.code === "string" && !error.code.includes("_")) {
-    (secureError as any).code = error.code;
+  if (error && typeof (error as { code?: unknown }).code === "string" && !(error as { code: string }).code.includes("_")) {
+  (secureError as unknown as Record<string, unknown>).code = (error as { code: string }).code;
   }
 
   return secureError;

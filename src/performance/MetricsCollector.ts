@@ -29,7 +29,7 @@ export interface RequestMetadata {
 
 export interface ToolExecutionContext {
   toolName: string;
-  parameters: any;
+  parameters: Record<string, unknown>;
   startTime: number;
   siteId: string | undefined;
 }
@@ -42,8 +42,8 @@ export class MetricsCollector {
   private config: CollectorConfig;
   private activeRequests: Map<string, RequestMetadata> = new Map();
   private activeTools: Map<string, ToolExecutionContext> = new Map();
-  private clientInstances: Map<string, any> = new Map();
-  private cacheManagers: Map<string, any> = new Map();
+  private clientInstances: Map<string, unknown> = new Map();
+  private cacheManagers: Map<string, unknown> = new Map();
   private logger = LoggerFactory.performance();
   private realTimeInterval?: NodeJS.Timeout | undefined;
 
@@ -70,25 +70,25 @@ export class MetricsCollector {
   /**
    * Register a WordPress client for monitoring
    */
-  registerClient(siteId: string, client: any): void {
+  registerClient(siteId: string, client: unknown): void {
     this.clientInstances.set(siteId, client);
 
     if (this.config.enableRequestInterception) {
-      this.interceptClientRequests(siteId, client);
+      this.interceptClientRequests(siteId, client as Record<string, unknown>);
     }
   }
 
   /**
    * Register a cache manager for monitoring
    */
-  registerCacheManager(siteId: string, cacheManager: any): void {
+  registerCacheManager(siteId: string, cacheManager: unknown): void {
     this.cacheManagers.set(siteId, cacheManager);
   }
 
   /**
    * Start tracking a tool execution
    */
-  startToolExecution(toolName: string, parameters: any, siteId?: string): string {
+  startToolExecution(toolName: string, parameters: Record<string, unknown>, siteId?: string): string {
     const executionId = `${toolName}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     this.activeTools.set(executionId, {
@@ -150,8 +150,9 @@ export class MetricsCollector {
     };
 
     for (const [_siteId, cacheManager] of this.cacheManagers) {
-      if (cacheManager && typeof cacheManager.getStats === "function") {
-        const stats = cacheManager.getStats();
+      const manager = cacheManager as { getStats?: () => CacheStats };
+      if (manager && typeof manager.getStats === "function") {
+        const stats = manager.getStats();
         aggregated.hits += stats.hits || 0;
         aggregated.misses += stats.misses || 0;
         aggregated.evictions += stats.evictions || 0;
@@ -182,8 +183,9 @@ export class MetricsCollector {
     const responseTimes: number[] = [];
 
     for (const [_siteId, client] of this.clientInstances) {
-      if (client && typeof client.getStats === "function") {
-        const stats = client.getStats();
+      const clientObj = client as { getStats?: () => ClientStats };
+      if (clientObj && typeof clientObj.getStats === "function") {
+        const stats = clientObj.getStats();
         aggregated.totalRequests += stats.totalRequests || 0;
         aggregated.successfulRequests += stats.successfulRequests || 0;
         aggregated.failedRequests += stats.failedRequests || 0;
@@ -212,21 +214,23 @@ export class MetricsCollector {
     client?: ClientStats;
     isActive: boolean;
   } {
-    const result: any = { isActive: false };
+    const result: Record<string, unknown> = { isActive: false };
 
     const cacheManager = this.cacheManagers.get(siteId);
-    if (cacheManager && typeof cacheManager.getStats === "function") {
-      result.cache = cacheManager.getStats();
+    const cacheObj = cacheManager as { getStats?: () => CacheStats } | undefined;
+    if (cacheObj && typeof cacheObj.getStats === "function") {
+      result.cache = cacheObj.getStats();
       result.isActive = true;
     }
 
     const client = this.clientInstances.get(siteId);
-    if (client && typeof client.getStats === "function") {
-      result.client = client.getStats();
+    const clientObj = client as { getStats?: () => ClientStats } | undefined;
+    if (clientObj && typeof clientObj.getStats === "function") {
+      result.client = clientObj.getStats();
       result.isActive = true;
     }
 
-    return result;
+    return result as { cache?: CacheStats; client?: ClientStats; isActive: boolean };
   }
 
   /**
@@ -248,7 +252,13 @@ export class MetricsCollector {
     worstPerforming: string;
   } {
     const sites = Array.from(this.clientInstances.keys());
-    const comparison: any = {};
+    const comparison: Record<string, {
+      responseTime: number;
+      cacheHitRate: number;
+      errorRate: number;
+      requestCount: number;
+      ranking: number;
+    }> = {};
     const rankings: Array<{ site: string; score: number }> = [];
 
     for (const siteId of sites) {
@@ -278,7 +288,10 @@ export class MetricsCollector {
 
     // Assign rankings
     rankings.forEach((item, index) => {
-      comparison[item.site].ranking = index + 1;
+      const siteData = comparison[item.site];
+      if (siteData) {
+        siteData.ranking = index + 1;
+      }
     });
 
     return {
@@ -343,13 +356,13 @@ export class MetricsCollector {
   exportDetailedReport(): {
     timestamp: string;
     overview: PerformanceMetrics;
-    siteComparison: any;
+    siteComparison: Record<string, unknown>;
     aggregatedStats: {
       cache: CacheStats;
       client: ClientStats;
     };
-    optimizations: any;
-    alerts: any[];
+    optimizations: Record<string, unknown>;
+    alerts: unknown[];
   } {
     return {
       timestamp: new Date().toISOString(),
@@ -374,13 +387,13 @@ export class MetricsCollector {
     }
 
     // Adjust collection frequency based on environment
-    const interval = ConfigHelpers.isDev() 
+    const interval = ConfigHelpers.isDev()
       ? Math.max(this.config.collectInterval * 2, 60000) // Longer intervals in dev
       : this.config.collectInterval;
-    
-    this.logger.info("Starting real-time metrics collection", { 
-      interval: `${interval/1000}s`,
-      environment: ConfigHelpers.get().get().app.nodeEnv
+
+    this.logger.info("Starting real-time metrics collection", {
+      interval: `${interval / 1000}s`,
+      environment: ConfigHelpers.get().get().app.nodeEnv,
     });
 
     this.realTimeInterval = setInterval(() => {
@@ -390,7 +403,7 @@ export class MetricsCollector {
         this.logger.debug("Real-time metrics updated");
       } catch (error) {
         this.logger.error("Failed to update real-time metrics", {
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }, interval);
@@ -412,7 +425,8 @@ export class MetricsCollector {
    */
   private updateCacheMetrics(): void {
     const aggregatedStats = this.getAggregatedCacheStats();
-    this.monitor.updateCacheMetrics(aggregatedStats);
+    // Type assertion: convert CacheStats to Record<string, unknown> via unknown
+    this.monitor.updateCacheMetrics(aggregatedStats as unknown as Record<string, unknown>);
   }
 
   /**
@@ -426,22 +440,29 @@ export class MetricsCollector {
   /**
    * Intercept client requests for automatic tracking
    */
-  private interceptClientRequests(siteId: string, client: any): void {
+  private interceptClientRequests(siteId: string, client: Record<string, unknown>): void {
     if (!client.request || typeof client.request !== "function") {
       return;
     }
 
     const originalRequest = client.request.bind(client);
 
-    client.request = async (...args: any[]) => {
+    const clientObj = client as {
+      request?: (...args: unknown[]) => Promise<unknown>;
+      originalRequest?: (...args: unknown[]) => Promise<unknown>;
+    };
+    if (!clientObj.request) return;
+
+    clientObj.originalRequest = clientObj.request;
+    clientObj.request = async (...args: unknown[]) => {
       const startTime = Date.now();
       const requestId = `${siteId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-      // Extract metadata
+      // Extract metadata with proper type assertions
       const metadata: RequestMetadata = {
         siteId,
-        endpoint: args[0] || "unknown",
-        method: args[1] || "GET",
+        endpoint: (args[0] as string) || "unknown",
+        method: (args[1] as string) || "GET",
         startTime,
         fromCache: false,
       };

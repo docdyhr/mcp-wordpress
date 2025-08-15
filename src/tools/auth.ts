@@ -11,7 +11,12 @@ export class AuthTools {
    * Retrieves the list of authentication tools.
    * @returns An array of MCPTool definitions.
    */
-  public getTools(): any[] {
+  public getTools(): Array<{
+    name: string;
+    description: string;
+    parameters?: Array<{ name: string; type?: string; description?: string; required?: boolean; enum?: string[]; items?: unknown }>;
+    handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
+  }> {
     return [
       {
         name: "wp_test_auth",
@@ -71,7 +76,10 @@ export class AuthTools {
    * @param params - The parameters for the tool request.
    * @returns A promise that resolves to an MCPToolResponse.
    */
-  public async handleTestAuth(client: WordPressClient, params: any): Promise<any> {
+  public async handleTestAuth(
+    client: WordPressClient,
+    params: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     try {
       await client.ping();
       const user = await client.getCurrentUser();
@@ -85,7 +93,7 @@ export class AuthTools {
         `**Roles:** ${user.roles?.join(", ") || "N/A"}\n\n` +
         "Your WordPress connection is working properly.";
 
-      return content;
+      return { content };
     } catch (error) {
       throw new Error(`Authentication test failed: ${getErrorMessage(error)}`);
     }
@@ -98,7 +106,10 @@ export class AuthTools {
    * @param params - The parameters for the tool request.
    * @returns A promise that resolves to an MCPToolResponse.
    */
-  public async handleGetAuthStatus(client: WordPressClient, params: any): Promise<any> {
+  public async handleGetAuthStatus(
+    client: WordPressClient,
+    params: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     try {
       const isAuthenticated = client.isAuthenticated;
       const config = client.config;
@@ -114,7 +125,7 @@ export class AuthTools {
         content += "**Status:** Not connected. Use 'wp_test_auth' to connect and verify credentials.";
       }
 
-      return content;
+      return { content };
     } catch (error) {
       throw new Error(`Failed to get auth status: ${getErrorMessage(error)}`);
     }
@@ -129,13 +140,14 @@ export class AuthTools {
    */
   public async handleSwitchAuthMethod(
     client: WordPressClient,
-    params: {
+    params: Record<string, unknown>,
+  ): Promise<unknown> {
+    const { method: _method, username: _username, password: _password, jwt_token: _jwt_token } = params as {
       method: AuthMethod;
       username?: string;
       password?: string;
       jwt_token?: string;
-    },
-  ): Promise<any> {
+    };
     try {
       // This functionality is not currently supported as the client
       // doesn't have an updateAuthConfig method

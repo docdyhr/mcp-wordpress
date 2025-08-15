@@ -2,7 +2,7 @@ import { getErrorMessage } from "./error.js";
 
 export interface ErrorContext {
   operation: string;
-  parameters?: Record<string, any>;
+  parameters?: Record<string, unknown>;
   suggestions?: string[];
   troubleshooting?: string[];
 }
@@ -54,7 +54,7 @@ export class ErrorHandlers {
   /**
    * Handle post not found errors
    */
-  static postNotFound(postId: number, originalError: any): EnhancedError {
+  static postNotFound(postId: number, originalError: unknown): EnhancedError {
     const errorMessage = getErrorMessage(originalError);
 
     return new EnhancedError(`Post with ID ${postId} not found`, {
@@ -78,7 +78,7 @@ export class ErrorHandlers {
   /**
    * Handle authentication errors
    */
-  static authenticationFailed(originalError: any): EnhancedError {
+  static authenticationFailed(originalError: unknown): EnhancedError {
     const errorMessage = getErrorMessage(originalError);
 
     return new EnhancedError("Authentication failed", {
@@ -141,7 +141,7 @@ export class ErrorHandlers {
   /**
    * Handle permission errors
    */
-  static permissionDenied(operation: string, originalError: any): EnhancedError {
+  static permissionDenied(operation: string, originalError: unknown): EnhancedError {
     const errorMessage = getErrorMessage(originalError);
 
     return new EnhancedError(`Permission denied for ${operation}`, {
@@ -163,7 +163,7 @@ export class ErrorHandlers {
   /**
    * Handle network/connection errors
    */
-  static connectionError(originalError: any): EnhancedError {
+  static connectionError(originalError: unknown): EnhancedError {
     const errorMessage = getErrorMessage(originalError);
 
     return new EnhancedError("Failed to connect to WordPress site", {
@@ -185,7 +185,7 @@ export class ErrorHandlers {
   /**
    * Handle validation errors
    */
-  static validationError(field: string, value: any, expectedType: string): EnhancedError {
+  static validationError(field: string, value: unknown, expectedType: string): EnhancedError {
     return new EnhancedError(`Invalid ${field}: expected ${expectedType}, got ${typeof value}`, {
       operation: "validation",
       parameters: { field, value, expectedType },
@@ -205,7 +205,7 @@ export class ErrorHandlers {
   /**
    * Handle rate limiting errors
    */
-  static rateLimitExceeded(originalError: any): EnhancedError {
+  static rateLimitExceeded(originalError: unknown): EnhancedError {
     const errorMessage = getErrorMessage(originalError);
 
     return new EnhancedError("Rate limit exceeded", {
@@ -227,7 +227,7 @@ export class ErrorHandlers {
   /**
    * Generic error handler with basic suggestions
    */
-  static generic(operation: string, originalError: any): EnhancedError {
+  static generic(operation: string, originalError: unknown): EnhancedError {
     const errorMessage = getErrorMessage(originalError);
 
     return new EnhancedError(`Failed to ${operation}`, {

@@ -72,11 +72,11 @@ export interface RequestOptions {
   timeout?: number;
   retries?: number;
   signal?: AbortSignal;
-  params?: any;
+  params?: Record<string, unknown>;
 }
 
 // API Response Wrapper
-export interface APIResponse<T = any> {
+export interface APIResponse<T = unknown> {
   data: T;
   status: number;
   statusText: string;
@@ -115,12 +115,12 @@ export interface IWordPressClient {
   disconnect(): Promise<void>;
 
   // Generic HTTP Methods
-  request<T = any>(method: HTTPMethod, endpoint: string, data?: any, options?: RequestOptions): Promise<T>;
-  get<T = any>(endpoint: string, options?: RequestOptions): Promise<T>;
-  post<T = any>(endpoint: string, data?: any, options?: RequestOptions): Promise<T>;
-  put<T = any>(endpoint: string, data?: any, options?: RequestOptions): Promise<T>;
-  patch<T = any>(endpoint: string, data?: any, options?: RequestOptions): Promise<T>;
-  delete<T = any>(endpoint: string, options?: RequestOptions): Promise<T>;
+  request<T = unknown>(method: HTTPMethod, endpoint: string, data?: unknown, options?: RequestOptions): Promise<T>;
+  get<T = unknown>(endpoint: string, options?: RequestOptions): Promise<T>;
+  post<T = unknown>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T>;
+  put<T = unknown>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T>;
+  patch<T = unknown>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T>;
+  delete<T = unknown>(endpoint: string, options?: RequestOptions): Promise<T>;
 
   // Posts
   getPosts(params?: PostQueryParams): Promise<WordPressPost[]>;
@@ -213,11 +213,7 @@ export interface IWordPressClient {
   deleteApplicationPassword(userId: number | "me", uuid: string): Promise<{ deleted: boolean }>;
 
   // Search
-  search(
-    query: string,
-    types?: string[],
-    subtype?: string,
-  ): Promise<import("./wordpress.js").WordPressSearchResult[]>;
+  search(query: string, types?: string[], subtype?: string): Promise<import("./wordpress.js").WordPressSearchResult[]>;
 
   // Utility Methods
   ping(): Promise<boolean>;
@@ -239,9 +235,9 @@ export interface IAuthProvider {
 export class WordPressAPIError extends Error {
   public readonly statusCode?: number;
   public readonly code?: string;
-  public data?: any;
+  public data?: unknown;
 
-  constructor(message: string, statusCode?: number, code?: string, data?: any) {
+  constructor(message: string, statusCode?: number, code?: string, data?: unknown) {
     super(message);
     this.name = "WordPressAPIError";
     if (statusCode !== undefined) this.statusCode = statusCode;
@@ -275,39 +271,74 @@ export class ValidationError extends WordPressAPIError {
 }
 
 // Type Guards
-export function isWordPressAPIError(error: any): error is WordPressAPIError {
+export function isWordPressAPIError(error: unknown): error is WordPressAPIError {
   return error instanceof WordPressAPIError;
 }
 
-export function isAuthenticationError(error: any): error is AuthenticationError {
+export function isAuthenticationError(error: unknown): error is AuthenticationError {
   return error instanceof AuthenticationError;
 }
 
-export function isRateLimitError(error: any): error is RateLimitError {
+export function isRateLimitError(error: unknown): error is RateLimitError {
   return error instanceof RateLimitError;
 }
 
-export function isValidationError(error: any): error is ValidationError {
+export function isValidationError(error: unknown): error is ValidationError {
   return error instanceof ValidationError;
 }
 
 // Response Type Guards
-export function isWordPressPost(obj: any): obj is WordPressPost {
-  return obj && typeof obj.id === "number" && obj.type === "post";
+export function isWordPressPost(obj: unknown): obj is WordPressPost {
+  return (
+    obj !== null &&
+    typeof obj === "object" &&
+    "id" in obj &&
+    "type" in obj &&
+    typeof (obj as Record<string, unknown>).id === "number" &&
+    (obj as Record<string, unknown>).type === "post"
+  );
 }
 
-export function isWordPressPage(obj: any): obj is WordPressPage {
-  return obj && typeof obj.id === "number" && obj.type === "page";
+export function isWordPressPage(obj: unknown): obj is WordPressPage {
+  return (
+    obj !== null &&
+    typeof obj === "object" &&
+    "id" in obj &&
+    "type" in obj &&
+    typeof (obj as Record<string, unknown>).id === "number" &&
+    (obj as Record<string, unknown>).type === "page"
+  );
 }
 
-export function isWordPressMedia(obj: any): obj is WordPressMedia {
-  return obj && typeof obj.id === "number" && obj.media_type;
+export function isWordPressMedia(obj: unknown): obj is WordPressMedia {
+  return (
+    obj !== null &&
+    typeof obj === "object" &&
+    "id" in obj &&
+    "media_type" in obj &&
+    typeof (obj as Record<string, unknown>).id === "number" &&
+    Boolean((obj as Record<string, unknown>).media_type)
+  );
 }
 
-export function isWordPressUser(obj: any): obj is WordPressUser {
-  return obj && typeof obj.id === "number" && obj.username;
+export function isWordPressUser(obj: unknown): obj is WordPressUser {
+  return (
+    obj !== null &&
+    typeof obj === "object" &&
+    "id" in obj &&
+    "username" in obj &&
+    typeof (obj as Record<string, unknown>).id === "number" &&
+    Boolean((obj as Record<string, unknown>).username)
+  );
 }
 
-export function isWordPressComment(obj: any): obj is WordPressComment {
-  return obj && typeof obj.id === "number" && typeof obj.post === "number";
+export function isWordPressComment(obj: unknown): obj is WordPressComment {
+  return (
+    obj !== null &&
+    typeof obj === "object" &&
+    "id" in obj &&
+    "post" in obj &&
+    typeof (obj as Record<string, unknown>).id === "number" &&
+    typeof (obj as Record<string, unknown>).post === "number"
+  );
 }

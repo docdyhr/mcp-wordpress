@@ -17,6 +17,7 @@ import type {
   ClientStats,
 } from "../types/client.js";
 import { WordPressAPIError, AuthenticationError, RateLimitError } from "../types/client.js";
+import { config } from "../config/Config.js";
 import type {
   WordPressPost,
   WordPressPage,
@@ -155,19 +156,20 @@ export class WordPressClient implements IWordPressClient {
    * @since 1.0.0
    */
   constructor(options: Partial<WordPressClientConfig> = {}) {
-    const baseUrl = options.baseUrl || process.env.WORDPRESS_SITE_URL || "";
+    const cfg = config();
+    const baseUrl = options.baseUrl || cfg.wordpress.siteUrl || "";
 
     // Validate and sanitize base URL
     this.baseUrl = this.validateAndSanitizeUrl(baseUrl);
     this.apiUrl = "";
-    this.timeout = options.timeout || parseInt(process.env.WORDPRESS_TIMEOUT || "30000");
-    this.maxRetries = options.maxRetries || parseInt(process.env.WORDPRESS_MAX_RETRIES || "3");
+    this.timeout = options.timeout || cfg.wordpress.timeout;
+    this.maxRetries = options.maxRetries || cfg.wordpress.maxRetries;
 
     // Authentication configuration
     this.auth = options.auth || this.getAuthFromEnv();
 
     // Rate limiting
-    this.requestInterval = 60000 / parseInt(process.env.RATE_LIMIT || "60");
+    this.requestInterval = 60000 / cfg.security.rateLimit;
 
     // Initialize stats
     this._stats = {
@@ -221,7 +223,7 @@ export class WordPressClient implements IWordPressClient {
       }
 
       // Prevent localhost/private IP access in production
-      if (process.env.NODE_ENV === "production") {
+      if (config().app.isProduction) {
         const hostname = parsed.hostname.toLowerCase();
         if (
           hostname === "localhost" ||
@@ -246,57 +248,59 @@ export class WordPressClient implements IWordPressClient {
   }
 
   private getAuthFromEnv(): AuthConfig {
-    const authMethod = process.env.WORDPRESS_AUTH_METHOD as AuthMethod;
+    const cfg = config();
+    const wp = cfg.wordpress;
+    const authMethod = wp.authMethod as AuthMethod;
 
     // Use explicit auth method if set
-    if (authMethod === "app-password" && process.env.WORDPRESS_USERNAME && process.env.WORDPRESS_APP_PASSWORD) {
+    if (authMethod === "app-password" && wp.username && wp.appPassword) {
       return {
         method: "app-password",
-        username: process.env.WORDPRESS_USERNAME,
-        appPassword: process.env.WORDPRESS_APP_PASSWORD,
+        username: wp.username,
+        appPassword: wp.appPassword,
       };
     }
 
     // Try Application Password first (fallback)
-    if (process.env.WORDPRESS_USERNAME && process.env.WORDPRESS_APP_PASSWORD) {
+    if (wp.username && wp.appPassword) {
       return {
         method: "app-password",
-        username: process.env.WORDPRESS_USERNAME,
-        appPassword: process.env.WORDPRESS_APP_PASSWORD,
+        username: wp.username,
+        appPassword: wp.appPassword,
       };
     }
 
     // Try JWT
-    if (process.env.WORDPRESS_JWT_SECRET && process.env.WORDPRESS_USERNAME && process.env.WORDPRESS_PASSWORD) {
+    if (wp.jwtSecret && wp.username && wp.password) {
       return {
         method: "jwt",
-        secret: process.env.WORDPRESS_JWT_SECRET,
-        username: process.env.WORDPRESS_USERNAME,
-        password: process.env.WORDPRESS_PASSWORD,
+        secret: wp.jwtSecret,
+        username: wp.username,
+        password: wp.password,
       };
     }
 
     // Try API Key
-    if (process.env.WORDPRESS_API_KEY) {
+    if (wp.apiKey) {
       return {
         method: "api-key",
-        apiKey: process.env.WORDPRESS_API_KEY,
+        apiKey: wp.apiKey,
       };
     }
 
     // Try Cookie
-    if (process.env.WORDPRESS_COOKIE_NONCE) {
+    if (wp.cookieNonce) {
       return {
         method: "cookie",
-        nonce: process.env.WORDPRESS_COOKIE_NONCE,
+        nonce: wp.cookieNonce,
       };
     }
 
     // Default to basic authentication
     return {
       method: "basic",
-      username: process.env.WORDPRESS_USERNAME || "",
-      password: process.env.WORDPRESS_PASSWORD || process.env.WORDPRESS_APP_PASSWORD || "",
+      username: wp.username || "",
+      password: wp.password || wp.appPassword || "",
     };
   }
 
@@ -1068,9 +1072,7 @@ export class WordPressClient implements IWordPressClient {
   buildUrl(endpoint: string, params?: Record<string, unknown>): string {
     const url = `${this.apiUrl}/${endpoint.replace(/^\/+/, "")}`;
     if (params) {
-      const normalizedParams = Object.fromEntries(
-        Object.entries(params).map(([k, v]) => [k, String(v)])
-      );
+      const normalizedParams = Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]));
       const searchParams = new URLSearchParams(normalizedParams);
       return `${url}?${searchParams.toString()}`;
     }

@@ -311,7 +311,7 @@ ${example.errorExample ? this.generateErrorExample(example.errorExample) : ""}
   /**
    * Generate error example
    */
-  private generateErrorExample(errorExample: { scenario: string; error: any }): string {
+  private generateErrorExample(errorExample: { scenario: string; error: unknown }): string {
     return `**Error Example (${errorExample.scenario}):**
 \`\`\`json
 ${JSON.stringify(errorExample.error, null, 2)}
@@ -370,7 +370,7 @@ ${permissions.map((perm) => `- \`${perm}\``).join("\n")}
   /**
    * Generate error documentation
    */
-  private generateErrorDocumentation(errorCodes: any[]): string {
+  private generateErrorDocumentation(errorCodes: unknown[]): string {
     if (errorCodes.length === 0) {
       return `### Common Errors
 
@@ -384,11 +384,11 @@ See [Error Handling Guide](../error-handling.md) for complete error reference.`;
 
     return errorCodes
       .map(
-        (error) => `### ${error.code}
+        (error) => `### ${(error as Record<string, unknown>).code}
 
-**Message:** ${error.message}  
-**Description:** ${error.description}  
-**Resolution:** ${error.resolution}
+**Message:** ${(error as Record<string, unknown>).message}  
+**Description:** ${(error as Record<string, unknown>).description}  
+**Resolution:** ${(error as Record<string, unknown>).resolution}
 `,
       )
       .join("\n\n");
@@ -435,13 +435,14 @@ ${relatedTools.map((tool) => `- [\`${tool}\`](./${tool}.md)`).join("\n")}
   /**
    * Generate type properties table
    */
-  private generateTypePropertiesTable(properties: any[]): string {
+  private generateTypePropertiesTable(properties: unknown[]): string {
     const headers = "| Property | Type | Required | Description |";
     const separator = "|----------|------|----------|-------------|";
 
     const rows = properties.map((prop) => {
-      const required = prop.required ? "✅" : "❌";
-      return `| \`${prop.name}\` | \`${prop.type}\` | ${required} | ${prop.description} |`;
+      const propObj = prop as Record<string, unknown>;
+      const required = propObj.required ? "✅" : "❌";
+      return `| \`${propObj.name}\` | \`${propObj.type}\` | ${required} | ${propObj.description} |`;
     });
 
     return [headers, separator, ...rows].join("\n");
@@ -483,7 +484,7 @@ ${relatedTools.map((tool) => `- [\`${tool}\`](./${tool}.md)`).join("\n")}
   /**
    * Format parameters for command examples
    */
-  private formatParameters(params: Record<string, any>): string {
+  private formatParameters(params: Record<string, unknown>): string {
     return Object.entries(params)
       .map(([key, value]) => `--${key}="${value}"`)
       .join(" ");
@@ -492,7 +493,7 @@ ${relatedTools.map((tool) => `- [\`${tool}\`](./${tool}.md)`).join("\n")}
   /**
    * Generate additional examples
    */
-  private generateAdditionalExamples(examples: any[]): string {
+  private generateAdditionalExamples(examples: unknown[]): string {
     return `## Additional Examples
 
 ${examples
