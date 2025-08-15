@@ -11,6 +11,7 @@ import { CreatePostRequest, PostQueryParams, UpdatePostRequest, WordPressPost } 
 import { getErrorMessage } from "../../utils/error.js";
 import { ErrorHandlers } from "../../utils/enhancedError.js";
 import { validateId, validatePaginationParams, validatePostParams } from "../../utils/validation.js";
+import { sanitizeHtml } from "../../utils/validation/security.js";
 import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "../../utils/streaming.js";
 
 /**
@@ -175,9 +176,7 @@ export async function handleListPosts(
             month: "short",
             day: "numeric",
           });
-          const excerpt = p.excerpt?.rendered
-            ? p.excerpt.rendered.replace(/<[^>]*>/g, "").substring(0, 80) + "..."
-            : "";
+          const excerpt = p.excerpt?.rendered ? sanitizeHtml(p.excerpt.rendered).substring(0, 80) + "..." : "";
 
           // Enhanced metadata
           const authorName = authorMap.get(p.author) || `User ${p.author}`;
@@ -257,11 +256,8 @@ export async function handleGetPost(client: WordPressClient, params: { id: numbe
     });
 
     const content = post.content?.rendered || "";
-    const excerpt = post.excerpt?.rendered ? post.excerpt.rendered.replace(/<[^>]*>/g, "").trim() : "";
-    const wordCount = content
-      .replace(/<[^>]*>/g, "")
-      .split(/\s+/)
-      .filter(Boolean).length;
+    const excerpt = post.excerpt?.rendered ? sanitizeHtml(post.excerpt.rendered).trim() : "";
+    const wordCount = sanitizeHtml(content).split(/\s+/).filter(Boolean).length;
 
     // Build comprehensive response
     let response = `# ${post.title.rendered}\n\n`;

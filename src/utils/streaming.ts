@@ -4,6 +4,7 @@
  */
 
 // Node.js streaming imports removed - not currently used but available for future enhancement
+import { sanitizeHtml } from "./validation/security.js";
 
 export interface StreamingOptions {
   batchSize?: number;
@@ -155,11 +156,7 @@ export class WordPressDataStreamer {
         return {
           id: p.id,
           title: title?.rendered || "Untitled",
-          excerpt: excerpt?.rendered
-            ? String(excerpt.rendered)
-                .replace(/<[^>]*>/g, "")
-                .substring(0, 150) + "..."
-            : "No excerpt",
+          excerpt: excerpt?.rendered ? sanitizeHtml(String(excerpt.rendered)).substring(0, 150) + "..." : "No excerpt",
           status: p.status,
           date: new Date(String(p.date)).toLocaleDateString(),
           link: p.link,
@@ -242,11 +239,7 @@ export class WordPressDataStreamer {
         const content = c.content as Record<string, unknown> | undefined;
         return {
           id: c.id,
-          content: content?.rendered
-            ? String(content.rendered)
-                .replace(/<[^>]*>/g, "")
-                .substring(0, 200) + "..."
-            : "No content",
+          content: content?.rendered ? sanitizeHtml(String(content.rendered)).substring(0, 200) + "..." : "No content",
           status: c.status,
           date: new Date(String(c.date)).toLocaleDateString(),
           author: options.includeAuthor

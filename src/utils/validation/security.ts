@@ -49,21 +49,33 @@ export function validateMimeType(mimeType: string, allowedTypes: string[]): void
 
 /**
  * Sanitizes HTML content to prevent XSS
- * Note: This is a basic implementation. For production use,
- * consider using a library like DOMPurify
+ * Note: This is a comprehensive implementation for security.
+ * For even more robust sanitization, consider using a library like DOMPurify
  */
 export function sanitizeHtml(html: string): string {
-  // Remove script tags and their content
-  let sanitized = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+  // Remove all script tags and their content (handles variations with spaces)
+  let sanitized = html.replace(/<script\s*[^>]*>[\s\S]*?<\/script\s*>/gi, "");
 
-  // Remove event handlers
-  sanitized = sanitized.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, "");
+  // Remove any remaining script-like content
+  sanitized = sanitized.replace(/<script[\s\S]*?>/gi, "");
+  sanitized = sanitized.replace(/<\/script[\s\S]*?>/gi, "");
 
-  // Remove javascript: protocol
-  sanitized = sanitized.replace(/javascript:/gi, "");
+  // Remove all event handlers (comprehensive pattern)
+  sanitized = sanitized.replace(/\s*on[a-z]+\s*=\s*["'][^"']*["']/gi, "");
+  sanitized = sanitized.replace(/\s*on[a-z]+\s*=\s*[^"'\s>]+/gi, "");
 
-  // Remove data: protocol (can be used for XSS)
-  sanitized = sanitized.replace(/data:text\/html/gi, "");
+  // Remove dangerous protocols (comprehensive list)
+  sanitized = sanitized.replace(/javascript\s*:/gi, "");
+  sanitized = sanitized.replace(/vbscript\s*:/gi, "");
+  sanitized = sanitized.replace(/data\s*:/gi, "");
+  sanitized = sanitized.replace(/livescript\s*:/gi, "");
+  sanitized = sanitized.replace(/mocha\s*:/gi, "");
+
+  // Remove dangerous HTML elements
+  sanitized = sanitized.replace(/<iframe[\s\S]*?<\/iframe>/gi, "");
+  sanitized = sanitized.replace(/<object[\s\S]*?<\/object>/gi, "");
+  sanitized = sanitized.replace(/<embed[\s\S]*?>/gi, "");
+  sanitized = sanitized.replace(/<form[\s\S]*?<\/form>/gi, "");
 
   return sanitized;
 }
