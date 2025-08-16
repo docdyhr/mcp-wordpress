@@ -39,7 +39,7 @@ jobs:
           echo "📊 Capturing baseline coverage from main branch..."
           git checkout main
           npm run build
-          npm run test:coverage
+          npm run test:coverage:baseline
           node scripts/incremental-coverage-guardrail.js capture-baseline
           
           # Store baseline as artifact for debugging
@@ -170,7 +170,7 @@ jobs:
       - name: 🧪 Run tests with coverage
         run: |
           npm run build
-          npm run test:coverage
+          npm run test:coverage:baseline
 
       - name: 📊 Capture new baseline
         run: |
