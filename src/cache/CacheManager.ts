@@ -4,6 +4,7 @@
  */
 
 import * as crypto from "crypto";
+import { ConfigHelpers } from "../config/Config.js";
 
 export interface CacheEntry<T = unknown> {
   value: T;
@@ -47,8 +48,10 @@ export class CacheManager {
   };
 
   constructor(private config: CacheConfig) {
-    // Start cleanup interval
-    this.startCleanupInterval();
+    // Start cleanup interval (skip in test environment to avoid timer issues)
+    if (!ConfigHelpers.isTest()) {
+      this.startCleanupInterval();
+    }
   }
 
   /**
@@ -326,6 +329,7 @@ export class CacheManager {
 
   /**
    * Start periodic cleanup of expired entries
+   * Note: This uses setInterval and is not called in test environments to avoid Jest timer issues
    */
   private startCleanupInterval(): void {
     this.cleanupInterval = setInterval(() => {
