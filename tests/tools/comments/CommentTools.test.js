@@ -250,8 +250,8 @@ describe("CommentTools", () => {
 
       expect(typeof result).toBe("string");
       expect(result).toContain("**Date:**");
-      // Should contain formatted date/time
-      expect(result).toMatch(/\d{1,2}\.\d{1,2}\.\d{4}/); // Date format pattern (European)
+      // Should contain formatted date/time (flexible for different locales)
+      expect(result).toMatch(/\d{1,2}[./-]\d{1,2}[./-]\d{4}/); // Date format pattern (flexible)
     });
   });
 
