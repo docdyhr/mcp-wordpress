@@ -3,7 +3,9 @@
  * Supports development, CI, and VS Code environments
  */
 
+// eslint-disable-next-line no-undef
 const isCI = process.env.CI === 'true';
+// eslint-disable-next-line no-undef
 const isPerformanceTest = process.env.PERFORMANCE_TEST === 'true';
 
 const baseConfig = {
