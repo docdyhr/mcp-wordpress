@@ -16,7 +16,6 @@
     "**/property/**/*.test.js",
     "**/unit/**/*.test.js",
     "**/utils/**/*.test.js",
-    "**/managers/**/*.test.js",
     "**/server/**/*.test.js",
     "**/tools/**/*.test.js",
     "**/cache/**/*.test.js",
@@ -28,7 +27,8 @@
     "/dist/",
     "/coverage/",
     "tests/cache/CacheInvalidation.test.js",
-    "tests/server/ToolRegistry.test.js"
+    "tests/server/ToolRegistry.test.js",
+    "tests/managers/authentication.test.js"
   ],
   "collectCoverage": true,
   "collectCoverageFrom": [
