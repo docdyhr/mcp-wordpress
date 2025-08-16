@@ -3,6 +3,8 @@
  * Collects, analyzes, and reports performance metrics
  */
 
+import { ConfigHelpers } from "../config/Config.js";
+
 export interface PerformanceMetrics {
   // Request Performance
   requests: {
@@ -121,7 +123,8 @@ export class PerformanceMonitor {
 
     this.metrics = this.initializeMetrics();
 
-    if (this.config.enableRealTimeMonitoring) {
+    // Don't start collection in test environment to avoid timer issues
+    if (this.config.enableRealTimeMonitoring && !ConfigHelpers.isTest()) {
       this.startCollection();
     }
   }
@@ -318,6 +321,7 @@ export class PerformanceMonitor {
 
   /**
    * Start automatic metric collection
+   * Note: This uses setInterval and is not called in test environments to avoid Jest timer issues
    */
   private startCollection(): void {
     this.collectionTimer = setInterval(() => {
