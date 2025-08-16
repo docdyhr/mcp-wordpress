@@ -32,10 +32,12 @@ import type {
   UpdateTagRequest,
   UploadMediaRequest,
   UpdateMediaRequest,
+  AuthMethod,
 } from "./wordpress.js";
 
 // Authentication Configuration
-export type AuthMethod = "app-password" | "jwt" | "basic" | "api-key" | "cookie";
+// AuthMethod is now imported from wordpress.js for consistency
+export type { AuthMethod };
 
 export interface AuthConfig {
   method: AuthMethod;
@@ -47,6 +49,38 @@ export interface AuthConfig {
   nonce?: string;
   token?: string;
   clientId?: string;
+}
+
+// Specific credential interfaces for type safety
+export interface AppPasswordCredentials {
+  username: string;
+  appPassword: string;
+}
+
+export interface JwtCredentials {
+  jwtToken: string;
+  username?: string;
+}
+
+export interface BasicCredentials {
+  username: string;
+  password: string;
+}
+
+export interface ApiKeyCredentials {
+  apiKey: string;
+}
+
+// Union type for all credential types
+export type AuthCredentials = AppPasswordCredentials | JwtCredentials | BasicCredentials | ApiKeyCredentials;
+
+// Authentication status interface
+export interface AuthStatus {
+  method: AuthMethod;
+  username?: string | undefined;
+  isAuthenticated: boolean;
+  tokenExpired: boolean;
+  tokenExpiry?: number;
 }
 
 // Client Configuration
