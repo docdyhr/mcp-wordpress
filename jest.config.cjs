@@ -46,10 +46,12 @@ const baseConfig = {
   // Coverage configuration
   collectCoverage: false, // Enable via --coverage flag or CI
   collectCoverageFrom: [
-    "src/**/*.ts",
-    "!src/**/*.d.ts", 
-    "!src/**/__mocks__/**",
-    "!src/**/*.test.ts"
+    "dist/**/*.js",
+    "!dist/**/*.d.ts", 
+    "!dist/**/__mocks__/**",
+    "!dist/**/*.test.js",
+    "!dist/**/index.js",
+    "!dist/types/**"
   ],
   coverageReporters: ["text-summary", "lcov", "html", "json", "cobertura"],
   coverageDirectory: "coverage",

@@ -31,13 +31,13 @@
     "tests/server/ToolRegistry.test.js",
     "tests/managers/authentication.test.js"
   ],
-  "collectCoverage": false,
+  "collectCoverage": true,
   "collectCoverageFrom": [
-    "src/**/*.ts",
-    "!src/**/*.d.ts",
-    "!src/**/*.test.ts",
-    "!src/types/**",
-    "!src/**/index.ts"
+    "dist/**/*.js",
+    "!dist/**/*.d.ts",
+    "!dist/**/*.test.js",
+    "!dist/types/**",
+    "!dist/**/index.js"
   ],
   "coverageReporters": [
     "text-summary",
@@ -73,23 +73,5 @@
   ],
   "globals": {
     "__EXECUTION_CONTEXT__": "jest"
-  },
-  "transform": {
-    "^.+\\.ts$": [
-      "babel-jest",
-      {
-        "presets": [
-          [
-            "@babel/preset-env",
-            {
-              "targets": {
-                "node": "current"
-              }
-            }
-          ],
-          "@babel/preset-typescript"
-        ]
-      }
-    ]
   }
 }

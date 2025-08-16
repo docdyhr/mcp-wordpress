@@ -112,7 +112,7 @@
     "test:config": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/config/",
     "test:contracts": "npm run test:compatibility",
     "test:coverage": "NODE_OPTIONS=\"--experimental-vm-modules\" npx jest --config=jest.typescript.config.json --coverage",
-    "test:coverage:ci": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --config=jest.typescript.config.json --coverage --testPathIgnorePatterns=\"tests/server/\" --testPathIgnorePatterns=\"tests/contracts/\" --forceExit --detectOpenHandles --silent",
+    "test:coverage:ci": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest --config=jest.config.cjs --coverage --testPathIgnorePatterns=\"tests/server/\" --testPathIgnorePatterns=\"tests/contracts/\" --forceExit --detectOpenHandles --silent",
     "test:coverage:report": "npm run test:coverage && node scripts/coverage-guardrail.js",
     "test:fast": "npm run test:typescript",
     "test:integration": "node scripts/test-integration.js",
