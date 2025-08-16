@@ -89,7 +89,7 @@ jobs:
           npm run test:coverage:ci || echo "Tests completed with warnings"
           echo "test_exit_code=$?" >> $GITHUB_OUTPUT
         continue-on-error: true
-      - name: Wait for WordPress health
+      - name: Wait for WordPress health and initialize
         run: |
           echo "Waiting for WordPress to become healthy..."
           for i in {1..30}; do
@@ -98,9 +98,32 @@ jobs:
             sleep 10
           done
           curl -fsS http://localhost:8081 > /dev/null || (echo "WordPress did not become ready"; exit 1)
+          
+          # Initialize WordPress installation
+          echo "Initializing WordPress installation..."
+          curl -X POST http://localhost:8081/wp-admin/install.php \
+            --data "weblog_title=Test+WordPress&user_name=testuser&admin_password=testpass123&admin_password2=testpass123&admin_email=test%40example.com&Submit=Install+WordPress" \
+            --header "Content-Type: application/x-www-form-urlencoded" \
+            --silent --fail || echo "WordPress installation may have failed"
+          
+          # Wait a moment for installation to complete
+          sleep 5
+          
+          # Verify WordPress is accessible
+          echo "Verifying WordPress installation..."
+          RESPONSE=$(curl -s http://localhost:8081/wp-json/ || echo "")
+          if echo "$RESPONSE" | grep -q "rest_route"; then
+            echo "✅ WordPress REST API is accessible"
+          else
+            echo "❌ WordPress REST API not accessible, response: $RESPONSE"
+            exit 1
+          fi
       - name: Live compatibility tests
         env:
           WORDPRESS_TEST_URL: http://localhost:8081
+          WORDPRESS_USERNAME: testuser
+          WORDPRESS_PASSWORD: testpass123
+          WORDPRESS_AUTH_METHOD: basic
           FORCE_LIVE_WP: 'true'
           NODE_OPTIONS: --experimental-vm-modules
         run: npm run test:compatibility
