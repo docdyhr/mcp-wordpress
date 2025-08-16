@@ -51,6 +51,38 @@ export interface AuthConfig {
   clientId?: string;
 }
 
+// Specific credential interfaces for type safety
+export interface AppPasswordCredentials {
+  username: string;
+  appPassword: string;
+}
+
+export interface JwtCredentials {
+  jwtToken: string;
+  username?: string;
+}
+
+export interface BasicCredentials {
+  username: string;
+  password: string;
+}
+
+export interface ApiKeyCredentials {
+  apiKey: string;
+}
+
+// Union type for all credential types
+export type AuthCredentials = AppPasswordCredentials | JwtCredentials | BasicCredentials | ApiKeyCredentials;
+
+// Authentication status interface
+export interface AuthStatus {
+  method: AuthMethod;
+  username?: string | undefined;
+  isAuthenticated: boolean;
+  tokenExpired: boolean;
+  tokenExpiry?: number;
+}
+
 // Client Configuration
 export interface WordPressClientConfig {
   baseUrl: string;

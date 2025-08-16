@@ -3,7 +3,15 @@
  * Handles all authentication methods and token management
  */
 
-import type { AuthConfig, WordPressClientConfig } from "../../types/client.js";
+import type {
+  AuthConfig,
+  WordPressClientConfig,
+  AuthStatus,
+  AppPasswordCredentials,
+  JwtCredentials,
+  BasicCredentials,
+  ApiKeyCredentials,
+} from "../../types/client.js";
 import { AuthenticationError } from "../../types/client.js";
 import { AUTH_METHODS, type AuthMethod } from "../../types/wordpress.js";
 import { config } from "../../config/Config.js";
@@ -117,6 +125,10 @@ export class AuthenticationManager extends BaseManager {
 
   /**
    * Get authentication headers for requests
+   *
+   * Note: This method is synchronous by design for test compatibility and simplicity.
+   * JWT token refresh should be handled externally before calling this method,
+   * as automatic refresh would require RequestManager integration.
    */
   getAuthHeaders(): Record<string, string> {
     const method = this.authConfig.authMethod || AUTH_METHODS.APP_PASSWORD;
@@ -314,7 +326,10 @@ export class AuthenticationManager extends BaseManager {
   /**
    * Update authentication method and credentials
    */
-  updateAuthMethod(method: AuthMethod, credentials: Record<string, unknown>): void {
+  updateAuthMethod(
+    method: AuthMethod,
+    credentials: AppPasswordCredentials | JwtCredentials | BasicCredentials | ApiKeyCredentials,
+  ): void {
     const validMethods = Object.values(AUTH_METHODS);
     if (!validMethods.includes(method)) {
       throw new AuthenticationError("Invalid authentication method", method);
@@ -331,39 +346,31 @@ export class AuthenticationManager extends BaseManager {
     // Set new auth method
     this.authConfig.authMethod = method;
 
-    // Validate and set new credentials with proper type checking
+    // Set new credentials with type safety
     switch (method) {
       case AUTH_METHODS.APP_PASSWORD:
-        if (credentials.username && typeof credentials.username === "string") {
-          this.authConfig.username = credentials.username;
-        }
-        if (credentials.appPassword && typeof credentials.appPassword === "string") {
-          this.authConfig.appPassword = credentials.appPassword;
-        }
+        const appCreds = credentials as AppPasswordCredentials;
+        this.authConfig.username = appCreds.username;
+        this.authConfig.appPassword = appCreds.appPassword;
         break;
 
       case AUTH_METHODS.JWT:
-        if (credentials.jwtToken && typeof credentials.jwtToken === "string") {
-          this.authConfig.jwtToken = credentials.jwtToken;
-        }
-        if (credentials.username && typeof credentials.username === "string") {
-          this.authConfig.username = credentials.username;
+        const jwtCreds = credentials as JwtCredentials;
+        this.authConfig.jwtToken = jwtCreds.jwtToken;
+        if (jwtCreds.username) {
+          this.authConfig.username = jwtCreds.username;
         }
         break;
 
       case AUTH_METHODS.BASIC:
-        if (credentials.username && typeof credentials.username === "string") {
-          this.authConfig.username = credentials.username;
-        }
-        if (credentials.password && typeof credentials.password === "string") {
-          this.authConfig.password = credentials.password;
-        }
+        const basicCreds = credentials as BasicCredentials;
+        this.authConfig.username = basicCreds.username;
+        this.authConfig.password = basicCreds.password;
         break;
 
       case AUTH_METHODS.API_KEY:
-        if (credentials.apiKey && typeof credentials.apiKey === "string") {
-          this.authConfig.apiKey = credentials.apiKey;
-        }
+        const apiCreds = credentials as ApiKeyCredentials;
+        this.authConfig.apiKey = apiCreds.apiKey;
         break;
     }
   }
@@ -412,11 +419,11 @@ export class AuthenticationManager extends BaseManager {
   /**
    * Get authentication status
    */
-  getAuthStatus(): Record<string, unknown> {
+  getAuthStatus(): AuthStatus {
     const method = this.authConfig.authMethod || AUTH_METHODS.APP_PASSWORD;
     const isExpired = this.isTokenExpired();
 
-    const status: Record<string, unknown> = {
+    const status: AuthStatus = {
       method,
       username: this.authConfig.username,
       isAuthenticated: method === AUTH_METHODS.JWT ? !isExpired : true,
