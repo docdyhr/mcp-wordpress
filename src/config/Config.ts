@@ -179,11 +179,12 @@ export class Config {
 
   /**
    * Check if a string value should be considered truthy
+   * Accepts common truthy string representations
    */
   private isTruthy(value: string | undefined): boolean {
     if (!value) return false;
-    const lowerValue = value.toLowerCase();
-    return ["true", "1", "yes", "on", "enable", "enabled", "disable", "disabled"].includes(lowerValue);
+    const lowerValue = value.trim().toLowerCase();
+    return ["true", "1", "yes", "on", "enable", "enabled"].includes(lowerValue);
   }
 
   /**

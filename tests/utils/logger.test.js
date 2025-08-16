@@ -549,6 +549,27 @@ describe("Logger", () => {
       expect(logOutput).toContain("critical-task");
     });
 
+    it("should handle fatal non-Error objects", () => {
+      const logger = new Logger();
+      const nonErrorObj = { message: "Non-error fatal", code: 500 };
+      logger.fatal(nonErrorObj);
+
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      const logOutput = consoleErrorSpy.mock.calls[0][0];
+      expect(logOutput).toContain("FATAL");
+      expect(logOutput).toContain("[object Object]");
+    });
+
+    it("should handle fatal non-Error primitives", () => {
+      const logger = new Logger();
+      logger.fatal(12345);
+
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      const logOutput = consoleErrorSpy.mock.calls[0][0];
+      expect(logOutput).toContain("FATAL");
+      expect(logOutput).toContain("12345");
+    });
+
     it("should handle error Error objects with context", () => {
       const logger = new Logger();
       const error = new Error("Regular error");
@@ -612,6 +633,28 @@ describe("Logger", () => {
       expect(logOutput).toContain("null");
       expect(logOutput).toContain("nested");
     });
+
+    it("should sanitize sensitive fields containing array values", () => {
+      const logger = new Logger();
+      logger.info("Test", {
+        password: ["secret1", "secret2"],
+        token: [123, 456],
+        apiKey: [null, undefined],
+        secret: [{ nested: "value" }, "anotherSecret"],
+      });
+
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      const logOutput = consoleErrorSpy.mock.calls[0][0];
+      // Sensitive array values should be sanitized, not exposing their contents
+      expect(logOutput).toContain("password");
+      expect(logOutput).not.toContain("secret1");
+      expect(logOutput).not.toContain("secret2");
+      expect(logOutput).not.toContain("anotherSecret");
+      expect(logOutput).not.toContain("nested");
+      expect(logOutput).toContain("token");
+      expect(logOutput).toContain("apiKey");
+      expect(logOutput).toContain("secret");
+    });
   });
 
   describe("Log Level Configuration", () => {
@@ -644,6 +687,22 @@ describe("Logger", () => {
       logger.info("Info message");
       expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
     });
+
+    it("should handle LOG_LEVEL case insensitivity", () => {
+      process.env.NODE_ENV = "development";
+      process.env.LOG_LEVEL = "ERROR"; // Uppercase
+      Config.reset();
+
+      const logger = new Logger();
+
+      logger.debug("Debug message");
+      logger.info("Info message");
+      logger.warn("Warning message");
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+
+      logger.error("Error message");
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("Message Formatting Edge Cases", () => {
@@ -660,6 +719,34 @@ describe("Logger", () => {
       const logOutput = consoleErrorSpy.mock.calls[0][0];
       expect(logOutput).toContain("Test message");
       expect(logOutput).not.toContain("{}");
+    });
+
+    it("should handle deeply nested context objects", () => {
+      const logger = new Logger();
+      const nestedContext = {
+        user: {
+          id: 123,
+          profile: {
+            name: "Alice",
+            address: {
+              city: "Wonderland",
+              zip: "12345",
+              details: {
+                coordinates: { lat: 51.5, lng: -0.1 },
+              },
+            },
+          },
+        },
+      };
+      logger.info("Nested context test", nestedContext);
+
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      const logOutput = consoleErrorSpy.mock.calls[0][0];
+      expect(logOutput).toContain("Nested context test");
+      expect(logOutput).toContain("Alice");
+      expect(logOutput).toContain("Wonderland");
+      expect(logOutput).toContain("51.5");
+      expect(logOutput).toContain("-0.1");
     });
 
     it("should handle loggers with all options", () => {
