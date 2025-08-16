@@ -32,10 +32,12 @@ import type {
   UpdateTagRequest,
   UploadMediaRequest,
   UpdateMediaRequest,
+  AuthMethod,
 } from "./wordpress.js";
 
 // Authentication Configuration
-export type AuthMethod = "app-password" | "jwt" | "basic" | "api-key" | "cookie";
+// AuthMethod is now imported from wordpress.js for consistency
+export type { AuthMethod };
 
 export interface AuthConfig {
   method: AuthMethod;

@@ -4,6 +4,17 @@
  * Comprehensive TypeScript definitions for WordPress REST API v2 responses
  */
 
+// Authentication method constants
+export const AUTH_METHODS = {
+  APP_PASSWORD: "app-password",
+  JWT: "jwt",
+  BASIC: "basic",
+  API_KEY: "api-key",
+  COOKIE: "cookie",
+} as const;
+
+export type AuthMethod = (typeof AUTH_METHODS)[keyof typeof AUTH_METHODS];
+
 // WordPress metadata type - can contain various primitive values and nested objects
 export type WordPressMeta = Record<string, unknown> | unknown[];
 
