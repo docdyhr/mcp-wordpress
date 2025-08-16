@@ -322,12 +322,22 @@ describe("Config Comprehensive Tests", () => {
     });
 
     it("should handle various truthy values for cache disabled", () => {
-      const truthyValues = ["true", "1", "yes", "disable"];
+      const truthyValues = ["true", "1", "yes", "enable", "enabled"];
 
       truthyValues.forEach((value) => {
         process.env.CACHE_DISABLED = value;
         Config.reset();
         expect(ConfigHelpers.shouldUseCache()).toBe(false);
+      });
+    });
+
+    it("should NOT treat 'disable' and 'disabled' as truthy values for security", () => {
+      const falsyValues = ["disable", "disabled", "false", "0", "no", "off"];
+
+      falsyValues.forEach((value) => {
+        process.env.CACHE_DISABLED = value;
+        Config.reset();
+        expect(ConfigHelpers.shouldUseCache()).toBe(true); // Cache should be enabled
       });
     });
   });
