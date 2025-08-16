@@ -143,7 +143,7 @@ export class Config {
       },
 
       cache: {
-        disabled: process.env.DISABLE_CACHE === "true",
+        disabled: this.isTruthy(process.env.CACHE_DISABLED) || this.isTruthy(process.env.DISABLE_CACHE),
         ttl: parseInt(process.env.CACHE_TTL || "300", 10), // 5 minutes default
         maxItems: parseInt(process.env.CACHE_MAX_ITEMS || "1000", 10),
         maxMemoryMB: parseInt(process.env.CACHE_MAX_MEMORY_MB || "50", 10),
@@ -178,13 +178,22 @@ export class Config {
   }
 
   /**
+   * Check if a string value should be considered truthy
+   * Accepts common truthy string representations
+   */
+  private isTruthy(value: string | undefined): boolean {
+    if (!value) return false;
+    const lowerValue = value.trim().toLowerCase();
+    return ["true", "1", "yes", "on", "enable", "enabled"].includes(lowerValue);
+  }
+
+  /**
    * Detect if running in CI environment
    */
   private detectCIEnvironment(): boolean {
     return (
       process.env.CI === "true" ||
       process.env.NODE_ENV === "ci" ||
-      process.env.NODE_ENV === "test" ||
       process.env.GITHUB_ACTIONS === "true" ||
       process.env.TRAVIS === "true" ||
       process.env.CIRCLECI === "true"

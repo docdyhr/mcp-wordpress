@@ -93,8 +93,14 @@ function sanitizeContext(context: LogContext): LogContext {
       keyLower.includes("key") ||
       keyLower.includes("credential");
 
-    if (isSensitive && typeof value === "string") {
-      sanitized[key] = value.length > 0 ? `[REDACTED:${value.length}chars]` : "[EMPTY]";
+    if (isSensitive) {
+      if (typeof value === "string") {
+        sanitized[key] = value.length > 0 ? `[REDACTED:${value.length}chars]` : "[EMPTY]";
+      } else if (Array.isArray(value)) {
+        sanitized[key] = "[EMPTY]"; // Redact entire array for sensitive fields
+      } else {
+        sanitized[key] = value; // Keep non-string, non-array values as-is
+      }
     } else {
       sanitized[key] = value;
     }
