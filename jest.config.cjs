@@ -4,7 +4,6 @@
  */
 
 const isCI = process.env.CI === 'true';
-const isVSCode = process.env.VSCODE_CWD !== undefined;
 const isPerformanceTest = process.env.PERFORMANCE_TEST === 'true';
 
 const baseConfig = {
@@ -46,12 +45,12 @@ const baseConfig = {
   // Coverage configuration
   collectCoverage: false, // Enable via --coverage flag or CI
   collectCoverageFrom: [
-    "dist/**/*.js",
-    "!dist/**/*.d.ts", 
-    "!dist/**/__mocks__/**",
-    "!dist/**/*.test.js",
-    "!dist/**/index.js",
-    "!dist/types/**"
+    "src/**/*.ts",
+    "!src/**/*.d.ts", 
+    "!src/**/__mocks__/**",
+    "!src/**/*.test.ts",
+    "!src/**/index.ts",
+    "!src/types/**"
   ],
   coverageReporters: ["text-summary", "lcov", "html", "json", "cobertura"],
   coverageDirectory: "coverage",
@@ -107,6 +106,11 @@ const baseConfig = {
   // Globals
   globals: {
     "__EXECUTION_CONTEXT__": "jest"
+  },
+
+  // Module name mapping for TypeScript imports with .js extensions
+  moduleNameMapper: {
+    "^(\\.{1,2}/.*)\\.js$": "$1"
   },
 
   // Ensure TypeScript source files imported directly from tests are transformed.

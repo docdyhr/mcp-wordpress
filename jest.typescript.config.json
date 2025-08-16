@@ -33,11 +33,11 @@
   ],
   "collectCoverage": true,
   "collectCoverageFrom": [
-    "dist/**/*.js",
-    "!dist/**/*.d.ts",
-    "!dist/**/*.test.js",
-    "!dist/types/**",
-    "!dist/**/index.js"
+    "src/**/*.ts",
+    "!src/**/*.d.ts",
+    "!src/**/*.test.ts",
+    "!src/types/**",
+    "!src/**/index.ts"
   ],
   "coverageReporters": [
     "text-summary",
@@ -73,5 +73,26 @@
   ],
   "globals": {
     "__EXECUTION_CONTEXT__": "jest"
+  },
+  "transform": {
+    "^.+\\.ts$": [
+      "babel-jest",
+      {
+        "presets": [
+          [
+            "@babel/preset-env",
+            {
+              "targets": {
+                "node": "current"
+              }
+            }
+          ],
+          "@babel/preset-typescript"
+        ]
+      }
+    ]
+  },
+  "moduleNameMapper": {
+    "^(\\.{1,2}/.*)\\.js$": "$1"
   }
 }

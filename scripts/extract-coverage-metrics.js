@@ -28,18 +28,27 @@ let branchesTotal = 0,
   branchesCovered = 0;
 let funcsTotal = 0,
   funcsCovered = 0;
+
 for (const file of Object.values(data)) {
-  if (file.lines) {
-    linesTotal += file.lines.total || 0;
-    linesCovered += file.lines.covered || 0;
+  // Jest format: s = statements, f = functions, b = branches
+  if (file.s) {
+    const statementCounts = Object.values(file.s);
+    linesTotal += statementCounts.length;
+    linesCovered += statementCounts.filter((count) => count > 0).length;
   }
-  if (file.branches) {
-    branchesTotal += file.branches.total || 0;
-    branchesCovered += file.branches.covered || 0;
+
+  if (file.f) {
+    const functionCounts = Object.values(file.f);
+    funcsTotal += functionCounts.length;
+    funcsCovered += functionCounts.filter((count) => count > 0).length;
   }
-  if (file.functions) {
-    funcsTotal += file.functions.total || 0;
-    funcsCovered += file.functions.covered || 0;
+
+  if (file.b) {
+    const branchCounts = Object.values(file.b);
+    branchesTotal += branchCounts.length;
+    branchesCovered += branchCounts.filter((branchArray) =>
+      Array.isArray(branchArray) ? branchArray.some((count) => count > 0) : branchArray > 0,
+    ).length;
   }
 }
 const linePct = linesTotal ? (linesCovered / linesTotal) * 100 : 0;
