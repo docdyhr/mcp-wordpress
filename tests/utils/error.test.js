@@ -6,7 +6,7 @@ import {
   handleToolError,
   validateRequired,
   validateSite,
-} from "../../dist/utils/error.js";
+} from "../../src/utils/error.ts";
 
 describe("error utilities", () => {
   describe("getErrorMessage", () => {
@@ -210,9 +210,7 @@ describe("error utilities", () => {
     it("should treat only null/undefined as missing (allow empty string/0/false)", () => {
       const params = { username: "", password: null, email: undefined, attempts: 0, active: false };
       const required = ["username", "password", "email", "attempts", "active"];
-      expect(() => validateRequired(params, required)).toThrow(
-        "Missing required parameters: password, email",
-      );
+      expect(() => validateRequired(params, required)).toThrow("Missing required parameters: password, email");
     });
   });
 

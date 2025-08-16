@@ -3,8 +3,9 @@
  * Supports development, CI, and VS Code environments
  */
 
+// eslint-disable-next-line no-undef
 const isCI = process.env.CI === 'true';
-const isVSCode = process.env.VSCODE_CWD !== undefined;
+// eslint-disable-next-line no-undef
 const isPerformanceTest = process.env.PERFORMANCE_TEST === 'true';
 
 const baseConfig = {
@@ -49,7 +50,9 @@ const baseConfig = {
     "src/**/*.ts",
     "!src/**/*.d.ts", 
     "!src/**/__mocks__/**",
-    "!src/**/*.test.ts"
+    "!src/**/*.test.ts",
+    "!src/**/index.ts",
+    "!src/types/**"
   ],
   coverageReporters: ["text-summary", "lcov", "html", "json", "cobertura"],
   coverageDirectory: "coverage",
@@ -105,6 +108,11 @@ const baseConfig = {
   // Globals
   globals: {
     "__EXECUTION_CONTEXT__": "jest"
+  },
+
+  // Module name mapping for TypeScript imports with .js extensions
+  moduleNameMapper: {
+    "^(\\.{1,2}/.*)\\.js$": "$1"
   },
 
   // Ensure TypeScript source files imported directly from tests are transformed.

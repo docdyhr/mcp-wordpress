@@ -20,7 +20,8 @@
     "**/server/**/*.test.js",
     "**/tools/**/*.test.js",
     "**/cache/**/*.test.js",
-    "**/client/**/*.test.js"
+    "**/client/**/*.test.js",
+    "**/performance/**/*.test.js"
   ],
   "testPathIgnorePatterns": [
     "/node_modules/",
@@ -30,7 +31,7 @@
     "tests/server/ToolRegistry.test.js",
     "tests/managers/authentication.test.js"
   ],
-  "collectCoverage": false,
+  "collectCoverage": true,
   "collectCoverageFrom": [
     "src/**/*.ts",
     "!src/**/*.d.ts",
@@ -90,5 +91,8 @@
         ]
       }
     ]
+  },
+  "moduleNameMapper": {
+    "^(\\.{1,2}/.*)\\.js$": "$1"
   }
 }
