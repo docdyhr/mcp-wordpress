@@ -159,8 +159,6 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.28.3",
-    "@babel/preset-typescript": "^7.27.1",
     "@eslint/js": "^9.32.0",
     "@jest/globals": "^30.0.5",
     "@pact-foundation/pact": "^15.0.1",
