@@ -114,27 +114,22 @@ const baseConfig = {
     "^(\\.{1,2}/.*)\\.js$": "$1"
   },
 
-  // Ensure TypeScript source files imported directly from tests are transformed.
-  // Some tests import .ts files (e.g. src/utils/logger.ts) using explicit extensions.
-  // The previous configuration only handled this in the typescript-specific Jest config.
-  // Adding the transform here resolves parse errors for `export type` and other TS syntax.
+  // Use ts-jest for TypeScript transformation
+  preset: 'ts-jest',
   transform: {
-    "^.+\\.ts$": [
-      "babel-jest",
-      {
-        presets: [
-          [
-            "@babel/preset-env",
-            {
-              targets: {
-                node: "current"
-              }
-            }
-          ],
-          "@babel/preset-typescript"
-        ]
+    "^.+\\.ts$": "ts-jest"
+  },
+  // Configure ts-jest for proper module resolution
+  globals: {
+    "__EXECUTION_CONTEXT__": "jest",
+    'ts-jest': {
+      useESM: true,
+      tsconfig: {
+        moduleResolution: 'node',
+        allowSyntheticDefaultImports: true,
+        esModuleInterop: true
       }
-    ]
+    }
   }
 };
 

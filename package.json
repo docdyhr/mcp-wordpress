@@ -190,6 +190,7 @@
     "prettier": "^3.6.2",
     "semantic-release": "^24.2.7",
     "sort-package-json": "^3.4.0",
+    "ts-jest": "^29.4.1",
     "typescript": "^5.9.2"
   },
   "engines": {
