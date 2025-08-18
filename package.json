@@ -159,8 +159,6 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.28.3",
-    "@babel/preset-typescript": "^7.27.1",
     "@eslint/js": "^9.32.0",
     "@jest/globals": "^30.0.5",
     "@pact-foundation/pact": "^15.0.1",
@@ -192,6 +190,7 @@
     "prettier": "^3.6.2",
     "semantic-release": "^24.2.7",
     "sort-package-json": "^3.4.0",
+    "ts-jest": "^29.4.1",
     "typescript": "^5.9.2"
   },
   "engines": {

@@ -71,25 +71,19 @@
     "<rootDir>/tests/jest.teardown.js"
   ],
   "globals": {
-    "__EXECUTION_CONTEXT__": "jest"
-  },
-  "transform": {
-    "^.+\\.ts$": [
-      "babel-jest",
-      {
-        "presets": [
-          [
-            "@babel/preset-env",
-            {
-              "targets": {
-                "node": "current"
-              }
-            }
-          ],
-          "@babel/preset-typescript"
-        ]
+    "__EXECUTION_CONTEXT__": "jest",
+    "ts-jest": {
+      "useESM": true,
+      "tsconfig": {
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true
       }
-    ]
+    }
+  },
+  "preset": "ts-jest",
+  "transform": {
+    "^.+\\.ts$": "ts-jest"
   },
   "moduleNameMapper": {
     "^(\\.{1,2}/.*)\\.js$": "$1"
