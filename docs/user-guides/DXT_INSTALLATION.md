@@ -14,7 +14,8 @@ This guide walks you through installing the WordPress MCP Server as a Claude Des
 
 **Option A: Download Pre-built Package**
 
-- Download `mcp-wordpress.dxt` from the releases page
+- Download [`mcp-wordpress.dxt`](https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt)
+  from the releases page
 - Skip to step 2
 
 **Option B: Build from Source**

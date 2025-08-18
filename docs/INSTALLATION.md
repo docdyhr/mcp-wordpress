@@ -27,7 +27,8 @@ The easiest way to get started with WordPress MCP in Claude Desktop.
 1. **Download DXT Package**
    ```bash
    # Download the latest DXT package
-   curl -L -o mcp-wordpress.dxt https://github.com/docdyhr/mcp-wordpress/raw/main/mcp-wordpress.dxt
+   curl -L -o mcp-wordpress.dxt \
+     https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt
    ```
 
 2. **Install in Claude Desktop**
@@ -419,5 +420,6 @@ After successful installation:
 
 ---
 
-**Found an issue with this guide?** [Edit on GitHub](https://github.com/docdyhr/mcp-wordpress/edit/main/docs/INSTALLATION.md) or
+**Found an issue with this guide?**
+[Edit on GitHub](https://github.com/docdyhr/mcp-wordpress/edit/main/docs/INSTALLATION.md) or
 [open an issue](https://github.com/docdyhr/mcp-wordpress/issues/new).

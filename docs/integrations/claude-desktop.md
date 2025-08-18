@@ -23,12 +23,15 @@ command line, no configuration files - just click and configure.
 
 **Option A: Direct Download**
 
-- Click here: [`mcp-wordpress.dxt`](https://github.com/docdyhr/mcp-wordpress/raw/main/mcp-wordpress.dxt) (2.6MB)
+- Click here:
+  [`mcp-wordpress.dxt`](https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt)
+  (3.4MB)
 
 **Option B: Command Line**
 
 ```bash
-curl -L -o mcp-wordpress.dxt https://github.com/docdyhr/mcp-wordpress/raw/main/mcp-wordpress.dxt
+curl -L -o mcp-wordpress.dxt \
+  https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt
 ```
 
 ### Step 2: Install in Claude Desktop
@@ -201,7 +204,8 @@ For advanced users, the DXT extension supports:
 ls -la mcp-wordpress.dxt
 
 # Re-download if file size seems wrong
-curl -L -o mcp-wordpress.dxt https://github.com/docdyhr/mcp-wordpress/raw/main/mcp-wordpress.dxt
+curl -L -o mcp-wordpress.dxt \
+  https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt
 
 # Reinstall extension
 # Remove from Claude Desktop and reinstall
@@ -422,5 +426,6 @@ When reporting DXT-related issues, include:
 ---
 
 **Ready to get started?**
-[Download the DXT extension](https://github.com/docdyhr/mcp-wordpress/raw/main/mcp-wordpress.dxt) and transform your
+[Download the DXT extension](https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt)
+and transform your
 WordPress management experience!
