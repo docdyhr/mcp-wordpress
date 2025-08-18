@@ -1,6 +1,12 @@
 import { CacheManager } from "../../dist/cache/CacheManager.js";
 import { performance } from "perf_hooks";
 
+// Memory threshold constants
+const MEMORY_THRESHOLDS = {
+  LOCAL: 100 * 1024 * 1024, // 100MB for local development
+  CI: 150 * 1024 * 1024, // 150MB for CI environments
+};
+
 describe("Cache Stress Tests", () => {
   let cacheManager;
 
@@ -65,10 +71,9 @@ describe("Cache Stress Tests", () => {
       expect(cacheManager.cache.size).toBeLessThanOrEqual(10000);
     });
 
-    it("should survive cache stampede scenarios", async () => {
+    it.skip("should survive cache stampede scenarios", async () => {
       // Skip this test since it requires CachedWordPressClient with proper config
-      console.log("Skipping cache stampede test - requires WordPress client integration");
-      expect(true).toBe(true); // Mark as passing
+      // Test would verify cache behavior under concurrent access patterns
     });
 
     it("should handle rapid cache churn without memory leaks", async () => {
@@ -118,9 +123,10 @@ describe("Cache Stress Tests", () => {
 
       console.log(`Memory after churn test: ${(memoryIncrease / 1024 / 1024).toFixed(1)}MB increase`);
 
-      // Memory increase should be reasonable (less than 150MB in CI environments)
+      // Memory increase should be reasonable
       // CI environments may have different memory characteristics
-      const memoryThreshold = process.env.CI ? 150 * 1024 * 1024 : 100 * 1024 * 1024;
+      // Only use higher threshold if process.env.CI is explicitly set to 'true'
+      const memoryThreshold = process.env.CI === "true" ? MEMORY_THRESHOLDS.CI : MEMORY_THRESHOLDS.LOCAL;
       expect(memoryIncrease).toBeLessThan(memoryThreshold);
       expect(cacheManager.cache.size).toBeLessThanOrEqual(10000);
     });
