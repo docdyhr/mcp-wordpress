@@ -412,7 +412,8 @@ npm run cache:stats
    # Recent fix for DXT: JSON parsing errors
    # Update to latest version
    curl -L -o mcp-wordpress.dxt \
-     https://github.com/docdyhr/mcp-wordpress/raw/main/mcp-wordpress.dxt
+     https://github.com/docdyhr/mcp-wordpress/releases/latest/download/\
+     mcp-wordpress.dxt
    
    # Reinstall DXT extension
    ```

@@ -59,13 +59,13 @@ async function buildCleanDXT() {
     
     // Create the DXT package
     console.log('🎁 Creating DXT package...');
-    execSync(`dxt pack . ${path.join(rootDir, 'mcp-wordpress-clean.dxt')}`, { stdio: 'inherit' });
+    execSync(`dxt pack . ${path.join(rootDir, 'mcp-wordpress.dxt')}`, { stdio: 'inherit' });
     
     // Clean up
     process.chdir(rootDir);
     await fs.remove(tempDir);
     
-    console.log('✅ Clean DXT package created: mcp-wordpress-clean.dxt');
+    console.log('✅ Official DXT package created: mcp-wordpress.dxt');
     
   } catch (error) {
     console.error('❌ Error building clean DXT:', error);

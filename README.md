@@ -73,7 +73,7 @@ WordPress Admin → Users → Profile → Application Passwords → Add New
 
 ```bash
 # Download and install in Claude Desktop
-curl -L https://github.com/docdyhr/mcp-wordpress/raw/main/mcp-wordpress.dxt -o mcp-wordpress.dxt
+curl -L https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt -o mcp-wordpress.dxt
 # Then: Claude Desktop → Extensions → Install → Select DXT file
 ```
 
@@ -99,7 +99,7 @@ Response: "✅ Authentication successful! Connected to: Your Site Name"
 
 **Easiest installation - just 2 clicks!**
 
-1. **Download**: [`mcp-wordpress.dxt`](https://github.com/docdyhr/mcp-wordpress/raw/main/mcp-wordpress.dxt) (2.6MB)
+1. **Download**: [`mcp-wordpress.dxt`](https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt) (3.4MB)
 2. **Install**: Claude Desktop → Extensions → Install → Select DXT file
 3. **Configure**: Enter your WordPress site URL and credentials
 
@@ -1114,7 +1114,7 @@ docker pull docdyhr/mcp-wordpress:1.3.1
 
 **Ready to transform your WordPress management?**
 
-1. **🏆 [Download DXT Extension](https://github.com/docdyhr/mcp-wordpress/raw/main/mcp-wordpress.dxt)** - Easiest setup
+1. **🏆 [Download DXT Extension](https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt)** - Easiest setup
    (2 minutes)
 2. **⚡ [Try NPX Method](docs/user-guides/NPX_SETUP.md)** - Power user setup (5 minutes)
 3. **📚 [Explore All Tools](docs/api/README.md)** - See what's possible
