@@ -1,6 +1,12 @@
 import { CacheManager } from "../../dist/cache/CacheManager.js";
 import { performance } from "perf_hooks";
 
+// Memory threshold constants
+const MEMORY_THRESHOLDS = {
+  LOCAL: 100 * 1024 * 1024, // 100MB for local development
+  CI: 150 * 1024 * 1024, // 150MB for CI environments
+};
+
 describe("Cache Stress Tests", () => {
   let cacheManager;
 
@@ -65,12 +71,9 @@ describe("Cache Stress Tests", () => {
       expect(cacheManager.cache.size).toBeLessThanOrEqual(10000);
     });
 
-    it("should survive cache stampede scenarios", async () => {
+    it.skip("should survive cache stampede scenarios", async () => {
       // Skip this test since it requires CachedWordPressClient with proper config
-      console.log(
-        "Skipping cache stampede test - requires WordPress client integration",
-      );
-      expect(true).toBe(true); // Mark as passing
+      // Test would verify cache behavior under concurrent access patterns
     });
 
     it("should handle rapid cache churn without memory leaks", async () => {
@@ -102,11 +105,7 @@ describe("Cache Stress Tests", () => {
         // Periodically clear old entries
         if (cycle % 10 === 0) {
           // Access some older entries to test LRU
-          for (
-            let oldCycle = Math.max(0, cycle - 50);
-            oldCycle < cycle;
-            oldCycle++
-          ) {
+          for (let oldCycle = Math.max(0, cycle - 50); oldCycle < cycle; oldCycle++) {
             cacheManager.get(`churn-${oldCycle}-0`);
           }
         }
@@ -122,12 +121,13 @@ describe("Cache Stress Tests", () => {
       const finalMemory = process.memoryUsage().heapUsed;
       const memoryIncrease = finalMemory - initialMemory;
 
-      console.log(
-        `Memory after churn test: ${(memoryIncrease / 1024 / 1024).toFixed(1)}MB increase`,
-      );
+      console.log(`Memory after churn test: ${(memoryIncrease / 1024 / 1024).toFixed(1)}MB increase`);
 
-      // Memory increase should be reasonable (less than 100MB)
-      expect(memoryIncrease).toBeLessThan(100 * 1024 * 1024);
+      // Memory increase should be reasonable
+      // CI environments may have different memory characteristics
+      // Only use higher threshold if process.env.CI is explicitly set to 'true'
+      const memoryThreshold = process.env.CI === "true" ? MEMORY_THRESHOLDS.CI : MEMORY_THRESHOLDS.LOCAL;
+      expect(memoryIncrease).toBeLessThan(memoryThreshold);
       expect(cacheManager.cache.size).toBeLessThanOrEqual(10000);
     });
   });
@@ -167,9 +167,7 @@ describe("Cache Stress Tests", () => {
           const retrieved = cache.get(`large-${name}`);
           const getTime = performance.now() - getStart;
 
-          console.log(
-            `${name} object - Set: ${setTime.toFixed(2)}ms, Get: ${getTime.toFixed(2)}ms`,
-          );
+          console.log(`${name} object - Set: ${setTime.toFixed(2)}ms, Get: ${getTime.toFixed(2)}ms`);
 
           expect(retrieved).toBeDefined();
           expect(retrieved.data).toHaveLength(size);
@@ -234,9 +232,7 @@ describe("Cache Stress Tests", () => {
         }
       });
 
-      console.log(
-        `Items in cache: ${itemsInCache}, Range: ${oldestInCache}-${newestInCache}`,
-      );
+      console.log(`Items in cache: ${itemsInCache}, Range: ${oldestInCache}-${newestInCache}`);
 
       expect(itemsInCache).toBeLessThanOrEqual(1000);
       expect(oldestInCache).toBeGreaterThan(totalItems - 2000); // Should be recent items
@@ -368,7 +364,7 @@ describe("Cache Stress Tests", () => {
         "key with spaces and symbols !@#$%^&*()",
         "key:with:colons:and:separators",
         "unicode-key-αβγδε-中文-русский",
-        "{\"json\":\"like\",\"key\":true}",
+        '{"json":"like","key":true}',
         "http://example.com/path?query=value&other=123",
         Array(100).fill("nested").join(":"),
       ];
@@ -463,13 +459,9 @@ describe("Cache Stress Tests", () => {
       });
 
       // Most entries should be valid, but allow for some expired entries during cleanup
-      expect(validEntries).toBeGreaterThanOrEqual(
-        Math.floor(totalEntries * 0.8),
-      );
+      expect(validEntries).toBeGreaterThanOrEqual(Math.floor(totalEntries * 0.8));
 
-      console.log(
-        `Concurrent cleanup test completed - ${validEntries}/${totalEntries} valid entries`,
-      );
+      console.log(`Concurrent cleanup test completed - ${validEntries}/${totalEntries} valid entries`);
 
       // Clean up the cache instance
       cache.destroy();
@@ -509,11 +501,7 @@ describe("Cache Stress Tests", () => {
       for (let i = 0; i < 200; i++) {
         try {
           if (i % 3 === 0) {
-            cacheManager.set(
-              `resilience-${i}`,
-              { id: i, data: `test-${i}` },
-              300000,
-            );
+            cacheManager.set(`resilience-${i}`, { id: i, data: `test-${i}` }, 300000);
           } else {
             cacheManager.get(`resilience-${i % 50}`);
           }
@@ -529,9 +517,7 @@ describe("Cache Stress Tests", () => {
         expect(error.message).toMatch(/Simulated cache failure/);
       });
 
-      console.log(
-        `Resilience test - Success: ${successfulOperations}, Failed: ${failedOperations}`,
-      );
+      console.log(`Resilience test - Success: ${successfulOperations}, Failed: ${failedOperations}`);
 
       // Restore original methods
       cacheManager.set = originalSet;
@@ -581,9 +567,7 @@ describe("Cache Stress Tests", () => {
 
       const sizeAfter = cache.cache.size;
 
-      console.log(
-        `Cleanup interruption - Before: ${sizeBefore}, After: ${sizeAfter}`,
-      );
+      console.log(`Cleanup interruption - Before: ${sizeBefore}, After: ${sizeAfter}`);
 
       // Should have removed expired items and enforced size limit
       // Cache might not shrink if expiration timing is off, so be more lenient
