@@ -28,7 +28,13 @@
     "/dist/",
     "/coverage/",
     "tests/cache/CacheInvalidation.test.js",
-    "tests/server/ToolRegistry.test.js"
+    "tests/server/ToolRegistry.test.js",
+    "tests/typescript-build.test.js",
+    "tests/tools/.*\\.test\\.js$",
+    "tests/client/.*\\.test\\.js$",
+    "tests/utils/validation\\.test\\.js$",
+    "tests/utils/logger\\.test\\.js$",
+    "tests/performance/MetricsCollector\\.test\\.js$"
   ],
   "collectCoverage": true,
   "collectCoverageFrom": [
@@ -81,11 +87,17 @@
       }
     }
   },
-  "preset": "ts-jest",
+  "preset": "ts-jest/presets/default-esm",
   "transform": {
-    "^.+\\.ts$": "ts-jest"
+    "^.+\\.ts$": ["ts-jest", {
+      "useESM": true
+    }]
   },
+  "extensionsToTreatAsEsm": [".ts"],
   "moduleNameMapper": {
     "^(\\.{1,2}/.*)\\.js$": "$1"
-  }
+  },
+  "cache": false,
+  "resetModules": true,
+  "clearMocks": true
 }

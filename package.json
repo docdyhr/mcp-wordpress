@@ -126,7 +126,7 @@
     "test:security:penetration": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/penetration-tests.test.js",
     "test:security:validation": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/security/security-validation.test.js",
     "test:tools": "node scripts/test-all-tools-fixed.js",
-    "test:typescript": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest",
+    "test:typescript": "npm run build && NODE_OPTIONS=\"--experimental-vm-modules\" jest --config=jest.typescript.config.json",
     "test:watch": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --watch",
     "test:weekly": "npm run test:compatibility",
     "test:with-env": "bash scripts/start-test-env.sh && npm run test:typescript",

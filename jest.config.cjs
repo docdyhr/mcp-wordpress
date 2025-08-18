@@ -104,32 +104,29 @@ const baseConfig = {
   // Setup files
   setupFilesAfterEnv: ["<rootDir>/tests/jest.teardown.js"],
   
-  // Globals
-  globals: {
-    "__EXECUTION_CONTEXT__": "jest"
-  },
-
   // Module name mapping for TypeScript imports with .js extensions
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1"
   },
 
-  // Use ts-jest for TypeScript transformation
-  preset: 'ts-jest',
+  // Use ts-jest for TypeScript transformation with ESM support
+  preset: 'ts-jest/presets/default-esm',
   transform: {
-    "^.+\\.ts$": "ts-jest"
-  },
-  // Configure ts-jest for proper module resolution
-  globals: {
-    "__EXECUTION_CONTEXT__": "jest",
-    'ts-jest': {
+    "^.+\\.ts$": ["ts-jest", {
       useESM: true,
       tsconfig: {
         moduleResolution: 'node',
         allowSyntheticDefaultImports: true,
-        esModuleInterop: true
+        esModuleInterop: true,
+        target: 'ES2020',
+        module: 'ESNext'
       }
-    }
+    }]
+  },
+  
+  // Globals
+  globals: {
+    "__EXECUTION_CONTEXT__": "jest"
   }
 };
 
