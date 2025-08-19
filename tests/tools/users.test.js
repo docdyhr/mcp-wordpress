@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { UserTools } from "../../dist/tools/users.js";
 
 describe("UserTools", () => {
@@ -6,18 +6,18 @@ describe("UserTools", () => {
   let mockClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock WordPress client with all needed methods
     mockClient = {
-      request: jest.fn(),
-      getUsers: jest.fn(),
-      getUser: jest.fn(),
-      getCurrentUser: jest.fn(),
-      createUser: jest.fn(),
-      updateUser: jest.fn(),
-      deleteUser: jest.fn(),
-      getSiteUrl: jest.fn().mockReturnValue("https://test-site.com"),
+      request: vi.fn(),
+      getUsers: vi.fn(),
+      getUser: vi.fn(),
+      getCurrentUser: vi.fn(),
+      createUser: vi.fn(),
+      updateUser: vi.fn(),
+      deleteUser: vi.fn(),
+      getSiteUrl: vi.fn().mockReturnValue("https://test-site.com"),
       config: {
         baseUrl: "https://test-site.com",
       },

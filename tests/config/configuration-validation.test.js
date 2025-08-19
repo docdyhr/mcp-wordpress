@@ -1,4 +1,4 @@
-import { describe, it, expect } from "@jest/globals";
+
 import { ConfigurationValidator } from "../../dist/config/ConfigurationSchema.js";
 
 describe("Configuration Validation Tests", () => {

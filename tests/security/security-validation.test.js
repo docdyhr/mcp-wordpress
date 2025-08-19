@@ -3,7 +3,7 @@
  * Tests for common security vulnerabilities and input validation
  */
 
-import { describe, test, expect, beforeEach } from "@jest/globals";
+// Vitest globals enabled
 
 // Mock security modules for testing
 const SecuritySchemas = {

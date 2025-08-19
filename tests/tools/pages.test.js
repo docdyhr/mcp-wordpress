@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { PageTools } from "../../dist/tools/pages.js";
 
 describe("PageTools", () => {
@@ -6,19 +6,19 @@ describe("PageTools", () => {
   let mockClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock WordPress client with all needed methods
     mockClient = {
-      request: jest.fn(),
-      getPages: jest.fn(),
-      getPage: jest.fn(),
-      createPage: jest.fn(),
-      updatePage: jest.fn(),
-      deletePage: jest.fn(),
-      getPageRevisions: jest.fn(),
-      getUser: jest.fn().mockResolvedValue({ name: "Test User", username: "testuser" }),
-      getSiteUrl: jest.fn().mockReturnValue("https://test-site.com"),
+      request: vi.fn(),
+      getPages: vi.fn(),
+      getPage: vi.fn(),
+      createPage: vi.fn(),
+      updatePage: vi.fn(),
+      deletePage: vi.fn(),
+      getPageRevisions: vi.fn(),
+      getUser: vi.fn().mockResolvedValue({ name: "Test User", username: "testuser" }),
+      getSiteUrl: vi.fn().mockReturnValue("https://test-site.com"),
       config: {
         baseUrl: "https://test-site.com",
       },

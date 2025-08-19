@@ -3,12 +3,12 @@
  * Achieving ≥70% coverage for pages tool implementation
  */
 
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { PageTools } from "../../../dist/tools/pages.js";
 import { WordPressClient } from "../../../dist/client/api.js"; // eslint-disable-line no-unused-vars
 
 // Mock the WordPressClient
-jest.mock("../../../dist/client/api.js");
+vi.mock("../../../dist/client/api.js");
 
 describe("PageTools", () => {
   let pageTools;
@@ -16,20 +16,20 @@ describe("PageTools", () => {
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Create mock client instance with all necessary methods
     mockClient = {
       config: {
         siteUrl: "https://test.wordpress.com",
       },
-      getSiteUrl: jest.fn().mockReturnValue("https://test.wordpress.com"),
-      getPages: jest.fn(),
-      getPage: jest.fn(),
-      createPage: jest.fn(),
-      updatePage: jest.fn(),
-      deletePage: jest.fn(),
-      getPageRevisions: jest.fn(),
+      getSiteUrl: vi.fn().mockReturnValue("https://test.wordpress.com"),
+      getPages: vi.fn(),
+      getPage: vi.fn(),
+      createPage: vi.fn(),
+      updatePage: vi.fn(),
+      deletePage: vi.fn(),
+      getPageRevisions: vi.fn(),
     };
 
     // Create PageTools instance

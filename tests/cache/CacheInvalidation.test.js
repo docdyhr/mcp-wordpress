@@ -1,9 +1,9 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { CacheInvalidation } from "../../dist/cache/CacheInvalidation.js";
 import { HttpCacheWrapper } from "../../dist/cache/HttpCacheWrapper.js";
 
 // Mock HttpCacheWrapper
-jest.mock("../../dist/cache/HttpCacheWrapper.js");
+vi.mock("../../dist/cache/HttpCacheWrapper.js");
 
 describe("CacheInvalidation", () => {
   let invalidation;
@@ -11,10 +11,10 @@ describe("CacheInvalidation", () => {
 
   beforeEach(() => {
     mockHttpCache = {
-      invalidatePattern: jest.fn(),
-      invalidateKey: jest.fn(),
-      clear: jest.fn(),
-      getKeys: jest.fn().mockReturnValue([]),
+      invalidatePattern: vi.fn(),
+      invalidateKey: vi.fn(),
+      clear: vi.fn(),
+      getKeys: vi.fn().mockReturnValue([]),
       siteId: "test-site",
     };
 
@@ -118,7 +118,7 @@ describe("CacheInvalidation", () => {
         timestamp: Date.now(),
       };
 
-      const processQueueSpy = jest.spyOn(invalidation, "processQueue");
+      const processQueueSpy = vi.spyOn(invalidation, "processQueue");
 
       await invalidation.trigger(event);
 
@@ -136,7 +136,7 @@ describe("CacheInvalidation", () => {
         timestamp: Date.now(),
       };
 
-      const processQueueSpy = jest.spyOn(invalidation, "processQueue");
+      const processQueueSpy = vi.spyOn(invalidation, "processQueue");
 
       await invalidation.trigger(event);
 
@@ -147,7 +147,7 @@ describe("CacheInvalidation", () => {
 
   describe("invalidateResource", () => {
     it("should create and trigger invalidation event", async () => {
-      const triggerSpy = jest.spyOn(invalidation, "trigger");
+      const triggerSpy = vi.spyOn(invalidation, "trigger");
 
       await invalidation.invalidateResource("posts", 123, "update");
 
@@ -161,7 +161,7 @@ describe("CacheInvalidation", () => {
     });
 
     it("should use default type when not specified", async () => {
-      const triggerSpy = jest.spyOn(invalidation, "trigger");
+      const triggerSpy = vi.spyOn(invalidation, "trigger");
 
       await invalidation.invalidateResource("posts", 123);
 
@@ -175,7 +175,7 @@ describe("CacheInvalidation", () => {
     });
 
     it("should handle resource without ID", async () => {
-      const triggerSpy = jest.spyOn(invalidation, "trigger");
+      const triggerSpy = vi.spyOn(invalidation, "trigger");
 
       await invalidation.invalidateResource("posts", undefined, "create");
 
@@ -209,7 +209,7 @@ describe("CacheInvalidation", () => {
 
       invalidation.eventQueue = [event1, event2];
 
-      const processEventSpy = jest.spyOn(invalidation, "processEvent");
+      const processEventSpy = vi.spyOn(invalidation, "processEvent");
 
       await invalidation.processQueue();
 
@@ -231,7 +231,7 @@ describe("CacheInvalidation", () => {
 
       let processingDuringExecution = false;
 
-      jest.spyOn(invalidation, "processEvent").mockImplementation(async () => {
+      vi.spyOn(invalidation, "processEvent").mockImplementation(async () => {
         processingDuringExecution = invalidation.processing;
         return Promise.resolve();
       });
@@ -253,7 +253,7 @@ describe("CacheInvalidation", () => {
 
       invalidation.eventQueue = [event];
 
-      jest.spyOn(invalidation, "processEvent").mockRejectedValue(new Error("Process error"));
+      vi.spyOn(invalidation, "processEvent").mockRejectedValue(new Error("Process error"));
 
       await expect(invalidation.processQueue()).resolves.not.toThrow();
       expect(invalidation.processing).toBe(false);
@@ -270,7 +270,7 @@ describe("CacheInvalidation", () => {
         timestamp: Date.now(),
       };
 
-      const applyRuleSpy = jest.spyOn(invalidation, "applyRule");
+      const applyRuleSpy = vi.spyOn(invalidation, "applyRule");
 
       await invalidation.processEvent(event);
 
@@ -292,7 +292,7 @@ describe("CacheInvalidation", () => {
         patterns: ["posts/*"],
       });
 
-      const applyRuleSpy = jest.spyOn(invalidation, "applyRule");
+      const applyRuleSpy = vi.spyOn(invalidation, "applyRule");
 
       await invalidation.processEvent(event);
 
@@ -605,7 +605,7 @@ describe("CacheInvalidation", () => {
       };
 
       // Mock slow processing
-      jest.spyOn(invalidation, "processEvent").mockImplementation(async () => {
+      vi.spyOn(invalidation, "processEvent").mockImplementation(async () => {
         await new Promise((resolve) => setTimeout(resolve, 100));
       });
 

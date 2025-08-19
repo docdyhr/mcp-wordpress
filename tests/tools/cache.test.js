@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { CacheTools } from "../../dist/tools/cache.js";
 import { CachedWordPressClient } from "../../dist/client/CachedWordPressClient.js";
 
@@ -8,23 +8,23 @@ describe("CacheTools", () => {
   let mockCachedClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock regular client
     mockClient = {
       cacheManager: {
-        getStats: jest.fn(),
-        clear: jest.fn(),
-        resetStats: jest.fn(),
+        getStats: vi.fn(),
+        clear: vi.fn(),
+        resetStats: vi.fn(),
       },
     };
 
     // Mock cached client with cache functionality
     mockCachedClient = {
-      getCacheStats: jest.fn(),
-      clearCache: jest.fn(),
-      clearCachePattern: jest.fn(),
-      warmCache: jest.fn(),
+      getCacheStats: vi.fn(),
+      clearCache: vi.fn(),
+      clearCachePattern: vi.fn(),
+      warmCache: vi.fn(),
     };
 
     // Make the cached client appear as instance of CachedWordPressClient

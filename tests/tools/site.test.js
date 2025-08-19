@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { SiteTools } from "../../dist/tools/site.js";
 
 describe("SiteTools", () => {
@@ -6,16 +6,16 @@ describe("SiteTools", () => {
   let mockClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockClient = {
-      request: jest.fn(),
-      getSiteSettings: jest.fn(),
-      updateSiteSettings: jest.fn(),
-      getSiteInfo: jest.fn(),
-      getPlugins: jest.fn(),
-      getThemes: jest.fn(),
-      getSiteHealth: jest.fn(),
+      request: vi.fn(),
+      getSiteSettings: vi.fn(),
+      updateSiteSettings: vi.fn(),
+      getSiteInfo: vi.fn(),
+      getPlugins: vi.fn(),
+      getThemes: vi.fn(),
+      getSiteHealth: vi.fn(),
     };
 
     siteTools = new SiteTools();
@@ -70,7 +70,7 @@ describe("SiteTools", () => {
       };
 
       mockClient.getSiteSettings.mockResolvedValue(mockSettings);
-      mockClient.getSiteUrl = jest.fn().mockReturnValue("https://site.example.com");
+      mockClient.getSiteUrl = vi.fn().mockReturnValue("https://site.example.com");
 
       const tools = siteTools.getTools();
       const settingsTool = tools.find((t) => t.name === "wp_get_site_settings");
@@ -93,7 +93,7 @@ describe("SiteTools", () => {
 
     it("should handle settings errors", async () => {
       mockClient.getSiteSettings.mockRejectedValue(new Error("Unauthorized"));
-      mockClient.getSiteUrl = jest.fn().mockReturnValue("https://site.example.com");
+      mockClient.getSiteUrl = vi.fn().mockReturnValue("https://site.example.com");
 
       const tools = siteTools.getTools();
       const settingsTool = tools.find((t) => t.name === "wp_get_site_settings");

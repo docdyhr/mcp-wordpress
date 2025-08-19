@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, jest } from "@jest/globals";
+import { vi } from "vitest";
 import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
@@ -83,8 +83,8 @@ describe("Performance Regression Detection", () => {
 
   afterAll(async () => {
     // Clear any remaining timers
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.clearAllTimers();
+    vi.useRealTimers();
 
     // Save performance results
     await fs.promises.writeFile(resultsFile, JSON.stringify(performanceResults, null, 2));

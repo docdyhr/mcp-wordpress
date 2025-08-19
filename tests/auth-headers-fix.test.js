@@ -2,7 +2,7 @@
  * Test to verify authentication headers are properly included in POST requests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "@jest/globals";
+
 import nock from "nock";
 
 describe("WordPress REST API Authentication Headers", () => {

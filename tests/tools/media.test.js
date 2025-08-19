@@ -1,12 +1,12 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
 // Mock fs before any imports that might use it
-jest.mock("fs", () => ({
+vi.mock("fs", () => ({
   __esModule: true,
   default: {
-    existsSync: jest.fn(),
+    existsSync: vi.fn(),
   },
-  existsSync: jest.fn(),
+  existsSync: vi.fn(),
 }));
 
 import { MediaTools } from "../../dist/tools/media.js";
@@ -17,17 +17,17 @@ describe("MediaTools", () => {
   let mockClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock WordPress client with all needed methods
     mockClient = {
-      request: jest.fn(),
-      getMedia: jest.fn(),
-      getMediaItem: jest.fn(),
-      uploadMedia: jest.fn(),
-      updateMedia: jest.fn(),
-      deleteMedia: jest.fn(),
-      getSiteUrl: jest.fn().mockReturnValue("https://test-site.com"),
+      request: vi.fn(),
+      getMedia: vi.fn(),
+      getMediaItem: vi.fn(),
+      uploadMedia: vi.fn(),
+      updateMedia: vi.fn(),
+      deleteMedia: vi.fn(),
+      getSiteUrl: vi.fn().mockReturnValue("https://test-site.com"),
       config: {
         baseUrl: "https://test-site.com",
       },

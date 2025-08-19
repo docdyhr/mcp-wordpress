@@ -45,8 +45,8 @@ describe("WordPress API Client Upload Timeout", () => {
     const mockReadFileSync = jest
       .spyOn(fs, "readFileSync")
       .mockReturnValue(testFile);
-    jest.spyOn(fs, "writeFileSync").mockImplementation(() => {});
-    jest.spyOn(fs, "unlinkSync").mockImplementation(() => {});
+    vi.spyOn(fs, "writeFileSync").mockImplementation(() => {});
+    vi.spyOn(fs, "unlinkSync").mockImplementation(() => {});
 
     // Ensure mocks persist across tests
     mockExistsSync.mockClear();
@@ -56,7 +56,7 @@ describe("WordPress API Client Upload Timeout", () => {
 
   afterEach(() => {
     nock.cleanAll();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe("uploadFile method timeout behavior", () => {

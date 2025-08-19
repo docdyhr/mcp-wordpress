@@ -3,16 +3,16 @@
  * Achieving ≥70% coverage for media tool implementation
  */
 
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
 // Mock fs module BEFORE any other imports
-const mockExistsSync = jest.fn();
-jest.unstable_mockModule("fs", () => ({
+const mockExistsSync = vi.fn();
+vi.unstable_mockModule("fs", () => ({
   existsSync: mockExistsSync,
 }));
 
 // Mock the dependencies
-jest.mock("../../../dist/client/api.js");
+vi.mock("../../../dist/client/api.js");
 
 // Now import the modules after mocking
 const { MediaTools } = await import("../../../dist/tools/media.js");
@@ -24,19 +24,19 @@ describe("MediaTools", () => {
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Create mock client instance with all necessary methods
     mockClient = {
       config: {
         siteUrl: "https://test.wordpress.com",
       },
-      getSiteUrl: jest.fn().mockReturnValue("https://test.wordpress.com"),
-      getMedia: jest.fn(),
-      getMediaItem: jest.fn(),
-      uploadMedia: jest.fn(),
-      updateMedia: jest.fn(),
-      deleteMedia: jest.fn(),
+      getSiteUrl: vi.fn().mockReturnValue("https://test.wordpress.com"),
+      getMedia: vi.fn(),
+      getMediaItem: vi.fn(),
+      uploadMedia: vi.fn(),
+      updateMedia: vi.fn(),
+      deleteMedia: vi.fn(),
     };
 
     // Create MediaTools instance

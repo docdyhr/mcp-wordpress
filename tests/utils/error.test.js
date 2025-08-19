@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import {
   getErrorMessage,
   isError,
@@ -6,7 +6,7 @@ import {
   handleToolError,
   validateRequired,
   validateSite,
-} from "../../src/utils/error.ts";
+} from "../../dist/utils/error.js";
 
 describe("error utilities", () => {
   describe("getErrorMessage", () => {
@@ -65,7 +65,7 @@ describe("error utilities", () => {
 
     beforeEach(() => {
       originalConsoleError = console.error;
-      console.error = jest.fn();
+      console.error = vi.fn();
     });
 
     afterEach(() => {
@@ -102,7 +102,7 @@ describe("error utilities", () => {
 
     beforeEach(() => {
       originalConsoleError = console.error;
-      console.error = jest.fn();
+      console.error = vi.fn();
     });
 
     afterEach(() => {
@@ -257,7 +257,7 @@ describe("error utilities", () => {
 
     beforeEach(() => {
       originalConsoleError = console.error;
-      console.error = jest.fn();
+      console.error = vi.fn();
     });
 
     afterEach(() => {

@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import {
   withErrorHandling,
   withValidation,
@@ -12,7 +12,7 @@ import {
 describe("toolWrapper utilities", () => {
   describe("withErrorHandling", () => {
     it("should wrap function with error handling", async () => {
-      const mockFn = jest.fn().mockResolvedValue("success");
+      const mockFn = vi.fn().mockResolvedValue("success");
       const wrappedFn = withErrorHandling("test_operation", mockFn);
 
       const result = await wrappedFn("arg1", "arg2");
@@ -22,14 +22,14 @@ describe("toolWrapper utilities", () => {
     });
 
     it("should handle errors with operation prefix", async () => {
-      const mockFn = jest.fn().mockRejectedValue(new Error("Original error"));
+      const mockFn = vi.fn().mockRejectedValue(new Error("Original error"));
       const wrappedFn = withErrorHandling("test_operation", mockFn);
 
       await expect(wrappedFn()).rejects.toThrow("test_operation: Original error");
     });
 
     it("should handle synchronous functions", async () => {
-      const mockFn = jest.fn().mockReturnValue("sync result");
+      const mockFn = vi.fn().mockReturnValue("sync result");
       const wrappedFn = withErrorHandling("test_operation", mockFn);
 
       const result = await wrappedFn();
@@ -37,7 +37,7 @@ describe("toolWrapper utilities", () => {
     });
 
     it("should handle non-Error objects", async () => {
-      const mockFn = jest.fn().mockRejectedValue("string error");
+      const mockFn = vi.fn().mockRejectedValue("string error");
       const wrappedFn = withErrorHandling("test_operation", mockFn);
 
       await expect(wrappedFn()).rejects.toThrow("test_operation: string error");
@@ -46,8 +46,8 @@ describe("toolWrapper utilities", () => {
 
   describe("withValidation", () => {
     it("should validate parameters before execution", async () => {
-      const mockValidator = jest.fn();
-      const mockFn = jest.fn().mockResolvedValue("success");
+      const mockValidator = vi.fn();
+      const mockFn = vi.fn().mockResolvedValue("success");
       const wrappedFn = withValidation("test_operation", mockValidator, mockFn);
 
       const result = await wrappedFn("arg1", "arg2");
@@ -58,10 +58,10 @@ describe("toolWrapper utilities", () => {
     });
 
     it("should handle validation errors", async () => {
-      const mockValidator = jest.fn().mockImplementation(() => {
+      const mockValidator = vi.fn().mockImplementation(() => {
         throw new Error("Validation failed");
       });
-      const mockFn = jest.fn();
+      const mockFn = vi.fn();
       const wrappedFn = withValidation("test_operation", mockValidator, mockFn);
 
       await expect(wrappedFn()).rejects.toThrow("test_operation: Validation failed");
@@ -69,8 +69,8 @@ describe("toolWrapper utilities", () => {
     });
 
     it("should handle execution errors after validation", async () => {
-      const mockValidator = jest.fn();
-      const mockFn = jest.fn().mockRejectedValue(new Error("Execution failed"));
+      const mockValidator = vi.fn();
+      const mockFn = vi.fn().mockRejectedValue(new Error("Execution failed"));
       const wrappedFn = withValidation("test_operation", mockValidator, mockFn);
 
       await expect(wrappedFn()).rejects.toThrow("test_operation: Execution failed");
@@ -169,7 +169,7 @@ describe("toolWrapper utilities", () => {
 
   describe("toolWrapper", () => {
     it("should execute function successfully", async () => {
-      const mockFn = jest.fn().mockResolvedValue("success");
+      const mockFn = vi.fn().mockResolvedValue("success");
       const result = await toolWrapper(mockFn);
 
       expect(mockFn).toHaveBeenCalled();
@@ -177,20 +177,20 @@ describe("toolWrapper utilities", () => {
     });
 
     it("should handle function errors", async () => {
-      const mockFn = jest.fn().mockRejectedValue(new Error("Function error"));
+      const mockFn = vi.fn().mockRejectedValue(new Error("Function error"));
 
       await expect(toolWrapper(mockFn)).rejects.toThrow("Function error");
     });
 
     it("should handle synchronous functions", async () => {
-      const mockFn = jest.fn().mockReturnValue("sync result");
+      const mockFn = vi.fn().mockReturnValue("sync result");
       const result = await toolWrapper(mockFn);
 
       expect(result).toBe("sync result");
     });
 
     it("should handle non-Error objects", async () => {
-      const mockFn = jest.fn().mockRejectedValue("string error");
+      const mockFn = vi.fn().mockRejectedValue("string error");
 
       await expect(toolWrapper(mockFn)).rejects.toThrow("string error");
     });
@@ -198,7 +198,7 @@ describe("toolWrapper utilities", () => {
 
   describe("integration scenarios", () => {
     it("should combine withErrorHandling and validators", async () => {
-      const mockFn = jest.fn().mockResolvedValue("success");
+      const mockFn = vi.fn().mockResolvedValue("success");
       const wrappedFn = withErrorHandling("test_operation", mockFn);
 
       // Test with validator
@@ -209,7 +209,7 @@ describe("toolWrapper utilities", () => {
     });
 
     it("should handle complex error scenarios", async () => {
-      const mockFn = jest.fn().mockImplementation((params) => {
+      const mockFn = vi.fn().mockImplementation((params) => {
         if (params.trigger === "validation") {
           throw new Error("Validation failed");
         } else if (params.trigger === "execution") {

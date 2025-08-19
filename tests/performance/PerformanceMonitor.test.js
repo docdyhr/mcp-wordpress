@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { PerformanceMonitor } from "../../dist/performance/PerformanceMonitor.js";
 
 describe("PerformanceMonitor", () => {
@@ -6,7 +6,7 @@ describe("PerformanceMonitor", () => {
   let mockConfig;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockConfig = {
       collectInterval: 1000,
