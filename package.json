@@ -104,7 +104,7 @@
     "setup": "node bin/setup.js",
     "start": "npm run build && node dist/index.js",
     "status": "node bin/status.js",
-    "test": "npm run test:vitest",
+    "test": "npm run build && vitest run",
     "test:auth": "node scripts/test-auth.js",
     "test:cache": "npm run build && vitest run tests/cache/",
     "test:ci": "npm run build && CI=true vitest run",
@@ -130,12 +130,9 @@
     "test:watch": "vitest",
     "test:weekly": "npm run test:compatibility",
     "test:with-env": "bash scripts/start-test-env.sh && npm run test:typescript",
+    "test:ui": "npm run build && vitest --ui",
     "typecheck": "tsc --noEmit",
-    "verify-claude": "node scripts/verify-claude-integration.js",
-    "test:vitest": "npm run build && vitest run",
-    "test:vitest:coverage": "npm run build && vitest run --coverage",
-    "test:vitest:watch": "npm run build && vitest",
-    "test:vitest:ui": "npm run build && vitest --ui"
+    "verify-claude": "node scripts/verify-claude-integration.js"
   },
   "lint-staged": {
     "*.{ts,js}": [

@@ -103,7 +103,6 @@ export default [
         beforeAll: "readonly",
         afterAll: "readonly",
         vi: "readonly",
-        jest: "readonly",
         require: "readonly",
         module: "readonly",
         exports: "writable",

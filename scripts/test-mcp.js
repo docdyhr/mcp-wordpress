@@ -65,7 +65,7 @@ class MCPTester {
       const _server = new MCPWordPressServer();
 
       // Test server creation
-      if (!server) {
+      if (!_server) {
         throw new Error('MCP server not initialized');
       }
 
