@@ -35,7 +35,7 @@ jobs:
         run: npm run build
 
       - name: 🧪 Run Vitest Tests
-        run: npm run test:vitest
+        run: npm test
         env:
           # Mock credentials for testing
           WORDPRESS_SITE_URL: https://example.com
@@ -44,7 +44,7 @@ jobs:
           CI: true
 
       - name: 📊 Run Tests with Coverage
-        run: npm run test:vitest:coverage
+        run: npm run test:coverage
 
       - name: 📈 Upload Coverage to Codecov
         uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # v4.5.0
