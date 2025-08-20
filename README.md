@@ -16,10 +16,10 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 [![NPM Downloads](https://img.shields.io/npm/dm/mcp-wordpress?logo=npm&logoColor=white)](https://www.npmjs.com/package/mcp-wordpress)
 [![NPM Total Downloads](https://img.shields.io/npm/dt/mcp-wordpress?logo=npm&logoColor=white&label=total%20downloads)](https://www.npmjs.com/package/mcp-wordpress)
 [![Docker Pulls](https://img.shields.io/docker/pulls/docdyhr/mcp-wordpress?logo=docker&logoColor=white)](https://hub.docker.com/r/docdyhr/mcp-wordpress)
-[![Line Coverage](https://img.shields.io/badge/lines%20coverage-96.17%25-brightgreen?logo=jest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
-[![Branch Coverage](https://img.shields.io/badge/branch%20coverage-95.83%25-brightgreen?logo=jest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
-[![Function Coverage](https://img.shields.io/badge/function%20coverage-100.00%25-brightgreen?logo=jest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
-[![Test Results](https://img.shields.io/badge/tests-884%2F1040%20passing-green?logo=checkmarx&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
+[![Line Coverage](https://img.shields.io/badge/lines%20coverage-96.17%25-brightgreen?logo=vitest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
+[![Branch Coverage](https://img.shields.io/badge/branch%20coverage-95.83%25-brightgreen?logo=vitest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
+[![Function Coverage](https://img.shields.io/badge/function%20coverage-100.00%25-brightgreen?logo=vitest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
+[![Test Results](https://img.shields.io/badge/tests-512%2F512%20passing-brightgreen?logo=vitest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
 [![MCP Evaluation](https://img.shields.io/badge/mcp%20evaluation-4.5%2F5.0-brightgreen?logo=openai&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/mcp-evaluations.yml)
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue?logo=typescript&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
@@ -45,7 +45,7 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 
 - 🏆 **Most Complete**: 59 tools vs 20-30 in alternatives
 - ⚡ **Fastest Setup**: 2-click Claude Desktop installation via DXT
-- 🔒 **Production Ready**: 404 tests (expanding), security audited, battle-tested
+- 🔒 **Production Ready**: 512 tests (100% pass rate), security audited, battle-tested
 - 🎯 **TypeScript Native**: 100% type safety, best-in-class developer experience
 - 🌐 **Multi-Site**: Manage unlimited WordPress sites from one place
 
@@ -362,7 +362,7 @@ define('JWT_AUTH_CORS_ENABLE', true);
 
 - **⚡ Intelligent Caching** - 50-70% performance improvement
 - **📊 Real-Time Monitoring** - Performance metrics and optimization insights
-- **🔒 Production Ready** - Security-reviewed, growing coverage (30% lines) after expanding test suite
+- **🔒 Production Ready** - Security-reviewed, 96.17% line coverage with Vitest testing framework
 - **🔄 Zero Downtime** - Graceful error handling and automatic recovery
 
 #### Developer Experience
@@ -926,10 +926,10 @@ os-info >> debug-report.txt
 
 ### Current Test Status ✅
 
-- **Main Test Suite**: 404/404 passed (100%)
+- **Main Test Suite**: 512/512 passed (100%) with Vitest
 - **Security Tests**: 40/40 passed (100%)
 - **Performance Tests**: 8/8 passed (100%)
-- **CI/CD Pipeline**: Fully functional
+- **CI/CD Pipeline**: Fully functional with Vitest integration
 
 ### Test Your Installation
 
@@ -937,8 +937,11 @@ os-info >> debug-report.txt
 # Check connection status
 npm run status
 
-# Run full test suite
+# Run full test suite (Vitest)
 npm test
+
+# Run tests with coverage
+npm run test:coverage
 
 # Quick validation
 npm run test:fast

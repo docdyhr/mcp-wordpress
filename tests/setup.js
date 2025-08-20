@@ -1,5 +1,6 @@
 /**
- * Jest setup file for tests with environment
+ * Vitest setup file for tests with environment
+ * This file is now handled by vitest.setup.ts, but kept for compatibility
  */
 /* eslint-env node */
 const path = require("path");
@@ -28,5 +29,5 @@ if (!process.env.WORDPRESS_AUTH_METHOD) {
   process.env.WORDPRESS_AUTH_METHOD = "app-password";
 }
 
-// Increase timeout for integration tests
-jest.setTimeout(30000);
+// Note: Timeouts are now handled in vitest.config.ts
+// This file is kept for backward compatibility
