@@ -9,33 +9,38 @@ import { vi } from "vitest";
 vi.mock("../../../dist/client/api.js");
 vi.mock("../../../dist/utils/streaming.js", () => ({
   WordPressDataStreamer: {
-    streamUsers: vi.fn().mockImplementation(async function* (users, options = {}) {
+    streamUsers: vi.fn().mockImplementation((users, options = {}) => {
       const batchSize = options.batchSize || 30;
 
-      // Process users in batches like the real implementation
-      for (let i = 0; i < users.length; i += batchSize) {
-        const batch = users.slice(i, i + batchSize);
-        const hasMore = i + batchSize < users.length;
+      // Return an async generator object directly
+      return {
+        async *[Symbol.asyncIterator]() {
+          // Process users in batches like the real implementation
+          for (let i = 0; i < users.length; i += batchSize) {
+            const batch = users.slice(i, i + batchSize);
+            const hasMore = i + batchSize < users.length;
 
-        // Transform users to match the real implementation format
-        const transformedData = batch.map((user) => ({
-          id: user.id,
-          name: user.name || "No name",
-          username: user.slug || "unknown",
-          email: user.email || "No email",
-          roles: options.includeRoles ? user.roles : undefined,
-          capabilities: options.includeCapabilities ? {} : undefined,
-          registeredDate: user.registered_date ? new Date(user.registered_date).toLocaleDateString() : "Unknown",
-        }));
+            // Transform users to match the real implementation format
+            const transformedData = batch.map((user) => ({
+              id: user.id,
+              name: user.name || "No name",
+              username: user.slug || "unknown",
+              email: user.email || "No email",
+              roles: options.includeRoles ? user.roles : undefined,
+              capabilities: options.includeCapabilities ? {} : undefined,
+              registeredDate: user.registered_date ? new Date(user.registered_date).toLocaleDateString() : "Unknown",
+            }));
 
-        yield {
-          data: transformedData,
-          hasMore,
-          cursor: hasMore ? String(i + batchSize) : undefined,
-          total: users.length,
-          processed: Math.min(i + batchSize, users.length),
-        };
-      }
+            yield {
+              data: transformedData,
+              hasMore,
+              cursor: hasMore ? String(i + batchSize) : undefined,
+              total: users.length,
+              processed: Math.min(i + batchSize, users.length),
+            };
+          }
+        },
+      };
     }),
   },
   StreamingUtils: {
