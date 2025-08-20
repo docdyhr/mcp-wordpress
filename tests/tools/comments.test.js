@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { CommentTools } from "../../dist/tools/comments.js";
 
 describe("CommentTools", () => {
@@ -6,17 +6,17 @@ describe("CommentTools", () => {
   let mockClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock WordPress client with all needed methods
     mockClient = {
-      request: jest.fn(),
-      getComments: jest.fn(),
-      getComment: jest.fn(),
-      createComment: jest.fn(),
-      updateComment: jest.fn(),
-      deleteComment: jest.fn(),
-      getSiteUrl: jest.fn().mockReturnValue("https://test-site.com"),
+      request: vi.fn(),
+      getComments: vi.fn(),
+      getComment: vi.fn(),
+      createComment: vi.fn(),
+      updateComment: vi.fn(),
+      deleteComment: vi.fn(),
+      getSiteUrl: vi.fn().mockReturnValue("https://test-site.com"),
       config: {
         baseUrl: "https://test-site.com",
       },

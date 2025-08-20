@@ -26,20 +26,19 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "exactOptionalPropertyTypes": true,
-    "types": ["node", "jest"]
+    "types": ["node", "vitest/globals"]
   },
   "include": [
-    "src/**/*",
-    "tests/**/*",
-    "bin/**/*",
-    "scripts/**/*"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
     "dist",
     "coverage",
     "**/*.test.js",
-    "**/*.spec.js"
+    "**/*.spec.js",
+    "src/**/__tests__/**/*",
+    "src/**/*.test.ts"
   ],
   "ts-node": {
     "esm": true,

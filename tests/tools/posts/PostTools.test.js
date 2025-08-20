@@ -3,22 +3,22 @@
  * Achieving ≥70% coverage for posts tool implementation
  */
 
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { PostTools } from "../../../dist/tools/posts/index.js";
 import { WordPressClient } from "../../../dist/client/api.js"; // eslint-disable-line no-unused-vars
 
 // Mock dependencies
-jest.mock("../../../dist/client/api.js");
-jest.mock("../../../dist/utils/streaming.js", () => ({
+vi.mock("../../../dist/client/api.js");
+vi.mock("../../../dist/utils/streaming.js", () => ({
   WordPressDataStreamer: {
-    streamPosts: jest.fn().mockImplementation(async function* (posts) {
+    streamPosts: vi.fn().mockImplementation(async function* (posts) {
       for (const post of posts) {
         yield { type: "post", data: post };
       }
     }),
   },
   StreamingUtils: {
-    formatStreamingResponse: jest.fn().mockReturnValue("Streamed response"),
+    formatStreamingResponse: vi.fn().mockReturnValue("Streamed response"),
   },
 }));
 
@@ -28,23 +28,23 @@ describe("PostTools", () => {
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Create mock client instance with all necessary methods
     mockClient = {
       config: {
         siteUrl: "https://test.wordpress.com",
       },
-      getSiteUrl: jest.fn().mockReturnValue("https://test.wordpress.com"),
-      getPosts: jest.fn(),
-      getPost: jest.fn(),
-      createPost: jest.fn(),
-      updatePost: jest.fn(),
-      deletePost: jest.fn(),
-      getPostRevisions: jest.fn(),
-      getUser: jest.fn(),
-      getCategory: jest.fn(),
-      getTag: jest.fn(),
+      getSiteUrl: vi.fn().mockReturnValue("https://test.wordpress.com"),
+      getPosts: vi.fn(),
+      getPost: vi.fn(),
+      createPost: vi.fn(),
+      updatePost: vi.fn(),
+      deletePost: vi.fn(),
+      getPostRevisions: vi.fn(),
+      getUser: vi.fn(),
+      getCategory: vi.fn(),
+      getTag: vi.fn(),
     };
 
     // Create PostTools instance

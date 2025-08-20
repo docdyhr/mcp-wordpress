@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { AuthTools } from "../../dist/tools/auth.js";
 
 describe("AuthTools", () => {
@@ -8,8 +8,8 @@ describe("AuthTools", () => {
   beforeEach(() => {
     // Mock WordPressClient with all required methods
     mockClient = {
-      ping: jest.fn(),
-      getCurrentUser: jest.fn(),
+      ping: vi.fn(),
+      getCurrentUser: vi.fn(),
       isAuthenticated: true,
       config: {
         baseUrl: "https://example.com",
@@ -292,7 +292,7 @@ describe("AuthTools", () => {
     });
 
     it("should handle client without config in handleTestAuth", async () => {
-      const badClient = { ping: jest.fn(), getCurrentUser: jest.fn() };
+      const badClient = { ping: vi.fn(), getCurrentUser: vi.fn() };
       badClient.ping.mockResolvedValue(true);
 
       await expect(authTools.handleTestAuth(badClient, {})).rejects.toThrow();

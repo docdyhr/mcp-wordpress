@@ -3,10 +3,10 @@
  * Achieving ≥70% coverage for comments tool implementation
  */
 
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
 // Mock the dependencies
-jest.mock("../../../dist/client/api.js");
+vi.mock("../../../dist/client/api.js");
 
 // Now import the modules after mocking
 const { CommentTools } = await import("../../../dist/tools/comments.js");
@@ -18,19 +18,19 @@ describe("CommentTools", () => {
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Create mock client instance with all necessary methods
     mockClient = {
       config: {
         siteUrl: "https://test.wordpress.com",
       },
-      getSiteUrl: jest.fn().mockReturnValue("https://test.wordpress.com"),
-      getComments: jest.fn(),
-      getComment: jest.fn(),
-      createComment: jest.fn(),
-      updateComment: jest.fn(),
-      deleteComment: jest.fn(),
+      getSiteUrl: vi.fn().mockReturnValue("https://test.wordpress.com"),
+      getComments: vi.fn(),
+      getComment: vi.fn(),
+      createComment: vi.fn(),
+      updateComment: vi.fn(),
+      deleteComment: vi.fn(),
     };
 
     // Create CommentTools instance

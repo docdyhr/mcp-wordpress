@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { ConnectionTester } from "../../dist/server/ConnectionTester.js";
 
 describe("ConnectionTester", () => {
@@ -10,25 +10,25 @@ describe("ConnectionTester", () => {
   beforeEach(() => {
     // Mock the logger to avoid actual logging output and track calls
     loggerSpy = {
-      info: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
-      child: jest.fn().mockReturnThis(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      debug: vi.fn(),
+      child: vi.fn().mockReturnThis(),
     };
 
     // Mock the LoggerFactory to return our spy
-    jest.doMock("../../dist/utils/logger.js", () => ({
+    vi.doMock("../../dist/utils/logger.js", () => ({
       LoggerFactory: {
         server: () => loggerSpy,
       },
     }));
 
     mockClient1 = {
-      ping: jest.fn(),
+      ping: vi.fn(),
     };
 
     mockClient2 = {
-      ping: jest.fn(),
+      ping: vi.fn(),
     };
 
     mockClients = new Map([
@@ -38,8 +38,8 @@ describe("ConnectionTester", () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.resetModules();
+    vi.clearAllMocks();
+    vi.resetModules();
   });
 
   describe("testClientConnections", () => {

@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { MCPWordPressServer } from "../../dist/index.js";
 
 describe("MCPWordPressServer", () => {
@@ -7,16 +7,16 @@ describe("MCPWordPressServer", () => {
 
   beforeEach(() => {
     originalConsoleError = console.error;
-    console.error = jest.fn();
+    console.error = vi.fn();
 
     originalProcessExit = process.exit;
-    process.exit = jest.fn();
+    process.exit = vi.fn();
   });
 
   afterEach(() => {
     console.error = originalConsoleError;
     process.exit = originalProcessExit;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("Constructor", () => {

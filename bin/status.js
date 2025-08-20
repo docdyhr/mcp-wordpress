@@ -18,7 +18,7 @@ class WordPressStatus {
 
   loadConfig() {
     if (existsSync(this.envPath)) {
-      dotenv.config({ path: this.envPath });
+      dotenv.config({ path: this.envPath, debug: false });
     }
   }
 

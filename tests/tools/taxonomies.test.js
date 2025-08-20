@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { TaxonomyTools } from "../../dist/tools/taxonomies.js";
 
 describe("TaxonomyTools", () => {
@@ -6,22 +6,22 @@ describe("TaxonomyTools", () => {
   let mockClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock WordPress client with all needed methods
     mockClient = {
-      request: jest.fn(),
-      getCategories: jest.fn(),
-      getCategory: jest.fn(),
-      createCategory: jest.fn(),
-      updateCategory: jest.fn(),
-      deleteCategory: jest.fn(),
-      getTags: jest.fn(),
-      getTag: jest.fn(),
-      createTag: jest.fn(),
-      updateTag: jest.fn(),
-      deleteTag: jest.fn(),
-      getSiteUrl: jest.fn().mockReturnValue("https://test-site.com"),
+      request: vi.fn(),
+      getCategories: vi.fn(),
+      getCategory: vi.fn(),
+      createCategory: vi.fn(),
+      updateCategory: vi.fn(),
+      deleteCategory: vi.fn(),
+      getTags: vi.fn(),
+      getTag: vi.fn(),
+      createTag: vi.fn(),
+      updateTag: vi.fn(),
+      deleteTag: vi.fn(),
+      getSiteUrl: vi.fn().mockReturnValue("https://test-site.com"),
       config: {
         baseUrl: "https://test-site.com",
       },

@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach } from "@jest/globals";
+// Vitest globals enabled
 
 describe("Tool Validation", () => {
   let PostTools, PageTools, MediaTools;

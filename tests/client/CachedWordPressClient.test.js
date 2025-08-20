@@ -1,10 +1,10 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { CachedWordPressClient } from "../../dist/client/CachedWordPressClient.js";
 import { WordPressClient } from "../../dist/client/api.js";
 import { CacheManager } from "../../dist/cache/CacheManager.js";
 
 // Mock the SecurityConfig
-jest.mock("../../dist/security/SecurityConfig.js", () => ({
+vi.mock("../../dist/security/SecurityConfig.js", () => ({
   SecurityConfig: {
     cache: {
       enabled: true,
@@ -37,7 +37,7 @@ describe("CachedWordPressClient", () => {
   beforeEach(() => {
     // Mock console.warn to avoid noise in tests
     originalConsoleWarn = console.warn;
-    console.warn = jest.fn();
+    console.warn = vi.fn();
 
     mockConfig = {
       baseUrl: "https://test-site.com",
@@ -53,7 +53,7 @@ describe("CachedWordPressClient", () => {
     clientsToCleanup.push(cachedClient);
 
     // Mock the parent class methods
-    jest.spyOn(WordPressClient.prototype, "request").mockImplementation(async (method, endpoint, _data, _options) => {
+    vi.spyOn(WordPressClient.prototype, "request").mockImplementation(async (method, endpoint, _data, _options) => {
       // Simulate different responses based on endpoint
       if (endpoint === "posts") {
         return [
@@ -81,15 +81,15 @@ describe("CachedWordPressClient", () => {
       return {};
     });
 
-    jest.spyOn(WordPressClient.prototype, "createPost").mockImplementation(async (data) => {
+    vi.spyOn(WordPressClient.prototype, "createPost").mockImplementation(async (data) => {
       return { id: 999, title: { rendered: data.title }, content: { rendered: data.content } };
     });
 
-    jest.spyOn(WordPressClient.prototype, "updatePost").mockImplementation(async (data) => {
+    vi.spyOn(WordPressClient.prototype, "updatePost").mockImplementation(async (data) => {
       return { id: data.id, title: { rendered: data.title }, content: { rendered: data.content } };
     });
 
-    jest.spyOn(WordPressClient.prototype, "deletePost").mockImplementation(async (id) => {
+    vi.spyOn(WordPressClient.prototype, "deletePost").mockImplementation(async (id) => {
       return { deleted: true, previous: { id, title: { rendered: "Deleted Post" } } };
     });
   });
@@ -106,7 +106,7 @@ describe("CachedWordPressClient", () => {
     }
     clientsToCleanup = [];
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("constructor", () => {
@@ -134,7 +134,7 @@ describe("CachedWordPressClient", () => {
   describe("request method caching behavior", () => {
     it("should cache GET requests", async () => {
       // Reset call count
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       // First request
       const result1 = await cachedClient.request("GET", "posts");
@@ -190,7 +190,7 @@ describe("CachedWordPressClient", () => {
 
   describe("enhanced API methods with caching", () => {
     it("should cache getPosts results", async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       const posts1 = await cachedClient.getPosts();
       const posts2 = await cachedClient.getPosts();
@@ -209,7 +209,7 @@ describe("CachedWordPressClient", () => {
     });
 
     it("should cache individual post requests", async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       const post1 = await cachedClient.getPost(1);
       const post2 = await cachedClient.getPost(1);
@@ -220,7 +220,7 @@ describe("CachedWordPressClient", () => {
     });
 
     it("should cache different posts separately", async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       await cachedClient.getPost(1);
       await cachedClient.getPost(2);
@@ -229,7 +229,7 @@ describe("CachedWordPressClient", () => {
     });
 
     it("should cache getCurrentUser with session settings", async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       const user1 = await cachedClient.getCurrentUser();
       const user2 = await cachedClient.getCurrentUser();
@@ -240,7 +240,7 @@ describe("CachedWordPressClient", () => {
     });
 
     it("should cache categories with semi-static settings", async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       const categories1 = await cachedClient.getCategories();
       const categories2 = await cachedClient.getCategories();
@@ -251,7 +251,7 @@ describe("CachedWordPressClient", () => {
     });
 
     it("should cache tags with semi-static settings", async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       const tags1 = await cachedClient.getTags();
       const tags2 = await cachedClient.getTags();
@@ -262,7 +262,7 @@ describe("CachedWordPressClient", () => {
     });
 
     it("should cache site settings with static settings", async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       const settings1 = await cachedClient.getSiteSettings();
       const settings2 = await cachedClient.getSiteSettings();
@@ -375,7 +375,7 @@ describe("CachedWordPressClient", () => {
 
     it("should handle cache warming errors gracefully", async () => {
       // Mock one of the warmup methods to fail
-      jest.spyOn(cachedClient, "getCurrentUser").mockRejectedValueOnce(new Error("User fetch failed"));
+      vi.spyOn(cachedClient, "getCurrentUser").mockRejectedValueOnce(new Error("User fetch failed"));
 
       // Should not throw error
       await expect(cachedClient.warmCache()).resolves.not.toThrow();
@@ -489,7 +489,7 @@ describe("CachedWordPressClient", () => {
     it("should handle cache manager errors gracefully", () => {
       // Mock cache manager to throw error
       const cacheManager = cachedClient.getCacheManager();
-      jest.spyOn(cacheManager, "getStats").mockImplementation(() => {
+      vi.spyOn(cacheManager, "getStats").mockImplementation(() => {
         throw new Error("Cache stats failed");
       });
 

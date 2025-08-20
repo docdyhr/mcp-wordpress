@@ -22,7 +22,7 @@ class MCPTester {
 
   loadConfig() {
     if (existsSync(this.envPath)) {
-      dotenv.config({ path: this.envPath });
+      dotenv.config({ path: this.envPath, debug: false });
     }
   }
 
@@ -62,10 +62,10 @@ class MCPTester {
   async testServerStartup() {
     await this.runTest('Server Startup', async () => {
       const { MCPWordPressServer } = await import('../dist/index.js');
-      const server = new MCPWordPressServer();
+      const _server = new MCPWordPressServer();
 
       // Test server creation
-      if (!server) {
+      if (!_server) {
         throw new Error('MCP server not initialized');
       }
 
@@ -77,7 +77,7 @@ class MCPTester {
   async testToolListing() {
     await this.runTest('Tool Listing', async () => {
       const { MCPWordPressServer } = await import('../dist/index.js');
-      const server = new MCPWordPressServer();
+      const _server = new MCPWordPressServer();
 
       // Since we can't directly access the tools list, we'll just verify server creation
       // The actual tool functionality is tested through the tool tests
@@ -89,7 +89,7 @@ class MCPTester {
   async testAuthenticationTools() {
     await this.runTest('Authentication Tools', async () => {
       const { MCPWordPressServer } = await import('../dist/index.js');
-      const server = new MCPWordPressServer();
+      const _server = new MCPWordPressServer();
 
       // Server creation implies auth tools are registered
       console.log('   ✅ Authentication tools registered - functionality tested in tool test suite');
@@ -100,7 +100,7 @@ class MCPTester {
   async testPostTools() {
     await this.runTest('Post Management Tools', async () => {
       const { MCPWordPressServer } = await import('../dist/index.js');
-      const server = new MCPWordPressServer();
+      const _server = new MCPWordPressServer();
 
       console.log('   ✅ Post management tools registered - functionality tested in tool test suite');
       return true;
@@ -110,7 +110,7 @@ class MCPTester {
   async testPageTools() {
     await this.runTest('Page Management Tools', async () => {
       const { MCPWordPressServer } = await import('../dist/index.js');
-      const server = new MCPWordPressServer();
+      const _server = new MCPWordPressServer();
 
       console.log('   ✅ Page management tools registered - functionality tested in tool test suite');
       return true;
@@ -120,7 +120,7 @@ class MCPTester {
   async testMediaTools() {
     await this.runTest('Media Management Tools', async () => {
       const { MCPWordPressServer } = await import('../dist/index.js');
-      const server = new MCPWordPressServer();
+      const _server = new MCPWordPressServer();
 
       console.log('   ✅ Media management tools registered - functionality tested in tool test suite');
       return true;
@@ -130,7 +130,7 @@ class MCPTester {
   async testUserTools() {
     await this.runTest('User Management Tools', async () => {
       const { MCPWordPressServer } = await import('../dist/index.js');
-      const server = new MCPWordPressServer();
+      const _server = new MCPWordPressServer();
 
       console.log('   ✅ User management tools registered - functionality tested in tool test suite');
       return true;
@@ -140,7 +140,7 @@ class MCPTester {
   async testCommentTools() {
     await this.runTest('Comment Management Tools', async () => {
       const { MCPWordPressServer } = await import('../dist/index.js');
-      const server = new MCPWordPressServer();
+      const _server = new MCPWordPressServer();
 
       console.log('   ✅ Comment management tools registered - functionality tested in tool test suite');
       return true;
@@ -150,7 +150,7 @@ class MCPTester {
   async testTaxonomyTools() {
     await this.runTest('Taxonomy Management Tools', async () => {
       const { MCPWordPressServer } = await import('../dist/index.js');
-      const server = new MCPWordPressServer();
+      const _server = new MCPWordPressServer();
 
       console.log('   ✅ Taxonomy management tools registered - functionality tested in tool test suite');
       return true;
@@ -160,7 +160,7 @@ class MCPTester {
   async testSiteTools() {
     await this.runTest('Site Information Tools', async () => {
       const { MCPWordPressServer } = await import('../dist/index.js');
-      const server = new MCPWordPressServer();
+      const _server = new MCPWordPressServer();
 
       console.log('   ✅ Site information tools registered - functionality tested in tool test suite');
       return true;
@@ -170,7 +170,7 @@ class MCPTester {
   async testErrorHandling() {
     await this.runTest('Error Handling', async () => {
       const { MCPWordPressServer } = await import('../dist/index.js');
-      const server = new MCPWordPressServer();
+      const _server = new MCPWordPressServer();
 
       console.log('   ✅ Error handling implemented - tested in tool test suite');
       return true;

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "@jest/globals";
+
 import { WordPressClient } from "../../dist/client/api.js";
 
 /**

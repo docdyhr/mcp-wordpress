@@ -3,20 +3,20 @@
  * Achieving ≥70% coverage for users tool implementation
  */
 
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
 // Mock the dependencies
-jest.mock("../../../dist/client/api.js");
-jest.mock("../../../dist/utils/streaming.js", () => ({
+vi.mock("../../../dist/client/api.js");
+vi.mock("../../../dist/utils/streaming.js", () => ({
   WordPressDataStreamer: {
-    streamUsers: jest.fn().mockImplementation(async function* (users) {
+    streamUsers: vi.fn().mockImplementation(async function* (users) {
       for (const user of users) {
         yield { type: "user", data: user };
       }
     }),
   },
   StreamingUtils: {
-    formatStreamingResponse: jest.fn().mockReturnValue("Streamed users response"),
+    formatStreamingResponse: vi.fn().mockReturnValue("Streamed users response"),
   },
 }));
 
@@ -30,20 +30,20 @@ describe("UserTools", () => {
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Create mock client instance with all necessary methods
     mockClient = {
       config: {
         siteUrl: "https://test.wordpress.com",
       },
-      getSiteUrl: jest.fn().mockReturnValue("https://test.wordpress.com"),
-      getUsers: jest.fn(),
-      getUser: jest.fn(),
-      getCurrentUser: jest.fn(),
-      createUser: jest.fn(),
-      updateUser: jest.fn(),
-      deleteUser: jest.fn(),
+      getSiteUrl: vi.fn().mockReturnValue("https://test.wordpress.com"),
+      getUsers: vi.fn(),
+      getUser: vi.fn(),
+      getCurrentUser: vi.fn(),
+      createUser: vi.fn(),
+      updateUser: vi.fn(),
+      deleteUser: vi.fn(),
     };
 
     // Create UserTools instance

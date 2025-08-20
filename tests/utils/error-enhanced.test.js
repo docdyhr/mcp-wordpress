@@ -1,24 +1,24 @@
 /**
  * Enhanced tests for error handling utilities
  */
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
 // ESM-friendly module mocking: must occur before dynamic imports
-jest.unstable_mockModule("../../dist/utils/logger.js", () => {
+vi.mock("../../dist/utils/logger.js", () => {
   const mockLogger = {
-    warn: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-    info: jest.fn(),
-    child: jest.fn(() => mockLogger)
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    child: vi.fn(() => mockLogger)
   };
   return {
-    Logger: jest.fn(() => mockLogger),
+    Logger: vi.fn(() => mockLogger),
     LoggerFactory: {
-      server: jest.fn(() => mockLogger),
-      api: jest.fn(() => mockLogger),
-      cache: jest.fn(() => mockLogger),
-      tool: jest.fn(() => mockLogger)
+      server: vi.fn(() => mockLogger),
+      api: vi.fn(() => mockLogger),
+      cache: vi.fn(() => mockLogger),
+      tool: vi.fn(() => mockLogger)
     }
   };
 });
@@ -39,7 +39,7 @@ beforeAll(async () => {
 
 describe("Enhanced Error Utilities", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("getErrorMessage", () => {

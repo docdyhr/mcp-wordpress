@@ -2,7 +2,7 @@
  * Performance Analytics Tests
  * Comprehensive test suite for PerformanceAnalytics.ts to achieve ≥50% coverage
  */
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
 import { PerformanceAnalytics } from "../../dist/performance/PerformanceAnalytics.js";
 // MetricsCollector is imported but not directly used - only for type reference
@@ -10,7 +10,7 @@ import { PerformanceAnalytics } from "../../dist/performance/PerformanceAnalytic
 
 // Mock MetricsCollector
 const mockMetricsCollector = {
-  collectCurrentMetrics: jest.fn(),
+  collectCurrentMetrics: vi.fn(),
 };
 
 describe("PerformanceAnalytics", () => {
@@ -19,7 +19,7 @@ describe("PerformanceAnalytics", () => {
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     
     // Default mock metrics
     mockMetrics = {

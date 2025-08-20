@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { AuthenticationManager } from "../../dist/client/managers/AuthenticationManager.js";
 import { AuthenticationError } from "../../dist/types/client.js";
 
@@ -215,7 +215,7 @@ describe("AuthenticationManager", () => {
       authManager.config.refreshToken = "refresh-token";
 
       // Mock the refresh API call
-      const mockRefresh = jest.fn().mockResolvedValue({
+      const mockRefresh = vi.fn().mockResolvedValue({
         token: "new-jwt-token",
         expires_in: 3600,
       });
@@ -231,7 +231,7 @@ describe("AuthenticationManager", () => {
       authManager.config.authMethod = "jwt";
       authManager.config.refreshToken = "invalid-refresh-token";
 
-      const mockRefresh = jest.fn().mockRejectedValue(new Error("Invalid refresh token"));
+      const mockRefresh = vi.fn().mockRejectedValue(new Error("Invalid refresh token"));
       authManager.refreshJwtToken = mockRefresh;
 
       await expect(authManager.refreshToken()).rejects.toThrow("Invalid refresh token");

@@ -3,7 +3,7 @@
  * Tests for common attack vectors and security vulnerabilities
  */
 
-import { describe, test, expect } from "@jest/globals";
+// Vitest globals enabled
 
 describe("Penetration Testing Suite", () => {
   describe("SQL Injection Attacks", () => {

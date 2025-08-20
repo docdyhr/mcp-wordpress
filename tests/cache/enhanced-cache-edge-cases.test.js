@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { CacheManager } from "../../dist/cache/CacheManager.js";
 
 describe("Enhanced Cache Edge Cases and Performance Validation", () => {
@@ -24,7 +24,7 @@ describe("Enhanced Cache Edge Cases and Performance Validation", () => {
       }
     });
     cacheManagers = [];
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("Edge Cases", () => {

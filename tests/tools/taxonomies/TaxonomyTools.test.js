@@ -3,10 +3,10 @@
  * Achieving ≥70% coverage for taxonomies tool implementation
  */
 
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
 // Mock the dependencies
-jest.mock("../../../dist/client/api.js");
+vi.mock("../../../dist/client/api.js");
 
 // Now import the modules after mocking
 const { TaxonomyTools } = await import("../../../dist/tools/taxonomies.js");
@@ -18,24 +18,24 @@ describe("TaxonomyTools", () => {
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Create mock client instance with all necessary methods
     mockClient = {
       config: {
         siteUrl: "https://test.wordpress.com",
       },
-      getSiteUrl: jest.fn().mockReturnValue("https://test.wordpress.com"),
-      getCategories: jest.fn(),
-      getCategory: jest.fn(),
-      createCategory: jest.fn(),
-      updateCategory: jest.fn(),
-      deleteCategory: jest.fn(),
-      getTags: jest.fn(),
-      getTag: jest.fn(),
-      createTag: jest.fn(),
-      updateTag: jest.fn(),
-      deleteTag: jest.fn(),
+      getSiteUrl: vi.fn().mockReturnValue("https://test.wordpress.com"),
+      getCategories: vi.fn(),
+      getCategory: vi.fn(),
+      createCategory: vi.fn(),
+      updateCategory: vi.fn(),
+      deleteCategory: vi.fn(),
+      getTags: vi.fn(),
+      getTag: vi.fn(),
+      createTag: vi.fn(),
+      updateTag: vi.fn(),
+      deleteTag: vi.fn(),
     };
 
     // Create TaxonomyTools instance

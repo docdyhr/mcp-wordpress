@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { MetricsCollector } from "../../dist/performance/MetricsCollector.js";
 
 describe("MetricsCollector", () => {
@@ -8,9 +8,9 @@ describe("MetricsCollector", () => {
   beforeEach(() => {
     // Create a mock PerformanceMonitor
     mockMonitor = {
-      recordRequest: jest.fn(),
-      updateCacheMetrics: jest.fn(),
-      getMetrics: jest.fn().mockReturnValue({
+      recordRequest: vi.fn(),
+      updateCacheMetrics: vi.fn(),
+      getMetrics: vi.fn().mockReturnValue({
         requests: {
           total: 100,
           failed: 5,
@@ -29,8 +29,8 @@ describe("MetricsCollector", () => {
           toolResponseTimes: {},
         },
       }),
-      getAlerts: jest.fn().mockReturnValue([]),
-      stop: jest.fn(),
+      getAlerts: vi.fn().mockReturnValue([]),
+      stop: vi.fn(),
     };
 
     collector = new MetricsCollector(mockMonitor);
@@ -40,7 +40,7 @@ describe("MetricsCollector", () => {
     if (collector) {
       collector.stop();
     }
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("initialization", () => {
@@ -106,7 +106,7 @@ describe("MetricsCollector", () => {
 
   describe("client registration", () => {
     it("should register clients", () => {
-      const mockClient = { request: jest.fn() };
+      const mockClient = { request: vi.fn() };
       collector.registerClient("site1", mockClient);
 
       // Just verify no errors - internal state is private
@@ -124,7 +124,7 @@ describe("MetricsCollector", () => {
   describe("cache manager registration", () => {
     it("should register cache managers", () => {
       const mockCacheManager = {
-        getStats: jest.fn().mockReturnValue({
+        getStats: vi.fn().mockReturnValue({
           hits: 10,
           misses: 2,
           evictions: 1,
@@ -185,7 +185,7 @@ describe("MetricsCollector", () => {
   describe("site metrics", () => {
     it("should get metrics for specific site", () => {
       const mockClient = {
-        getStats: jest.fn().mockReturnValue({
+        getStats: vi.fn().mockReturnValue({
           totalRequests: 50,
           successfulRequests: 45,
           failedRequests: 5,
@@ -196,7 +196,7 @@ describe("MetricsCollector", () => {
       };
 
       const mockCache = {
-        getStats: jest.fn().mockReturnValue({
+        getStats: vi.fn().mockReturnValue({
           hits: 100,
           misses: 20,
           evictions: 5,
@@ -230,7 +230,7 @@ describe("MetricsCollector", () => {
       const sites = ["site1", "site2", "site3"];
       sites.forEach((site, index) => {
         collector.registerClient(site, {
-          getStats: jest.fn().mockReturnValue({
+          getStats: vi.fn().mockReturnValue({
             totalRequests: 100 * (index + 1),
             successfulRequests: 100 * (index + 1) - 5 * (index + 1),
             failedRequests: 5 * (index + 1),
@@ -241,7 +241,7 @@ describe("MetricsCollector", () => {
         });
 
         collector.registerCacheManager(site, {
-          getStats: jest.fn().mockReturnValue({
+          getStats: vi.fn().mockReturnValue({
             hits: 80 - index * 10,
             misses: 20 + index * 10,
             evictions: 0,
@@ -341,7 +341,7 @@ describe("MetricsCollector", () => {
     it("should export detailed performance report", () => {
       // Register a site to make the report more complete
       collector.registerClient("site1", {
-        getStats: jest.fn().mockReturnValue({
+        getStats: vi.fn().mockReturnValue({
           totalRequests: 100,
           successfulRequests: 95,
           failedRequests: 5,

@@ -1,44 +1,44 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { ToolRegistry } from "../../dist/server/ToolRegistry.js";
 import { z } from "zod";
 
 // Mock dependencies
-jest.mock("../../dist/client/api.js");
-jest.mock("../../dist/utils/error.js", () => ({
-  getErrorMessage: jest.fn((error) => error.message || "Unknown error"),
+vi.mock("../../dist/client/api.js");
+vi.mock("../../dist/utils/error.js", () => ({
+  getErrorMessage: vi.fn((error) => error.message || "Unknown error"),
 }));
 
-jest.mock("../../dist/utils/enhancedError.js", () => ({
-  EnhancedError: jest.fn().mockImplementation((message) => ({ message, toString: () => message })),
+vi.mock("../../dist/utils/enhancedError.js", () => ({
+  EnhancedError: vi.fn().mockImplementation((message) => ({ message, toString: () => message })),
   ErrorHandlers: {
-    siteParameterMissing: jest.fn((sites) => ({
+    siteParameterMissing: vi.fn((sites) => ({
       toString: () => `Site parameter is required. Available sites: ${sites.join(", ")}`,
     })),
-    siteNotFound: jest.fn((siteId, sites) => ({
+    siteNotFound: vi.fn((siteId, sites) => ({
       toString: () => `Site '${siteId}' not found. Available sites: ${sites.join(", ")}`,
     })),
   },
 }));
 
 // Mock tools
-jest.mock("../../dist/tools/index.js", () => ({
-  PostTools: jest.fn().mockImplementation(() => ({
+vi.mock("../../dist/tools/index.js", () => ({
+  PostTools: vi.fn().mockImplementation(() => ({
     getTools: () => [
       {
         name: "wp_get_posts",
         description: "Get WordPress posts",
         parameters: [{ name: "per_page", type: "number", description: "Number of posts per page" }],
-        handler: jest.fn().mockResolvedValue({ content: [{ type: "text", text: "Mock posts" }] }),
+        handler: vi.fn().mockResolvedValue({ content: [{ type: "text", text: "Mock posts" }] }),
       },
     ],
   })),
-  CacheTools: jest.fn().mockImplementation(() => ({
+  CacheTools: vi.fn().mockImplementation(() => ({
     getTools: () => [
       {
         name: "wp_cache_stats",
         description: "Get cache statistics",
         parameters: [],
-        handler: jest.fn().mockResolvedValue({ content: [{ type: "text", text: "Mock cache stats" }] }),
+        handler: vi.fn().mockResolvedValue({ content: [{ type: "text", text: "Mock cache stats" }] }),
       },
     ],
   })),
@@ -46,7 +46,7 @@ jest.mock("../../dist/tools/index.js", () => ({
 
 // Mock MCP Server
 const mockMcpServer = {
-  tool: jest.fn(),
+  tool: vi.fn(),
 };
 
 describe("ToolRegistry", () => {
@@ -56,10 +56,10 @@ describe("ToolRegistry", () => {
   let mockClients;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    mockClient1 = { ping: jest.fn() };
-    mockClient2 = { ping: jest.fn() };
+    mockClient1 = { ping: vi.fn() };
+    mockClient2 = { ping: vi.fn() };
 
     mockClients = new Map([
       ["site1", mockClient1],
@@ -141,7 +141,7 @@ describe("ToolRegistry", () => {
         name: "test_tool",
         description: "Test tool",
         parameters: [],
-        handler: jest.fn(),
+        handler: vi.fn(),
       };
 
       registry.registerTool(tool);
@@ -164,7 +164,7 @@ describe("ToolRegistry", () => {
           { name: "param1", type: "string", description: "Parameter 1" },
           { name: "param2", type: "number", description: "Parameter 2" },
         ],
-        handler: jest.fn(),
+        handler: vi.fn(),
       };
 
       registry.registerTool(tool);
@@ -182,7 +182,7 @@ describe("ToolRegistry", () => {
         name: "test_tool",
         description: "Test tool",
         parameters: [],
-        handler: jest.fn(),
+        handler: vi.fn(),
       };
 
       registry.registerTool(tool);
@@ -201,7 +201,7 @@ describe("ToolRegistry", () => {
         name: "test_tool",
         description: "Test tool",
         parameters: [],
-        handler: jest.fn(),
+        handler: vi.fn(),
       };
 
       singleRegistry.registerTool(tool);
@@ -216,7 +216,7 @@ describe("ToolRegistry", () => {
       const tool = {
         name: "test_tool",
         parameters: [],
-        handler: jest.fn(),
+        handler: vi.fn(),
       };
 
       registry.registerTool(tool);
@@ -232,7 +232,7 @@ describe("ToolRegistry", () => {
 
   describe("tool execution", () => {
     it("should execute tool with correct client", async () => {
-      const mockHandler = jest.fn().mockResolvedValue({ content: [{ type: "text", text: "Success" }] });
+      const mockHandler = vi.fn().mockResolvedValue({ content: [{ type: "text", text: "Success" }] });
       const tool = {
         name: "test_tool",
         description: "Test tool",
@@ -256,7 +256,7 @@ describe("ToolRegistry", () => {
         name: "test_tool",
         description: "Test tool",
         parameters: [],
-        handler: jest.fn(),
+        handler: vi.fn(),
       };
 
       registry.registerTool(tool);
@@ -274,7 +274,7 @@ describe("ToolRegistry", () => {
         name: "test_tool",
         description: "Test tool",
         parameters: [],
-        handler: jest.fn(),
+        handler: vi.fn(),
       };
 
       registry.registerTool(tool);
@@ -291,7 +291,7 @@ describe("ToolRegistry", () => {
       const singleClient = new Map([["site1", mockClient1]]);
       const singleRegistry = new ToolRegistry(mockMcpServer, singleClient);
 
-      const mockHandler = jest.fn().mockResolvedValue({ content: [{ type: "text", text: "Success" }] });
+      const mockHandler = vi.fn().mockResolvedValue({ content: [{ type: "text", text: "Success" }] });
       const tool = {
         name: "test_tool",
         description: "Test tool",
@@ -311,7 +311,7 @@ describe("ToolRegistry", () => {
     });
 
     it("should handle tool execution errors", async () => {
-      const mockHandler = jest.fn().mockRejectedValue(new Error("Tool execution failed"));
+      const mockHandler = vi.fn().mockRejectedValue(new Error("Tool execution failed"));
       const tool = {
         name: "test_tool",
         description: "Test tool",
@@ -330,7 +330,7 @@ describe("ToolRegistry", () => {
     });
 
     it("should pass parameters to tool handler", async () => {
-      const mockHandler = jest.fn().mockResolvedValue({ content: [{ type: "text", text: "Success" }] });
+      const mockHandler = vi.fn().mockResolvedValue({ content: [{ type: "text", text: "Success" }] });
       const tool = {
         name: "test_tool",
         description: "Test tool",
@@ -368,7 +368,7 @@ describe("ToolRegistry", () => {
       const tool = {
         name: "test_tool",
         parameters: [{ name: "text_param", type: "string", description: "Text parameter" }],
-        handler: jest.fn(),
+        handler: vi.fn(),
       };
 
       const baseSchema = {};
@@ -382,7 +382,7 @@ describe("ToolRegistry", () => {
       const tool = {
         name: "test_tool",
         parameters: [{ name: "num_param", type: "number", description: "Number parameter" }],
-        handler: jest.fn(),
+        handler: vi.fn(),
       };
 
       const baseSchema = {};
@@ -396,7 +396,7 @@ describe("ToolRegistry", () => {
       const tool = {
         name: "test_tool",
         parameters: [{ name: "bool_param", type: "boolean", description: "Boolean parameter" }],
-        handler: jest.fn(),
+        handler: vi.fn(),
       };
 
       const baseSchema = {};
@@ -413,7 +413,7 @@ describe("ToolRegistry", () => {
           { name: "required_param", type: "string", required: true },
           { name: "optional_param", type: "string", required: false },
         ],
-        handler: jest.fn(),
+        handler: vi.fn(),
       };
 
       const baseSchema = {};
@@ -430,7 +430,7 @@ describe("ToolRegistry", () => {
       const tool = {
         name: "test_tool",
         parameters: [{ name: "default_param", type: "number", default: 10 }],
-        handler: jest.fn(),
+        handler: vi.fn(),
       };
 
       const baseSchema = {};
@@ -444,7 +444,7 @@ describe("ToolRegistry", () => {
       const tool = {
         name: "test_tool",
         parameters: [{ name: "enum_param", type: "string", enum: ["option1", "option2", "option3"] }],
-        handler: jest.fn(),
+        handler: vi.fn(),
       };
 
       const baseSchema = {};
@@ -458,7 +458,7 @@ describe("ToolRegistry", () => {
       const tool = {
         name: "test_tool",
         parameters: [{ name: "tool_param", type: "string" }],
-        handler: jest.fn(),
+        handler: vi.fn(),
       };
 
       const baseSchema = {
@@ -488,7 +488,7 @@ describe("ToolRegistry", () => {
         getTools: () => [
           {
             name: null, // Invalid name
-            handler: jest.fn(),
+            handler: vi.fn(),
           },
         ],
       }));
@@ -497,7 +497,7 @@ describe("ToolRegistry", () => {
     });
 
     it("should handle tool execution timeout", async () => {
-      const mockHandler = jest.fn().mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 10000)));
+      const mockHandler = vi.fn().mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 10000)));
 
       const tool = {
         name: "slow_tool",
@@ -532,7 +532,7 @@ describe("ToolRegistry", () => {
           { name: "enabled", type: "boolean", required: false },
           { name: "status", type: "string", enum: ["active", "inactive"] },
         ],
-        handler: jest.fn().mockResolvedValue({ content: [{ type: "text", text: "Complex result" }] }),
+        handler: vi.fn().mockResolvedValue({ content: [{ type: "text", text: "Complex result" }] }),
       };
 
       registry.registerTool(complexTool);
@@ -548,7 +548,7 @@ describe("ToolRegistry", () => {
     });
 
     it("should handle tool execution with full parameter set", async () => {
-      const mockHandler = jest.fn().mockResolvedValue({ content: [{ type: "text", text: "Full result" }] });
+      const mockHandler = vi.fn().mockResolvedValue({ content: [{ type: "text", text: "Full result" }] });
 
       const tool = {
         name: "full_tool",

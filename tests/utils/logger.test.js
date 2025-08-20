@@ -1,7 +1,7 @@
 /**
  * Tests for the centralized logging system
  */
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 // Import from source for proper coverage collection
 import { Logger, LoggerFactory, createLogger, createSiteLogger, createRequestLogger } from "../../src/utils/logger.ts";
 import { Config } from "../../src/config/Config.ts";
@@ -19,8 +19,8 @@ describe("Logger", () => {
     Config.reset();
 
     // Mock console methods
-    consoleErrorSpy = jest.fn();
-    consoleLogSpy = jest.fn();
+    consoleErrorSpy = vi.fn();
+    consoleLogSpy = vi.fn();
     console.error = consoleErrorSpy;
     console.log = consoleLogSpy;
 

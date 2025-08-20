@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { CacheManager } from "../../dist/cache/CacheManager.js";
 
 describe("Advanced Cache Testing Suite", () => {
@@ -16,18 +16,18 @@ describe("Advanced Cache Testing Suite", () => {
 
     // Mock WordPress client with required configuration
     mockClient = {
-      getPosts: jest.fn(),
-      getPost: jest.fn(),
-      createPost: jest.fn(),
-      updatePost: jest.fn(),
-      deletePost: jest.fn(),
-      getUsers: jest.fn(),
-      getUser: jest.fn(),
-      getMedia: jest.fn(),
-      uploadMedia: jest.fn(),
-      getCategories: jest.fn(),
-      getTags: jest.fn(),
-      getSiteInfo: jest.fn(),
+      getPosts: vi.fn(),
+      getPost: vi.fn(),
+      createPost: vi.fn(),
+      updatePost: vi.fn(),
+      deletePost: vi.fn(),
+      getUsers: vi.fn(),
+      getUser: vi.fn(),
+      getMedia: vi.fn(),
+      uploadMedia: vi.fn(),
+      getCategories: vi.fn(),
+      getTags: vi.fn(),
+      getSiteInfo: vi.fn(),
       // Mock client properties needed for CachedWordPressClient
       baseUrl: "https://test.example.com",
       username: "test-user",
@@ -39,7 +39,7 @@ describe("Advanced Cache Testing Suite", () => {
   });
 
   afterEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Cleanup cache managers to prevent worker process issues
     if (cacheManager?.destroy) {

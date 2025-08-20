@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { PostTools } from "../../dist/tools/posts/index.js";
 
 describe("PostTools", () => {
@@ -6,21 +6,21 @@ describe("PostTools", () => {
   let mockClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock WordPress client with all needed methods
     mockClient = {
-      request: jest.fn(),
-      getPosts: jest.fn(),
-      getPost: jest.fn(),
-      createPost: jest.fn(),
-      updatePost: jest.fn(),
-      deletePost: jest.fn(),
-      getPostRevisions: jest.fn(),
-      getUser: jest.fn().mockResolvedValue({ name: "Test User", username: "testuser" }),
-      getCategory: jest.fn().mockResolvedValue({ id: 1, name: "Test Category" }),
-      getTag: jest.fn().mockResolvedValue({ id: 1, name: "Test Tag" }),
-      getSiteUrl: jest.fn().mockReturnValue("https://test-site.com"),
+      request: vi.fn(),
+      getPosts: vi.fn(),
+      getPost: vi.fn(),
+      createPost: vi.fn(),
+      updatePost: vi.fn(),
+      deletePost: vi.fn(),
+      getPostRevisions: vi.fn(),
+      getUser: vi.fn().mockResolvedValue({ name: "Test User", username: "testuser" }),
+      getCategory: vi.fn().mockResolvedValue({ id: 1, name: "Test Category" }),
+      getTag: vi.fn().mockResolvedValue({ id: 1, name: "Test Tag" }),
+      getSiteUrl: vi.fn().mockReturnValue("https://test-site.com"),
       config: {
         baseUrl: "https://test-site.com",
       },
