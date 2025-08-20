@@ -67,12 +67,13 @@ export default defineConfig({
       ],
       
       // Coverage thresholds - same as Jest
+      // Coverage thresholds - gradually raise these as migration progresses
       thresholds: {
         global: {
-          branches: 30,
-          functions: 35,
-          lines: 40,
-          statements: 38
+          branches: 50,
+          functions: 60,
+          lines: 65,
+          statements: 60
         }
       }
     },
