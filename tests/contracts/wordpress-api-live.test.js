@@ -1,12 +1,9 @@
-
 import { WordPressClient } from "../../dist/client/api.js";
 
 /**
  * WordPress API Live Contract Tests
  * Tests against real WordPress when available, uses mocks otherwise
  */
-
-/* eslint-disable jest/no-conditional-expect */
 
 describe("WordPress API Live Contract Tests", () => {
   let wordpressClient;

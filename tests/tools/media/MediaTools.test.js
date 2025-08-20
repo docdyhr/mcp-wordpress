@@ -7,8 +7,12 @@ import { vi } from "vitest";
 
 // Mock fs module BEFORE any other imports
 const mockExistsSync = vi.fn();
-vi.unstable_mockModule("fs", () => ({
+vi.mock("fs", () => ({
   existsSync: mockExistsSync,
+  statSync: vi.fn().mockReturnValue({ size: 1024 }),
+  readFileSync: vi.fn().mockReturnValue(Buffer.from("test file content")),
+  writeFileSync: vi.fn(),
+  unlinkSync: vi.fn(),
 }));
 
 // Mock the dependencies

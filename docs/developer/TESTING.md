@@ -6,11 +6,11 @@ Comprehensive guide to the test suite, testing strategies, and best practices fo
 
 ### Current Test Status ✅
 
-- **Main Test Suite**: 207/207 passed (100%)
+- **Main Test Suite**: 512/512 passed (100%) with Vitest
 - **Security Tests**: 40/40 passed (100%)
 - **Performance Tests**: 8/8 passed (100%)
-- **CI/CD Pipeline**: Fully functional
-- **Code Coverage**: 95%+ coverage maintained
+- **CI/CD Pipeline**: Fully functional with Vitest integration
+- **Code Coverage**: 96.17% line coverage maintained
 
 ### Test Architecture
 
@@ -101,14 +101,19 @@ npm run test:with-env       # Tests with Docker WordPress
 
 ## 🔧 Test Configuration
 
-### Jest Configuration
+### Vitest Configuration
 
-```javascript
-// jest.config.js
-module.exports = {
-  testEnvironment: "node",
-  testMatch: ["**/tests/**/*.test.js"],
-  collectCoverageFrom: ["src/**/*.ts", "!src/**/*.d.ts", "!src/**/*.test.ts"],
+```typescript
+// vitest.config.ts
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    environment: 'node',
+    include: ['tests/**/*.test.js'],
+    coverage: {
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/*.d.ts', 'src/**/*.test.ts'],
   coverageThreshold: {
     global: {
       branches: 50,
@@ -646,15 +651,15 @@ describe("Component Name", () => {
 // tests/utils/mocks.js
 export const mockWordPressClient = {
   posts: {
-    create: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    get: jest.fn(),
-    list: jest.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    get: vi.fn(),
+    list: vi.fn(),
   },
   auth: {
-    authenticate: jest.fn(),
-    getAuthHeaders: jest.fn(),
+    authenticate: vi.fn(),
+    getAuthHeaders: vi.fn(),
   },
 };
 
@@ -699,8 +704,8 @@ DEBUG=true npm test
 # Debug specific test file
 DEBUG=true npm test -- tests/integration/wordpress-api.test.js
 
-# Debug with Node.js inspector
-node --inspect-brk ./node_modules/.bin/jest --runInBand
+# Debug with Node.js inspector (Vitest)
+node --inspect-brk ./node_modules/.bin/vitest run --no-coverage
 ```
 
 ### Test Debugging Tools

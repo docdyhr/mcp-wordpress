@@ -1,5 +1,6 @@
 import { CacheManager } from "../../dist/cache/CacheManager.js";
 import { performance } from "perf_hooks";
+import { runEnvironmentAwarePerformanceTest, getPerformanceThresholds } from "../utils/ci-helpers.js";
 
 describe("Cache Performance Benchmarks", () => {
   let cacheManager;
@@ -43,8 +44,9 @@ describe("Cache Performance Benchmarks", () => {
 
       console.log(`Cache write throughput: ${throughput.toFixed(0)} ops/sec`);
 
-      // Should achieve at least 30,000 ops/sec (CI-friendly threshold)
-      expect(throughput).toBeGreaterThan(30000);
+      // Use environment-aware performance thresholds
+      const thresholds = getPerformanceThresholds();
+      expect(throughput).toBeGreaterThan(thresholds.CACHE_WRITE_THROUGHPUT);
       expect(cacheManager.cache.size).toBe(Math.min(iterations, 1000));
     });
 
@@ -78,8 +80,9 @@ describe("Cache Performance Benchmarks", () => {
 
       console.log(`Cache read throughput: ${throughput.toFixed(0)} ops/sec`);
 
-      // Should achieve at least 20,000 ops/sec for reads (very CI-friendly threshold)
-      expect(throughput).toBeGreaterThan(20000);
+      // Use environment-aware performance thresholds
+      const thresholds = getPerformanceThresholds();
+      expect(throughput).toBeGreaterThan(thresholds.CACHE_READ_THROUGHPUT);
       expect(cacheManager.stats.hitRate).toBe(1.0); // 100% hit rate
     });
 
@@ -123,7 +126,9 @@ describe("Cache Performance Benchmarks", () => {
 
       console.log(`Mixed workload throughput: ${throughput.toFixed(0)} ops/sec (${reads} reads, ${writes} writes)`);
 
-      expect(throughput).toBeGreaterThan(40000); // Lower than pure reads but still high
+      // Use environment-aware performance thresholds
+      const thresholds = getPerformanceThresholds();
+      expect(throughput).toBeGreaterThan(thresholds.MIXED_WORKLOAD_THROUGHPUT);
       expect(reads + writes).toBe(iterations);
       expect(writes / iterations).toBeCloseTo(writeRatio, 1);
     });
@@ -411,13 +416,25 @@ describe("Cache Performance Benchmarks", () => {
       });
 
       // Check performance scaling between consecutive results
-      for (let index = 1; index < results.length; index++) {
-        const result = results[index];
-        const previous = results[index - 1];
-        // Performance shouldn't degrade dramatically with size
-        // More lenient threshold for VS Code/CI environments
-        expect(result.accessThroughput).toBeGreaterThan(previous.accessThroughput * 0.3);
-      }
+      runEnvironmentAwarePerformanceTest(
+        // Local environment: Full scaling assertions
+        () => {
+          for (let index = 1; index < results.length; index++) {
+            const result = results[index];
+            const previous = results[index - 1];
+            // Performance shouldn't degrade dramatically with size
+            // More lenient threshold for VS Code/CI environments
+            expect(result.accessThroughput).toBeGreaterThan(previous.accessThroughput * 0.3);
+          }
+        },
+        // CI environment: Basic throughput validation
+        () => {
+          const thresholds = getPerformanceThresholds();
+          results.forEach((result) => {
+            expect(result.accessThroughput).toBeGreaterThan(thresholds.CACHE_READ_THROUGHPUT);
+          });
+        },
+      );
     });
 
     it("should handle high concurrency efficiently", async () => {
@@ -481,16 +498,22 @@ describe("Cache Performance Benchmarks", () => {
       });
 
       // Check throughput scaling between consecutive results
-      // In CI environments, throughput might not scale or might even degrade due to resource constraints
-      // Skip this check in CI environments
-      if (!process.env.CI) {
-        for (let index = 1; index < results.length; index++) {
-          const result = results[index];
-          const previous = results[index - 1];
-          // Throughput should scale with concurrency in non-CI environments
-          expect(result.throughput).toBeGreaterThan(previous.throughput * 0.5);
-        }
-      }
+      runEnvironmentAwarePerformanceTest(
+        // Local environment: Throughput should scale with concurrency
+        () => {
+          for (let index = 1; index < results.length; index++) {
+            const result = results[index];
+            const previous = results[index - 1];
+            // Throughput should scale with concurrency in non-CI environments
+            expect(result.throughput).toBeGreaterThan(previous.throughput * 0.5);
+          }
+        },
+        // CI environment: Skip scaling checks due to resource constraints
+        () => {
+          // In CI, we already validated basic throughput above
+          // No additional scaling assertions needed
+        },
+      );
 
       // Clean up the cache instance
       cache.destroy();

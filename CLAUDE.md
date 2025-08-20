@@ -69,9 +69,9 @@ npm run test:performance   # Performance monitoring (8/8 passing)
 npm run test:watch         # Watch mode for tests
 
 # New: Enhanced Testing Areas
-NODE_OPTIONS="--experimental-vm-modules" npx jest tests/utils/     # Utils tests (134 tests)
-NODE_OPTIONS="--experimental-vm-modules" npx jest tests/config/    # Config tests (21 tests)
-NODE_OPTIONS="--experimental-vm-modules" npx jest tests/server/    # Server tests
+npm run build && vitest run tests/utils/     # Utils tests (134 tests)
+npm run build && vitest run tests/config/    # Config tests (21 tests)
+npm run build && vitest run tests/server/    # Server tests
 
 # Code Quality
 npm run lint               # ESLint check
@@ -425,10 +425,10 @@ describe("WordPress Integration", () => {
 import { Logger, LoggerFactory } from "../../dist/utils/logger.js";
 
 describe("API Operations", () => {
-  let consoleSpy: jest.SpyInstance;
+  let consoleSpy: vi.SpyInstance;
   
   beforeEach(() => {
-    consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    consoleSpy = vi.spyOn(console, 'error').mockImplementation();
     process.env.NODE_ENV = "development"; // Enable logging
     process.env.LOG_LEVEL = "debug";
   });

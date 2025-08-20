@@ -1,6 +1,7 @@
 # Testing Guidelines & Best Practices
 
-This document establishes comprehensive testing standards for the MCP WordPress project, ensuring code quality, reliability, and maintainability across all components.
+This document establishes comprehensive testing standards for the MCP WordPress project, ensuring code quality, reliability,
+and maintainability across all components.
 
 ## Table of Contents
 
@@ -26,7 +27,7 @@ This document establishes comprehensive testing standards for the MCP WordPress 
 
 ### Testing Pyramid
 
-```
+```text
     🔺 E2E Tests (10%)
        - Full WordPress integration
        - Contract verification
@@ -45,7 +46,7 @@ This document establishes comprehensive testing standards for the MCP WordPress 
 
 ### Directory Structure
 
-```
+```text
 tests/
 ├── unit/                    # Unit tests for individual components
 │   ├── utils/              # Utility function tests
@@ -58,12 +59,13 @@ tests/
 ├── security/               # Security validation tests
 ├── property/               # Property-based testing
 ├── cache/                  # Cache system tests
-└── jest.teardown.js        # Global test teardown
+└── vitest.setup.ts         # Global test setup and teardown
 ```
 
 ### Test Categories
 
 #### 1. Unit Tests (`tests/unit/`)
+
 **Purpose**: Test individual functions and classes in isolation  
 **Coverage Target**: 70-90% of codebase
 
@@ -89,6 +91,7 @@ describe('validateId', () => {
 ```
 
 #### 2. Integration Tests (`tests/integration/`)
+
 **Purpose**: Test component interactions and system behavior  
 **Coverage Target**: Critical integration points
 
@@ -116,6 +119,7 @@ describe('WordPress Client Integration', () => {
 ```
 
 #### 3. Contract Tests (`tests/contracts/`)
+
 **Purpose**: Verify API compatibility and external integrations  
 **Coverage Target**: All external API interactions
 
@@ -150,6 +154,7 @@ describe('WordPress API Contracts', () => {
 ```
 
 #### 4. Performance Tests (`tests/performance/`)
+
 **Purpose**: Validate performance characteristics and prevent regressions
 
 ```javascript
@@ -173,6 +178,7 @@ describe('Cache Performance', () => {
 ```
 
 #### 5. Security Tests (`tests/security/`)
+
 **Purpose**: Validate security measures and prevent vulnerabilities
 
 ```javascript
@@ -198,33 +204,41 @@ describe('Input Validation Security', () => {
 
 ### Primary Stack
 
-- **Jest** - Primary test runner and assertion library
-- **ESM Support** - ES Module compatibility for TypeScript
-- **Mock Framework** - Built-in Jest mocking capabilities
+- **Vitest** - Primary test runner and assertion library with native ESM support
+- **TypeScript Support** - Native TypeScript support without transpilation
+- **Mock Framework** - Built-in Vitest mocking capabilities
 - **Property Testing** - fast-check for property-based testing
 - **Contract Testing** - Pact.js for API contract verification
 
 ### Configuration Files
 
-```javascript
-// jest.config.cjs - Main configuration
-module.exports = {
-  testEnvironment: "node",
-  collectCoverageFrom: [
-    "src/**/*.ts",
-    "!src/**/*.d.ts",
-    "!src/types/**",
-    "!src/**/index.ts"
-  ],
-  coverageThreshold: {
-    global: {
-      branches: 30,
-      functions: 35,
-      lines: 40,
-      statements: 38
+```typescript
+// vitest.config.ts - Main configuration
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    environment: 'node',
+    coverage: {
+      include: [
+        'src/**/*.ts'
+      ],
+      exclude: [
+        'src/**/*.d.ts',
+        'src/types/**',
+        'src/**/index.ts'
+      ],
+      thresholds: {
+        global: {
+          branches: 50,
+          functions: 60,
+          lines: 65,
+          statements: 60
+        }
+      }
     }
   }
-};
+});
 ```
 
 ### Essential Commands
@@ -259,7 +273,7 @@ describe('ComponentName', () => {
     it('should behavior under condition', () => {
       // Arrange - Set up test data and mocks
       const input = createTestInput();
-      const mockDependency = jest.fn().mockReturnValue(expectedResult);
+      const mockDependency = vi.fn().mockReturnValue(expectedResult);
       
       // Act - Execute the code under test
       const result = methodName(input, mockDependency);
@@ -275,11 +289,13 @@ describe('ComponentName', () => {
 ### Naming Conventions
 
 #### Test Files
+
 - Unit tests: `ComponentName.test.js`
 - Integration tests: `integration-scenario.test.js`
 - Contract tests: `api-contract.test.js`
 
 #### Test Descriptions
+
 ```javascript
 // ✅ Good: Describes behavior clearly
 it('should return 401 when authentication fails')
@@ -295,12 +311,13 @@ it('tests the function')
 ### Test Data Management
 
 #### Use Factory Functions
+
 ```javascript
 // test-factories.js
 export const createMockWordPressClient = (overrides = {}) => ({
-  createPost: jest.fn().mockResolvedValue({ id: 1, title: { rendered: 'Test' } }),
-  getPosts: jest.fn().mockResolvedValue([]),
-  request: jest.fn(),
+  createPost: vi.fn().mockResolvedValue({ id: 1, title: { rendered: 'Test' } }),
+  getPosts: vi.fn().mockResolvedValue([]),
+  request: vi.fn(),
   ...overrides
 });
 
@@ -313,6 +330,7 @@ export const createTestPost = (overrides = {}) => ({
 ```
 
 #### Avoid Test Interdependence
+
 ```javascript
 // ✅ Good: Each test is independent
 describe('PostsTools', () => {
@@ -343,6 +361,7 @@ it('should update the post', () => {
 ## Coverage Requirements
 
 ### Global Targets (Phase 1)
+
 - **Lines**: 40% minimum
 - **Branches**: 30% minimum  
 - **Functions**: 35% minimum
@@ -351,6 +370,7 @@ it('should update the post', () => {
 ### Component-Specific Requirements
 
 #### Critical Components (High Standards)
+
 ```javascript
 // src/utils/validation.ts, src/utils/error.ts
 {
@@ -362,6 +382,7 @@ it('should update the post', () => {
 ```
 
 #### Core Business Logic (Medium Standards)
+
 ```javascript
 // src/client/api.ts, src/tools/
 {
@@ -373,6 +394,7 @@ it('should update the post', () => {
 ```
 
 #### Advanced Features (Baseline Standards)
+
 ```javascript
 // src/performance/, src/cache/
 {
@@ -485,9 +507,9 @@ describe('createPost', () => {
 
 ```javascript
 // ✅ Mock HTTP requests and external services
-jest.mock('node-fetch');
-const fetch = require('node-fetch');
-fetch.mockResolvedValue({
+vi.mock('node-fetch');
+import fetch from 'node-fetch';
+vi.mocked(fetch).mockResolvedValue({
   ok: true,
   json: () => Promise.resolve({ id: 1, title: 'Test' })
 });
@@ -498,7 +520,7 @@ fetch.mockResolvedValue({
 ```javascript
 // ❌ Testing internal implementation
 it('should call private method', () => {
-  const spy = jest.spyOn(instance, '_privateMethod');
+  const spy = vi.spyOn(instance, '_privateMethod');
   instance.publicMethod();
   expect(spy).toHaveBeenCalled(); 
 });
@@ -642,23 +664,26 @@ describe('Validation Properties', () => {
 ### Common Issues & Solutions
 
 #### 1. TypeScript Import Errors
+
 ```bash
 # Error: Cannot find module '../../src/utils/validation.js'
-# Solution: Ensure proper Jest configuration for ES modules
-NODE_OPTIONS="--experimental-vm-modules" jest
+# Solution: Vitest has native ES modules support
+npm test
 ```
 
 #### 2. Coverage Not Generated
+
 ```bash
 # Issue: Coverage shows 0% despite tests passing
-# Check: collectCoverageFrom paths in Jest config
-"collectCoverageFrom": [
-  "src/**/*.ts",        # ✅ Correct path
+# Check: include paths in Vitest config
+"include": [
+  "src/**/*.ts"        # ✅ Correct path
   "!src/**/*.d.ts"      # ✅ Exclude type definitions
 ]
 ```
 
 #### 3. Flaky Tests
+
 ```javascript
 // ✅ Use proper async/await patterns
 it('should handle async operations', async () => {
@@ -673,10 +698,11 @@ it('should complete within 1 second', (done) => {
 ```
 
 #### 4. Mock Issues
+
 ```javascript
 // ✅ Reset mocks between tests
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 // ✅ Verify mock calls properly
