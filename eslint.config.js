@@ -1,6 +1,5 @@
 import js from "@eslint/js";
 import nodePlugin from "eslint-plugin-node";
-import jestPlugin from "eslint-plugin-jest";
 import tsParser from "@typescript-eslint/parser";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
 import prettierConfig from "eslint-config-prettier";
@@ -92,12 +91,18 @@ export default [
   },
   {
     files: ["**/*.test.js", "**/*.spec.js", "tests/**/*.js", "**/*.test.ts", "**/*.spec.ts", "**/__tests__/**/*.ts"],
-    plugins: {
-      jest: jestPlugin,
-    },
     languageOptions: {
       globals: {
-        ...jestPlugin.environments.globals.globals,
+        // Vitest globals
+        describe: "readonly",
+        it: "readonly",
+        test: "readonly",
+        expect: "readonly",
+        beforeEach: "readonly",
+        afterEach: "readonly",
+        beforeAll: "readonly",
+        afterAll: "readonly",
+        vi: "readonly",
         jest: "readonly",
         require: "readonly",
         module: "readonly",
@@ -107,13 +112,7 @@ export default [
       },
     },
     rules: {
-      ...jestPlugin.configs.recommended.rules,
-      "jest/prefer-expect-assertions": "off",
-      "jest/no-disabled-tests": "warn",
-      "jest/no-focused-tests": "error",
-      "jest/no-identical-title": "error",
-      "jest/prefer-to-have-length": "warn",
-      "jest/valid-expect": "error",
+      // Vitest/testing best practices (without Jest plugin)
       "no-console": "off", // Allow console in tests
       "@typescript-eslint/no-explicit-any": "off", // Allow any in tests
     },

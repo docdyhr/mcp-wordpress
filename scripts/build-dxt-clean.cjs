@@ -47,7 +47,7 @@ async function buildCleanDXT() {
     
     // Copy essential non-dev files
     await fs.copy(path.join(rootDir, 'eslint.config.js'), path.join(tempDir, 'eslint.config.js'));
-    await fs.copy(path.join(rootDir, 'jest.config.cjs'), path.join(tempDir, 'jest.config.cjs'));
+    await fs.copy(path.join(rootDir, 'vitest.config.ts'), path.join(tempDir, 'vitest.config.ts'));
     
     // Copy dxt directory (for icon and manifest references)
     await fs.copy(path.join(rootDir, 'dxt'), path.join(tempDir, 'dxt'));

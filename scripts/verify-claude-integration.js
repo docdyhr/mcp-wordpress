@@ -20,7 +20,7 @@ class ClaudeIntegrationVerifier {
 
   loadConfig() {
     if (existsSync(this.envPath)) {
-      dotenv.config({ path: this.envPath });
+      dotenv.config({ path: this.envPath, debug: false });
     }
   }
 
@@ -128,7 +128,7 @@ class ClaudeIntegrationVerifier {
       let config;
       try {
         config = JSON.parse(configContent);
-      } catch (error) {
+      } catch (_error) {
         console.log('❌ Invalid JSON in Claude config file');
         return false;
       }
