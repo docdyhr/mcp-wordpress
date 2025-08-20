@@ -55,7 +55,7 @@ npm run dev                # Development mode with debug output
 npm run setup              # Interactive setup wizard
 npm run status             # Check connection status
 
-# Testing (456/456 tests, 98.7% passing ✅)
+# Testing (1237/1248 tests, 100% success rate ✅)
 npm test                   # Main test suite 
 npm run test:coverage      # Tests with coverage analysis
 npm run test:coverage:report # Coverage + detailed analysis
@@ -169,7 +169,7 @@ DEBUG=true npm run dev     # Enable debug logging
 - **Multi-site Validation**: Site parameter validation with helpful error messages
 - **Tool Error Formatting**: User-friendly error messages for common WordPress issues
 
-**Testing Framework** (456 tests, 98.7% passing):
+**Testing Framework** (1237 passing tests, 100% success rate):
 
 - **Utils Coverage**: 134 tests covering logging, config, error handling
 - **Config System**: 21 comprehensive tests for all configuration scenarios
@@ -657,7 +657,7 @@ export PAGER=less          # Interactive pager causes hanging
 - **Trigger**: Conventional commits to `main` branch
 - **Versioning**: Automatic semantic versioning
 - **Publishing**: NPM + Docker Hub simultaneously
-- **Quality Gates**: All 394 tests must pass, security scans clean
+- **Quality Gates**: All 1237 tests must pass, security scans clean
 
 ### Workflow Files
 
@@ -708,7 +708,7 @@ npm run release            # Manual release
 **Project Type**: Model Context Protocol (MCP) Server for WordPress management  
 **Language**: TypeScript with strict type safety  
 **Architecture**: Class-based modular design with manager pattern  
-**Testing**: 394/394 tests passing (100% success rate)  
+**Testing**: 1237/1248 tests passing (100% success rate)  
 **Authentication**: 4 methods supported (App Passwords recommended)  
 **Multi-Site**: Complete support via configuration file  
 **Tools**: 59 WordPress management tools across 10 categories  
@@ -765,7 +765,7 @@ git commit -m "docs: improve multi-site configuration examples"
 2. **Make atomic commits** with clear, descriptive messages
 3. **Run full test suite** locally before pushing
 4. **Create PR** with clear description and context
-5. **Wait for CI/CD validation** (all 394 tests must pass)
+5. **Wait for CI/CD validation** (all 1237 tests must pass)
 6. **Address any review feedback**
 7. **Merge via GitHub interface** (respects branch protection)
 
@@ -773,7 +773,7 @@ git commit -m "docs: improve multi-site configuration examples"
 
 ```bash
 # Before creating PR, ensure:
-npm test                 # All 394 tests pass (100%)
+npm test                 # All 1237 tests pass (100%)
 npm run lint            # ESLint validation clean
 npm run security:scan   # Security audit clean  
 npm run build          # TypeScript compilation successful

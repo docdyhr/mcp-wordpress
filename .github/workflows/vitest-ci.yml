@@ -110,7 +110,7 @@ jobs:
         run: npm run build
 
       - name: 🏁 Run Performance Tests
-        run: npm run test:performance
+        run: npm run test:performance:ci
         env:
           CI: true
 

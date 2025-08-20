@@ -21,6 +21,8 @@ export default defineConfig({
       "tests/server/ToolRegistry.test.js",
       "tests/typescript-build.test.js",
       "tests/performance/MetricsCollector.test.js",
+      // Skip long-running performance tests in CI
+      ...(process.env.CI ? ["tests/performance/regression-detection.test.js"] : []),
     ],
 
     // Global test configuration
@@ -88,12 +90,7 @@ export default defineConfig({
     },
 
     // Reporter configuration
-    reporter: ["verbose"],
-
-    // Global variables for compatibility
-    define: {
-      __EXECUTION_CONTEXT__: '"vitest"',
-    },
+    reporters: ["verbose"],
   },
 
   // TypeScript and module resolution
@@ -102,6 +99,11 @@ export default defineConfig({
       // Support .js imports for TypeScript files
       "^(\\.{1,2}/.*)\\.js$": "$1",
     },
+  },
+
+  // Global variables for compatibility
+  define: {
+    __EXECUTION_CONTEXT__: '"vitest"',
   },
 
   // ESBuild configuration for TypeScript

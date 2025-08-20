@@ -42,7 +42,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🐳 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v3.7.1
 
       - name: 📝 Extract Metadata (Test)
         id: meta
@@ -112,10 +112,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🐳 Set up QEMU (Multi-platform)
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v3.2.0
 
       - name: 🐳 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v3.7.1
         with:
           # Use latest buildkit features
           driver: docker-container

@@ -43,7 +43,22 @@ jobs:
         run: npm run build
 
       - name: 🧪 Run ${{ matrix.test-suite }} Tests
-        run: npm run test:${{ matrix.test-suite }}
+        run: |
+          case "${{ matrix.test-suite }}" in
+            "typescript")
+              npm run test:typescript
+              ;;
+            "security")
+              npm run test:security
+              ;;
+            "config")
+              npm run test:config
+              ;;
+            *)
+              echo "Unknown test suite: ${{ matrix.test-suite }}"
+              exit 1
+              ;;
+          esac
         env:
           # Mock credentials for testing
           WORDPRESS_SITE_URL: https://example.com
@@ -282,7 +297,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🔒 Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.29.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -292,7 +307,7 @@ jobs:
           severity: 'CRITICAL,HIGH,MEDIUM'
 
       - name: 📤 Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v3.27.0
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
