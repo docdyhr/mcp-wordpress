@@ -3,14 +3,7 @@
  * Tests the timeout behavior for file upload operations
  */
 
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-  jest,
-} from "@jest/globals";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { WordPressClient } from "../../dist/client/api.js";
 import nock from "nock";
 import fs from "fs";
@@ -34,17 +27,11 @@ describe("WordPress API Client Upload Timeout", () => {
     });
 
     // Mock the file system for uploadMedia tests with stronger implementation
-    const mockExistsSync = jest
-      .spyOn(fs, "existsSync")
-      .mockImplementation((path) => {
-        return path === testFilePath || path.includes("test-file.txt");
-      });
-    const mockStatSync = vi
-      .spyOn(fs, "statSync")
-      .mockReturnValue({ size: 1024 });
-    const mockReadFileSync = vi
-      .spyOn(fs, "readFileSync")
-      .mockReturnValue(testFile);
+    const mockExistsSync = vi.spyOn(fs, "existsSync").mockImplementation((path) => {
+      return path === testFilePath || path.includes("test-file.txt");
+    });
+    const mockStatSync = vi.spyOn(fs, "statSync").mockReturnValue({ size: 1024 });
+    const mockReadFileSync = vi.spyOn(fs, "readFileSync").mockReturnValue(testFile);
     vi.spyOn(fs, "writeFileSync").mockImplementation(() => {});
     vi.spyOn(fs, "unlinkSync").mockImplementation(() => {});
 
@@ -70,27 +57,15 @@ describe("WordPress API Client Upload Timeout", () => {
         .reply(200, { id: 123, title: "uploaded" });
 
       await expect(
-        client.uploadFile(
-          testFile,
-          "test.txt",
-          "text/plain",
-          {},
-          { timeout: customTimeout },
-        ),
+        client.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: customTimeout }),
       ).rejects.toThrow(/Request timeout after/);
     });
 
     it("should use default 5-minute timeout for uploads when no custom timeout provided", async () => {
       // Mock upload request directly
-      nock(testBaseUrl)
-        .post("/wp-json/wp/v2/media")
-        .reply(200, { id: 123, title: "uploaded" });
+      nock(testBaseUrl).post("/wp-json/wp/v2/media").reply(200, { id: 123, title: "uploaded" });
 
-      const result = await client.uploadFile(
-        testFile,
-        "test.txt",
-        "text/plain",
-      );
+      const result = await client.uploadFile(testFile, "test.txt", "text/plain");
       expect(result.id).toBe(123);
     });
 
@@ -113,32 +88,19 @@ describe("WordPress API Client Upload Timeout", () => {
         .reply(200, { id: 123 });
 
       // Use the client's default timeout instead of upload timeout by passing explicit 100ms
-      await expect(
-        fastClient.uploadFile(
-          testFile,
-          "test.txt",
-          "text/plain",
-          {},
-          { timeout: 100 },
-        ),
-      ).rejects.toThrow(/Request timeout after/);
+      await expect(fastClient.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: 100 })).rejects.toThrow(
+        /Request timeout after/,
+      );
     });
   });
 
   describe("uploadMedia method timeout behavior", () => {
     it("should use default 5-minute timeout", async () => {
       // Mock upload request
-      nock(testBaseUrl)
-        .post("/wp-json/wp/v2/media")
-        .reply(200, { id: 456, title: "media-upload" });
+      nock(testBaseUrl).post("/wp-json/wp/v2/media").reply(200, { id: 456, title: "media-upload" });
 
       // Test uploadFile directly instead of uploadMedia to avoid fs mocking issues
-      const result = await client.uploadFile(
-        testFile,
-        "test-media.txt",
-        "text/plain",
-        { title: "Test Media" },
-      );
+      const result = await client.uploadFile(testFile, "test-media.txt", "text/plain", { title: "Test Media" });
 
       expect(result.id).toBe(456);
     });
@@ -162,15 +124,9 @@ describe("WordPress API Client Upload Timeout", () => {
         .reply(200, { id: 456 });
 
       // Test uploadFile with explicit timeout
-      await expect(
-        fastClient.uploadFile(
-          testFile,
-          "test.txt",
-          "text/plain",
-          {},
-          { timeout: 100 },
-        ),
-      ).rejects.toThrow(/Request timeout after/);
+      await expect(fastClient.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: 100 })).rejects.toThrow(
+        /Request timeout after/,
+      );
     });
   });
 
@@ -184,13 +140,7 @@ describe("WordPress API Client Upload Timeout", () => {
         .reply(200, { id: 789 });
 
       await expect(
-        client.uploadFile(
-          testFile,
-          "test.txt",
-          "text/plain",
-          {},
-          { timeout: shortTimeout },
-        ),
+        client.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: shortTimeout }),
       ).rejects.toThrow(/Request timeout after \d+ms/);
     });
 
@@ -207,9 +157,9 @@ describe("WordPress API Client Upload Timeout", () => {
           return [200, { id: 999 }];
         });
 
-      await expect(
-        client.post("posts", { title: "Test Post" }, { timeout: 100 }),
-      ).rejects.toThrow(/Request timeout after/);
+      await expect(client.post("posts", { title: "Test Post" }, { timeout: 100 })).rejects.toThrow(
+        /Request timeout after/,
+      );
 
       // Should only make 1 request, no retries for timeout
       expect(requestCount).toBe(1);
@@ -246,15 +196,9 @@ describe("WordPress API Client Upload Timeout", () => {
         .delay(150) // Longer than our custom timeout
         .reply(200, { id: 222 });
 
-      await expect(
-        client.uploadFile(
-          testFile,
-          "test.txt",
-          "text/plain",
-          {},
-          { timeout: 100 },
-        ),
-      ).rejects.toThrow(/Request timeout after/);
+      await expect(client.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: 100 })).rejects.toThrow(
+        /Request timeout after/,
+      );
 
       const finalStats = client.stats;
       expect(finalStats.failedRequests).toBe(initialStats.failedRequests + 1);
@@ -264,34 +208,18 @@ describe("WordPress API Client Upload Timeout", () => {
 
   describe("upload permission handling", () => {
     it("should handle network connection errors during upload", async () => {
-      nock(testBaseUrl)
-        .post("/wp-json/wp/v2/media")
-        .replyWithError("socket hang up");
+      nock(testBaseUrl).post("/wp-json/wp/v2/media").replyWithError("socket hang up");
 
-      await expect(
-        client.uploadFile(
-          testFile,
-          "test.txt",
-          "text/plain",
-          {},
-          { timeout: 1000 },
-        ),
-      ).rejects.toThrow(/Network connection lost during upload/);
+      await expect(client.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: 1000 })).rejects.toThrow(
+        /Network connection lost during upload/,
+      );
     });
 
     it("should set max listeners to prevent EventEmitter warnings", async () => {
       // This test ensures FormData max listeners are set correctly
-      nock(testBaseUrl)
-        .post("/wp-json/wp/v2/media")
-        .reply(200, { id: 123, title: "uploaded" });
+      nock(testBaseUrl).post("/wp-json/wp/v2/media").reply(200, { id: 123, title: "uploaded" });
 
-      const result = await client.uploadFile(
-        testFile,
-        "test.txt",
-        "text/plain",
-        {},
-        { timeout: 1000 },
-      );
+      const result = await client.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: 1000 });
       expect(result.id).toBe(123);
 
       // No assertion needed - this test passes if no EventEmitter warning is thrown
@@ -301,8 +229,7 @@ describe("WordPress API Client Upload Timeout", () => {
       // Test that our error message improvement is included
       const endpoint = "media";
       const method = "POST";
-      const errorMessage =
-        "Du bist mit deiner Benutzerrolle leider nicht berechtigt, Beiträge zu erstellen.";
+      const errorMessage = "Du bist mit deiner Benutzerrolle leider nicht berechtigt, Beiträge zu erstellen.";
 
       // Verify the conditions for the enhanced error message
       expect(endpoint.includes("media") && method === "POST").toBe(true);
