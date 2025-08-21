@@ -50,11 +50,12 @@ jobs:
           performance-baseline-
     
     - name: Run performance regression tests
-      run: npm run test:performance
+      run: npm run test:performance:ci
       continue-on-error: ${{ github.actor == 'dependabot[bot]' || github.actor == 'github-actions[bot]' }}  # Only ignore failures for automated PRs
       env:
         NODE_ENV: test
         PERFORMANCE_TEST: true
+        CI: true
     
     - name: Upload performance results
       uses: actions/upload-artifact@v4
