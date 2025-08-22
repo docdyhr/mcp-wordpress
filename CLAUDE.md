@@ -13,6 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 - [Troubleshooting](#troubleshooting)
 - [CI/CD Pipeline](#cicd-pipeline)
 - [Claude Memory Integration](#claude-memory-integration)
+- [GitHub MCP Integration](#github-mcp-integration)
 - [Next Steps for Development](#next-steps-for-development)
 
 ## Quick Start
@@ -700,6 +701,125 @@ npm run release            # Manual release
 - Maintain relationships between tools, configurations, and their specific use cases
 - Track evolution of codebase architecture and key design decisions
 - Remember patterns that lead to successful problem resolution
+
+---
+
+## GitHub MCP Integration
+
+### Enhanced GitHub Workflow Automation
+
+**Claude Code now has comprehensive GitHub MCP permissions** for full development lifecycle management:
+
+#### **Available GitHub MCP Tools**
+
+**Repository Management:**
+
+- `mcp__github__search_repositories` - Search and discover repositories
+- `mcp__github__get_file_contents` - Read repository files and directories
+- `mcp__github__create_repository` - Create new repositories
+- `mcp__github__fork_repository` - Fork repositories
+
+**Pull Request Management:**
+
+- `mcp__github__list_pull_requests` - List and filter PRs
+- `mcp__github__get_pull_request` - Get detailed PR information
+- `mcp__github__get_pull_request_files` - View changed files in PRs
+- `mcp__github__get_pull_request_status` - Check CI/CD status
+- `mcp__github__get_pull_request_reviews` - Access code reviews
+- `mcp__github__get_pull_request_comments` - Read PR discussions
+- `mcp__github__create_pull_request` - Create new pull requests
+- `mcp__github__create_pull_request_review` - Submit code reviews
+- `mcp__github__merge_pull_request` - Merge approved PRs
+- `mcp__github__update_pull_request_branch` - Update PR branches
+
+**Issue Tracking:**
+
+- `mcp__github__list_issues` - List and filter repository issues
+- `mcp__github__get_issue` - Get detailed issue information
+- `mcp__github__create_issue` - Create new issues
+- `mcp__github__update_issue` - Update issue status and details
+- `mcp__github__add_issue_comment` - Comment on issues
+
+**Branch Management:**
+
+- `mcp__github__create_branch` - Create new branches
+- `mcp__github__list_commits` - View commit history
+
+**Code Analysis:**
+
+- `mcp__github__search_code` - Search across repositories
+- `mcp__github__search_issues` - Advanced issue/PR search
+- `mcp__github__search_users` - Find GitHub users
+
+**File Operations:**
+
+- `mcp__github__create_or_update_file` - Single file operations
+- `mcp__github__push_files` - Multi-file commits
+
+#### **Integration with Claude Code Hooks**
+
+The GitHub MCP tools work seamlessly with the newly implemented Claude Code hooks:
+
+**Automated Workflow Examples:**
+
+```typescript
+// PR Review Automation
+const prFiles = await mcp__github__get_pull_request_files("owner", "repo", prNumber);
+const prReviews = await mcp__github__get_pull_request_reviews("owner", "repo", prNumber);
+
+// Automated issue management based on hook triggers
+if (hookDetectedBug) {
+  await mcp__github__create_issue({
+    title: "Bug detected by Claude Code hooks",
+    body: "Automated detection from code quality hooks",
+    labels: ["bug", "automated"]
+  });
+}
+
+// Smart PR merging with status checks
+const prStatus = await mcp__github__get_pull_request_status("owner", "repo", prNumber);
+if (prStatus.state === "success") {
+  await mcp__github__merge_pull_request("owner", "repo", prNumber);
+}
+```
+
+**Current Repository Status:**
+
+- **Repository**: `docdyhr/mcp-wordpress` (PUBLIC)
+- **Your Permission**: `ADMIN`
+- **Claude Code Access**: Full repository management capabilities
+
+#### **Workflow Enhancement Benefits**
+
+1. **Automated Code Review**: Claude can analyze PRs, suggest improvements, and submit reviews
+2. **Intelligent Issue Management**: Automatic issue creation/updates based on code analysis
+3. **Smart Branch Management**: Automated branch creation and cleanup
+4. **CI/CD Integration**: Monitor build status and automate deployment decisions
+5. **Code Quality Gates**: Automated quality checks before merging
+6. **Documentation Sync**: Keep documentation updated with code changes
+
+#### **Security and Best Practices**
+
+- **Branch Protection**: All operations respect repository branch protection rules
+- **Audit Trail**: All GitHub operations are logged and attributed
+- **Permission Scope**: Limited to approved repositories and operations
+- **Hook Integration**: GitHub operations trigger appropriate Claude Code hooks
+- **Conventional Commits**: Automated commit message formatting
+
+#### **Usage Examples**
+
+```bash
+# Claude can now automatically:
+# - Review PRs for code quality issues
+# - Merge approved PRs after CI passes
+# - Create issues for detected problems
+# - Update documentation based on code changes
+# - Manage release workflows
+# - Sync branch protection settings
+```
+
+This GitHub MCP integration transforms Claude Code from a local development assistant into a comprehensive GitHub workflow
+automation system, perfectly complementing the project's existing CI/CD pipeline and quality gates.
 
 ---
 
