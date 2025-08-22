@@ -8,6 +8,7 @@ on:
   schedule:
     # Run nightly tests at 2 AM UTC
     - cron: '0 2 * * *'
+  workflow_dispatch:
 
 env:
   NODE_VERSION: '20'
