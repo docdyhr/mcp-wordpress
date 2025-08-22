@@ -252,7 +252,7 @@ If you discover a security vulnerability:
 
 1. **Do NOT** create a public GitHub issue
 2. **Do NOT** share details publicly
-3. **Do** email security concerns to the maintainer
+3. **Do** create a security advisory on GitHub or contact the maintainer through repository issues
 4. **Do** provide detailed steps to reproduce
 5. **Do** suggest fixes if possible
 
