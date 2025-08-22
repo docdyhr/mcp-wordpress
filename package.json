@@ -169,7 +169,6 @@
     "@types/node": "^20.19.9",
     "@typescript-eslint/eslint-plugin": "^8.39.0",
     "@typescript-eslint/parser": "^8.39.0",
-    "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
     "archiver": "^7.0.1",
     "c8": "^10.1.3",
