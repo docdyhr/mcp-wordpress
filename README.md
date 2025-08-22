@@ -23,9 +23,9 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 [![MCP Evaluation](https://img.shields.io/badge/mcp%20evaluation-4.5%2F5.0-brightgreen?logo=openai&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/mcp-evaluations.yml)
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue?logo=typescript&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
-[![Security Tests](https://img.shields.io/badge/security%20tests-40%2F40%20passing-brightgreen?logo=shield&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/tree/main/tests/security)
+[![Security Tests](https://img.shields.io/badge/security%20tests-%2F%20passing-brightgreen?logo=shield&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/tree/main/tests/security)
 [![Vulnerabilities](https://img.shields.io/badge/vulnerabilities-0%20known-brightgreen?logo=security&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/security/advisories)
-[![Penetration Testing](https://img.shields.io/badge/penetration%20testing-28%2F28%20passing-brightgreen?logo=bug&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/blob/main/tests/security/penetration-tests.test.js)
+[![Penetration Testing](https://img.shields.io/badge/penetration%20testing-%2F%20passing-brightgreen?logo=bug&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/blob/main/tests/security/penetration-tests.test.js)
 [![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker&logoColor=white)](https://hub.docker.com/r/docdyhr/mcp-wordpress)
 [![License](https://img.shields.io/badge/license-MIT-green?logo=opensource&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/blob/main/LICENSE)
 [![smithery badge](https://smithery.ai/badge/@docdyhr/mcp-wordpress)](https://smithery.ai/server/@docdyhr/mcp-wordpress)
