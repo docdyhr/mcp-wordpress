@@ -41,11 +41,11 @@ jobs:
       - name: 📦 Install Dependencies
         run: npm ci
 
-      - name: 🔍 Quick Dependency Validation
+      - name: 🔍 Quick Dependency Validation  
         if: matrix.node-version == 20 && matrix.test-suite == 'typescript'
         run: |
           echo "Running quick dependency validation..."
-          npx depcheck --skip-missing --ignores @vitest/coverage-v8
+          npx depcheck --skip-missing
           echo "✅ Dependencies validated"
 
       - name: 🏗️ Build Project
