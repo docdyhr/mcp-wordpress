@@ -42,7 +42,7 @@ jobs:
           path: ./
           base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
           head: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || '' }}
-          extra_args: --only-verified --exclude-paths="tests/,*.test.js,*.spec.js,docs/,*.md,.github/ISSUE_TEMPLATE/"
+          extra_args: --only-verified --exclude-globs="tests/**,**/*.test.js,**/*.spec.js,docs/**,**/*.md"
 
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2.3.6
