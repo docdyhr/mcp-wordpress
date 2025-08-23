@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.5](https://github.com/docdyhr/mcp-wordpress/compare/v2.5.4...v2.5.5) (2025-08-23)
+
+### 🐛 Bug Fixes
+
+* finalize security monitoring workflow YAML syntax ([192de4d](https://github.com/docdyhr/mcp-wordpress/commit/192de4d1bdcf9ceb942469210a76b681a35286c6))
+* resolve failing publishing verification workflows ([6756986](https://github.com/docdyhr/mcp-wordpress/commit/67569867f83a4208874a4598c060807619389ba4))
+* resolve security monitoring workflow syntax issues ([0e14687](https://github.com/docdyhr/mcp-wordpress/commit/0e14687ce29b1d5e8d6f01c7aee2edeb763a2317))
+
 ## [2.5.4](https://github.com/docdyhr/mcp-wordpress/compare/v2.5.3...v2.5.4) (2025-08-23)
 
 ### 🐛 Bug Fixes
