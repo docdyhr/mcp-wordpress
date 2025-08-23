@@ -5,7 +5,8 @@
     "@semantic-release/changelog",
     "@semantic-release/git",
     "conventional-changelog-conventionalcommits",
-    "sort-package-json"
+    "sort-package-json",
+    "@vitest/coverage-v8"
   ],
   "skip-missing": [
     "node-fetch"

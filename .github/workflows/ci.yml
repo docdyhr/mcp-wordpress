@@ -19,6 +19,7 @@ jobs:
   test-matrix:
     name: 🧪 Test Matrix
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -39,6 +40,13 @@ jobs:
 
       - name: 📦 Install Dependencies
         run: npm ci
+
+      - name: 🔍 Quick Dependency Validation
+        if: matrix.node-version == 20 && matrix.test-suite == 'typescript'
+        run: |
+          echo "Running quick dependency validation..."
+          npx depcheck --skip-missing --ignores @vitest/coverage-v8
+          echo "✅ Dependencies validated"
 
       - name: 🏗️ Build Project
         run: npm run build
@@ -71,6 +79,7 @@ jobs:
   quality-checks:
     name: 🔍 Quality & Security
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
@@ -84,16 +93,19 @@ jobs:
       - name: 📦 Install Dependencies
         run: npm ci
 
-      - name: 💾 Cache Build Output
+      - name: 💾 Enhanced Cache Strategy
         uses: actions/cache@v4
         with:
           path: |
-            dist/
+            ~/.npm
             node_modules/.cache/
-          key: ${{ runner.os }}-build-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**/*') }}
+            dist/
+            coverage/
+          key: ${{ runner.os }}-enhanced-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('src/**/*') }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ hashFiles('package-lock.json') }}-
-            ${{ runner.os }}-build-
+            ${{ runner.os }}-enhanced-${{ hashFiles('**/package-lock.json') }}-
+            ${{ runner.os }}-enhanced-
+            ${{ runner.os }}-
 
       - name: 🏗️ Build Project
         run: npm run build
@@ -117,8 +129,22 @@ jobs:
       - name: 🔒 Security Audit
         run: npm audit --audit-level moderate
 
-      - name: 🔍 Dependency Check
-        run: npx depcheck
+      - name: 🔍 Dependency Check with Context
+        id: depcheck
+        run: |
+          echo "Running dependency analysis..."
+          npx depcheck --detailed
+          echo "✅ Dependency check completed"
+        continue-on-error: true
+
+      - name: 📊 Depcheck Results Analysis
+        if: steps.depcheck.outcome == 'failure'
+        run: |
+          echo "::warning::Depcheck found potential issues."
+          echo "Note: Some dependencies may be used indirectly (e.g., by tools like vitest)"
+          echo "Check .depcheckrc configuration if this is a false positive"
+          npx depcheck --detailed
+          exit 1
 
   # 📦 Build & Package
   build-package:
