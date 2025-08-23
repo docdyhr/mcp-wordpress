@@ -2,9 +2,9 @@ name: '🛡️ Security Monitoring'
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
     # Skip for dependency-only PRs
     paths-ignore:
       - 'package-lock.json'
@@ -40,9 +40,15 @@ jobs:
         uses: trufflesecurity/trufflehog@v3.82.11
         with:
           path: ./
-          base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
-          head: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || '' }}
-          extra_args: --only-verified --exclude-paths="tests/,*.test.js,*.spec.js,docs/,*.md,.github/ISSUE_TEMPLATE/"
+          base: >-
+            ${{ github.event_name == 'pull_request' &&
+            github.event.pull_request.base.sha || '' }}
+          head: >-
+            ${{ github.event_name == 'pull_request' &&
+            github.event.pull_request.head.sha || '' }}
+          extra_args: >-
+            --only-verified
+            --exclude-paths="tests/,*.test.js,*.spec.js,docs/,*.md,.github/ISSUE_TEMPLATE/"
 
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2.3.6
@@ -123,7 +129,7 @@ jobs:
         run: |
           npm audit --production
           npm audit --json > npm-audit.json || true
-          
+
       - name: 🔍 Check for known vulnerabilities with Snyk
         if: ${{ secrets.SNYK_TOKEN != '' }}
         uses: snyk/actions/node@master
@@ -132,7 +138,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=medium
-          
+
       - name: 📊 Snyk Skipped Notice
         if: ${{ secrets.SNYK_TOKEN == '' }}
         run: |
@@ -172,7 +178,8 @@ jobs:
       - name: 🔍 Check licenses
         run: |
           npx license-checker --production --summary --out license-report.json
-          npx license-checker --production --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;CC0-1.0;Unlicense"
+          npx license-checker --production \
+            --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;CC0-1.0;Unlicense"
 
   # 📊 Security Dashboard
   security-summary:

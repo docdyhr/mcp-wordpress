@@ -1,14 +1,18 @@
 name: Legacy NPM Publish (Manual Release)
 
 on:
-  release:
-    types: [created]
+  # Only trigger on manual dispatch to avoid conflicts with main release workflow
   workflow_dispatch:
     inputs:
       version:
         description: 'Version to publish'
         required: true
         type: string
+      force_publish:
+        description: 'Force publish even if version exists'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   publish:
@@ -48,7 +52,29 @@ jobs:
       - name: Verify package contents
         run: npm publish --dry-run
 
+      - name: Check if version exists
+        id: version_check
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Current package version: $VERSION"
+          
+          if npm view mcp-wordpress@$VERSION version 2>/dev/null; then
+            echo "version_exists=true" >> $GITHUB_OUTPUT
+            echo "Version $VERSION already exists on npm"
+          else
+            echo "version_exists=false" >> $GITHUB_OUTPUT
+            echo "Version $VERSION does not exist on npm"
+          fi
+
       - name: Publish to NPM
+        if: steps.version_check.outputs.version_exists == 'false' || github.event.inputs.force_publish == 'true'
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          
+      - name: Skip publishing notice
+        if: steps.version_check.outputs.version_exists == 'true' && github.event.inputs.force_publish != 'true'
+        run: |
+          echo "⚠️ Version already published to npm"
+          echo "Use force_publish=true to override this check"
+          echo "Current version: $(node -p "require('./package.json').version")"
