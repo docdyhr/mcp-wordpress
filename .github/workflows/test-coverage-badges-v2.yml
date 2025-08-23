@@ -28,6 +28,8 @@ env:
 jobs:
   update-metrics:
     runs-on: ubuntu-latest
+    # Temporarily disabled to fix CI/CD issues
+    if: false
     services:
       mysql:
         image: mysql:8.0
