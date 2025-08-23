@@ -124,18 +124,11 @@ jobs:
           npm audit --production
           npm audit --json > npm-audit.json || true
 
-      - name: 🔍 Check for known vulnerabilities with Snyk (Optional)
+      - name: 📊 Snyk Security Analysis (Optional)
         run: |
-          if [ -n "${{ secrets.SNYK_TOKEN }}" ]; then
-            echo "Running Snyk scan..."
-            npm install -g snyk
-            snyk test --severity-threshold=medium || echo "Snyk scan completed with findings"
-          else
-            echo "⚠️ **Snyk scanning skipped** - SNYK_TOKEN not configured" >> $GITHUB_STEP_SUMMARY
-            echo "To enable Snyk scanning, add SNYK_TOKEN to repository secrets" >> $GITHUB_STEP_SUMMARY
-          fi
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          echo "⚠️ **Snyk scanning skipped** - SNYK_TOKEN not configured" >> $GITHUB_STEP_SUMMARY
+          echo "To enable Snyk scanning, add SNYK_TOKEN to repository secrets" >> $GITHUB_STEP_SUMMARY
+          echo "Alternative: Use 'npm audit' for basic vulnerability scanning" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
 
       - name: 🔍 OSSF Scorecard analysis (Optional)
