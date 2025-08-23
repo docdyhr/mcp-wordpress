@@ -18,8 +18,18 @@ async function buildCleanDXT() {
     // Copy only the essential files
     console.log('📦 Copying essential files...');
     
-    // Copy manifest and icon to root
-    await fs.copy(path.join(rootDir, 'dxt', 'manifest.json'), path.join(tempDir, 'manifest.json'));
+    // Copy and update manifest with current package version
+    const packageJson = await fs.readJson(path.join(rootDir, 'package.json'));
+    const manifest = await fs.readJson(path.join(rootDir, 'dxt', 'manifest.json'));
+    
+    // Sync version with package.json
+    manifest.version = packageJson.version;
+    
+    // Write updated manifest to temp directory
+    await fs.writeJson(path.join(tempDir, 'manifest.json'), manifest, { spaces: 2 });
+    console.log(`📝 Updated manifest version to ${packageJson.version}`);
+    
+    // Copy icon to root
     await fs.copy(path.join(rootDir, 'dxt', 'icon.png'), path.join(tempDir, 'icon.png'));
     
     // Copy dist directory
