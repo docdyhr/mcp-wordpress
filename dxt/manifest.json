@@ -56,37 +56,27 @@
       "type": "string",
       "title": "WordPress Site URL",
       "description": "The full URL of your WordPress site (e.g., https://yoursite.com)",
-      "required": true,
-      "placeholder": "https://yoursite.com"
+      "required": true
     },
     "wordpress_username": {
       "type": "string",
       "title": "WordPress Username",
       "description": "Your WordPress username with appropriate permissions",
-      "required": true,
-      "placeholder": "your-username"
+      "required": true
     },
     "wordpress_app_password": {
       "type": "string",
       "title": "WordPress Application Password",
       "description": "Generate an Application Password in WordPress Admin → Users → Profile → Application Passwords",
       "required": true,
-      "sensitive": true,
-      "placeholder": "xxxx xxxx xxxx xxxx xxxx xxxx"
+      "sensitive": true
     },
     "auth_method": {
       "type": "string",
       "title": "Authentication Method",
-      "description": "Choose your WordPress authentication method",
+      "description": "Choose your WordPress authentication method (app-password, jwt, basic, api-key)",
       "required": false,
-      "default": "app-password",
-      "enum": ["app-password", "jwt", "basic", "api-key"],
-      "enum_labels": [
-        "Application Password (Recommended)",
-        "JWT Authentication",
-        "Basic Authentication",
-        "API Key Authentication"
-      ]
+      "default": "app-password"
     },
     "debug_mode": {
       "type": "boolean",
@@ -216,10 +206,5 @@
     "dxt_version": "0.1",
     "platforms": ["win32", "darwin", "linux"],
     "node_version": ">=18.0.0"
-  },
-  "requirements": {
-    "wordpress_version": ">=5.0",
-    "rest_api": "enabled",
-    "https": "recommended"
   }
 }
