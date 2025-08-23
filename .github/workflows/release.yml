@@ -288,11 +288,82 @@ jobs:
           echo "::error title=Docker Publishing Verification Failed::Failed to verify Docker image publication"
           echo "Manual intervention may be required to publish the Docker image"
 
+  # 📦 DXT Package Build and Upload
+  dxt-package:
+    name: 📦 Build and Upload DXT Package
+    runs-on: ubuntu-latest
+    needs: semantic-release
+    if: needs.semantic-release.outputs.new-release-published == 'true' || github.event_name == 'release'
+    permissions:
+      contents: write
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+        env:
+          HUSKY: 0
+
+      - name: 🏗️ Build Project
+        run: npm run build
+        env:
+          HUSKY: 0
+
+      - name: 📦 Install DXT CLI
+        run: npm install -g @modelcontextprotocol/dxt
+        env:
+          HUSKY: 0
+
+      - name: 🎁 Build DXT Package
+        run: npm run dxt:package:official
+        env:
+          HUSKY: 0
+
+      - name: 🔍 Verify DXT Package
+        run: |
+          ls -la mcp-wordpress.dxt
+          echo "DXT package size: $(du -h mcp-wordpress.dxt | cut -f1)"
+          file mcp-wordpress.dxt
+
+      - name: 🏷️ Get Release Info
+        id: release-info
+        run: |
+          if [ "${{ github.event_name }}" == "release" ]; then
+            echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${{ needs.semantic-release.outputs.new-release-version }}" >> $GITHUB_OUTPUT
+            echo "tag=v${{ needs.semantic-release.outputs.new-release-version }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 📤 Upload DXT Package to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.release-info.outputs.tag }}
+          files: mcp-wordpress.dxt
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ✅ DXT Package Upload Success
+        run: |
+          echo "✅ DXT package uploaded successfully!"
+          echo "📦 Package: mcp-wordpress.dxt"
+          echo "🏷️ Version: ${{ steps.release-info.outputs.version }}"
+          echo "🔗 Download URL: https://github.com/docdyhr/mcp-wordpress/releases/download/${{ steps.release-info.outputs.tag }}/mcp-wordpress.dxt"
+
   # 🎉 Post-Release Actions
   post-release:
     name: 🎉 Post-Release Actions
     runs-on: ubuntu-latest
-    needs: [semantic-release, npm-publish, docker-publish]
+    needs: [semantic-release, npm-publish, docker-publish, dxt-package]
     if: always() && (needs.semantic-release.outputs.new-release-published == 'true' || github.event_name == 'release')
     steps:
       - name: 📊 Release Summary
@@ -302,20 +373,25 @@ jobs:
           echo "🏷️ Version: ${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}"
           echo "📦 NPM Status: ${{ needs.npm-publish.result }}"
           echo "🐳 Docker Status: ${{ needs.docker-publish.result }}"
+          echo "📦 DXT Package Status: ${{ needs.dxt-package.result }}"
           echo "🔄 Semantic Release: ${{ needs.semantic-release.result }}"
           echo "=========================="
           
       - name: ✅ Success Notification
-        if: needs.semantic-release.result == 'success' && needs.docker-publish.result == 'success'
+        if: needs.semantic-release.result == 'success' && needs.docker-publish.result == 'success' && needs.dxt-package.result == 'success'
         run: |
           echo "🎉 Release completed successfully!"
           echo "✅ All components published successfully"
+          echo "📦 NPM: Published"
+          echo "🐳 Docker: Published" 
+          echo "📦 DXT Package: Uploaded"
           
       - name: 🚨 Failure Notification
-        if: needs.semantic-release.result == 'failure' || needs.docker-publish.result == 'failure'
+        if: needs.semantic-release.result == 'failure' || needs.docker-publish.result == 'failure' || needs.dxt-package.result == 'failure'
         run: |
           echo "❌ Release had failures!"
           echo "Please check the workflow logs and fix any issues."
           echo "Semantic Release: ${{ needs.semantic-release.result }}"
           echo "Docker Publish: ${{ needs.docker-publish.result }}"
+          echo "DXT Package: ${{ needs.dxt-package.result }}"
           exit 1
