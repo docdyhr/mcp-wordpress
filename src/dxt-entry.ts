@@ -13,6 +13,7 @@ logger.debug("DXT entry point starting...");
 logger.debug(`Current working directory: ${process.cwd()}`);
 logger.debug(`__dirname equivalent: ${import.meta.url}`);
 logger.debug("Environment variables passed from DXT:");
+logger.debug(`  MULTI_SITE_MODE: ${process.env.MULTI_SITE_MODE ? "SET" : "NOT SET"}`);
 logger.debug(`  WORDPRESS_SITE_URL: ${process.env.WORDPRESS_SITE_URL ? "SET" : "NOT SET"}`);
 logger.debug(`  WORDPRESS_USERNAME: ${process.env.WORDPRESS_USERNAME ? "SET" : "NOT SET"}`);
 logger.debug(`  WORDPRESS_APP_PASSWORD: ${process.env.WORDPRESS_APP_PASSWORD ? "SET" : "NOT SET"}`);

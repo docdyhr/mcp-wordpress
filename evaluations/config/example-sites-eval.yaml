@@ -1,0 +1,37 @@
+# Example evaluation configuration for multi-site WordPress testing
+# Copy this file and customize with your own WordPress sites
+
+model:
+  provider: openai
+  name: gpt-4o
+
+evals:
+  - name: test_site1_connection
+    description: Test connection to first configured site
+    prompt: "Get site information from the WordPress site using site parameter 'site1'"
+    expected_result: "Should return site information from the first configured site"
+  
+  - name: test_list_posts_site1
+    description: Test listing posts from first site
+    prompt: "List the 3 most recent posts from site 'site1'"
+    expected_result: "Should return recent posts from the first site"
+  
+  - name: test_site2_connection
+    description: Test connection to second configured site
+    prompt: "Get site information from the WordPress site using site parameter 'site2'"
+    expected_result: "Should return site information from the second configured site"
+  
+  - name: test_multisite_functionality
+    description: Test multi-site functionality
+    prompt: "Show me how many sites are configured and list one post from each site"
+    expected_result: "Should demonstrate multi-site capabilities across all configured sites"
+
+  - name: test_site_switching
+    description: Test switching between sites
+    prompt: "First get settings from site1, then get settings from site2"
+    expected_result: "Should successfully retrieve different settings from each site"
+
+  - name: test_cross_site_operations
+    description: Test operations across multiple sites
+    prompt: "Count the total number of posts across all configured sites"
+    expected_result: "Should aggregate data from all configured WordPress sites"
