@@ -1,6 +1,6 @@
 {
   "name": "mcp-wordpress",
-  "version": "2.6.1",
+  "version": "2.6.2",
   "description": "Comprehensive Model Context Protocol server for WordPress management with 59 tools, performance monitoring, intelligent caching, auto-generated documentation, Docker support, TypeScript, and production-ready authentication - CI/CD test",
   "keywords": [
     "mcp",
