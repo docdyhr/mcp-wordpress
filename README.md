@@ -1,58 +1,5 @@
 # 🚀 MCP WordPress Server
 
-<!-- Animated Updates Banner -->
-<div align="center">
-
-<!-- Dynamic Moving Banner (HTML) -->
-<div style="
-  background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7);
-  background-size: 500% 500%;
-  animation: rainbow 3s linear infinite;
-  padding: 12px;
-  border-radius: 8px;
-  margin: 15px 0;
-  overflow: hidden;
-">
-  <marquee behavior="scroll" direction="left" scrollamount="4" 
-    style="color: white; font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px rgba(0,0,0,0.7);">
-    🎉 NEW! Multi-Site DXT Extension • 🔧 Claude Desktop Integration • ✨ 59 WordPress Tools • 📦 Production Ready •
-    🚀 Auto-Configuration Detection • 💎 Enhanced Performance • 🛡️ Security Validated
-  </marquee>
-</div>
-
-<style>
-@keyframes rainbow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-</style>
-
-<!-- GitHub-Compatible Banner -->
-> ## 🎉 **LATEST UPDATES** 🎉
->
-> **🆕 Multi-Site DXT Extension with UI Toggle** • **🔧 Enhanced Claude Desktop Integration** • **✨ 59 WordPress Tools Ready**
->
-> **📦 New Features:** DXT Multi-Site Mode | Auto-Configuration Detection | Production-Ready Performance
->
-> *Updated: August 2024 | Version 2.5.4+ | [View Changelog →](#-changelog)*
-
-<details>
-<summary><b>🚀 What's New in v2.5.4+</b></summary>
-
-- ✅ **Multi-Site DXT Extension** - Manage multiple WordPress sites from Claude Desktop
-- ✅ **UI Toggle for Multi-Site Mode** - Simple checkbox to enable/disable multi-site functionality  
-- ✅ **Enhanced Configuration Detection** - Automatic detection of mcp-wordpress.config.json files
-- ✅ **Improved Error Handling** - Better error messages and debugging support
-- ✅ **Performance Optimizations** - Enhanced caching and request optimization
-- ✅ **Security Enhancements** - Updated dependencies and security validations
-
-</details>
-
----
-
-</div>
-
 <div align="center">
 <img src="images/wordpress-mcp-logo.png" width="50%" alt="WordPress MCP Logo">
 
@@ -82,6 +29,14 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 [![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker&logoColor=white)](https://hub.docker.com/r/docdyhr/mcp-wordpress)
 [![License](https://img.shields.io/badge/license-MIT-green?logo=opensource&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/blob/main/LICENSE)
 [![smithery badge](https://smithery.ai/badge/@docdyhr/mcp-wordpress)](https://smithery.ai/server/@docdyhr/mcp-wordpress)
+
+---
+
+### 🎉 **NEW:** Multi-Site DXT Extension Now Available! 
+
+> 🆕 **Claude Desktop Integration** • ✨ **59 WordPress Tools** • 🔧 **Production Ready** • 📦 **Updated August 2025**
+
+---
 
 </div>
 
