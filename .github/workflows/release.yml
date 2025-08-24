@@ -292,8 +292,12 @@ jobs:
   dxt-package:
     name: 📦 Build and Upload DXT Package
     runs-on: ubuntu-latest
-    needs: semantic-release
-    if: needs.semantic-release.outputs.new-release-published == 'true' || github.event_name == 'release'
+    needs: [semantic-release]
+    if: |
+      always() && (
+        (needs.semantic-release.result == 'success' && needs.semantic-release.outputs.new-release-published == 'true') ||
+        github.event_name == 'release'
+      )
     permissions:
       contents: write
     steps:
@@ -364,7 +368,11 @@ jobs:
     name: 🎉 Post-Release Actions
     runs-on: ubuntu-latest
     needs: [semantic-release, npm-publish, docker-publish, dxt-package]
-    if: always() && (needs.semantic-release.outputs.new-release-published == 'true' || github.event_name == 'release')
+    if: |
+      always() && (
+        (needs.semantic-release.result == 'success' && needs.semantic-release.outputs.new-release-published == 'true') ||
+        github.event_name == 'release'
+      )
     steps:
       - name: 📊 Release Summary
         run: |
