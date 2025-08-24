@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.3](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.2...v2.6.3) (2025-08-24)
+
+### 🐛 Bug Fixes
+
+* correct DXT package workflow conditions for release events ([0205915](https://github.com/docdyhr/mcp-wordpress/commit/0205915cb72e5cef0af68a6261c00c08d909ff7f))
+* simplify banner to minimal announcement ([eebdd13](https://github.com/docdyhr/mcp-wordpress/commit/eebdd1364101ef25eacd0b9360a67c068219e8e0))
+
 ## [2.6.2](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.1...v2.6.2) (2025-08-24)
 
 ### 🐛 Bug Fixes
