@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.2](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.1...v2.6.2) (2025-08-24)
+
+### 🐛 Bug Fixes
+
+* trigger DXT package release for multi-site functionality ([d622d77](https://github.com/docdyhr/mcp-wordpress/commit/d622d775c751360405f08892a192fc5af364cc56))
+
 ## [2.6.1](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.0...v2.6.1) (2025-08-24)
 
 ### 🐛 Bug Fixes
