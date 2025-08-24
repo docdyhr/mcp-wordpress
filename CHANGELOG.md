@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.5.4...v2.6.0) (2025-08-24)
+
+### 🚀 Features
+
+* add animated banner with latest updates to README ([a1ef5de](https://github.com/docdyhr/mcp-wordpress/commit/a1ef5de81f42e0c4307ecf4f4bda313c86e30648))
+* add DXT package build and upload to release workflow ([1876974](https://github.com/docdyhr/mcp-wordpress/commit/1876974e979513308940cdc64f9c8e600d772e0c))
+* improve DXT build process with automatic version sync ([dabf4b3](https://github.com/docdyhr/mcp-wordpress/commit/dabf4b37656f4a1114da772d4060d163844e779e))
+
+### 🐛 Bug Fixes
+
+* correct TruffleHog exclude paths parameter ([d08d4ac](https://github.com/docdyhr/mcp-wordpress/commit/d08d4acee0347d354043c3f8b0f2de7e7a0dc88c))
+* finalize security monitoring workflow YAML syntax ([192de4d](https://github.com/docdyhr/mcp-wordpress/commit/192de4d1bdcf9ceb942469210a76b681a35286c6))
+* remove invalid DXT schema fields from manifest ([12b1fdc](https://github.com/docdyhr/mcp-wordpress/commit/12b1fdc5599ffa14bcbed54e14810986db8bbb51))
+* resolve failing publishing verification workflows ([6756986](https://github.com/docdyhr/mcp-wordpress/commit/67569867f83a4208874a4598c060807619389ba4))
+* resolve security monitoring workflow syntax issues ([0e14687](https://github.com/docdyhr/mcp-wordpress/commit/0e14687ce29b1d5e8d6f01c7aee2edeb763a2317))
+* simplify TruffleHog configuration to resolve scanning issues ([235794d](https://github.com/docdyhr/mcp-wordpress/commit/235794ddd49bf714203a4b6211fd3b0227ee0231))
+* update DXT manifest version to match package.json (2.5.4) ([34ba303](https://github.com/docdyhr/mcp-wordpress/commit/34ba30340e9f33a2117560014930b9680f479891))
+
 ## [2.5.4](https://github.com/docdyhr/mcp-wordpress/compare/v2.5.3...v2.5.4) (2025-08-23)
 
 ### 🐛 Bug Fixes
