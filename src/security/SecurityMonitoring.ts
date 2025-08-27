@@ -616,7 +616,7 @@ export class SecurityMonitor extends EventEmitter {
    */
   private groupBy(array: SecurityEvent[], property: string): Record<string, number> {
     return array.reduce<Record<string, number>>((acc, item) => {
-      const key = ((item as Record<string, unknown>)[property] as string) || "unknown";
+      const key = String((item as unknown as Record<string, unknown>)[property]) || "unknown";
       acc[key] = (acc[key] || 0) + 1;
       return acc;
     }, {});

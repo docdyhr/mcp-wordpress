@@ -73,19 +73,21 @@ export class SEOTools {
   private contentAnalyzer: ContentAnalyzer;
   private metaGenerator: MetaGenerator;
   private schemaGenerator: SchemaGenerator;
-  private internalLinkingSuggester: InternalLinkingSuggester;
-  private siteAuditor: SiteAuditor;
-  private bulkOperations: BulkOperations;
   private cacheManager: SEOCacheManager;
+  // Client-dependent components created per request
+  // private internalLinkingSuggester: InternalLinkingSuggester;
+  // private siteAuditor: SiteAuditor;
+  // private bulkOperations: BulkOperations;
 
   constructor() {
     this.contentAnalyzer = new ContentAnalyzer();
     this.metaGenerator = new MetaGenerator();
     this.schemaGenerator = new SchemaGenerator();
     this.cacheManager = new SEOCacheManager();
-    this.internalLinkingSuggester = new InternalLinkingSuggester(this.getSiteClient());
-    this.siteAuditor = new SiteAuditor(this.getSiteClient());
-    this.bulkOperations = new BulkOperations(this.getSiteClient(), this.cacheManager);
+    // Note: Client-dependent components will be initialized when needed in handlers
+    // this.internalLinkingSuggester - initialized per request
+    // this.siteAuditor - initialized per request
+    // this.bulkOperations - initialized per request
   }
 
   /**
@@ -578,8 +580,8 @@ export class SEOTools {
 
     // Initialize internal linking suggester for the specific client
     const linkingSuggester = new InternalLinkingSuggester(client, {
-      maxSuggestions: (params as unknown).maxSuggestions || 10,
-      minRelevanceScore: (params as unknown).minimumRelevance || 30,
+      maxSuggestions: params.maxSuggestions || 10,
+      minRelevanceScore: params.minimumRelevance || 30,
       maxLinksPerPost: 5,
       useSemanticAnalysis: true,
       enableContextualPlacement: true,
@@ -713,14 +715,14 @@ export class SEOTools {
   private async executeSiteAudit(client: WordPressClient, params: SEOToolParams): Promise<SiteAuditResult> {
     // Initialize site auditor for the specific client
     const siteAuditor = new SiteAuditor(client, {
-      includeTechnical: (params as unknown).includeTechnical !== false,
-      includeContent: (params as unknown).includeContent !== false,
-      includeArchitecture: (params as unknown).includeArchitecture !== false,
-      includePerformance: (params as unknown).includePerformance !== false,
-      includeAccessibility: (params as unknown).includeAccessibility || false,
-      maxPagesForContentAudit: (params as unknown).maxPages || 50,
-      minSeverityLevel: (params as unknown).minSeverity || "medium",
-      includeRecommendations: (params as unknown).includeRecommendations !== false,
+      includeTechnical: params.includeTechnical !== false,
+      includeContent: params.includeContent !== false,
+      includeArchitecture: params.includeArchitecture !== false,
+      includePerformance: params.includePerformance !== false,
+      includeAccessibility: params.includeAccessibility || false,
+      maxPagesForContentAudit: params.maxPages || 50,
+      minSeverityLevel: params.minSeverity || "medium",
+      includeRecommendations: params.includeRecommendations !== false,
     });
 
     // Perform comprehensive site audit

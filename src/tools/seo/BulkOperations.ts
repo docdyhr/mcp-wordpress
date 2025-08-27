@@ -179,7 +179,7 @@ export class BulkOperations {
           } catch (_error) {
             const bulkError: BulkOperationError = {
               postId,
-              _error: _error instanceof Error ? _error.message : String(_error),
+              error: _error instanceof Error ? _error.message : String(_error),
               attempts: 1,
               retryable: this.isRetryableError(_error),
             };
@@ -236,7 +236,7 @@ export class BulkOperations {
       success: progress.completed,
       failed: progress.failed,
       skipped: progress.skipped,
-      errors: errors.map((e) => ({ postId: e.postId, _error: e.error })),
+      errors: errors.map((e) => ({ postId: e.postId, error: e.error })),
       processingTime: Date.now() - startTime,
       dryRun: params.dryRun || false,
     };
@@ -304,7 +304,7 @@ export class BulkOperations {
           } catch (_error) {
             const bulkError: BulkOperationError = {
               postId,
-              _error: _error instanceof Error ? _error.message : String(_error),
+              error: _error instanceof Error ? _error.message : String(_error),
               attempts: 1,
               retryable: this.isRetryableError(_error),
             };
@@ -344,7 +344,7 @@ export class BulkOperations {
       success: progress.completed,
       failed: progress.failed,
       skipped: progress.skipped,
-      errors: errors.map((e) => ({ postId: e.postId, _error: e.error })),
+      errors: errors.map((e) => ({ postId: e.postId, error: e.error })),
       processingTime: Date.now() - startTime,
       dryRun: false,
     };
@@ -462,7 +462,7 @@ export class BulkOperations {
           delay,
         });
 
-        return { success: true, result, _error };
+        return { success: true, result, error };
       } catch (retryError) {
         error.attempts = attempt;
         error.error = retryError instanceof Error ? retryError.message : String(retryError);
@@ -479,7 +479,7 @@ export class BulkOperations {
       }
     }
 
-    return { success: false, _error };
+    return { success: false, error };
   }
 
   /**

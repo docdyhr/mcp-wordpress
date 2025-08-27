@@ -86,7 +86,7 @@ export class BaseToolUtils {
         } catch (_error) {
           errors.push(
             new ValidationError(
-              `Failed to transform parameter ${rule.key}: ${getErrorMessage(error)}`,
+              `Failed to transform parameter ${rule.key}: ${getErrorMessage(_error)}`,
               rule.key,
               value,
             ),
@@ -113,7 +113,7 @@ export class BaseToolUtils {
       }
       return createSuccess(createWordPressId(numId));
     } catch (_error) {
-      return createError(new ValidationError(`Invalid ${name}: ${getErrorMessage(error)}`, name, id));
+      return createError(new ValidationError(`Invalid ${name}: ${getErrorMessage(_error)}`, name, id));
     }
   }
 

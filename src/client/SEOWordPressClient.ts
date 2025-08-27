@@ -21,6 +21,7 @@ import { LoggerFactory } from "../utils/logger.js";
 import { handleToolError } from "../utils/error.js";
 import type { WordPressPost, WordPressPage } from "../types/wordpress.js";
 import type { WordPressClientConfig } from "../types/client.js";
+import type { SchemaType } from "../types/seo.js";
 import type { SEOMetadata, SchemaMarkup } from "../types/seo.js";
 
 /**
@@ -446,7 +447,7 @@ export class SEOWordPressClient extends WordPressClient {
    * Extract SEO metadata from WordPress post/page object
    */
   private extractSEOMetadata(content: WordPressPost | WordPressPage): SEOMetadata {
-    const meta = (content as unknown).meta || {};
+    const meta = (Array.isArray(content.meta) ? {} : content.meta || {}) as Record<string, unknown>;
     const fields = this.pluginFields[this.detectedPlugin];
 
     // Extract basic metadata with plugin-specific field handling
@@ -489,7 +490,7 @@ export class SEOWordPressClient extends WordPressClient {
    * Extract schema markup from post meta
    */
   private extractSchemaMarkup(content: WordPressPost | WordPressPage): SchemaMarkup | undefined {
-    const meta = (content as unknown).meta || {};
+    const meta = (Array.isArray(content.meta) ? {} : content.meta || {}) as Record<string, unknown>;
     const fields = this.pluginFields[this.detectedPlugin];
 
     const schemaData = this.getPluginSchemaData(meta, fields);
@@ -507,7 +508,7 @@ export class SEOWordPressClient extends WordPressClient {
       if (this.detectedPlugin === "yoast" && schemaData) {
         return {
           "@context": "https://schema.org",
-          "@type": schemaData as unknown,
+          "@type": schemaData as SchemaType,
         };
       }
 
@@ -574,10 +575,10 @@ export class SEOWordPressClient extends WordPressClient {
 
     // WordPress meta values can be arrays
     if (Array.isArray(value)) {
-      return value[0] || undefined;
+      return (value[0] as string) || undefined;
     }
 
-    return value || undefined;
+    return (value as string) || undefined;
   }
 
   /**

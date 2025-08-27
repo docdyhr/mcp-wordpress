@@ -63,10 +63,10 @@ export async function handleGenerateMetadata(client: WordPressClient, args: Reco
 
     // Add custom title/description if provided
     if (args.title) {
-      (params as unknown).title = args.title;
+      params.title = args.title as string;
     }
     if (args.description) {
-      (params as unknown).description = args.description;
+      params.description = args.description as string;
     }
     if (args.focusKeyword) {
       params.focusKeywords = [args.focusKeyword as string];
@@ -120,7 +120,7 @@ export async function handleGenerateSchema(client: WordPressClient, args: Record
 
     // Add custom data if provided
     if (args.customData) {
-      (params as unknown).customData = args.customData;
+      params.customData = args.customData;
     }
 
     return await seoTools.generateSchema(params);
@@ -146,7 +146,7 @@ export async function handleValidateSchema(client: WordPressClient, args: Record
 
     // Add Google validator flag if provided
     if (args.useGoogleValidator) {
-      (params as unknown).useGoogleValidator = args.useGoogleValidator;
+      params.useGoogleValidator = args.useGoogleValidator as boolean;
     }
 
     return await seoTools.validateSchema(params);
@@ -174,10 +174,10 @@ export async function handleSuggestInternalLinks(
 
     // Add optional parameters
     if (args.maxSuggestions) {
-      (params as unknown).maxSuggestions = args.maxSuggestions;
+      params.maxSuggestions = args.maxSuggestions as number;
     }
     if (args.minimumRelevance) {
-      (params as unknown).minimumRelevance = args.minimumRelevance;
+      params.minimumRelevance = args.minimumRelevance as number;
     }
 
     return await seoTools.suggestInternalLinks(params);
@@ -203,10 +203,10 @@ export async function handlePerformSiteAudit(client: WordPressClient, args: Reco
 
     // Add optional parameters
     if (args.maxPages) {
-      (params as unknown).maxPages = args.maxPages;
+      params.maxPages = args.maxPages as number;
     }
     if (args.includeExternalLinks) {
-      (params as unknown).includeExternalLinks = args.includeExternalLinks;
+      params.includeExternalLinks = args.includeExternalLinks as boolean;
     }
 
     return await seoTools.performSiteAudit(params);

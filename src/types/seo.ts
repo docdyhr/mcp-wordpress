@@ -90,6 +90,48 @@ export interface SEOToolParams {
 
   /** Include recommendations flag for live data retrieval */
   includeRecommendations?: boolean;
+
+  /** Use Google validator for schema validation */
+  useGoogleValidator?: boolean;
+
+  /** Custom data for schema generation or other operations */
+  customData?: unknown;
+
+  /** Title for metadata generation */
+  title?: string;
+
+  /** Description for metadata generation */
+  description?: string;
+
+  /** Maximum number of suggestions for internal linking */
+  maxSuggestions?: number;
+
+  /** Minimum relevance score for suggestions */
+  minimumRelevance?: number;
+
+  /** Maximum pages to audit */
+  maxPages?: number;
+
+  /** Include external links in audit */
+  includeExternalLinks?: boolean;
+
+  /** Include technical audit */
+  includeTechnical?: boolean;
+
+  /** Include content audit */
+  includeContent?: boolean;
+
+  /** Include architecture audit */
+  includeArchitecture?: boolean;
+
+  /** Include performance audit */
+  includePerformance?: boolean;
+
+  /** Include accessibility audit */
+  includeAccessibility?: boolean;
+
+  /** Minimum severity level for audit */
+  minSeverity?: "low" | "medium" | "high" | "critical";
 }
 
 /**

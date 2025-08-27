@@ -536,7 +536,7 @@ export class WordPressClient implements IWordPressClient {
         // For FormData, check if it has getHeaders method (form-data package)
         if (typeof (data as { getHeaders?: () => Record<string, string> }).getHeaders === "function") {
           // Use headers from form-data package
-          const formHeaders = (data as { getHeaders(): Record<string, string> }).getHeaders();
+          const formHeaders = (data as unknown as { getHeaders(): Record<string, string> }).getHeaders();
           Object.assign(headers, formHeaders);
         } else {
           // For native FormData, don't set Content-Type (let fetch set it with boundary)

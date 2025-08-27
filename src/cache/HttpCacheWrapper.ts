@@ -95,7 +95,11 @@ export class HttpCacheWrapper {
         }
 
         // Content changed - update cache
-        return (await this.cacheAndReturn(response, cacheKey, cacheOptions)) as unknown;
+        return await this.cacheAndReturn(
+          response as { data: T; status: number; headers: Record<string, string> },
+          cacheKey,
+          cacheOptions,
+        );
       } catch (_error) {
         // If conditional request fails, try without conditions
         this.logger.warn("Conditional request failed, falling back to regular request", {
