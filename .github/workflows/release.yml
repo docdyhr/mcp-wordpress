@@ -323,7 +323,7 @@ jobs:
           HUSKY: 0
 
       - name: 📦 Install DXT CLI
-        run: npm install -g @modelcontextprotocol/dxt
+        run: npm install -g @anthropic-ai/dxt
         env:
           HUSKY: 0
 
