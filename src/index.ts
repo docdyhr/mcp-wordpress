@@ -27,17 +27,17 @@ class MCPWordPressServer {
 
     if (this.wordpressClients.size === 0) {
       // In test environments, don't exit the process
-      if (ConfigHelpers.isCI() || ConfigHelpers.isTest() || (globalThis as Record<string, unknown>).__EXECUTION_CONTEXT__ === "jest") {
+      if (
+        ConfigHelpers.isCI() ||
+        ConfigHelpers.isTest() ||
+        (globalThis as Record<string, unknown>).__EXECUTION_CONTEXT__ === "jest"
+      ) {
         this.logger.warn("No WordPress sites configured in test environment");
         // Create a dummy client for testing
         this.wordpressClients.set("test", {} as WordPressClient);
       } else {
         this.logger.fatal("No WordPress sites configured. Server cannot start.", {
-          expectedEnvVars: [
-            "WORDPRESS_SITE_URL",
-            "WORDPRESS_USERNAME", 
-            "WORDPRESS_APP_PASSWORD"
-          ]
+          expectedEnvVars: ["WORDPRESS_SITE_URL", "WORDPRESS_USERNAME", "WORDPRESS_APP_PASSWORD"],
         });
         process.exit(1);
       }
@@ -68,7 +68,7 @@ class MCPWordPressServer {
     // Use optimized connection testing with timeouts and concurrency control
     await ConnectionTester.testClientConnections(this.wordpressClients, {
       timeout: ConfigHelpers.getTimeout("test"),
-      maxConcurrent: ConfigHelpers.isCI() ? 2 : 3 // Reduce concurrency in CI
+      maxConcurrent: ConfigHelpers.isCI() ? 2 : 3, // Reduce concurrency in CI
     });
     this.initialized = true;
   }
@@ -79,13 +79,13 @@ class MCPWordPressServer {
 
     if (!this.initialized && !isDXTMode) {
       this.logger.info("Testing connections to configured WordPress sites...", {
-        siteCount: this.wordpressClients.size
+        siteCount: this.wordpressClients.size,
       });
       try {
         await this.testClientConnections();
-      } catch (error) {
+      } catch (_error) {
         this.logger.warn("Connection test failed - continuing with server startup", {
-          error: getErrorMessage(error)
+          _error: getErrorMessage(_error),
         });
       }
     } else if (isDXTMode) {
@@ -95,7 +95,7 @@ class MCPWordPressServer {
 
     this.logger.info("Starting MCP WordPress Server...", {
       version: SERVER_VERSION,
-      sites: this.wordpressClients.size
+      sites: this.wordpressClients.size,
     });
 
     // Connect to stdio transport with timeout
@@ -112,14 +112,14 @@ class MCPWordPressServer {
       clearTimeout(connectionTimeout);
 
       this.logger.info("Server started and connected successfully", {
-        sites: this.wordpressClients.size
+        sites: this.wordpressClients.size,
       });
 
       // Keep the process alive
       process.stdin.resume();
-    } catch (error) {
+    } catch (_error) {
       clearTimeout(connectionTimeout);
-      throw error;
+      throw _error;
     }
   }
 
@@ -133,7 +133,7 @@ class MCPWordPressServer {
 // --- Main Execution ---
 async function main() {
   const mainLogger = LoggerFactory.server();
-  
+
   try {
     const mcpServer = new MCPWordPressServer();
     await mcpServer.run();
@@ -145,8 +145,8 @@ async function main() {
 
     process.on("SIGINT", shutdown);
     process.on("SIGTERM", shutdown);
-  } catch (error) {
-    mainLogger.fatal("Failed to start server", { error: getErrorMessage(error) });
+  } catch (_error) {
+    mainLogger.fatal("Failed to start server", { _error: getErrorMessage(_error) });
     process.exit(1);
   }
 }

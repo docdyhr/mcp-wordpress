@@ -193,8 +193,8 @@ export class DocumentationGenerator {
           const doc = await this.extractToolDocumentation(toolDef as ToolDefinition, category, className);
           toolDocs.push(doc);
         }
-      } catch (error) {
-        this.logger.warn(`⚠️ Failed to extract documentation for ${className}:`, { error: String(error) });
+      } catch (_error) {
+        this.logger.warn(`⚠️ Failed to extract documentation for ${className}:`, { _error: String(_error) });
       }
     }
 

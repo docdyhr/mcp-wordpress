@@ -47,9 +47,9 @@ export class RequestManager extends BaseManager {
       this.updateAverageResponseTime(timer.end());
 
       return response as T;
-    } catch (error) {
+    } catch (_error) {
       this.stats.failedRequests++;
-      this.handleError(error, `${method} ${endpoint}`);
+      this.handleError(_error, `${method} ${endpoint}`);
     } finally {
       this.stats.totalRequests++;
     }

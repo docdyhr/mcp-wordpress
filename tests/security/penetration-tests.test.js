@@ -42,13 +42,13 @@ describe("Penetration Testing Suite", () => {
 
   describe("Cross-Site Scripting (XSS) Attacks", () => {
     const xssPayloads = [
-      "<script>alert(\"XSS\")</script>",
-      "<img src=\"x\" onerror=\"alert('XSS')\">",
+      '<script>alert("XSS")</script>',
+      '<img src="x" onerror="alert(\'XSS\')">',
       "<svg onload=\"alert('XSS')\"></svg>",
-      "javascript:alert(\"XSS\")",
+      'javascript:alert("XSS")',
       "<iframe src=\"javascript:alert('XSS')\"></iframe>",
       "<body onload=\"alert('XSS')\">",
-      "<input type=\"text\" value=\"\" onfocus=\"alert('XSS')\">",
+      '<input type="text" value="" onfocus="alert(\'XSS\')">',
     ];
 
     test("should prevent XSS in post titles", async () => {
@@ -112,7 +112,7 @@ describe("Penetration Testing Suite", () => {
       "| cat /etc/passwd",
       "& whoami",
       "`rm -rf /`",
-      "; echo \"pwned\" > /tmp/hacked",
+      '; echo "pwned" > /tmp/hacked',
     ];
 
     test("should prevent command injection in search queries", async () => {
@@ -134,7 +134,7 @@ describe("Penetration Testing Suite", () => {
       { username: "admin", password: "' OR '1'='1" },
       { username: "admin'--", password: "anything" },
       { username: "admin", password: "'; DROP TABLE wp_users; --" },
-      { username: "\" or 1=1#", password: "password" },
+      { username: '" or 1=1#', password: "password" },
     ];
 
     test("should prevent authentication bypass attempts", async () => {
@@ -269,9 +269,7 @@ async function testSecureFunction(methodName, params) {
 
     if (
       typeof params.content === "string" &&
-      (params.content.includes("DROP TABLE") ||
-        params.content.includes("'") ||
-        params.content.includes("UNION"))
+      (params.content.includes("DROP TABLE") || params.content.includes("'") || params.content.includes("UNION"))
     ) {
       const error = new Error("SecurityError: SQL injection detected");
       error.name = "SecurityError";
@@ -318,9 +316,7 @@ async function testSecureFunction(methodName, params) {
     // Path traversal detection
     if (
       typeof params.filename === "string" &&
-      (params.filename.includes("..") ||
-        params.filename.includes("/etc/") ||
-        params.filename.includes("wp-config"))
+      (params.filename.includes("..") || params.filename.includes("/etc/") || params.filename.includes("wp-config"))
     ) {
       const error = new Error("SecurityError: Path traversal detected");
       error.name = "SecurityError";
@@ -343,9 +339,7 @@ async function testSecureFunction(methodName, params) {
     // Authentication bypass detection
     if (
       typeof params.username === "string" &&
-      (params.username.includes("'") ||
-        params.username.includes("--") ||
-        params.username.includes(" or "))
+      (params.username.includes("'") || params.username.includes("--") || params.username.includes(" or "))
     ) {
       const error = new Error("SecurityError: Authentication bypass detected");
       error.name = "SecurityError";
@@ -354,9 +348,7 @@ async function testSecureFunction(methodName, params) {
 
     if (
       typeof params.password === "string" &&
-      (params.password.includes("'") ||
-        params.password.includes("OR") ||
-        params.password.includes("DROP TABLE"))
+      (params.password.includes("'") || params.password.includes("OR") || params.password.includes("DROP TABLE"))
     ) {
       const error = new Error("SecurityError: Authentication bypass detected");
       error.name = "SecurityError";
@@ -379,13 +371,13 @@ async function testSecureFunction(methodName, params) {
         created: new Date().toISOString(),
       },
     };
-  } catch (error) {
-    if (!error.name) {
-      error.name = "ValidationError";
+  } catch (testError) {
+    if (!testError.name) {
+      testError.name = "ValidationError";
     }
-    if (!error.message.includes(error.name)) {
-      error.message = `${error.name}: ${error.message}`;
+    if (!testError.message.includes(testError.name)) {
+      testError.message = `${testError.name}: ${testError.message}`;
     }
-    throw error;
+    throw testError;
   }
 }

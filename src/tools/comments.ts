@@ -14,7 +14,14 @@ export class CommentTools {
   public getTools(): Array<{
     name: string;
     description: string;
-    parameters?: Array<{ name: string; type?: string; description?: string; required?: boolean; enum?: string[]; items?: unknown }>;
+    parameters?: Array<{
+      name: string;
+      type?: string;
+      description?: string;
+      required?: boolean;
+      enum?: string[];
+      items?: unknown;
+    }>;
     handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
   }> {
     return [
@@ -165,8 +172,8 @@ export class CommentTools {
           )
           .join("\n");
       return content;
-    } catch (error) {
-      throw new Error(`Failed to list comments: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to list comments: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -182,8 +189,8 @@ export class CommentTools {
         `- **Status:** ${comment.status}\n` +
         `- **Content:** ${comment.content.rendered}`;
       return content;
-    } catch (error) {
-      throw new Error(`Failed to get comment: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to get comment: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -192,21 +199,18 @@ export class CommentTools {
     try {
       const comment = await client.createComment(createParams);
       return `✅ Comment created successfully with ID: ${comment.id}`;
-    } catch (error) {
-      throw new Error(`Failed to create comment: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to create comment: ${getErrorMessage(_error)}`);
     }
   }
 
-  public async handleUpdateComment(
-    client: WordPressClient,
-    params: Record<string, unknown>,
-  ): Promise<unknown> {
+  public async handleUpdateComment(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     try {
       const updateParams = params as unknown as UpdateCommentRequest & { id: number };
       const comment = await client.updateComment(updateParams);
       return `✅ Comment ${comment.id} updated successfully. New status: ${comment.status}.`;
-    } catch (error) {
-      throw new Error(`Failed to update comment: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to update comment: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -216,8 +220,8 @@ export class CommentTools {
       await client.deleteComment(id, force);
       const action = force ? "permanently deleted" : "moved to trash";
       return `✅ Comment ${id} has been ${action}`;
-    } catch (error) {
-      throw new Error(`Failed to delete comment: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to delete comment: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -229,8 +233,8 @@ export class CommentTools {
         status: "approved",
       });
       return `✅ Comment ${comment.id} has been approved.`;
-    } catch (error) {
-      throw new Error(`Failed to approve comment: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to approve comment: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -242,8 +246,8 @@ export class CommentTools {
         status: "spam",
       });
       return `✅ Comment ${comment.id} has been marked as spam.`;
-    } catch (error) {
-      throw new Error(`Failed to mark comment as spam: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to mark comment as spam: ${getErrorMessage(_error)}`);
     }
   }
 }

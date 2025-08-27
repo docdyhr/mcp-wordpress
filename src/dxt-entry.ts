@@ -34,9 +34,9 @@ async function startDXTServer() {
 
     process.on("SIGINT", shutdown);
     process.on("SIGTERM", shutdown);
-  } catch (error) {
-    logger.fatal(`DXT server failed to start: ${error instanceof Error ? error.message : String(error)}`);
-    logger.fatal(`Stack trace: ${error instanceof Error ? error.stack : "No stack trace available"}`);
+  } catch (_error) {
+    logger.fatal(`DXT server failed to start: ${_error instanceof Error ? _error.message : String(_error)}`);
+    logger.fatal(`Stack trace: ${_error instanceof Error ? _error.stack : "No stack trace available"}`);
     process.exit(1);
   }
 }

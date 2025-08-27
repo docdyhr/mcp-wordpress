@@ -12,8 +12,7 @@ const logger = LoggerFactory.server().child({ component: "ErrorUtils" });
 const LEGACY_ERROR_LOGS_ENABLED = config().error.legacyLogsEnabled;
 
 // Internal helper to avoid sprinkling conditionals
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function legacyConsoleError(...args: any[]) {
+function legacyConsoleError(...args: unknown[]) {
   if (LEGACY_ERROR_LOGS_ENABLED) {
     console.error(...args);
   }

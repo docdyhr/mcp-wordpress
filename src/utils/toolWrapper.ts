@@ -4,8 +4,8 @@
  */
 
 import { getErrorMessage } from "./error.js";
-import type { IWordPressClient } from '../types/client.js';
-import type { BaseToolParams } from '../types/tools.js';
+import type { IWordPressClient } from "../types/client.js";
+import type { BaseToolParams } from "../types/tools.js";
 
 /**
  * Wrapper for tool methods that standardizes error handling
@@ -17,8 +17,8 @@ export function withErrorHandling<T extends readonly unknown[], R>(
   return async (...args: T): Promise<R> => {
     try {
       return await fn(...args);
-    } catch (error) {
-      throw new Error(`${operation}: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`${operation}: ${getErrorMessage(_error)}`);
     }
   };
 }
@@ -35,8 +35,8 @@ export function withValidation<T extends readonly unknown[], R>(
     try {
       validator(...args);
       return await fn(...args);
-    } catch (error) {
-      throw new Error(`${operation}: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`${operation}: ${getErrorMessage(_error)}`);
     }
   };
 }
@@ -82,8 +82,8 @@ export function errorHandler(operation: string) {
     descriptor.value = async function (...args: unknown[]) {
       try {
         return await originalMethod.apply(this, args);
-      } catch (error) {
-        throw new Error(`${operation}: ${getErrorMessage(error)}`);
+      } catch (_error) {
+        throw new Error(`${operation}: ${getErrorMessage(_error)}`);
       }
     };
 
@@ -112,7 +112,7 @@ export function formatErrorResponse(operation: string, error: unknown): never {
 export async function toolWrapper<T>(fn: () => Promise<T>): Promise<T> {
   try {
     return await fn();
-  } catch (error) {
-    throw new Error(getErrorMessage(error));
+  } catch (_error) {
+    throw new Error(getErrorMessage(_error));
   }
 }

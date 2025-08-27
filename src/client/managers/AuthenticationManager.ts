@@ -200,8 +200,8 @@ export class AuthenticationManager extends BaseManager {
         "JWT authentication requires RequestManager integration - not yet implemented",
         AUTH_METHODS.JWT,
       );
-    } catch (error) {
-      this.handleError(error, "JWT authentication");
+    } catch (_error) {
+      this.handleError(_error, "JWT authentication");
     }
   }
 
@@ -219,9 +219,9 @@ export class AuthenticationManager extends BaseManager {
       // For now, we'll return true if headers can be generated
       this.authenticated = true;
       return true;
-    } catch (error) {
+    } catch (_error) {
       this.authenticated = false;
-      debug.log("Authentication test failed", error);
+      debug.log("Authentication test failed", _error);
       return false;
     }
   }

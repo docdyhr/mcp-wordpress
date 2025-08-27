@@ -287,7 +287,7 @@ export class SecurityConfigManager {
 
     logger.info("Loaded configurations and policies", {
       configurationCount: this.configurations.size,
-      policyCount: this.policies.size
+      policyCount: this.policies.size,
     });
   }
 
@@ -309,8 +309,8 @@ export class SecurityConfigManager {
     // Validate policy
     try {
       SecurityPolicySchema.parse(policy);
-    } catch (error) {
-      throw new SecurityValidationError("Invalid security policy", [{ message: String(error) }]);
+    } catch (_error) {
+      throw new SecurityValidationError("Invalid security policy", [{ message: String(_error) }]);
     }
 
     this.policies.set(policy.id, policy);
@@ -342,8 +342,8 @@ export class SecurityConfigManager {
     // Validate updated policy
     try {
       SecurityPolicySchema.parse(updatedPolicy);
-    } catch (error) {
-      throw new SecurityValidationError("Invalid policy update", [{ message: String(error) }]);
+    } catch (_error) {
+      throw new SecurityValidationError("Invalid policy update", [{ message: String(_error) }]);
     }
 
     this.policies.set(policyId, updatedPolicy);
@@ -786,8 +786,8 @@ export class SecurityConfigManager {
       await fs.unlink(filePath);
       logger.info(`Deleted policy: ${policy.name}`, { policyId });
       return true;
-    } catch (error) {
-      logger.warn("Failed to delete policy file", { error });
+    } catch (_error) {
+      logger.warn("Failed to delete policy file", { _error });
       return false;
     }
   }
@@ -826,8 +826,8 @@ export class SecurityConfigManager {
 
       logger.info(`Imported configuration for environment: ${config.environment}`, { environment: config.environment });
       return config;
-    } catch (error) {
-      throw new SecurityValidationError("Failed to import configuration", [{ message: String(error) }]);
+    } catch (_error) {
+      throw new SecurityValidationError("Failed to import configuration", [{ message: String(_error) }]);
     }
   }
 }

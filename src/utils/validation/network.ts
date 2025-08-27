@@ -69,9 +69,9 @@ export function validateUrl(url: string, fieldName: string = "url"): string {
     }
 
     return cleanUrl;
-  } catch (error) {
-    if (error instanceof WordPressAPIError) {
-      throw error;
+  } catch (_error) {
+    if (_error instanceof WordPressAPIError) {
+      throw _error;
     }
     throw new WordPressAPIError(`Invalid ${fieldName}: malformed URL "${cleanUrl}"`, 400, "INVALID_PARAMETER");
   }

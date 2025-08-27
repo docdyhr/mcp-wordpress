@@ -15,7 +15,14 @@ export class UserTools {
   public getTools(): Array<{
     name: string;
     description: string;
-    parameters?: Array<{ name: string; type?: string; description?: string; required?: boolean; enum?: string[]; items?: unknown }>;
+    parameters?: Array<{
+      name: string;
+      type?: string;
+      description?: string;
+      required?: boolean;
+      enum?: string[];
+      items?: unknown;
+    }>;
     handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
   }> {
     return [
@@ -218,8 +225,8 @@ export class UserTools {
           })
           .join("\n\n");
       return content;
-    } catch (error) {
-      throw new Error(`Failed to list users: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to list users: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -234,8 +241,8 @@ export class UserTools {
         `- **Email:** ${user.email}\n` +
         `- **Roles:** ${user.roles?.join(", ") || "N/A"}`;
       return content;
-    } catch (error) {
-      throw new Error(`Failed to get user: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to get user: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -300,8 +307,8 @@ export class UserTools {
         `- **Profile Link:** ${user.link || `${siteUrl}/wp-admin/profile.php`}`;
 
       return { content };
-    } catch (error) {
-      throw new Error(`Failed to get current user: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to get current user: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -310,8 +317,8 @@ export class UserTools {
     try {
       const user = await client.createUser(createParams);
       return `✅ User "${user.name}" created successfully with ID: ${user.id}.`;
-    } catch (error) {
-      throw new Error(`Failed to create user: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to create user: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -320,8 +327,8 @@ export class UserTools {
     try {
       const user = await client.updateUser(updateParams);
       return `✅ User ${user.id} updated successfully.`;
-    } catch (error) {
-      throw new Error(`Failed to update user: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to update user: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -334,8 +341,8 @@ export class UserTools {
         content += ` Their content has been reassigned to user ID ${reassign}.`;
       }
       return content;
-    } catch (error) {
-      throw new Error(`Failed to delete user: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to delete user: ${getErrorMessage(_error)}`);
     }
   }
 }

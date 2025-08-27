@@ -19,7 +19,14 @@ export class TaxonomyTools {
   public getTools(): Array<{
     name: string;
     description: string;
-    parameters?: Array<{ name: string; type?: string; description?: string; required?: boolean; enum?: string[]; items?: unknown }>;
+    parameters?: Array<{
+      name: string;
+      type?: string;
+      description?: string;
+      required?: boolean;
+      enum?: string[];
+      items?: unknown;
+    }>;
     handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
   }> {
     return [
@@ -187,8 +194,8 @@ export class TaxonomyTools {
         `Found ${categories.length} categories:\n\n` +
         categories.map((c) => `- ID ${c.id}: **${c.name}** (Posts: ${c.count})`).join("\n");
       return content;
-    } catch (error) {
-      throw new Error(`Failed to list categories: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to list categories: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -203,8 +210,8 @@ export class TaxonomyTools {
         `- **Description:** ${category.description || "None"}\n` +
         `- **Post Count:** ${category.count}`;
       return content;
-    } catch (error) {
-      throw new Error(`Failed to get category: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to get category: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -213,21 +220,18 @@ export class TaxonomyTools {
     try {
       const category = await client.createCategory(createParams);
       return `✅ Category "${category.name}" created successfully with ID: ${category.id}.`;
-    } catch (error) {
-      throw new Error(`Failed to create category: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to create category: ${getErrorMessage(_error)}`);
     }
   }
 
-  public async handleUpdateCategory(
-    client: WordPressClient,
-    params: Record<string, unknown>,
-  ): Promise<unknown> {
+  public async handleUpdateCategory(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     const updateParams = params as unknown as UpdateCategoryRequest;
     try {
       const category = await client.updateCategory(updateParams);
       return `✅ Category ${category.id} updated successfully.`;
-    } catch (error) {
-      throw new Error(`Failed to update category: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to update category: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -236,8 +240,8 @@ export class TaxonomyTools {
     try {
       await client.deleteCategory(id);
       return `✅ Category ${id} has been deleted.`;
-    } catch (error) {
-      throw new Error(`Failed to delete category: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to delete category: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -252,8 +256,8 @@ export class TaxonomyTools {
         `Found ${tags.length} tags:\n\n` +
         tags.map((t) => `- ID ${t.id}: **${t.name}** (Posts: ${t.count})`).join("\n");
       return content;
-    } catch (error) {
-      throw new Error(`Failed to list tags: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to list tags: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -267,8 +271,8 @@ export class TaxonomyTools {
         `- **Slug:** ${tag.slug}\n` +
         `- **Post Count:** ${tag.count}`;
       return content;
-    } catch (error) {
-      throw new Error(`Failed to get tag: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to get tag: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -277,8 +281,8 @@ export class TaxonomyTools {
     try {
       const tag = await client.createTag(createParams);
       return `✅ Tag "${tag.name}" created successfully with ID: ${tag.id}.`;
-    } catch (error) {
-      throw new Error(`Failed to create tag: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to create tag: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -287,8 +291,8 @@ export class TaxonomyTools {
     try {
       const tag = await client.updateTag(updateParams);
       return `✅ Tag ${tag.id} updated successfully.`;
-    } catch (error) {
-      throw new Error(`Failed to update tag: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to update tag: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -297,8 +301,8 @@ export class TaxonomyTools {
     try {
       await client.deleteTag(id);
       return `✅ Tag ${id} has been deleted.`;
-    } catch (error) {
-      throw new Error(`Failed to delete tag: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to delete tag: ${getErrorMessage(_error)}`);
     }
   }
 }

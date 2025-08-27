@@ -14,7 +14,14 @@ export class SiteTools {
   public getTools(): Array<{
     name: string;
     description: string;
-    parameters?: Array<{ name: string; type?: string; description?: string; required?: boolean; enum?: string[]; items?: unknown }>;
+    parameters?: Array<{
+      name: string;
+      type?: string;
+      description?: string;
+      required?: boolean;
+      enum?: string[];
+      items?: unknown;
+    }>;
     handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
   }> {
     return [
@@ -126,10 +133,7 @@ export class SiteTools {
     ];
   }
 
-  public async handleGetSiteSettings(
-    client: WordPressClient,
-    _params: Record<string, unknown>,
-  ): Promise<unknown> {
+  public async handleGetSiteSettings(client: WordPressClient, _params: Record<string, unknown>): Promise<unknown> {
     try {
       const settings = await client.getSiteSettings();
       const siteUrl = client.getSiteUrl();
@@ -182,27 +186,21 @@ export class SiteTools {
       content += `**📊 Retrieved:** ${new Date().toLocaleString()}`;
 
       return content;
-    } catch (error) {
-      throw new Error(`Failed to get site settings: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to get site settings: ${getErrorMessage(_error)}`);
     }
   }
 
-  public async handleUpdateSiteSettings(
-    client: WordPressClient,
-    params: Record<string, unknown>,
-  ): Promise<unknown> {
+  public async handleUpdateSiteSettings(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     try {
       const updatedSettings = await client.updateSiteSettings(params);
       return `✅ Site settings updated successfully. New title: ${updatedSettings.title}`;
-    } catch (error) {
-      throw new Error(`Failed to update site settings: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to update site settings: ${getErrorMessage(_error)}`);
     }
   }
 
-  public async handleSearchSite(
-    client: WordPressClient,
-    params: Record<string, unknown>,
-  ): Promise<unknown> {
+  public async handleSearchSite(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     try {
       const { term, type } = params as { term: string; type?: "posts" | "pages" | "media" };
       const results = await client.search(term, type ? [type] : undefined);
@@ -213,12 +211,15 @@ export class SiteTools {
         `Found ${results.length} results for "${term}":\n\n` +
         results.map((r) => `- [${r.type}] **${r.title}**\n  Link: ${r.url}`).join("\n");
       return content;
-    } catch (error) {
-      throw new Error(`Failed to perform search: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to perform search: ${getErrorMessage(_error)}`);
     }
   }
 
-  public async handleGetApplicationPasswords(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+  public async handleGetApplicationPasswords(
+    client: WordPressClient,
+    params: Record<string, unknown>,
+  ): Promise<unknown> {
     try {
       const { user_id } = params as { user_id: number };
       const passwords = await client.getApplicationPasswords(user_id);
@@ -234,8 +235,8 @@ export class SiteTools {
           )
           .join("\n");
       return content;
-    } catch (error) {
-      throw new Error(`Failed to get application passwords: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to get application passwords: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -252,8 +253,8 @@ export class SiteTools {
         `**Password:** \`${result.password}\`\n\n` +
         "**IMPORTANT:** This password is shown only once. Please save it securely.";
       return content;
-    } catch (error) {
-      throw new Error(`Failed to create application password: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to create application password: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -265,8 +266,8 @@ export class SiteTools {
       const { user_id, uuid } = params as { user_id: number; uuid: string };
       await client.deleteApplicationPassword(user_id, uuid);
       return `✅ Application password with UUID ${uuid} has been revoked.`;
-    } catch (error) {
-      throw new Error(`Failed to delete application password: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to delete application password: ${getErrorMessage(_error)}`);
     }
   }
 }

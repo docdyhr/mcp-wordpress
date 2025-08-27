@@ -14,7 +14,14 @@ export class AuthTools {
   public getTools(): Array<{
     name: string;
     description: string;
-    parameters?: Array<{ name: string; type?: string; description?: string; required?: boolean; enum?: string[]; items?: unknown }>;
+    parameters?: Array<{
+      name: string;
+      type?: string;
+      description?: string;
+      required?: boolean;
+      enum?: string[];
+      items?: unknown;
+    }>;
     handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
   }> {
     return [
@@ -94,8 +101,8 @@ export class AuthTools {
         "Your WordPress connection is working properly.";
 
       return { content };
-    } catch (error) {
-      throw new Error(`Authentication test failed: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Authentication test failed: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -126,8 +133,8 @@ export class AuthTools {
       }
 
       return { content };
-    } catch (error) {
-      throw new Error(`Failed to get auth status: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to get auth status: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -138,11 +145,13 @@ export class AuthTools {
    * @param params - The parameters for the tool request, including the new auth details.
    * @returns A promise that resolves to an MCPToolResponse.
    */
-  public async handleSwitchAuthMethod(
-    client: WordPressClient,
-    params: Record<string, unknown>,
-  ): Promise<unknown> {
-    const { method: _method, username: _username, password: _password, jwt_token: _jwt_token } = params as {
+  public async handleSwitchAuthMethod(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
+    const {
+      method: _method,
+      username: _username,
+      password: _password,
+      jwt_token: _jwt_token,
+    } = params as {
       method: AuthMethod;
       username?: string;
       password?: string;
@@ -154,8 +163,8 @@ export class AuthTools {
       throw new Error(
         "Dynamic authentication method switching is not currently supported. Please update your configuration file and restart the server.",
       );
-    } catch (error) {
-      throw new Error(`Failed to switch auth method: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to switch auth method: ${getErrorMessage(_error)}`);
     }
   }
 }

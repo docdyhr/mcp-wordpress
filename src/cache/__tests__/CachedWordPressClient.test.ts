@@ -61,7 +61,7 @@ describe("CachedWordPressClient", () => {
       expect(customClient["siteId"]).toBe("custom-site");
     });
 
-    test("should default to \"default\" site ID", () => {
+    test('should default to "default" site ID', () => {
       const defaultClient = new CachedWordPressClient(config);
       expect(defaultClient["siteId"]).toBe("default");
     });
@@ -70,7 +70,7 @@ describe("CachedWordPressClient", () => {
   describe("GET Request Caching", () => {
     test("should cache GET requests", async () => {
       const mockResponse = [{ id: 1, title: "Test Post" }];
-      (client as any).request = jest
+      (client as unknown).request = jest
         .fn()
         .mockImplementationOnce(async () => mockResponse)
         .mockImplementationOnce(async () => mockResponse);
@@ -84,19 +84,19 @@ describe("CachedWordPressClient", () => {
       expect(result2).toEqual(mockResponse);
 
       // Verify the underlying request was only called once due to caching
-      expect((client as any).request).toHaveBeenCalledTimes(1);
+      expect((client as unknown).request).toHaveBeenCalledTimes(1);
     });
 
     test("should cache individual post requests", async () => {
       const mockPost = { id: 1, title: "Test Post" };
-      (client as any).request = jest.fn().mockResolvedValue(mockPost);
+      (client as unknown).request = jest.fn().mockResolvedValue(mockPost);
 
       const result1 = await client.getPost(1);
       const result2 = await client.getPost(1);
 
       expect(result1).toEqual(mockPost);
       expect(result2).toEqual(mockPost);
-      expect((client as any).request).toHaveBeenCalledTimes(1);
+      expect((client as unknown).request).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -109,10 +109,7 @@ describe("CachedWordPressClient", () => {
       const _originalCreatePost = client.createPost;
       client.createPost = jest.fn().mockResolvedValue(mockPost);
 
-      const invalidateSpy = jest.spyOn(
-        client["cacheInvalidation"],
-        "invalidateResource",
-      );
+      const invalidateSpy = jest.spyOn(client["cacheInvalidation"], "invalidateResource");
 
       await client.createPost(mockCreateData);
 
@@ -124,10 +121,7 @@ describe("CachedWordPressClient", () => {
       const mockUpdateData = { id: 1, title: "Updated Post" };
 
       client.updatePost = jest.fn().mockResolvedValue(mockPost);
-      const invalidateSpy = jest.spyOn(
-        client["cacheInvalidation"],
-        "invalidateResource",
-      );
+      const invalidateSpy = jest.spyOn(client["cacheInvalidation"], "invalidateResource");
 
       await client.updatePost(mockUpdateData);
 
@@ -136,10 +130,7 @@ describe("CachedWordPressClient", () => {
 
     test("should invalidate cache on post deletion", async () => {
       client.deletePost = jest.fn().mockResolvedValue(undefined);
-      const invalidateSpy = jest.spyOn(
-        client["cacheInvalidation"],
-        "invalidateResource",
-      );
+      const invalidateSpy = jest.spyOn(client["cacheInvalidation"], "invalidateResource");
 
       await client.deletePost(1);
 
@@ -150,35 +141,30 @@ describe("CachedWordPressClient", () => {
   describe("Cache Configuration by Endpoint Type", () => {
     test("should use static caching for site settings", async () => {
       const mockSettings = { title: "Test Site" };
-      (client as any).request = jest.fn().mockResolvedValue(mockSettings);
+      (client as unknown).request = jest.fn().mockResolvedValue(mockSettings);
 
       await client.getSiteSettings();
 
       // Verify request was made with static cache configuration
-      expect((client as any).request).toHaveBeenCalledWith("GET", "settings");
+      expect((client as unknown).request).toHaveBeenCalledWith("GET", "settings");
     });
 
     test("should use semi-static caching for categories", async () => {
       const mockCategories = [{ id: 1, name: "Test Category" }];
-      (client as any).request = jest.fn().mockResolvedValue(mockCategories);
+      (client as unknown).request = jest.fn().mockResolvedValue(mockCategories);
 
       await client.getCategories();
 
-      expect((client as any).request).toHaveBeenCalledWith(
-        "GET",
-        "categories",
-        null,
-        { params: {} },
-      );
+      expect((client as unknown).request).toHaveBeenCalledWith("GET", "categories", null, { params: {} });
     });
 
     test("should use session caching for current user", async () => {
       const mockUser = { id: 1, username: "testuser" };
-      (client as any).request = jest.fn().mockResolvedValue(mockUser);
+      (client as unknown).request = jest.fn().mockResolvedValue(mockUser);
 
       await client.getCurrentUser();
 
-      expect((client as any).request).toHaveBeenCalledWith("GET", "users/me");
+      expect((client as unknown).request).toHaveBeenCalledWith("GET", "users/me");
     });
   });
 
@@ -194,10 +180,7 @@ describe("CachedWordPressClient", () => {
 
     test("should clear cache by pattern", () => {
       const pattern = "posts.*";
-      const clearPatternSpy = jest.spyOn(
-        client["httpCache"],
-        "invalidatePattern",
-      );
+      const clearPatternSpy = jest.spyOn(client["httpCache"], "invalidatePattern");
 
       const result = client.clearCachePattern(pattern);
 
@@ -232,9 +215,7 @@ describe("CachedWordPressClient", () => {
     });
 
     test("should handle cache warming errors gracefully", async () => {
-      client.getCurrentUser = jest
-        .fn()
-        .mockRejectedValue(new Error("Auth failed"));
+      client.getCurrentUser = jest.fn().mockRejectedValue(new Error("Auth failed"));
       client.getCategories = jest.fn().mockResolvedValue([]);
       client.getTags = jest.fn().mockResolvedValue([]);
       client.getSiteSettings = jest.fn().mockResolvedValue({});
@@ -251,19 +232,19 @@ describe("CachedWordPressClient", () => {
   describe("Cache Key Generation", () => {
     test("should generate different cache keys for different parameters", async () => {
       const mockPosts = [{ id: 1 }];
-      (client as any).request = jest.fn().mockResolvedValue(mockPosts);
+      (client as unknown).request = jest.fn().mockResolvedValue(mockPosts);
 
       // Make requests with different parameters
       await client.getPosts({ per_page: 10 });
       await client.getPosts({ per_page: 20 });
 
       // Should make two separate requests due to different cache keys
-      expect((client as any).request).toHaveBeenCalledTimes(2);
+      expect((client as unknown).request).toHaveBeenCalledTimes(2);
     });
 
     test("should use same cache key for identical parameters", async () => {
       const mockPosts = [{ id: 1 }];
-      (client as any).request = jest.fn().mockResolvedValue(mockPosts);
+      (client as unknown).request = jest.fn().mockResolvedValue(mockPosts);
 
       const params = { per_page: 10, status: ["publish"] as ["publish"] };
 
@@ -271,19 +252,15 @@ describe("CachedWordPressClient", () => {
       await client.getPosts(params);
 
       // Should only make one request due to caching
-      expect((client as any).request).toHaveBeenCalledTimes(1);
+      expect((client as unknown).request).toHaveBeenCalledTimes(1);
     });
   });
 
   describe("Helper Methods", () => {
     test("should extract resource from endpoint", () => {
-      const resource1 = (client as any).extractResourceFromEndpoint("posts");
-      const resource2 = (client as any).extractResourceFromEndpoint(
-        "posts/123",
-      );
-      const resource3 = (client as any).extractResourceFromEndpoint(
-        "categories",
-      );
+      const resource1 = (client as unknown).extractResourceFromEndpoint("posts");
+      const resource2 = (client as unknown).extractResourceFromEndpoint("posts/123");
+      const resource3 = (client as unknown).extractResourceFromEndpoint("categories");
 
       expect(resource1).toBe("posts");
       expect(resource2).toBe("posts");
@@ -291,9 +268,9 @@ describe("CachedWordPressClient", () => {
     });
 
     test("should extract ID from endpoint", () => {
-      const id1 = (client as any).extractIdFromEndpoint("posts/123");
-      const id2 = (client as any).extractIdFromEndpoint("posts/123/revisions");
-      const id3 = (client as any).extractIdFromEndpoint("posts");
+      const id1 = (client as unknown).extractIdFromEndpoint("posts/123");
+      const id2 = (client as unknown).extractIdFromEndpoint("posts/123/revisions");
+      const id3 = (client as unknown).extractIdFromEndpoint("posts");
 
       expect(id1).toBe(123);
       expect(id2).toBe(123);
@@ -301,19 +278,17 @@ describe("CachedWordPressClient", () => {
     });
 
     test("should identify endpoint types correctly", () => {
-      expect((client as any).isStaticEndpoint("settings")).toBe(true);
-      expect((client as any).isStaticEndpoint("types")).toBe(true);
-      expect((client as any).isStaticEndpoint("posts")).toBe(false);
+      expect((client as unknown).isStaticEndpoint("settings")).toBe(true);
+      expect((client as unknown).isStaticEndpoint("types")).toBe(true);
+      expect((client as unknown).isStaticEndpoint("posts")).toBe(false);
 
-      expect((client as any).isSemiStaticEndpoint("categories")).toBe(true);
-      expect((client as any).isSemiStaticEndpoint("tags")).toBe(true);
-      expect((client as any).isSemiStaticEndpoint("posts")).toBe(false);
+      expect((client as unknown).isSemiStaticEndpoint("categories")).toBe(true);
+      expect((client as unknown).isSemiStaticEndpoint("tags")).toBe(true);
+      expect((client as unknown).isSemiStaticEndpoint("posts")).toBe(false);
 
-      expect((client as any).isSessionEndpoint("users/me")).toBe(true);
-      expect((client as any).isSessionEndpoint("application-passwords")).toBe(
-        true,
-      );
-      expect((client as any).isSessionEndpoint("posts")).toBe(false);
+      expect((client as unknown).isSessionEndpoint("users/me")).toBe(true);
+      expect((client as unknown).isSessionEndpoint("application-passwords")).toBe(true);
+      expect((client as unknown).isSessionEndpoint("posts")).toBe(false);
     });
   });
 });

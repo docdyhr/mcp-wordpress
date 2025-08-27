@@ -377,16 +377,16 @@ export class AutomatedRemediation {
             details: result.details,
           });
         }
-      } catch (error) {
+      } catch (_error) {
         this.logger.error("Remediation action threw error", {
           actionId: action.id,
-          error: String(error),
+          _error: String(_error),
         });
         results.push({
           vulnerabilityId: action.id,
           success: false,
           action: action.type,
-          details: `Error: ${error instanceof Error ? error.message : String(error)}`,
+          details: `Error: ${_error instanceof Error ? _error.message : String(_error)}`,
           timestamp: new Date(),
         });
       }
@@ -460,12 +460,12 @@ export class AutomatedRemediation {
         backupPath,
         validationResult,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         vulnerabilityId: action.id,
         success: false,
         action: action.type,
-        details: `Remediation failed: ${error instanceof Error ? error.message : String(error)}`,
+        details: `Remediation failed: ${_error instanceof Error ? _error.message : String(_error)}`,
         timestamp: new Date(),
       };
     }
@@ -621,10 +621,10 @@ export class AutomatedRemediation {
       }
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       this.logger.warn("Validation failed for action", {
         actionId: action.id,
-        error: String(error),
+        _error: String(_error),
       });
       return false;
     }
@@ -667,8 +667,10 @@ export class AutomatedRemediation {
         targetFile,
         backupPath,
       });
-    } catch (error) {
-      throw new SecurityValidationError(`Rollback failed: ${error instanceof Error ? error.message : String(error)}`);
+    } catch (_error) {
+      throw new SecurityValidationError(
+        `Rollback failed: ${_error instanceof Error ? _error.message : String(_error)}`,
+      );
     }
   }
 
@@ -689,8 +691,8 @@ export class AutomatedRemediation {
           this.logger.debug("Cleaned up old backup", { file });
         }
       }
-    } catch (error) {
-      this.logger.warn("Backup cleanup failed", { error: String(error) });
+    } catch (_error) {
+      this.logger.warn("Backup cleanup failed", { _error: String(_error) });
     }
   }
 }

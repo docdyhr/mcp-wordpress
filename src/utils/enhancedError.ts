@@ -93,7 +93,7 @@ export class ErrorHandlers {
         "Go to your WordPress admin → Users → Profile → Application Passwords",
         "Create a new application password with a descriptive name",
         "Make sure the WordPress site URL ends with wp-json/wp/v2",
-        "Check if your site has any security plugins blocking REST API",
+        "Check if your site has unknown security plugins blocking REST API",
         `Original error: ${errorMessage}`,
       ],
     });
