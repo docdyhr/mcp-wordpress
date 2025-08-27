@@ -257,13 +257,13 @@ export class Logger {
         this.debug(`Completed: ${message}`, { duration: `${duration}ms` });
         return result;
       }
-    } catch (error) {
+    } catch (_error) {
       const duration = Date.now() - start;
       this.error(`Failed: ${message}`, {
         duration: `${duration}ms`,
-        error: error instanceof Error ? error.message : String(error),
+        _error: _error instanceof Error ? _error.message : String(_error),
       });
-      throw error;
+      throw _error;
     }
   }
 }

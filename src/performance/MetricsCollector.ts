@@ -252,13 +252,16 @@ export class MetricsCollector {
     worstPerforming: string;
   } {
     const sites = Array.from(this.clientInstances.keys());
-    const comparison: Record<string, {
-      responseTime: number;
-      cacheHitRate: number;
-      errorRate: number;
-      requestCount: number;
-      ranking: number;
-    }> = {};
+    const comparison: Record<
+      string,
+      {
+        responseTime: number;
+        cacheHitRate: number;
+        errorRate: number;
+        requestCount: number;
+        ranking: number;
+      }
+    > = {};
     const rankings: Array<{ site: string; score: number }> = [];
 
     for (const siteId of sites) {
@@ -401,9 +404,9 @@ export class MetricsCollector {
         this.updateCacheMetrics();
         this.updateClientMetrics();
         this.logger.debug("Real-time metrics updated");
-      } catch (error) {
+      } catch (_error) {
         this.logger.error("Failed to update real-time metrics", {
-          error: error instanceof Error ? error.message : String(error),
+          _error: _error instanceof Error ? _error.message : String(_error),
         });
       }
     }, interval);
@@ -480,12 +483,12 @@ export class MetricsCollector {
         this.activeRequests.delete(requestId);
 
         return result;
-      } catch (error) {
+      } catch (_error) {
         const responseTime = Date.now() - startTime;
         this.monitor.recordRequest(responseTime, false);
         this.activeRequests.delete(requestId);
 
-        throw error;
+        throw _error;
       }
     };
   }

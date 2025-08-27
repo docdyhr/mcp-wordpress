@@ -177,8 +177,8 @@ describe("Cache Stress Tests", () => {
           expect(getTime).toBeLessThan(100); // Should retrieve within 100ms
 
           testSucceeded = true;
-        } catch (error) {
-          testError = error;
+        } catch (caughtError) {
+          testError = caughtError;
         }
 
         // Either the test succeeded or we got an expected error
@@ -508,9 +508,9 @@ describe("Cache Stress Tests", () => {
             cacheManager.get(`resilience-${i % 50}`);
           }
           successfulOperations++;
-        } catch (error) {
+        } catch (testError) {
           failedOperations++;
-          errors.push(error);
+          errors.push(testError);
         }
       }
 

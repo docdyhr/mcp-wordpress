@@ -141,8 +141,8 @@ export class ToolRegistry {
               },
             ],
           };
-        } catch (error) {
-          if (this.isAuthenticationError(error)) {
+        } catch (_error) {
+          if (this.isAuthenticationError(_error)) {
             return {
               content: [
                 {
@@ -155,12 +155,12 @@ export class ToolRegistry {
           }
 
           // Handle enhanced errors with suggestions
-          if (error instanceof EnhancedError) {
+          if (_error instanceof EnhancedError) {
             return {
               content: [
                 {
                   type: "text" as const,
-                  text: error.toString(),
+                  text: _error.toString(),
                 },
               ],
               isError: true,
@@ -171,7 +171,7 @@ export class ToolRegistry {
             content: [
               {
                 type: "text" as const,
-                text: `Error: ${getErrorMessage(error)}`,
+                text: `Error: ${getErrorMessage(_error)}`,
               },
             ],
             isError: true,

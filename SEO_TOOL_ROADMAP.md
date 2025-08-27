@@ -32,6 +32,18 @@ The MCP protocol foundation builds on JSON-RPC 2.0 messaging with stateful sessi
 HTTP+SSE, and streamable HTTP transports. Authentication leverages OAuth 2.1 with JWT tokens and WordPress application
 passwords, ensuring secure access while maintaining the flexibility needed for headless implementations.
 
+### Technical Architecture Alignment
+
+The SEO toolkit integrates seamlessly with the existing MCP WordPress architecture:
+
+- **Tool System**: Follows the class-based pattern established in `src/tools/` with manager architecture
+- **Client Integration**: Extends `WordPressClient` with SEO-specific REST API interactions
+- **Configuration**: Leverages `Config.ts` singleton for SEO settings and feature flags
+- **Logging**: Uses `LoggerFactory` for SEO operations with component-specific contexts
+- **Error Handling**: Implements structured error types with WordPress-specific SEO error messages
+- **Caching**: Extends `CachedWordPressClient` with SEO-specific cache strategies
+- **Testing**: Follows the established testing patterns with unit, integration, and property tests
+
 ## Essential MCP tool functions and implementation
 
 ### Primary SEO management tools
@@ -55,27 +67,45 @@ Planned MCP tool surfaces (initial set)
 - seo.keyword_research: Retrieve and cluster keywords (optional integrations)
 
 ```typescript
-// Core tool definition structure
-interface SEOToolSchema {
-  name: "wp_seo_analyze_content";
-  inputSchema: {
-    postId: number;
-    analysisType: "readability" | "keywords" | "structure" | "full";
-  };
-  outputSchema: {
-    score: number;
-    recommendations: Array<{
-      type: string;
-      priority: "low" | "medium" | "high";
-      message: string;
-    }>;
-    metrics: {
-      wordCount: number;
-      keywordDensity: number;
-      readabilityScore: number;
-    };
-  };
+// Core tool definition structure following existing patterns
+export class SEOTools {
+  constructor(private client: WordPressClient) {}
+
+  async analyzeContent(params: AnalyzeContentParams): Promise<AnalyzeContentResult> {
+    const logger = LoggerFactory.tool("wp_seo_analyze_content", params.site);
+    
+    return await logger.time("SEO content analysis", async () => {
+      validateRequired(params, ['postId', 'analysisType']);
+      const siteClient = this.getSiteClient(params.site);
+      
+      // Implement analysis logic with caching
+      const cacheKey = `seo:analyze:${params.postId}:${params.analysisType}`;
+      const cached = await this.cache.get(cacheKey);
+      if (cached) return cached;
+      
+      const result = await this.performAnalysis(siteClient, params);
+      await this.cache.set(cacheKey, result, { ttl: 21600 }); // 6 hour cache
+      return result;
+    });
+  }
 }
+
+// Zod schemas for type safety
+const AnalyzeContentParamsSchema = z.object({
+  postId: z.number(),
+  analysisType: z.enum(["readability", "keywords", "structure", "full"]),
+  site: z.string().optional(),
+  focusKeywords: z.array(z.string()).optional(),
+  locale: z.string().default("en-US")
+});
+
+const SEORecommendationSchema = z.object({
+  type: z.enum(["title", "meta", "content", "structure", "keyword", "technical"]),
+  priority: z.enum(["low", "medium", "high", "critical"]),
+  message: z.string(),
+  impact: z.number().min(0).max(100),
+  autoFixAvailable: z.boolean().default(false)
+});
 ```
 
 ### Schema markup and structured data automation
@@ -131,6 +161,25 @@ The implementation employs a three‑tier caching system: memory cache for frequ
 caching across multiple servers, and WordPress transients for fallback storage (via companion plugin). SEO analysis
 results cache for 6 hours with automatic invalidation on content updates, while schema markup caches until post
 modification triggers regeneration. Cache keys are namespaced by site + tool + input hash to avoid collisions.
+
+```typescript
+// SEO-specific cache configuration
+export class SEOCacheManager extends CacheManager {
+  private readonly SEO_CACHE_PREFIX = "seo:";
+  private readonly DEFAULT_TTL = {
+    analysis: 21600,     // 6 hours for content analysis
+    schema: 86400,       // 24 hours for schema markup
+    audit: 3600,         // 1 hour for site audits
+    keywords: 604800,    // 7 days for keyword research
+    serp: 43200         // 12 hours for SERP data
+  };
+
+  async invalidatePostSEO(postId: number, siteId?: string): Promise<void> {
+    const pattern = `${this.SEO_CACHE_PREFIX}*:${postId}:*`;
+    await this.invalidatePattern(pattern, siteId);
+  }
+}
+```
 
 Performance benchmarks target sub-200ms response times for content analysis, with bulk operations processing 100 posts
 in under 30 seconds. The system implements circuit breaker patterns for external API failures and maintains dead letter

@@ -59,15 +59,15 @@ export class ConnectionTester {
           const duration = Date.now() - startTime;
           this.logger.info("Connection successful", { siteId, duration: `${duration}ms` });
           results.push({ siteId, success: true });
-        } catch (error) {
+        } catch (_error) {
           const duration = Date.now() - startTime;
-          const errorMessage = getErrorMessage(error);
+          const errorMessage = getErrorMessage(_error);
 
           this.logger.warn("Connection failed", {
             siteId,
             error: errorMessage,
             duration: `${duration}ms`,
-            isAuthError: ConnectionTester.isAuthenticationError(error),
+            isAuthError: ConnectionTester.isAuthenticationError(_error),
           });
 
           results.push({ siteId, success: false, error: errorMessage });
@@ -122,10 +122,10 @@ export class ConnectionTester {
 
       this.logger.debug("Health check passed", { siteId });
       return true;
-    } catch (error) {
+    } catch (_error) {
       this.logger.warn("Health check failed", {
         siteId,
-        error: getErrorMessage(error),
+        _error: getErrorMessage(_error),
       });
       return false;
     }

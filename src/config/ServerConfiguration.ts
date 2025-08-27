@@ -46,10 +46,10 @@ export class ServerConfiguration {
       console.log = () => {};
       // eslint-disable-next-line no-console
       console.error = () => {};
-      dotenv.config({ 
+      dotenv.config({
         path: this.envPath,
         debug: false,
-        override: false
+        override: false,
       });
     } finally {
       // eslint-disable-next-line no-console
@@ -147,10 +147,10 @@ export class ServerConfiguration {
       }
 
       return { clients, configs: validConfigs };
-    } catch (error) {
+    } catch (_error) {
       this.logger.fatal("Failed to load multi-site configuration", {
         configPath,
-        error: getErrorMessage(error),
+        _error: getErrorMessage(_error),
       });
       process.exit(1);
     }
@@ -287,9 +287,9 @@ export class ServerConfiguration {
       }
 
       return { clients, configs: [siteConfig] };
-    } catch (error) {
+    } catch (_error) {
       this.logger.error("Configuration validation failed for single-site mode", {
-        error: getErrorMessage(error),
+        _error: getErrorMessage(_error),
         suggestion: "Please check your environment variables or MCP configuration",
       });
       return { clients: new Map(), configs: [] };

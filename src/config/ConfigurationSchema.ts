@@ -142,12 +142,14 @@ export class ConfigurationValidator {
   static validateMultiSiteConfig(config: unknown): MultiSiteConfigType {
     try {
       return MultiSiteConfigSchema.parse(config);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const messages = error.errors.map((err) => `${err.path.join(".")}: ${err.message}`).join("; ");
+    } catch (_error) {
+      if (_error instanceof z.ZodError) {
+        const messages = _error.errors
+          .map((err: { path: (string | number)[]; message: string }) => `${err.path.join(".")}: ${err.message}`)
+          .join("; ");
         throw new Error(`Multi-site configuration validation failed: ${messages}`);
       }
-      throw error;
+      throw _error;
     }
   }
 
@@ -157,12 +159,14 @@ export class ConfigurationValidator {
   static validateEnvironmentConfig(env: Record<string, string | undefined>): EnvironmentConfigType {
     try {
       return EnvironmentConfigSchema.parse(env);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const messages = error.errors.map((err) => `${err.path.join(".")}: ${err.message}`).join("; ");
+    } catch (_error) {
+      if (_error instanceof z.ZodError) {
+        const messages = _error.errors
+          .map((err: { path: (string | number)[]; message: string }) => `${err.path.join(".")}: ${err.message}`)
+          .join("; ");
         throw new Error(`Environment configuration validation failed: ${messages}`);
       }
-      throw error;
+      throw _error;
     }
   }
 
@@ -172,12 +176,14 @@ export class ConfigurationValidator {
   static validateMcpConfig(config: unknown): McpConfigType {
     try {
       return McpConfigSchema.parse(config);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const messages = error.errors.map((err) => `${err.path.join(".")}: ${err.message}`).join("; ");
+    } catch (_error) {
+      if (_error instanceof z.ZodError) {
+        const messages = _error.errors
+          .map((err: { path: (string | number)[]; message: string }) => `${err.path.join(".")}: ${err.message}`)
+          .join("; ");
         throw new Error(`MCP configuration validation failed: ${messages}`);
       }
-      throw error;
+      throw _error;
     }
   }
 
@@ -187,12 +193,14 @@ export class ConfigurationValidator {
   static validateSiteConfig(config: unknown): SiteType {
     try {
       return SiteSchema.parse(config);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const messages = error.errors.map((err) => `${err.path.join(".")}: ${err.message}`).join("; ");
+    } catch (_error) {
+      if (_error instanceof z.ZodError) {
+        const messages = _error.errors
+          .map((err: { path: (string | number)[]; message: string }) => `${err.path.join(".")}: ${err.message}`)
+          .join("; ");
         throw new Error(`Site configuration validation failed: ${messages}`);
       }
-      throw error;
+      throw _error;
     }
   }
 

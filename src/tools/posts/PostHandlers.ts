@@ -208,8 +208,8 @@ export async function handleListPosts(
     }
 
     return finalContent;
-  } catch (error) {
-    throw new Error(`Failed to list posts: ${getErrorMessage(error)}`);
+  } catch (_error) {
+    throw new Error(`Failed to list posts: ${getErrorMessage(_error)}`);
   }
 }
 
@@ -295,11 +295,11 @@ export async function handleGetPost(client: WordPressClient, params: { id: numbe
     }
 
     return response;
-  } catch (error) {
-    if (error instanceof Error && error.message.includes("404")) {
+  } catch (_error) {
+    if (_error instanceof Error && _error.message.includes("404")) {
       return `Post with ID ${params.id} not found. Please verify the ID and try again.`;
     }
-    throw new Error(`Failed to get post: ${getErrorMessage(error)}`);
+    throw new Error(`Failed to get post: ${getErrorMessage(_error)}`);
   }
 }
 
@@ -334,8 +334,8 @@ export async function handleCreatePost(
     }
 
     return response;
-  } catch (error) {
-    throw new Error(`Failed to create post: ${getErrorMessage(error)}`);
+  } catch (_error) {
+    throw new Error(`Failed to create post: ${getErrorMessage(_error)}`);
   }
 }
 
@@ -386,11 +386,11 @@ export async function handleUpdatePost(
     response += `\n**Link**: ${updatedPost.link}`;
 
     return response;
-  } catch (error) {
-    if (error instanceof Error && error.message.includes("404")) {
+  } catch (_error) {
+    if (_error instanceof Error && _error.message.includes("404")) {
       return `Post with ID ${params.id} not found. Please verify the ID and try again.`;
     }
-    throw new Error(`Failed to update post: ${getErrorMessage(error)}`);
+    throw new Error(`Failed to update post: ${getErrorMessage(_error)}`);
   }
 }
 
@@ -422,11 +422,11 @@ export async function handleDeletePost(
     } else {
       return `Failed to delete post with ID ${params.id}. It may not exist or you may not have permission.`;
     }
-  } catch (error) {
-    if (error instanceof Error && error.message.includes("404")) {
+  } catch (_error) {
+    if (_error instanceof Error && _error.message.includes("404")) {
       return `Post with ID ${params.id} not found. Please verify the ID and try again.`;
     }
-    throw new Error(`Failed to delete post: ${getErrorMessage(error)}`);
+    throw new Error(`Failed to delete post: ${getErrorMessage(_error)}`);
   }
 }
 
@@ -465,10 +465,10 @@ export async function handleGetPostRevisions(
     });
 
     return response;
-  } catch (error) {
-    if (error instanceof Error && error.message.includes("404")) {
+  } catch (_error) {
+    if (_error instanceof Error && _error.message.includes("404")) {
       return `Post with ID ${params.id} not found. Please verify the ID and try again.`;
     }
-    throw new Error(`Failed to get post revisions: ${getErrorMessage(error)}`);
+    throw new Error(`Failed to get post revisions: ${getErrorMessage(_error)}`);
   }
 }

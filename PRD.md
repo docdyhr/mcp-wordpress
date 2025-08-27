@@ -100,10 +100,80 @@ FR‑8 Provider Integrations (optional)
 
 ## 8. System Design Notes
 
-- Implement tools in `src/tools/seo/*.ts` and register in `src/tools/index.ts`.
-- Shared types in `src/types/seo.ts`; caching helpers in `src/cache/`.
-- Provider interfaces in `src/tools/seo/providers/*.ts`; disabled by default.
-- Optional companion WP plugin provides custom endpoints and Action Scheduler hooks if needed.
+### Implementation Architecture
+
+```text
+src/
+├── tools/
+│   ├── seo/
+│   │   ├── index.ts              # SEO tools registration
+│   │   ├── SEOTools.ts           # Main SEO tools class
+│   │   ├── analyzers/
+│   │   │   ├── ContentAnalyzer.ts
+│   │   │   ├── ReadabilityAnalyzer.ts
+│   │   │   └── KeywordAnalyzer.ts
+│   │   ├── generators/
+│   │   │   ├── MetaGenerator.ts
+│   │   │   ├── SchemaGenerator.ts
+│   │   │   └── SitemapGenerator.ts
+│   │   ├── validators/
+│   │   │   ├── SchemaValidator.ts
+│   │   │   └── MetaValidator.ts
+│   │   ├── optimizers/
+│   │   │   ├── InternalLinkOptimizer.ts
+│   │   │   └── CoreWebVitalsOptimizer.ts
+│   │   └── providers/
+│   │       ├── interfaces/
+│   │       ├── GoogleSearchConsole.ts
+│   │       ├── DataForSEO.ts
+│   │       └── Ahrefs.ts
+│   └── index.ts                  # Tool registration
+├── types/
+│   └── seo.ts                    # SEO-specific TypeScript types
+├── cache/
+│   └── SEOCacheManager.ts        # SEO cache strategies
+└── utils/
+    └── seo/
+        ├── rateLimiter.ts         # SEO API rate limiting
+        └── sanitizers.ts          # Meta content sanitization
+```
+
+### Tool Registration Pattern
+
+```typescript
+// src/tools/seo/index.ts
+export const seoTools = [
+  {
+    name: "wp_seo_analyze_content",
+    description: "Analyze content for SEO optimization",
+    inputSchema: AnalyzeContentParamsSchema,
+    handler: (params) => seoToolsInstance.analyzeContent(params)
+  },
+  // Additional tools...
+];
+```
+
+### Configuration Integration
+
+```typescript
+// SEO feature flags in Config.ts
+export interface SEOConfig {
+  enabled: boolean;
+  providers: {
+    searchConsole: boolean;
+    dataForSEO: boolean;
+    ahrefs: boolean;
+  };
+  limits: {
+    bulkOperationSize: number;
+    rateLimitPerMinute: number;
+  };
+  cache: {
+    analysisLTL: number;
+    schemaLTL: number;
+  };
+}
+```
 
 ## 9. Testing Strategy
 

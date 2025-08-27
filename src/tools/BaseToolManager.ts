@@ -33,10 +33,10 @@ export class BaseToolUtils {
    */
   static validateParams<T extends Record<string, unknown>>(
     params: unknown,
-    rules: readonly ParameterValidationRule[]
+    rules: readonly ParameterValidationRule[],
   ): Result<T, Error> {
-    if (!params || typeof params !== 'object' || Array.isArray(params)) {
-      return createError(new ValidationError('Parameters must be a non-null object', 'params', params));
+    if (!params || typeof params !== "object" || Array.isArray(params)) {
+      return createError(new ValidationError("Parameters must be a non-null object", "params", params));
     }
 
     const typedParams = params as Record<string, unknown>;
@@ -48,11 +48,9 @@ export class BaseToolUtils {
 
       // Check required fields
       if (rule.required && (!exists || value === undefined || value === null)) {
-        errors.push(new ValidationError(
-          rule.errorMessage || `Missing required parameter: ${rule.key}`,
-          rule.key,
-          value
-        ));
+        errors.push(
+          new ValidationError(rule.errorMessage || `Missing required parameter: ${rule.key}`, rule.key, value),
+        );
         continue;
       }
 
@@ -63,21 +61,21 @@ export class BaseToolUtils {
 
       // Type validation
       if (rule.type && typeof value !== rule.type) {
-        errors.push(new ValidationError(
-          `Parameter ${rule.key} must be of type ${rule.type}, got ${typeof value}`,
-          rule.key,
-          value
-        ));
+        errors.push(
+          new ValidationError(
+            `Parameter ${rule.key} must be of type ${rule.type}, got ${typeof value}`,
+            rule.key,
+            value,
+          ),
+        );
         continue;
       }
 
       // Custom validation
       if (rule.validator && !rule.validator(value)) {
-        errors.push(new ValidationError(
-          rule.errorMessage || `Parameter ${rule.key} failed validation`,
-          rule.key,
-          value
-        ));
+        errors.push(
+          new ValidationError(rule.errorMessage || `Parameter ${rule.key} failed validation`, rule.key, value),
+        );
         continue;
       }
 
@@ -85,12 +83,14 @@ export class BaseToolUtils {
       if (rule.transformer) {
         try {
           typedParams[rule.key] = rule.transformer(value);
-        } catch (error) {
-          errors.push(new ValidationError(
-            `Failed to transform parameter ${rule.key}: ${getErrorMessage(error)}`,
-            rule.key,
-            value
-          ));
+        } catch (_error) {
+          errors.push(
+            new ValidationError(
+              `Failed to transform parameter ${rule.key}: ${getErrorMessage(error)}`,
+              rule.key,
+              value,
+            ),
+          );
         }
       }
     }
@@ -109,19 +109,11 @@ export class BaseToolUtils {
     try {
       const numId = Number(id);
       if (!Number.isInteger(numId) || numId <= 0) {
-        return createError(new ValidationError(
-          `Invalid ${name}: must be a positive integer`,
-          name,
-          id
-        ));
+        return createError(new ValidationError(`Invalid ${name}: must be a positive integer`, name, id));
       }
       return createSuccess(createWordPressId(numId));
-    } catch (error) {
-      return createError(new ValidationError(
-        `Invalid ${name}: ${getErrorMessage(error)}`,
-        name,
-        id
-      ));
+    } catch (_error) {
+      return createError(new ValidationError(`Invalid ${name}: ${getErrorMessage(error)}`, name, id));
     }
   }
 
@@ -130,7 +122,7 @@ export class BaseToolUtils {
    */
   static validateIds(ids: unknown[], name = "ids"): Result<readonly WordPressId[], Error> {
     const validatedIds: WordPressId[] = [];
-    
+
     for (let i = 0; i < ids.length; i++) {
       const result = this.validateId(ids[i], `${name}[${i}]`);
       if (!result.success) {
@@ -138,7 +130,7 @@ export class BaseToolUtils {
       }
       validatedIds.push(result.data);
     }
-    
+
     return createSuccess(validatedIds as readonly WordPressId[]);
   }
 
@@ -148,13 +140,13 @@ export class BaseToolUtils {
   static handleError(error: unknown, operation: string, context?: Record<string, unknown> | undefined): Error {
     const errorMessage = getErrorMessage(error);
     const enhancedMessage = `Error in ${operation}: ${errorMessage}`;
-    
+
     const enhancedError = new Error(enhancedMessage) as EnhancedError;
     enhancedError.originalError = error;
     enhancedError.operation = operation;
     enhancedError.context = context;
     enhancedError.timestamp = new Date();
-    
+
     return enhancedError;
   }
 
@@ -162,18 +154,14 @@ export class BaseToolUtils {
    * Generate cache keys with enhanced options
    */
   static generateCacheKey(
-    operation: string, 
+    operation: string,
     params: DeepReadonly<Record<string, unknown>>,
-    options: CacheKeyOptions = {}
+    options: CacheKeyOptions = {},
   ): string {
-    const {
-      namespace = 'wp',
-      includeTimestamp = false,
-      customHasher
-    } = options;
+    const { namespace = "wp", includeTimestamp = false, customHasher } = options;
 
     const site = params.site || "default";
-    
+
     let paramStr: string;
     if (customHasher) {
       paramStr = customHasher(params as Record<string, unknown>);
@@ -186,12 +174,12 @@ export class BaseToolUtils {
     }
 
     let cacheKey = `${namespace}:${site}:${operation}:${paramStr}`;
-    
+
     if (includeTimestamp) {
       const timestamp = Math.floor(Date.now() / 1000);
       cacheKey += `:${timestamp}`;
     }
-    
+
     return cacheKey;
   }
 
@@ -200,17 +188,17 @@ export class BaseToolUtils {
    */
   static formatSuccessMessage(operation: string, details?: string, count?: number): string {
     let message = operation;
-    
+
     if (count !== undefined) {
-      message += ` (${count} ${count === 1 ? 'item' : 'items'})`;
+      message += ` (${count} ${count === 1 ? "item" : "items"})`;
     }
-    
+
     if (details) {
       message += `: ${details}`;
     } else {
       message += " completed successfully";
     }
-    
+
     return message;
   }
 
@@ -218,7 +206,7 @@ export class BaseToolUtils {
    * Validate string parameters with enhanced checks
    */
   static validateString(
-    value: unknown, 
+    value: unknown,
     name: string,
     options: {
       readonly required?: boolean;
@@ -226,7 +214,7 @@ export class BaseToolUtils {
       readonly maxLength?: number;
       readonly pattern?: RegExp;
       readonly allowEmpty?: boolean;
-    } = {}
+    } = {},
   ): Result<string, Error> {
     const { required = true, minLength, maxLength, pattern, allowEmpty = false } = options;
 
@@ -234,10 +222,10 @@ export class BaseToolUtils {
       if (required) {
         return createError(new ValidationError(`${name} is required`, name, value));
       }
-      return createSuccess('');
+      return createSuccess("");
     }
 
-    if (typeof value !== 'string') {
+    if (typeof value !== "string") {
       return createError(new ValidationError(`${name} must be a string`, name, value));
     }
 
@@ -246,27 +234,15 @@ export class BaseToolUtils {
     }
 
     if (minLength !== undefined && value.length < minLength) {
-      return createError(new ValidationError(
-        `${name} must be at least ${minLength} characters long`, 
-        name, 
-        value
-      ));
+      return createError(new ValidationError(`${name} must be at least ${minLength} characters long`, name, value));
     }
 
     if (maxLength !== undefined && value.length > maxLength) {
-      return createError(new ValidationError(
-        `${name} must be no more than ${maxLength} characters long`, 
-        name, 
-        value
-      ));
+      return createError(new ValidationError(`${name} must be no more than ${maxLength} characters long`, name, value));
     }
 
     if (pattern && !pattern.test(value)) {
-      return createError(new ValidationError(
-        `${name} does not match required pattern`, 
-        name, 
-        value
-      ));
+      return createError(new ValidationError(`${name} does not match required pattern`, name, value));
     }
 
     return createSuccess(value);
@@ -275,25 +251,21 @@ export class BaseToolUtils {
   /**
    * Type-safe parameter extraction
    */
-  static extractParam<T>(
-    params: DeepReadonly<Record<string, unknown>>, 
-    key: string, 
-    defaultValue?: T
-  ): T | undefined {
+  static extractParam<T>(params: DeepReadonly<Record<string, unknown>>, key: string, defaultValue?: T): T | undefined {
     const value = params[key];
-    return value !== undefined ? value as T : defaultValue;
+    return value !== undefined ? (value as T) : defaultValue;
   }
 
   /**
    * Safe array extraction with type validation
    */
   static extractArray<T>(
-    params: DeepReadonly<Record<string, unknown>>, 
+    params: DeepReadonly<Record<string, unknown>>,
     key: string,
-    itemValidator?: (item: unknown) => item is T
+    itemValidator?: (item: unknown) => item is T,
   ): readonly T[] {
     const value = params[key];
-    
+
     if (!Array.isArray(value)) {
       return [];
     }
@@ -311,9 +283,9 @@ class ValidationError extends Error {
   constructor(
     message: string,
     public readonly field: string,
-    public readonly value: unknown
+    public readonly value: unknown,
   ) {
     super(message);
-    this.name = 'ValidationError';
+    this.name = "ValidationError";
   }
 }

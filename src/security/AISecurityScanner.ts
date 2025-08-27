@@ -170,9 +170,9 @@ export class AISecurityScanner {
       });
 
       return result;
-    } catch (error) {
-      this.logger.error("Security scan failed", { scanId, error: String(error) });
-      throw new SecurityValidationError("Security scan failed", [{ message: String(error) }]);
+    } catch (_error) {
+      this.logger.error("Security scan failed", { scanId, _error: String(_error) });
+      throw new SecurityValidationError("Security scan failed", [{ message: String(_error) }]);
     }
   }
 
@@ -204,9 +204,9 @@ export class AISecurityScanner {
           await this.scanFile(fullPath);
         }
       }
-    } catch (error) {
+    } catch (_error) {
       // Directory might not exist or be accessible
-      this.logger.warn("Cannot scan directory", { dirPath, error: String(error) });
+      this.logger.warn("Cannot scan directory", { dirPath, _error: String(_error) });
     }
   }
 
@@ -238,8 +238,8 @@ export class AISecurityScanner {
       this.scanForCSRF(filePath, content, lines);
       this.scanForInfoDisclosure(filePath, content, lines);
       this.scanForInsecureConfiguration(filePath, content, lines);
-    } catch (error) {
-      this.logger.warn("Cannot scan file", { filePath, error: String(error) });
+    } catch (_error) {
+      this.logger.warn("Cannot scan file", { filePath, _error: String(_error) });
     }
   }
 

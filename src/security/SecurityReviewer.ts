@@ -381,9 +381,13 @@ export class SecurityReviewer {
       logger.info("Review completed", { filePath, findingsCount: findings.length, reviewId });
 
       return result;
-    } catch (error) {
-      logger.error("Review failed", { filePath, reviewId, error: error instanceof Error ? error.message : String(error) });
-      throw new SecurityValidationError("Security review failed", [{ message: String(error) }]);
+    } catch (_error) {
+      logger.error("Review failed", {
+        filePath,
+        reviewId,
+        _error: _error instanceof Error ? _error.message : String(_error),
+      });
+      throw new SecurityValidationError("Security review failed", [{ message: String(_error) }]);
     }
   }
 
@@ -422,9 +426,12 @@ export class SecurityReviewer {
       }
 
       return results;
-    } catch (error) {
-      logger.error("Directory review failed", { dirPath, error: error instanceof Error ? error.message : String(error) });
-      throw new SecurityValidationError("Directory review failed", [{ message: String(error) }]);
+    } catch (_error) {
+      logger.error("Directory review failed", {
+        dirPath,
+        _error: _error instanceof Error ? _error.message : String(_error),
+      });
+      throw new SecurityValidationError("Directory review failed", [{ message: String(_error) }]);
     }
   }
 

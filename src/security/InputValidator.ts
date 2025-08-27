@@ -180,21 +180,22 @@ export function validateSecurity(schema: z.ZodSchema) {
 
         // Call original method with validated params
         return await method.call(this, validatedParams, ...args.slice(1));
-      } catch (error) {
+      } catch (_error) {
         // Log security validation failure
         logger.error(`Security validation failed for ${propertyName}`, {
           timestamp: new Date().toISOString(),
           method: propertyName,
-          error: error instanceof z.ZodError ? error.errors : error instanceof Error ? error.message : String(error),
+          _error:
+            _error instanceof z.ZodError ? _error.errors : _error instanceof Error ? _error.message : String(_error),
         });
 
         throw new SecurityValidationError(
           `Security validation failed for ${propertyName}`,
-          error instanceof z.ZodError
-            ? error.errors
+          _error instanceof z.ZodError
+            ? _error.errors
             : [
                 {
-                  message: error instanceof Error ? error.message : String(error),
+                  message: _error instanceof Error ? _error.message : String(_error),
                 },
               ],
         );

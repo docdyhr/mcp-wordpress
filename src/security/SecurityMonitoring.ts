@@ -282,10 +282,10 @@ export class SecurityMonitor extends EventEmitter {
 
       action.result = "success";
       action.details += " - executed successfully";
-    } catch (error) {
+    } catch (_error) {
       action.result = "failure";
-      action.details += ` - failed: ${error instanceof Error ? error.message : String(error)}`;
-      logger.error(`Action ${type} failed`, { type, error });
+      action.details += ` - failed: ${_error instanceof Error ? _error.message : String(_error)}`;
+      logger.error(`Action ${type} failed`, { type, _error });
     }
 
     return action;
@@ -614,9 +614,9 @@ export class SecurityMonitor extends EventEmitter {
   /**
    * Group array by property
    */
-  private groupBy(array: Array<Record<string, any>>, property: string): Record<string, number> { // eslint-disable-line @typescript-eslint/no-explicit-any
+  private groupBy(array: SecurityEvent[], property: string): Record<string, number> {
     return array.reduce<Record<string, number>>((acc, item) => {
-      const key = (item && item[property]) || "unknown";
+      const key = ((item as Record<string, unknown>)[property] as string) || "unknown";
       acc[key] = (acc[key] || 0) + 1;
       return acc;
     }, {});

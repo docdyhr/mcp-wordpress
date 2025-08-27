@@ -4,10 +4,7 @@
 
 import { CacheManager } from "../CacheManager.js";
 import { HttpCacheWrapper } from "../HttpCacheWrapper.js";
-import {
-  CacheInvalidation,
-  WordPressCachePatterns,
-} from "../CacheInvalidation.js";
+import { CacheInvalidation, WordPressCachePatterns } from "../CacheInvalidation.js";
 
 describe("CacheInvalidation", () => {
   let cacheManager: CacheManager;
@@ -132,12 +129,10 @@ describe("CacheInvalidation", () => {
 
       // Mock the invalidation process to track order
       const originalInvalidatePattern = httpCache.invalidatePattern;
-      httpCache.invalidatePattern = jest
-        .fn()
-        .mockImplementation((pattern: string) => {
-          processedEvents.push(pattern);
-          return originalInvalidatePattern.call(httpCache, pattern);
-        });
+      httpCache.invalidatePattern = jest.fn().mockImplementation((pattern: string) => {
+        processedEvents.push(pattern);
+        return originalInvalidatePattern.call(httpCache, pattern);
+      });
 
       // Queue multiple events
       await Promise.all([
@@ -192,7 +187,7 @@ describe("CacheInvalidation", () => {
 
       // Should only invalidate posts/123, not posts/456 or pages/123
       const remainingKeys: string[] = [];
-      for (const [key] of (cacheManager as any).cache.entries()) {
+      for (const [key] of (cacheManager as unknown).cache.entries()) {
         remainingKeys.push(key);
       }
 

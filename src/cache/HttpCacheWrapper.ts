@@ -95,13 +95,12 @@ export class HttpCacheWrapper {
         }
 
         // Content changed - update cache
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return await this.cacheAndReturn(response, cacheKey, cacheOptions) as any;
-      } catch (error) {
+        return (await this.cacheAndReturn(response, cacheKey, cacheOptions)) as unknown;
+      } catch (_error) {
         // If conditional request fails, try without conditions
         this.logger.warn("Conditional request failed, falling back to regular request", {
-          error: error instanceof Error ? error.message : String(error),
-          siteId: this.siteId
+          _error: _error instanceof Error ? _error.message : String(_error),
+          siteId: this.siteId,
         });
       }
     }

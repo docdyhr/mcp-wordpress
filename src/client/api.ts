@@ -239,11 +239,11 @@ export class WordPressClient implements IWordPressClient {
 
       // Return clean URL without query parameters or fragments
       return `${parsed.protocol}//${parsed.host}${parsed.pathname}`.replace(/\/$/, "");
-    } catch (error) {
-      if (error instanceof TypeError) {
+    } catch (_error) {
+      if (_error instanceof TypeError) {
         throw new Error("Invalid WordPress site URL format");
       }
-      throw error;
+      throw _error;
     }
   }
 
@@ -407,10 +407,10 @@ export class WordPressClient implements IWordPressClient {
         default:
           throw new Error(`Unsupported authentication method: ${method}`);
       }
-    } catch (error) {
+    } catch (_error) {
       this._stats.authFailures++;
-      logError(error as Error, { method });
-      throw error;
+      logError(_error as Error, { method });
+      throw _error;
     }
   }
 
@@ -436,8 +436,8 @@ export class WordPressClient implements IWordPressClient {
       this.authenticated = true;
       debug.log("Basic/Application Password authentication successful");
       return true;
-    } catch (error) {
-      throw new AuthenticationError(`Basic authentication failed: ${(error as Error).message}`, this.auth.method);
+    } catch (_error) {
+      throw new AuthenticationError(`Basic authentication failed: ${(_error as Error).message}`, this.auth.method);
     }
   }
 
@@ -473,8 +473,8 @@ export class WordPressClient implements IWordPressClient {
       this.authenticated = true;
       debug.log("JWT authentication successful");
       return true;
-    } catch (error) {
-      throw new AuthenticationError(`JWT authentication failed: ${(error as Error).message}`, this.auth.method);
+    } catch (_error) {
+      throw new AuthenticationError(`JWT authentication failed: ${(_error as Error).message}`, this.auth.method);
     }
   }
 
@@ -536,8 +536,7 @@ export class WordPressClient implements IWordPressClient {
         // For FormData, check if it has getHeaders method (form-data package)
         if (typeof (data as { getHeaders?: () => Record<string, string> }).getHeaders === "function") {
           // Use headers from form-data package
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const formHeaders = (data as any).getHeaders();
+          const formHeaders = (data as { getHeaders(): Record<string, string> }).getHeaders();
           Object.assign(headers, formHeaders);
         } else {
           // For native FormData, don't set Content-Type (let fetch set it with boundary)
@@ -681,12 +680,12 @@ export class WordPressClient implements IWordPressClient {
           this.updateAverageResponseTime(duration);
           return responseText as T;
         }
-      } catch (error) {
+      } catch (_error) {
         clearTimeout(timeoutId);
-        lastError = error as Error;
+        lastError = _error as Error;
 
         // Handle timeout errors
-        if ((error as Error & { name?: string }).name === "AbortError") {
+        if ((_error as Error & { name?: string }).name === "AbortError") {
           lastError = new Error(`Request timeout after ${requestTimeout}ms`);
         }
 

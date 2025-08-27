@@ -107,11 +107,11 @@ export class SecuritySystem {
 
       this.initialized = true;
       logger.info("Security system initialized successfully");
-    } catch (error) {
+    } catch (_error) {
       logger.error("Security system initialization failed", {
-        error: error instanceof Error ? error.message : String(error),
+        _error: _error instanceof Error ? _error.message : String(_error),
       });
-      throw new SecurityValidationError("Security system initialization failed", [{ message: String(error) }]);
+      throw new SecurityValidationError("Security system initialization failed", [{ message: String(_error) }]);
     }
   }
 

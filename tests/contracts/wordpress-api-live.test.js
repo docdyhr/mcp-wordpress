@@ -36,8 +36,8 @@ describe("WordPress API Live Contract Tests", () => {
           throw new Error(`WordPress not accessible: ${response.status}`);
         }
         console.log("✅ Live WordPress instance is accessible");
-      } catch (error) {
-        throw new Error(`Failed to connect to live WordPress: ${error.message}`);
+      } catch (testError) {
+        throw new Error(`Failed to connect to live WordPress: ${testError.message}`);
       }
     } else {
       console.log("🔧 Using mock client for contract tests - no live WordPress configured");

@@ -54,7 +54,14 @@ export class MediaTools {
   public getTools(): Array<{
     name: string;
     description: string;
-    parameters?: Array<{ name: string; type?: string; description?: string; required?: boolean; enum?: string[]; items?: unknown }>;
+    parameters?: Array<{
+      name: string;
+      type?: string;
+      description?: string;
+      required?: boolean;
+      enum?: string[];
+      items?: unknown;
+    }>;
     handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
   }> {
     return [
@@ -197,8 +204,8 @@ export class MediaTools {
         `Found ${media.length} media items:\n\n` +
         media.map((m) => `- ID ${m.id}: **${m.title.rendered}** (${m.mime_type})\n  Link: ${m.source_url}`).join("\n");
       return content;
-    } catch (error) {
-      throw new Error(`Failed to list media: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to list media: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -215,15 +222,12 @@ export class MediaTools {
         (media.alt_text ? `- **Alt Text:** ${media.alt_text}\n` : "") +
         (media.caption.rendered ? `- **Caption:** ${media.caption.rendered}\n` : "");
       return content;
-    } catch (error) {
-      throw new Error(`Failed to get media item: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to get media item: ${getErrorMessage(_error)}`);
     }
   }
 
-  public async handleUploadMedia(
-    client: WordPressClient,
-    params: Record<string, unknown>,
-  ): Promise<unknown> {
+  public async handleUploadMedia(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     const uploadParams = params as unknown as UploadMediaRequest & { file_path: string };
     try {
       if (!fs.existsSync(uploadParams.file_path)) {
@@ -232,21 +236,18 @@ export class MediaTools {
 
       const media = await client.uploadMedia(uploadParams);
       return `✅ Media uploaded successfully!\n- ID: ${media.id}\n- Title: ${media.title.rendered}\n- URL: ${media.source_url}`;
-    } catch (error) {
-      throw new Error(`Failed to upload media: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to upload media: ${getErrorMessage(_error)}`);
     }
   }
 
-  public async handleUpdateMedia(
-    client: WordPressClient,
-    params: Record<string, unknown>,
-  ): Promise<unknown> {
+  public async handleUpdateMedia(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     const updateParams = params as unknown as UpdateMediaRequest & { id: number };
     try {
       const media = await client.updateMedia(updateParams);
       return `✅ Media ${media.id} updated successfully.`;
-    } catch (error) {
-      throw new Error(`Failed to update media: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to update media: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -256,8 +257,8 @@ export class MediaTools {
       await client.deleteMedia(id, force);
       const action = force ? "permanently deleted" : "moved to trash";
       return `✅ Media item ${id} has been ${action}`;
-    } catch (error) {
-      throw new Error(`Failed to delete media: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to delete media: ${getErrorMessage(_error)}`);
     }
   }
 }

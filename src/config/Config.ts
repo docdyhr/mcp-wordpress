@@ -74,6 +74,38 @@ export interface AppConfig {
     readonly isTravis: boolean;
     readonly isCircleCI: boolean;
   };
+
+  // SEO Configuration
+  readonly seo: {
+    readonly enabled: boolean;
+    readonly providers: {
+      readonly searchConsole: boolean;
+      readonly dataForSEO: boolean;
+      readonly ahrefs: boolean;
+    };
+    readonly limits: {
+      readonly bulkOperationSize: number;
+      readonly rateLimitPerMinute: number;
+      readonly maxConcurrentAnalysis: number;
+    };
+    readonly cache: {
+      readonly analysisTTL: number;
+      readonly schemaTTL: number;
+      readonly auditTTL: number;
+      readonly keywordsTTL: number;
+    };
+    readonly metadata: {
+      readonly titleMaxLength: number;
+      readonly descriptionMaxLength: number;
+      readonly descriptionMinLength: number;
+    };
+    readonly analysis: {
+      readonly minWordCount: number;
+      readonly targetKeywordDensity: number;
+      readonly maxKeywordDensity: number;
+      readonly minReadabilityScore: number;
+    };
+  };
 }
 
 /**
@@ -173,6 +205,37 @@ export class Config {
         isGitHubActions: process.env.GITHUB_ACTIONS === "true",
         isTravis: process.env.TRAVIS === "true",
         isCircleCI: process.env.CIRCLECI === "true",
+      },
+
+      seo: {
+        enabled: process.env.SEO_ENABLED !== "false",
+        providers: {
+          searchConsole: process.env.SEO_PROVIDER_SEARCH_CONSOLE === "true",
+          dataForSEO: process.env.SEO_PROVIDER_DATAFORSEO === "true",
+          ahrefs: process.env.SEO_PROVIDER_AHREFS === "true",
+        },
+        limits: {
+          bulkOperationSize: parseInt(process.env.SEO_BULK_OPERATION_SIZE || "10", 10),
+          rateLimitPerMinute: parseInt(process.env.SEO_RATE_LIMIT_PER_MINUTE || "30", 10),
+          maxConcurrentAnalysis: parseInt(process.env.SEO_MAX_CONCURRENT_ANALYSIS || "5", 10),
+        },
+        cache: {
+          analysisTTL: parseInt(process.env.SEO_CACHE_ANALYSIS_TTL || "21600", 10), // 6 hours
+          schemaTTL: parseInt(process.env.SEO_CACHE_SCHEMA_TTL || "86400", 10), // 24 hours
+          auditTTL: parseInt(process.env.SEO_CACHE_AUDIT_TTL || "3600", 10), // 1 hour
+          keywordsTTL: parseInt(process.env.SEO_CACHE_KEYWORDS_TTL || "604800", 10), // 7 days
+        },
+        metadata: {
+          titleMaxLength: parseInt(process.env.SEO_TITLE_MAX_LENGTH || "60", 10),
+          descriptionMaxLength: parseInt(process.env.SEO_DESCRIPTION_MAX_LENGTH || "160", 10),
+          descriptionMinLength: parseInt(process.env.SEO_DESCRIPTION_MIN_LENGTH || "155", 10),
+        },
+        analysis: {
+          minWordCount: parseInt(process.env.SEO_MIN_WORD_COUNT || "300", 10),
+          targetKeywordDensity: parseFloat(process.env.SEO_TARGET_KEYWORD_DENSITY || "2.5"),
+          maxKeywordDensity: parseFloat(process.env.SEO_MAX_KEYWORD_DENSITY || "3.5"),
+          minReadabilityScore: parseFloat(process.env.SEO_MIN_READABILITY_SCORE || "60"),
+        },
       },
     };
   }

@@ -152,7 +152,7 @@ export class SecurityCIPipeline {
     logger.info(`Executing ${stage} security gates`, {
       stage,
       branch: context.branch,
-      commit: context.commit
+      commit: context.commit,
     });
 
     const applicableGates = Array.from(this.gates.values()).filter((gate) => gate.stage === stage && gate.enabled);
@@ -184,8 +184,8 @@ export class SecurityCIPipeline {
           logger.error(`Stopping pipeline due to blocking gate failure: ${gate.name}`, { gateName: gate.name });
           break;
         }
-      } catch (error) {
-        logger.error(`Gate execution error: ${gate.name}`, { gateName: gate.name, error });
+      } catch (_error) {
+        logger.error(`Gate execution _error: ${gate.name}`, { gateName: gate.name, _error });
 
         const errorResult: GateResult = {
           gateId: gate.id,
@@ -194,7 +194,7 @@ export class SecurityCIPipeline {
           duration: Date.now() - startTime,
           checks: [],
           blocking: gate.blocking,
-          message: `Gate execution failed: ${error instanceof Error ? error.message : String(error)}`,
+          message: `Gate execution failed: ${_error instanceof Error ? _error.message : String(_error)}`,
         };
 
         gateResults.push(errorResult);
@@ -236,8 +236,8 @@ export class SecurityCIPipeline {
       try {
         const checkResult = await this.executeSecurityCheck(check, context, options);
         checkResults.push(checkResult);
-      } catch (error) {
-        logger.error(`Check execution error: ${check.name}`, { checkName: check.name, error });
+      } catch (_error) {
+        logger.error(`Check execution _error: ${check.name}`, { checkName: check.name, _error });
 
         checkResults.push({
           checkId: check.id,
@@ -245,7 +245,7 @@ export class SecurityCIPipeline {
           status: "error",
           duration: Date.now() - startTime,
           findings: [],
-          details: `Check execution failed: ${error instanceof Error ? error.message : String(error)}`,
+          details: `Check execution failed: ${_error instanceof Error ? _error.message : String(_error)}`,
           score: 0,
         });
       }
@@ -360,8 +360,8 @@ export class SecurityCIPipeline {
         details,
         score,
       };
-    } catch (error) {
-      throw new SecurityValidationError(`Check ${check.name} failed`, [{ message: String(error) }]);
+    } catch (_error) {
+      throw new SecurityValidationError(`Check ${check.name} failed`, [{ message: String(_error) }]);
     }
   }
 
@@ -540,8 +540,8 @@ export class SecurityCIPipeline {
     score: number;
     details: string;
   }> {
-  const complianceParams = check.parameters as { frameworks?: string[] };
-  const frameworks: string[] = complianceParams.frameworks ?? ["OWASP", "CWE"];
+    const complianceParams = check.parameters as { frameworks?: string[] };
+    const frameworks: string[] = complianceParams.frameworks ?? ["OWASP", "CWE"];
     const findings: SecurityFinding[] = [];
 
     // Check for compliance with security frameworks

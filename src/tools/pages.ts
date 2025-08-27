@@ -14,7 +14,14 @@ export class PageTools {
   public getTools(): Array<{
     name: string;
     description: string;
-    parameters?: Array<{ name: string; type?: string; description?: string; required?: boolean; enum?: string[]; items?: unknown }>;
+    parameters?: Array<{
+      name: string;
+      type?: string;
+      description?: string;
+      required?: boolean;
+      enum?: string[];
+      items?: unknown;
+    }>;
     handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
   }> {
     return [
@@ -152,8 +159,8 @@ export class PageTools {
         `Found ${pages.length} pages:\n\n` +
         pages.map((p) => `- ID ${p.id}: **${p.title.rendered}** (${p.status})\n  Link: ${p.link}`).join("\n");
       return content;
-    } catch (error) {
-      throw new Error(`Failed to list pages: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to list pages: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -168,8 +175,8 @@ export class PageTools {
         `- **Link:** ${page.link}\n` +
         `- **Date:** ${new Date(page.date).toLocaleString()}`;
       return content;
-    } catch (error) {
-      throw new Error(`Failed to get page: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to get page: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -178,8 +185,8 @@ export class PageTools {
     try {
       const page = await client.createPage(createParams);
       return `✅ Page created successfully!\n- ID: ${page.id}\n- Title: ${page.title.rendered}\n- Link: ${page.link}`;
-    } catch (error) {
-      throw new Error(`Failed to create page: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to create page: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -188,8 +195,8 @@ export class PageTools {
     try {
       const page = await client.updatePage(updateParams);
       return `✅ Page ${page.id} updated successfully.`;
-    } catch (error) {
-      throw new Error(`Failed to update page: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to update page: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -199,8 +206,8 @@ export class PageTools {
       await client.deletePage(id, force);
       const action = params.force ? "permanently deleted" : "moved to trash";
       return `✅ Page ${id} has been ${action}.`;
-    } catch (error) {
-      throw new Error(`Failed to delete page: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to delete page: ${getErrorMessage(_error)}`);
     }
   }
 
@@ -217,8 +224,8 @@ export class PageTools {
           .map((r) => `- Revision by user ID ${r.author} at ${new Date(r.modified).toLocaleString()}`)
           .join("\n");
       return content;
-    } catch (error) {
-      throw new Error(`Failed to get page revisions: ${getErrorMessage(error)}`);
+    } catch (_error) {
+      throw new Error(`Failed to get page revisions: ${getErrorMessage(_error)}`);
     }
   }
 }
