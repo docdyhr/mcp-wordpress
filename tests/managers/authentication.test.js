@@ -1,6 +1,6 @@
 import { vi } from "vitest";
-import { AuthenticationManager } from "../../dist/client/managers/AuthenticationManager.js";
-import { AuthenticationError } from "../../dist/types/client.js";
+import { AuthenticationManager } from "@/client/managers/AuthenticationManager.js";
+import { AuthenticationError } from "@/types/client.js";
 
 describe("AuthenticationManager", () => {
   let authManager;

@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import * as fs from "fs";
+import { promises as fsPromises } from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
 import { WordPressClient } from "../client/api.js";
@@ -82,17 +83,17 @@ export class ServerConfiguration {
    * Load WordPress client configurations
    * Returns a Map of site ID to WordPressClient instances
    */
-  public loadClientConfigurations(mcpConfig?: McpConfigType): {
+  public async loadClientConfigurations(mcpConfig?: McpConfigType): Promise<{
     clients: Map<string, WordPressClient>;
     configs: SiteConfig[];
-  } {
+  }> {
     const configPath = path.resolve(this.rootDir, "mcp-wordpress.config.json");
 
     if (fs.existsSync(configPath)) {
       if (ConfigHelpers.shouldLogInfo()) {
         this.logger.info("Found multi-site configuration file", { configPath });
       }
-      return this.loadMultiSiteConfig(configPath);
+      return await this.loadMultiSiteConfig(configPath);
     } else {
       if (ConfigHelpers.shouldLogInfo()) {
         this.logger.info("Multi-site config not found, using environment variables for single-site mode", {
@@ -106,12 +107,12 @@ export class ServerConfiguration {
   /**
    * Load multi-site configuration from JSON file
    */
-  private loadMultiSiteConfig(configPath: string): {
+  private async loadMultiSiteConfig(configPath: string): Promise<{
     clients: Map<string, WordPressClient>;
     configs: SiteConfig[];
-  } {
+  }> {
     try {
-      const configFile = fs.readFileSync(configPath, "utf-8");
+      const configFile = await fsPromises.readFile(configPath, "utf-8");
       const rawConfig = JSON.parse(configFile);
 
       // Validate configuration using Zod schema

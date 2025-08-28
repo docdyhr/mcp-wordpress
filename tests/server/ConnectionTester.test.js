@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { ConnectionTester } from "../../dist/server/ConnectionTester.js";
+import { ConnectionTester } from "@/server/ConnectionTester.js";
 
 describe("ConnectionTester", () => {
   let mockClient1;

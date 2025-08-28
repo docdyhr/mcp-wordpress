@@ -4,12 +4,12 @@
  */
 
 // Use native fetch in Node.js 18+
-import type { HTTPMethod, RequestOptions, ClientStats, WordPressClientConfig } from "../../types/client.js";
-import { WordPressAPIError, RateLimitError } from "../../types/client.js";
-import { config } from "../../config/Config.js";
+import type { HTTPMethod, RequestOptions, ClientStats, WordPressClientConfig } from "@/types/client.js";
+import { WordPressAPIError, RateLimitError } from "@/types/client.js";
+import { config } from "@/config/Config.js";
 import { BaseManager } from "./BaseManager.js";
 import { AuthenticationManager } from "./AuthenticationManager.js";
-import { debug, startTimer } from "../../utils/debug.js";
+import { debug, startTimer } from "@/utils/debug.js";
 
 export class RequestManager extends BaseManager {
   private stats: ClientStats;
@@ -29,6 +29,7 @@ export class RequestManager extends BaseManager {
       averageResponseTime: 0,
       rateLimitHits: 0,
       authFailures: 0,
+      errors: 0,
     };
   }
 

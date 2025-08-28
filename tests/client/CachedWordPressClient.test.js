@@ -1,7 +1,7 @@
 import { vi } from "vitest";
-import { CachedWordPressClient } from "../../dist/client/CachedWordPressClient.js";
-import { WordPressClient } from "../../dist/client/api.js";
-import { CacheManager } from "../../dist/cache/CacheManager.js";
+import { CachedWordPressClient } from "@/client/CachedWordPressClient.js";
+import { WordPressClient } from "@/client/api.js";
+import { CacheManager } from "@/cache/CacheManager.js";
 
 // Mock the SecurityConfig
 vi.mock("../../dist/security/SecurityConfig.js", () => ({

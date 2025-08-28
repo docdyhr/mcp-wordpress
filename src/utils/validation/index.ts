@@ -32,5 +32,5 @@ export { validatePostStatus, validateSearchQuery, validatePaginationParams, vali
 export { RateLimiter, authRateLimiter } from "./rateLimit.js";
 
 // Re-export type dependencies for convenience
-export type { WordPressId } from "../../types/enhanced.js";
-export { WordPressAPIError } from "../../types/client.js";
+export type { WordPressId } from "@/types/enhanced.js";
+export { WordPressAPIError } from "@/types/client.js";

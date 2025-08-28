@@ -25,6 +25,17 @@ import type { SchemaType } from "../types/seo.js";
 import type { SEOMetadata, SchemaMarkup } from "../types/seo.js";
 
 /**
+ * WordPress Plugin interface for API responses
+ */
+interface WordPressPlugin {
+  slug: string;
+  status: "active" | "inactive";
+  name?: string;
+  description?: string;
+  version?: string;
+}
+
+/**
  * SEO plugin metadata field mappings
  */
 interface SEOPluginFields {
@@ -64,15 +75,28 @@ interface SEOPluginFields {
 }
 
 /**
- * SEO data structure for API responses
+ * SEO data structure for API responses (flattened format)
  */
 interface SEODataResponse {
   postId: number;
-  metadata: SEOMetadata;
-  schema?: SchemaMarkup | undefined;
   plugin: "yoast" | "rankmath" | "seopress" | "none";
-  pluginVersion?: string | undefined;
+  title: string | null;
+  description: string | null;
+  canonical: string | null;
+  focusKeyword: string | null;
+  openGraph: {
+    title: string | null;
+    description: string | null;
+  };
+  twitter: {
+    title: string | null;
+    description: string | null;
+  };
+  schema?: SchemaMarkup | undefined;
+  raw: Record<string, unknown>;
   lastModified: string;
+  success?: boolean;
+  message?: string;
 }
 
 /**
@@ -160,37 +184,33 @@ export class SEOWordPressClient extends WordPressClient {
    */
   private async detectSEOPlugins(): Promise<void> {
     try {
-      // Try to detect Yoast SEO by checking for its REST API endpoints
-      try {
-        const yoastCheck = await this.get("yoast/v1/meta", { timeout: 5000 });
-        if (yoastCheck) {
-          this.detectedPlugin = "yoast";
-          return;
-        }
-      } catch {
-        // Yoast not detected, continue
+      // Get list of installed plugins
+      const plugins = await this.get("/wp/v2/plugins");
+      
+      if (!Array.isArray(plugins)) {
+        this.logger.debug("Could not retrieve plugins list");
+        return;
       }
 
-      // Try to detect RankMath by checking for common meta fields
-      try {
-        const posts = await this.getPosts({ per_page: 1, meta_key: "rank_math_title" });
-        if (posts && posts.length > 0) {
-          this.detectedPlugin = "rankmath";
-          return;
-        }
-      } catch {
-        // RankMath not detected, continue
+      // Check for active SEO plugins in order of preference
+      const activePlugins = (plugins as WordPressPlugin[]).filter((plugin) => plugin.status === "active");
+      
+      // Check for Yoast SEO
+      if (activePlugins.some((plugin) => plugin.slug === "wordpress-seo")) {
+        this.detectedPlugin = "yoast";
+        return;
       }
-
-      // Try to detect SEOPress
-      try {
-        const posts = await this.getPosts({ per_page: 1, meta_key: "_seopress_titles_title" });
-        if (posts && posts.length > 0) {
-          this.detectedPlugin = "seopress";
-          return;
-        }
-      } catch {
-        // SEOPress not detected
+      
+      // Check for RankMath
+      if (activePlugins.some((plugin) => plugin.slug === "seo-by-rank-math")) {
+        this.detectedPlugin = "rankmath";
+        return;
+      }
+      
+      // Check for SEOPress
+      if (activePlugins.some((plugin) => plugin.slug === "wp-seopress")) {
+        this.detectedPlugin = "seopress";
+        return;
       }
 
       this.logger.debug("No SEO plugins detected, using generic metadata approach");
@@ -224,11 +244,27 @@ export class SEOWordPressClient extends WordPressClient {
       // Extract schema markup if available
       const schema = this.extractSchemaMarkup(content);
 
+      // Get raw plugin data for debugging
+      const raw = this.getRawPluginData(content);
+      
+      // For malformed plugin data (detected plugin but no actual data), return null for title/description
+      const pluginDetected = this.detectedPlugin !== "none";
+      const pluginDataMalformed = pluginDetected && !this.hasPluginData(content);
+
       return {
         postId: postId,
-        metadata,
-        schema,
         plugin: this.detectedPlugin,
+        title: pluginDataMalformed ? null : metadata.title,
+        description: pluginDataMalformed ? null : metadata.description,
+        canonical: metadata.canonical || null,
+        focusKeyword: metadata.focusKeyword || null,
+        openGraph: metadata.openGraph || { title: null, description: null },
+        twitter: metadata.twitterCard ? {
+          title: metadata.twitterCard.title || null,
+          description: metadata.twitterCard.description || null
+        } : { title: null, description: null },
+        schema,
+        raw,
         lastModified: content.modified || content.date || new Date().toISOString(),
       };
     } catch (_error) {
@@ -248,6 +284,25 @@ export class SEOWordPressClient extends WordPressClient {
     this.logger.debug("Updating SEO metadata", { postId, type, plugin: this.detectedPlugin });
 
     try {
+      // Check if SEO plugin is available
+      if (this.detectedPlugin === "none") {
+        return {
+          success: false,
+          message: "No SEO plugin detected. Cannot update SEO metadata.",
+          postId,
+          plugin: this.detectedPlugin,
+          title: null,
+          description: null,
+          focusKeyword: null,
+          canonical: null,
+          openGraph: { title: null, description: null },
+          twitter: { title: null, description: null },
+          schema: undefined,
+          raw: {},
+          lastModified: new Date().toISOString(),
+        };
+      }
+
       // Prepare meta fields based on detected plugin
       const metaFields = this.prepareSEOMetaFields(metadata);
 
@@ -475,13 +530,34 @@ export class SEOWordPressClient extends WordPressClient {
       };
     }
 
-    // Extract OpenGraph data if available
-    metadata.openGraph = {
-      title: metadata.title,
-      description: metadata.description,
-      type: content.type === "page" ? "website" : "article",
-      url: content.link,
-    };
+    // Extract OpenGraph and Twitter data based on plugin
+    if (this.detectedPlugin === "yoast" && meta.yoast_head_json) {
+      const yoastData = meta.yoast_head_json as Record<string, unknown>;
+      
+      metadata.openGraph = {
+        title: (yoastData.og_title as string) || metadata.title,
+        description: (yoastData.og_description as string) || metadata.description,
+        type: content.type === "page" ? "website" : "article",
+        url: content.link,
+      };
+      
+      const twitterTitle = yoastData.twitter_title as string;
+      const twitterDescription = yoastData.twitter_description as string;
+      
+      metadata.twitterCard = {
+        card: "summary",
+        ...(twitterTitle && { title: twitterTitle }),
+        ...(twitterDescription && { description: twitterDescription }),
+      };
+    } else {
+      // Default OpenGraph data
+      metadata.openGraph = {
+        title: metadata.title,
+        description: metadata.description,
+        type: content.type === "page" ? "website" : "article",
+        url: content.link,
+      };
+    }
 
     return metadata;
   }
@@ -566,19 +642,42 @@ export class SEOWordPressClient extends WordPressClient {
   /**
    * Extract meta value with array handling
    */
-  private extractMetaValue(meta: Record<string, unknown>, fieldName?: string): string | undefined {
-    if (!fieldName || !meta[fieldName]) {
-      return undefined;
+  private extractMetaValue(meta: Record<string, unknown>, fieldName?: string): string | null {
+    if (!fieldName) {
+      return null;
+    }
+    
+    // For Yoast, check yoast_head_json first
+    if (this.detectedPlugin === "yoast" && meta.yoast_head_json) {
+      const yoastData = meta.yoast_head_json as Record<string, unknown>;
+      
+      // Map field names to yoast_head_json properties
+      const yoastFieldMap: Record<string, string> = {
+        '_yoast_wpseo_title': 'title',
+        '_yoast_wpseo_metadesc': 'description',
+        '_yoast_wpseo_canonical': 'canonical',
+        '_yoast_wpseo_focuskw': 'focuskw'
+      };
+      
+      const yoastField = yoastFieldMap[fieldName];
+      if (yoastField && yoastData[yoastField]) {
+        return yoastData[yoastField] as string;
+      }
+    }
+
+    // Fallback to direct meta field lookup
+    if (!meta[fieldName]) {
+      return null;
     }
 
     const value = meta[fieldName];
 
     // WordPress meta values can be arrays
     if (Array.isArray(value)) {
-      return (value[0] as string) || undefined;
+      return (value[0] as string) || null;
     }
 
-    return (value as string) || undefined;
+    return (value as string) || null;
   }
 
   /**
@@ -645,7 +744,7 @@ export class SEOWordPressClient extends WordPressClient {
         for (const post of testPosts) {
           try {
             const seoData = await this.getSEOMetadata(post.id);
-            if (seoData.metadata.title || seoData.metadata.description) {
+            if (seoData.title || seoData.description) {
               postsWithSEO++;
             }
           } catch (_error) {
@@ -665,14 +764,14 @@ export class SEOWordPressClient extends WordPressClient {
 
           // Make a small test update
           const testMetadata: Partial<SEOMetadata> = {
-            description: (originalSEO.metadata.description || "") + " [TEST]",
+            description: (originalSEO.description || "") + " [TEST]",
           };
 
           await this.updateSEOMetadata(testPost.id, testMetadata);
 
           // Restore original data
           await this.updateSEOMetadata(testPost.id, {
-            description: originalSEO.metadata.description,
+            description: originalSEO.description || "",
           });
 
           result.canWriteMetadata = true;
@@ -686,6 +785,92 @@ export class SEOWordPressClient extends WordPressClient {
     } catch (_error) {
       result.errors?.push(`SEO integration test failed: ${(_error as Error).message}`);
       return result;
+    }
+  }
+
+  /**
+   * Get integration status for SEO features
+   */
+  getIntegrationStatus(): {
+    hasPlugin: boolean;
+    plugin: string;
+    canReadMetadata: boolean;
+    canWriteMetadata: boolean;
+    features: {
+      metaTags: boolean;
+      schema: boolean;
+      socialMedia: boolean;
+      xmlSitemap: boolean;
+      breadcrumbs: boolean;
+    };
+  } {
+    const hasPlugin = this.detectedPlugin !== "none";
+    
+    return {
+      hasPlugin,
+      plugin: this.detectedPlugin,
+      canReadMetadata: hasPlugin,
+      canWriteMetadata: hasPlugin,
+      features: {
+        metaTags: hasPlugin,
+        schema: hasPlugin,
+        socialMedia: hasPlugin,
+        xmlSitemap: false, // Would need additional API calls
+        breadcrumbs: false,
+      },
+    };
+  }
+
+  /**
+   * Check if content has plugin-specific SEO data
+   */
+  private hasPluginData(content: WordPressPost | WordPressPage): boolean {
+    const meta = (Array.isArray(content.meta) ? {} : content.meta || {}) as Record<string, unknown>;
+
+    switch (this.detectedPlugin) {
+      case "yoast":
+        // Check for yoast_head_json or individual meta fields
+        return (meta.yoast_head_json !== null && meta.yoast_head_json !== undefined) ||
+               (meta._yoast_wpseo_title !== null && meta._yoast_wpseo_title !== undefined);
+      case "rankmath":
+        return meta.rank_math_title !== null && meta.rank_math_title !== undefined;
+      case "seopress":
+        return meta._seopress_titles_title !== null && meta._seopress_titles_title !== undefined;
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Get raw plugin data for debugging purposes
+   */
+  private getRawPluginData(content: WordPressPost | WordPressPage): Record<string, unknown> {
+    const meta = (Array.isArray(content.meta) ? {} : content.meta || {}) as Record<string, unknown>;
+
+    // Return the raw plugin-specific data based on detected plugin
+    switch (this.detectedPlugin) {
+      case "yoast":
+        return (meta.yoast_head_json as Record<string, unknown>) || {};
+      case "rankmath":
+        // Extract RankMath specific fields
+        const rankMathData: Record<string, unknown> = {};
+        Object.keys(meta).forEach(key => {
+          if (key.startsWith('rank_math_')) {
+            rankMathData[key] = meta[key];
+          }
+        });
+        return rankMathData;
+      case "seopress":
+        // Extract SEOPress specific fields
+        const seopressData: Record<string, unknown> = {};
+        Object.keys(meta).forEach(key => {
+          if (key.startsWith('_seopress_')) {
+            seopressData[key] = meta[key];
+          }
+        });
+        return seopressData;
+      default:
+        return {};
     }
   }
 }

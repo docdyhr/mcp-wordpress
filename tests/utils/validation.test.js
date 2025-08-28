@@ -13,8 +13,8 @@ import {
   validateSearchQuery,
   validatePaginationParams,
   validatePostParams,
-} from "../../dist/utils/validation.js";
-import { WordPressAPIError } from "../../dist/types/client.js";
+} from "@/utils/validation.js";
+import { WordPressAPIError } from "@/types/client.js";
 
 describe("validation utilities", () => {
   describe("validateId", () => {

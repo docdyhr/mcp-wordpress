@@ -3,10 +3,10 @@
  * Provides common functionality and error handling
  */
 
-import type { WordPressClientConfig } from "../../types/client.js";
-import { WordPressAPIError } from "../../types/client.js";
-import { debug, logError } from "../../utils/debug.js";
-import { getErrorMessage } from "../../utils/error.js";
+import type { WordPressClientConfig } from "@/types/client.js";
+import { WordPressAPIError } from "@/types/client.js";
+import { debug, logError } from "@/utils/debug.js";
+import { getErrorMessage } from "@/utils/error.js";
 
 export abstract class BaseManager {
   protected config: WordPressClientConfig;

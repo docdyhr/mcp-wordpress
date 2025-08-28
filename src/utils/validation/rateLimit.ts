@@ -5,7 +5,7 @@
  * For production, consider using Redis or similar distributed cache.
  */
 
-import { WordPressAPIError } from "../../types/client.js";
+import { WordPressAPIError } from "@/types/client.js";
 
 /**
  * Rate limiting tracker (simple in-memory implementation)

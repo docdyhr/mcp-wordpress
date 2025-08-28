@@ -1,4 +1,4 @@
-import { CacheManager } from "../../dist/cache/CacheManager.js";
+import { CacheManager } from "@/cache/CacheManager.js";
 import { performance } from "perf_hooks";
 
 // Memory threshold constants

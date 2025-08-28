@@ -19,42 +19,20 @@ class MCPWordPressServer {
   private wordpressClients: Map<string, WordPressClient> = new Map();
   private initialized: boolean = false;
   private siteConfigs: SiteConfig[] = [];
-  private toolRegistry: ToolRegistry;
+  private toolRegistry!: ToolRegistry;
   private logger = LoggerFactory.server();
 
-  constructor(mcpConfig?: McpConfigType) {
-    this.loadConfiguration(mcpConfig);
-
-    if (this.wordpressClients.size === 0) {
-      // In test environments, don't exit the process
-      if (
-        ConfigHelpers.isCI() ||
-        ConfigHelpers.isTest() ||
-        (globalThis as Record<string, unknown>).__EXECUTION_CONTEXT__ === "jest"
-      ) {
-        this.logger.warn("No WordPress sites configured in test environment");
-        // Create a dummy client for testing
-        this.wordpressClients.set("test", {} as WordPressClient);
-      } else {
-        this.logger.fatal("No WordPress sites configured. Server cannot start.", {
-          expectedEnvVars: ["WORDPRESS_SITE_URL", "WORDPRESS_USERNAME", "WORDPRESS_APP_PASSWORD"],
-        });
-        process.exit(1);
-      }
-    }
-
+  constructor(private mcpConfig?: McpConfigType) {
+    // Server initialization will happen in run() method
     this.server = new McpServer({
       name: "mcp-wordpress",
       version: SERVER_VERSION,
     });
-
-    this.toolRegistry = new ToolRegistry(this.server, this.wordpressClients);
-    this.setupTools();
   }
 
-  private loadConfiguration(mcpConfig?: McpConfigType) {
+  private async loadConfiguration(mcpConfig?: McpConfigType) {
     const serverConfig = ServerConfiguration.getInstance();
-    const { clients, configs } = serverConfig.loadClientConfigurations(mcpConfig);
+    const { clients, configs } = await serverConfig.loadClientConfigurations(mcpConfig);
 
     this.wordpressClients = clients;
     this.siteConfigs = configs;
@@ -74,6 +52,30 @@ class MCPWordPressServer {
   }
 
   async run() {
+    // Load configuration asynchronously
+    await this.loadConfiguration(this.mcpConfig);
+
+    if (this.wordpressClients.size === 0) {
+      // In test environments, don't exit the process
+      if (
+        ConfigHelpers.isCI() ||
+        ConfigHelpers.isTest() ||
+        (globalThis as Record<string, unknown>).__EXECUTION_CONTEXT__ === "jest"
+      ) {
+        this.logger.warn("No WordPress sites configured in test environment");
+        // Create a dummy client for testing
+        this.wordpressClients.set("test", {} as WordPressClient);
+      } else {
+        this.logger.fatal("No WordPress sites configured. Server cannot start.", {
+          expectedEnvVars: ["WORDPRESS_SITE_URL", "WORDPRESS_USERNAME", "WORDPRESS_APP_PASSWORD"],
+        });
+        process.exit(1);
+      }
+    }
+
+    this.toolRegistry = new ToolRegistry(this.server, this.wordpressClients);
+    this.setupTools();
+
     // Skip connection testing in DXT environment to prevent timeouts
     const isDXTMode = ConfigHelpers.isDXT() || process.argv[0]?.includes("dxt-entry");
 

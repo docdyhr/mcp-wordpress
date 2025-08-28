@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.4...v2.7.0) (2025-08-28)
+
+### 🚀 Features
+
+* **architecture**: Complete migration to composition-based architecture ([TECH-001](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.4...v2.7.0))
+  - Replaced monolithic WordPressClient with modular manager pattern
+  - Added AuthManager, RequestManager, and operation-specific managers
+  - Enabled full testability with dependency injection
+  - Maintained 100% backward compatibility through adapter pattern
+
+* **seo**: Complete SEO toolkit implementation ([FEAT-002](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.4...v2.7.0))
+  - Content analyzer with readability metrics and keyword density
+  - SEO metadata generator with OpenGraph and Twitter Cards
+  - Schema.org markup generator for multiple content types
+  - WordPress SEO plugin integration (Yoast, RankMath, SEOPress)
+  - Bulk SEO operations with progress tracking
+
+* **testing**: Enhanced testing infrastructure ([QUAL-003](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.4...v2.7.0))
+  - Runtime TypeScript path alias resolution for composed architecture
+  - Comprehensive test coverage for all new managers and SEO tools
+  - Full integration test suite for composition pattern
+
+### 🐛 Bug Fixes
+
+* **client**: Fixed SEO client integration status reporting
+* **testing**: Resolved path alias resolution issues in vitest configuration
+* **composition**: Fixed authentication and request delegation in composed managers
+
+### 🔧 Technical Improvements
+
+* **build**: Added vite-tsconfig-paths for runtime module resolution
+* **config**: Enhanced vitest configuration with comprehensive alias mapping
+* **docs**: Added composition migration guide and architectural documentation
+
+### 📈 Performance
+
+* **architecture**: Improved modularity enables better performance optimization
+* **testing**: Faster test execution with proper module resolution
+
 ## [2.6.4](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.3...v2.6.4) (2025-08-27)
 
 ### 🐛 Bug Fixes

@@ -1,6 +1,24 @@
 import { defineConfig } from "vitest/config";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
+  plugins: [tsconfigPaths()],
+  
+  // Manual alias resolution for compiled JS files
+  resolve: {
+    alias: {
+      "@/types": new URL("./dist/types", import.meta.url).pathname,
+      "@/client": new URL("./dist/client", import.meta.url).pathname,
+      "@/utils": new URL("./dist/utils", import.meta.url).pathname,
+      "@/config": new URL("./dist/config", import.meta.url).pathname,
+      "@/tools": new URL("./dist/tools", import.meta.url).pathname,
+      "@/cache": new URL("./dist/cache", import.meta.url).pathname,
+      "@/security": new URL("./dist/security", import.meta.url).pathname,
+      "@/performance": new URL("./dist/performance", import.meta.url).pathname,
+      "@/server": new URL("./dist/server", import.meta.url).pathname,
+      "@": new URL("./dist", import.meta.url).pathname,
+    },
+  },
   test: {
     // Environment
     environment: "node",
@@ -93,13 +111,7 @@ export default defineConfig({
     reporters: ["verbose"],
   },
 
-  // TypeScript and module resolution
-  resolve: {
-    alias: {
-      // Support .js imports for TypeScript files
-      "^(\\.{1,2}/.*)\\.js$": "$1",
-    },
-  },
+  // TypeScript and module resolution - handled by tsconfigPaths plugin
 
   // Global variables for compatibility
   define: {

@@ -178,6 +178,7 @@ export class MetricsCollector {
       averageResponseTime: 0,
       rateLimitHits: 0,
       authFailures: 0,
+      errors: 0,
     };
 
     const responseTimes: number[] = [];

@@ -5,8 +5,8 @@
  * These validators form the foundation for more specific validation logic.
  */
 
-import { WordPressAPIError } from "../../types/client.js";
-import { WordPressId, createWordPressId } from "../../types/enhanced.js";
+import { WordPressAPIError } from "@/types/client.js";
+import { WordPressId, createWordPressId } from "@/types/enhanced.js";
 
 /**
  * Validates and sanitizes numeric IDs with comprehensive edge case handling

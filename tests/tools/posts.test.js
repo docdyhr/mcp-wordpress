@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { PostTools } from "../../dist/tools/posts/index.js";
+import { PostTools } from "@/tools/posts/index.js";
 
 describe("PostTools", () => {
   let postTools;

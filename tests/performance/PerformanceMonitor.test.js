@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { PerformanceMonitor } from "../../dist/performance/PerformanceMonitor.js";
+import { PerformanceMonitor } from "@/performance/PerformanceMonitor.js";
 
 describe("PerformanceMonitor", () => {
   let monitor;

@@ -486,7 +486,7 @@ export const SEOToolParamsSchema = z.object({
     .optional(),
   focusKeywords: z.array(z.string()).optional(),
   locale: z.string().optional(),
-  updates: z.record(z.unknown()).optional(),
+  updates: z.record(z.string(), z.unknown()).optional(),
   dryRun: z.boolean().optional(),
   force: z.boolean().optional(),
   auditType: z.enum(["technical", "content", "performance", "full"]).optional(),

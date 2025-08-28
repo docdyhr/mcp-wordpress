@@ -5,8 +5,8 @@
  * and username validation with security considerations.
  */
 
-import { WordPressAPIError } from "../../types/client.js";
-import { config } from "../../config/Config.js";
+import { WordPressAPIError } from "@/types/client.js";
+import { config } from "@/config/Config.js";
 
 /**
  * Validates and sanitizes URLs with enhanced edge case handling

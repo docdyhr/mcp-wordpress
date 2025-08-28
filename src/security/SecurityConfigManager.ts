@@ -247,7 +247,7 @@ const SecurityPolicySchema = z.object({
         paths: z.array(z.string()).optional(),
         userRoles: z.array(z.string()).optional(),
       }),
-      parameters: z.record(z.unknown()),
+      parameters: z.record(z.string(), z.unknown()),
       exceptions: z.array(z.string()),
     }),
   ),

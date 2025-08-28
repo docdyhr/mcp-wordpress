@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { TaxonomyTools } from "../../dist/tools/taxonomies.js";
+import { TaxonomyTools } from "@/tools/taxonomies.js";
 
 describe("TaxonomyTools", () => {
   let taxonomyTools;

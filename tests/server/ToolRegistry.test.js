@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { ToolRegistry } from "../../dist/server/ToolRegistry.js";
+import { ToolRegistry } from "@/server/ToolRegistry.js";
 import { z } from "zod";
 
 // Mock dependencies

@@ -1,4 +1,4 @@
-import { WordPressClient } from "../../dist/client/api.js";
+import { WordPressClient } from "@/client/api.js";
 
 /**
  * WordPress API Live Contract Tests

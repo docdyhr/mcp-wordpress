@@ -8,10 +8,10 @@
  * @since 2.7.0
  */
 
-import { WordPressClient } from "../../client/api.js";
+import { WordPressClient } from "@/client/api.js";
 import { SEOTools } from "./SEOTools.js";
-import { LoggerFactory } from "../../utils/logger.js";
-import type { SEOToolParams, SEOAnalysisType, SEOMetadata, SchemaType } from "../../types/seo.js";
+import { LoggerFactory } from "@/utils/logger.js";
+import type { SEOToolParams, SEOAnalysisType, SEOMetadata, SchemaType } from "@/types/seo.js";
 
 // Single instance of SEOTools to be reused
 let seoToolsInstance: SEOTools | null = null;

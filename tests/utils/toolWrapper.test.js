@@ -7,7 +7,7 @@ import {
   formatSuccessResponse,
   formatErrorResponse,
   toolWrapper,
-} from "../../dist/utils/toolWrapper.js";
+} from "@/utils/toolWrapper.js";
 
 describe("toolWrapper utilities", () => {
   describe("withErrorHandling", () => {

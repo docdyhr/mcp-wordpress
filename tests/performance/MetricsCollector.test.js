@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { MetricsCollector } from "../../dist/performance/MetricsCollector.js";
+import { MetricsCollector } from "@/performance/MetricsCollector.js";
 
 describe("MetricsCollector", () => {
   let collector;

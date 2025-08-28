@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { CommentTools } from "../../dist/tools/comments.js";
+import { CommentTools } from "@/tools/comments.js";
 
 describe("CommentTools", () => {
   let commentTools;

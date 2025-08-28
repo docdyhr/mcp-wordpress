@@ -6,7 +6,7 @@ import {
   handleToolError,
   validateRequired,
   validateSite,
-} from "../../dist/utils/error.js";
+} from "@/utils/error.js";
 
 describe("error utilities", () => {
   describe("getErrorMessage", () => {

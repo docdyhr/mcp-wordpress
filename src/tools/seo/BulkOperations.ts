@@ -8,13 +8,13 @@
  * @since 2.7.0
  */
 
-import { WordPressClient } from "../../client/api.js";
+import { WordPressClient } from "@/client/api.js";
 import { MetaGenerator } from "./generators/MetaGenerator.js";
 import { ContentAnalyzer } from "./analyzers/ContentAnalyzer.js";
-import { SEOCacheManager } from "../../cache/SEOCacheManager.js";
-import { LoggerFactory } from "../../utils/logger.js";
-import { SEOToolParams, BulkOperationResult, SEOAnalysisResult } from "../../types/seo.js";
-import type { WordPressPost } from "../../types/wordpress.js";
+import { SEOCacheManager } from "@/cache/SEOCacheManager.js";
+import { LoggerFactory } from "@/utils/logger.js";
+import { SEOToolParams, BulkOperationResult, SEOAnalysisResult } from "@/types/seo.js";
+import type { WordPressPost } from "@/types/wordpress.js";
 
 /**
  * Configuration for bulk operations

@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { CacheManager } from "../../dist/cache/CacheManager.js";
+import { CacheManager } from "@/cache/CacheManager.js";
 
 describe("Advanced Cache Testing Suite", () => {
   let cacheManager;

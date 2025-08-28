@@ -6,13 +6,13 @@
  * validation, API interaction, and response formatting.
  */
 
-import { WordPressClient } from "../../client/api.js";
-import { CreatePostRequest, PostQueryParams, UpdatePostRequest, WordPressPost } from "../../types/wordpress.js";
-import { getErrorMessage } from "../../utils/error.js";
-import { ErrorHandlers } from "../../utils/enhancedError.js";
-import { validateId, validatePaginationParams, validatePostParams } from "../../utils/validation.js";
-import { sanitizeHtml } from "../../utils/validation/security.js";
-import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "../../utils/streaming.js";
+import { WordPressClient } from "@/client/api.js";
+import { CreatePostRequest, PostQueryParams, UpdatePostRequest, WordPressPost } from "@/types/wordpress.js";
+import { getErrorMessage } from "@/utils/error.js";
+import { ErrorHandlers } from "@/utils/enhancedError.js";
+import { validateId, validatePaginationParams, validatePostParams } from "@/utils/validation.js";
+import { sanitizeHtml } from "@/utils/validation/security.js";
+import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "@/utils/streaming.js";
 
 /**
  * Handles listing WordPress posts with advanced filtering and pagination

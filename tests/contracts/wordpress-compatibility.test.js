@@ -1,5 +1,5 @@
 
-import { WordPressClient } from "../../dist/client/api.js";
+import { WordPressClient } from "@/client/api.js";
 
 /**
  * Simple WordPress API compatibility tests

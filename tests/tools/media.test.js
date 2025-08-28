@@ -9,7 +9,7 @@ vi.mock("fs", () => ({
   existsSync: vi.fn(),
 }));
 
-import { MediaTools } from "../../dist/tools/media.js";
+import { MediaTools } from "@/tools/media.js";
 import fs from "fs";
 
 describe("MediaTools", () => {

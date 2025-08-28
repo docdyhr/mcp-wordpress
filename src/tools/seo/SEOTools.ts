@@ -16,17 +16,17 @@
  * @since 2.7.0
  */
 
-import { WordPressClient } from "../../client/api.js";
-import { SEOWordPressClient } from "../../client/SEOWordPressClient.js";
-import { LoggerFactory } from "../../utils/logger.js";
-import { validateRequired, handleToolError } from "../../utils/error.js";
+import { WordPressClient } from "@/client/api.js";
+import { SEOWordPressClient } from "@/client/SEOWordPressClient.js";
+import { LoggerFactory } from "@/utils/logger.js";
+import { validateRequired, handleToolError } from "@/utils/error.js";
 import { ContentAnalyzer } from "./analyzers/ContentAnalyzer.js";
 import { MetaGenerator } from "./generators/MetaGenerator.js";
 import { SchemaGenerator } from "./generators/SchemaGenerator.js";
 import { InternalLinkingSuggester } from "./optimizers/InternalLinkingSuggester.js";
 import { SiteAuditor } from "./auditors/SiteAuditor.js";
 import { BulkOperations } from "./BulkOperations.js";
-import { SEOCacheManager } from "../../cache/SEOCacheManager.js";
+import { SEOCacheManager } from "@/cache/SEOCacheManager.js";
 import { seoToolDefinitions } from "./SEOToolDefinitions.js";
 import {
   handleAnalyzeContent,
@@ -48,8 +48,8 @@ import type {
   SEOToolParams,
   BulkOperationResult,
   SiteAuditResult,
-} from "../../types/seo.js";
-import type { WordPressPost } from "../../types/wordpress.js";
+} from "@/types/seo.js";
+import type { WordPressPost } from "@/types/wordpress.js";
 
 /**
  * Main SEOTools class that provides WordPress SEO management functionality.
@@ -684,9 +684,9 @@ export class SEOTools {
             url: post.link,
             seoData: post.seoData
               ? {
-                  hasTitle: !!post.seoData.metadata.title,
-                  hasDescription: !!post.seoData.metadata.description,
-                  hasFocusKeyword: !!post.seoData.metadata.focusKeyword,
+                  hasTitle: !!post.seoData.title,
+                  hasDescription: !!post.seoData.description,
+                  hasFocusKeyword: !!post.seoData.focusKeyword,
                   plugin: post.seoData.plugin,
                   lastModified: post.seoData.lastModified,
                 }
@@ -787,7 +787,7 @@ export class SEOTools {
    */
   private analyzeLiveSEOData(
     posts: Array<{
-      seoData?: { plugin: string; metadata: { title?: string; description?: string; focusKeyword?: string } };
+      seoData?: { plugin: string; title?: string | null; description?: string | null; focusKeyword?: string | null };
     }>,
   ): Record<string, unknown> {
     const analysis = {
@@ -811,9 +811,9 @@ export class SEOTools {
         pluginCounts[post.seoData.plugin as keyof typeof pluginCounts]++;
 
         // Count metadata presence
-        if (post.seoData.metadata.title) analysis.postsWithTitles++;
-        if (post.seoData.metadata.description) analysis.postsWithDescriptions++;
-        if (post.seoData.metadata.focusKeyword) analysis.postsWithFocusKeywords++;
+        if (post.seoData.title) analysis.postsWithTitles++;
+        if (post.seoData.description) analysis.postsWithDescriptions++;
+        if (post.seoData.focusKeyword) analysis.postsWithFocusKeywords++;
       }
     }
 

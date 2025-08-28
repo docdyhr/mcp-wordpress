@@ -4,9 +4,9 @@
  */
 import { vi } from "vitest";
 
-import { PerformanceAnalytics } from "../../dist/performance/PerformanceAnalytics.js";
+import { PerformanceAnalytics } from "@/performance/PerformanceAnalytics.js";
 // MetricsCollector is imported but not directly used - only for type reference
-// import { MetricsCollector } from "../../dist/performance/MetricsCollector.js";
+// import { MetricsCollector } from "@/performance/MetricsCollector.js";
 
 // Mock MetricsCollector
 const mockMetricsCollector = {

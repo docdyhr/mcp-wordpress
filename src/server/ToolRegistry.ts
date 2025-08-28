@@ -223,7 +223,7 @@ export class ToolRegistry {
       case "array":
         return z.array(z.string());
       case "object":
-        return z.record(z.unknown());
+        return z.record(z.string(), z.unknown());
       default:
         return z.string();
     }

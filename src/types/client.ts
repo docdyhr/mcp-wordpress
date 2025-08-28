@@ -58,8 +58,10 @@ export interface AppPasswordCredentials {
 }
 
 export interface JwtCredentials {
-  jwtToken: string;
-  username?: string;
+  username: string;
+  password: string;
+  jwtToken?: string;
+  jwtSecret?: string;
 }
 
 export interface BasicCredentials {
@@ -76,11 +78,10 @@ export type AuthCredentials = AppPasswordCredentials | JwtCredentials | BasicCre
 
 // Authentication status interface
 export interface AuthStatus {
-  method: AuthMethod;
-  username?: string | undefined;
   isAuthenticated: boolean;
-  tokenExpired: boolean;
-  tokenExpiry?: number;
+  method: AuthMethod;
+  lastAuthAttempt?: Date | null;
+  tokenExpiry?: Date | null;
 }
 
 // Client Configuration
@@ -134,6 +135,7 @@ export interface ClientStats {
   lastRequestTime?: number;
   rateLimitHits: number;
   authFailures: number;
+  errors: number;
 }
 
 // WordPress API Client Interface

@@ -30,7 +30,7 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 [![License](https://img.shields.io/badge/license-MIT-green?logo=opensource&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/blob/main/LICENSE)
 [![smithery badge](https://smithery.ai/badge/@docdyhr/mcp-wordpress)](https://smithery.ai/server/@docdyhr/mcp-wordpress)
 
-### 🎉 **NEW:** Multi-Site DXT Extension Now Available!
+### 🎉 **NEW:** v2.7.0 - Composition Architecture & Complete SEO Toolkit!
 
 </div>
 

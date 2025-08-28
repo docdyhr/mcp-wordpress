@@ -6,7 +6,7 @@
  * for better maintainability and testing.
  */
 
-import type { MCPTool } from "../../types/mcp.js";
+import type { MCPTool } from "@/types/mcp.js";
 
 /**
  * Tool definition for listing WordPress posts

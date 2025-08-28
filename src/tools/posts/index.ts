@@ -27,8 +27,8 @@
  * ```
  */
 
-import { WordPressClient } from "../../client/api.js";
-import { CreatePostRequest, PostQueryParams, UpdatePostRequest, WordPressPost } from "../../types/wordpress.js";
+import { WordPressClient } from "@/client/api.js";
+import { CreatePostRequest, PostQueryParams, UpdatePostRequest, WordPressPost } from "@/types/wordpress.js";
 import { postToolDefinitions } from "./PostToolDefinitions.js";
 import {
   handleListPosts,

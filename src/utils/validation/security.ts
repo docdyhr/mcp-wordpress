@@ -6,7 +6,7 @@
  */
 
 import * as path from "path";
-import { WordPressAPIError } from "../../types/client.js";
+import { WordPressAPIError } from "@/types/client.js";
 
 /**
  * Validates and sanitizes file paths to prevent directory traversal

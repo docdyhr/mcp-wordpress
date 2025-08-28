@@ -5,7 +5,7 @@
  * pagination, search queries, and status validation.
  */
 
-import { WordPressAPIError } from "../../types/client.js";
+import { WordPressAPIError } from "@/types/client.js";
 import { validateId } from "./core.js";
 import { validateString, validateArray } from "./core.js";
 import { sanitizeHtml } from "./security.js";

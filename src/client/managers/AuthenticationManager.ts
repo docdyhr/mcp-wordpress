@@ -11,12 +11,12 @@ import type {
   JwtCredentials,
   BasicCredentials,
   ApiKeyCredentials,
-} from "../../types/client.js";
-import { AuthenticationError } from "../../types/client.js";
-import { AUTH_METHODS, type AuthMethod } from "../../types/wordpress.js";
-import { config } from "../../config/Config.js";
+} from "@/types/client.js";
+import { AuthenticationError } from "@/types/client.js";
+import { AUTH_METHODS, type AuthMethod } from "@/types/wordpress.js";
+import { config } from "@/config/Config.js";
 import { BaseManager } from "./BaseManager.js";
-import { debug } from "../../utils/debug.js";
+import { debug } from "@/utils/debug.js";
 
 interface AuthManagerConfig extends WordPressClientConfig {
   siteUrl: string; // Required based on constructor validation
@@ -450,14 +450,12 @@ export class AuthenticationManager extends BaseManager {
     const isExpired = this.isTokenExpired();
 
     const status: AuthStatus = {
-      method,
-      username: this.authConfig.username,
       isAuthenticated: method === AUTH_METHODS.JWT ? !isExpired : true,
-      tokenExpired: isExpired,
+      method,
     };
 
     if (method === AUTH_METHODS.JWT && this.authConfig.tokenExpiry) {
-      status.tokenExpiry = this.authConfig.tokenExpiry;
+      status.tokenExpiry = new Date(this.authConfig.tokenExpiry);
     }
 
     return status;

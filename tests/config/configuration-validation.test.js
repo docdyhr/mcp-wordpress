@@ -1,5 +1,5 @@
 
-import { ConfigurationValidator } from "../../dist/config/ConfigurationSchema.js";
+import { ConfigurationValidator } from "@/config/ConfigurationSchema.js";
 
 describe("Configuration Validation Tests", () => {
   describe("Multi-Site Configuration Validation", () => {

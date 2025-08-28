@@ -175,7 +175,7 @@ export function validateSecurity(schema: z.ZodSchema) {
         logger.info(`Security validation passed for ${propertyName}`, {
           timestamp: new Date().toISOString(),
           method: propertyName,
-          paramCount: Object.keys(validatedParams).length,
+          paramCount: typeof validatedParams === 'object' && validatedParams ? Object.keys(validatedParams).length : 0,
         });
 
         // Call original method with validated params
@@ -186,13 +186,13 @@ export function validateSecurity(schema: z.ZodSchema) {
           timestamp: new Date().toISOString(),
           method: propertyName,
           _error:
-            _error instanceof z.ZodError ? _error.errors : _error instanceof Error ? _error.message : String(_error),
+            _error instanceof z.ZodError ? _error.issues : _error instanceof Error ? _error.message : String(_error),
         });
 
         throw new SecurityValidationError(
           `Security validation failed for ${propertyName}`,
           _error instanceof z.ZodError
-            ? _error.errors
+            ? _error.issues
             : [
                 {
                   message: _error instanceof Error ? _error.message : String(_error),
@@ -210,12 +210,12 @@ export function validateSecurity(schema: z.ZodSchema) {
  * Custom security validation error
  */
 export class SecurityValidationError extends Error {
-  public readonly errors: Array<z.ZodIssue | { message: string }>;
+  public readonly issues: Array<z.ZodIssue | { message: string }>;
 
-  constructor(message: string, errors: Array<z.ZodIssue | { message: string }> = []) {
+  constructor(message: string, issues: Array<z.ZodIssue | { message: string }> = []) {
     super(message);
     this.name = "SecurityValidationError";
-    this.errors = errors;
+    this.issues = issues;
   }
 }
 

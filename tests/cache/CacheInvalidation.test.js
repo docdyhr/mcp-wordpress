@@ -1,6 +1,6 @@
 import { vi } from "vitest";
-import { CacheInvalidation } from "../../dist/cache/CacheInvalidation.js";
-import { HttpCacheWrapper } from "../../dist/cache/HttpCacheWrapper.js";
+import { CacheInvalidation } from "@/cache/CacheInvalidation.js";
+import { HttpCacheWrapper } from "@/cache/HttpCacheWrapper.js";
 
 // Mock HttpCacheWrapper
 vi.mock("../../dist/cache/HttpCacheWrapper.js");

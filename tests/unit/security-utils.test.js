@@ -1,5 +1,5 @@
 
-import { SecurityUtils } from "../../dist/security/SecurityConfig.js";
+import { SecurityUtils } from "@/security/SecurityConfig.js";
 
 describe("SecurityUtils", () => {
   describe("redactSensitiveData", () => {

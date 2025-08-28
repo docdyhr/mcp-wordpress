@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { PageTools } from "../../dist/tools/pages.js";
+import { PageTools } from "@/tools/pages.js";
 
 describe("PageTools", () => {
   let pageTools;

@@ -26,7 +26,7 @@ export type {
   SEOMetrics,
   InternalLinkSuggestion,
   AuditIssue,
-} from "../../types/seo.js";
+} from "@/types/seo.js";
 
 // Export tool definitions
 export { seoToolDefinitions } from "./SEOToolDefinitions.js";

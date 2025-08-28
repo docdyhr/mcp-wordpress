@@ -1,6 +1,6 @@
 import { vi } from "vitest";
-import { CacheTools } from "../../dist/tools/cache.js";
-import { CachedWordPressClient } from "../../dist/client/CachedWordPressClient.js";
+import { CacheTools } from "@/tools/cache.js";
+import { CachedWordPressClient } from "@/client/CachedWordPressClient.js";
 
 describe("CacheTools", () => {
   let cacheTools;

@@ -5,7 +5,7 @@
  * and common XSS attack vectors.
  */
 
-import { sanitizeHtml } from "../../dist/utils/validation/security.js";
+import { sanitizeHtml } from "@/utils/validation/security.js";
 
 describe("Enhanced HTML Sanitization Security Tests", () => {
   describe("Script Tag Removal", () => {

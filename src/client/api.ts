@@ -5,7 +5,7 @@
 
 // Use native fetch in Node.js 18+
 import FormData from "form-data";
-import * as fs from "fs";
+import { promises as fsPromises } from "fs";
 import * as path from "path";
 import type {
   IWordPressClient,
@@ -179,6 +179,7 @@ export class WordPressClient implements IWordPressClient {
       averageResponseTime: 0,
       rateLimitHits: 0,
       authFailures: 0,
+      errors: 0,
     };
 
     // Validate configuration
@@ -818,13 +819,15 @@ export class WordPressClient implements IWordPressClient {
   }
 
   async uploadMedia(data: UploadMediaRequest): Promise<WordPressMedia> {
-    if (!fs.existsSync(data.file_path)) {
+    try {
+      await fsPromises.access(data.file_path);
+    } catch {
       throw new Error(`File not found: ${data.file_path}`);
     }
 
-    const stats = fs.statSync(data.file_path);
+    const stats = await fsPromises.stat(data.file_path);
     const filename = data.title || path.basename(data.file_path);
-    const fileBuffer = fs.readFileSync(data.file_path);
+    const fileBuffer = await fsPromises.readFile(data.file_path);
 
     // Check if file is too large (WordPress default is 2MB for most installs)
     const maxSize = 10 * 1024 * 1024; // 10MB reasonable limit

@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { WordPressClient } from "../../dist/client/api.js";
+import { WordPressClient } from "@/client/api.js";
 import nock from "nock";
 import fs from "fs";
 

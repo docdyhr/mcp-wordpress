@@ -26,7 +26,20 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "exactOptionalPropertyTypes": true,
-    "types": ["node", "vitest/globals"]
+    "types": ["node", "vitest/globals"],
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["*"],
+      "@/types/*": ["types/*"],
+      "@/client/*": ["client/*"],
+      "@/server/*": ["server/*"],
+      "@/tools/*": ["tools/*"],
+      "@/utils/*": ["utils/*"],
+      "@/config/*": ["config/*"],
+      "@/cache/*": ["cache/*"],
+      "@/security/*": ["security/*"],
+      "@/performance/*": ["performance/*"]
+    }
   },
   "include": [
     "src/**/*"

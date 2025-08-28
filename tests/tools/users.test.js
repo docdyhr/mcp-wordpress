@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { UserTools } from "../../dist/tools/users.js";
+import { UserTools } from "@/tools/users.js";
 
 describe("UserTools", () => {
   let userTools;

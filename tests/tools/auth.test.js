@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { AuthTools } from "../../dist/tools/auth.js";
+import { AuthTools } from "@/tools/auth.js";
 
 describe("AuthTools", () => {
   let authTools;
