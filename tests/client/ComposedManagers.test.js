@@ -7,7 +7,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 import { ComposedAuthenticationManager } from "../../dist/client/managers/ComposedAuthenticationManager.js";
 import { ComposedRequestManager } from "../../dist/client/managers/ComposedRequestManager.js";
-import { ComposedManagerFactory, createComposedWordPressClient } from "../../dist/client/managers/ComposedManagerFactory.js";
+import {
+  ComposedManagerFactory,
+  createComposedWordPressClient,
+} from "../../dist/client/managers/ComposedManagerFactory.js";
 import { ConfigurationProviderImpl } from "../../dist/client/managers/implementations/ConfigurationProviderImpl.js";
 import { ErrorHandlerImpl } from "../../dist/client/managers/implementations/ErrorHandlerImpl.js";
 import { ParameterValidatorImpl } from "../../dist/client/managers/implementations/ParameterValidatorImpl.js";
@@ -35,7 +38,7 @@ describe("Composed Managers", () => {
 
     // Reset fetch mock
     mockFetch.mockReset();
-    
+
     // Default successful response
     mockFetch.mockResolvedValue({
       ok: true,
@@ -52,7 +55,7 @@ describe("Composed Managers", () => {
   describe("ConfigurationProviderImpl", () => {
     it("should provide configuration access", () => {
       const configProvider = new ConfigurationProviderImpl(mockConfig);
-      
+
       expect(configProvider.config.baseUrl).toBe("https://test-site.com");
       expect(configProvider.getTimeout()).toBe(30000);
       expect(configProvider.isDebugEnabled()).toBe(false);
@@ -60,7 +63,7 @@ describe("Composed Managers", () => {
 
     it("should validate required configuration", () => {
       const invalidConfig = { baseUrl: "https://test.com" }; // missing auth
-      
+
       expect(() => {
         const configProvider = new ConfigurationProviderImpl(invalidConfig);
         configProvider.validateConfiguration();
@@ -69,7 +72,7 @@ describe("Composed Managers", () => {
 
     it("should provide configuration values by path", () => {
       const configProvider = new ConfigurationProviderImpl(mockConfig);
-      
+
       expect(configProvider.getConfigValue("auth.method")).toBe("app-password");
       expect(configProvider.getConfigValue("nonexistent", "default")).toBe("default");
     });
@@ -86,7 +89,7 @@ describe("Composed Managers", () => {
 
     it("should handle WordPress API errors", () => {
       const apiError = new WordPressAPIError("Test error", 400, "test_error");
-      
+
       expect(() => {
         errorHandler.handleError(apiError, "test operation");
       }).toThrow(WordPressAPIError);
@@ -94,7 +97,7 @@ describe("Composed Managers", () => {
 
     it("should handle timeout errors", () => {
       const timeoutError = { name: "AbortError" };
-      
+
       expect(() => {
         errorHandler.handleError(timeoutError, "test operation");
       }).toThrow("Request timeout after 30000ms");
@@ -102,17 +105,17 @@ describe("Composed Managers", () => {
 
     it("should handle connection errors", () => {
       const connectionError = { code: "ECONNREFUSED" };
-      
+
       expect(() => {
         errorHandler.handleError(connectionError, "test operation");
       }).toThrow("Cannot connect to WordPress site");
     });
 
     it("should log successful operations", () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation();
-      
+      const consoleSpy = vi.spyOn(console, "log").mockImplementation();
+
       errorHandler.logSuccess("test operation", { test: true });
-      
+
       // Note: This depends on the debug.log implementation
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
@@ -128,11 +131,11 @@ describe("Composed Managers", () => {
 
     it("should validate required parameters", () => {
       const params = { name: "test", value: 123 };
-      
+
       expect(() => {
         validator.validateRequired(params, ["name", "value"]);
       }).not.toThrow();
-      
+
       expect(() => {
         validator.validateRequired(params, ["name", "missing"]);
       }).toThrow("Missing required parameter: missing");
@@ -141,11 +144,11 @@ describe("Composed Managers", () => {
     it("should validate string parameters", () => {
       expect(validator.validateString("hello", "test")).toBe("hello");
       expect(validator.validateString(null, "test")).toBe("");
-      
+
       expect(() => {
         validator.validateString(123, "test");
       }).toThrow("test must be a string");
-      
+
       expect(() => {
         validator.validateString("", "test", { required: true });
       }).toThrow("test is required");
@@ -155,7 +158,7 @@ describe("Composed Managers", () => {
       expect(() => {
         validator.validateString("hi", "test", { minLength: 5 });
       }).toThrow("test must be at least 5 characters");
-      
+
       expect(() => {
         validator.validateString("this is too long", "test", { maxLength: 5 });
       }).toThrow("test must be no more than 5 characters");
@@ -165,7 +168,7 @@ describe("Composed Managers", () => {
       expect(validator.validateNumber(42, "test")).toBe(42);
       expect(validator.validateNumber("42", "test")).toBe(42);
       expect(validator.validateNumber(null, "test")).toBe(0);
-      
+
       expect(() => {
         validator.validateNumber("not a number", "test");
       }).toThrow("test must be a valid number");
@@ -173,11 +176,11 @@ describe("Composed Managers", () => {
 
     it("should validate WordPress IDs", () => {
       expect(validator.validateWordPressId(42)).toBe(42);
-      
+
       expect(() => {
         validator.validateWordPressId(0);
       }).toThrow("id must be at least 1");
-      
+
       expect(() => {
         validator.validateWordPressId("not a number");
       }).toThrow("id must be a valid number");
@@ -204,25 +207,25 @@ describe("Composed Managers", () => {
     it("should provide auth headers", async () => {
       await authManager.authenticate();
       const headers = authManager.getAuthHeaders();
-      
+
       expect(headers.Authorization).toContain("Basic ");
     });
 
     it("should handle authentication failures", async () => {
       const invalidConfig = {
         ...mockConfig,
-        auth: { method: "app-password" } // missing credentials
+        auth: { method: "app-password" }, // missing credentials
       };
-      
+
       const invalidAuthManager = ComposedAuthenticationManager.create(invalidConfig);
-      
+
       await expect(invalidAuthManager.authenticate()).rejects.toThrow(AuthenticationError);
     });
 
     it("should provide authentication status", async () => {
       await authManager.authenticate();
       const status = authManager.getAuthStatus();
-      
+
       expect(status.isAuthenticated).toBe(true);
       expect(status.method).toBe("app-password");
       expect(status.lastAuthAttempt).toBeInstanceOf(Date);
@@ -236,7 +239,7 @@ describe("Composed Managers", () => {
     beforeEach(async () => {
       authManager = ComposedAuthenticationManager.create(mockConfig);
       await authManager.authenticate();
-      
+
       requestManager = ComposedRequestManager.create(mockConfig, authManager);
       await requestManager.initialize();
     });
@@ -247,7 +250,7 @@ describe("Composed Managers", () => {
 
     it("should make GET requests", async () => {
       const response = await requestManager.request("GET", "/wp/v2/posts");
-      
+
       expect(response).toEqual({ id: 1, title: "Test Post" });
       expect(mockFetch).toHaveBeenCalledWith(
         "https://test-site.com/wp-json/wp/v2/posts",
@@ -257,28 +260,28 @@ describe("Composed Managers", () => {
             "Content-Type": "application/json",
             Authorization: expect.stringContaining("Basic"),
           }),
-        })
+        }),
       );
     });
 
     it("should make POST requests", async () => {
       const postData = { title: "New Post", content: "Post content" };
-      
+
       await requestManager.request("POST", "/wp/v2/posts", postData);
-      
+
       expect(mockFetch).toHaveBeenCalledWith(
         "https://test-site.com/wp-json/wp/v2/posts",
         expect.objectContaining({
           method: "POST",
           body: JSON.stringify(postData),
-        })
+        }),
       );
     });
 
     it("should track request statistics", async () => {
       await requestManager.request("GET", "/wp/v2/posts");
       const stats = requestManager.getStats();
-      
+
       expect(stats.totalRequests).toBe(1);
       expect(stats.successfulRequests).toBe(1);
       expect(stats.failedRequests).toBe(0);
@@ -288,7 +291,7 @@ describe("Composed Managers", () => {
       await requestManager.request("GET", "/wp/v2/posts");
       requestManager.resetStats();
       const stats = requestManager.getStats();
-      
+
       expect(stats.totalRequests).toBe(0);
       expect(stats.successfulRequests).toBe(0);
     });
@@ -303,25 +306,19 @@ describe("Composed Managers", () => {
         }),
       });
 
-      await expect(
-        requestManager.request("GET", "/wp/v2/posts/999")
-      ).rejects.toThrow("Post not found");
+      await expect(requestManager.request("GET", "/wp/v2/posts/999")).rejects.toThrow("Post not found");
     });
 
     it("should handle network errors", async () => {
       mockFetch.mockRejectedValue(new Error("Network error"));
 
-      await expect(
-        requestManager.request("GET", "/wp/v2/posts")
-      ).rejects.toThrow("Network error");
+      await expect(requestManager.request("GET", "/wp/v2/posts")).rejects.toThrow("Network error");
     });
 
     it("should require initialization", async () => {
       const uninitializedManager = ComposedRequestManager.create(mockConfig, authManager);
-      
-      await expect(
-        uninitializedManager.request("GET", "/wp/v2/posts")
-      ).rejects.toThrow("not initialized");
+
+      await expect(uninitializedManager.request("GET", "/wp/v2/posts")).rejects.toThrow("not initialized");
     });
   });
 
@@ -354,7 +351,7 @@ describe("Composed Managers", () => {
 
     it("should create complete composed client", async () => {
       const client = await factory.createComposedClient({ clientConfig: mockConfig });
-      
+
       expect(client.isAuthenticated()).toBe(true);
       expect(client.config.baseUrl).toBe("https://test-site.com");
     });
@@ -402,7 +399,7 @@ describe("Composed Managers", () => {
 
     it("should create posts", async () => {
       const postData = { title: "New Post", content: "Content" };
-      
+
       mockFetch.mockResolvedValue({
         ok: true,
         status: 201,
@@ -427,15 +424,15 @@ describe("Composed Managers", () => {
 
   describe("MigrationAdapter", () => {
     it("should create compatible managers", async () => {
-      const { requestManager, authManager } = await MigrationAdapter.createCompatibleManagers(mockConfig);
-      
+      const { authManager } = await MigrationAdapter.createCompatibleManagers(mockConfig);
+
       expect(authManager).toBeInstanceOf(ComposedAuthenticationManager);
       expect(authManager.isAuthenticated()).toBe(true);
     });
 
     it("should detect composed managers", () => {
       const authManager = ComposedAuthenticationManager.create(mockConfig);
-      
+
       expect(MigrationAdapter.isComposed(authManager)).toBe(true);
       expect(MigrationAdapter.isComposed({})).toBe(false);
     });
@@ -443,9 +440,9 @@ describe("Composed Managers", () => {
     it("should provide migration status", () => {
       const authManager = ComposedAuthenticationManager.create(mockConfig);
       const plainObject = {};
-      
+
       const status = MigrationAdapter.getMigrationStatus([authManager, plainObject]);
-      
+
       expect(status.total).toBe(2);
       expect(status.composed).toBe(1);
       expect(status.inheritance).toBe(1);
@@ -454,7 +451,7 @@ describe("Composed Managers", () => {
 
     it("should generate migration guide", () => {
       const guide = MigrationAdapter.generateMigrationGuide();
-      
+
       expect(guide).toContain("Migration Guide");
       expect(guide).toContain("Benefits of Composition");
       expect(guide).toContain("Migration Steps");

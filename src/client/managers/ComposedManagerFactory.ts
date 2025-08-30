@@ -4,14 +4,14 @@
  */
 
 import type { WordPressClientConfig } from "@/types/client.js";
-import type { 
-  ManagerFactory, 
+import type {
+  ManagerFactory,
   ConfigurationProvider,
   ErrorHandler,
   ParameterValidator,
   AuthenticationProvider,
   RequestHandler,
-  ManagerCompositionConfig
+  ManagerCompositionConfig,
 } from "./interfaces/ManagerInterfaces.js";
 
 import { ConfigurationProviderImpl } from "./implementations/ConfigurationProviderImpl.js";
@@ -65,12 +65,12 @@ export class ComposedManagerFactory implements ManagerFactory {
     const errorHandler = config.customErrorHandler || this.createErrorHandler(config.clientConfig);
     const validator = config.customValidator || this.createParameterValidator();
     const authProvider = config.customAuthProvider || this.createAuthenticationProvider(config.clientConfig);
-    
+
     // Initialize authentication
     await authProvider.authenticate();
-    
+
     const requestHandler = this.createRequestHandler(config.clientConfig, authProvider);
-    
+
     return new ComposedWordPressClient({
       configProvider,
       errorHandler,
@@ -109,9 +109,12 @@ export class ComposedWordPressClient {
     try {
       // Initialize all components
       await this.dependencies.authProvider.authenticate();
-      
-      if ('initialize' in this.dependencies.requestHandler && typeof this.dependencies.requestHandler.initialize === 'function') {
-        await (this.dependencies.requestHandler as any).initialize();
+
+      if (
+        "initialize" in this.dependencies.requestHandler &&
+        typeof this.dependencies.requestHandler.initialize === "function"
+      ) {
+        await (this.dependencies.requestHandler as { initialize: () => Promise<void> }).initialize();
       }
 
       this.initialized = true;
@@ -153,7 +156,7 @@ export class ComposedWordPressClient {
   /**
    * WordPress-specific convenience methods
    */
-  
+
   /**
    * Get posts
    */
@@ -198,8 +201,11 @@ export class ComposedWordPressClient {
    * Cleanup resources
    */
   dispose(): void {
-    if ('dispose' in this.dependencies.requestHandler && typeof this.dependencies.requestHandler.dispose === 'function') {
-      (this.dependencies.requestHandler as any).dispose();
+    if (
+      "dispose" in this.dependencies.requestHandler &&
+      typeof this.dependencies.requestHandler.dispose === "function"
+    ) {
+      (this.dependencies.requestHandler as { dispose: () => void }).dispose();
     }
     this.initialized = false;
   }

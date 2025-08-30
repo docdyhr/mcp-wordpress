@@ -17,19 +17,22 @@ export class ConfigurationProviderImpl implements ConfigurationProvider {
   /**
    * Get configuration value by path (dot notation)
    */
-  getConfigValue<T>(path: string, defaultValue?: T): T | undefined {
-    return path.split('.').reduce((obj, key) => obj?.[key], this.config as any) ?? defaultValue;
+  getConfigValue<T = unknown>(path: string, defaultValue?: T): T | undefined {
+    return (
+      (path.split(".").reduce((obj, key) => (obj as Record<string, unknown>)?.[key], this.config as unknown) as T) ??
+      defaultValue
+    );
   }
 
   /**
    * Validate configuration completeness
    */
   validateConfiguration(): void {
-    const required = ['baseUrl', 'auth'];
-    const missing = required.filter(field => !this.config[field as keyof WordPressClientConfig]);
-    
+    const required = ["baseUrl", "auth"];
+    const missing = required.filter((field) => !this.config[field as keyof WordPressClientConfig]);
+
     if (missing.length > 0) {
-      throw new Error(`Missing required configuration: ${missing.join(', ')}`);
+      throw new Error(`Missing required configuration: ${missing.join(", ")}`);
     }
   }
 
@@ -44,6 +47,6 @@ export class ConfigurationProviderImpl implements ConfigurationProvider {
    * Check if debug mode is enabled
    */
   isDebugEnabled(): boolean {
-    return Boolean((this.config as any).debug);
+    return Boolean((this.config as unknown as Record<string, unknown>).debug);
   }
 }

@@ -1,6 +1,6 @@
 /**
  * Tests for WordPressClient
- * 
+ *
  * Basic test coverage for the main WordPress REST API client.
  * Tests core functionality, authentication, and error handling.
  */
@@ -58,7 +58,7 @@ describe("WordPressClient", () => {
       json: vi.fn().mockResolvedValue({ id: 1, title: "Test" }),
       text: vi.fn().mockResolvedValue('{"id": 1, "title": "Test"}'),
     };
-    
+
     mockFetch.mockResolvedValue(mockResponse);
 
     const config = {
@@ -108,7 +108,7 @@ describe("WordPressClient", () => {
       await client.get("/wp/v2/posts");
 
       expect(mockFetch).toHaveBeenCalled();
-      const [url, options] = mockFetch.mock.calls[0];
+      const [_url, options] = mockFetch.mock.calls[0];
       expect(options.headers.Authorization).toMatch(/^Basic /);
     });
 
@@ -123,7 +123,7 @@ describe("WordPressClient", () => {
       };
 
       const jwtClient = new WordPressClient(jwtConfig);
-      
+
       // Mock JWT token response
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -150,7 +150,7 @@ describe("WordPressClient", () => {
       const basicClient = new WordPressClient(basicConfig);
       await basicClient.get("/wp/v2/posts");
 
-      const [url, options] = mockFetch.mock.calls[0];
+      const [_url, options] = mockFetch.mock.calls[0];
       expect(options.headers.Authorization).toMatch(/^Basic /);
     });
   });
@@ -164,14 +164,14 @@ describe("WordPressClient", () => {
         expect.objectContaining({
           method: "GET",
           headers: expect.any(Object),
-        })
+        }),
       );
       expect(result).toEqual({ id: 1, title: "Test" });
     });
 
     it("should make POST requests with data", async () => {
       const postData = { title: "New Post", content: "Content" };
-      
+
       await client.post("/wp/v2/posts", postData);
 
       expect(mockFetch).toHaveBeenCalledWith(
@@ -182,13 +182,13 @@ describe("WordPressClient", () => {
           headers: expect.objectContaining({
             "Content-Type": "application/json",
           }),
-        })
+        }),
       );
     });
 
     it("should make PUT requests", async () => {
       const putData = { id: 1, title: "Updated Post" };
-      
+
       await client.put("/wp/v2/posts/1", putData);
 
       expect(mockFetch).toHaveBeenCalledWith(
@@ -196,7 +196,7 @@ describe("WordPressClient", () => {
         expect.objectContaining({
           method: "PUT",
           body: JSON.stringify(putData),
-        })
+        }),
       );
     });
 
@@ -207,7 +207,7 @@ describe("WordPressClient", () => {
         "https://test.example.com/wp-json/wp/v2/posts/1",
         expect.objectContaining({
           method: "DELETE",
-        })
+        }),
       );
     });
   });
@@ -282,12 +282,12 @@ describe("WordPressClient", () => {
 
   describe("URL Construction", () => {
     it("should build correct URLs with base path", () => {
-      const _url = client.buildUrl("/wp/v2/posts");
+      const url = client.buildUrl("/wp/v2/posts");
       expect(url).toBe("https://test.example.com/wp-json/wp/v2/posts");
     });
 
     it("should handle query parameters", () => {
-      const _url = client.buildUrl("/wp/v2/posts", { per_page: 10, status: "publish" });
+      const url = client.buildUrl("/wp/v2/posts", { per_page: 10, status: "publish" });
       expect(url).toBe("https://test.example.com/wp-json/wp/v2/posts?per_page=10&status=publish");
     });
 
@@ -297,7 +297,7 @@ describe("WordPressClient", () => {
         auth: { method: "app-password", username: "user", appPassword: "pass" },
       });
 
-      const _url = clientWithSlash.buildUrl("/wp/v2/posts");
+      const url = clientWithSlash.buildUrl("/wp/v2/posts");
       expect(url).toBe("https://test.example.com/wp-json/wp/v2/posts");
     });
   });
@@ -306,31 +306,31 @@ describe("WordPressClient", () => {
     it("should set correct headers", async () => {
       await client.get("/wp/v2/posts");
 
-      const [url, options] = mockFetch.mock.calls[0];
+      const [_url, options] = mockFetch.mock.calls[0];
       expect(options.headers).toEqual(
         expect.objectContaining({
           "User-Agent": expect.stringMatching(/MCP-WordPress/),
           Accept: "application/json",
           Authorization: expect.any(String),
-        })
+        }),
       );
     });
 
     it("should handle custom headers", async () => {
       const customHeaders = { "X-Custom-Header": "test-value" };
-      
+
       await client.request("GET", "/wp/v2/posts", null, {
         headers: customHeaders,
       });
 
-      const [url, options] = mockFetch.mock.calls[0];
+      const [_url, options] = mockFetch.mock.calls[0];
       expect(options.headers["X-Custom-Header"]).toBe("test-value");
     });
 
     it("should set timeout", async () => {
       await client.get("/wp/v2/posts");
 
-      const [url, options] = mockFetch.mock.calls[0];
+      const [_url, options] = mockFetch.mock.calls[0];
       expect(options.signal).toBeDefined();
     });
   });
@@ -379,7 +379,7 @@ describe("WordPressClient", () => {
 
     it("should update posts", async () => {
       const updatedPost = { id: 1, title: "Updated Title" };
-      
+
       mockResponse.json.mockResolvedValue(updatedPost);
 
       const result = await client.updatePost(updatedPost);

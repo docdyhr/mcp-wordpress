@@ -144,9 +144,7 @@ export class ConfigurationValidator {
       return MultiSiteConfigSchema.parse(config);
     } catch (_error) {
       if (_error instanceof z.ZodError) {
-        const messages = _error.issues
-          .map((err: any) => `${err.path.join(".")}: ${err.message}`)
-          .join("; ");
+        const messages = _error.issues.map((err: z.ZodIssue) => `${err.path.join(".")}: ${err.message}`).join("; ");
         throw new Error(`Multi-site configuration validation failed: ${messages}`);
       }
       throw _error;
@@ -161,9 +159,7 @@ export class ConfigurationValidator {
       return EnvironmentConfigSchema.parse(env);
     } catch (_error) {
       if (_error instanceof z.ZodError) {
-        const messages = _error.issues
-          .map((err: any) => `${err.path.join(".")}: ${err.message}`)
-          .join("; ");
+        const messages = _error.issues.map((err: z.ZodIssue) => `${err.path.join(".")}: ${err.message}`).join("; ");
         throw new Error(`Environment configuration validation failed: ${messages}`);
       }
       throw _error;
@@ -178,9 +174,7 @@ export class ConfigurationValidator {
       return McpConfigSchema.parse(config);
     } catch (_error) {
       if (_error instanceof z.ZodError) {
-        const messages = _error.issues
-          .map((err: any) => `${err.path.join(".")}: ${err.message}`)
-          .join("; ");
+        const messages = _error.issues.map((err: z.ZodIssue) => `${err.path.join(".")}: ${err.message}`).join("; ");
         throw new Error(`MCP configuration validation failed: ${messages}`);
       }
       throw _error;
@@ -195,9 +189,7 @@ export class ConfigurationValidator {
       return SiteSchema.parse(config);
     } catch (_error) {
       if (_error instanceof z.ZodError) {
-        const messages = _error.issues
-          .map((err: any) => `${err.path.join(".")}: ${err.message}`)
-          .join("; ");
+        const messages = _error.issues.map((err: z.ZodIssue) => `${err.path.join(".")}: ${err.message}`).join("; ");
         throw new Error(`Site configuration validation failed: ${messages}`);
       }
       throw _error;
@@ -228,7 +220,7 @@ export class ConfigurationValidator {
     if (result.success) {
       return [];
     }
-    return result.error.issues.map((err: any) => `${err.path.join(".")}: ${err.message}`);
+    return result.error.issues.map((err: z.ZodIssue) => `${err.path.join(".")}: ${err.message}`);
   }
 }
 

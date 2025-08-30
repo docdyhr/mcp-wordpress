@@ -4,24 +4,21 @@
  */
 
 import type {
-  AuthConfig,
   WordPressClientConfig,
   AuthStatus,
   AppPasswordCredentials,
   JwtCredentials,
   BasicCredentials,
-  ApiKeyCredentials,
 } from "@/types/client.js";
 import { AuthenticationError } from "@/types/client.js";
 import { AUTH_METHODS, type AuthMethod } from "@/types/wordpress.js";
-import { config } from "@/config/Config.js";
 import { debug } from "@/utils/debug.js";
 
-import type { 
-  ConfigurationProvider, 
-  ErrorHandler, 
+import type {
+  ConfigurationProvider,
+  ErrorHandler,
   ParameterValidator,
-  AuthenticationProvider
+  AuthenticationProvider,
 } from "./interfaces/ManagerInterfaces.js";
 
 import { ConfigurationProviderImpl } from "./implementations/ConfigurationProviderImpl.js";
@@ -147,7 +144,7 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
     if (this.authMethod === "jwt") {
       try {
         return await this.refreshJWTToken();
-      } catch (refreshError) {
+      } catch (_refreshError) {
         // If refresh fails, try full re-authentication
         return await this.authenticate();
       }
@@ -174,7 +171,7 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
    */
   private async authenticateAppPassword(): Promise<boolean> {
     const credentials = this.getAppPasswordCredentials();
-    
+
     // App passwords are stateless - just validate credentials format
     this.dependencies.validator.validateString(credentials.username, "username", { required: true });
     this.dependencies.validator.validateString(credentials.appPassword, "appPassword", { required: true });
@@ -190,7 +187,7 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
   private async authenticateJWT(): Promise<boolean> {
     const credentials = this.getJWTCredentials();
     const tokenEndpoint = "/jwt-auth/v1/token";
-    
+
     try {
       const response = await fetch(`${this.dependencies.configProvider.config.baseUrl}/wp-json${tokenEndpoint}`, {
         method: "POST",
@@ -207,24 +204,24 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
         throw new AuthenticationError(`JWT authentication failed: ${response.statusText}`, "jwt");
       }
 
-      const data = await response.json() as { token?: string; expires_in?: number };
-      
+      const data = (await response.json()) as { token?: string; expires_in?: number };
+
       if (!data.token) {
         throw new AuthenticationError("No token received from JWT authentication", "jwt");
       }
 
       this.authToken = data.token;
       this.isAuth = true;
-      
+
       // Set token expiry (default to 24 hours if not provided)
       const expiresIn = data.expires_in || 86400; // 24 hours in seconds
       this.tokenExpiry = new Date(Date.now() + expiresIn * 1000);
 
-      debug.log("JWT authentication successful", { 
-        expiresIn, 
-        expiry: this.tokenExpiry.toISOString() 
+      debug.log("JWT authentication successful", {
+        expiresIn,
+        expiry: this.tokenExpiry.toISOString(),
       });
-      
+
       return true;
     } catch (error) {
       throw new AuthenticationError(`JWT authentication failed: ${String(error)}`, "jwt");
@@ -236,7 +233,7 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
    */
   private async authenticateBasic(): Promise<boolean> {
     const credentials = this.getBasicCredentials();
-    
+
     this.dependencies.validator.validateString(credentials.username, "username", { required: true });
     this.dependencies.validator.validateString(credentials.password, "password", { required: true });
 
@@ -250,7 +247,7 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
    */
   private async authenticateApiKey(): Promise<boolean> {
     const apiKey = this.getApiKeyFromConfig();
-    
+
     this.dependencies.validator.validateString(apiKey, "apiKey", { required: true });
 
     this.isAuth = true;
@@ -267,12 +264,12 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
     }
 
     const refreshEndpoint = "/jwt-auth/v1/token/validate";
-    
+
     try {
       const response = await fetch(`${this.dependencies.configProvider.config.baseUrl}/wp-json${refreshEndpoint}`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${this.authToken}`,
+          Authorization: `Bearer ${this.authToken}`,
           "Content-Type": "application/json",
         },
       });
@@ -313,7 +310,7 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
    */
   private getAuthMethodFromConfig(): AuthMethod {
     const authConfig = this.dependencies.configProvider.config.auth;
-    
+
     if (authConfig.method && Object.values(AUTH_METHODS).includes(authConfig.method as AuthMethod)) {
       return authConfig.method as AuthMethod;
     }
@@ -322,7 +319,7 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
     if (authConfig.appPassword) return "app-password";
     if (authConfig.secret || authConfig.password) return "jwt";
     if (authConfig.apiKey) return "api-key";
-    
+
     return "basic"; // fallback
   }
 
@@ -331,7 +328,7 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
    */
   private validateAuthConfiguration(): void {
     const authConfig = this.dependencies.configProvider.config.auth;
-    
+
     if (!authConfig) {
       throw new AuthenticationError("No authentication configuration provided", this.authMethod);
     }
@@ -339,7 +336,10 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
     switch (this.authMethod) {
       case "app-password":
         if (!authConfig.username || !authConfig.appPassword) {
-          throw new AuthenticationError("App password authentication requires username and appPassword", this.authMethod);
+          throw new AuthenticationError(
+            "App password authentication requires username and appPassword",
+            this.authMethod,
+          );
         }
         break;
       case "jwt":
@@ -380,11 +380,11 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
       username: authConfig.username!,
       password: authConfig.password!,
     };
-    
+
     if (authConfig.secret) {
       credentials.jwtSecret = authConfig.secret;
     }
-    
+
     return credentials;
   }
 

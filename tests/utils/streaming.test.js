@@ -1,6 +1,6 @@
 /**
  * Tests for streaming utilities
- * 
+ *
  * Comprehensive test coverage for streaming operations,
  * data transformation, and stream handling utilities.
  */
@@ -9,22 +9,22 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { Readable, Writable, Transform } from "stream";
 
 // Import streaming utilities - adjust path based on actual exports
-import * as StreamUtils from "@/utils/streaming.js";
+// import * as StreamUtils from "@/utils/streaming.js"; // Module doesn't exist yet
 
 describe("Streaming Utilities", () => {
-  let mockStream;
+  let _mockStream;
   let outputData;
 
   beforeEach(() => {
     vi.clearAllMocks();
     outputData = [];
-    
+
     // Create a mock writable stream for testing
-    mockStream = new Writable({
+    _mockStream = new Writable({
       write(chunk, encoding, callback) {
         outputData.push(chunk.toString());
         callback();
-      }
+      },
     });
   });
 
@@ -35,22 +35,22 @@ describe("Streaming Utilities", () => {
   describe("Stream Creation", () => {
     it("should create readable stream from array", async () => {
       const testData = ["item1", "item2", "item3"];
-      
+
       // Test basic stream creation pattern
       const readable = new Readable({
         objectMode: true,
         read() {
           const item = testData.shift();
           this.push(item || null);
-        }
+        },
       });
 
       const chunks = [];
-      readable.on('data', chunk => chunks.push(chunk));
-      
+      readable.on("data", (chunk) => chunks.push(chunk));
+
       await new Promise((resolve, reject) => {
-        readable.on('end', resolve);
-        readable.on('error', reject);
+        readable.on("end", resolve);
+        readable.on("error", reject);
       });
 
       expect(chunks).toEqual(["item1", "item2", "item3"]);
@@ -68,17 +68,17 @@ describe("Streaming Utilities", () => {
         read() {
           const { value, done } = this.generator.next();
           this.push(done ? null : value);
-        }
+        },
       });
-      
+
       readable.generator = dataGenerator();
 
       const chunks = [];
-      readable.on('data', chunk => chunks.push(chunk));
-      
+      readable.on("data", (chunk) => chunks.push(chunk));
+
       await new Promise((resolve, reject) => {
-        readable.on('end', resolve);
-        readable.on('error', reject);
+        readable.on("end", resolve);
+        readable.on("error", reject);
       });
 
       expect(chunks).toEqual(["first", "second", "third"]);
@@ -88,15 +88,15 @@ describe("Streaming Utilities", () => {
       const readable = new Readable({
         read() {
           this.push(null); // End immediately
-        }
+        },
       });
 
       const chunks = [];
-      readable.on('data', chunk => chunks.push(chunk));
-      
+      readable.on("data", (chunk) => chunks.push(chunk));
+
       await new Promise((resolve, reject) => {
-        readable.on('end', resolve);
-        readable.on('error', reject);
+        readable.on("end", resolve);
+        readable.on("error", reject);
       });
 
       expect(chunks).toHaveLength(0);
@@ -110,7 +110,7 @@ describe("Streaming Utilities", () => {
         transform(chunk, encoding, callback) {
           this.push(chunk.toString().toUpperCase());
           callback();
-        }
+        },
       });
 
       const readable = new Readable({
@@ -118,21 +118,21 @@ describe("Streaming Utilities", () => {
         read() {
           const data = ["hello", "world"];
           this.push(data.shift() || null);
-        }
+        },
       });
 
       const chunks = [];
-      
+
       readable
         .pipe(transform)
-        .on('data', chunk => chunks.push(chunk))
-        .on('end', () => {
+        .on("data", (chunk) => chunks.push(chunk))
+        .on("end", () => {
           expect(chunks).toEqual(["HELLO", "WORLD"]);
         });
 
       await new Promise((resolve, reject) => {
-        transform.on('end', resolve);
-        transform.on('error', reject);
+        transform.on("end", resolve);
+        transform.on("error", reject);
       });
     });
 
@@ -144,7 +144,7 @@ describe("Streaming Utilities", () => {
             this.push(chunk);
           }
           callback();
-        }
+        },
       });
 
       const readable = new Readable({
@@ -152,18 +152,16 @@ describe("Streaming Utilities", () => {
         read() {
           const numbers = [1, 2, 3, 4, 5, 6];
           this.push(numbers.shift() || null);
-        }
+        },
       });
 
       const chunks = [];
-      
-      readable
-        .pipe(filter)
-        .on('data', chunk => chunks.push(chunk));
+
+      readable.pipe(filter).on("data", (chunk) => chunks.push(chunk));
 
       await new Promise((resolve, reject) => {
-        filter.on('end', resolve);
-        filter.on('error', reject);
+        filter.on("end", resolve);
+        filter.on("error", reject);
       });
 
       expect(chunks).toEqual([2, 4, 6]);
@@ -173,49 +171,41 @@ describe("Streaming Utilities", () => {
       const complexTransform = new Transform({
         objectMode: true,
         transform(chunk, encoding, callback) {
-          if (typeof chunk === 'object' && chunk !== null) {
+          if (typeof chunk === "object" && chunk !== null) {
             this.push({
               ...chunk,
               processed: true,
               timestamp: Date.now(),
-              id: Math.random().toString(36).substr(2, 9)
+              id: Math.random().toString(36).substr(2, 9),
             });
           } else {
             this.push({
               value: chunk,
               type: typeof chunk,
               processed: true,
-              timestamp: Date.now()
+              timestamp: Date.now(),
             });
           }
           callback();
-        }
+        },
       });
 
-      const testObjects = [
-        { name: "test1" },
-        { name: "test2", data: "value" },
-        "string value",
-        123,
-        null
-      ];
+      const testObjects = [{ name: "test1" }, { name: "test2", data: "value" }, "string value", 123, null];
 
       const readable = new Readable({
         objectMode: true,
         read() {
           this.push(testObjects.shift() || null);
-        }
+        },
       });
 
       const chunks = [];
-      
-      readable
-        .pipe(complexTransform)
-        .on('data', chunk => chunks.push(chunk));
+
+      readable.pipe(complexTransform).on("data", (chunk) => chunks.push(chunk));
 
       await new Promise((resolve, reject) => {
-        complexTransform.on('end', resolve);
-        complexTransform.on('error', reject);
+        complexTransform.on("end", resolve);
+        complexTransform.on("error", reject);
       });
 
       expect(chunks).toHaveLength(5);
@@ -229,75 +219,71 @@ describe("Streaming Utilities", () => {
     it("should handle read errors", async () => {
       const errorStream = new Readable({
         read() {
-          this.emit('error', new Error('Read error'));
-        }
+          this.emit("error", new Error("Read error"));
+        },
       });
 
       let errorCaught = false;
-      
-      errorStream.on('error', (error) => {
+
+      errorStream.on("error", (error) => {
         errorCaught = true;
-        expect(error.message).toBe('Read error');
+        expect(error.message).toBe("Read error");
       });
 
-      await new Promise(resolve => setTimeout(resolve, 10));
-      
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
       expect(errorCaught).toBe(true);
     });
 
     it("should handle transform errors", async () => {
       const errorTransform = new Transform({
         transform(chunk, encoding, callback) {
-          callback(new Error('Transform error'));
-        }
+          callback(new Error("Transform error"));
+        },
       });
 
       const readable = new Readable({
         read() {
           this.push("test data");
           this.push(null);
-        }
+        },
       });
 
       let errorCaught = false;
-      
-      readable
-        .pipe(errorTransform)
-        .on('error', (error) => {
-          errorCaught = true;
-          expect(error.message).toBe('Transform error');
-        });
 
-      await new Promise(resolve => setTimeout(resolve, 10));
-      
+      readable.pipe(errorTransform).on("error", (error) => {
+        errorCaught = true;
+        expect(error.message).toBe("Transform error");
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
       expect(errorCaught).toBe(true);
     });
 
     it("should handle write errors", async () => {
       const errorWritable = new Writable({
         write(chunk, encoding, callback) {
-          callback(new Error('Write error'));
-        }
+          callback(new Error("Write error"));
+        },
       });
 
       const readable = new Readable({
         read() {
           this.push("test data");
           this.push(null);
-        }
+        },
       });
 
       let errorCaught = false;
-      
-      readable
-        .pipe(errorWritable)
-        .on('error', (error) => {
-          errorCaught = true;
-          expect(error.message).toBe('Write error');
-        });
 
-      await new Promise(resolve => setTimeout(resolve, 10));
-      
+      readable.pipe(errorWritable).on("error", (error) => {
+        errorCaught = true;
+        expect(error.message).toBe("Write error");
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
       expect(errorCaught).toBe(true);
     });
   });
@@ -311,7 +297,7 @@ describe("Streaming Utilities", () => {
             outputData.push(chunk.toString());
             callback();
           }, 1);
-        }
+        },
       });
 
       const fastReadable = new Readable({
@@ -320,20 +306,17 @@ describe("Streaming Utilities", () => {
             this.push(`item-${i}`);
           }
           this.push(null);
-        }
+        },
       });
 
       const startTime = Date.now();
-      
+
       await new Promise((resolve, reject) => {
-        fastReadable
-          .pipe(slowWritable)
-          .on('finish', resolve)
-          .on('error', reject);
+        fastReadable.pipe(slowWritable).on("finish", resolve).on("error", reject);
       });
 
       const duration = Date.now() - startTime;
-      
+
       expect(outputData).toHaveLength(10);
       expect(duration).toBeGreaterThan(5); // Should take some time due to backpressure
     });
@@ -341,7 +324,7 @@ describe("Streaming Utilities", () => {
     it("should handle high watermark limits", async () => {
       const highWaterMark = 5;
       let pushCount = 0;
-      
+
       const readable = new Readable({
         highWaterMark,
         read() {
@@ -353,18 +336,18 @@ describe("Streaming Utilities", () => {
           } else {
             this.push(null);
           }
-        }
+        },
       });
 
       const chunks = [];
-      
-      readable.on('data', chunk => {
+
+      readable.on("data", (chunk) => {
         chunks.push(chunk.toString());
       });
 
       await new Promise((resolve, reject) => {
-        readable.on('end', resolve);
-        readable.on('error', reject);
+        readable.on("end", resolve);
+        readable.on("error", reject);
       });
 
       expect(chunks).toHaveLength(20);
@@ -378,33 +361,33 @@ describe("Streaming Utilities", () => {
         transform(chunk, encoding, callback) {
           this.push(chunk.toString().toUpperCase());
           callback();
-        }
+        },
       });
 
       const addPrefixTransform = new Transform({
         transform(chunk, encoding, callback) {
           this.push(`PREFIX: ${chunk}`);
           callback();
-        }
+        },
       });
 
       const readable = new Readable({
         read() {
           const words = ["hello", "world"];
           this.push(words.shift() || null);
-        }
+        },
       });
 
       const chunks = [];
-      
+
       readable
         .pipe(upperTransform)
         .pipe(addPrefixTransform)
-        .on('data', chunk => chunks.push(chunk.toString()));
+        .on("data", (chunk) => chunks.push(chunk.toString()));
 
       await new Promise((resolve, reject) => {
-        addPrefixTransform.on('end', resolve);
-        addPrefixTransform.on('error', reject);
+        addPrefixTransform.on("end", resolve);
+        addPrefixTransform.on("error", reject);
       });
 
       expect(chunks).toEqual(["PREFIX: HELLO", "PREFIX: WORLD"]);
@@ -416,7 +399,7 @@ describe("Streaming Utilities", () => {
         read() {
           const items = [1, 2, 3, 4, 5];
           this.push(items.shift() || null);
-        }
+        },
       });
 
       const doubleTransform = new Transform({
@@ -424,7 +407,7 @@ describe("Streaming Utilities", () => {
         transform(chunk, encoding, callback) {
           this.push(chunk * 2);
           callback();
-        }
+        },
       });
 
       const squareTransform = new Transform({
@@ -432,25 +415,25 @@ describe("Streaming Utilities", () => {
         transform(chunk, encoding, callback) {
           this.push(chunk * chunk);
           callback();
-        }
+        },
       });
 
       const doubledResults = [];
       const squaredResults = [];
 
       // Split the stream
-      source.on('data', (chunk) => {
+      source.on("data", (chunk) => {
         doubleTransform.write(chunk);
         squareTransform.write(chunk);
       });
 
-      source.on('end', () => {
+      source.on("end", () => {
         doubleTransform.end();
         squareTransform.end();
       });
 
-      doubleTransform.on('data', chunk => doubledResults.push(chunk));
-      squareTransform.on('data', chunk => squaredResults.push(chunk));
+      doubleTransform.on("data", (chunk) => doubledResults.push(chunk));
+      squareTransform.on("data", (chunk) => squaredResults.push(chunk));
 
       await new Promise((resolve, reject) => {
         let finished = 0;
@@ -458,10 +441,10 @@ describe("Streaming Utilities", () => {
           finished++;
           if (finished === 2) resolve();
         };
-        
-        doubleTransform.on('end', onFinish);
-        squareTransform.on('end', onFinish);
-        source.on('error', reject);
+
+        doubleTransform.on("end", onFinish);
+        squareTransform.on("end", onFinish);
+        source.on("error", reject);
       });
 
       expect(doubledResults).toEqual([2, 4, 6, 8, 10]);
@@ -473,7 +456,7 @@ describe("Streaming Utilities", () => {
     it("should handle large datasets without memory leaks", async () => {
       const ITEM_COUNT = 10000;
       let processedCount = 0;
-      
+
       const largeStream = new Readable({
         objectMode: true,
         read() {
@@ -482,7 +465,7 @@ describe("Streaming Utilities", () => {
           } else {
             this.push(null);
           }
-        }
+        },
       });
 
       const counter = new Writable({
@@ -490,21 +473,18 @@ describe("Streaming Utilities", () => {
         write(chunk, encoding, callback) {
           // Just count, don't store
           callback();
-        }
+        },
       });
 
       const startMemory = process.memoryUsage().heapUsed;
-      
+
       await new Promise((resolve, reject) => {
-        largeStream
-          .pipe(counter)
-          .on('finish', resolve)
-          .on('error', reject);
+        largeStream.pipe(counter).on("finish", resolve).on("error", reject);
       });
 
       const endMemory = process.memoryUsage().heapUsed;
       const memoryIncrease = endMemory - startMemory;
-      
+
       expect(processedCount).toBe(ITEM_COUNT);
       // Memory increase should be reasonable (less than 50MB)
       expect(memoryIncrease).toBeLessThan(50 * 1024 * 1024);
@@ -512,7 +492,7 @@ describe("Streaming Utilities", () => {
 
     it("should properly clean up resources", async () => {
       let cleanupCalled = false;
-      
+
       const cleanupStream = new Readable({
         read() {
           this.push("test data");
@@ -521,15 +501,15 @@ describe("Streaming Utilities", () => {
         destroy(error, callback) {
           cleanupCalled = true;
           callback(error);
-        }
+        },
       });
 
       const chunks = [];
-      cleanupStream.on('data', chunk => chunks.push(chunk.toString()));
+      cleanupStream.on("data", (chunk) => chunks.push(chunk.toString()));
 
       await new Promise((resolve, reject) => {
-        cleanupStream.on('end', resolve);
-        cleanupStream.on('error', reject);
+        cleanupStream.on("end", resolve);
+        cleanupStream.on("error", reject);
       });
 
       cleanupStream.destroy();
@@ -543,9 +523,9 @@ describe("Streaming Utilities", () => {
     it("should work with async iterators", async () => {
       async function* asyncGenerator() {
         yield "async-1";
-        await new Promise(resolve => setTimeout(resolve, 1));
+        await new Promise((resolve) => setTimeout(resolve, 1));
         yield "async-2";
-        await new Promise(resolve => setTimeout(resolve, 1));
+        await new Promise((resolve) => setTimeout(resolve, 1));
         yield "async-3";
       }
 
@@ -555,22 +535,22 @@ describe("Streaming Utilities", () => {
           if (!this.iterator) {
             this.iterator = asyncGenerator();
           }
-          
+
           try {
             const { value, done } = await this.iterator.next();
             this.push(done ? null : value);
           } catch (error) {
-            this.emit('error', error);
+            this.emit("error", error);
           }
-        }
+        },
       });
 
       const chunks = [];
-      readable.on('data', chunk => chunks.push(chunk));
+      readable.on("data", (chunk) => chunks.push(chunk));
 
       await new Promise((resolve, reject) => {
-        readable.on('end', resolve);
-        readable.on('error', reject);
+        readable.on("end", resolve);
+        readable.on("error", reject);
       });
 
       expect(chunks).toEqual(["async-1", "async-2", "async-3"]);
@@ -580,7 +560,7 @@ describe("Streaming Utilities", () => {
       async function* errorGenerator() {
         yield "before-error";
         throw new Error("Async generator error");
-        yield "after-error"; // Should never reach this
+        // yield "after-error"; // Should never reach this (unreachable)
       }
 
       const readable = new Readable({
@@ -589,26 +569,26 @@ describe("Streaming Utilities", () => {
           if (!this.iterator) {
             this.iterator = errorGenerator();
           }
-          
+
           try {
             const { value, done } = await this.iterator.next();
             this.push(done ? null : value);
           } catch (error) {
-            this.emit('error', error);
+            this.emit("error", error);
           }
-        }
+        },
       });
 
       const chunks = [];
       let errorCaught = false;
 
-      readable.on('data', chunk => chunks.push(chunk));
-      readable.on('error', error => {
+      readable.on("data", (chunk) => chunks.push(chunk));
+      readable.on("error", (error) => {
         errorCaught = true;
         expect(error.message).toBe("Async generator error");
       });
 
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       expect(chunks).toEqual(["before-error"]);
       expect(errorCaught).toBe(true);
@@ -629,7 +609,7 @@ describe("Streaming Utilities", () => {
           } else {
             this.push(null);
           }
-        }
+        },
       });
 
       const consumer = new Writable({
@@ -637,16 +617,13 @@ describe("Streaming Utilities", () => {
         write(chunk, encoding, callback) {
           consumed++;
           callback();
-        }
+        },
       });
 
       const startTime = Date.now();
 
       await new Promise((resolve, reject) => {
-        producer
-          .pipe(consumer)
-          .on('finish', resolve)
-          .on('error', reject);
+        producer.pipe(consumer).on("finish", resolve).on("error", reject);
       });
 
       const duration = Date.now() - startTime;
@@ -670,9 +647,9 @@ describe("Streaming Utilities", () => {
           read() {
             const items = Array.from({ length: itemsPerStream }, (_, i) => `stream-${s}-item-${i}`);
             this.push(items.shift() || null);
-          }
+          },
         });
-        
+
         streams.push(stream);
       }
 
@@ -680,11 +657,11 @@ describe("Streaming Utilities", () => {
       const promises = streams.map((stream, index) => {
         const streamResults = [];
         results[index] = streamResults;
-        
+
         return new Promise((resolve, reject) => {
-          stream.on('data', chunk => streamResults.push(chunk));
-          stream.on('end', resolve);
-          stream.on('error', reject);
+          stream.on("data", (chunk) => streamResults.push(chunk));
+          stream.on("end", resolve);
+          stream.on("error", reject);
         });
       });
 

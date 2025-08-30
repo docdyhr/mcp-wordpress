@@ -6,15 +6,14 @@
 import type { HTTPMethod, RequestOptions, ClientStats, WordPressClientConfig } from "@/types/client.js";
 import { WordPressAPIError, RateLimitError } from "@/types/client.js";
 import { config } from "@/config/Config.js";
-import { debug, startTimer } from "@/utils/debug.js";
+import { startTimer } from "@/utils/debug.js";
 
-import type { 
-  ComposedManager, 
-  ConfigurationProvider, 
-  ErrorHandler, 
+import type {
+  ConfigurationProvider,
+  ErrorHandler,
   ParameterValidator,
   AuthenticationProvider,
-  RequestHandler
+  RequestHandler,
 } from "./interfaces/ManagerInterfaces.js";
 
 import { ConfigurationProviderImpl } from "./implementations/ConfigurationProviderImpl.js";
@@ -76,10 +75,10 @@ export class ComposedRequestManager implements RequestHandler {
       if (!this.dependencies.configProvider.config.baseUrl) {
         throw new Error("Base URL is required");
       }
-      
+
       // Ensure authentication is ready
       await this.dependencies.authProvider.authenticate();
-      
+
       this.initialized = true;
     } catch (error) {
       this.dependencies.errorHandler.handleError(error, "initialize request manager");
@@ -91,7 +90,7 @@ export class ComposedRequestManager implements RequestHandler {
    */
   async request<T>(method: HTTPMethod, endpoint: string, data?: unknown, options: RequestOptions = {}): Promise<T> {
     this.ensureInitialized();
-    
+
     const timer = startTimer();
     this.stats.totalRequests++;
 
@@ -113,7 +112,7 @@ export class ComposedRequestManager implements RequestHandler {
     } catch (error) {
       this.stats.failedRequests++;
       this.stats.errors++;
-      
+
       if (error instanceof RateLimitError) {
         this.stats.rateLimitHits++;
       }
@@ -153,7 +152,7 @@ export class ComposedRequestManager implements RequestHandler {
 
     if (timeSinceLastRequest < this.requestInterval) {
       const delay = this.requestInterval - timeSinceLastRequest;
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
 
     this.lastRequestTime = Date.now();
@@ -163,20 +162,20 @@ export class ComposedRequestManager implements RequestHandler {
    * Make request with retry logic
    */
   private async makeRequestWithRetry<T>(
-    method: HTTPMethod, 
-    endpoint: string, 
-    data?: unknown, 
+    method: HTTPMethod,
+    endpoint: string,
+    data?: unknown,
     options: RequestOptions = {},
-    attempt: number = 1
+    attempt: number = 1,
   ): Promise<T> {
     const maxRetries = 3; // Use default retries for composed manager
-    
+
     try {
       return await this.makeRequest<T>(method, endpoint, data, options);
     } catch (error) {
       if (attempt <= maxRetries && this.shouldRetry(error)) {
         const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
         return this.makeRequestWithRetry<T>(method, endpoint, data, options, attempt + 1);
       }
       throw error;
@@ -186,7 +185,12 @@ export class ComposedRequestManager implements RequestHandler {
   /**
    * Make actual HTTP request
    */
-  private async makeRequest<T>(method: HTTPMethod, endpoint: string, data?: unknown, options: RequestOptions = {}): Promise<T> {
+  private async makeRequest<T>(
+    method: HTTPMethod,
+    endpoint: string,
+    data?: unknown,
+    options: RequestOptions = {},
+  ): Promise<T> {
     const url = this.buildUrl(endpoint);
     const requestOptions = await this.buildRequestOptions(method, data, options);
 
@@ -197,9 +201,9 @@ export class ComposedRequestManager implements RequestHandler {
     }
 
     const contentType = response.headers.get("content-type");
-    
+
     if (contentType && contentType.includes("application/json")) {
-      return await response.json() as T;
+      return (await response.json()) as T;
     }
 
     return (await response.text()) as unknown as T;
@@ -210,22 +214,26 @@ export class ComposedRequestManager implements RequestHandler {
    */
   private buildUrl(endpoint: string): string {
     const baseUrl = this.dependencies.configProvider.config.baseUrl;
-    const cleanBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-    
+    const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+    const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+
     return `${cleanBase}/wp-json${cleanEndpoint}`;
   }
 
   /**
    * Build request options with authentication
    */
-  private async buildRequestOptions(method: HTTPMethod, data?: unknown, options: RequestOptions = {}): Promise<RequestInit> {
+  private async buildRequestOptions(
+    method: HTTPMethod,
+    data?: unknown,
+    options: RequestOptions = {},
+  ): Promise<RequestInit> {
     const authHeaders = this.dependencies.authProvider.getAuthHeaders();
     const timeout = this.dependencies.configProvider.config.timeout || 30000;
 
     const headers = {
       "Content-Type": "application/json",
-      "Accept": "application/json",
+      Accept: "application/json",
       "User-Agent": "MCP-WordPress/2.0",
       ...authHeaders,
       ...options.headers,
@@ -234,9 +242,7 @@ export class ComposedRequestManager implements RequestHandler {
     const requestOptions: RequestInit = {
       method,
       headers,
-      signal: typeof AbortSignal !== "undefined" && AbortSignal.timeout 
-        ? AbortSignal.timeout(timeout) 
-        : null,
+      signal: typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(timeout) : null,
     };
 
     if (data && (method === "POST" || method === "PUT" || method === "PATCH")) {
@@ -251,16 +257,16 @@ export class ComposedRequestManager implements RequestHandler {
    */
   private async handleHttpError(response: Response): Promise<never> {
     const statusCode = response.status;
-    
+
     if (statusCode === 401) {
       this.stats.authFailures++;
-      
+
       // Try to refresh authentication
       try {
         await this.dependencies.authProvider.handleAuthFailure(new Error(`HTTP ${statusCode}`));
         // If refresh succeeds, the caller should retry
         throw new WordPressAPIError("Authentication refreshed, retry needed", 401, "auth_refreshed");
-      } catch (authError) {
+      } catch (_authError) {
         throw new WordPressAPIError("Authentication failed", 401, "auth_failed");
       }
     }
@@ -272,9 +278,9 @@ export class ComposedRequestManager implements RequestHandler {
     }
 
     let errorMessage = `HTTP ${statusCode}: ${response.statusText}`;
-    
+
     try {
-      const errorBody = await response.json() as { message?: string };
+      const errorBody = (await response.json()) as { message?: string };
       if (errorBody.message) {
         errorMessage = errorBody.message;
       }
@@ -296,7 +302,7 @@ export class ComposedRequestManager implements RequestHandler {
 
     if (error instanceof Error) {
       const retryableErrors = ["ECONNRESET", "ETIMEDOUT", "ENOTFOUND", "EAI_AGAIN"];
-      return retryableErrors.some(code => error.message.includes(code));
+      return retryableErrors.some((code) => error.message.includes(code));
     }
 
     return false;

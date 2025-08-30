@@ -8,7 +8,6 @@ import { RequestManager } from "../RequestManager.js";
 import { AuthenticationManager } from "../AuthenticationManager.js";
 import { ComposedRequestManager } from "../ComposedRequestManager.js";
 import { ComposedAuthenticationManager } from "../ComposedAuthenticationManager.js";
-import { createComposedWordPressClient } from "../ComposedManagerFactory.js";
 
 /**
  * Adapter that wraps composed managers to provide the same interface as inheritance-based ones
@@ -19,7 +18,7 @@ export class RequestManagerAdapter {
   constructor(clientConfig: WordPressClientConfig, authManager: AuthenticationManager | ComposedAuthenticationManager) {
     // If the authManager is the old inheritance-based one, create a composed one
     let composedAuthManager: ComposedAuthenticationManager;
-    
+
     if (authManager instanceof ComposedAuthenticationManager) {
       composedAuthManager = authManager;
     } else {
@@ -41,7 +40,12 @@ export class RequestManagerAdapter {
    * Delegate request method to composed manager
    */
   async request<T>(method: HTTPMethod, endpoint: string, data?: unknown, options?: unknown): Promise<T> {
-    return this.composedManager.request<T>(method, endpoint, data, options as any);
+    return this.composedManager.request<T>(
+      method,
+      endpoint,
+      data,
+      options as Parameters<ComposedRequestManager["request"]>[3],
+    );
   }
 
   /**
@@ -93,8 +97,8 @@ export class MigrationAdapter {
    * Factory method that returns either old or new managers based on feature flag
    */
   static async createManagers(
-    config: WordPressClientConfig, 
-    useComposition: boolean = true
+    config: WordPressClientConfig,
+    useComposition: boolean = true,
   ): Promise<{
     requestManager: RequestManager | RequestManagerAdapter;
     authManager: AuthenticationManager | ComposedAuthenticationManager;
@@ -111,9 +115,11 @@ export class MigrationAdapter {
    * Check if a manager is using the new composed approach
    */
   static isComposed(manager: unknown): boolean {
-    return manager instanceof ComposedAuthenticationManager || 
-           manager instanceof ComposedRequestManager ||
-           manager instanceof RequestManagerAdapter;
+    return (
+      manager instanceof ComposedAuthenticationManager ||
+      manager instanceof ComposedRequestManager ||
+      manager instanceof RequestManagerAdapter
+    );
   }
 
   /**
@@ -126,7 +132,7 @@ export class MigrationAdapter {
     percentage: number;
   } {
     const total = managers.length;
-    const composed = managers.filter(manager => MigrationAdapter.isComposed(manager)).length;
+    const composed = managers.filter((manager) => MigrationAdapter.isComposed(manager)).length;
     const inheritance = total - composed;
     const percentage = total > 0 ? Math.round((composed / total) * 100) : 0;
 
@@ -142,14 +148,14 @@ export class MigrationAdapter {
    * Performance comparison between inheritance and composition approaches
    */
   static async performanceComparison(
-    config: WordPressClientConfig, 
-    iterations: number = 100
+    config: WordPressClientConfig,
+    iterations: number = 100,
   ): Promise<{
     inheritance: number;
     composition: number;
     improvement: string;
   }> {
-    console.log(`Running performance comparison with ${iterations} iterations...`);
+    // Running performance comparison with iterations
 
     // Test composition approach only (inheritance baseline would require old managers)
     const compositionStart = performance.now();
