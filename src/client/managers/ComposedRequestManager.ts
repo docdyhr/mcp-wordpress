@@ -7,6 +7,7 @@ import type { HTTPMethod, RequestOptions, ClientStats, WordPressClientConfig } f
 import { WordPressAPIError, RateLimitError } from "@/types/client.js";
 import { config } from "@/config/Config.js";
 import { startTimer } from "@/utils/debug.js";
+import { getUserAgent } from "@/utils/version.js";
 
 import type {
   ConfigurationProvider,
@@ -234,7 +235,7 @@ export class ComposedRequestManager implements RequestHandler {
     const headers = {
       "Content-Type": "application/json",
       Accept: "application/json",
-      "User-Agent": "MCP-WordPress/2.0",
+      "User-Agent": getUserAgent(),
       ...authHeaders,
       ...options.headers,
     };

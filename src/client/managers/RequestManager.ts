@@ -10,6 +10,7 @@ import { config } from "@/config/Config.js";
 import { BaseManager } from "./BaseManager.js";
 import { AuthenticationManager } from "./AuthenticationManager.js";
 import { debug, startTimer } from "@/utils/debug.js";
+import { getUserAgent } from "@/utils/version.js";
 
 export class RequestManager extends BaseManager {
   private stats: ClientStats;
@@ -119,7 +120,7 @@ export class RequestManager extends BaseManager {
         method,
         headers: {
           "Content-Type": "application/json",
-          "User-Agent": "MCP-WordPress/1.1.1",
+          "User-Agent": getUserAgent(),
           ...authHeaders, // Add auth headers before custom headers
           ...options.headers,
         },

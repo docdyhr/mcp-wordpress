@@ -7,6 +7,7 @@
 import FormData from "form-data";
 import { promises as fsPromises } from "fs";
 import * as path from "path";
+import { getUserAgent } from "../utils/version.js";
 import type {
   IWordPressClient,
   WordPressClientConfig,
@@ -509,7 +510,7 @@ export class WordPressClient implements IWordPressClient {
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      "User-Agent": "MCP-WordPress/1.0.0",
+      "User-Agent": getUserAgent(),
       ...options.headers,
     };
 

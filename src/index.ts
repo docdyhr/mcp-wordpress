@@ -9,9 +9,7 @@ import { getErrorMessage } from "./utils/error.js";
 import { LoggerFactory } from "./utils/logger.js";
 import { ConfigHelpers } from "./config/Config.js";
 import { McpConfigType } from "./config/ServerConfiguration.js";
-
-// --- Constants ---
-const SERVER_VERSION = "1.1.8"; // Technical debt resolution and modular architecture
+import { getVersion, getDisplayVersion } from "./utils/version.js";
 
 // --- Main Server Class ---
 class MCPWordPressServer {
@@ -26,7 +24,7 @@ class MCPWordPressServer {
     // Server initialization will happen in run() method
     this.server = new McpServer({
       name: "mcp-wordpress",
-      version: SERVER_VERSION,
+      version: getVersion(),
     });
   }
 
@@ -96,7 +94,7 @@ class MCPWordPressServer {
     }
 
     this.logger.info("Starting MCP WordPress Server...", {
-      version: SERVER_VERSION,
+      version: getDisplayVersion(),
       sites: this.wordpressClients.size,
     });
 
