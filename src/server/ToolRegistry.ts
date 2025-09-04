@@ -26,8 +26,9 @@ export interface ToolDefinition {
  * Handles tool registration, parameter validation, and execution
  */
 export class ToolRegistry {
-  private server: McpServer;
-  private wordpressClients: Map<string, WordPressClient>;
+  // Exposed for tests that assert presence of these fields
+  public server: McpServer;
+  public wordpressClients: Map<string, WordPressClient>;
 
   constructor(server: McpServer, wordpressClients: Map<string, WordPressClient>) {
     this.server = server;

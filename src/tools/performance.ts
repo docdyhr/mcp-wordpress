@@ -33,10 +33,13 @@ export default class PerformanceTools {
   private monitor: PerformanceMonitor;
   private collector: MetricsCollector;
   private analytics: PerformanceAnalytics;
-  private logger = LoggerFactory.performance();
+  private logger: ReturnType<typeof LoggerFactory.performance>;
   private historicalDataInterval?: NodeJS.Timeout | undefined;
 
   constructor(clients?: Map<string, unknown>) {
+    // Initialize logger first
+    this.logger = LoggerFactory.performance();
+    
     // Initialize performance monitoring system
     this.monitor = new PerformanceMonitor({
       enableRealTimeMonitoring: true,

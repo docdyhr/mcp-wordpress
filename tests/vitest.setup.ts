@@ -36,12 +36,12 @@ afterAll(() => {
 process.on("uncaughtException", (error) => {
   // eslint-disable-next-line no-console
   console.error("Uncaught exception in test:", error);
-  process.exit(1);
+  // Don't exit the process, let vitest handle it
 });
 
 // Handle unhandled promise rejections in test environment
 process.on("unhandledRejection", (reason, _promise) => {
   // eslint-disable-next-line no-console
   console.error("Unhandled promise rejection in test:", reason);
-  process.exit(1);
+  // Don't exit the process, let vitest handle it
 });

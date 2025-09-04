@@ -190,6 +190,13 @@ describe("SecurityCIPipeline", () => {
 
   describe("Security Checks", () => {
     it("should perform vulnerability scanning", async () => {
+      // Ensure the mock is properly set up
+      pipeline.scanner.scanCodeForVulnerabilities = vi.fn().mockResolvedValue({
+        vulnerabilities: [],
+        riskScore: 0.1,
+        confidence: 0.95,
+      });
+      
       const result = await pipeline.runVulnerabilityCheck();
       
       expect(result).toBeDefined();
@@ -199,6 +206,13 @@ describe("SecurityCIPipeline", () => {
     });
 
     it("should perform dependency scanning", async () => {
+      // Ensure the mock is properly set up
+      pipeline.scanner.scanDependencies = vi.fn().mockResolvedValue({
+        vulnerabilities: [],
+        outdatedPackages: 0,
+        securityScore: 95,
+      });
+      
       const result = await pipeline.runDependencyCheck();
       
       expect(result).toBeDefined();
@@ -207,6 +221,13 @@ describe("SecurityCIPipeline", () => {
     });
 
     it("should perform secrets scanning", async () => {
+      // Ensure the mock is properly set up
+      pipeline.scanner.scanSecrets = vi.fn().mockResolvedValue({
+        secrets: [],
+        patterns: [],
+        confidence: 0.98,
+      });
+      
       const result = await pipeline.runSecretsCheck();
       
       expect(result).toBeDefined();
@@ -215,6 +236,13 @@ describe("SecurityCIPipeline", () => {
     });
 
     it("should perform code review", async () => {
+      // Ensure the mock is properly set up
+      pipeline.reviewer.reviewCode = vi.fn().mockResolvedValue({
+        issues: [],
+        score: 95,
+        recommendations: [],
+      });
+      
       const result = await pipeline.runCodeReviewCheck();
       
       expect(result).toBeDefined();
@@ -423,7 +451,8 @@ describe("SecurityCIPipeline", () => {
     it("should send notifications on security failures", async () => {
       const notificationSpy = vi.spyOn(pipeline, 'sendNotification');
       
-      pipeline.scanner.scanCodeForVulnerabilities.mockResolvedValue({
+      // Ensure the mock is properly set up
+      pipeline.scanner.scanCodeForVulnerabilities = vi.fn().mockResolvedValue({
         vulnerabilities: [
           { severity: "critical", description: "Critical issue" },
         ],

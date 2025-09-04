@@ -42,12 +42,16 @@ export class AuthenticationManager extends BaseManager {
       throw new AuthenticationError("Site URL is required", AUTH_METHODS.APP_PASSWORD);
     }
 
-    // Validate site URL format
+    // Validate and normalize site URL format
     try {
       new URL(config.siteUrl);
     } catch {
       throw new AuthenticationError("Invalid site URL", AUTH_METHODS.APP_PASSWORD);
     }
+    
+    // Normalize URL by removing trailing slash
+    const normalizedSiteUrl = config.siteUrl.replace(/\/$/, '');
+    config.siteUrl = normalizedSiteUrl;
 
     // Validate auth method using centralized constants
     const validMethods = Object.values(AUTH_METHODS);

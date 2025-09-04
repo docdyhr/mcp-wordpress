@@ -113,10 +113,10 @@ describe("Streaming Utilities", () => {
         },
       });
 
+      const data = ["hello", "world"];
       const readable = new Readable({
         objectMode: true,
         read() {
-          const data = ["hello", "world"];
           this.push(data.shift() || null);
         },
       });
@@ -147,10 +147,10 @@ describe("Streaming Utilities", () => {
         },
       });
 
+      const numbers = [1, 2, 3, 4, 5, 6];
       const readable = new Readable({
         objectMode: true,
         read() {
-          const numbers = [1, 2, 3, 4, 5, 6];
           this.push(numbers.shift() || null);
         },
       });
@@ -190,7 +190,7 @@ describe("Streaming Utilities", () => {
         },
       });
 
-      const testObjects = [{ name: "test1" }, { name: "test2", data: "value" }, "string value", 123, null];
+      const testObjects = [{ name: "test1" }, { name: "test2", data: "value" }, "string value", 123, { isNull: true }];
 
       const readable = new Readable({
         objectMode: true,
@@ -225,12 +225,16 @@ describe("Streaming Utilities", () => {
 
       let errorCaught = false;
 
-      errorStream.on("error", (error) => {
-        errorCaught = true;
-        expect(error.message).toBe("Read error");
+      await new Promise((resolve) => {
+        errorStream.on("error", (error) => {
+          errorCaught = true;
+          expect(error.message).toBe("Read error");
+          resolve();
+        });
+        
+        // Start reading to trigger the error
+        errorStream.read();
       });
-
-      await new Promise((resolve) => setTimeout(resolve, 10));
 
       expect(errorCaught).toBe(true);
     });

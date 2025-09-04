@@ -167,7 +167,27 @@ export class WordPressClient implements IWordPressClient {
     this.maxRetries = options.maxRetries || cfg.wordpress.maxRetries;
 
     // Authentication configuration
-    this.auth = options.auth || this.getAuthFromEnv();
+    if (options.auth) {
+      // If auth is provided but without method, infer it
+      if (!options.auth.method) {
+        const auth = options.auth as any;
+        if (auth.username && auth.appPassword) {
+          this.auth = { ...auth, method: "app-password" };
+        } else if (auth.username && auth.password && auth.secret) {
+          this.auth = { ...auth, method: "jwt" };
+        } else if (auth.username && auth.password) {
+          this.auth = { ...auth, method: "basic" };
+        } else if (auth.apiKey) {
+          this.auth = { ...auth, method: "api-key" };
+        } else {
+          this.auth = { ...auth, method: "app-password" }; // default
+        }
+      } else {
+        this.auth = options.auth;
+      }
+    } else {
+      this.auth = this.getAuthFromEnv();
+    }
 
     // Rate limiting
     this.requestInterval = 60000 / cfg.security.rateLimit;

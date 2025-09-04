@@ -230,7 +230,9 @@ export class MediaTools {
   public async handleUploadMedia(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     const uploadParams = params as unknown as UploadMediaRequest & { file_path: string };
     try {
-      if (!fs.existsSync(uploadParams.file_path)) {
+      try {
+        await fs.promises.access(uploadParams.file_path);
+      } catch (_error) {
         throw new Error(`File not found at path: ${uploadParams.file_path}`);
       }
 

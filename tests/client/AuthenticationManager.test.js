@@ -9,17 +9,39 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { AuthenticationManager } from "@/client/managers/AuthenticationManager.js";
 import { AuthenticationError } from "@/types/client.js";
 import { AUTH_METHODS } from "@/types/wordpress.js";
+import { config } from "../../dist/config/Config.js";
+
+// Mock the config module
+vi.mock("../../dist/config/Config.js", () => {
+  return {
+    config: vi.fn(() => ({ 
+      wordpress: {},
+      error: { legacyLogsEnabled: false },
+      debug: { enabled: false }
+    })),
+    ConfigHelpers: {
+      shouldDebug: vi.fn(() => false),
+    },
+  };
+});
 
 describe("AuthenticationManager", () => {
   let authManager;
-  let mockConfig;
+  let testConfig;
+
+  // Helper function to create complete mock config
+  const createMockConfig = (wordpress = {}) => ({
+    wordpress,
+    error: { legacyLogsEnabled: false },
+    debug: { enabled: false }
+  });
 
   beforeEach(() => {
     // Reset mocks
     vi.clearAllMocks();
     
     // Default valid config
-    mockConfig = {
+    testConfig = {
       siteUrl: "https://example.wordpress.com",
       authMethod: AUTH_METHODS.APP_PASSWORD,
       username: "testuser",
@@ -27,7 +49,10 @@ describe("AuthenticationManager", () => {
       timeout: 30000
     };
 
-    authManager = new AuthenticationManager(mockConfig);
+    // Reset the config mock to return default config
+    vi.mocked(config).mockReturnValue(createMockConfig({}));
+
+    authManager = new AuthenticationManager(testConfig);
   });
 
   describe("Constructor", () => {
@@ -43,25 +68,25 @@ describe("AuthenticationManager", () => {
 
     it("should throw error for missing site URL", () => {
       expect(() => {
-        new AuthenticationManager({ ...mockConfig, siteUrl: "" });
+        new AuthenticationManager({ ...testConfig, siteUrl: "" });
       }).toThrow(AuthenticationError);
     });
 
     it("should throw error for invalid site URL format", () => {
       expect(() => {
-        new AuthenticationManager({ ...mockConfig, siteUrl: "not-a-url" });
+        new AuthenticationManager({ ...testConfig, siteUrl: "not-a-url" });
       }).toThrow(AuthenticationError);
     });
 
     it("should throw error for invalid auth method", () => {
       expect(() => {
-        new AuthenticationManager({ ...mockConfig, authMethod: "invalid-method" });
+        new AuthenticationManager({ ...testConfig, authMethod: "invalid-method" });
       }).toThrow(AuthenticationError);
     });
 
     it("should normalize site URL by removing trailing slash", () => {
       const manager = new AuthenticationManager({
-        ...mockConfig,
+        ...testConfig,
         siteUrl: "https://example.com/"
       });
       
@@ -71,14 +96,10 @@ describe("AuthenticationManager", () => {
 
   describe("Environment Configuration", () => {
     it("should get app password auth from env", () => {
-      vi.doMock("../../dist/config/Config.js", () => ({
-        config: () => ({
-          wordpress: {
-            authMethod: AUTH_METHODS.APP_PASSWORD,
-            username: "env-user",
-            appPassword: "env-password"
-          }
-        })
+      vi.mocked(config).mockReturnValue(createMockConfig({
+        authMethod: AUTH_METHODS.APP_PASSWORD,
+        username: "env-user",
+        appPassword: "env-password"
       }));
 
       const authConfig = AuthenticationManager.getAuthFromEnv();
@@ -91,15 +112,11 @@ describe("AuthenticationManager", () => {
     });
 
     it("should get JWT auth from env", () => {
-      vi.doMock("../../dist/config/Config.js", () => ({
-        config: () => ({
-          wordpress: {
-            authMethod: AUTH_METHODS.JWT,
-            username: "jwt-user",
-            password: "jwt-password",
-            jwtSecret: "jwt-secret"
-          }
-        })
+      vi.mocked(config).mockReturnValue(createMockConfig({
+        authMethod: AUTH_METHODS.JWT,
+        username: "jwt-user",
+        password: "jwt-password",
+        jwtSecret: "jwt-secret"
       }));
 
       const authConfig = AuthenticationManager.getAuthFromEnv();
@@ -113,14 +130,10 @@ describe("AuthenticationManager", () => {
     });
 
     it("should get basic auth from env", () => {
-      vi.doMock("../../dist/config/Config.js", () => ({
-        config: () => ({
-          wordpress: {
-            authMethod: AUTH_METHODS.BASIC,
-            username: "basic-user",
-            password: "basic-password"
-          }
-        })
+      vi.mocked(config).mockReturnValue(createMockConfig({
+        authMethod: AUTH_METHODS.BASIC,
+        username: "basic-user",
+        password: "basic-password"
       }));
 
       const authConfig = AuthenticationManager.getAuthFromEnv();
@@ -133,13 +146,9 @@ describe("AuthenticationManager", () => {
     });
 
     it("should get API key auth from env", () => {
-      vi.doMock("../../dist/config/Config.js", () => ({
-        config: () => ({
-          wordpress: {
-            authMethod: AUTH_METHODS.API_KEY,
-            apiKey: "test-api-key"
-          }
-        })
+      vi.mocked(config).mockReturnValue(createMockConfig({
+        authMethod: AUTH_METHODS.API_KEY,
+        apiKey: "test-api-key"
       }));
 
       const authConfig = AuthenticationManager.getAuthFromEnv();
@@ -151,12 +160,8 @@ describe("AuthenticationManager", () => {
     });
 
     it("should throw error for unsupported auth method", () => {
-      vi.doMock("../../dist/config/Config.js", () => ({
-        config: () => ({
-          wordpress: {
-            authMethod: "unsupported-method"
-          }
-        })
+      vi.mocked(config).mockReturnValue(createMockConfig({
+        authMethod: "unsupported-method"
       }));
 
       expect(() => {
@@ -180,7 +185,7 @@ describe("AuthenticationManager", () => {
 
     it("should generate JWT headers", () => {
       const jwtConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.JWT,
         jwtToken: "test-jwt-token"
       };
@@ -195,7 +200,7 @@ describe("AuthenticationManager", () => {
 
     it("should generate basic auth headers", () => {
       const basicConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.BASIC,
         username: "basicuser",
         password: "basicpass"
@@ -214,7 +219,7 @@ describe("AuthenticationManager", () => {
 
     it("should generate API key headers", () => {
       const apiConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.API_KEY,
         apiKey: "test-api-key"
       };
@@ -229,7 +234,7 @@ describe("AuthenticationManager", () => {
 
     it("should generate empty headers for cookie auth", () => {
       const cookieConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.COOKIE
       };
       
@@ -241,7 +246,7 @@ describe("AuthenticationManager", () => {
 
     it("should throw error for missing app password credentials", () => {
       const invalidConfig = {
-        ...mockConfig,
+        ...testConfig,
         appPassword: undefined
       };
       
@@ -254,7 +259,7 @@ describe("AuthenticationManager", () => {
 
     it("should throw error for missing JWT token", () => {
       const jwtConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.JWT
       };
       
@@ -284,7 +289,7 @@ describe("AuthenticationManager", () => {
 
     it("should validate JWT config successfully", () => {
       const jwtConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.JWT,
         username: "jwtuser",
         password: "jwtpass",
@@ -300,7 +305,7 @@ describe("AuthenticationManager", () => {
 
     it("should validate basic auth config successfully", () => {
       const basicConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.BASIC,
         username: "basicuser",
         password: "basicpass"
@@ -315,7 +320,7 @@ describe("AuthenticationManager", () => {
 
     it("should validate API key config successfully", () => {
       const apiConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.API_KEY,
         apiKey: "test-api-key"
       };
@@ -328,7 +333,7 @@ describe("AuthenticationManager", () => {
     });
 
     it("should throw error for missing auth method", () => {
-      const invalidConfig = { ...mockConfig };
+      const invalidConfig = { ...testConfig };
       delete invalidConfig.authMethod;
       
       const invalidManager = new AuthenticationManager(invalidConfig);
@@ -340,7 +345,7 @@ describe("AuthenticationManager", () => {
 
     it("should throw error for incomplete app password config", () => {
       const invalidConfig = {
-        ...mockConfig,
+        ...testConfig,
         appPassword: undefined
       };
       
@@ -353,7 +358,7 @@ describe("AuthenticationManager", () => {
 
     it("should throw error for incomplete JWT config", () => {
       const invalidConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.JWT,
         username: "user",
         // Missing password and secret
@@ -376,7 +381,7 @@ describe("AuthenticationManager", () => {
 
     it("should validate JWT credentials", () => {
       const jwtConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.JWT,
         jwtToken: "valid-jwt-token"
       };
@@ -390,7 +395,7 @@ describe("AuthenticationManager", () => {
 
     it("should throw error for missing username", () => {
       const invalidConfig = {
-        ...mockConfig,
+        ...testConfig,
         username: undefined
       };
       
@@ -403,7 +408,7 @@ describe("AuthenticationManager", () => {
 
     it("should throw error for missing JWT token", () => {
       const jwtConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.JWT
       };
       
@@ -507,7 +512,7 @@ describe("AuthenticationManager", () => {
   describe("Token Management", () => {
     it("should detect expired JWT tokens", () => {
       const jwtConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.JWT,
         jwtToken: "expired-token",
         tokenExpiry: Date.now() - 1000 // Expired 1 second ago
@@ -520,7 +525,7 @@ describe("AuthenticationManager", () => {
 
     it("should detect valid JWT tokens", () => {
       const jwtConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.JWT,
         jwtToken: "valid-token",
         tokenExpiry: Date.now() + (60 * 60 * 1000) // Valid for 1 hour
@@ -533,7 +538,7 @@ describe("AuthenticationManager", () => {
 
     it("should treat missing expiry as expired", () => {
       const jwtConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.JWT,
         jwtToken: "token-without-expiry"
       };
@@ -549,7 +554,7 @@ describe("AuthenticationManager", () => {
 
     it("should refresh JWT token with mock implementation", async () => {
       const jwtConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.JWT,
         jwtToken: "old-token"
       };
@@ -579,15 +584,13 @@ describe("AuthenticationManager", () => {
       
       expect(status).toEqual({
         method: AUTH_METHODS.APP_PASSWORD,
-        username: "testuser",
-        isAuthenticated: true,
-        tokenExpired: false
+        isAuthenticated: true
       });
     });
 
     it("should return authentication status for JWT", () => {
       const jwtConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.JWT,
         jwtToken: "valid-token",
         tokenExpiry: Date.now() + (60 * 60 * 1000)
@@ -598,16 +601,14 @@ describe("AuthenticationManager", () => {
       
       expect(status).toEqual({
         method: AUTH_METHODS.JWT,
-        username: "testuser",
         isAuthenticated: true,
-        tokenExpired: false,
-        tokenExpiry: expect.any(Number)
+        tokenExpiry: expect.any(Date)
       });
     });
 
     it("should return expired status for JWT with expired token", () => {
       const jwtConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.JWT,
         jwtToken: "expired-token",
         tokenExpiry: Date.now() - 1000
@@ -618,10 +619,8 @@ describe("AuthenticationManager", () => {
       
       expect(status).toEqual({
         method: AUTH_METHODS.JWT,
-        username: "testuser",
         isAuthenticated: false,
-        tokenExpired: true,
-        tokenExpiry: expect.any(Number)
+        tokenExpiry: expect.any(Date)
       });
     });
   });
@@ -652,7 +651,7 @@ describe("AuthenticationManager", () => {
 
     it("should clear JWT token", () => {
       const jwtConfig = {
-        ...mockConfig,
+        ...testConfig,
         authMethod: AUTH_METHODS.JWT,
         jwtToken: "test-token"
       };

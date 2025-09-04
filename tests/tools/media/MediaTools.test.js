@@ -7,12 +7,21 @@ import { vi } from "vitest";
 
 // Mock fs module BEFORE any other imports
 const mockExistsSync = vi.fn();
+const mockAccess = vi.fn();
+
 vi.mock("fs", () => ({
   existsSync: mockExistsSync,
   statSync: vi.fn().mockReturnValue({ size: 1024 }),
   readFileSync: vi.fn().mockReturnValue(Buffer.from("test file content")),
   writeFileSync: vi.fn(),
   unlinkSync: vi.fn(),
+  promises: {
+    access: mockAccess,
+    readFile: vi.fn().mockResolvedValue(Buffer.from("test file content")),
+    writeFile: vi.fn(),
+    unlink: vi.fn(),
+    stat: vi.fn().mockResolvedValue({ size: 1024 }),
+  },
 }));
 
 // Mock the dependencies
@@ -29,6 +38,10 @@ describe("MediaTools", () => {
   beforeEach(() => {
     // Reset mocks
     vi.clearAllMocks();
+    
+    // Default to file exists (resolved promise means file exists)
+    mockAccess.mockResolvedValue(undefined);
+    mockExistsSync.mockReturnValue(true);
 
     // Create mock client instance with all necessary methods
     mockClient = {
@@ -259,7 +272,7 @@ describe("MediaTools", () => {
 
   describe("handleUploadMedia", () => {
     beforeEach(() => {
-      mockExistsSync.mockReturnValue(true);
+      // File exists by default (mockAccess already resolves in main beforeEach)
       mockClient.uploadMedia.mockResolvedValue({
         id: 100,
         title: { rendered: "Uploaded Image" },
@@ -274,7 +287,7 @@ describe("MediaTools", () => {
         file_path: "/path/to/image.jpg",
       });
 
-      expect(mockExistsSync).toHaveBeenCalledWith("/path/to/image.jpg");
+      expect(mockAccess).toHaveBeenCalledWith("/path/to/image.jpg");
       expect(mockClient.uploadMedia).toHaveBeenCalledWith({
         file_path: "/path/to/image.jpg",
       });
@@ -301,6 +314,8 @@ describe("MediaTools", () => {
     });
 
     it("should handle file not found error", async () => {
+      // Mock fs.promises.access to reject (file doesn't exist)
+      mockAccess.mockRejectedValue(new Error("ENOENT"));
       mockExistsSync.mockReturnValue(false);
 
       await expect(
@@ -309,7 +324,7 @@ describe("MediaTools", () => {
         }),
       ).rejects.toThrow("Failed to upload media: File not found at path: /non/existent/file.jpg");
 
-      expect(mockExistsSync).toHaveBeenCalledWith("/non/existent/file.jpg");
+      expect(mockAccess).toHaveBeenCalledWith("/non/existent/file.jpg");
       expect(mockClient.uploadMedia).not.toHaveBeenCalled();
     });
 
@@ -512,7 +527,7 @@ describe("MediaTools", () => {
     });
 
     it("should handle authentication errors", async () => {
-      mockExistsSync.mockReturnValue(true);
+      // File exists by default (mockAccess resolves)
       mockClient.uploadMedia.mockRejectedValue(new Error("401 Unauthorized"));
 
       await expect(mediaTools.handleUploadMedia(mockClient, { file_path: "/path/to/file.jpg" })).rejects.toThrow(
@@ -548,17 +563,16 @@ describe("MediaTools", () => {
     });
 
     it("should handle file system permission errors", async () => {
-      mockExistsSync.mockImplementation(() => {
-        throw new Error("Permission denied");
-      });
+      // Mock fs.promises.access to reject with permission error
+      mockAccess.mockRejectedValue(new Error("Permission denied"));
 
       await expect(mediaTools.handleUploadMedia(mockClient, { file_path: "/restricted/file.jpg" })).rejects.toThrow(
-        "Failed to upload media: Permission denied",
+        "Failed to upload media: File not found at path: /restricted/file.jpg",
       );
     });
 
     it("should handle large file uploads", async () => {
-      mockExistsSync.mockReturnValue(true);
+      // File exists by default (mockAccess resolves)
       mockClient.uploadMedia.mockRejectedValue(new Error("Request entity too large"));
 
       await expect(mediaTools.handleUploadMedia(mockClient, { file_path: "/path/to/large-file.jpg" })).rejects.toThrow(

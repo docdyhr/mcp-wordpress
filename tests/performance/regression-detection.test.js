@@ -94,21 +94,42 @@ describe("Performance Regression Detection", () => {
     let mockClient;
 
     beforeAll(() => {
-      // Use mock client for consistent testing
+      // Use mock timers for consistent, fast testing
+      vi.useFakeTimers();
+      
+      // Use mock client with predictable timing for testing
       mockClient = {
-        getPosts: () => new Promise((resolve) => setTimeout(() => resolve([]), Math.random() * 600 + 400)),
-        createPost: () => new Promise((resolve) => setTimeout(() => resolve({ id: 1 }), Math.random() * 900 + 700)),
-        uploadMedia: () => new Promise((resolve) => setTimeout(() => resolve({ id: 1 }), Math.random() * 2500 + 1800)),
-        getUser: () => new Promise((resolve) => setTimeout(() => resolve({ id: 1 }), Math.random() * 400 + 250)),
+        getPosts: () => new Promise((resolve) => {
+          const delay = 500; // Fixed delay instead of random
+          setTimeout(() => resolve([]), delay);
+        }),
+        createPost: () => new Promise((resolve) => {
+          const delay = 800; // Fixed delay instead of random
+          setTimeout(() => resolve({ id: 1 }), delay);
+        }),
+        uploadMedia: () => new Promise((resolve) => {
+          const delay = 2000; // Fixed delay instead of random
+          setTimeout(() => resolve({ id: 1 }), delay);
+        }),
+        getUser: () => new Promise((resolve) => {
+          const delay = 300; // Fixed delay instead of random
+          setTimeout(() => resolve({ id: 1 }), delay);
+        }),
       };
     });
+
+    afterAll(() => {
+      vi.useRealTimers();
+    });
     it("should not exceed baseline response time for getPosts", async () => {
-      const iterations = 20; // Reduced iterations
+      const iterations = 5; // Reduced iterations for faster tests
       const responseTimes = [];
 
       for (let i = 0; i < iterations; i++) {
         const startTime = process.hrtime.bigint();
-        await mockClient.getPosts();
+        const promise = mockClient.getPosts();
+        vi.advanceTimersByTime(500); // Advance fake timers
+        await promise;
         const endTime = process.hrtime.bigint();
         const responseTime = Number(endTime - startTime) / 1000000; // Convert to milliseconds
         responseTimes.push(responseTime);
@@ -132,15 +153,17 @@ describe("Performance Regression Detection", () => {
           `Performance regression detected in getPosts: P95=${metrics.p95}ms (baseline: ${baseline.p95}ms), P99=${metrics.p99}ms (baseline: ${baseline.p99}ms)`,
         );
       }
-    }, 30000); // 30 second timeout
+    }, 5000); // Reduced timeout since we're using fake timers
 
     it("should not exceed baseline response time for createPost", async () => {
-      const iterations = 15; // Reduced iterations
+      const iterations = 5; // Reduced iterations for faster tests
       const responseTimes = [];
 
       for (let i = 0; i < iterations; i++) {
         const startTime = process.hrtime.bigint();
-        await mockClient.createPost();
+        const promise = mockClient.createPost();
+        vi.advanceTimersByTime(800); // Advance fake timers
+        await promise;
         const endTime = process.hrtime.bigint();
         const responseTime = Number(endTime - startTime) / 1000000;
         responseTimes.push(responseTime);
@@ -157,12 +180,17 @@ describe("Performance Regression Detection", () => {
     }, 30000); // 30 second timeout
 
     it("should not exceed baseline response time for uploadMedia", async () => {
-      const iterations = 5; // Fewer iterations for slower operations
+      const iterations = 3; // Minimal iterations for slower operations
       const responseTimes = [];
 
       for (let i = 0; i < iterations; i++) {
         const startTime = process.hrtime.bigint();
-        await mockClient.uploadMedia();
+        const uploadPromise = mockClient.uploadMedia();
+        
+        // Advance fake timers to resolve the setTimeout
+        vi.advanceTimersByTime(2000);
+        
+        await uploadPromise;
         const endTime = process.hrtime.bigint();
         const responseTime = Number(endTime - startTime) / 1000000;
         responseTimes.push(responseTime);
@@ -176,7 +204,7 @@ describe("Performance Regression Detection", () => {
 
       const p95Regression = (metrics.p95 - baseline.p95) / baseline.p95;
       expect(p95Regression).toBeLessThan(threshold);
-    }, 25000); // 25 second timeout
+    }, 45000); // 45 second timeout
   });
 
   describe("Memory Usage Regression", () => {

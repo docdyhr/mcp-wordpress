@@ -27,6 +27,7 @@
     "noUnusedParameters": false,
     "exactOptionalPropertyTypes": true,
     "types": ["node", "vitest/globals"],
+    
     "baseUrl": "./src",
     "paths": {
       "@/*": ["*"],

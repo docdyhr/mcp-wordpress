@@ -8,7 +8,7 @@
  * - Version comparison utilities
  */
 
-import { readFileSync } from "fs";
+import { readFile } from "fs/promises";
 import { join } from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
@@ -50,6 +50,7 @@ export class VersionManager {
   private static instance: VersionManager;
   private versionInfo: VersionInfo | null = null;
   private packageJson: PackageJson | null = null;
+  private isInitialized: boolean = false;
 
   private constructor() {}
 
@@ -64,31 +65,67 @@ export class VersionManager {
   }
 
   /**
+   * Initialize version manager with async file loading
+   * Call this early in application startup for optimal performance
+   */
+  async initialize(): Promise<void> {
+    if (this.isInitialized) {
+      return;
+    }
+
+    try {
+      this.packageJson = await this.loadPackageJson();
+      this.versionInfo = this.loadVersionFromPackage(this.packageJson);
+      this.isInitialized = true;
+    } catch (_error) {
+      // Fall back to sync loading if async fails
+      this.packageJson = await this.loadPackageJson(); // This will use fallback
+      this.versionInfo = this.loadVersionFromPackage(this.packageJson);
+      this.isInitialized = true;
+    }
+  }
+
+  /**
    * Get version information
-   * Reads from package.json on first call, caches for subsequent calls
+   * Uses cached version if available, loads synchronously with fallback if needed
    */
   getVersion(): VersionInfo {
     if (!this.versionInfo) {
-      this.versionInfo = this.loadVersion();
+      // If not initialized, load synchronously with fallback
+      this.versionInfo = this.loadVersionSync();
     }
     return this.versionInfo;
   }
 
   /**
    * Get package information
+   * Uses cached package if available, loads synchronously with fallback if needed
    */
   getPackageInfo(): PackageJson {
     if (!this.packageJson) {
-      this.packageJson = this.loadPackageJson();
+      // Return fallback package info if not loaded
+      this.packageJson = {
+        name: "mcp-wordpress",
+        version: "2.7.0", // Fallback version
+        description: "MCP WordPress Server",
+      };
     }
     return this.packageJson;
   }
 
   /**
-   * Load version from package.json
+   * Load version synchronously (with fallback)
+   * @deprecated Use initialize() followed by getVersion() for better performance
    */
-  private loadVersion(): VersionInfo {
-    const pkg = this.loadPackageJson();
+  private loadVersionSync(): VersionInfo {
+    const pkg = this.getPackageInfo(); // Uses fallback if needed
+    return this.loadVersionFromPackage(pkg);
+  }
+
+  /**
+   * Load version from package data
+   */
+  private loadVersionFromPackage(pkg: PackageJson): VersionInfo {
     const parsed = this.parseSemanticVersion(pkg.version);
 
     // Add build metadata if available
@@ -109,7 +146,7 @@ export class VersionManager {
   /**
    * Load package.json
    */
-  private loadPackageJson(): PackageJson {
+  private async loadPackageJson(): Promise<PackageJson> {
     try {
       // Get the project root directory
       const __filename = fileURLToPath(import.meta.url);
@@ -117,7 +154,7 @@ export class VersionManager {
       const projectRoot = join(__dirname, "..", "..");
       const packagePath = join(projectRoot, "package.json");
 
-      const packageContent = readFileSync(packagePath, "utf-8");
+      const packageContent = await readFile(packagePath, "utf-8");
       return JSON.parse(packageContent) as PackageJson;
     } catch (_error) {
       // Fallback for runtime environments where package.json might not be available

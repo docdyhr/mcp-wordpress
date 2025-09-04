@@ -441,7 +441,7 @@ describe("BaseManager", () => {
         baseManager.handleError(customError, "test operation");
       } catch (caught) {
         expect(caught.code).toBe("E001");
-        expect(caught.details).toEqual({ extra: "data" });
+        expect(caught.data).toEqual({ extra: "data" });
       }
     });
   });

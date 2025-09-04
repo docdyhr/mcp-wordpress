@@ -93,10 +93,10 @@ describe("SecurityReviewer", () => {
       readdirSync: vi.fn().mockReturnValue([]),
     };
 
-    vi.mocked(fs.readFileSync).mockImplementation(mockFs.readFileSync);
-    vi.mocked(fs.existsSync).mockImplementation(mockFs.existsSync);
-    vi.mocked(fs.statSync).mockImplementation(mockFs.statSync);
-    vi.mocked(fs.readdirSync).mockImplementation(mockFs.readdirSync);
+    fs.readFileSync = vi.fn().mockImplementation(mockFs.readFileSync);
+    fs.existsSync = vi.fn().mockImplementation(mockFs.existsSync);
+    fs.statSync = vi.fn().mockImplementation(mockFs.statSync);
+    fs.readdirSync = vi.fn().mockImplementation(mockFs.readdirSync);
 
     reviewer = new SecurityReviewer(mockConfig);
     vi.clearAllMocks();

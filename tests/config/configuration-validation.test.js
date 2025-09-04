@@ -29,7 +29,7 @@ describe("Configuration Validation Tests", () => {
 
       expect(() =>
         ConfigurationValidator.validateMultiSiteConfig(invalidConfig),
-      ).toThrow(/sites: Required/);
+      ).toThrow(/Multi-site configuration validation failed/);
     });
 
     it("should reject configuration with duplicate site IDs", () => {
@@ -366,7 +366,7 @@ describe("Configuration Validation Tests", () => {
         {
           safeParse: (_data) => ({
             success: false,
-            error: { errors: [{ path: ["sites"], message: "Required" }] },
+            error: { issues: [{ path: ["sites"], message: "Required" }] },
           }),
         },
         invalidConfig,

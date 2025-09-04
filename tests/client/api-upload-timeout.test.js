@@ -48,12 +48,12 @@ describe("WordPress API Client Upload Timeout", () => {
 
   describe("uploadFile method timeout behavior", () => {
     it("should use custom timeout when provided in options", async () => {
-      const customTimeout = 2000; // 2 seconds
+      const customTimeout = 100; // Very short timeout for fast testing
 
       // Mock slow response that exceeds custom timeout
       nock(testBaseUrl)
         .post("/wp-json/wp/v2/media")
-        .delay(customTimeout + 500) // Delay longer than timeout
+        .delay(customTimeout + 50) // Short delay but still exceeds timeout
         .reply(200, { id: 123, title: "uploaded" });
 
       await expect(
@@ -73,7 +73,7 @@ describe("WordPress API Client Upload Timeout", () => {
       // Create client with very short timeout for faster testing
       const fastClient = new WordPressClient({
         baseUrl: testBaseUrl,
-        timeout: 100, // Very short timeout
+        timeout: 50, // Very short timeout for testing
         auth: {
           method: "app-password",
           username: "testuser",
@@ -84,11 +84,11 @@ describe("WordPress API Client Upload Timeout", () => {
       // Mock slow response that exceeds timeout
       nock(testBaseUrl)
         .post("/wp-json/wp/v2/media")
-        .delay(200) // Longer than client timeout
+        .delay(100) // Short delay but longer than client timeout
         .reply(200, { id: 123 });
 
-      // Use the client's default timeout instead of upload timeout by passing explicit 100ms
-      await expect(fastClient.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: 100 })).rejects.toThrow(
+      // Use the client's default timeout instead of upload timeout by passing explicit 50ms
+      await expect(fastClient.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: 50 })).rejects.toThrow(
         /Request timeout after/,
       );
     });

@@ -1,5 +1,4 @@
 import dotenv from "dotenv";
-import * as fs from "fs";
 import { promises as fsPromises } from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
@@ -64,7 +63,7 @@ export class ServerConfiguration {
       this.logger.debug("ServerConfiguration initialized", {
         rootDir: this.rootDir,
         envPath: this.envPath,
-        envFileExists: fs.existsSync(this.envPath),
+        // Note: envFileExists check moved to async initialization
       });
     }
   }
@@ -89,12 +88,14 @@ export class ServerConfiguration {
   }> {
     const configPath = path.resolve(this.rootDir, "mcp-wordpress.config.json");
 
-    if (fs.existsSync(configPath)) {
+    try {
+      await fsPromises.access(configPath);
       if (ConfigHelpers.shouldLogInfo()) {
         this.logger.info("Found multi-site configuration file", { configPath });
       }
       return await this.loadMultiSiteConfig(configPath);
-    } else {
+    } catch (_error) {
+      // Config file doesn't exist or is not accessible
       if (ConfigHelpers.shouldLogInfo()) {
         this.logger.info("Multi-site config not found, using environment variables for single-site mode", {
           configPath,

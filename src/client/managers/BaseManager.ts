@@ -38,6 +38,14 @@ export abstract class BaseManager {
       if (error.code === "ECONNREFUSED" || error.code === "ENOTFOUND") {
         throw new WordPressAPIError(`Cannot connect to WordPress site: ${this.config.baseUrl}`, 503, "connection_failed");
       }
+
+      // Preserve custom error properties if they exist
+      const customCode = (error as any).code;
+      const customDetails = (error as any).details;
+      if (customCode && customCode !== "ECONNREFUSED" && customCode !== "ENOTFOUND" && customCode !== "ABORT_ERR") {
+        const message = getErrorMessage(error);
+        throw new WordPressAPIError(`${operation} failed: ${message}`, 500, customCode, customDetails);
+      }
     }
 
     const message = getErrorMessage(error);
