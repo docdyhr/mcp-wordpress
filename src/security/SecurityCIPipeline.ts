@@ -128,40 +128,45 @@ export class SecurityCIPipeline {
     },
   ) {
     // Basic validation expected by tests
-    if (!config || !((config as any).projectPath && String((config as any).projectPath).length > 0)) {
+    const configWithPath = config as Record<string, unknown> & {
+      projectPath?: string;
+      scannerConfig?: Record<string, unknown> & { invalid?: boolean };
+    };
+    if (!config || !(configWithPath.projectPath && String(configWithPath.projectPath).length > 0)) {
       throw new Error("Invalid configuration: projectPath is required");
     }
-    if ((config as any).scannerConfig && ((config as any).scannerConfig as any).invalid) {
+    if (configWithPath.scannerConfig && configWithPath.scannerConfig.invalid) {
       throw new Error("Invalid scanner configuration");
     }
 
     this.config = config;
 
     // Instantiate components (tests provide vi.mocks which should replace constructors in the dist/ runtime)
-  // Allow dependency injection for tests to provide mocked implementations
-  this.scanner = (deps && deps.scanner) || new AISecurityScanner();
-  this.remediation = (deps && deps.remediation) || new AutomatedRemediation();
-  this.reviewer = (deps && deps.reviewer) || new SecurityReviewer();
-  this.configManager = (deps && deps.configManager) || new SecurityConfigManager();
+    // Allow dependency injection for tests to provide mocked implementations
+    this.scanner = (deps && deps.scanner) || new AISecurityScanner();
+    this.remediation = (deps && deps.remediation) || new AutomatedRemediation();
+    this.reviewer = (deps && deps.reviewer) || new SecurityReviewer();
+    this.configManager = (deps && deps.configManager) || new SecurityConfigManager();
 
     // Small helper: ensure methods exist and are spyable under vitest without overwriting existing mocks
-    const makeMockable = (obj: any, methods: string[]) => {
+    const makeMockable = (obj: unknown, methods: string[]) => {
+      const _objRecord = obj as Record<string, unknown>;
       // Only ensure missing methods exist. Never overwrite or wrap existing properties so test-provided
       // mocks are not replaced.
-      const viRef = (globalThis as any).vi;
+      const viRef = (globalThis as Record<string, unknown> & { vi?: Record<string, unknown> }).vi;
       if (!obj) return;
 
       for (const m of methods) {
         try {
-          const current = obj[m];
+          const current = _objRecord[m];
           // If method already exists (mock or real), do not replace it.
           if (typeof current !== "undefined") continue;
 
           if (viRef && typeof viRef.fn === "function") {
-            obj[m] = viRef.fn();
+            _objRecord[m] = (viRef.fn as () => unknown)();
           } else {
             // Provide a harmless default implementation when tests aren't present
-            obj[m] = () => Promise.resolve(null);
+            _objRecord[m] = () => Promise.resolve(null);
           }
         } catch (_e) {
           // ignore and continue
@@ -177,22 +182,33 @@ export class SecurityCIPipeline {
     this.initializeDefaultGates();
   }
 
-
   // --- Public API expected by tests ---
 
   async executePreCommitGate(options: Record<string, unknown> = {}): Promise<PipelineSecurityReport> {
     const context = this.buildDefaultContext();
-    return this.executeSecurityGates("pre-commit", context, options as any);
+    return this.executeSecurityGates(
+      "pre-commit",
+      context,
+      options as { skipNonBlocking?: boolean; continueOnFailure?: boolean; dryRun?: boolean },
+    );
   }
 
   async executePreBuildGate(options: Record<string, unknown> = {}): Promise<PipelineSecurityReport> {
     const context = this.buildDefaultContext();
-    return this.executeSecurityGates("pre-build", context, options as any);
+    return this.executeSecurityGates(
+      "pre-build",
+      context,
+      options as { skipNonBlocking?: boolean; continueOnFailure?: boolean; dryRun?: boolean },
+    );
   }
 
   async executePreDeployGate(options: Record<string, unknown> = {}): Promise<PipelineSecurityReport> {
     const context = this.buildDefaultContext();
-    return this.executeSecurityGates("pre-deploy", context, options as any);
+    return this.executeSecurityGates(
+      "pre-deploy",
+      context,
+      options as { skipNonBlocking?: boolean; continueOnFailure?: boolean; dryRun?: boolean },
+    );
   }
 
   // Convenience runners for individual checks used by tests
@@ -222,7 +238,7 @@ export class SecurityCIPipeline {
       try {
         const scanPromise = scanner.scanCodeForVulnerabilities
           ? scanner.scanCodeForVulnerabilities()
-          : scanner.performScan?.() ?? Promise.resolve({ vulnerabilities: [], riskScore: 0 });
+          : (scanner.performScan?.() ?? Promise.resolve({ vulnerabilities: [], riskScore: 0 }));
 
         if (opts.timeout && opts.timeout > 0) {
           const res = await Promise.race([
@@ -230,7 +246,7 @@ export class SecurityCIPipeline {
             new Promise((resolve) => setTimeout(() => resolve({ __timeout: true }), opts.timeout)),
           ]);
 
-          if (res && (res as any).__timeout) {
+          if (res && (res as Record<string, unknown> & { __timeout?: boolean }).__timeout) {
             return { checkId: check.id, status: "timeout" };
           }
 
@@ -247,8 +263,9 @@ export class SecurityCIPipeline {
         }
 
         // Normalize vulnerabilities field
-        if (!Array.isArray((res as any).vulnerabilities)) {
-          (res as any).vulnerabilities = [];
+        const resWithVulns = res as Record<string, unknown> & { vulnerabilities?: unknown[] };
+        if (!Array.isArray(resWithVulns.vulnerabilities)) {
+          resWithVulns.vulnerabilities = [];
         }
 
         return { checkId: check.id, status: "passed", result: res } as Record<string, unknown>;
@@ -264,25 +281,29 @@ export class SecurityCIPipeline {
 
   async runDependencyCheck(): Promise<Record<string, unknown>> {
     const scanner = this.scanner as unknown as Partial<{ scanDependencies: () => Promise<Record<string, unknown>> }>;
-    const res = await scanner.scanDependencies?.() ?? { vulnerabilities: [] };
+    const res = (await scanner.scanDependencies?.()) ?? { vulnerabilities: [] };
     return { checkId: "dependency-scan", status: "passed", result: res };
   }
 
   async runSecretsCheck(): Promise<Record<string, unknown>> {
     const scanner = this.scanner as unknown as Partial<{ scanSecrets: () => Promise<Record<string, unknown>> }>;
-    const res = await scanner.scanSecrets?.() ?? { secrets: [] };
+    const res = (await scanner.scanSecrets?.()) ?? { secrets: [] };
     return { checkId: "secrets-scan", status: "passed", result: res };
   }
 
   async runCodeReviewCheck(): Promise<Record<string, unknown>> {
     // Prefer reviewCode if present in mocked reviewer, else fallback
-    const reviewFn = (this.reviewer as any).reviewCode ?? (this.reviewer as any).reviewDirectory;
-    const res = await reviewFn?.("src/") ?? { issues: [] };
+    const reviewer = this.reviewer as unknown as {
+      reviewCode?: (path: string) => Promise<{ issues: unknown[] }>;
+      reviewDirectory?: (path: string) => Promise<{ issues: unknown[] }>;
+    };
+    const reviewFn = reviewer.reviewCode ?? reviewer.reviewDirectory;
+    const res = (await reviewFn?.("src/")) ?? { issues: [] };
     return { checkId: "code-review", status: "passed", result: res };
   }
 
   // Gate management
-  configureGate(gate: any): void {
+  configureGate(gate: Partial<SecurityGate>): void {
     if (!gate || !gate.id || !gate.stage) {
       throw new Error("Invalid gate configuration");
     }
@@ -338,23 +359,27 @@ export class SecurityCIPipeline {
   }
 
   // Automated remediation
-  async executeAutoRemediation(): Promise<any> {
+  async executeAutoRemediation(): Promise<Record<string, unknown>> {
     try {
-      const res = await (this.remediation as any).autoFix();
+      const remediation = this.remediation as Record<string, unknown> & { autoFix?: () => Promise<unknown> };
+      const res = await remediation.autoFix?.();
       return { status: "ok", result: res };
     } catch (err) {
       return { status: "failed", error: String(err) };
     }
   }
 
-  async generateRemediationPlan(): Promise<any[]> {
-    return (this.remediation as any).generateRecommendations?.() ?? [];
+  async generateRemediationPlan(): Promise<unknown[]> {
+    const remediation = this.remediation as Record<string, unknown> & {
+      generateRecommendations?: () => Promise<unknown[]> | unknown[];
+    };
+    return remediation.generateRecommendations?.() ?? [];
   }
 
   // Full pipeline orchestration
-  async executeFullPipeline(): Promise<any> {
+  async executeFullPipeline(): Promise<Record<string, unknown>> {
     const start = Date.now();
-    const stages: any[] = [];
+    const stages: PipelineSecurityReport[] = [];
     let overallStatus: string = "passed";
     let blockedBy: string | undefined;
 
@@ -384,22 +409,22 @@ export class SecurityCIPipeline {
       return { stages, overallStatus, duration: Date.now() - start, blockedBy };
     }
 
-  return { stages, overallStatus, duration: Math.max(1, Date.now() - start) };
+    return { stages, overallStatus, duration: Math.max(1, Date.now() - start) };
   }
 
   // Notifications
-  sendNotification(payload: any): void {
+  sendNotification(payload: Record<string, unknown>): void {
     logger.info("Sending notification", { payload });
   }
 
-  formatNotification(data: any): { subject: string; body: string } {
+  formatNotification(data: Record<string, unknown>): { subject: string; body: string } {
     const subject = data.status === "failed" ? "Security Gate Failed" : "Security Gate Report";
-  const body = `Stage: ${data.stage}\nStatus: ${data.status}\ncritical: ${data.criticalIssues ?? 0}`;
+    const body = `Stage: ${data.stage}\nStatus: ${data.status}\ncritical: ${data.criticalIssues ?? 0}`;
     return { subject, body };
   }
 
   // Configuration reloading
-  reloadConfiguration(newConfig: any): void {
+  reloadConfiguration(newConfig: Record<string, unknown>): void {
     if (!newConfig || newConfig.projectPath == null) throw new Error("Invalid configuration");
     // preserve gate enabled/disabled states
     const state: Record<string, boolean> = {};
@@ -484,8 +509,12 @@ export class SecurityCIPipeline {
         // Send notification for failed gates (tests expect notification on failure)
         try {
           if (gateResult.status === "failed") {
-            const criticalCount = gateResult.checks.flatMap(c => c.findings).filter(f => f.severity === 'critical').length;
-            this.sendNotification(this.formatNotification({ stage, status: gateResult.status, criticalIssues: criticalCount }));
+            const criticalCount = gateResult.checks
+              .flatMap((c) => c.findings)
+              .filter((f) => f.severity === "critical").length;
+            this.sendNotification(
+              this.formatNotification({ stage, status: gateResult.status, criticalIssues: criticalCount }),
+            );
           }
         } catch (_e) {
           // ignore notification errors during test runs
@@ -565,7 +594,6 @@ export class SecurityCIPipeline {
 
     // Evaluate gate status based on check results and thresholds
     const gateStatus = this.evaluateGateStatus(gate, checkResults);
-
 
     return {
       gateId: gate.id,
@@ -695,53 +723,71 @@ export class SecurityCIPipeline {
       includeRuntime?: boolean;
       includeFileSystem?: boolean;
     };
-  // Prefer explicit scanner APIs when present (tests mock these). Fall back to performScan when needed.
-  const scannerAny = this.scanner as unknown as {
-    scanCodeForVulnerabilities?: () => Promise<any>;
-    performScan?: (opts?: any) => Promise<any>;
-  };
+    // Prefer explicit scanner APIs when present (tests mock these). Fall back to performScan when needed.
+    const scannerAny = this.scanner as unknown as {
+      scanCodeForVulnerabilities?: () => Promise<unknown>;
+      performScan?: (opts?: unknown) => Promise<unknown>;
+    };
 
-  let scanResult: any;
-  if (typeof scannerAny.scanCodeForVulnerabilities === "function") {
-    scanResult = await scannerAny.scanCodeForVulnerabilities();
-  } else if (typeof scannerAny.performScan === "function") {
-    scanResult = await scannerAny.performScan({
-      targets: scanParams.targets ?? ["src/"],
-      depth: scanParams.depth ?? "deep",
-      includeRuntime: scanParams.includeRuntime ?? false,
-      includeFileSystem: scanParams.includeFileSystem ?? true,
-    });
-  } else {
-    scanResult = { vulnerabilities: [], summary: { total: 0, critical: 0, high: 0, medium: 0 } };
-  }
+    let scanResult: unknown;
+    if (typeof scannerAny.scanCodeForVulnerabilities === "function") {
+      scanResult = await scannerAny.scanCodeForVulnerabilities();
+    } else if (typeof scannerAny.performScan === "function") {
+      scanResult = await scannerAny.performScan({
+        targets: scanParams.targets ?? ["src/"],
+        depth: scanParams.depth ?? "deep",
+        includeRuntime: scanParams.includeRuntime ?? false,
+        includeFileSystem: scanParams.includeFileSystem ?? true,
+      });
+    } else {
+      scanResult = { vulnerabilities: [], summary: { total: 0, critical: 0, high: 0, medium: 0 } };
+    }
 
-  // Normalize scanResult shape if mocks provide only vulnerabilities without summary
-  const vulns = Array.isArray(scanResult?.vulnerabilities) ? scanResult.vulnerabilities : [];
-  const summary = scanResult?.summary
-    ? scanResult.summary
-    : {
-        total: vulns.length,
-        critical: vulns.filter((v: any) => v.severity === "critical").length,
-        high: vulns.filter((v: any) => v.severity === "high").length,
-        medium: vulns.filter((v: any) => v.severity === "medium").length,
+    // Normalize scanResult shape if mocks provide only vulnerabilities without summary
+    const scanResultTyped = scanResult as
+      | { vulnerabilities?: unknown[]; summary?: Record<string, unknown> }
+      | null
+      | undefined;
+    const vulns = Array.isArray(scanResultTyped?.vulnerabilities) ? scanResultTyped.vulnerabilities : [];
+    const summary = scanResultTyped?.summary
+      ? scanResultTyped.summary
+      : {
+          total: vulns.length,
+          critical: vulns.filter((v: unknown) => (v as { severity?: string })?.severity === "critical").length,
+          high: vulns.filter((v: unknown) => (v as { severity?: string })?.severity === "high").length,
+          medium: vulns.filter((v: unknown) => (v as { severity?: string })?.severity === "medium").length,
+        };
+
+    const findings: SecurityFinding[] = (vulns || []).map((vuln: unknown) => {
+      const v = vuln as {
+        id?: string;
+        severity?: string;
+        type?: string;
+        description?: string;
+        location?: { file?: string; line?: number };
+        remediation?: { suggested?: string };
       };
+      return {
+        id: v.id || "unknown",
+        severity: (v.severity as SecurityFinding["severity"]) || "medium",
+        type: v.type || "vulnerability",
+        description: v.description || "No description",
+        file: v.location?.file,
+        line: v.location?.line,
+        remediation: v.remediation?.suggested,
+      };
+    });
+    const summaryTyped = summary as { critical?: number; high?: number; medium?: number };
+    const score = Math.max(
+      0,
+      100 - ((summaryTyped.critical || 0) * 10 + (summaryTyped.high || 0) * 5 + (summaryTyped.medium || 0) * 2),
+    );
 
-    const findings: SecurityFinding[] = (vulns || []).map((vuln: any) => ({
-      id: vuln.id,
-      severity: vuln.severity,
-      type: vuln.type,
-      description: vuln.description,
-      file: vuln.location?.file,
-      line: vuln.location?.line,
-      remediation: vuln.remediation?.suggested,
-    }));
-    const score = Math.max(0, 100 - (summary.critical * 10 + summary.high * 5 + summary.medium * 2));
-
-  return {
-    findings,
-    score,
-    details: `Scanned codebase: ${summary.total} vulnerabilities found`,
-  };
+    return {
+      findings,
+      score,
+      details: `Scanned codebase: ${summary.total} vulnerabilities found`,
+    };
   }
 
   /**
@@ -759,12 +805,12 @@ export class SecurityCIPipeline {
 
     // Support either reviewer.reviewDirectory (returns array) or reviewer.reviewCode (returns single summary)
     const reviewerAny = this.reviewer as unknown as {
-      reviewDirectory?: (path: string, opts?: any) => Promise<any>;
-      reviewCode?: (path: string, opts?: any) => Promise<any>;
+      reviewDirectory?: (path: string, opts?: unknown) => Promise<unknown>;
+      reviewCode?: (path: string, opts?: unknown) => Promise<unknown>;
     };
 
     const raw =
-      (typeof reviewerAny.reviewDirectory === "function"
+      typeof reviewerAny.reviewDirectory === "function"
         ? await reviewerAny.reviewDirectory("src/", {
             recursive: true,
             rules: reviewParams.rules ?? [],
@@ -772,11 +818,11 @@ export class SecurityCIPipeline {
             aiAnalysis: reviewParams.aiAnalysis ?? false,
           })
         : typeof reviewerAny.reviewCode === "function"
-        ? await reviewerAny.reviewCode("src/", {
-            rules: reviewParams.rules ?? [],
-            aiAnalysis: reviewParams.aiAnalysis ?? false,
-          })
-        : []);
+          ? await reviewerAny.reviewCode("src/", {
+              rules: reviewParams.rules ?? [],
+              aiAnalysis: reviewParams.aiAnalysis ?? false,
+            })
+          : [];
 
     const reviewResults = Array.isArray(raw) ? raw : raw ? [raw] : [];
 
@@ -784,15 +830,29 @@ export class SecurityCIPipeline {
     let totalScore = 0;
 
     for (const result of reviewResults) {
-      const resultFindings = (result.findings || []).map((finding: any) => ({
-        id: finding.id,
-        severity: finding.severity,
-        type: finding.category || finding.type || "review",
-        description: finding.message || finding.description,
-        file: result.file,
-        line: finding.line,
-        remediation: finding.recommendation || finding.remediation,
-      }));
+      const resultTyped = result as { findings?: unknown[]; file?: string };
+      const resultFindings = (resultTyped.findings || []).map((finding: unknown) => {
+        const f = finding as {
+          id?: string;
+          severity?: string;
+          category?: string;
+          type?: string;
+          message?: string;
+          description?: string;
+          line?: number;
+          recommendation?: string;
+          remediation?: string;
+        };
+        return {
+          id: f.id || "unknown",
+          severity: (f.severity as SecurityFinding["severity"]) || "medium",
+          type: f.category || f.type || "review",
+          description: f.message || f.description || "No description",
+          file: resultTyped.file,
+          line: f.line,
+          remediation: f.recommendation || f.remediation,
+        };
+      });
 
       allFindings.push(...resultFindings);
       totalScore += this.calculateFileScore(result.findings || []);
@@ -842,11 +902,16 @@ export class SecurityCIPipeline {
     // Some test mocks provide validateCompliance, others may not. Fall back to compliant=true when unavailable.
     let compliance: { compliant: boolean; violations: string[] } = { compliant: true, violations: [] };
     try {
-      if (typeof (this.configManager as any).validateCompliance === 'function') {
-        compliance = await (this.configManager as any).validateCompliance(context.environment);
-      } else if (typeof (this.configManager as any).getSecurityConfig === 'function') {
+      const configManager = this.configManager as Record<string, unknown> & {
+        validateCompliance?: (env: string) => Promise<{ compliant: boolean; violations: string[] }>;
+        getSecurityConfig?: () => Record<string, unknown> & { compliant?: boolean; violations?: string[] };
+      };
+
+      if (typeof configManager.validateCompliance === "function") {
+        compliance = await configManager.validateCompliance(context.environment);
+      } else if (typeof configManager.getSecurityConfig === "function") {
         // derive basic compliance from config when validateCompliance is not available
-        const cfg = (this.configManager as any).getSecurityConfig() || {};
+        const cfg = configManager.getSecurityConfig() || {};
         compliance = { compliant: !!cfg.compliant, violations: cfg.violations ?? [] };
       }
     } catch (_e) {
@@ -946,7 +1011,7 @@ export class SecurityCIPipeline {
     const highCount = allFindings.filter((f) => f.severity === "high").length;
     const mediumCount = allFindings.filter((f) => f.severity === "medium").length;
 
-    // Exclude error checks from average score calculation  
+    // Exclude error checks from average score calculation
     const validChecks = checkResults.filter((result) => result.status !== "error");
     const averageScore =
       validChecks.length > 0 ? validChecks.reduce((sum, result) => sum + result.score, 0) / validChecks.length : 100;

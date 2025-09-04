@@ -19,17 +19,19 @@ npm run build             # TypeScript compilation
 
 **Core**: MCP Server (`src/index.ts`) managing 59 WordPress tools across 10 categories  
 **Client**: Composition pattern with dependency injection, 4 auth methods  
-**Tools**: Posts(6), Pages(6), Media(5), Users(6), Comments(7), Taxonomies(10), Site(6), Auth(3), Cache(4), Performance(6)  
+**Tools**: Posts(6), Pages(6), Media(5), Users(6), Comments(7), Taxonomies(10), Site(6), Auth(3), Cache(4), Performance(6)
 **Key Files**: `src/client/WordPressClient.ts`, `src/tools/`, `src/config/Config.ts`, `src/utils/logger.ts`
 
 ## Configuration
 
 **Multi-Site** (`mcp-wordpress.config.json`):
+
 ```json
 {"sites": [{"id": "site1", "config": {"WORDPRESS_SITE_URL": "https://site.com", "WORDPRESS_USERNAME": "user", "WORDPRESS_APP_PASSWORD": "xxxx xxxx"}}]}
 ```
 
 **Single-Site** (`.env`):
+
 ```bash
 WORDPRESS_SITE_URL=https://site.com
 WORDPRESS_USERNAME=user
@@ -41,6 +43,7 @@ WORDPRESS_APP_PASSWORD=xxxx xxxx xxxx xxxx
 **Methods**: App Passwords (recommended), JWT, Basic, API Key
 
 **401 Fix**: `npm run fix:rest-auth` or add to `.htaccess`:
+
 ```apache
 RewriteCond %{HTTP:Authorization} ^(.*)
 RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
@@ -55,6 +58,7 @@ DEBUG=true npm run dev     # Debug logging
 ```
 
 **Common Issues:**
+
 - TypeScript: Use `| undefined` for optional properties
 - ESLint: Use `_` prefix for unused variables
 - WordPress 401: Run `npm run fix:rest-auth`
@@ -69,6 +73,7 @@ DEBUG=true npm run dev     # Debug logging
 ## Development Workflow
 
 ### Branch Strategy
+
 ```bash
 git checkout -b feature/specific-improvement
 git checkout -b fix/specific-bug
@@ -76,6 +81,7 @@ git checkout -b chore/maintenance-task
 ```
 
 ### Commit Standards
+
 ```bash
 git commit -m "feat: add new WordPress tool"
 git commit -m "fix: resolve authentication issue"
@@ -83,6 +89,7 @@ git commit -m "chore: update dependencies"
 ```
 
 ### Quality Gates
+
 ```bash
 npm test                 # All tests must pass
 npm run lint            # ESLint validation
@@ -101,6 +108,7 @@ npm run build          # TypeScript compilation
 **Status**: Production-ready with CI/CD
 
 **Critical Files**:
+
 - `src/index.ts` - MCP Server
 - `src/client/WordPressClient.ts` - API client
 - `src/tools/` - Tool implementations

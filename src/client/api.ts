@@ -170,7 +170,13 @@ export class WordPressClient implements IWordPressClient {
     if (options.auth) {
       // If auth is provided but without method, infer it
       if (!options.auth.method) {
-        const auth = options.auth as any;
+        const auth = options.auth as AuthConfig & {
+          username?: string;
+          appPassword?: string;
+          password?: string;
+          secret?: string;
+          apiKey?: string;
+        };
         if (auth.username && auth.appPassword) {
           this.auth = { ...auth, method: "app-password" };
         } else if (auth.username && auth.password && auth.secret) {

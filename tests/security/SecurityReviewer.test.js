@@ -1,6 +1,6 @@
 /**
  * Tests for SecurityReviewer
- * 
+ *
  * Tests the AI-powered security code review system including
  * vulnerability detection, code analysis, and security scoring.
  */
@@ -44,7 +44,7 @@ vi.mock("../../dist/security/AISecurityScanner.js", () => ({
 // Mock Security Config
 vi.mock("../../dist/security/SecurityConfig.js", () => ({
   SecurityUtils: {
-    sanitize: vi.fn(input => input?.toString().replace(/[<>]/g, "")),
+    sanitize: vi.fn((input) => input?.toString().replace(/[<>]/g, "")),
     validateInput: vi.fn(() => true),
     hash: vi.fn(() => "mock-hash"),
   },
@@ -93,10 +93,11 @@ describe("SecurityReviewer", () => {
       readdirSync: vi.fn().mockReturnValue([]),
     };
 
-    fs.readFileSync = vi.fn().mockImplementation(mockFs.readFileSync);
-    fs.existsSync = vi.fn().mockImplementation(mockFs.existsSync);
-    fs.statSync = vi.fn().mockImplementation(mockFs.statSync);
-    fs.readdirSync = vi.fn().mockImplementation(mockFs.readdirSync);
+    // Configure the mocked fs module
+    vi.mocked(fs.readFileSync).mockImplementation(mockFs.readFileSync);
+    vi.mocked(fs.existsSync).mockImplementation(mockFs.existsSync);
+    vi.mocked(fs.statSync).mockImplementation(mockFs.statSync);
+    vi.mocked(fs.readdirSync).mockImplementation(mockFs.readdirSync);
 
     reviewer = new SecurityReviewer(mockConfig);
     vi.clearAllMocks();
@@ -118,7 +119,7 @@ describe("SecurityReviewer", () => {
 
     it("should validate configuration on init", () => {
       const invalidConfig = { ...mockConfig, projectRoot: "" };
-      
+
       expect(() => new SecurityReviewer(invalidConfig)).toThrow();
     });
   });
@@ -141,7 +142,7 @@ describe("SecurityReviewer", () => {
 
     it("should analyze single file for vulnerabilities", async () => {
       const result = await reviewer.analyzeFile("/test/app.js");
-      
+
       expect(result).toBeDefined();
       expect(result.filePath).toBe("/test/app.js");
       expect(result.issues).toBeDefined();
@@ -166,7 +167,7 @@ describe("SecurityReviewer", () => {
       });
 
       const result = await reviewer.analyzeFile("/test/app.js");
-      
+
       expect(result.issues).toHaveLength(1);
       expect(result.issues[0].type).toBe("sql-injection");
       expect(result.issues[0].severity).toBe("high");
@@ -184,7 +185,7 @@ describe("SecurityReviewer", () => {
       });
 
       const result = await reviewer.analyzeFile("/test/vulnerable.js");
-      
+
       expect(result.securityScore).toBeLessThan(50);
       expect(result.riskLevel).toBe("high");
     });
@@ -193,7 +194,7 @@ describe("SecurityReviewer", () => {
       mockFs.readFileSync.mockReturnValue("invalid javascript code {{{");
 
       const result = await reviewer.analyzeFile("/test/broken.js");
-      
+
       expect(result.issues).toBeDefined();
       expect(result.parseError).toBe(true);
     });
@@ -201,15 +202,13 @@ describe("SecurityReviewer", () => {
 
   describe("Project Analysis", () => {
     beforeEach(() => {
-      mockFs.readdirSync.mockReturnValue([
-        "app.js", "config.js", "routes.js", "package.json"
-      ]);
+      mockFs.readdirSync.mockReturnValue(["app.js", "config.js", "routes.js", "package.json"]);
       mockFs.readFileSync.mockReturnValue("const test = 'safe code';");
     });
 
     it("should analyze entire project", async () => {
       const result = await reviewer.analyzeProject();
-      
+
       expect(result).toBeDefined();
       expect(result.summary).toBeDefined();
       expect(result.files).toBeInstanceOf(Array);
@@ -218,22 +217,19 @@ describe("SecurityReviewer", () => {
     });
 
     it("should respect include/exclude patterns", async () => {
-      mockFs.readdirSync.mockReturnValue([
-        "src/app.js", "node_modules/lib.js", "dist/bundle.js", "tests/test.js"
-      ]);
+      mockFs.readdirSync.mockReturnValue(["src/app.js", "node_modules/lib.js", "dist/bundle.js", "tests/test.js"]);
 
       const result = await reviewer.analyzeProject();
-      
+
       // Should only analyze files matching patterns and not excluded
       expect(result.files.length).toBeLessThan(4);
-      expect(result.files.every(f => 
-        !f.filePath.includes("node_modules") && 
-        !f.filePath.includes("dist")
-      )).toBe(true);
+      expect(result.files.every((f) => !f.filePath.includes("node_modules") && !f.filePath.includes("dist"))).toBe(
+        true,
+      );
     });
 
     it("should aggregate security metrics", async () => {
-      reviewer.aiScanner.analyzeCode.mockImplementation(() => 
+      reviewer.aiScanner.analyzeCode.mockImplementation(() =>
         Promise.resolve({
           vulnerabilities: [
             { severity: "high", type: "xss" },
@@ -241,11 +237,11 @@ describe("SecurityReviewer", () => {
           ],
           patterns: [],
           confidence: 0.9,
-        })
+        }),
       );
 
       const result = await reviewer.analyzeProject();
-      
+
       expect(result.summary.criticalIssues).toBeGreaterThanOrEqual(0);
       expect(result.summary.highIssues).toBeGreaterThanOrEqual(0);
       expect(result.summary.mediumIssues).toBeGreaterThanOrEqual(0);
@@ -276,10 +272,8 @@ describe("SecurityReviewer", () => {
       });
 
       const result = await reviewer.analyzeFile("/test/secrets.js");
-      
-      expect(result.issues.some(issue => 
-        issue.type === "hardcoded-secret"
-      )).toBe(true);
+
+      expect(result.issues.some((issue) => issue.type === "hardcoded-secret")).toBe(true);
     });
 
     it("should detect XSS vulnerabilities", async () => {
@@ -305,10 +299,8 @@ describe("SecurityReviewer", () => {
       });
 
       const result = await reviewer.analyzeFile("/test/xss.js");
-      
-      expect(result.issues.some(issue => 
-        issue.type === "xss"
-      )).toBe(true);
+
+      expect(result.issues.some((issue) => issue.type === "xss")).toBe(true);
     });
 
     it("should check dependency security", async () => {
@@ -334,10 +326,8 @@ describe("SecurityReviewer", () => {
       });
 
       const result = await reviewer.analyzeFile("/test/package.json");
-      
-      expect(result.issues.some(issue => 
-        issue.type === "insecure-dependency"
-      )).toBe(true);
+
+      expect(result.issues.some((issue) => issue.type === "insecure-dependency")).toBe(true);
     });
   });
 
@@ -345,16 +335,12 @@ describe("SecurityReviewer", () => {
     it("should assess overall project risk", async () => {
       const mockFiles = [
         { filePath: "/test/app.js", securityScore: 85, issues: [] },
-        { filePath: "/test/auth.js", securityScore: 60, issues: [
-          { severity: "high", type: "auth-bypass" }
-        ]},
-        { filePath: "/test/db.js", securityScore: 40, issues: [
-          { severity: "critical", type: "sql-injection" }
-        ]},
+        { filePath: "/test/auth.js", securityScore: 60, issues: [{ severity: "high", type: "auth-bypass" }] },
+        { filePath: "/test/db.js", securityScore: 40, issues: [{ severity: "critical", type: "sql-injection" }] },
       ];
 
       const risk = await reviewer.assessProjectRisk(mockFiles);
-      
+
       expect(risk).toBeDefined();
       expect(risk.overallRisk).toBeDefined();
       expect(risk.riskFactors).toBeInstanceOf(Array);
@@ -365,13 +351,11 @@ describe("SecurityReviewer", () => {
     it("should identify high-risk files", async () => {
       const mockFiles = [
         { filePath: "/test/safe.js", securityScore: 95, issues: [] },
-        { filePath: "/test/risky.js", securityScore: 20, issues: [
-          { severity: "critical", type: "code-injection" }
-        ]},
+        { filePath: "/test/risky.js", securityScore: 20, issues: [{ severity: "critical", type: "code-injection" }] },
       ];
 
       const risk = await reviewer.assessProjectRisk(mockFiles);
-      
+
       expect(risk.highRiskFiles).toContain("/test/risky.js");
       expect(risk.highRiskFiles).not.toContain("/test/safe.js");
     });
@@ -381,14 +365,12 @@ describe("SecurityReviewer", () => {
         { severity: "critical", type: "rce" },
         { severity: "critical", type: "sql-injection" },
       ];
-      
-      const mediumVulns = [
-        { severity: "medium", type: "info-disclosure" },
-      ];
+
+      const mediumVulns = [{ severity: "medium", type: "info-disclosure" }];
 
       const criticalRisk = await reviewer.calculateRiskScore(criticalVulns);
       const mediumRisk = await reviewer.calculateRiskScore(mediumVulns);
-      
+
       expect(criticalRisk).toBeGreaterThan(mediumRisk);
       expect(criticalRisk).toBeGreaterThan(0.8);
       expect(mediumRisk).toBeLessThan(0.5);
@@ -398,7 +380,7 @@ describe("SecurityReviewer", () => {
   describe("Reporting", () => {
     it("should generate comprehensive security report", async () => {
       const report = await reviewer.generateReport();
-      
+
       expect(report).toBeDefined();
       expect(report.timestamp).toBeInstanceOf(Date);
       expect(report.summary).toBeDefined();
@@ -408,7 +390,7 @@ describe("SecurityReviewer", () => {
 
     it("should include executive summary", async () => {
       const report = await reviewer.generateReport();
-      
+
       expect(report.summary.totalFiles).toBeGreaterThanOrEqual(0);
       expect(report.summary.totalIssues).toBeGreaterThanOrEqual(0);
       expect(report.summary.overallScore).toBeGreaterThanOrEqual(0);
@@ -429,7 +411,7 @@ describe("SecurityReviewer", () => {
       });
 
       const report = await reviewer.generateReport();
-      
+
       expect(report.recommendations).toHaveLength(1);
       expect(report.recommendations[0]).toContain("parameterized queries");
     });
@@ -438,7 +420,7 @@ describe("SecurityReviewer", () => {
       const jsonReport = await reviewer.generateReport("json");
       const htmlReport = await reviewer.generateReport("html");
       const markdownReport = await reviewer.generateReport("markdown");
-      
+
       expect(typeof jsonReport).toBe("object");
       expect(typeof htmlReport).toBe("string");
       expect(typeof markdownReport).toBe("string");
@@ -450,15 +432,15 @@ describe("SecurityReviewer", () => {
   describe("Configuration Management", () => {
     it("should allow runtime rule configuration", () => {
       const newRules = {
-        "custom-security-rule": { 
-          enabled: true, 
+        "custom-security-rule": {
+          enabled: true,
           severity: "high",
           pattern: /dangerous-function\(/g,
         },
       };
 
       reviewer.updateSecurityRules(newRules);
-      
+
       expect(reviewer.config.securityRules["custom-security-rule"]).toBeDefined();
     });
 
@@ -472,7 +454,7 @@ describe("SecurityReviewer", () => {
 
     it("should support rule disabling", () => {
       reviewer.disableRule("no-hardcoded-secrets");
-      
+
       expect(reviewer.config.securityRules["no-hardcoded-secrets"].enabled).toBe(false);
     });
   });
@@ -482,7 +464,7 @@ describe("SecurityReviewer", () => {
       const startTime = Date.now();
       await reviewer.analyzeFile("/test/app.js");
       const duration = Date.now() - startTime;
-      
+
       expect(duration).toBeLessThan(2000); // Should complete within 2 seconds
     });
 
@@ -493,17 +475,17 @@ describe("SecurityReviewer", () => {
       const startTime = Date.now();
       await reviewer.analyzeFile("/test/large.js");
       const duration = Date.now() - startTime;
-      
+
       expect(duration).toBeLessThan(5000); // Should handle large files
     });
 
     it("should support parallel analysis", async () => {
       const files = ["/test/app1.js", "/test/app2.js", "/test/app3.js"];
-      
+
       const startTime = Date.now();
       const results = await reviewer.analyzeFilesInParallel(files);
       const duration = Date.now() - startTime;
-      
+
       expect(results).toHaveLength(3);
       expect(duration).toBeLessThan(3000); // Parallel should be faster
     });
@@ -514,18 +496,16 @@ describe("SecurityReviewer", () => {
       mockFs.existsSync.mockReturnValue(false);
 
       const result = await reviewer.analyzeFile("/test/missing.js");
-      
+
       expect(result.error).toBeDefined();
       expect(result.error).toContain("not found");
     });
 
     it("should recover from AI scanner failures", async () => {
-      reviewer.aiScanner.analyzeCode.mockRejectedValue(
-        new Error("AI service unavailable")
-      );
+      reviewer.aiScanner.analyzeCode.mockRejectedValue(new Error("AI service unavailable"));
 
       const result = await reviewer.analyzeFile("/test/app.js");
-      
+
       expect(result).toBeDefined();
       expect(result.error).toContain("AI service unavailable");
       expect(result.fallbackAnalysis).toBe(true);
@@ -535,20 +515,18 @@ describe("SecurityReviewer", () => {
       mockFs.readFileSync.mockReturnValue("invalid { code } structure");
 
       const result = await reviewer.analyzeFile("/test/malformed.js");
-      
+
       expect(result.parseError).toBe(true);
       expect(result.issues).toBeDefined(); // Should still provide some analysis
     });
 
     it("should timeout on hanging analysis", async () => {
-      reviewer.aiScanner.analyzeCode.mockImplementation(
-        () => new Promise(resolve => setTimeout(resolve, 10000))
-      );
+      reviewer.aiScanner.analyzeCode.mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 10000)));
 
       const startTime = Date.now();
       const result = await reviewer.analyzeFile("/test/slow.js", { timeout: 1000 });
       const duration = Date.now() - startTime;
-      
+
       expect(duration).toBeLessThan(2000);
       expect(result.timeout).toBe(true);
     });
@@ -561,7 +539,7 @@ describe("SecurityReviewer", () => {
         exitOnFailure: false,
         includeMetrics: true,
       });
-      
+
       expect(ciReport).toBeDefined();
       expect(ciReport).toContain("<testsuite");
       expect(ciReport).toContain("security-analysis");
@@ -572,7 +550,7 @@ describe("SecurityReviewer", () => {
         event: "security-scan-complete",
         results: { totalIssues: 5, criticalIssues: 1 },
       });
-      
+
       expect(webhookPayload).toBeDefined();
       expect(webhookPayload.event).toBe("security-scan-complete");
       expect(webhookPayload.results).toBeDefined();
@@ -581,7 +559,7 @@ describe("SecurityReviewer", () => {
     it("should export results to external systems", async () => {
       const sarif = await reviewer.exportToSARIF();
       const sonar = await reviewer.exportToSonarQube();
-      
+
       expect(sarif).toBeDefined();
       expect(sarif.version).toBe("2.1.0");
       expect(sonar).toBeDefined();
