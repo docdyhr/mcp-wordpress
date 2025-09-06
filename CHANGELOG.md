@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.4...v2.7.0) (2025-09-06)
+
+### 🚀 Features
+
+* **architecture:** Complete test suite architectural improvements and fixes ([8105023](https://github.com/docdyhr/mcp-wordpress/commit/8105023b5d04621466bcd9d150a3c45a256d5045))
+* **ci:** Complete CI/CD pipeline optimization and automation ([ec1f82b](https://github.com/docdyhr/mcp-wordpress/commit/ec1f82b86469197d13252f35945026bfb8d7693c))
+* **ci:** Comprehensive CI/CD pipeline health improvements ([0ae8c44](https://github.com/docdyhr/mcp-wordpress/commit/0ae8c44d2c6f8bd4822bcf49f34155ee1dd5d787))
+* release v2.7.0 with composition architecture and complete SEO toolkit ([90a7ea3](https://github.com/docdyhr/mcp-wordpress/commit/90a7ea38699363aa001950dcfc42689a3d139650))
+* **seo:** Complete SEO toolkit implementation with TypeScript fixes ([#118](https://github.com/docdyhr/mcp-wordpress/issues/118)) ([a6c4c45](https://github.com/docdyhr/mcp-wordpress/commit/a6c4c4543329abe8b434c283c96d8830a122e8fa))
+* **version:** Implement best-practices versioning system with SemVer support ([12d03fd](https://github.com/docdyhr/mcp-wordpress/commit/12d03fde4984e3609558c2ef29f82f5c6eea8765))
+
+### 🐛 Bug Fixes
+
+* **ci:** Fix all ESLint errors and TypeScript compilation issues ([eef4a59](https://github.com/docdyhr/mcp-wordpress/commit/eef4a59587ea9107754b55a0822eb740074801c1))
+* **types:** Resolve TypeScript compilation errors in SecurityCIPipeline ([2f36f28](https://github.com/docdyhr/mcp-wordpress/commit/2f36f28f886917c7e62c2fc96098d05bb96328d9))
+
 ## [2.7.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.4...v2.7.0) (2025-08-28)
 
 ### 🚀 Features
