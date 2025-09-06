@@ -361,7 +361,7 @@ export class SecurityCIPipeline {
   // Automated remediation
   async executeAutoRemediation(): Promise<Record<string, unknown>> {
     try {
-      const remediation = this.remediation as Record<string, unknown> & { autoFix?: () => Promise<unknown> };
+      const remediation = this.remediation as unknown as Record<string, unknown> & { autoFix?: () => Promise<unknown> };
       const res = await remediation.autoFix?.();
       return { status: "ok", result: res };
     } catch (err) {
@@ -370,7 +370,7 @@ export class SecurityCIPipeline {
   }
 
   async generateRemediationPlan(): Promise<unknown[]> {
-    const remediation = this.remediation as Record<string, unknown> & {
+    const remediation = this.remediation as unknown as Record<string, unknown> & {
       generateRecommendations?: () => Promise<unknown[]> | unknown[];
     };
     return remediation.generateRecommendations?.() ?? [];
@@ -902,7 +902,7 @@ export class SecurityCIPipeline {
     // Some test mocks provide validateCompliance, others may not. Fall back to compliant=true when unavailable.
     let compliance: { compliant: boolean; violations: string[] } = { compliant: true, violations: [] };
     try {
-      const configManager = this.configManager as Record<string, unknown> & {
+      const configManager = this.configManager as unknown as Record<string, unknown> & {
         validateCompliance?: (env: string) => Promise<{ compliant: boolean; violations: string[] }>;
         getSecurityConfig?: () => Record<string, unknown> & { compliant?: boolean; violations?: string[] };
       };
