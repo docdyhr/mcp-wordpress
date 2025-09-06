@@ -58,6 +58,10 @@ export default [
       // Node.js specific
       "node/no-unsupported-features/es-syntax": "off",
       "node/no-missing-import": "off",
+
+      // Enforce commit-style docs comments marker (lightweight heuristic):
+      // Warn if a top-of-file comment starts with 'Doc:' instead of 'docs:'
+      "no-warning-comments": ["warn", { terms: ["Doc:"], location: "start" }],
     },
   },
   {
