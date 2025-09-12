@@ -59,8 +59,8 @@ export default [
       "node/no-unsupported-features/es-syntax": "off",
       "node/no-missing-import": "off",
 
-      // Enforce commit-style docs comments marker (lightweight heuristic):
-      // Warn if a top-of-file comment starts with 'Doc:' instead of 'docs:'
+      // Warn if a comment starts with 'Doc:' (to discourage its use).
+      // Note: This does not enforce using 'docs:' instead; it only warns on 'Doc:'.
       "no-warning-comments": ["warn", { terms: ["Doc:"], location: "start" }],
     },
   },
