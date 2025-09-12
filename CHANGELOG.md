@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.7.0...v2.8.0) (2025-09-12)
+
+### 🚀 Features
+
+* **security:** soft-fail internal check errors (warning, neutral score) ([#122](https://github.com/docdyhr/mcp-wordpress/issues/122)) ([8666093](https://github.com/docdyhr/mcp-wordpress/commit/866609370e1a7a8118df2aa54fae8e760a4752e4))
+
 ## [2.7.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.4...v2.7.0) (2025-09-06)
 
 ### 🚀 Features
