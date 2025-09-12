@@ -58,6 +58,10 @@ export default [
       // Node.js specific
       "node/no-unsupported-features/es-syntax": "off",
       "node/no-missing-import": "off",
+
+      // Warn if a comment starts with 'Doc:' (to discourage its use).
+      // Note: This does not enforce using 'docs:' instead; it only warns on 'Doc:'.
+      "no-warning-comments": ["warn", { terms: ["Doc:"], location: "start" }],
     },
   },
   {

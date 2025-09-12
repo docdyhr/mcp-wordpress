@@ -1,0 +1,10 @@
+# Code owners for automated review assignment
+# Format: pattern  owner
+
+* @docdyhr
+
+/src/security/ @docdyhr
+/src/client/ @docdyhr
+/src/cache/ @docdyhr
+/tests/ @docdyhr
+/docs/ @docdyhr
