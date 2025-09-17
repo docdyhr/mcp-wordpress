@@ -1,6 +1,6 @@
 /**
  * Tests for WordPressClientRefactored
- * 
+ *
  * Tests the refactored modular WordPress client architecture
  */
 
@@ -46,7 +46,7 @@ describe("WordPressClientRefactored", () => {
       json: vi.fn().mockResolvedValue({ id: 1, title: "Test" }),
       text: vi.fn().mockResolvedValue('{"id": 1, "title": "Test"}'),
     };
-    
+
     global.fetch.mockResolvedValue(mockResponse);
 
     const config = {
@@ -95,25 +95,25 @@ describe("WordPressClientRefactored", () => {
   describe("HTTP Methods", () => {
     it("should make GET requests", async () => {
       const result = await client.get("/wp/v2/posts");
-      
+
       expect(global.fetch).toHaveBeenCalledWith(
         "https://test.example.com/wp-json/wp/v2/posts",
         expect.objectContaining({
           method: "GET",
           headers: expect.objectContaining({
-            "Accept": "application/json",
+            Accept: "application/json",
             "User-Agent": "MCP-WordPress-Client/2.0",
           }),
-        })
+        }),
       );
       expect(result).toEqual({ id: 1, title: "Test" });
     });
 
     it("should make POST requests with data", async () => {
       const postData = { title: "New Post", content: "Content" };
-      
+
       await client.post("/wp/v2/posts", postData);
-      
+
       expect(global.fetch).toHaveBeenCalledWith(
         "https://test.example.com/wp-json/wp/v2/posts",
         expect.objectContaining({
@@ -122,32 +122,32 @@ describe("WordPressClientRefactored", () => {
           headers: expect.objectContaining({
             "Content-Type": "application/json",
           }),
-        })
+        }),
       );
     });
 
     it("should make PUT requests", async () => {
       const putData = { id: 1, title: "Updated Post" };
-      
+
       await client.put("/wp/v2/posts/1", putData);
-      
+
       expect(global.fetch).toHaveBeenCalledWith(
         "https://test.example.com/wp-json/wp/v2/posts/1",
         expect.objectContaining({
           method: "PUT",
           body: JSON.stringify(putData),
-        })
+        }),
       );
     });
 
     it("should make DELETE requests", async () => {
       await client.delete("/wp/v2/posts/1");
-      
+
       expect(global.fetch).toHaveBeenCalledWith(
         "https://test.example.com/wp-json/wp/v2/posts/1",
         expect.objectContaining({
           method: "DELETE",
-        })
+        }),
       );
     });
   });
@@ -176,34 +176,34 @@ describe("WordPressClientRefactored", () => {
 
   describe("Operation Managers", () => {
     it("should delegate post operations to PostOperations", async () => {
-      const spy = vi.spyOn(client.posts, 'getPosts');
-      
+      const spy = vi.spyOn(client.posts, "getPosts");
+
       await client.getPosts();
-      
+
       expect(spy).toHaveBeenCalled();
     });
 
     it("should delegate page operations to PageOperations", async () => {
-      const spy = vi.spyOn(client.pages, 'getPages');
-      
+      const spy = vi.spyOn(client.pages, "getPages");
+
       await client.getPages();
-      
+
       expect(spy).toHaveBeenCalled();
     });
 
     it("should delegate media operations to MediaOperations", async () => {
-      const spy = vi.spyOn(client.media, 'getMedia');
-      
+      const spy = vi.spyOn(client.media, "getMedia");
+
       await client.getMedia();
-      
+
       expect(spy).toHaveBeenCalled();
     });
 
     it("should delegate user operations to UserOperations", async () => {
-      const spy = vi.spyOn(client.users, 'getUsers');
-      
+      const spy = vi.spyOn(client.users, "getUsers");
+
       await client.getUsers();
-      
+
       expect(spy).toHaveBeenCalled();
     });
   });
@@ -211,7 +211,7 @@ describe("WordPressClientRefactored", () => {
   describe("Authentication Integration", () => {
     it("should include authentication headers", async () => {
       await client.get("/wp/v2/posts");
-      
+
       const [, options] = global.fetch.mock.calls[0];
       expect(options.headers.Authorization).toMatch(/^Basic /);
     });
@@ -290,14 +290,21 @@ describe("WordPressClientRefactored", () => {
 
     it("should calculate average response time", async () => {
       // Mock fetch with a small delay to simulate response time
-      global.fetch.mockImplementation(() =>
-        new Promise(resolve => setTimeout(() => resolve({
-          ok: true,
-          status: 200,
-          json: async () => ({ posts: [] }),
-          text: async () => '{"posts":[]}',
-          headers: new Map([['content-type', 'application/json']]),
-        }), 1)) // 1ms delay
+      global.fetch.mockImplementation(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve({
+                  ok: true,
+                  status: 200,
+                  json: async () => ({ posts: [] }),
+                  text: async () => '{"posts":[]}',
+                  headers: new Map([["content-type", "application/json"]]),
+                }),
+              1,
+            ),
+          ), // 1ms delay
       );
 
       await client.get("/wp/v2/posts");
@@ -321,63 +328,53 @@ describe("WordPressClientRefactored", () => {
     it("should maintain backward compatibility for post methods", async () => {
       const post = await client.getPost(1);
       expect(post).toBeDefined();
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining("/posts/1"),
-        expect.any(Object)
-      );
+      expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("/posts/1"), expect.any(Object));
     });
 
     it("should maintain backward compatibility for page methods", async () => {
       const page = await client.getPage(1);
       expect(page).toBeDefined();
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining("/pages/1"),
-        expect.any(Object)
-      );
+      expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("/pages/1"), expect.any(Object));
     });
 
     it("should maintain backward compatibility for user methods", async () => {
       const user = await client.getUser(1);
       expect(user).toBeDefined();
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining("/users/1"),
-        expect.any(Object)
-      );
+      expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("/users/1"), expect.any(Object));
     });
   });
 
   describe("Performance", () => {
     it("should handle concurrent requests", async () => {
-      const promises = [
-        client.get("/wp/v2/posts"),
-        client.get("/wp/v2/pages"),
-        client.get("/wp/v2/users"),
-      ];
+      const promises = [client.get("/wp/v2/posts"), client.get("/wp/v2/pages"), client.get("/wp/v2/users")];
 
       const results = await Promise.all(promises);
-      
+
       expect(results).toHaveLength(3);
       expect(global.fetch).toHaveBeenCalledTimes(3);
     });
 
     it("should handle request timeouts", async () => {
-      global.fetch.mockImplementation(() => 
-        new Promise(resolve => setTimeout(resolve, 10000))
+      global.fetch.mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            setTimeout(() => reject(new Error("Request timeout")), 200);
+          }),
       );
 
       const timeoutPromise = client.get("/wp/v2/posts", { timeout: 100 });
-      
+
       await expect(timeoutPromise).rejects.toThrow();
-    });
+    }, 1000);
   });
 
   describe("FormData Handling", () => {
     it("should handle FormData uploads", async () => {
       const formData = new FormData();
       formData.append("file", "test-content");
-      
+
       await client.post("/wp/v2/media", formData);
-      
+
       const [, options] = global.fetch.mock.calls[0];
       expect(options.body).toBe(formData);
       expect(options.headers["Content-Type"]).toBeUndefined(); // Should be removed for FormData

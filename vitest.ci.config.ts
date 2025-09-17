@@ -46,8 +46,8 @@ export default defineConfig({
     globals: true,
 
     // Shorter timeouts for CI stability
-    testTimeout: 8000, // 8 seconds max per test
-    hookTimeout: 3000, // 3 seconds for setup/teardown
+    testTimeout: 5000, // 5 seconds max per test
+    hookTimeout: 2000, // 2 seconds for setup/teardown
 
     // Test behavior
     clearMocks: true,
