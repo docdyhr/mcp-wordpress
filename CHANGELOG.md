@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.2](https://github.com/docdyhr/mcp-wordpress/compare/v2.9.1...v2.9.2) (2025-09-17)
+
+### 🐛 Bug Fixes
+
+* **ci:** Optimize memory allocation and test configuration ([5acb7fa](https://github.com/docdyhr/mcp-wordpress/commit/5acb7fa12eb81d198f8ddfbad7390c274f0e4335))
+* **tests:** Reduce timeout values for CI stability ([deb7210](https://github.com/docdyhr/mcp-wordpress/commit/deb721037946f7058c960e436c441afc585cd8b1))
+
 ## [2.9.1](https://github.com/docdyhr/mcp-wordpress/compare/v2.9.0...v2.9.1) (2025-09-17)
 
 ### 🐛 Bug Fixes
