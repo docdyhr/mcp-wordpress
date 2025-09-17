@@ -35,7 +35,7 @@ jobs:
         run: npm run build
 
       - name: 🧪 Run Vitest Tests
-        run: npm test
+        run: NODE_OPTIONS="--max-old-space-size=8192" npx vitest run --config vitest.ci.config.ts
         env:
           # Mock credentials for testing
           WORDPRESS_SITE_URL: https://example.com
@@ -44,7 +44,7 @@ jobs:
           CI: true
 
       - name: 📊 Run Tests with Coverage
-        run: npm run test:coverage:ci
+        run: NODE_OPTIONS="--max-old-space-size=6144" npx vitest run --coverage --config vitest.ci.config.ts
         continue-on-error: true
 
       - name: 📈 Upload Coverage to Codecov (Optional)

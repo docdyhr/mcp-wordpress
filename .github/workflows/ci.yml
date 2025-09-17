@@ -12,7 +12,7 @@ on:
 
 env:
   NODE_VERSION: '20'
-  NODE_OPTIONS: '--experimental-vm-modules'
+  NODE_OPTIONS: '--max-old-space-size=8192 --experimental-vm-modules'
 
 jobs:
   # 🧪 Testing Jobs
