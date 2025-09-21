@@ -28,7 +28,7 @@
  */
 
 import { WordPressClient } from "@/client/api.js";
-import { CreatePostRequest, PostQueryParams, UpdatePostRequest, WordPressPost } from "@/types/wordpress.js";
+import { CreatePostRequest, PostQueryParams, PostStatus, UpdatePostRequest, WordPressPost } from "@/types/wordpress.js";
 import { postToolDefinitions } from "./PostToolDefinitions.js";
 import {
   handleListPosts,
@@ -112,75 +112,151 @@ export class PostTools {
    * Lists WordPress posts with advanced filtering capabilities.
    *
    * @param client - WordPress client instance
-   * @param params - Query parameters for filtering posts
+   * @param params - Query parameters for filtering posts (may include MCP fields)
    * @returns Formatted list of posts or error message
    */
-  public async handleListPosts(client: WordPressClient, params: PostQueryParams): Promise<WordPressPost[] | string> {
-    return handleListPosts(client, params);
+  public async handleListPosts(
+    client: WordPressClient,
+    params: PostQueryParams | Record<string, unknown>,
+  ): Promise<WordPressPost[] | string> {
+    // Extract only the relevant query parameters, excluding MCP-specific fields
+    const queryParams: PostQueryParams = {};
+
+    if (params.page !== undefined) queryParams.page = params.page as number;
+    if (params.per_page !== undefined) queryParams.per_page = params.per_page as number;
+    if (params.search !== undefined) queryParams.search = params.search as string;
+    if (params.orderby !== undefined) queryParams.orderby = params.orderby as string;
+    if (params.order !== undefined) queryParams.order = params.order as "asc" | "desc";
+    if (params.status !== undefined) {
+      // Handle both string and array forms
+      const statusValue = params.status;
+      if (Array.isArray(statusValue)) {
+        queryParams.status = statusValue as PostStatus[];
+      } else {
+        queryParams.status = [statusValue as PostStatus];
+      }
+    }
+    if (params.categories !== undefined) queryParams.categories = params.categories as number[];
+    if (params.tags !== undefined) queryParams.tags = params.tags as number[];
+    if (params.offset !== undefined) queryParams.offset = params.offset as number;
+
+    return handleListPosts(client, queryParams);
   }
 
   /**
    * Retrieves a single WordPress post with detailed information.
    *
    * @param client - WordPress client instance
-   * @param params - Parameters including post ID
+   * @param params - Parameters including post ID (may include MCP fields)
    * @returns Detailed post information or error message
    */
-  public async handleGetPost(client: WordPressClient, params: { id: number }): Promise<WordPressPost | string> {
-    return handleGetPost(client, params);
+  public async handleGetPost(
+    client: WordPressClient,
+    params: { id: number } | Record<string, unknown>,
+  ): Promise<WordPressPost | string> {
+    // Extract only the relevant parameters
+    const postParams = {
+      id: params.id as number,
+    };
+
+    return handleGetPost(client, postParams);
   }
 
   /**
    * Creates a new WordPress post with validation and feedback.
    *
    * @param client - WordPress client instance
-   * @param params - Post creation parameters
+   * @param params - Post creation parameters (may include additional MCP fields like 'site')
    * @returns Created post information or error message
    */
-  public async handleCreatePost(client: WordPressClient, params: CreatePostRequest): Promise<WordPressPost | string> {
-    return handleCreatePost(client, params);
+  public async handleCreatePost(
+    client: WordPressClient,
+    params: CreatePostRequest | Record<string, unknown>,
+  ): Promise<WordPressPost | string> {
+    // Extract only the relevant post creation parameters, excluding MCP-specific fields like 'site'
+    const postParams: CreatePostRequest = {
+      title: params.title as string,
+    };
+
+    if (params.content !== undefined) postParams.content = params.content as string;
+    if (params.status !== undefined) postParams.status = params.status as PostStatus;
+    if (params.excerpt !== undefined) postParams.excerpt = params.excerpt as string;
+    if (params.categories !== undefined) postParams.categories = params.categories as number[];
+    if (params.tags !== undefined) postParams.tags = params.tags as number[];
+    if (params.featured_media !== undefined) postParams.featured_media = params.featured_media as number;
+    if (params.date !== undefined) postParams.date = params.date as string;
+
+    return handleCreatePost(client, postParams);
   }
 
   /**
    * Updates an existing WordPress post with change tracking.
    *
    * @param client - WordPress client instance
-   * @param params - Post update parameters including ID
+   * @param params - Post update parameters including ID (may include MCP fields)
    * @returns Updated post information or error message
    */
   public async handleUpdatePost(
     client: WordPressClient,
-    params: UpdatePostRequest & { id: number },
+    params: (UpdatePostRequest & { id: number }) | Record<string, unknown>,
   ): Promise<WordPressPost | string> {
-    return handleUpdatePost(client, params);
+    // Extract only the relevant update parameters
+    const updateParams: UpdatePostRequest & { id: number } = {
+      id: params.id as number,
+    };
+
+    if (params.title !== undefined) updateParams.title = params.title as string;
+    if (params.content !== undefined) updateParams.content = params.content as string;
+    if (params.status !== undefined) updateParams.status = params.status as PostStatus;
+    if (params.excerpt !== undefined) updateParams.excerpt = params.excerpt as string;
+    if (params.categories !== undefined) updateParams.categories = params.categories as number[];
+    if (params.tags !== undefined) updateParams.tags = params.tags as number[];
+    if (params.featured_media !== undefined) updateParams.featured_media = params.featured_media as number;
+    if (params.date !== undefined) updateParams.date = params.date as string;
+
+    return handleUpdatePost(client, updateParams);
   }
 
   /**
    * Deletes a WordPress post with options for trash or permanent deletion.
    *
    * @param client - WordPress client instance
-   * @param params - Deletion parameters including ID and force option
+   * @param params - Deletion parameters including ID and force option (may include MCP fields)
    * @returns Deletion result or error message
    */
   public async handleDeletePost(
     client: WordPressClient,
-    params: { id: number; force?: boolean },
+    params: { id: number; force?: boolean } | Record<string, unknown>,
   ): Promise<{ deleted: boolean; previous?: WordPressPost } | string> {
-    return handleDeletePost(client, params);
+    // Extract only the relevant parameters
+    const deleteParams: { id: number; force?: boolean } = {
+      id: params.id as number,
+    };
+
+    if (params.force !== undefined) {
+      deleteParams.force = params.force as boolean;
+    }
+
+    return handleDeletePost(client, deleteParams);
   }
 
   /**
    * Retrieves revision history for a WordPress post.
    *
    * @param client - WordPress client instance
-   * @param params - Parameters including post ID
+   * @param params - Parameters including post ID (may include MCP fields)
    * @returns Post revisions or error message
    */
   public async handleGetPostRevisions(
     client: WordPressClient,
-    params: { id: number },
+    params: { id: number } | Record<string, unknown>,
   ): Promise<WordPressPost[] | string> {
-    return handleGetPostRevisions(client, params);
+    // Extract only the relevant parameters
+    const revisionParams = {
+      id: params.id as number,
+    };
+
+    return handleGetPostRevisions(client, revisionParams);
   }
 }
 
