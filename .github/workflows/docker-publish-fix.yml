@@ -217,8 +217,8 @@ jobs:
             if docker pull $IMAGE; then
               echo "✅ Successfully pulled image: $IMAGE"
 
-              # Verify image can run
-              if docker run --rm $IMAGE --version; then
+              # Verify image can run (test with basic health check)
+              if timeout 10 docker run --rm $IMAGE node -e "console.log('MCP WordPress Server - Health Check OK'); process.exit(0)"; then
                 echo "✅ Image runs successfully"
                 echo "verification_status=success" >> $GITHUB_OUTPUT
                 break

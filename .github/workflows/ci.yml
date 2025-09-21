@@ -2,17 +2,17 @@ name: 🚀 CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   schedule:
     # Run nightly tests at 2 AM UTC
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '20'
-  NODE_OPTIONS: '--max-old-space-size=8192 --experimental-vm-modules'
+  NODE_VERSION: "20"
+  NODE_OPTIONS: "--max-old-space-size=8192 --experimental-vm-modules"
 
 jobs:
   # 🧪 Testing Jobs
@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         node-version: [20, 22]
-        test-suite: 
+        test-suite:
           - typescript
           - security
           - config
@@ -36,12 +36,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
 
-      - name: 🔍 Quick Dependency Validation  
+      - name: 🔍 Quick Dependency Validation
         if: matrix.node-version == 20 && matrix.test-suite == 'typescript'
         run: |
           echo "Running quick dependency validation..."
@@ -88,7 +88,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -117,7 +117,7 @@ jobs:
         run: npm run lint
 
       - name: 📊 Test Coverage
-        run: npm run test:coverage
+        run: npm run build && NODE_OPTIONS="--max-old-space-size=8192" vitest run --coverage
 
       - name: 📈 Upload Coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -159,7 +159,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -195,7 +195,7 @@ jobs:
     if: github.event_name == 'schedule' || contains(github.event.head_commit.message, '[test-wp]')
     strategy:
       matrix:
-        wordpress-version: ['6.0', '6.1', '6.2', '6.3', '6.4', '6.5', 'latest']
+        wordpress-version: ["6.0", "6.1", "6.2", "6.3", "6.4", "6.5", "latest"]
     services:
       mysql:
         image: mysql:8.0
@@ -226,7 +226,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -242,16 +242,16 @@ jobs:
       - name: 🔧 Setup WordPress for Testing
         run: |
           echo "Installing WordPress and setting up test user..."
-          
+
           # Get WordPress container ID
           WP_CONTAINER=$(docker ps --filter "ancestor=wordpress:${{ matrix.wordpress-version }}" --format "{{.ID}}")
           echo "WordPress container: $WP_CONTAINER"
-          
+
           # Wait for WordPress container to be ready
           echo "Waiting for WordPress container to be ready..."
           timeout 60 bash -c "until docker exec $WP_CONTAINER php -v >/dev/null 2>&1; do sleep 2; echo -n '.'; done"
           echo "Container ready"
-          
+
           # Install WP-CLI in container
           echo "Installing WP-CLI..."
           docker exec $WP_CONTAINER bash -c "
@@ -261,12 +261,12 @@ jobs:
             mv wp-cli.phar /usr/local/bin/wp &&
             wp --version --allow-root
           "
-          
+
           # Wait for WordPress to be accessible
           echo "Waiting for WordPress to be accessible..."
           timeout 120 bash -c 'until curl -f http://localhost:8080/ >/dev/null 2>&1; do sleep 2; echo -n "."; done'
           echo "WordPress accessible"
-          
+
           # Install WordPress
           echo "Installing WordPress..."
           docker exec $WP_CONTAINER bash -c "
@@ -279,7 +279,7 @@ jobs:
               --admin_email='test@example.com' \
               --allow-root --quiet
           "
-          
+
           # Configure WordPress for API testing
           echo "Configuring WordPress for API testing..."
           docker exec $WP_CONTAINER bash -c "
@@ -289,7 +289,7 @@ jobs:
             wp user update admin --role=administrator --allow-root --quiet &&
             wp post create --post_title='Test Post' --post_content='Test content for API' --post_status=publish --allow-root --quiet
           "
-          
+
           # Verify installation
           echo "Verifying WordPress installation..."
           if curl -s http://localhost:8080/wp-json/wp/v2/ | grep -q 'namespace'; then
@@ -299,7 +299,7 @@ jobs:
             curl -s http://localhost:8080/wp-json/wp/v2/ || true
             exit 1
           fi
-          
+
           echo "WordPress setup completed successfully"
 
       - name: 🧪 Test WordPress ${{ matrix.wordpress-version }} Compatibility
@@ -326,19 +326,19 @@ jobs:
       - name: 🔒 Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.29.0
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
+          scan-type: "fs"
+          scan-ref: "."
           ignore-unfixed: true
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH,MEDIUM'
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL,HIGH,MEDIUM"
 
       - name: 📤 Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3.27.0
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
-          category: 'trivy-fs-scan'
+          sarif_file: "trivy-results.sarif"
+          category: "trivy-fs-scan"
 
   # 📚 Documentation
   docs-check:
@@ -352,7 +352,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -393,8 +393,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
+          cache: "npm"
+          registry-url: "https://registry.npmjs.org"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -408,16 +408,16 @@ jobs:
         run: |
           # Extract version from package.json
           VERSION=$(node -p "require('./package.json').version")
-          
+
           # Check if release already exists
           if gh release view "v$VERSION" >/dev/null 2>&1; then
             echo "✅ Release v$VERSION already exists (created by semantic-release)"
             exit 0
           fi
-          
+
           # Create GitHub release only if it doesn't exist
           echo "📝 Creating release v$VERSION..."
-          
+
           # Generate release notes if file doesn't exist
           if [ ! -f "RELEASE_NOTES_v$VERSION.md" ]; then
             echo "# Release v$VERSION" > RELEASE_NOTES_v$VERSION.md
@@ -426,7 +426,7 @@ jobs:
             echo "" >> RELEASE_NOTES_v$VERSION.md
             echo "See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details." >> RELEASE_NOTES_v$VERSION.md
           fi
-          
+
           gh release create "v$VERSION" \
             --title "Release v$VERSION" \
             --notes-file RELEASE_NOTES_v$VERSION.md \
@@ -458,7 +458,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -471,7 +471,7 @@ jobs:
           # Create a simple performance test
           echo "Running performance benchmarks..."
           time npm run health
-          
+
           # Memory usage check
           node -e "
             const used = process.memoryUsage();
@@ -505,7 +505,7 @@ jobs:
 
   # 📈 Metrics Collection
   metrics:
-    name: 📈 Metrics Collection  
+    name: 📈 Metrics Collection
     runs-on: ubuntu-latest
     if: always()
     needs: [test-matrix, quality-checks, build-package]
