@@ -1,0 +1,53 @@
+default_language_version:
+  node: system
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ["--maxkb=1000"]
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: check-json
+      - id: mixed-line-ending
+      - id: check-case-conflict
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        types_or: [javascript, jsx, ts, tsx, json, yaml, markdown, css]
+        files: \.(js|jsx|ts|tsx|json|yaml|yml|md|css)$
+
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v9.16.0
+    hooks:
+      - id: eslint
+        files: \.(js|jsx|ts|tsx)$
+        types: [file]
+        additional_dependencies:
+          - eslint@^8.45.0
+          - eslint-config-prettier@^9.0.0
+          - "@typescript-eslint/eslint-plugin@^6.0.0"
+          - "@typescript-eslint/parser@^6.0.0"
+
+  - repo: local
+    hooks:
+      - id: typecheck
+        name: TypeScript Typecheck
+        entry: npm run typecheck
+        language: system
+        pass_filenames: false
+        files: \.(ts|tsx)$
+
+      - id: test-changed
+        name: Test Changed Files
+        entry: npm test -- --changed
+        language: system
+        pass_filenames: false
+        files: \.(js|ts|tsx)$
+        stages: [commit]
