@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.10.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.9.3...v2.10.0) (2025-09-21)
+
+### 🚀 Features
+
+* **ci:** Add comprehensive Docker publishing fix and verification workflows ([0054b6b](https://github.com/docdyhr/mcp-wordpress/commit/0054b6b4174618629a40c0d2990faf294b880ca4)), closes [#128](https://github.com/docdyhr/mcp-wordpress/issues/128) [#129](https://github.com/docdyhr/mcp-wordpress/issues/129) [#128](https://github.com/docdyhr/mcp-wordpress/issues/128) [#129](https://github.com/docdyhr/mcp-wordpress/issues/129)
+
 ## [2.9.3](https://github.com/docdyhr/mcp-wordpress/compare/v2.9.2...v2.9.3) (2025-09-21)
 
 ### 🐛 Bug Fixes
