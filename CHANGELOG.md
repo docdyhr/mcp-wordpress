@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.3](https://github.com/docdyhr/mcp-wordpress/compare/v2.9.2...v2.9.3) (2025-09-21)
+
+### 🐛 Bug Fixes
+
+* **tools:** Resolve post creation parameter passing issue ([fc8fa5c](https://github.com/docdyhr/mcp-wordpress/commit/fc8fa5c92e366c730241aa3bdd1491ecc60924e1)), closes [#120](https://github.com/docdyhr/mcp-wordpress/issues/120)
+
 ## [2.9.2](https://github.com/docdyhr/mcp-wordpress/compare/v2.9.1...v2.9.2) (2025-09-17)
 
 ### 🐛 Bug Fixes
