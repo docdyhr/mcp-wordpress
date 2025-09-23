@@ -4,26 +4,26 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Docker tag to build'
+        description: "Docker tag to build"
         required: false
         type: string
-        default: 'dev'
+        default: "dev"
       push:
-        description: 'Push to registry'
+        description: "Push to registry"
         required: false
         type: boolean
         default: false
       test_build:
-        description: 'Run test build only'
+        description: "Run test build only"
         required: false
         type: boolean
         default: true
   pull_request:
     paths:
-      - 'Dockerfile'
-      - 'docker-compose.yml'
-      - '.dockerignore'
-      - '.github/workflows/docker-modern.yml'
+      - "Dockerfile"
+      - "docker-compose.yml"
+      - ".dockerignore"
+      - ".github/workflows/docker-modern.yml"
 
 env:
   REGISTRY: docker.io
@@ -58,13 +58,13 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: linux/amd64  # Single platform for faster testing
+          platforms: linux/amd64 # Single platform for faster testing
           push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          # v6 features enabled for testing  
+          # v6 features enabled for testing
           provenance: true
           sbom: true
           outputs: type=oci,dest=/tmp/image.tar
@@ -73,17 +73,17 @@ jobs:
         run: |
           # Import OCI image and test basic functionality
           docker import /tmp/image.tar test-image:latest
-          
+
           # Test image runs
           IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
           echo "Testing image: $IMAGE_TAG"
-          
+
           # Basic smoke test - check that container starts and has expected structure
           docker run --rm test-image:latest node --version || echo "Node version check failed"
-          
+
           # Check image size
           docker images test-image:latest --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"
-          
+
           # Security scan (if trivy is available)
           if command -v trivy &> /dev/null; then
             trivy image --exit-code 0 --severity HIGH,CRITICAL test-image:latest
@@ -175,8 +175,8 @@ jobs:
             BUILD_DATE={{date 'YYYY-MM-DDTHH:mm:ssZ'}}
             VCS_REF=${{ github.sha }}
           # v6 Enhanced Features
-          provenance: true  # Generate provenance attestation
-          sbom: true        # Generate Software Bill of Materials
+          provenance: true # Generate provenance attestation
+          sbom: true # Generate Software Bill of Materials
           # Annotations for OCI spec compliance
           annotations: |
             org.opencontainers.image.title=MCP WordPress Server

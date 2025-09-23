@@ -6,13 +6,13 @@ Export comprehensive performance report
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `site` | `string` | ❌ | Specific site ID for multi-site setups (optional for single site) | - | `site1`, `production` |
-| `format` | `string` | ❌ | Export format (json, csv, summary) | `summary` | `example` |
-| `includeHistorical` | `boolean` | ❌ | Include historical data (default: true) | - | `example` |
-| `includeAnalytics` | `boolean` | ❌ | Include analytics and insights (default: true) | - | `example` |
-| `timeRange` | `string` | ❌ | Time range for data export (1h, 6h, 24h, 7d, 30d) | - | `example` |
+| Parameter           | Type      | Required | Description                                                       | Default   | Examples              |
+| ------------------- | --------- | -------- | ----------------------------------------------------------------- | --------- | --------------------- |
+| `site`              | `string`  | ❌       | Specific site ID for multi-site setups (optional for single site) | -         | `site1`, `production` |
+| `format`            | `string`  | ❌       | Export format (json, csv, summary)                                | `summary` | `example`             |
+| `includeHistorical` | `boolean` | ❌       | Include historical data (default: true)                           | -         | `example`             |
+| `includeAnalytics`  | `boolean` | ❌       | Include analytics and insights (default: true)                    | -         | `example`             |
+| `timeRange`         | `string`  | ❌       | Time range for data export (1h, 6h, 24h, 7d, 30d)                 | -         | `example`             |
 
 ## Examples
 
@@ -21,11 +21,13 @@ Export comprehensive performance report
 Simple example of using wp_performance_export
 
 **Command:**
+
 ```bash
-wp_performance_export 
+wp_performance_export
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -41,6 +43,7 @@ wp_performance_export
 ```
 
 **Error Example (Authentication failure):**
+
 ```json
 {
   "error": "Authentication failed",
@@ -48,17 +51,18 @@ wp_performance_export
 }
 ```
 
-
 ### Multi-Site performance Usage
 
 Using wp_performance_export with specific site targeting
 
 **Command:**
+
 ```bash
 wp_performance_export --site="site1"
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -72,20 +76,19 @@ wp_performance_export --site="site1"
   }
 }
 ```
-
-
-
 
 ### Advanced performance Configuration
 
 Comprehensive example using all available parameters
 
 **Command:**
+
 ```bash
 wp_performance_export --site="site1" --format="summary" --includeHistorical="example_value" --includeAnalytics="example_value" --timeRange="example_value"
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -99,13 +102,6 @@ wp_performance_export --site="site1" --format="summary" --includeHistorical="exa
   }
 }
 ```
-
-
-
-
-
-
-
 
 ## Response Format
 
@@ -129,34 +125,24 @@ wp_performance_export --site="site1" --format="summary" --includeHistorical="exa
 
 ### AUTHENTICATION_FAILED
 
-**Message:** Authentication failed  
-**Description:** Invalid credentials or insufficient permissions  
-**Resolution:** Check your authentication credentials and user permissions
-
+**Message:** Authentication failed **Description:** Invalid credentials or insufficient permissions **Resolution:**
+Check your authentication credentials and user permissions
 
 ### VALIDATION_ERROR
 
-**Message:** Parameter validation failed  
-**Description:** One or more required parameters are missing or invalid  
+**Message:** Parameter validation failed **Description:** One or more required parameters are missing or invalid
 **Resolution:** Review the required parameters and their formats
-
 
 ### NOT_FOUND
 
-**Message:** Resource not found  
-**Description:** The requested resource does not exist  
-**Resolution:** Verify the resource ID and ensure it exists
-
+**Message:** Resource not found **Description:** The requested resource does not exist **Resolution:** Verify the
+resource ID and ensure it exists
 
 ### PERMISSION_DENIED
 
-**Message:** Insufficient permissions  
-**Description:** The user does not have permission to perform this action  
+**Message:** Insufficient permissions **Description:** The user does not have permission to perform this action
 **Resolution:** Contact an administrator to grant the necessary permissions
-
-
-
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

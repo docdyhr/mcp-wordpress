@@ -852,7 +852,9 @@ export class SEOTools {
     const titlePercentage = analysis.postsWithSEO > 0 ? (analysis.postsWithTitles / analysis.postsWithSEO) * 100 : 0;
     if (titlePercentage < 80) {
       analysis.recommendations.push(
-        `${Math.round(100 - titlePercentage)}% of SEO-enabled posts lack custom titles. Add SEO titles for better search visibility.`,
+        `${Math.round(
+          100 - titlePercentage,
+        )}% of SEO-enabled posts lack custom titles. Add SEO titles for better search visibility.`,
       );
     }
 
@@ -860,7 +862,9 @@ export class SEOTools {
       analysis.postsWithSEO > 0 ? (analysis.postsWithDescriptions / analysis.postsWithSEO) * 100 : 0;
     if (descPercentage < 80) {
       analysis.recommendations.push(
-        `${Math.round(100 - descPercentage)}% of SEO-enabled posts lack meta descriptions. Add descriptions to improve click-through rates.`,
+        `${Math.round(
+          100 - descPercentage,
+        )}% of SEO-enabled posts lack meta descriptions. Add descriptions to improve click-through rates.`,
       );
     }
 

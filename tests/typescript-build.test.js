@@ -2,8 +2,6 @@
  * Tests for TypeScript Build and Exports
  */
 
-
-
 describe("TypeScript Build Tests", () => {
   describe("Module Exports", () => {
     it("should export MCPWordPressServer from main index", async () => {
@@ -131,9 +129,7 @@ describe("TypeScript Build Tests", () => {
         (process.env.WORDPRESS_APP_PASSWORD || process.env.WORDPRESS_PASSWORD);
 
       if (!hasCredentials) {
-        console.log(
-          "   ✓ Skipped server instantiation - no credentials available (CI environment)",
-        );
+        console.log("   ✓ Skipped server instantiation - no credentials available (CI environment)");
         return;
       }
 
@@ -150,9 +146,7 @@ describe("TypeScript Build Tests", () => {
         (process.env.WORDPRESS_APP_PASSWORD || process.env.WORDPRESS_PASSWORD);
 
       if (!hasCredentials) {
-        console.log(
-          "   ✓ Skipped tool count verification - no credentials available (CI environment)",
-        );
+        console.log("   ✓ Skipped tool count verification - no credentials available (CI environment)");
         return;
       }
 

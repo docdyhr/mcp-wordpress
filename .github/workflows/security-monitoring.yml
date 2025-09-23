@@ -1,4 +1,4 @@
-name: '🛡️ Security Monitoring'
+name: "🛡️ Security Monitoring"
 
 on:
   push:
@@ -7,16 +7,16 @@ on:
     branches: [main, develop]
     # Skip for dependency-only PRs
     paths-ignore:
-      - 'package-lock.json'
-      - 'npm-shrinkwrap.json'
-      - 'yarn.lock'
-      - 'pnpm-lock.yaml'
-      - 'security-fixes.txt'
-      - 'update-report-*.md'
-      - 'updates-*.json'
+      - "package-lock.json"
+      - "npm-shrinkwrap.json"
+      - "yarn.lock"
+      - "pnpm-lock.yaml"
+      - "security-fixes.txt"
+      - "update-report-*.md"
+      - "updates-*.json"
   schedule:
     # Run daily security checks at 3 AM UTC
-    - cron: '0 3 * * *'
+    - cron: "0 3 * * *"
   workflow_dispatch:
 
 permissions:
@@ -34,7 +34,7 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for better scanning
+          fetch-depth: 0 # Full history for better scanning
 
       - name: 🔍 TruffleHog Secret Scan
         uses: trufflesecurity/trufflehog@v3.82.13
@@ -75,8 +75,8 @@ jobs:
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: 📦 Install dependencies
         run: npm ci
@@ -116,8 +116,8 @@ jobs:
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: 🔍 Check npm audit
         run: |
@@ -164,8 +164,8 @@ jobs:
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: 📦 Install dependencies
         run: npm ci

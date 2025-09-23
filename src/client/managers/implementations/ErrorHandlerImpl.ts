@@ -28,18 +28,14 @@ export class ErrorHandlerImpl implements ErrorHandler {
 
     if (isErrorLike(error)) {
       if (error.name === "AbortError" || error.code === "ABORT_ERR") {
-        throw new WordPressAPIError(
-          `Request timeout after ${this.configProvider.config.timeout}ms`, 
-          408, 
-          "timeout"
-        );
+        throw new WordPressAPIError(`Request timeout after ${this.configProvider.config.timeout}ms`, 408, "timeout");
       }
 
       if (error.code === "ECONNREFUSED" || error.code === "ENOTFOUND") {
         throw new WordPressAPIError(
-          `Cannot connect to WordPress site: ${this.configProvider.config.baseUrl}`, 
-          503, 
-          "connection_failed"
+          `Cannot connect to WordPress site: ${this.configProvider.config.baseUrl}`,
+          503,
+          "connection_failed",
         );
       }
     }
@@ -60,27 +56,21 @@ export class ErrorHandlerImpl implements ErrorHandler {
    */
   handleAuthError(error: unknown, operation: string): never {
     logError(`Authentication failed during ${operation}:`, error as Record<string, unknown>);
-    
+
     if (error instanceof WordPressAPIError) {
       throw error;
     }
 
     const message = getErrorMessage(error);
-    throw new WordPressAPIError(
-      `Authentication failed during ${operation}: ${message}`, 
-      401, 
-      "auth_failed"
-    );
+    throw new WordPressAPIError(`Authentication failed during ${operation}: ${message}`, 401, "auth_failed");
   }
 
   /**
    * Handle rate limit errors specifically
    */
   handleRateLimitError(retryAfter?: number): never {
-    const message = retryAfter 
-      ? `Rate limit exceeded. Retry after ${retryAfter} seconds.`
-      : "Rate limit exceeded.";
-    
+    const message = retryAfter ? `Rate limit exceeded. Retry after ${retryAfter} seconds.` : "Rate limit exceeded.";
+
     throw new WordPressAPIError(message, 429, "rate_limited");
   }
 
@@ -91,12 +81,8 @@ export class ErrorHandlerImpl implements ErrorHandler {
     const message = getErrorMessage(baseError);
     const contextString = Object.entries(context)
       .map(([key, value]) => `${key}=${String(value)}`)
-      .join(', ');
-    
-    return new WordPressAPIError(
-      `${message} (Context: ${contextString})`,
-      500,
-      "contextual_error"
-    );
+      .join(", ");
+
+    return new WordPressAPIError(`${message} (Context: ${contextString})`, 500, "contextual_error");
   }
 }

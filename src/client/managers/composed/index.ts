@@ -1,13 +1,13 @@
 /**
  * Composed Managers Export
- * 
+ *
  * This module provides composition-based alternatives to the inheritance-based managers.
  * The composed managers offer better testability, flexibility, and adherence to SOLID principles.
- * 
+ *
  * Usage:
  * ```typescript
  * import { createComposedWordPressClient } from '@/client/managers/composed';
- * 
+ *
  * const client = await createComposedWordPressClient(config);
  * const posts = await client.getPosts();
  * ```
@@ -23,7 +23,7 @@ export type {
   BaseManagerContract,
   ComposedManager,
   ManagerFactory,
-  ManagerCompositionConfig
+  ManagerCompositionConfig,
 } from "../interfaces/ManagerInterfaces.js";
 
 // Implementations
@@ -36,11 +36,11 @@ export { ComposedAuthenticationManager } from "../ComposedAuthenticationManager.
 export { ComposedRequestManager } from "../ComposedRequestManager.js";
 
 // Factory and Client
-export { 
+export {
   ComposedManagerFactory,
   ComposedWordPressClient,
   createComposedWordPressClient,
-  type ComposedWordPressClientDependencies
+  type ComposedWordPressClientDependencies,
 } from "../ComposedManagerFactory.js";
 
 // Migration utilities (for gradual migration from inheritance to composition)

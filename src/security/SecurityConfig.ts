@@ -190,7 +190,9 @@ export class SecurityUtils {
       return obj;
     }
 
-    const working: Record<string, unknown> | unknown[] = Array.isArray(obj) ? [...obj] : { ...(obj as Record<string, unknown>) };
+    const working: Record<string, unknown> | unknown[] = Array.isArray(obj)
+      ? [...obj]
+      : { ...(obj as Record<string, unknown>) };
 
     if (Array.isArray(working)) {
       return working.map((val) => (typeof val === "object" ? SecurityUtils.redactSensitiveData(val) : val));
@@ -276,8 +278,12 @@ export function createSecureError(
   const secureError = new Error(fallbackMessage);
 
   // Preserve error code if it's safe
-  if (error && typeof (error as { code?: unknown }).code === "string" && !(error as { code: string }).code.includes("_")) {
-  (secureError as unknown as Record<string, unknown>).code = (error as { code: string }).code;
+  if (
+    error &&
+    typeof (error as { code?: unknown }).code === "string" &&
+    !(error as { code: string }).code.includes("_")
+  ) {
+    (secureError as unknown as Record<string, unknown>).code = (error as { code: string }).code;
   }
 
   return secureError;

@@ -7,6 +7,7 @@ Based on coverage analysis, the following areas need attention:
 ### Critical Areas (0% coverage)
 
 1. **Tool Implementations** (`src/tools/`):
+
    - site.ts (0% coverage)
    - taxonomies.ts (0% coverage)
    - users.ts (0% coverage)

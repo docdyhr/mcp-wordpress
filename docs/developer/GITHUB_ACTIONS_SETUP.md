@@ -9,8 +9,7 @@ NPM publishing.
 
 ### 1. NPM Publish Workflow (`.github/workflows/npm-publish.yml`)
 
-**Trigger**: When a GitHub release is created  
-**Purpose**: Automatically publish the package to NPM
+**Trigger**: When a GitHub release is created **Purpose**: Automatically publish the package to NPM
 
 **Features**:
 
@@ -58,6 +57,7 @@ gh release create v1.1.3 --title "Release v1.1.3" --notes "Release notes here"
 ### 1. Configure NPM Token
 
 1. **Generate NPM Token**:
+
    - Log in to [npmjs.com](https://npmjs.com)
    - Go to Account Settings → Access Tokens
    - Create an "Automation" token

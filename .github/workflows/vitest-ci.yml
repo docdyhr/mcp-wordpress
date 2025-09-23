@@ -2,12 +2,12 @@ name: 🚀 Vitest CI Pipeline
 
 on:
   push:
-    branches: [ main, develop, fix/ci-memory-test-threshold ]
+    branches: [main, develop, fix/ci-memory-test-threshold]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: "20"
 
 jobs:
   # 🧪 Vitest Testing Suite
@@ -26,7 +26,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -55,7 +55,7 @@ jobs:
           file: ./coverage/lcov.info
           flags: vitest
           name: vitest-coverage
-          
+
   # 🔍 Specific Test Suites
   test-suites:
     name: 🔍 Test Suite - ${{ matrix.suite }}
@@ -63,7 +63,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: 
+        suite:
           - security
           - config
           - performance
@@ -76,7 +76,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -104,7 +104,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci

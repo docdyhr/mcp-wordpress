@@ -10,7 +10,7 @@ import type { WordPressClientConfig } from "@/types/client.js";
  */
 export interface ConfigurationProvider {
   readonly config: WordPressClientConfig;
-  
+
   /**
    * Get configuration value by path
    */
@@ -49,12 +49,16 @@ export interface ParameterValidator {
   /**
    * Validate string parameters
    */
-  validateString(value: unknown, fieldName: string, options?: {
-    required?: boolean;
-    minLength?: number;
-    maxLength?: number;
-    pattern?: RegExp;
-  }): string;
+  validateString(
+    value: unknown,
+    fieldName: string,
+    options?: {
+      required?: boolean;
+      minLength?: number;
+      maxLength?: number;
+      pattern?: RegExp;
+    },
+  ): string;
 
   /**
    * Validate WordPress ID parameters
@@ -148,7 +152,7 @@ export interface ManagerFactory {
 export interface ManagerCompositionConfig {
   /** WordPress client configuration */
   clientConfig: WordPressClientConfig;
-  
+
   /** Optional custom implementations */
   customErrorHandler?: ErrorHandler;
   customValidator?: ParameterValidator;

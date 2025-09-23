@@ -136,14 +136,14 @@ sleep 10  # Wait for propagation
 RESPONSE=$(curl -s "https://hub.docker.com/v2/repositories/${IMAGE_NAME}/tags")
 if echo "$RESPONSE" | jq -e ".results[] | select(.name == \"$VERSION\" or .name == \"v$VERSION\")" > /dev/null 2>&1; then
     print_success "✅ Version $VERSION successfully published to Docker Hub"
-    
+
     # Show published tags
     echo ""
     print_status "Published tags:"
     for tag in "${TAGS[@]}"; do
         echo "  - $tag"
     done
-    
+
     # Show Docker Hub URL
     echo ""
     print_status "Docker Hub URL: https://hub.docker.com/r/${IMAGE_NAME}/tags?name=${VERSION}"

@@ -95,7 +95,9 @@ function comparePerformance() {
           const categoryDiff = parseFloat(curr.avg_score) - parseFloat(prev.avg_score);
           if (Math.abs(categoryDiff) > 0.1) {
             console.log(
-              `  ${category}: ${prev.avg_score} → ${curr.avg_score} (${categoryDiff > 0 ? "+" : ""}${categoryDiff.toFixed(2)})`,
+              `  ${category}: ${prev.avg_score} → ${curr.avg_score} (${
+                categoryDiff > 0 ? "+" : ""
+              }${categoryDiff.toFixed(2)})`,
             );
           }
         } else {

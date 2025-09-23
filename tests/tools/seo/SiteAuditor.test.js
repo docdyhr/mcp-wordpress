@@ -26,16 +26,16 @@ const samplePosts = [
     content: {
       rendered: `
         <h1>Complete Guide to WordPress SEO Optimization</h1>
-        <p>WordPress SEO optimization is crucial for improving your website's search engine visibility. 
-        This comprehensive guide covers all essential aspects of technical SEO, content optimization, 
-        and performance enhancement. Search engines like Google prioritize well-optimized WordPress sites 
+        <p>WordPress SEO optimization is crucial for improving your website's search engine visibility.
+        This comprehensive guide covers all essential aspects of technical SEO, content optimization,
+        and performance enhancement. Search engines like Google prioritize well-optimized WordPress sites
         that provide excellent user experience and valuable content to their audience.</p>
-        <p>Understanding the fundamentals of WordPress SEO helps you create content that ranks higher 
-        in search results. This includes optimizing your content structure, using proper heading hierarchy, 
+        <p>Understanding the fundamentals of WordPress SEO helps you create content that ranks higher
+        in search results. This includes optimizing your content structure, using proper heading hierarchy,
         and ensuring your website loads quickly for both desktop and mobile users.</p>
-        <p>Technical SEO considerations include proper URL structure, meta tags optimization, schema markup 
-        implementation, and ensuring your WordPress site is easily crawlable by search engine bots. 
-        Content optimization involves keyword research, proper keyword placement, and creating comprehensive 
+        <p>Technical SEO considerations include proper URL structure, meta tags optimization, schema markup
+        implementation, and ensuring your WordPress site is easily crawlable by search engine bots.
+        Content optimization involves keyword research, proper keyword placement, and creating comprehensive
         content that addresses user search intent effectively.</p>
       `,
     },
@@ -107,13 +107,13 @@ const samplePages = [
     content: {
       rendered: `
         <h1>Contact Us</h1>
-        <p>Get in touch with our team for any inquiries, support requests, or business opportunities. 
-        We are committed to providing excellent customer service and responding to all communications 
-        promptly. Our experienced team is here to help you achieve your goals and answer any questions 
+        <p>Get in touch with our team for any inquiries, support requests, or business opportunities.
+        We are committed to providing excellent customer service and responding to all communications
+        promptly. Our experienced team is here to help you achieve your goals and answer any questions
         you may have about our services, products, or solutions.</p>
-        <p>Whether you need technical support, want to learn more about our offerings, or are interested 
-        in partnering with us, we welcome the opportunity to connect. Please use the contact form below 
-        or reach out directly using the contact information provided. We look forward to hearing from you 
+        <p>Whether you need technical support, want to learn more about our offerings, or are interested
+        in partnering with us, we welcome the opportunity to connect. Please use the contact form below
+        or reach out directly using the contact information provided. We look forward to hearing from you
         and building a successful business relationship together.</p>
       `,
     },

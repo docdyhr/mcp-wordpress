@@ -147,7 +147,7 @@ export const seoTools = [
     name: "wp_seo_analyze_content",
     description: "Analyze content for SEO optimization",
     inputSchema: AnalyzeContentParamsSchema,
-    handler: (params) => seoToolsInstance.analyzeContent(params)
+    handler: (params) => seoToolsInstance.analyzeContent(params),
   },
   // Additional tools...
 ];

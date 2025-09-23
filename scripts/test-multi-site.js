@@ -5,25 +5,25 @@
  * Tests the multi-site functionality of the MCP WordPress server
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const rootDir = path.resolve(__dirname, '..');
+const rootDir = path.resolve(__dirname, "..");
 
 // Colors for output
 const colors = {
-  reset: '\x1b[0m',
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  magenta: '\x1b[35m',
-  cyan: '\x1b[36m',
-  white: '\x1b[37m',
-  bold: '\x1b[1m'
+  reset: "\x1b[0m",
+  red: "\x1b[31m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  blue: "\x1b[34m",
+  magenta: "\x1b[35m",
+  cyan: "\x1b[36m",
+  white: "\x1b[37m",
+  bold: "\x1b[1m",
 };
 
 function log(message, color = colors.reset) {
@@ -48,23 +48,23 @@ function warning(message) {
 
 async function testMultiSiteConfiguration() {
   log(`\n${colors.bold}${colors.cyan}🌐 Multi-Site Configuration Test${colors.reset}`);
-  log('============================================================');
+  log("============================================================");
 
   try {
     // Check if config file exists
-    const configPath = path.resolve(rootDir, 'mcp-wordpress.config.json');
+    const configPath = path.resolve(rootDir, "mcp-wordpress.config.json");
     if (!fs.existsSync(configPath)) {
-      error('mcp-wordpress.config.json not found');
+      error("mcp-wordpress.config.json not found");
       return false;
     }
-    success('Configuration file found');
+    success("Configuration file found");
 
     // Parse config
-    const configContent = fs.readFileSync(configPath, 'utf-8');
+    const configContent = fs.readFileSync(configPath, "utf-8");
     const config = JSON.parse(configContent);
-    
+
     if (!config.sites || !Array.isArray(config.sites)) {
-      error('Invalid configuration: sites array missing');
+      error("Invalid configuration: sites array missing");
       return false;
     }
     success(`Found ${config.sites.length} site configurations`);
@@ -75,16 +75,16 @@ async function testMultiSiteConfiguration() {
         error(`Invalid site configuration: ${JSON.stringify(site)}`);
         return false;
       }
-      
+
       if (!site.config.WORDPRESS_SITE_URL || !site.config.WORDPRESS_USERNAME || !site.config.WORDPRESS_APP_PASSWORD) {
         error(`Missing required configuration for site ${site.id}`);
         return false;
       }
-      
+
       success(`Site ${site.id} (${site.name}) configuration valid`);
       info(`  URL: ${site.config.WORDPRESS_SITE_URL}`);
       info(`  Username: ${site.config.WORDPRESS_USERNAME}`);
-      info(`  Auth Method: ${site.config.WORDPRESS_AUTH_METHOD || 'app-password'}`);
+      info(`  Auth Method: ${site.config.WORDPRESS_AUTH_METHOD || "app-password"}`);
     }
 
     return true;
@@ -96,29 +96,29 @@ async function testMultiSiteConfiguration() {
 
 async function testServerInitialization() {
   log(`\n${colors.bold}${colors.cyan}🚀 Server Initialization Test${colors.reset}`);
-  log('============================================================');
+  log("============================================================");
 
   try {
     // Import the server class
-    const { default: MCPWordPressServer } = await import('../dist/index.js');
-    
+    const { default: MCPWordPressServer } = await import("../dist/index.js");
+
     // Create server instance
-    info('Creating server instance...');
+    info("Creating server instance...");
     const server = new MCPWordPressServer();
-    success('Server instance created successfully');
-    
+    success("Server instance created successfully");
+
     // Test that server has the expected properties
-    if (typeof server.run !== 'function') {
-      error('Server missing run method');
+    if (typeof server.run !== "function") {
+      error("Server missing run method");
       return false;
     }
-    
-    if (typeof server.shutdown !== 'function') {
-      error('Server missing shutdown method');
+
+    if (typeof server.shutdown !== "function") {
+      error("Server missing shutdown method");
       return false;
     }
-    
-    success('Server has required methods');
+
+    success("Server has required methods");
     return true;
   } catch (err) {
     error(`Server initialization failed: ${err.message}`);
@@ -128,13 +128,13 @@ async function testServerInitialization() {
 
 async function testClientConnections() {
   log(`\n${colors.bold}${colors.cyan}🔌 Client Connection Test${colors.reset}`);
-  log('============================================================');
+  log("============================================================");
 
   try {
     // Import client and config
-    const { WordPressClient } = await import('../dist/client/api.js');
-    const configPath = path.resolve(rootDir, 'mcp-wordpress.config.json');
-    const configContent = fs.readFileSync(configPath, 'utf-8');
+    const { WordPressClient } = await import("../dist/client/api.js");
+    const configPath = path.resolve(rootDir, "mcp-wordpress.config.json");
+    const configContent = fs.readFileSync(configPath, "utf-8");
     const config = JSON.parse(configContent);
 
     let successCount = 0;
@@ -142,34 +142,34 @@ async function testClientConnections() {
 
     for (const site of config.sites) {
       info(`Testing connection to ${site.name} (${site.id})...`);
-      
+
       try {
         const clientConfig = {
           baseUrl: site.config.WORDPRESS_SITE_URL,
           auth: {
-            method: site.config.WORDPRESS_AUTH_METHOD || 'app-password',
+            method: site.config.WORDPRESS_AUTH_METHOD || "app-password",
             username: site.config.WORDPRESS_USERNAME,
-            appPassword: site.config.WORDPRESS_APP_PASSWORD
-          }
+            appPassword: site.config.WORDPRESS_APP_PASSWORD,
+          },
         };
 
         const client = new WordPressClient(clientConfig);
-        
+
         // Test connection
         await client.ping();
         success(`${site.name}: Connection successful`);
-        
+
         // Test authentication by getting current user
         const user = await client.getCurrentUser();
         info(`  Authenticated as: ${user.name} (${user.username})`);
-        
+
         successCount++;
       } catch (err) {
         error(`${site.name}: Connection failed - ${err.message}`);
       }
     }
 
-    log('\n' + '='.repeat(60));
+    log("\n" + "=".repeat(60));
     if (successCount === totalSites) {
       success(`All ${totalSites} sites connected successfully`);
       return true;
@@ -185,12 +185,12 @@ async function testClientConnections() {
 
 async function main() {
   log(`${colors.bold}${colors.magenta}\n🧪 MCP WordPress Multi-Site Integration Test${colors.reset}`);
-  log('============================================================');
-  
+  log("============================================================");
+
   const tests = [
-    { name: 'Multi-Site Configuration', fn: testMultiSiteConfiguration },
-    { name: 'Server Initialization', fn: testServerInitialization },
-    { name: 'Client Connections', fn: testClientConnections }
+    { name: "Multi-Site Configuration", fn: testMultiSiteConfiguration },
+    { name: "Server Initialization", fn: testServerInitialization },
+    { name: "Client Connections", fn: testClientConnections },
   ];
 
   let passedTests = 0;
@@ -205,21 +205,21 @@ async function main() {
 
   // Summary
   log(`\n${colors.bold}📊 Test Summary${colors.reset}`);
-  log('============================================================');
+  log("============================================================");
   log(`Tests Passed: ${passedTests}/${totalTests}`);
   log(`Success Rate: ${Math.round((passedTests / totalTests) * 100)}%`);
 
   if (passedTests === totalTests) {
-    success('🎉 All multi-site integration tests passed!');
+    success("🎉 All multi-site integration tests passed!");
     process.exit(0);
   } else {
-    error('❌ Some tests failed. Please check the output above.');
+    error("❌ Some tests failed. Please check the output above.");
     process.exit(1);
   }
 }
 
 // Run the tests
-main().catch(err => {
+main().catch((err) => {
   error(`Fatal error: ${err.message}`);
   process.exit(1);
 });

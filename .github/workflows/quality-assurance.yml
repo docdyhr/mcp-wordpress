@@ -2,15 +2,15 @@ name: 🔍 Quality Assurance
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   schedule:
     # Run quality checks daily at 6 AM UTC
-    - cron: '0 6 * * *'
+    - cron: "0 6 * * *"
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: "20"
 
 jobs:
   # 🧹 Code Quality
@@ -21,13 +21,13 @@ jobs:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Needed for SonarCloud
+          fetch-depth: 0 # Needed for SonarCloud
 
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -79,7 +79,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -140,7 +140,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -193,7 +193,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -205,7 +205,7 @@ jobs:
         run: |
           echo "## ⚡ Performance Benchmarks" > performance-report.md
           echo "" >> performance-report.md
-          
+
           # Startup time test
           echo "### 🚀 Startup Performance:" >> performance-report.md
           START_TIME=$(date +%s%3N)
@@ -213,7 +213,7 @@ jobs:
           END_TIME=$(date +%s%3N)
           DURATION=$((END_TIME - START_TIME))
           echo "- Health check duration: ${DURATION}ms" >> performance-report.md
-          
+
           # Memory usage test
           echo "" >> performance-report.md
           echo "### 💾 Memory Usage:" >> performance-report.md
@@ -243,13 +243,13 @@ jobs:
         run: |
           # Install markdown linter
           npm install -g markdownlint-cli
-          
+
           # Check markdown files
           markdownlint "**/*.md" --ignore node_modules > markdown-issues.txt || true
-          
+
           echo "## 📝 Documentation Quality Report" > docs-quality.md
           echo "" >> docs-quality.md
-          
+
           if [ -s markdown-issues.txt ]; then
             echo "### ⚠️ Markdown Issues Found:" >> docs-quality.md
             echo '```' >> docs-quality.md
@@ -263,10 +263,10 @@ jobs:
         run: |
           # Install link checker
           npm install -g markdown-link-check
-          
+
           echo "" >> docs-quality.md
           echo "### 🔗 Link Check Results:" >> docs-quality.md
-          
+
           # Check links in all markdown files
           find . -name "*.md" -not -path "./node_modules/*" | while read file; do
             echo "Checking links in: $file"
@@ -297,7 +297,7 @@ jobs:
         run: |
           echo "## 📊 Quality Gates Evaluation" > quality-gates.md
           echo "" >> quality-gates.md
-          
+
           echo "### 🎯 Quality Gate Results:" >> quality-gates.md
           echo "- 🧹 Code Quality: ${{ needs.code-quality.result }}" >> quality-gates.md
           echo "- 🔒 Security Analysis: ${{ needs.security-analysis.result }}" >> quality-gates.md
@@ -305,21 +305,21 @@ jobs:
           echo "- 🧪 Performance Testing: ${{ needs.performance-testing.result }}" >> quality-gates.md
           echo "- 📝 Documentation Check: ${{ needs.documentation-check.result }}" >> quality-gates.md
           echo "" >> quality-gates.md
-          
+
           # Calculate overall quality score
           PASSED=0
           TOTAL=5
-          
+
           [ "${{ needs.code-quality.result }}" == "success" ] && PASSED=$((PASSED + 1))
           [ "${{ needs.security-analysis.result }}" == "success" ] && PASSED=$((PASSED + 1))
           [ "${{ needs.coverage-analysis.result }}" == "success" ] && PASSED=$((PASSED + 1))
           [ "${{ needs.performance-testing.result }}" == "success" ] && PASSED=$((PASSED + 1))
           [ "${{ needs.documentation-check.result }}" == "success" ] && PASSED=$((PASSED + 1))
-          
+
           SCORE=$((PASSED * 100 / TOTAL))
           echo "### 📈 Overall Quality Score: ${SCORE}%" >> quality-gates.md
           echo "" >> quality-gates.md
-          
+
           if [ $SCORE -ge 80 ]; then
             echo "✅ **Quality gates PASSED** - Code meets quality standards!" >> quality-gates.md
             echo "QUALITY_GATE_PASSED=true" >> $GITHUB_ENV

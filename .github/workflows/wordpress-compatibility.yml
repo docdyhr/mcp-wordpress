@@ -3,27 +3,27 @@ name: 📜 WordPress Compatibility Testing
 on:
   # Weekly check for WordPress API changes
   schedule:
-    - cron: '0 3 * * 1'  # Every Monday at 3 AM UTC
-  
+    - cron: "0 3 * * 1" # Every Monday at 3 AM UTC
+
   # Manual trigger
   workflow_dispatch:
-  
+
   # On main branch for important changes
   push:
     branches: [main]
     paths:
-      - 'src/client/**'
-      - 'src/tools/**'
-      - 'src/types/wordpress.ts'
+      - "src/client/**"
+      - "src/tools/**"
+      - "src/types/wordpress.ts"
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: "20"
 
 jobs:
   compatibility-check:
     name: 🔍 WordPress API Compatibility
     runs-on: ubuntu-latest
-    
+
     services:
       wordpress:
         image: wordpress:latest
@@ -35,11 +35,9 @@ jobs:
         ports:
           - 8080:80
         options: >-
-          --health-cmd "curl -f http://localhost:80 || exit 1"
-          --health-interval 30s
-          --health-timeout 10s
+          --health-cmd "curl -f http://localhost:80 || exit 1" --health-interval 30s --health-timeout 10s
           --health-retries 5
-      
+
       mysql:
         image: mysql:8.0
         env:
@@ -50,10 +48,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd "mysqladmin ping -h localhost"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd "mysqladmin ping -h localhost" --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
       - name: 📥 Checkout Code
@@ -63,7 +58,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -85,7 +80,7 @@ jobs:
             curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar &&
             chmod +x wp-cli.phar &&
             mv wp-cli.phar /usr/local/bin/wp &&
-            
+
             # Install WordPress
             cd /var/www/html &&
             wp core install \
@@ -95,17 +90,17 @@ jobs:
               --admin_password='password' \
               --admin_email='admin@example.com' \
               --allow-root &&
-            
+
             # Create test user
             wp user create testuser test@example.com \
               --user_pass='test-password-123' \
               --role='administrator' \
               --allow-root &&
-            
+
             # Set up permalinks
             wp rewrite structure '/%postname%/' --allow-root &&
             wp rewrite flush --allow-root &&
-            
+
             # Create test content
             wp post create --post_title='Test Post' --post_content='Test content' --post_status='publish' --allow-root
           " || echo "WordPress setup may have failed - continuing anyway"
@@ -143,18 +138,18 @@ jobs:
               repo: context.repo.repo,
               title: '🚨 WordPress API Compatibility Issue Detected',
               body: `## Weekly Compatibility Check Failed
-              
+
               The weekly WordPress compatibility test has detected issues.
-              
+
               **Details:**
               - Date: ${new Date().toISOString()}
               - Workflow: [Run #${context.runNumber}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
-              
+
               **Action Required:**
               1. Review the test failures
               2. Check if WordPress API has changed
               3. Update client code if needed
-              
+
               cc @${context.repo.owner}`,
               labels: ['compatibility', 'automated']
             });

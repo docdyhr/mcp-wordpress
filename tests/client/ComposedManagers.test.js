@@ -21,7 +21,7 @@ import { WordPressAPIError, AuthenticationError } from "../../dist/types/client.
 // Mock the config module to enable debug logging for this test suite
 vi.mock("../../dist/config/Config.js", () => {
   return {
-    config: vi.fn(() => ({ 
+    config: vi.fn(() => ({
       wordpress: {},
       error: { legacyLogsEnabled: false },
       debug: { enabled: true },
@@ -30,8 +30,8 @@ vi.mock("../../dist/config/Config.js", () => {
       rateLimitWindow: 60000,
       rateLimit: 60,
       security: {
-        rateLimit: 60
-      }
+        rateLimit: 60,
+      },
     })),
     ConfigHelpers: {
       shouldDebug: vi.fn(() => true),
@@ -133,7 +133,7 @@ describe("Composed Managers", () => {
     });
 
     it("should log successful operations", () => {
-      // The logSuccess method should complete without errors  
+      // The logSuccess method should complete without errors
       // We can see from the stderr output that debug logging is working
       expect(() => {
         errorHandler.logSuccess("test operation", { test: true });

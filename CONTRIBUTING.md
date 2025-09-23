@@ -1,7 +1,7 @@
 # Contributing to MCP WordPress Server
 
-Welcome to the MCP WordPress Server project! This document provides comprehensive guidelines for contributing to
-this WordPress Model Context Protocol (MCP) server implementation.
+Welcome to the MCP WordPress Server project! This document provides comprehensive guidelines for contributing to this
+WordPress Model Context Protocol (MCP) server implementation.
 
 ## 📋 Table of Contents
 
@@ -150,13 +150,13 @@ All contributions must include tests based on the following hierarchy:
 
 ```typescript
 // Example unit test structure
-describe('WordPressClient', () => {
-  describe('authentication', () => {
-    it('should authenticate with app password', async () => {
+describe("WordPressClient", () => {
+  describe("authentication", () => {
+    it("should authenticate with app password", async () => {
       // Test implementation
     });
-    
-    it('should handle authentication failures gracefully', async () => {
+
+    it("should handle authentication failures gracefully", async () => {
       // Test implementation
     });
   });
@@ -204,17 +204,17 @@ npm run test:watch
 
 ```typescript
 // Use descriptive test names
-it('should create post with featured media and return management links', async () => {
+it("should create post with featured media and return management links", async () => {
   // Arrange
   const postData = {
-    title: 'Test Post',
-    content: '<p>Test content</p>',
-    featured_media: 42
+    title: "Test Post",
+    content: "<p>Test content</p>",
+    featured_media: 42,
   };
-  
+
   // Act
   const result = await postTool.createPost(postData);
-  
+
   // Assert
   expect(result.id).toBeDefined();
   expect(result.featured_media).toBe(42);
@@ -222,14 +222,14 @@ it('should create post with featured media and return management links', async (
 });
 
 // Test error conditions
-it('should throw validation error for missing required title', async () => {
+it("should throw validation error for missing required title", async () => {
   await expect(postTool.createPost({})).rejects.toThrow(/title.*required/i);
 });
 
 // Test edge cases
-it('should handle empty post content gracefully', async () => {
-  const result = await postTool.createPost({ title: 'Test', content: '' });
-  expect(result.content.rendered).toBe('');
+it("should handle empty post content gracefully", async () => {
+  const result = await postTool.createPost({ title: "Test", content: "" });
+  expect(result.content.rendered).toBe("");
 });
 ```
 
@@ -318,16 +318,13 @@ interface WordPressPost {
   content: {
     rendered: string;
   };
-  status: 'publish' | 'draft' | 'pending' | 'private';
+  status: "publish" | "draft" | "pending" | "private";
   featured_media?: number | undefined;
 }
 
 // ✅ Use proper type guards
 function isWordPressPost(obj: unknown): obj is WordPressPost {
-  return typeof obj === 'object' && 
-         obj !== null &&
-         'id' in obj &&
-         'title' in obj;
+  return typeof obj === "object" && obj !== null && "id" in obj && "title" in obj;
 }
 
 // ✅ Handle optional properties correctly
@@ -346,9 +343,7 @@ interface ToolParams {
 
 ```typescript
 // ✅ Proper function typing
-export async function createPost(
-  params: CreatePostParams
-): Promise<WordPressPost> {
+export async function createPost(params: CreatePostParams): Promise<WordPressPost> {
   // Implementation
 }
 
@@ -357,10 +352,10 @@ export class WordPressApiError extends Error {
   constructor(
     message: string,
     public statusCode: number,
-    public response?: unknown
+    public response?: unknown,
   ) {
     super(message);
-    this.name = 'WordPressApiError';
+    this.name = "WordPressApiError";
   }
 }
 ```
@@ -375,11 +370,11 @@ We use **centralized structured logging** for all components:
 
 ```typescript
 // ✅ ALWAYS use LoggerFactory
-import { LoggerFactory } from '../utils/logger.js';
+import { LoggerFactory } from "../utils/logger.js";
 
 // Create component-specific loggers
-const apiLogger = LoggerFactory.api('site1');
-const toolLogger = LoggerFactory.tool('wp_create_post', 'site2');
+const apiLogger = LoggerFactory.api("site1");
+const toolLogger = LoggerFactory.tool("wp_create_post", "site2");
 const cacheLogger = LoggerFactory.cache();
 const securityLogger = LoggerFactory.security();
 ```
@@ -388,40 +383,40 @@ const securityLogger = LoggerFactory.security();
 
 ```typescript
 // ❌ NEVER use console.log directly
-console.log('Debug info:', data);
+console.log("Debug info:", data);
 
 // ❌ NEVER use generic console methods
-console.error('Error occurred');
-console.warn('Warning message');
+console.error("Error occurred");
+console.warn("Warning message");
 
 // ❌ NEVER log sensitive data without sanitization
-logger.info('User credentials', { username, password });
+logger.info("User credentials", { username, password });
 ```
 
 #### Required Logging Patterns
 
 ```typescript
 // ✅ Use appropriate log levels
-logger.debug('Processing request', { endpoint: '/wp/v2/posts' });
-logger.info('Post created successfully', { postId: 123, title: 'Post Title' });
-logger.warn('Cache miss detected', { key: 'posts:123', reason: 'expired' });
-logger.error('API request failed', { statusCode: 401, endpoint: '/wp/v2/posts' });
+logger.debug("Processing request", { endpoint: "/wp/v2/posts" });
+logger.info("Post created successfully", { postId: 123, title: "Post Title" });
+logger.warn("Cache miss detected", { key: "posts:123", reason: "expired" });
+logger.error("API request failed", { statusCode: 401, endpoint: "/wp/v2/posts" });
 
 // ✅ Use timing for performance monitoring
-const result = await logger.time('Database query', async () => {
+const result = await logger.time("Database query", async () => {
   return await database.query(sql);
 });
 
 // ✅ Sensitive data is automatically sanitized
-logger.info('Authentication attempt', {
-  username: 'testuser',
-  password: 'secret123', // Automatically becomes [REDACTED:9chars]
-  token: 'abc123def'      // Automatically becomes [REDACTED:9chars]
+logger.info("Authentication attempt", {
+  username: "testuser",
+  password: "secret123", // Automatically becomes [REDACTED:9chars]
+  token: "abc123def", // Automatically becomes [REDACTED:9chars]
 });
 
 // ✅ Use contextual logging
-const requestLogger = logger.child({ requestId: uuid(), userId: 'user123' });
-requestLogger.info('Processing user request');
+const requestLogger = logger.child({ requestId: uuid(), userId: "user123" });
+requestLogger.info("Processing user request");
 ```
 
 #### Log Level Guidelines
@@ -447,18 +442,18 @@ function validatePostData(data: unknown): CreatePostParams {
   const schema = z.object({
     title: z.string().min(1).max(200),
     content: z.string().optional(),
-    status: z.enum(['publish', 'draft', 'pending', 'private']).optional()
+    status: z.enum(["publish", "draft", "pending", "private"]).optional(),
   });
-  
+
   return schema.parse(data);
 }
 
 // ✅ Sanitize HTML content
-import { sanitizeHtml } from '../security/sanitization.js';
+import { sanitizeHtml } from "../security/sanitization.js";
 
 const safeContent = sanitizeHtml(userContent, {
-  allowedTags: ['p', 'br', 'strong', 'em'],
-  allowedAttributes: {}
+  allowedTags: ["p", "br", "strong", "em"],
+  allowedAttributes: {},
 });
 ```
 
@@ -468,10 +463,10 @@ const safeContent = sanitizeHtml(userContent, {
 // ✅ Secure credential handling
 class AuthenticationManager {
   private credentials: Map<string, SiteCredentials> = new Map();
-  
+
   setCredentials(siteId: string, credentials: SiteCredentials): void {
     // Credentials are never logged
-    this.logger.info('Credentials updated', { siteId });
+    this.logger.info("Credentials updated", { siteId });
     this.credentials.set(siteId, credentials);
   }
 }
@@ -479,9 +474,9 @@ class AuthenticationManager {
 // ✅ Secure API communication
 const response = await fetch(url, {
   headers: {
-    'Authorization': `Bearer ${token}`,
-    'User-Agent': 'MCP-WordPress/2.4.0',
-    'Content-Type': 'application/json'
+    Authorization: `Bearer ${token}`,
+    "User-Agent": "MCP-WordPress/2.4.0",
+    "Content-Type": "application/json",
   },
   // Always use HTTPS in production
 });
@@ -492,7 +487,7 @@ const response = await fetch(url, {
 ```typescript
 // ✅ Use parameterized queries
 const query = `
-  SELECT * FROM posts 
+  SELECT * FROM posts
   WHERE status = ? AND author_id = ?
 `;
 const results = await db.query(query, [status, authorId]);
@@ -534,20 +529,20 @@ Code must meet **performance standards**:
 
 ```typescript
 // ✅ Include performance tests for critical paths
-describe('Performance Tests', () => {
-  it('should create post within 2 seconds', async () => {
+describe("Performance Tests", () => {
+  it("should create post within 2 seconds", async () => {
     const start = Date.now();
     await postTool.createPost(testData);
     const duration = Date.now() - start;
-    
+
     expect(duration).toBeLessThan(2000);
   });
-  
-  it('should handle 100 concurrent requests', async () => {
-    const promises = Array(100).fill(null).map(() => 
-      postTool.listPosts({ per_page: 10 })
-    );
-    
+
+  it("should handle 100 concurrent requests", async () => {
+    const promises = Array(100)
+      .fill(null)
+      .map(() => postTool.listPosts({ per_page: 10 }));
+
     await expect(Promise.all(promises)).resolves.toBeDefined();
   });
 });
@@ -561,16 +556,16 @@ describe('Performance Tests', () => {
 - **Type annotations**: Required for all exports
 - **Usage examples**: Required for tools and utilities
 
-```typescript
+````typescript
 /**
  * Creates a new WordPress post with comprehensive validation
- * 
+ *
  * @param params - Post creation parameters
  * @param params.title - Post title (required)
  * @param params.content - Post content in HTML format
  * @param params.status - Publishing status
  * @returns Promise resolving to created post with metadata
- * 
+ *
  * @example
  * ```typescript
  * const post = await createPost({
@@ -584,7 +579,7 @@ describe('Performance Tests', () => {
 export async function createPost(params: CreatePostParams): Promise<WordPressPost> {
   // Implementation
 }
-```
+````
 
 ### README Updates
 
@@ -629,15 +624,18 @@ Before submitting a pull request, ensure:
 
 ```markdown
 ## Description
+
 Brief description of changes and motivation.
 
 ## Type of Change
+
 - [ ] Bug fix (non-breaking change that fixes an issue)
 - [ ] New feature (non-breaking change that adds functionality)
 - [ ] Breaking change (fix or feature that causes existing functionality to change)
 - [ ] Documentation update
 
 ## Testing
+
 - [ ] Unit tests added/updated
 - [ ] Integration tests added/updated
 - [ ] Security tests added/updated (if applicable)
@@ -645,23 +643,27 @@ Brief description of changes and motivation.
 - [ ] All tests pass
 
 ## Coverage
+
 - [ ] Coverage maintained or improved
 - [ ] New code meets ≥50% coverage target
 - [ ] No regression in coverage metrics
 
 ## Security
+
 - [ ] Input validation implemented
 - [ ] No sensitive data exposed in logs
 - [ ] Authentication/authorization properly handled
 - [ ] Security tests pass
 
 ## Performance
+
 - [ ] Performance impact assessed
 - [ ] No memory leaks introduced
 - [ ] Response times within targets
 - [ ] Performance tests pass (if applicable)
 
 ## Documentation
+
 - [ ] Code documented with JSDoc
 - [ ] README updated (if applicable)
 - [ ] Usage examples provided
@@ -711,8 +713,8 @@ The `main` branch has strict protection rules:
 
 ## 🎯 Summary
 
-This project maintains **high standards** for code quality, testing, and security.
-By following these guidelines, you help ensure that the MCP WordPress Server remains:
+This project maintains **high standards** for code quality, testing, and security. By following these guidelines, you
+help ensure that the MCP WordPress Server remains:
 
 - ✅ **Reliable**: Comprehensive testing and quality gates
 - ✅ **Secure**: Defense-in-depth security practices

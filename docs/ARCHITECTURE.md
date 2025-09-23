@@ -14,9 +14,9 @@
 
 ## System Overview
 
-The MCP WordPress Server is a TypeScript-based Model Context Protocol (MCP) server that provides AI tools
-with comprehensive WordPress management capabilities. It follows a modular, security-first architecture with
-comprehensive validation and performance optimization.
+The MCP WordPress Server is a TypeScript-based Model Context Protocol (MCP) server that provides AI tools with
+comprehensive WordPress management capabilities. It follows a modular, security-first architecture with comprehensive
+validation and performance optimization.
 
 ### Key Architectural Principles
 
@@ -222,7 +222,7 @@ class MCPWordPressServer {
   private wordpressClients: Map<string, WordPressClient>;
   private toolRegistry: ToolRegistry;
   private connectionTester: ConnectionTester;
-  
+
   // Server lifecycle management
   // Tool registration and routing
   // Multi-site client management
@@ -246,7 +246,7 @@ Manages tool discovery, registration, and request routing:
 class ToolRegistry {
   private tools: Map<string, ToolHandler>;
   private toolClasses: ToolClass[];
-  
+
   // Dynamic tool discovery
   // Tool metadata management
   // Request routing
@@ -270,7 +270,7 @@ Modular HTTP client for WordPress REST API:
 class WordPressClient {
   private authManager: AuthenticationManager;
   private requestManager: RequestManager;
-  
+
   // High-level WordPress operations
   // Manager coordination
   // Configuration management
@@ -307,7 +307,7 @@ class PostTools {
   public getTools(): MCPTool[] {
     // Tool definitions
   }
-  
+
   public async handleListPosts(client: WordPressClient, params: PostQueryParams): Promise<string> {
     // Implementation with validation, processing, and formatting
   }
@@ -734,11 +734,11 @@ class WordPressClient {
   constructor(
     private authManager: AuthenticationManager,
     private requestManager: RequestManager,
-    private cacheManager: CacheManager
+    private cacheManager: CacheManager,
   ) {}
-  
+
   async getPosts(params: PostQueryParams): Promise<Post[]> {
-    return this.requestManager.get('/posts', params);
+    return this.requestManager.get("/posts", params);
   }
 }
 ```
@@ -771,7 +771,7 @@ class ClientFactory {
     const authManager = new AuthenticationManager(config.auth);
     const requestManager = new RequestManager(config.request);
     const cacheManager = new CacheManager(config.cache);
-    
+
     return new WordPressClient(authManager, requestManager, cacheManager);
   }
 }
@@ -782,13 +782,13 @@ class ClientFactory {
 ```typescript
 class PerformanceMonitor {
   private observers: PerformanceObserver[] = [];
-  
+
   subscribe(observer: PerformanceObserver): void {
     this.observers.push(observer);
   }
-  
+
   notify(metric: PerformanceMetric): void {
-    this.observers.forEach(observer => observer.update(metric));
+    this.observers.forEach((observer) => observer.update(metric));
   }
 }
 ```
@@ -802,7 +802,7 @@ abstract class BaseTool {
     const result = await this.executeOperation(client, params);
     return this.formatResponse(result);
   }
-  
+
   protected abstract validateParameters(params: any): void;
   protected abstract executeOperation(client: WordPressClient, params: any): Promise<any>;
   protected abstract formatResponse(result: any): string;
@@ -845,6 +845,6 @@ abstract class BaseTool {
 
 ---
 
-*This architecture documentation is maintained by the development team. Last updated: 2024-01-15*
+_This architecture documentation is maintained by the development team. Last updated: 2024-01-15_
 
-*For architectural questions, visit our [GitHub Discussions](https://github.com/docdyhr/mcp-wordpress/discussions)*
+_For architectural questions, visit our [GitHub Discussions](https://github.com/docdyhr/mcp-wordpress/discussions)_

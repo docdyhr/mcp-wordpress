@@ -46,7 +46,7 @@ fi
 for version in "${FAILED_VERSIONS[@]}"; do
     echo ""
     echo "🏗️  Processing $version..."
-    
+
     # Trigger the manual Docker publish workflow
     echo "   📤 Triggering Docker build workflow..."
     if gh workflow run docker-publish.yml \
@@ -58,7 +58,7 @@ for version in "${FAILED_VERSIONS[@]}"; do
         echo "   ❌ Failed to trigger build for $version"
         exit 1
     fi
-    
+
     # Small delay between triggers to avoid rate limiting
     sleep 2
 done

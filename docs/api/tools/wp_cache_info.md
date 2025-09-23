@@ -6,9 +6,9 @@ Get detailed cache configuration and status information.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `site` | `string` | ❌ | Site ID to get cache info for. | - | `site1`, `production` |
+| Parameter | Type     | Required | Description                    | Default | Examples              |
+| --------- | -------- | -------- | ------------------------------ | ------- | --------------------- |
+| `site`    | `string` | ❌       | Site ID to get cache info for. | -       | `site1`, `production` |
 
 ## Examples
 
@@ -17,11 +17,13 @@ Get detailed cache configuration and status information.
 Simple example of using wp_cache_info
 
 **Command:**
+
 ```bash
-wp_cache_info 
+wp_cache_info
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -31,6 +33,7 @@ wp_cache_info
 ```
 
 **Error Example (Authentication failure):**
+
 ```json
 {
   "error": "Authentication failed",
@@ -38,17 +41,18 @@ wp_cache_info
 }
 ```
 
-
 ### Multi-Site cache Usage
 
 Using wp_cache_info with specific site targeting
 
 **Command:**
+
 ```bash
 wp_cache_info --site="site1"
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -56,13 +60,6 @@ wp_cache_info --site="site1"
   "message": "wp_cache_info executed successfully"
 }
 ```
-
-
-
-
-
-
-
 
 ## Response Format
 
@@ -86,34 +83,24 @@ wp_cache_info --site="site1"
 
 ### AUTHENTICATION_FAILED
 
-**Message:** Authentication failed  
-**Description:** Invalid credentials or insufficient permissions  
-**Resolution:** Check your authentication credentials and user permissions
-
+**Message:** Authentication failed **Description:** Invalid credentials or insufficient permissions **Resolution:**
+Check your authentication credentials and user permissions
 
 ### VALIDATION_ERROR
 
-**Message:** Parameter validation failed  
-**Description:** One or more required parameters are missing or invalid  
+**Message:** Parameter validation failed **Description:** One or more required parameters are missing or invalid
 **Resolution:** Review the required parameters and their formats
-
 
 ### NOT_FOUND
 
-**Message:** Resource not found  
-**Description:** The requested resource does not exist  
-**Resolution:** Verify the resource ID and ensure it exists
-
+**Message:** Resource not found **Description:** The requested resource does not exist **Resolution:** Verify the
+resource ID and ensure it exists
 
 ### PERMISSION_DENIED
 
-**Message:** Insufficient permissions  
-**Description:** The user does not have permission to perform this action  
+**Message:** Insufficient permissions **Description:** The user does not have permission to perform this action
 **Resolution:** Contact an administrator to grant the necessary permissions
-
-
-
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

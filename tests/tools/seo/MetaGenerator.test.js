@@ -106,8 +106,8 @@ describe("MetaGenerator", () => {
       id: 2,
       title: { rendered: "WordPress Performance Guide" },
       content: {
-        rendered: `<p>WordPress performance optimization is crucial for user experience and SEO. 
-        This guide covers caching, image optimization, database optimization, and more advanced techniques. 
+        rendered: `<p>WordPress performance optimization is crucial for user experience and SEO.
+        This guide covers caching, image optimization, database optimization, and more advanced techniques.
         Learn how to make your WordPress site lightning fast.</p>`,
       },
       excerpt: { rendered: "Learn WordPress performance optimization techniques for better speed and SEO." },

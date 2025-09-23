@@ -71,7 +71,7 @@ counter=0
 while true; do
     # Follow redirects to get the actual content
     response=$(curl -s -L http://localhost:8081/ 2>/dev/null || echo "")
-    
+
     # Check if WordPress is responding with installation page or working site
     if [[ "$response" == *"WordPress"* ]] && ([[ "$response" == *"install"* ]] || [[ "$response" == *"Welcome"* ]] || [[ "$response" == *"configuration"* ]]); then
         echo -e "\n${GREEN}✅ WordPress installation page is ready${NC}"
@@ -80,7 +80,7 @@ while true; do
         echo -e "\n${GREEN}✅ WordPress is responding${NC}"
         break
     fi
-    
+
     sleep 5
     counter=$((counter + 5))
     if [ $counter -ge $timeout ]; then
@@ -112,7 +112,7 @@ fi
 echo -e "${YELLOW}📋 Setting up WordPress authentication for contract testing...${NC}"
 if bash scripts/setup-wordpress-for-testing.sh; then
     echo -e "${GREEN}✅ WordPress authentication setup completed${NC}"
-    
+
     # Source the generated credentials
     if [[ -f /tmp/wordpress-test-credentials.sh ]]; then
         source /tmp/wordpress-test-credentials.sh

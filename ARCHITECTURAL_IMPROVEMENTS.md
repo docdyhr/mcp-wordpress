@@ -2,8 +2,8 @@
 
 ## Overview
 
-This document summarizes the major architectural improvements made to the MCP WordPress project,
-focusing on test reliability, ESM mocking challenges, and overall system quality.
+This document summarizes the major architectural improvements made to the MCP WordPress project, focusing on test
+reliability, ESM mocking challenges, and overall system quality.
 
 ## Test Suite Status: 100% Success Rate ✅
 
@@ -43,7 +43,9 @@ vi.mock("../../dist/utils/logger.js", () => ({
 
 ```typescript
 // Before: Expected inheritance pattern
-class TestToolManager extends BaseToolManager { /* ... */ }
+class TestToolManager extends BaseToolManager {
+  /* ... */
+}
 
 // After: Test static utility methods
 describe("BaseToolUtils", () => {
@@ -65,10 +67,10 @@ describe("BaseToolUtils", () => {
 // Fixed timer advancement
 for (let i = 0; i < iterations; i++) {
   const uploadPromise = mockClient.uploadMedia();
-  
+
   // Advance fake timers to resolve the setTimeout
   vi.advanceTimersByTime(2000);
-  
+
   await uploadPromise;
 }
 ```
@@ -160,5 +162,5 @@ These architectural improvements represent a significant maturation of the MCP W
 - **Maintainability**: Clear separation of concerns and comprehensive coverage
 - **Production Readiness**: Battle-tested components with proven reliability
 
-The project now serves as a model for TypeScript/Node.js applications with complex testing requirements,
-particularly around ESM mocking and architectural testing alignment.
+The project now serves as a model for TypeScript/Node.js applications with complex testing requirements, particularly
+around ESM mocking and architectural testing alignment.

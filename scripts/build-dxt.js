@@ -33,17 +33,11 @@ async function buildDXT() {
 
     // Copy manifest
     console.log("📋 Copying manifest...");
-    fs.copyFileSync(
-      path.join(DXT_DIR, "manifest.json"),
-      path.join(BUILD_DIR, "manifest.json"),
-    );
+    fs.copyFileSync(path.join(DXT_DIR, "manifest.json"), path.join(BUILD_DIR, "manifest.json"));
 
     // Copy icon
     console.log("🖼️  Copying icon...");
-    fs.copyFileSync(
-      path.join(DXT_DIR, "icon.png"),
-      path.join(BUILD_DIR, "icon.png"),
-    );
+    fs.copyFileSync(path.join(DXT_DIR, "icon.png"), path.join(BUILD_DIR, "icon.png"));
 
     // Copy main entry point to root
     console.log("📦 Copying main entry point...");
@@ -56,10 +50,7 @@ async function buildDXT() {
     // Copy package.json first for dependency installation
     console.log("📚 Copying package.json for dependencies...");
     fs.copyFileSync("package.json", path.join(BUILD_DIR, "package.json"));
-    fs.copyFileSync(
-      "package-lock.json",
-      path.join(BUILD_DIR, "package-lock.json"),
-    );
+    fs.copyFileSync("package-lock.json", path.join(BUILD_DIR, "package-lock.json"));
 
     // Install production dependencies
     console.log("📦 Installing production dependencies...");
@@ -76,10 +67,7 @@ async function buildDXT() {
       dependencies: packageJson.dependencies,
       engines: packageJson.engines,
     };
-    fs.writeFileSync(
-      path.join(BUILD_DIR, "package.json"),
-      JSON.stringify(productionPackageJson, null, 2),
-    );
+    fs.writeFileSync(path.join(BUILD_DIR, "package.json"), JSON.stringify(productionPackageJson, null, 2));
 
     // Remove package-lock.json as it's no longer needed after install
     fs.rmSync(path.join(BUILD_DIR, "package-lock.json"));
@@ -134,25 +122,14 @@ For more information, visit: https://github.com/docdyhr/mcp-wordpress
     });
 
     console.log(`\n✅ DXT package created: ${PACKAGE_NAME}`);
-    console.log(
-      `📊 Package size: ${(fs.statSync(PACKAGE_NAME).size / 1024 / 1024).toFixed(2)} MB`,
-    );
+    console.log(`📊 Package size: ${(fs.statSync(PACKAGE_NAME).size / 1024 / 1024).toFixed(2)} MB`);
 
     // Validate the package
     console.log("\n🔍 Validating DXT package...");
-    const manifest = JSON.parse(
-      fs.readFileSync(path.join(BUILD_DIR, "manifest.json"), "utf8"),
-    );
+    const manifest = JSON.parse(fs.readFileSync(path.join(BUILD_DIR, "manifest.json"), "utf8"));
 
     // Basic validation
-    const requiredFields = [
-      "dxt_version",
-      "name",
-      "version",
-      "description",
-      "author",
-      "server",
-    ];
+    const requiredFields = ["dxt_version", "name", "version", "description", "author", "server"];
     const missingFields = requiredFields.filter((field) => !manifest[field]);
 
     if (missingFields.length > 0) {
@@ -163,9 +140,7 @@ For more information, visit: https://github.com/docdyhr/mcp-wordpress
     console.log("✅ Manifest validation passed");
     console.log(`📦 Extension: ${manifest.name} v${manifest.version}`);
     console.log(`🔧 Tools: ${manifest.tools ? manifest.tools.length : 0}`);
-    console.log(
-      `💬 Prompts: ${manifest.prompts ? manifest.prompts.length : 0}`,
-    );
+    console.log(`💬 Prompts: ${manifest.prompts ? manifest.prompts.length : 0}`);
 
     console.log("\n🎉 DXT package build completed successfully!");
     console.log(`\nTo install the package:`);

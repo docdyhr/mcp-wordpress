@@ -15,18 +15,18 @@ const PERFORMANCE_SLA = {
   // Response time targets (milliseconds)
   responseTime: {
     p50: 100,     // 50th percentile < 100ms
-    p95: 300,     // 95th percentile < 300ms  
+    p95: 300,     // 95th percentile < 300ms
     p99: 500,     // 99th percentile < 500ms
     max: 1000     // Maximum < 1000ms
   },
-  
+
   // Throughput targets (requests/second)
   throughput: {
     read: 1000,   // GET requests/sec
     write: 100,   // POST/PUT/DELETE requests/sec
     mixed: 500    // Mixed workload requests/sec
   },
-  
+
   // Cache performance targets
   cache: {
     hitRate: 0.80,        // 80% cache hit rate
@@ -34,15 +34,15 @@ const PERFORMANCE_SLA = {
     readOpsPerSec: 100000, // Cache read operations/sec
     memoryUsage: 512      // Max memory usage MB
   },
-  
+
   // Resource utilization targets
   resources: {
     cpuUsage: 0.70,       // Max 70% CPU utilization
-    memoryUsage: 0.80,    // Max 80% memory utilization  
+    memoryUsage: 0.80,    // Max 80% memory utilization
     diskIO: 100,          // Max 100 MB/s disk I/O
     networkIO: 500        // Max 500 MB/s network I/O
   },
-  
+
   // Availability targets
   availability: {
     uptime: 0.999,        // 99.9% uptime SLA
@@ -61,7 +61,7 @@ const TEST_SCENARIOS = [
     target: 'posts'
   },
   {
-    name: 'Cache Performance Test', 
+    name: 'Cache Performance Test',
     description: 'Validate cache hit rates and performance',
     duration: 30,
     operations: 10000,
@@ -85,7 +85,7 @@ const TEST_SCENARIOS = [
 
 function getCurrentMetrics() {
   console.log('📈 Collecting current performance metrics...');
-  
+
   const metrics = {
     timestamp: new Date().toISOString(),
     system: {
@@ -106,14 +106,14 @@ function getCurrentMetrics() {
       timeout: 120000,
       stdio: ['pipe', 'pipe', 'pipe']
     });
-    
+
     // Extract cache performance metrics from test output
     const cacheMetrics = extractCacheMetrics(cacheTest);
     metrics.application.cache = cacheMetrics;
-    
+
     console.log('  🔍 Cache write throughput:', cacheMetrics.writeThroughput.toLocaleString(), 'ops/sec');
     console.log('  🔍 Cache read throughput:', cacheMetrics.readThroughput.toLocaleString(), 'ops/sec');
-    
+
   } catch (error) {
     console.warn('  ⚠️ Could not collect all performance metrics:', error.message);
   }
@@ -153,7 +153,7 @@ function extractCacheMetrics(testOutput) {
     const latencyMatch = testOutput.match(/P50: ([\d.]+)ms, P95: ([\d.]+)ms, P99: ([\d.]+)ms/);
     if (latencyMatch) {
       metrics.latencyP50 = parseFloat(latencyMatch[1]);
-      metrics.latencyP95 = parseFloat(latencyMatch[2]);  
+      metrics.latencyP95 = parseFloat(latencyMatch[2]);
       metrics.latencyP99 = parseFloat(latencyMatch[3]);
     }
 
@@ -166,7 +166,7 @@ function extractCacheMetrics(testOutput) {
 
 function validateAgainstSLA(metrics) {
   console.log('\n🎯 Validating performance against SLA targets...');
-  
+
   const results = {
     overall: 'PASS',
     details: [],
@@ -176,40 +176,40 @@ function validateAgainstSLA(metrics) {
   // Validate cache performance
   if (metrics.application.cache) {
     const cache = metrics.application.cache;
-    
+
     // Cache write throughput
     if (cache.writeThroughput >= PERFORMANCE_SLA.cache.writeOpsPerSec) {
-      results.details.push({ 
-        metric: 'Cache Write Throughput', 
-        status: 'PASS', 
-        value: cache.writeThroughput, 
-        target: PERFORMANCE_SLA.cache.writeOpsPerSec 
+      results.details.push({
+        metric: 'Cache Write Throughput',
+        status: 'PASS',
+        value: cache.writeThroughput,
+        target: PERFORMANCE_SLA.cache.writeOpsPerSec
       });
     } else {
-      results.details.push({ 
-        metric: 'Cache Write Throughput', 
-        status: 'FAIL', 
-        value: cache.writeThroughput, 
-        target: PERFORMANCE_SLA.cache.writeOpsPerSec 
+      results.details.push({
+        metric: 'Cache Write Throughput',
+        status: 'FAIL',
+        value: cache.writeThroughput,
+        target: PERFORMANCE_SLA.cache.writeOpsPerSec
       });
       results.overall = 'FAIL';
       results.score -= 15;
     }
 
-    // Cache read throughput  
+    // Cache read throughput
     if (cache.readThroughput >= PERFORMANCE_SLA.cache.readOpsPerSec) {
-      results.details.push({ 
-        metric: 'Cache Read Throughput', 
-        status: 'PASS', 
-        value: cache.readThroughput, 
-        target: PERFORMANCE_SLA.cache.readOpsPerSec 
+      results.details.push({
+        metric: 'Cache Read Throughput',
+        status: 'PASS',
+        value: cache.readThroughput,
+        target: PERFORMANCE_SLA.cache.readOpsPerSec
       });
     } else {
-      results.details.push({ 
-        metric: 'Cache Read Throughput', 
-        status: 'FAIL', 
-        value: cache.readThroughput, 
-        target: PERFORMANCE_SLA.cache.readOpsPerSec 
+      results.details.push({
+        metric: 'Cache Read Throughput',
+        status: 'FAIL',
+        value: cache.readThroughput,
+        target: PERFORMANCE_SLA.cache.readOpsPerSec
       });
       results.overall = 'FAIL';
       results.score -= 15;
@@ -217,18 +217,18 @@ function validateAgainstSLA(metrics) {
 
     // Response time validation
     if (cache.latencyP95 <= PERFORMANCE_SLA.responseTime.p95) {
-      results.details.push({ 
-        metric: 'Response Time P95', 
-        status: 'PASS', 
-        value: cache.latencyP95 + 'ms', 
-        target: PERFORMANCE_SLA.responseTime.p95 + 'ms' 
+      results.details.push({
+        metric: 'Response Time P95',
+        status: 'PASS',
+        value: cache.latencyP95 + 'ms',
+        target: PERFORMANCE_SLA.responseTime.p95 + 'ms'
       });
     } else {
-      results.details.push({ 
-        metric: 'Response Time P95', 
-        status: 'FAIL', 
-        value: cache.latencyP95 + 'ms', 
-        target: PERFORMANCE_SLA.responseTime.p95 + 'ms' 
+      results.details.push({
+        metric: 'Response Time P95',
+        status: 'FAIL',
+        value: cache.latencyP95 + 'ms',
+        target: PERFORMANCE_SLA.responseTime.p95 + 'ms'
       });
       results.overall = 'FAIL';
       results.score -= 20;
@@ -240,7 +240,7 @@ function validateAgainstSLA(metrics) {
 
 function generateBenchmarkReport(metrics, validation) {
   console.log('\n📋 Generating benchmark report...');
-  
+
   const report = {
     metadata: {
       version: '2.4.2',
@@ -312,20 +312,20 @@ async function main() {
   try {
     // Step 1: Collect current metrics
     const metrics = getCurrentMetrics();
-    
+
     // Step 2: Validate against SLA
     const validation = validateAgainstSLA(metrics);
-    
-    // Step 3: Generate comprehensive report  
+
+    // Step 3: Generate comprehensive report
     const report = generateBenchmarkReport(metrics, validation);
-    
+
     // Step 4: Save benchmark report
     const reportPath = 'performance-benchmark.json';
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-    
+
     // Step 5: Display results
     displayResults(validation);
-    
+
     console.log('\n📊 Performance Benchmarks Summary:');
     console.log('==================================');
     console.log(`Cache Write Throughput: ${metrics.application.cache?.writeThroughput?.toLocaleString() || 'N/A'} ops/sec`);
@@ -334,7 +334,7 @@ async function main() {
     console.log(`Response Time P95: ${metrics.application.cache?.latencyP95 || 'N/A'}ms`);
     console.log('');
     console.log(`✅ Benchmark report saved to: ${reportPath}`);
-    
+
     if (report.recommendations.length > 0) {
       console.log('\n💡 Performance Recommendations:');
       console.log('===============================');
@@ -344,12 +344,12 @@ async function main() {
         console.log('');
       });
     }
-    
+
     console.log('🎉 Performance benchmarking complete!');
-    
+
     // Exit with appropriate code
     process.exit(validation.overall === 'PASS' ? 0 : 1);
-    
+
   } catch (error) {
     console.error('❌ Error during performance benchmarking:', error.message);
     process.exit(1);

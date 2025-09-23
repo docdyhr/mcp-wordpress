@@ -110,6 +110,5 @@ updates:
       - "dependencies"
       - "docker"
       - "security"
-
 # Security updates are automatically created for all ecosystems
 # and take priority over the schedule defined above

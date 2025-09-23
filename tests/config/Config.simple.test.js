@@ -12,7 +12,7 @@ describe("Config System", () => {
   it("should handle environment variables", () => {
     process.env.NODE_ENV = "test";
     process.env.DEBUG = "true";
-    
+
     expect(process.env.NODE_ENV).toBe("test");
     expect(process.env.DEBUG).toBe("true");
   });

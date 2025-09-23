@@ -7,7 +7,7 @@ on:
     branches: [main, develop]
   schedule:
     # Run CodeQL analysis daily at 3 AM UTC for comprehensive coverage
-    - cron: '0 3 * * *'
+    - cron: "0 3 * * *"
   workflow_dispatch:
 
 permissions:
@@ -17,19 +17,19 @@ permissions:
   packages: read
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: "20"
 
 jobs:
   codeql-analyze:
     name: 🔍 CodeQL Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    
+
     strategy:
       fail-fast: false
       matrix:
         # Use javascript-typescript for comprehensive coverage
-        language: ['javascript-typescript']
+        language: ["javascript-typescript"]
         # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
 
     steps:
@@ -40,7 +40,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci

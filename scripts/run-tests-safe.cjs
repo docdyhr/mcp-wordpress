@@ -17,7 +17,7 @@ const TEST_BATCHES = [
     timeout: 60000,
   },
   {
-    name: 'Client & Config & Utils',  
+    name: 'Client & Config & Utils',
     paths: ['tests/client/', 'tests/config/', 'tests/utils/'],
     timeout: 90000,
   },
@@ -52,7 +52,7 @@ class TestRunner {
   async runBatch(batch) {
     console.log(`\n🧪 Running ${batch.name}...`);
     console.log(`   Paths: ${batch.paths.join(', ')}`);
-    
+
     return new Promise((resolve, reject) => {
       // Build first
       try {
@@ -108,22 +108,22 @@ class TestRunner {
         // Try different patterns for test results
         const testFilesPassedMatch = stdout.match(/Test Files\s+(\d+)\s+passed/);
         const testFilesFailedMatch = stdout.match(/Test Files\s+(\d+)\s+failed/);
-        
+
         if (testFilesPassedMatch) {
           testFiles = parseInt(testFilesPassedMatch[1]) || 0;
         }
-        
+
         // Match patterns like "Tests  248 passed" or "Tests  5 failed | 243 passed"
         const testsPassedMatch = stdout.match(/Tests\s+(\d+)\s+passed/);
         const testsFailedMatch = stdout.match(/Tests\s+(\d+)\s+failed/);
-        
+
         if (testsPassedMatch) {
           passed = parseInt(testsPassedMatch[1]) || 0;
         }
         if (testsFailedMatch) {
           failed = parseInt(testsFailedMatch[1]) || 0;
         }
-        
+
         tests = passed + failed;
 
         const success = code === 0;
@@ -168,16 +168,16 @@ class TestRunner {
 
   async runAllBatches() {
     console.log('🚀 Starting memory-safe test runner...\n');
-    
+
     for (const batch of TEST_BATCHES) {
       const result = await this.runBatch(batch);
       this.results.push(result);
-      
+
       // Force garbage collection between batches
       if (global.gc) {
         global.gc();
       }
-      
+
       // Small delay between batches
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
@@ -189,20 +189,20 @@ class TestRunner {
   printSummary() {
     console.log('\n📊 Test Summary:');
     console.log('================');
-    
+
     let successfulBatches = 0;
-    
+
     for (const result of this.results) {
       const status = result.success ? '✅' : '❌';
       console.log(`${status} ${result.batch}: ${result.passed || 0} passed, ${result.failed || 0} failed`);
       if (result.success) successfulBatches++;
     }
-    
+
     console.log('\n📈 Overall Results:');
     console.log(`   Batches: ${successfulBatches}/${this.results.length} successful`);
     console.log(`   Tests: ${this.totalPassed} passed, ${this.totalFailed} failed`);
     console.log(`   Total: ${this.totalTests} tests`);
-    
+
     if (this.totalFailed > 0) {
       console.log('\n❌ Some tests failed. Check individual batch output above.');
       process.exit(1);

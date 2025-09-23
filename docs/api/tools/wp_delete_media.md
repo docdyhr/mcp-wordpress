@@ -6,10 +6,10 @@ Deletes a media item.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `id` | `number` | ✅ | The ID of the media item to delete. | - | `123`, `456` |
-| `force` | `boolean` | ❌ | If true, permanently delete. If false, move to trash. Defaults to false. | - | `example` |
+| Parameter | Type      | Required | Description                                                              | Default | Examples     |
+| --------- | --------- | -------- | ------------------------------------------------------------------------ | ------- | ------------ |
+| `id`      | `number`  | ✅       | The ID of the media item to delete.                                      | -       | `123`, `456` |
+| `force`   | `boolean` | ❌       | If true, permanently delete. If false, move to trash. Defaults to false. | -       | `example`    |
 
 ## Examples
 
@@ -18,11 +18,13 @@ Deletes a media item.
 Simple example of using wp_delete_media
 
 **Command:**
+
 ```bash
 wp_delete_media --id="123"
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -34,15 +36,13 @@ wp_delete_media --id="123"
 ```
 
 **Error Example (Authentication failure):**
+
 ```json
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
 }
 ```
-
-
-
 
 ## Required Permissions
 
@@ -51,7 +51,6 @@ This tool requires the following WordPress user capabilities:
 - `delete_files`
 
 **Note:** The authenticated user must have these capabilities to successfully execute this tool.
-
 
 ## Response Format
 
@@ -75,34 +74,24 @@ This tool requires the following WordPress user capabilities:
 
 ### AUTHENTICATION_FAILED
 
-**Message:** Authentication failed  
-**Description:** Invalid credentials or insufficient permissions  
-**Resolution:** Check your authentication credentials and user permissions
-
+**Message:** Authentication failed **Description:** Invalid credentials or insufficient permissions **Resolution:**
+Check your authentication credentials and user permissions
 
 ### VALIDATION_ERROR
 
-**Message:** Parameter validation failed  
-**Description:** One or more required parameters are missing or invalid  
+**Message:** Parameter validation failed **Description:** One or more required parameters are missing or invalid
 **Resolution:** Review the required parameters and their formats
-
 
 ### NOT_FOUND
 
-**Message:** Resource not found  
-**Description:** The requested resource does not exist  
-**Resolution:** Verify the resource ID and ensure it exists
-
+**Message:** Resource not found **Description:** The requested resource does not exist **Resolution:** Verify the
+resource ID and ensure it exists
 
 ### PERMISSION_DENIED
 
-**Message:** Insufficient permissions  
-**Description:** The user does not have permission to perform this action  
+**Message:** Insufficient permissions **Description:** The user does not have permission to perform this action
 **Resolution:** Contact an administrator to grant the necessary permissions
-
-
-
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

@@ -63,7 +63,9 @@ describe("Cache Stress Tests", () => {
       const degradation = (lastBatch - firstBatch) / firstBatch;
 
       console.log(
-        `Stress test - First batch: ${firstBatch.toFixed(2)}ms, Last batch: ${lastBatch.toFixed(2)}ms, Degradation: ${(degradation * 100).toFixed(1)}%`,
+        `Stress test - First batch: ${firstBatch.toFixed(2)}ms, Last batch: ${lastBatch.toFixed(2)}ms, Degradation: ${(
+          degradation * 100
+        ).toFixed(1)}%`,
       );
 
       // Performance shouldn't degrade more than 100% even under extreme load

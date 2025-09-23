@@ -16,7 +16,7 @@ async function extractMetrics() {
     // Extract test count by running test suite
     console.log('📊 Running test suite to count tests...');
     const testOutput = execSync('npm test 2>&1', { encoding: 'utf8', timeout: 60000 });
-    
+
     // Parse test results from output
     const testMatch = testOutput.match(/Tests:\s+(\d+)\s+failed,\s+(\d+)\s+passed,\s+(\d+)\s+total/);
     if (testMatch) {
@@ -86,7 +86,7 @@ async function extractMetrics() {
     console.log('📋 Using existing coverage metrics from README...');
     coverageResults = {
       statements: '29.76',
-      branches: '23.84', 
+      branches: '23.84',
       functions: '27.69',
       lines: '30.97'
     };

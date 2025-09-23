@@ -35,10 +35,9 @@ async function checkNPM(version) {
     }
 
     // Get publish time
-    const publishTime = execSync(
-      `npm view ${PACKAGE_NAME} time.${version || npmVersion}`,
-      { encoding: "utf-8" },
-    ).trim();
+    const publishTime = execSync(`npm view ${PACKAGE_NAME} time.${version || npmVersion}`, {
+      encoding: "utf-8",
+    }).trim();
     console.log(`📅 Published at: ${new Date(publishTime).toLocaleString()}`);
 
     console.log(`🔗 NPM URL: https://www.npmjs.com/package/${PACKAGE_NAME}`);
@@ -54,9 +53,7 @@ async function checkDockerHub(version) {
 
   try {
     // Fetch tags from Docker Hub API
-    const response = await fetch(
-      `https://hub.docker.com/v2/repositories/${DOCKER_IMAGE}/tags?page_size=50`,
-    );
+    const response = await fetch(`https://hub.docker.com/v2/repositories/${DOCKER_IMAGE}/tags?page_size=50`);
     const data = await response.json();
 
     if (!data.results) {
@@ -66,21 +63,15 @@ async function checkDockerHub(version) {
     // Get latest tag info
     const latestTag = data.results.find((tag) => tag.name === "latest");
     if (latestTag) {
-      console.log(
-        `✅ Latest tag updated: ${new Date(latestTag.last_updated).toLocaleString()}`,
-      );
+      console.log(`✅ Latest tag updated: ${new Date(latestTag.last_updated).toLocaleString()}`);
     }
 
     // Check specific version if provided
     if (version) {
-      const versionTag = data.results.find(
-        (tag) => tag.name === version || tag.name === `v${version}`,
-      );
+      const versionTag = data.results.find((tag) => tag.name === version || tag.name === `v${version}`);
       if (versionTag) {
         console.log(`✅ Version ${versionTag.name} exists on Docker Hub`);
-        console.log(
-          `📅 Published at: ${new Date(versionTag.last_updated).toLocaleString()}`,
-        );
+        console.log(`📅 Published at: ${new Date(versionTag.last_updated).toLocaleString()}`);
       } else {
         console.log(`❌ Version ${version} NOT found on Docker Hub`);
         return false;
@@ -90,14 +81,10 @@ async function checkDockerHub(version) {
     // List all available tags
     console.log("\n📋 Available Docker tags:");
     data.results.slice(0, 10).forEach((tag) => {
-      console.log(
-        `  - ${tag.name} (${new Date(tag.last_updated).toLocaleDateString()})`,
-      );
+      console.log(`  - ${tag.name} (${new Date(tag.last_updated).toLocaleDateString()})`);
     });
 
-    console.log(
-      `\n🔗 Docker Hub URL: https://hub.docker.com/r/${DOCKER_IMAGE}/tags`,
-    );
+    console.log(`\n🔗 Docker Hub URL: https://hub.docker.com/r/${DOCKER_IMAGE}/tags`);
     return true;
   } catch (error) {
     console.error("❌ Failed to check Docker Hub:", error.message);
@@ -117,15 +104,12 @@ async function checkGitHubRelease(version) {
 
     if (version) {
       try {
-        const releaseInfo = execSync(
-          `gh release view v${version} --json tagName,publishedAt,url`,
-          { encoding: "utf-8" },
-        );
+        const releaseInfo = execSync(`gh release view v${version} --json tagName,publishedAt,url`, {
+          encoding: "utf-8",
+        });
         const release = JSON.parse(releaseInfo);
         console.log(`✅ GitHub release v${version} exists`);
-        console.log(
-          `📅 Published at: ${new Date(release.publishedAt).toLocaleString()}`,
-        );
+        console.log(`📅 Published at: ${new Date(release.publishedAt).toLocaleString()}`);
         console.log(`🔗 Release URL: ${release.url}`);
       } catch {
         console.log(`❌ GitHub release v${version} NOT found`);

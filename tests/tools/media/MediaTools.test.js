@@ -38,7 +38,7 @@ describe("MediaTools", () => {
   beforeEach(() => {
     // Reset mocks
     vi.clearAllMocks();
-    
+
     // Default to file exists (resolved promise means file exists)
     mockAccess.mockResolvedValue(undefined);
     mockExistsSync.mockReturnValue(true);

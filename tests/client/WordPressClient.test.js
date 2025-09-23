@@ -367,10 +367,12 @@ describe("WordPressClient", () => {
           { id: 1, title: { rendered: "Post 1" } },
           { id: 2, title: { rendered: "Post 2" } },
         ]),
-        text: vi.fn().mockResolvedValue(JSON.stringify([
-          { id: 1, title: { rendered: "Post 1" } },
-          { id: 2, title: { rendered: "Post 2" } },
-        ])),
+        text: vi.fn().mockResolvedValue(
+          JSON.stringify([
+            { id: 1, title: { rendered: "Post 1" } },
+            { id: 2, title: { rendered: "Post 2" } },
+          ]),
+        ),
       });
 
       const posts = await client.getPosts();

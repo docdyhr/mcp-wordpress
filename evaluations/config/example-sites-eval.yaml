@@ -10,17 +10,17 @@ evals:
     description: Test connection to first configured site
     prompt: "Get site information from the WordPress site using site parameter 'site1'"
     expected_result: "Should return site information from the first configured site"
-  
+
   - name: test_list_posts_site1
     description: Test listing posts from first site
     prompt: "List the 3 most recent posts from site 'site1'"
     expected_result: "Should return recent posts from the first site"
-  
+
   - name: test_site2_connection
     description: Test connection to second configured site
     prompt: "Get site information from the WordPress site using site parameter 'site2'"
     expected_result: "Should return site information from the second configured site"
-  
+
   - name: test_multisite_functionality
     description: Test multi-site functionality
     prompt: "Show me how many sites are configured and list one post from each site"

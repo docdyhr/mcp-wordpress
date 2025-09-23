@@ -171,7 +171,9 @@ describe("Cache Performance Benchmarks", () => {
       const max = latencies[latencies.length - 1];
 
       console.log(
-        `Cache operation latencies - P50: ${p50.toFixed(3)}ms, P95: ${p95.toFixed(3)}ms, P99: ${p99.toFixed(3)}ms, Max: ${max.toFixed(3)}ms`,
+        `Cache operation latencies - P50: ${p50.toFixed(3)}ms, P95: ${p95.toFixed(3)}ms, P99: ${p99.toFixed(
+          3,
+        )}ms, Max: ${max.toFixed(3)}ms`,
       );
 
       // Latency assertions
@@ -345,7 +347,9 @@ describe("Cache Performance Benchmarks", () => {
       const heapVariation = (maxHeap - minHeap) / minHeap;
 
       console.log(
-        `Memory stability - Min: ${(minHeap / 1024 / 1024).toFixed(1)}MB, Max: ${(maxHeap / 1024 / 1024).toFixed(1)}MB, Variation: ${(heapVariation * 100).toFixed(1)}%`,
+        `Memory stability - Min: ${(minHeap / 1024 / 1024).toFixed(1)}MB, Max: ${(maxHeap / 1024 / 1024).toFixed(
+          1,
+        )}MB, Variation: ${(heapVariation * 100).toFixed(1)}%`,
       );
 
       // Memory should not continuously grow excessively
@@ -403,7 +407,9 @@ describe("Cache Performance Benchmarks", () => {
         });
 
         console.log(
-          `Cache size ${size}: Fill=${fillThroughput.toFixed(0)} ops/sec, Access=${accessThroughput.toFixed(0)} ops/sec`,
+          `Cache size ${size}: Fill=${fillThroughput.toFixed(0)} ops/sec, Access=${accessThroughput.toFixed(
+            0,
+          )} ops/sec`,
         );
 
         // Clean up the cache instance

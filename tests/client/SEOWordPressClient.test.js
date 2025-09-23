@@ -334,7 +334,7 @@ describe("SEOWordPressClient", () => {
         {
           id: 2,
           title: { rendered: "Post 2" },
-          type: "post", 
+          type: "post",
           link: "https://example.com/post-2",
           meta: {
             yoast_head_json: { title: "Post 2", description: "Desc 2" },
@@ -346,7 +346,7 @@ describe("SEOWordPressClient", () => {
           id: 3,
           title: { rendered: "Post 3" },
           type: "post",
-          link: "https://example.com/post-3", 
+          link: "https://example.com/post-3",
           meta: {
             yoast_head_json: { title: "Post 3", description: "Desc 3" },
             _yoast_wpseo_title: "Post 3",
@@ -419,7 +419,7 @@ describe("SEOWordPressClient", () => {
       const result = await client.bulkGetSEOMetadata({
         postIds: [1, 2, 3],
       });
-      
+
       // Should return only successful posts (post 1), skipping failed ones
       expect(result).toHaveLength(1);
       expect(result[0].postId).toBe(1);
@@ -464,19 +464,19 @@ describe("SEOWordPressClient", () => {
       };
 
       // Mock the update call
-      mockWordPressClient.updatePost.mockResolvedValueOnce({ 
+      mockWordPressClient.updatePost.mockResolvedValueOnce({
         id: 123,
         meta: {
           _yoast_wpseo_title: "New Title",
           _yoast_wpseo_metadesc: "New Description",
-        }
+        },
       });
 
       // Mock the subsequent getSEOMetadata call
       const mockUpdatedPost = {
         id: 123,
         title: { rendered: "Test Post" },
-        type: "post", 
+        type: "post",
         link: "https://example.com/test-post",
         meta: {
           yoast_head_json: {
@@ -487,9 +487,9 @@ describe("SEOWordPressClient", () => {
           _yoast_wpseo_metadesc: "New Description",
           _yoast_wpseo_canonical: "https://example.com/new-canonical",
           _yoast_wpseo_focuskw: "new keyword",
-        }
+        },
       };
-      
+
       mockWordPressClient.getPost.mockResolvedValueOnce(mockUpdatedPost);
 
       const result = await client.updateSEOMetadata(123, updates);
@@ -505,7 +505,7 @@ describe("SEOWordPressClient", () => {
             _yoast_wpseo_canonical: "https://example.com/new-canonical",
             _yoast_wpseo_focuskw: "new keyword",
           }),
-        })
+        }),
       );
     });
 
@@ -521,7 +521,7 @@ describe("SEOWordPressClient", () => {
 
       // Mock updatePost call
       mockWordPressClient.updatePost.mockResolvedValueOnce({ success: true });
-      
+
       // Mock the final getSEOMetadata call - this calls getPost
       mockWordPressClient.getPost.mockResolvedValueOnce({
         id: 123,
@@ -541,7 +541,7 @@ describe("SEOWordPressClient", () => {
             rank_math_title: "RankMath Title",
             rank_math_description: "RankMath Description",
           }),
-        })
+        }),
       );
     });
 
@@ -557,7 +557,7 @@ describe("SEOWordPressClient", () => {
 
       // Mock updatePost call
       mockWordPressClient.updatePost.mockResolvedValueOnce({ success: true });
-      
+
       // Mock the final getSEOMetadata call - this calls getPost
       mockWordPressClient.getPost.mockResolvedValueOnce({
         id: 123,
@@ -577,7 +577,7 @@ describe("SEOWordPressClient", () => {
             _seopress_titles_title: "SEOPress Title",
             _seopress_titles_desc: "SEOPress Description",
           }),
-        })
+        }),
       );
     });
 
@@ -591,10 +591,10 @@ describe("SEOWordPressClient", () => {
           appPassword: "test password",
         },
       });
-      
+
       // Apply all the mocked methods to the fresh client
       Object.assign(freshClient, mockWordPressClient);
-      
+
       // Mock no SEO plugins detected
       mockWordPressClient.get.mockResolvedValueOnce([]);
       await freshClient.initializeSEO();
@@ -631,7 +631,7 @@ describe("SEOWordPressClient", () => {
 
       // Mock updatePost call
       mockWordPressClient.updatePost.mockResolvedValueOnce({ success: true });
-      
+
       // Mock the final getSEOMetadata call - this calls getPost
       mockWordPressClient.getPost.mockResolvedValueOnce({
         id: 123,
@@ -649,7 +649,7 @@ describe("SEOWordPressClient", () => {
           meta: expect.objectContaining({
             _yoast_wpseo_title: "Only Title Updated",
           }),
-        })
+        }),
       );
 
       // Should not include other fields
@@ -663,7 +663,7 @@ describe("SEOWordPressClient", () => {
 
       // Mock updatePage call
       mockWordPressClient.updatePage.mockResolvedValueOnce({ success: true });
-      
+
       // Mock the final getSEOMetadata call - this calls getPage
       mockWordPressClient.getPage.mockResolvedValueOnce({
         id: 456,
@@ -681,7 +681,7 @@ describe("SEOWordPressClient", () => {
           meta: expect.objectContaining({
             _yoast_wpseo_title: "Page Title",
           }),
-        })
+        }),
       );
     });
   });
@@ -715,9 +715,8 @@ describe("SEOWordPressClient", () => {
         yoast_head_json: null,
       };
 
-      mockWordPressClient.get
-        .mockResolvedValueOnce([{ slug: "wordpress-seo", status: "active" }]);
-      
+      mockWordPressClient.get.mockResolvedValueOnce([{ slug: "wordpress-seo", status: "active" }]);
+
       mockWordPressClient.getPost.mockResolvedValueOnce(mockPost);
 
       await client.initializeSEO();

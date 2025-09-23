@@ -68,9 +68,7 @@ describe("Configuration Loading", () => {
       expect(validConfig.sites).toHaveLength(2);
       expect(validConfig.sites[0].id).toBe("site1");
       expect(validConfig.sites[0].name).toBe("Test Site 1");
-      expect(validConfig.sites[0].config.WORDPRESS_SITE_URL).toBe(
-        "https://site1.example.com",
-      );
+      expect(validConfig.sites[0].config.WORDPRESS_SITE_URL).toBe("https://site1.example.com");
       expect(validConfig.sites[1].id).toBe("site2");
     });
 

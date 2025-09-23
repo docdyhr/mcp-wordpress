@@ -6,13 +6,13 @@ on:
     branches: [main, develop]
     # Skip dependency review for automated dependency updates
     paths-ignore:
-      - 'package-lock.json'
-      - 'npm-shrinkwrap.json'
-      - 'yarn.lock'
-      - 'pnpm-lock.yaml'
-      - 'security-fixes.txt'
-      - 'update-report-*.md'
-      - 'updates-*.json'
+      - "package-lock.json"
+      - "npm-shrinkwrap.json"
+      - "yarn.lock"
+      - "pnpm-lock.yaml"
+      - "security-fixes.txt"
+      - "update-report-*.md"
+      - "updates-*.json"
   workflow_dispatch:
 
 permissions:
@@ -39,10 +39,10 @@ jobs:
 
       - name: 🔍 Dependency Review
         uses: actions/dependency-review-action@v4
-        continue-on-error: true  # Don't fail if GitHub Advanced Security not enabled
+        continue-on-error: true # Don't fail if GitHub Advanced Security not enabled
         with:
           # Make less strict for dependency updates
-          fail-on-severity: high  # Changed from 'moderate' to 'high'
+          fail-on-severity: high # Changed from 'moderate' to 'high'
           # Fail if vulnerabilities are found in runtime dependencies
           fail-on-scopes: runtime
           # License check (allow common open source licenses)
@@ -50,13 +50,13 @@ jobs:
           # Security advisories configuration
           allow-ghsas: false
           # Comment on PR with results (only on failure for dependency PRs)
-          comment-summary-in-pr: on-failure  # Changed from 'always'
+          comment-summary-in-pr: on-failure # Changed from 'always'
           # Vulnerability severity threshold
           vulnerability-check: true
           # License compliance check (relaxed for dependency updates)
-          license-check: true  # Keep enabled but make non-blocking
+          license-check: true # Keep enabled but make non-blocking
           # Show OpenSSF Scorecard information
-          show-openssf-scorecard: true  # Keep enabled for supply chain visibility
+          show-openssf-scorecard: true # Keep enabled for supply chain visibility
 
   security-audit:
     name: 🔒 Security Audit
@@ -68,8 +68,8 @@ jobs:
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -80,20 +80,20 @@ jobs:
         run: |
           echo "## 🔍 NPM Security Audit Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Run audit and capture results
           if npm audit --audit-level=moderate --json > audit-results.json 2>/dev/null; then
             echo "✅ **No moderate or higher vulnerabilities found**" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️ **Vulnerabilities detected**" >> $GITHUB_STEP_SUMMARY
-            
+
             # Parse and display results
             if [ -f audit-results.json ]; then
               CRITICAL=$(cat audit-results.json | jq -r '.metadata.vulnerabilities.critical // 0')
               HIGH=$(cat audit-results.json | jq -r '.metadata.vulnerabilities.high // 0')
               MODERATE=$(cat audit-results.json | jq -r '.metadata.vulnerabilities.moderate // 0')
               LOW=$(cat audit-results.json | jq -r '.metadata.vulnerabilities.low // 0')
-              
+
               echo "- 🔴 Critical: $CRITICAL" >> $GITHUB_STEP_SUMMARY
               echo "- 🟠 High: $HIGH" >> $GITHUB_STEP_SUMMARY
               echo "- 🟡 Moderate: $MODERATE" >> $GITHUB_STEP_SUMMARY
@@ -121,8 +121,8 @@ jobs:
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -133,23 +133,23 @@ jobs:
         run: |
           # Install license checker
           npm install -g license-checker
-          
+
           echo "## 📜 License Compliance Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Generate license report
           license-checker --json > licenses.json
-          
+
           # Check for problematic licenses
           PROBLEMATIC_LICENSES="GPL-2.0,AGPL-1.0,AGPL-3.0,LGPL-2.0"
-          
+
           if license-checker --excludePackages 'dev-dependencies' --restrictLicenses "$PROBLEMATIC_LICENSES" --summary; then
             echo "✅ **No problematic licenses found**" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️ **Problematic licenses detected**" >> $GITHUB_STEP_SUMMARY
             echo "Please review the licenses and ensure compliance." >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           # Count license types
           TOTAL_LICENSES=$(cat licenses.json | jq 'keys | length')
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -174,15 +174,15 @@ jobs:
         run: |
           echo "## 🔗 Supply Chain Security Analysis" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check for package-lock.json integrity
           if [ -f package-lock.json ]; then
             echo "✅ **package-lock.json found**" >> $GITHUB_STEP_SUMMARY
-            
+
             # Check lockfile version
             LOCKFILE_VERSION=$(cat package-lock.json | jq -r '.lockfileVersion')
             echo "- Lockfile version: $LOCKFILE_VERSION" >> $GITHUB_STEP_SUMMARY
-            
+
             # Count dependencies
             DEPS_COUNT=$(cat package-lock.json | jq '.dependencies | length // 0')
             echo "- Total dependencies: $DEPS_COUNT" >> $GITHUB_STEP_SUMMARY
@@ -190,7 +190,7 @@ jobs:
             echo "⚠️ **package-lock.json missing**" >> $GITHUB_STEP_SUMMARY
             echo "Consider using npm ci for reproducible builds." >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           # Check for .npmrc security settings
           if [ -f .npmrc ]; then
             echo "📄 **.npmrc configuration found**" >> $GITHUB_STEP_SUMMARY

@@ -34,10 +34,10 @@ export class JWTAuthImplementation {
   private jwtToken: string | null = null;
   private tokenExpiry: number | null = null;
   private refreshTokenValue: string | null = null;
-  
+
   constructor(
     private requestManager: RequestManager,
-    private authConfig: AuthConfig
+    private authConfig: AuthConfig,
   ) {}
 
   /**
@@ -49,9 +49,9 @@ export class JWTAuthImplementation {
     }
 
     try {
-      this.logger.info("Starting JWT authentication", { 
+      this.logger.info("Starting JWT authentication", {
         username: this.authConfig.username,
-        endpoint: "jwt-auth/v1/token"
+        endpoint: "jwt-auth/v1/token",
       });
 
       const response = await this.requestManager.request<JWTTokenResponse>(
@@ -64,7 +64,7 @@ export class JWTAuthImplementation {
         {
           skipAuth: true, // Don't use auth headers for the auth request itself
           timeout: 10000,
-        } as RequestOptions & { skipAuth: boolean }
+        } as RequestOptions & { skipAuth: boolean },
       );
 
       if (!response.token) {
@@ -73,10 +73,10 @@ export class JWTAuthImplementation {
 
       // Store the JWT token
       this.jwtToken = response.token;
-      
+
       // Calculate token expiry (default to 24 hours if not provided)
-      const expiresInSeconds = response.expires_in || (24 * 60 * 60);
-      this.tokenExpiry = Date.now() + (expiresInSeconds * 1000);
+      const expiresInSeconds = response.expires_in || 24 * 60 * 60;
+      this.tokenExpiry = Date.now() + expiresInSeconds * 1000;
 
       this.logger.info("JWT authentication successful", {
         user: response.user_nicename,
@@ -85,14 +85,13 @@ export class JWTAuthImplementation {
 
       // Test the token by validating it
       await this.validateToken();
-
     } catch (error) {
       this.jwtToken = null;
       this.tokenExpiry = null;
       this.logger.error("JWT authentication failed", {
         error: error instanceof Error ? error.message : String(error),
       });
-      
+
       if (error instanceof Error) {
         throw new AuthenticationError(`JWT authentication failed: ${error.message}`, AUTH_METHODS.JWT);
       }
@@ -118,11 +117,11 @@ export class JWTAuthImplementation {
             Authorization: `Bearer ${this.jwtToken}`,
           },
           timeout: 5000,
-        }
+        },
       );
 
       const isValid = response.data.status === 200;
-      
+
       if (!isValid) {
         this.logger.warn("JWT token validation failed", { response });
         this.jwtToken = null;
@@ -130,7 +129,6 @@ export class JWTAuthImplementation {
       }
 
       return isValid;
-
     } catch (error) {
       this.logger.warn("JWT token validation error", {
         error: error instanceof Error ? error.message : String(error),
@@ -162,14 +160,14 @@ export class JWTAuthImplementation {
               Authorization: `Bearer ${this.jwtToken}`,
             },
             timeout: 5000,
-          }
+          },
         );
 
         if (refreshResponse.token) {
           this.jwtToken = refreshResponse.token;
-          const expiresInSeconds = refreshResponse.expires_in || (24 * 60 * 60);
-          this.tokenExpiry = Date.now() + (expiresInSeconds * 1000);
-          
+          const expiresInSeconds = refreshResponse.expires_in || 24 * 60 * 60;
+          this.tokenExpiry = Date.now() + expiresInSeconds * 1000;
+
           this.logger.info("JWT token refreshed successfully", {
             expiresAt: new Date(this.tokenExpiry).toISOString(),
           });
@@ -186,17 +184,16 @@ export class JWTAuthImplementation {
 
       this.logger.debug("Re-authenticating to refresh JWT token");
       await this.authenticateJWT();
-
     } catch (error) {
       this.jwtToken = null;
       this.tokenExpiry = null;
       this.logger.error("JWT token refresh failed", {
         error: error instanceof Error ? error.message : String(error),
       });
-      
+
       throw new AuthenticationError(
-        `JWT token refresh failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        AUTH_METHODS.JWT
+        `JWT token refresh failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        AUTH_METHODS.JWT,
       );
     }
   }
@@ -208,10 +205,10 @@ export class JWTAuthImplementation {
     if (!this.tokenExpiry) {
       return true;
     }
-    
+
     // Consider token expired if it expires within 5 minutes (300000ms)
     const buffer = 5 * 60 * 1000;
-    return Date.now() >= (this.tokenExpiry - buffer);
+    return Date.now() >= this.tokenExpiry - buffer;
   }
 
   /**
@@ -245,7 +242,7 @@ export class JWTAuthImplementation {
     if (!this.jwtToken) {
       return {};
     }
-    
+
     return {
       Authorization: `Bearer ${this.jwtToken}`,
     };
@@ -294,9 +291,9 @@ export class JWTAuthImplementation {
         {
           headers: this.getAuthHeaders(),
           timeout: 5000,
-        }
+        },
       );
-      
+
       this.logger.info("JWT token invalidated on server");
     } catch (error) {
       this.logger.warn("Failed to invalidate JWT token on server", {

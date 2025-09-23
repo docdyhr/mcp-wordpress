@@ -2,8 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.10.1](https://github.com/docdyhr/mcp-wordpress/compare/v2.10.0...v2.10.1) (2025-09-22)
 
@@ -15,160 +15,206 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🚀 Features
 
-* **ci:** Add comprehensive Docker publishing fix and verification workflows ([0054b6b](https://github.com/docdyhr/mcp-wordpress/commit/0054b6b4174618629a40c0d2990faf294b880ca4)), closes [#128](https://github.com/docdyhr/mcp-wordpress/issues/128) [#129](https://github.com/docdyhr/mcp-wordpress/issues/129) [#128](https://github.com/docdyhr/mcp-wordpress/issues/128) [#129](https://github.com/docdyhr/mcp-wordpress/issues/129)
+- **ci:** Add comprehensive Docker publishing fix and verification workflows
+  ([0054b6b](https://github.com/docdyhr/mcp-wordpress/commit/0054b6b4174618629a40c0d2990faf294b880ca4)), closes
+  [#128](https://github.com/docdyhr/mcp-wordpress/issues/128)
+  [#129](https://github.com/docdyhr/mcp-wordpress/issues/129)
+  [#128](https://github.com/docdyhr/mcp-wordpress/issues/128)
+  [#129](https://github.com/docdyhr/mcp-wordpress/issues/129)
 
 ## [2.9.3](https://github.com/docdyhr/mcp-wordpress/compare/v2.9.2...v2.9.3) (2025-09-21)
 
 ### 🐛 Bug Fixes
 
-* **tools:** Resolve post creation parameter passing issue ([fc8fa5c](https://github.com/docdyhr/mcp-wordpress/commit/fc8fa5c92e366c730241aa3bdd1491ecc60924e1)), closes [#120](https://github.com/docdyhr/mcp-wordpress/issues/120)
+- **tools:** Resolve post creation parameter passing issue
+  ([fc8fa5c](https://github.com/docdyhr/mcp-wordpress/commit/fc8fa5c92e366c730241aa3bdd1491ecc60924e1)), closes
+  [#120](https://github.com/docdyhr/mcp-wordpress/issues/120)
 
 ## [2.9.2](https://github.com/docdyhr/mcp-wordpress/compare/v2.9.1...v2.9.2) (2025-09-17)
 
 ### 🐛 Bug Fixes
 
-* **ci:** Optimize memory allocation and test configuration ([5acb7fa](https://github.com/docdyhr/mcp-wordpress/commit/5acb7fa12eb81d198f8ddfbad7390c274f0e4335))
-* **tests:** Reduce timeout values for CI stability ([deb7210](https://github.com/docdyhr/mcp-wordpress/commit/deb721037946f7058c960e436c441afc585cd8b1))
+- **ci:** Optimize memory allocation and test configuration
+  ([5acb7fa](https://github.com/docdyhr/mcp-wordpress/commit/5acb7fa12eb81d198f8ddfbad7390c274f0e4335))
+- **tests:** Reduce timeout values for CI stability
+  ([deb7210](https://github.com/docdyhr/mcp-wordpress/commit/deb721037946f7058c960e436c441afc585cd8b1))
 
 ## [2.9.1](https://github.com/docdyhr/mcp-wordpress/compare/v2.9.0...v2.9.1) (2025-09-17)
 
 ### 🐛 Bug Fixes
 
-* **ci:** Comprehensive pipeline health monitoring and auto-recovery ([c3d79e6](https://github.com/docdyhr/mcp-wordpress/commit/c3d79e6282c966ec612b57e5f92431bd68b97e52))
+- **ci:** Comprehensive pipeline health monitoring and auto-recovery
+  ([c3d79e6](https://github.com/docdyhr/mcp-wordpress/commit/c3d79e6282c966ec612b57e5f92431bd68b97e52))
 
 ## [2.9.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.8.1...v2.9.0) (2025-09-14)
 
 ### 🚀 Features
 
-* **ci:** Add comprehensive pipeline health monitoring and auto-recovery ([dbacb23](https://github.com/docdyhr/mcp-wordpress/commit/dbacb23ca74934d663ddc4f60ddd22653efad7d3))
+- **ci:** Add comprehensive pipeline health monitoring and auto-recovery
+  ([dbacb23](https://github.com/docdyhr/mcp-wordpress/commit/dbacb23ca74934d663ddc4f60ddd22653efad7d3))
 
 ## [2.8.1](https://github.com/docdyhr/mcp-wordpress/compare/v2.8.0...v2.8.1) (2025-09-13)
 
 ### 🐛 Bug Fixes
 
-* **ci:** Add missing npm scripts for CI/CD pipeline ([ba5756f](https://github.com/docdyhr/mcp-wordpress/commit/ba5756fce69396e238b9e328cb4a3ae37c77882b))
+- **ci:** Add missing npm scripts for CI/CD pipeline
+  ([ba5756f](https://github.com/docdyhr/mcp-wordpress/commit/ba5756fce69396e238b9e328cb4a3ae37c77882b))
 
 ## [2.8.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.7.0...v2.8.0) (2025-09-12)
 
 ### 🚀 Features
 
-* **security:** soft-fail internal check errors (warning, neutral score) ([#122](https://github.com/docdyhr/mcp-wordpress/issues/122)) ([8666093](https://github.com/docdyhr/mcp-wordpress/commit/866609370e1a7a8118df2aa54fae8e760a4752e4))
+- **security:** soft-fail internal check errors (warning, neutral score)
+  ([#122](https://github.com/docdyhr/mcp-wordpress/issues/122))
+  ([8666093](https://github.com/docdyhr/mcp-wordpress/commit/866609370e1a7a8118df2aa54fae8e760a4752e4))
 
 ## [2.7.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.4...v2.7.0) (2025-09-06)
 
 ### 🚀 Features
 
-* **architecture:** Complete test suite architectural improvements and fixes ([8105023](https://github.com/docdyhr/mcp-wordpress/commit/8105023b5d04621466bcd9d150a3c45a256d5045))
-* **ci:** Complete CI/CD pipeline optimization and automation ([ec1f82b](https://github.com/docdyhr/mcp-wordpress/commit/ec1f82b86469197d13252f35945026bfb8d7693c))
-* **ci:** Comprehensive CI/CD pipeline health improvements ([0ae8c44](https://github.com/docdyhr/mcp-wordpress/commit/0ae8c44d2c6f8bd4822bcf49f34155ee1dd5d787))
-* release v2.7.0 with composition architecture and complete SEO toolkit ([90a7ea3](https://github.com/docdyhr/mcp-wordpress/commit/90a7ea38699363aa001950dcfc42689a3d139650))
-* **seo:** Complete SEO toolkit implementation with TypeScript fixes ([#118](https://github.com/docdyhr/mcp-wordpress/issues/118)) ([a6c4c45](https://github.com/docdyhr/mcp-wordpress/commit/a6c4c4543329abe8b434c283c96d8830a122e8fa))
-* **version:** Implement best-practices versioning system with SemVer support ([12d03fd](https://github.com/docdyhr/mcp-wordpress/commit/12d03fde4984e3609558c2ef29f82f5c6eea8765))
+- **architecture:** Complete test suite architectural improvements and fixes
+  ([8105023](https://github.com/docdyhr/mcp-wordpress/commit/8105023b5d04621466bcd9d150a3c45a256d5045))
+- **ci:** Complete CI/CD pipeline optimization and automation
+  ([ec1f82b](https://github.com/docdyhr/mcp-wordpress/commit/ec1f82b86469197d13252f35945026bfb8d7693c))
+- **ci:** Comprehensive CI/CD pipeline health improvements
+  ([0ae8c44](https://github.com/docdyhr/mcp-wordpress/commit/0ae8c44d2c6f8bd4822bcf49f34155ee1dd5d787))
+- release v2.7.0 with composition architecture and complete SEO toolkit
+  ([90a7ea3](https://github.com/docdyhr/mcp-wordpress/commit/90a7ea38699363aa001950dcfc42689a3d139650))
+- **seo:** Complete SEO toolkit implementation with TypeScript fixes
+  ([#118](https://github.com/docdyhr/mcp-wordpress/issues/118))
+  ([a6c4c45](https://github.com/docdyhr/mcp-wordpress/commit/a6c4c4543329abe8b434c283c96d8830a122e8fa))
+- **version:** Implement best-practices versioning system with SemVer support
+  ([12d03fd](https://github.com/docdyhr/mcp-wordpress/commit/12d03fde4984e3609558c2ef29f82f5c6eea8765))
 
 ### 🐛 Bug Fixes
 
-* **ci:** Fix all ESLint errors and TypeScript compilation issues ([eef4a59](https://github.com/docdyhr/mcp-wordpress/commit/eef4a59587ea9107754b55a0822eb740074801c1))
-* **types:** Resolve TypeScript compilation errors in SecurityCIPipeline ([2f36f28](https://github.com/docdyhr/mcp-wordpress/commit/2f36f28f886917c7e62c2fc96098d05bb96328d9))
+- **ci:** Fix all ESLint errors and TypeScript compilation issues
+  ([eef4a59](https://github.com/docdyhr/mcp-wordpress/commit/eef4a59587ea9107754b55a0822eb740074801c1))
+- **types:** Resolve TypeScript compilation errors in SecurityCIPipeline
+  ([2f36f28](https://github.com/docdyhr/mcp-wordpress/commit/2f36f28f886917c7e62c2fc96098d05bb96328d9))
 
 ## [2.7.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.4...v2.7.0) (2025-08-28)
 
 ### 🚀 Features
 
-* **architecture**: Complete migration to composition-based architecture ([TECH-001](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.4...v2.7.0))
+- **architecture**: Complete migration to composition-based architecture
+  ([TECH-001](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.4...v2.7.0))
+
   - Replaced monolithic WordPressClient with modular manager pattern
   - Added AuthManager, RequestManager, and operation-specific managers
   - Enabled full testability with dependency injection
   - Maintained 100% backward compatibility through adapter pattern
 
-* **seo**: Complete SEO toolkit implementation ([FEAT-002](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.4...v2.7.0))
+- **seo**: Complete SEO toolkit implementation
+  ([FEAT-002](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.4...v2.7.0))
+
   - Content analyzer with readability metrics and keyword density
   - SEO metadata generator with OpenGraph and Twitter Cards
   - Schema.org markup generator for multiple content types
   - WordPress SEO plugin integration (Yoast, RankMath, SEOPress)
   - Bulk SEO operations with progress tracking
 
-* **testing**: Enhanced testing infrastructure ([QUAL-003](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.4...v2.7.0))
+- **testing**: Enhanced testing infrastructure
+  ([QUAL-003](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.4...v2.7.0))
   - Runtime TypeScript path alias resolution for composed architecture
   - Comprehensive test coverage for all new managers and SEO tools
   - Full integration test suite for composition pattern
 
 ### 🐛 Bug Fixes
 
-* **client**: Fixed SEO client integration status reporting
-* **testing**: Resolved path alias resolution issues in vitest configuration
-* **composition**: Fixed authentication and request delegation in composed managers
+- **client**: Fixed SEO client integration status reporting
+- **testing**: Resolved path alias resolution issues in vitest configuration
+- **composition**: Fixed authentication and request delegation in composed managers
 
 ### 🔧 Technical Improvements
 
-* **build**: Added vite-tsconfig-paths for runtime module resolution
-* **config**: Enhanced vitest configuration with comprehensive alias mapping
-* **docs**: Added composition migration guide and architectural documentation
+- **build**: Added vite-tsconfig-paths for runtime module resolution
+- **config**: Enhanced vitest configuration with comprehensive alias mapping
+- **docs**: Added composition migration guide and architectural documentation
 
 ### 📈 Performance
 
-* **architecture**: Improved modularity enables better performance optimization
-* **testing**: Faster test execution with proper module resolution
+- **architecture**: Improved modularity enables better performance optimization
+- **testing**: Faster test execution with proper module resolution
 
 ## [2.6.4](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.3...v2.6.4) (2025-08-27)
 
 ### 🐛 Bug Fixes
 
-* resolve DXT packaging failures and update manifest version ([065f704](https://github.com/docdyhr/mcp-wordpress/commit/065f7049afa7d3980274df6211419ecba8da18a8))
+- resolve DXT packaging failures and update manifest version
+  ([065f704](https://github.com/docdyhr/mcp-wordpress/commit/065f7049afa7d3980274df6211419ecba8da18a8))
 
 ## [2.6.3](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.2...v2.6.3) (2025-08-24)
 
 ### 🐛 Bug Fixes
 
-* correct DXT package workflow conditions for release events ([0205915](https://github.com/docdyhr/mcp-wordpress/commit/0205915cb72e5cef0af68a6261c00c08d909ff7f))
-* simplify banner to minimal announcement ([eebdd13](https://github.com/docdyhr/mcp-wordpress/commit/eebdd1364101ef25eacd0b9360a67c068219e8e0))
+- correct DXT package workflow conditions for release events
+  ([0205915](https://github.com/docdyhr/mcp-wordpress/commit/0205915cb72e5cef0af68a6261c00c08d909ff7f))
+- simplify banner to minimal announcement
+  ([eebdd13](https://github.com/docdyhr/mcp-wordpress/commit/eebdd1364101ef25eacd0b9360a67c068219e8e0))
 
 ## [2.6.2](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.1...v2.6.2) (2025-08-24)
 
 ### 🐛 Bug Fixes
 
-* trigger DXT package release for multi-site functionality ([d622d77](https://github.com/docdyhr/mcp-wordpress/commit/d622d775c751360405f08892a192fc5af364cc56))
+- trigger DXT package release for multi-site functionality
+  ([d622d77](https://github.com/docdyhr/mcp-wordpress/commit/d622d775c751360405f08892a192fc5af364cc56))
 
 ## [2.6.1](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.0...v2.6.1) (2025-08-24)
 
 ### 🐛 Bug Fixes
 
-* simplify and reposition banner - clean design with 2025 date ([0fc4560](https://github.com/docdyhr/mcp-wordpress/commit/0fc4560598f434049ebe4572a20a337100ff4ff2))
+- simplify and reposition banner - clean design with 2025 date
+  ([0fc4560](https://github.com/docdyhr/mcp-wordpress/commit/0fc4560598f434049ebe4572a20a337100ff4ff2))
 
 ## [2.6.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.5.4...v2.6.0) (2025-08-24)
 
 ### 🚀 Features
 
-* add animated banner with latest updates to README ([a1ef5de](https://github.com/docdyhr/mcp-wordpress/commit/a1ef5de81f42e0c4307ecf4f4bda313c86e30648))
-* add DXT package build and upload to release workflow ([1876974](https://github.com/docdyhr/mcp-wordpress/commit/1876974e979513308940cdc64f9c8e600d772e0c))
-* improve DXT build process with automatic version sync ([dabf4b3](https://github.com/docdyhr/mcp-wordpress/commit/dabf4b37656f4a1114da772d4060d163844e779e))
+- add animated banner with latest updates to README
+  ([a1ef5de](https://github.com/docdyhr/mcp-wordpress/commit/a1ef5de81f42e0c4307ecf4f4bda313c86e30648))
+- add DXT package build and upload to release workflow
+  ([1876974](https://github.com/docdyhr/mcp-wordpress/commit/1876974e979513308940cdc64f9c8e600d772e0c))
+- improve DXT build process with automatic version sync
+  ([dabf4b3](https://github.com/docdyhr/mcp-wordpress/commit/dabf4b37656f4a1114da772d4060d163844e779e))
 
 ### 🐛 Bug Fixes
 
-* correct TruffleHog exclude paths parameter ([d08d4ac](https://github.com/docdyhr/mcp-wordpress/commit/d08d4acee0347d354043c3f8b0f2de7e7a0dc88c))
-* finalize security monitoring workflow YAML syntax ([192de4d](https://github.com/docdyhr/mcp-wordpress/commit/192de4d1bdcf9ceb942469210a76b681a35286c6))
-* remove invalid DXT schema fields from manifest ([12b1fdc](https://github.com/docdyhr/mcp-wordpress/commit/12b1fdc5599ffa14bcbed54e14810986db8bbb51))
-* resolve failing publishing verification workflows ([6756986](https://github.com/docdyhr/mcp-wordpress/commit/67569867f83a4208874a4598c060807619389ba4))
-* resolve security monitoring workflow syntax issues ([0e14687](https://github.com/docdyhr/mcp-wordpress/commit/0e14687ce29b1d5e8d6f01c7aee2edeb763a2317))
-* simplify TruffleHog configuration to resolve scanning issues ([235794d](https://github.com/docdyhr/mcp-wordpress/commit/235794ddd49bf714203a4b6211fd3b0227ee0231))
-* update DXT manifest version to match package.json (2.5.4) ([34ba303](https://github.com/docdyhr/mcp-wordpress/commit/34ba30340e9f33a2117560014930b9680f479891))
+- correct TruffleHog exclude paths parameter
+  ([d08d4ac](https://github.com/docdyhr/mcp-wordpress/commit/d08d4acee0347d354043c3f8b0f2de7e7a0dc88c))
+- finalize security monitoring workflow YAML syntax
+  ([192de4d](https://github.com/docdyhr/mcp-wordpress/commit/192de4d1bdcf9ceb942469210a76b681a35286c6))
+- remove invalid DXT schema fields from manifest
+  ([12b1fdc](https://github.com/docdyhr/mcp-wordpress/commit/12b1fdc5599ffa14bcbed54e14810986db8bbb51))
+- resolve failing publishing verification workflows
+  ([6756986](https://github.com/docdyhr/mcp-wordpress/commit/67569867f83a4208874a4598c060807619389ba4))
+- resolve security monitoring workflow syntax issues
+  ([0e14687](https://github.com/docdyhr/mcp-wordpress/commit/0e14687ce29b1d5e8d6f01c7aee2edeb763a2317))
+- simplify TruffleHog configuration to resolve scanning issues
+  ([235794d](https://github.com/docdyhr/mcp-wordpress/commit/235794ddd49bf714203a4b6211fd3b0227ee0231))
+- update DXT manifest version to match package.json (2.5.4)
+  ([34ba303](https://github.com/docdyhr/mcp-wordpress/commit/34ba30340e9f33a2117560014930b9680f479891))
 
 ## [2.5.4](https://github.com/docdyhr/mcp-wordpress/compare/v2.5.3...v2.5.4) (2025-08-23)
 
 ### 🐛 Bug Fixes
 
-* correct depcheck CLI parameters in quick validation step ([bb207b8](https://github.com/docdyhr/mcp-wordpress/commit/bb207b8e8d3ff7c6523666cca8179bf24c7115bd))
+- correct depcheck CLI parameters in quick validation step
+  ([bb207b8](https://github.com/docdyhr/mcp-wordpress/commit/bb207b8e8d3ff7c6523666cca8179bf24c7115bd))
 
 ## [2.5.3](https://github.com/docdyhr/mcp-wordpress/compare/v2.5.2...v2.5.3) (2025-08-23)
 
 ### 🐛 Bug Fixes
 
-* resolve CI/CD dependency check failure and implement pipeline improvements ([505215f](https://github.com/docdyhr/mcp-wordpress/commit/505215f8c195735b5c935f3786f7aebaaa499411))
+- resolve CI/CD dependency check failure and implement pipeline improvements
+  ([505215f](https://github.com/docdyhr/mcp-wordpress/commit/505215f8c195735b5c935f3786f7aebaaa499411))
 
 ## [2.5.2](https://github.com/docdyhr/mcp-wordpress/compare/v2.5.1...v2.5.2) (2025-08-23)
 
 ### 🐛 Bug Fixes
 
-* CI/CD workflow improvements and security monitoring syntax ([ff1b1d6](https://github.com/docdyhr/mcp-wordpress/commit/ff1b1d6c86ab69000b50c9148f80dac7aeb82cc7))
+- CI/CD workflow improvements and security monitoring syntax
+  ([ff1b1d6](https://github.com/docdyhr/mcp-wordpress/commit/ff1b1d6c86ab69000b50c9148f80dac7aeb82cc7))
 
 # Changelog
 
@@ -182,17 +228,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### 🔧 Technical Debt Resolution
 
 - **Code Quality Improvements**
+
   - Remove 104 ESLint violations (89 explicit `any` types, 25 console statements)
   - Fix unused variable violations in catch blocks
   - Replace console statements with structured logging via LoggerFactory
   - Add proper TypeScript interfaces and type guards
 
 - **Dependency Management**
+
   - Update 12 outdated dependencies to latest versions
   - Migrate to Node.js v22 type definitions
   - Evaluate Zod v4 migration for improved validation
 
 - **Testing & Coverage**
+
   - Fix test coverage reporting configuration
   - Add missing unit tests for improved coverage
   - Set coverage thresholds for CI pipeline
@@ -320,7 +369,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### ⚠️ Behavior Changes
 
-- `validateRequired` now treats only `null` and `undefined` as missing; falsy values like `""`, `0`, and `false` are considered present. Tests updated accordingly.
+- `validateRequired` now treats only `null` and `undefined` as missing; falsy values like `""`, `0`, and `false` are
+  considered present. Tests updated accordingly.
 
 ## [2.0.2](https://github.com/docdyhr/mcp-wordpress/compare/v2.0.1...v2.0.2) (2025-07-16)
 

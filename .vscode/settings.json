@@ -1,6 +1,6 @@
 {
   "jest.disabledWorkspaceFolders": [],
-  "jest.runMode": "on-demand", 
+  "jest.runMode": "on-demand",
   "jest.jestCommandLine": "NODE_OPTIONS='--experimental-vm-modules' npx jest --config=jest.config.cjs",
   "jest.rootPath": "./",
   "jest.configPath": "jest.config.cjs",

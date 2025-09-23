@@ -236,7 +236,9 @@ export class CacheTools {
         throw new Error("No WordPress sites configured.");
       } else {
         throw new Error(
-          `Multiple sites configured. Please specify --site parameter. Available sites: ${Array.from(this.clients.keys()).join(", ")}`,
+          `Multiple sites configured. Please specify --site parameter. Available sites: ${Array.from(
+            this.clients.keys(),
+          ).join(", ")}`,
         );
       }
     }

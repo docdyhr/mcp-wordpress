@@ -1,15 +1,15 @@
 /**
  * Enhanced Request Types for WordPress API Client
- * 
- * This file provides strongly-typed request interfaces to replace 
+ *
+ * This file provides strongly-typed request interfaces to replace
  * loose typing throughout the codebase.
  */
 
-import type { DeepReadonly } from './enhanced.js';
+import type { DeepReadonly } from "./enhanced.js";
 
 // Generic HTTP Request Structure
 export interface HTTPRequestConfig {
-  readonly method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  readonly method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   readonly url: string;
   readonly headers?: DeepReadonly<Record<string, string>>;
   readonly timeout?: number;
@@ -32,7 +32,7 @@ export interface QueuedRequest {
   readonly id: string;
   readonly config: HTTPRequestFull;
   readonly timestamp: Date;
-  readonly priority: 'low' | 'medium' | 'high';
+  readonly priority: "low" | "medium" | "high";
   readonly retries: number;
   readonly maxRetries: number;
 }
@@ -84,7 +84,7 @@ export interface ErrorResponse {
 
 // Authentication Request Types
 export interface AuthenticationRequest {
-  readonly method: 'app-password' | 'jwt' | 'basic' | 'api-key' | 'cookie';
+  readonly method: "app-password" | "jwt" | "basic" | "api-key" | "cookie";
   readonly credentials: DeepReadonly<{
     readonly username?: string;
     readonly password?: string;
@@ -108,11 +108,11 @@ export interface AuthenticationResponse {
 
 // WordPress Specific Request Types
 export interface WordPressQueryParams {
-  readonly context?: 'view' | 'embed' | 'edit';
+  readonly context?: "view" | "embed" | "edit";
   readonly page?: number;
   readonly per_page?: number;
   readonly search?: string;
-  readonly order?: 'asc' | 'desc';
+  readonly order?: "asc" | "desc";
   readonly orderby?: string;
   readonly offset?: number;
   readonly include?: readonly number[];
@@ -137,14 +137,14 @@ export interface PostSpecificParams extends WordPressQueryParams {
 export interface MediaSpecificParams extends WordPressQueryParams {
   readonly parent?: number;
   readonly parent_exclude?: readonly number[];
-  readonly media_type?: 'image' | 'video' | 'text' | 'application' | 'audio';
+  readonly media_type?: "image" | "video" | "text" | "application" | "audio";
   readonly mime_type?: string;
 }
 
 export interface UserSpecificParams extends WordPressQueryParams {
   readonly roles?: readonly string[];
   readonly capabilities?: readonly string[];
-  readonly who?: 'authors';
+  readonly who?: "authors";
   readonly has_published_posts?: readonly string[];
 }
 
@@ -153,14 +153,14 @@ export interface CommentSpecificParams extends WordPressQueryParams {
   readonly parent?: readonly number[];
   readonly parent_exclude?: readonly number[];
   readonly post?: readonly number[];
-  readonly type?: 'comment' | 'trackback' | 'pingback';
+  readonly type?: "comment" | "trackback" | "pingback";
   readonly password?: string;
 }
 
 // Batch Request Types
 export interface BatchOperation<TParams = unknown> {
   readonly id: string;
-  readonly method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  readonly method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   readonly endpoint: string;
   readonly params?: TParams;
   readonly data?: unknown;
@@ -222,7 +222,7 @@ export interface PaginatedResponse<TData> {
 // Search Request Types
 export interface SearchRequest {
   readonly query: string;
-  readonly type?: readonly ('post' | 'page' | 'attachment' | 'user' | 'comment')[];
+  readonly type?: readonly ("post" | "page" | "attachment" | "user" | "comment")[];
   readonly subtype?: readonly string[];
   readonly include?: readonly number[];
   readonly exclude?: readonly number[];
@@ -253,7 +253,7 @@ export interface UploadRequest {
   readonly description?: string;
   readonly post?: number;
   readonly author?: number;
-  readonly status?: 'publish' | 'future' | 'draft' | 'pending' | 'private';
+  readonly status?: "publish" | "future" | "draft" | "pending" | "private";
   readonly date?: string;
   readonly date_gmt?: string;
 }
@@ -292,7 +292,7 @@ export interface RateLimitState {
 }
 
 export interface RateLimitedRequest extends HTTPRequestFull {
-  readonly priority: 'low' | 'medium' | 'high';
+  readonly priority: "low" | "medium" | "high";
   readonly rateLimitKey?: string;
 }
 
@@ -300,7 +300,7 @@ export interface RateLimitedRequest extends HTTPRequestFull {
 export interface CacheableRequest extends HTTPRequestConfig {
   readonly cacheKey?: string;
   readonly cacheTTL?: number;
-  readonly cacheStrategy?: 'cache-first' | 'network-first' | 'cache-only' | 'network-only';
+  readonly cacheStrategy?: "cache-first" | "network-first" | "cache-only" | "network-only";
   readonly invalidateCache?: boolean;
   readonly cacheTags?: readonly string[];
 }
@@ -338,7 +338,7 @@ export interface HealthCheckRequest {
 }
 
 export interface HealthCheckResponse {
-  readonly status: 'healthy' | 'degraded' | 'unhealthy';
+  readonly status: "healthy" | "degraded" | "unhealthy";
   readonly responseTime: number;
   readonly statusCode: number;
   readonly timestamp: Date;
@@ -353,7 +353,7 @@ export interface HealthCheckResponse {
 export interface RequestValidationRule {
   readonly field: string;
   readonly required: boolean;
-  readonly type: 'string' | 'number' | 'boolean' | 'array' | 'object';
+  readonly type: "string" | "number" | "boolean" | "array" | "object";
   readonly minLength?: number;
   readonly maxLength?: number;
   readonly pattern?: RegExp;

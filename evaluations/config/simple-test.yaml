@@ -7,7 +7,7 @@ evals:
     description: Test basic WordPress connection
     prompt: "Test if the WordPress MCP server is working by getting site information"
     expected_result: "Should return WordPress site information"
-  
+
   - name: test_list_posts
     description: Test listing WordPress posts
     prompt: "List the most recent 3 WordPress posts"

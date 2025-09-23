@@ -61,7 +61,7 @@ docker run -d \
 
 ```yaml
 # docker-compose.prod.yml
-version: '3.8'
+version: "3.8"
 
 services:
   mcp-wordpress:
@@ -190,7 +190,7 @@ HEALTH_CHECK_TIMEOUT=5000
       }
     },
     {
-      "id": "staging", 
+      "id": "staging",
       "name": "Staging Site",
       "config": {
         "WORDPRESS_SITE_URL": "https://staging.main-site.com",
@@ -230,13 +230,14 @@ HEALTH_CHECK_TIMEOUT=5000
 ### Authentication Best Practices
 
 1. **Application Passwords (Recommended)**
+
    ```bash
    # WordPress Admin → Users → Your Profile → Application Passwords
    # Generate unique password for MCP server
    WORDPRESS_APP_PASSWORD=xxxx xxxx xxxx xxxx xxxx xxxx
    ```
 
-2. **JWT Authentication** 
+2. **JWT Authentication**
    ```bash
    # Install JWT Authentication plugin
    # Configure JWT secret in wp-config.php
@@ -256,22 +257,22 @@ upstream mcp_wordpress {
 server {
     listen 443 ssl http2;
     server_name api.yourdomain.com;
-    
+
     # SSL configuration
     ssl_certificate /path/to/cert.pem;
     ssl_certificate_key /path/to/key.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
-    
+
     # Security headers
     add_header X-Frame-Options DENY;
     add_header X-Content-Type-Options nosniff;
     add_header X-XSS-Protection "1; mode=block";
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
-    
+
     # Rate limiting
     limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
     limit_req zone=api burst=20 nodelay;
-    
+
     location / {
         proxy_pass http://mcp_wordpress;
         proxy_http_version 1.1;
@@ -309,19 +310,19 @@ const cacheConfig = {
   // Memory cache
   maxItems: 5000,
   maxMemoryMB: 512,
-  
+
   // TTL settings (seconds)
   ttl: {
-    posts: 1800,      // 30 minutes
-    pages: 3600,      // 1 hour
-    users: 7200,      // 2 hours
-    media: 86400,     // 24 hours
-    settings: 43200   // 12 hours
+    posts: 1800, // 30 minutes
+    pages: 3600, // 1 hour
+    users: 7200, // 2 hours
+    media: 86400, // 24 hours
+    settings: 43200, // 12 hours
   },
-  
+
   // Compression
   enableCompression: true,
-  compressionLevel: 6
+  compressionLevel: 6,
 };
 ```
 
@@ -338,7 +339,7 @@ ALTER TABLE wp_postmeta ADD INDEX idx_meta_key_value (meta_key, meta_value(191))
 
 ```yaml
 # docker-compose.scale.yml
-version: '3.8'
+version: "3.8"
 
 services:
   mcp-wordpress:
@@ -347,10 +348,10 @@ services:
       replicas: 3
       resources:
         limits:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 512M
         reservations:
-          cpus: '0.25'
+          cpus: "0.25"
           memory: 256M
       restart_policy:
         condition: on-failure
@@ -412,7 +413,7 @@ curl http://localhost:9090/metrics
 
 ```yaml
 # monitoring/docker-compose.yml
-version: '3.8'
+version: "3.8"
 
 services:
   prometheus:
@@ -443,7 +444,7 @@ services:
 
 volumes:
   prometheus_data:
-  grafana_data:  
+  grafana_data:
   loki_data:
 ```
 
@@ -558,7 +559,7 @@ docker-compose logs -f mcp-wordpress
 # CPU profiling
 docker exec mcp-wordpress node --prof dist/index.js
 
-# Memory profiling  
+# Memory profiling
 docker exec mcp-wordpress node --inspect=0.0.0.0:9229 dist/index.js
 
 # Heap snapshots
@@ -593,8 +594,9 @@ docker exec mcp-wordpress node -e "
 ### Maintenance Schedule
 
 - **Daily**: Health checks, log review, performance metrics
-- **Weekly**: Security updates, cache optimization, backup verification  
+- **Weekly**: Security updates, cache optimization, backup verification
 - **Monthly**: Full security audit, performance benchmarking, dependency updates
 - **Quarterly**: Architecture review, capacity planning, disaster recovery testing
 
-🚀 **Production Ready**: MCP WordPress Server is now fully prepared for enterprise production deployments with comprehensive monitoring, security, and performance optimization.
+🚀 **Production Ready**: MCP WordPress Server is now fully prepared for enterprise production deployments with
+comprehensive monitoring, security, and performance optimization.

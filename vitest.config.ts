@@ -3,7 +3,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
-  
+
   // Manual alias resolution for compiled JS files
   resolve: {
     alias: {
@@ -45,8 +45,8 @@ export default defineConfig({
     globals: true,
 
     // Timeouts - reasonable timeouts for stability
-    testTimeout: 10000,  // 10 seconds for complex tests
-    hookTimeout: 5000,   // 5 seconds for setup/teardown
+    testTimeout: 10000, // 10 seconds for complex tests
+    hookTimeout: 5000, // 5 seconds for setup/teardown
 
     // Test behavior
     clearMocks: true,
@@ -98,8 +98,8 @@ export default defineConfig({
     },
 
     // Performance and debugging - optimized for memory safety
-    isolate: true,   // Isolate tests to prevent memory leaks
-    maxConcurrency: 4,  // Limit concurrent tests to prevent memory spikes
+    isolate: true, // Isolate tests to prevent memory leaks
+    maxConcurrency: 4, // Limit concurrent tests to prevent memory spikes
     poolOptions: {
       threads: {
         singleThread: false,
@@ -116,11 +116,7 @@ export default defineConfig({
     },
 
     // Memory management
-    forceRerunTriggers: [
-      '**/package.json/**',
-      '**/vitest.config.*/**',
-      '**/vite.config.*/**',
-    ],
+    forceRerunTriggers: ["**/package.json/**", "**/vitest.config.*/**", "**/vite.config.*/**"],
 
     // Reporter configuration
     reporters: ["verbose"],

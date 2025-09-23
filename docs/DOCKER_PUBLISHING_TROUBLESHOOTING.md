@@ -1,20 +1,24 @@
 # Docker Publishing Troubleshooting Guide
 
-This guide helps resolve Docker Hub publishing failures and provides tools for manual intervention when the automated release process encounters issues.
+This guide helps resolve Docker Hub publishing failures and provides tools for manual intervention when the automated
+release process encounters issues.
 
 ## 🚨 Current Status - Multiple Missing Versions
 
 **Investigation Results:**
+
 - NPM Publishing: ✅ All versions available (2.0.4, 2.1.0, 2.2.0, 2.3.0)
 - Docker Hub Publishing: ❌ Multiple versions missing since v2.0.4
 
 **Missing Docker Hub Versions:**
+
 - v2.0.4 (original issue)
 - v2.1.0, v2.2.0, v2.3.0 (subsequent failures)
 
 **Root Cause:** Systemic Docker publishing failure in release workflow since v2.0.4 release.
 
 **Available Versions on Docker Hub:**
+
 - ✅ v2.0.0, v2.0.1, v2.0.2, v2.0.3 (working)
 - ❌ v2.0.4, v2.1.0, v2.2.0, v2.3.0 (missing)
 
@@ -36,11 +40,13 @@ done
 ### Missing Docker Hub Versions
 
 **Symptoms:**
+
 - NPM publishing succeeds but Docker Hub fails
 - Verification workflow reports missing versions
 - GitHub releases exist but corresponding Docker images are absent
 
 **Root Causes:**
+
 - Docker Hub API rate limiting
 - Network timeouts during multi-platform builds
 - Docker registry authentication issues
@@ -175,6 +181,7 @@ The release workflow now includes:
 ### Image Integrity
 
 All published images include:
+
 - **Provenance**: Build attestation data
 - **SBOM**: Software Bill of Materials
 - **Signatures**: Cryptographic verification
@@ -208,6 +215,7 @@ curl -s https://hub.docker.com/v2/repositories/docdyhr/mcp-wordpress/tags | \
 If all automated methods fail:
 
 1. **Manual Docker Build:**
+
    ```bash
    git checkout v2.0.4
    docker buildx build --platform linux/amd64,linux/arm64 \
@@ -217,6 +225,7 @@ If all automated methods fail:
    ```
 
 2. **Contact Repository Maintainer:**
+
    - Create detailed issue with error logs
    - Include attempted resolution steps
    - Mention urgency level and impact

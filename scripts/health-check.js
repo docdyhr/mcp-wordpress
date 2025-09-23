@@ -89,10 +89,7 @@ function checkNodeEnvironment() {
     const nodeVersion = process.version;
     const majorVersion = parseInt(nodeVersion.slice(1).split(".")[0]);
 
-    log(
-      `Node.js version: ${nodeVersion}`,
-      majorVersion >= 18 ? "success" : "warning",
-    );
+    log(`Node.js version: ${nodeVersion}`, majorVersion >= 18 ? "success" : "warning");
 
     if (majorVersion < 18) {
       log("Recommended: Node.js 18 or higher", "warning");
@@ -154,12 +151,7 @@ function checkDependencies() {
     log("node_modules directory exists", "success");
 
     // Check for key dependencies
-    const keyDeps = [
-      "@modelcontextprotocol/sdk",
-      "typescript",
-      "dotenv",
-      "form-data",
-    ];
+    const keyDeps = ["@modelcontextprotocol/sdk", "typescript", "dotenv", "form-data"];
 
     // Optional dependencies (nice to have but not required for CI)
     const optionalDeps = ["node-fetch"];
@@ -258,9 +250,7 @@ function checkEnvironmentConfig() {
     }
 
     const envContent = fs.readFileSync(envPath, "utf8");
-    const envLines = envContent
-      .split("\n")
-      .filter((line) => line.trim() && !line.trim().startsWith("#"));
+    const envLines = envContent.split("\n").filter((line) => line.trim() && !line.trim().startsWith("#"));
 
     const requiredVars = ["WORDPRESS_SITE_URL", "WORDPRESS_USERNAME"];
 
@@ -276,16 +266,9 @@ function checkEnvironmentConfig() {
     }
 
     // Check for at least one auth method
-    const authMethods = [
-      "WORDPRESS_APP_PASSWORD",
-      "WORDPRESS_PASSWORD",
-      "WORDPRESS_API_KEY",
-      "WORDPRESS_JWT_SECRET",
-    ];
+    const authMethods = ["WORDPRESS_APP_PASSWORD", "WORDPRESS_PASSWORD", "WORDPRESS_API_KEY", "WORDPRESS_JWT_SECRET"];
 
-    const hasAuthMethod = authMethods.some((method) =>
-      envLines.some((line) => line.startsWith(`${method}=`)),
-    );
+    const hasAuthMethod = authMethods.some((method) => envLines.some((line) => line.startsWith(`${method}=`)));
 
     if (hasAuthMethod) {
       log("Authentication method configured", "success");
@@ -316,12 +299,7 @@ function checkCompiledOutput() {
       return false;
     }
 
-    const keyFiles = [
-      "index.js",
-      "client/api.js",
-      "client/auth.js",
-      "tools/posts.js",
-    ];
+    const keyFiles = ["index.js", "client/api.js", "client/auth.js", "tools/posts.js"];
 
     let allCompiledFilesExist = true;
     for (const file of keyFiles) {
@@ -345,9 +323,7 @@ function checkCompiledOutput() {
  * Main health check function
  */
 async function runHealthCheck() {
-  console.log(
-    `${colors.bright}${colors.cyan}🏥 WordPress MCP Server - Health Check${colors.reset}`,
-  );
+  console.log(`${colors.bright}${colors.cyan}🏥 WordPress MCP Server - Health Check${colors.reset}`);
   console.log("=".repeat(60));
   console.log(`📍 Project Root: ${projectRoot}`);
 
@@ -380,15 +356,10 @@ async function runHealthCheck() {
   const successRate = Math.round((passedChecks / checks.length) * 100);
 
   results.forEach((result) => {
-    log(
-      `${result.name}: ${result.passed ? "PASS" : "FAIL"}`,
-      result.passed ? "success" : "error",
-    );
+    log(`${result.name}: ${result.passed ? "PASS" : "FAIL"}`, result.passed ? "success" : "error");
   });
 
-  console.log(
-    `\n${colors.bright}Overall Health: ${successRate}%${colors.reset}`,
-  );
+  console.log(`\n${colors.bright}Overall Health: ${successRate}%${colors.reset}`);
 
   if (successRate === 100) {
     log("🎉 All health checks passed! System is ready.", "success");
@@ -429,10 +400,7 @@ async function runHealthCheck() {
   const requiredSuccessRate = isCI ? 83 : 100; // Allow 5/6 checks to pass in CI
 
   if (isCI && successRate >= requiredSuccessRate) {
-    log(
-      "🎉 CI environment: Essential checks passed, system is operational.",
-      "success",
-    );
+    log("🎉 CI environment: Essential checks passed, system is operational.", "success");
   }
 
   process.exit(successRate >= requiredSuccessRate ? 0 : 1);

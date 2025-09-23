@@ -1,10 +1,12 @@
 # MCP WordPress Tools Evaluation Guide
 
-This guide covers the comprehensive evaluation system for MCP WordPress tools using [mcp-evals](https://github.com/mclenhard/mcp-evals).
+This guide covers the comprehensive evaluation system for MCP WordPress tools using
+[mcp-evals](https://github.com/mclenhard/mcp-evals).
 
 ## Overview
 
-The evaluation system provides automated testing and scoring of WordPress MCP tools using LLM-based evaluation to ensure:
+The evaluation system provides automated testing and scoring of WordPress MCP tools using LLM-based evaluation to
+ensure:
 
 - **Tool Reliability**: Consistent performance across different scenarios
 - **Quality Assurance**: Comprehensive testing of all 59 WordPress tools
@@ -157,23 +159,19 @@ evals:
 ### TypeScript Evaluation
 
 ```typescript
-import { EvalFunction, grade } from 'mcp-evals';
-import { openai } from 'mcp-evals/models';
+import { EvalFunction, grade } from "mcp-evals";
+import { openai } from "mcp-evals/models";
 
 export const customEval: EvalFunction = {
-  name: 'custom_evaluation',
-  description: 'Test custom functionality',
+  name: "custom_evaluation",
+  description: "Test custom functionality",
   run: async () => {
-    const result = await grade(
-      openai("gpt-4o"),
-      "Your test prompt here",
-      {
-        systemPrompt: "Evaluation criteria...",
-        responseFormat: { type: "json_object" }
-      }
-    );
+    const result = await grade(openai("gpt-4o"), "Your test prompt here", {
+      systemPrompt: "Evaluation criteria...",
+      responseFormat: { type: "json_object" },
+    });
     return JSON.parse(result);
-  }
+  },
 };
 ```
 
@@ -314,10 +312,7 @@ open evaluations/reports/evaluation-report.html
       "reason": "Error handling could be more graceful"
     }
   ],
-  "recommendations": [
-    "Improve error handling for edge cases",
-    "Add more comprehensive validation"
-  ]
+  "recommendations": ["Improve error handling for edge cases", "Add more comprehensive validation"]
 }
 ```
 
@@ -345,7 +340,7 @@ const customScoring = {
   completeness: { weight: 0.3, min: 3.5 },
   relevance: { weight: 0.2, min: 3.0 },
   clarity: { weight: 0.1, min: 3.0 },
-  reasoning: { weight: 0.1, min: 3.0 }
+  reasoning: { weight: 0.1, min: 3.0 },
 };
 ```
 

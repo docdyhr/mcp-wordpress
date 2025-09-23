@@ -18,7 +18,7 @@ fix_prettier() {
 # Function to fix dependency issues
 fix_dependencies() {
     echo "📦 Checking and fixing dependencies..."
-    
+
     # Clean and reinstall if lockfile is inconsistent
     if ! npm ci --prefer-offline 2>/dev/null; then
         echo "🗑️ Cleaning dependencies and reinstalling..."
@@ -26,7 +26,7 @@ fix_dependencies() {
         npm cache clean --force
         npm install
     fi
-    
+
     # Fix known vulnerabilities
     npm audit fix --force || echo "Some vulnerabilities may require manual review"
 }
@@ -49,14 +49,14 @@ fix_test_snapshots() {
 # Function to fix ConfigHelpers issues
 fix_config_helpers() {
     echo "⚙️ Checking ConfigHelpers issues..."
-    
+
     # Check if ConfigHelpers.isTest exists
     if ! grep -q "isTest" src/config/Config.ts; then
         echo "🔧 Adding missing ConfigHelpers.isTest method..."
-        
+
         # Backup original file
         cp src/config/Config.ts src/config/Config.ts.backup
-        
+
         # Add missing method (simplified approach)
         cat >> src/config/Config.ts << 'EOF'
 
@@ -65,19 +65,19 @@ export class ConfigHelpers {
   static isTest(): boolean {
     return process.env.NODE_ENV === 'test';
   }
-  
+
   static isDev(): boolean {
     return process.env.NODE_ENV === 'development';
   }
-  
+
   static isCI(): boolean {
     return Boolean(process.env.CI);
   }
-  
+
   static shouldDebug(): boolean {
     return ConfigHelpers.isDev() || Boolean(process.env.DEBUG);
   }
-  
+
   static getTimeout(type = 'default'): number {
     if (ConfigHelpers.isTest()) return 5000;
     if (ConfigHelpers.isCI()) return 30000;
@@ -94,7 +94,7 @@ commit_fixes() {
         echo "✅ No changes to commit"
         return 0
     fi
-    
+
     echo "💾 Committing auto-fixes..."
     git add -A
     git commit -m "fix(ci): Auto-fix common CI/CD issues
@@ -111,7 +111,7 @@ commit_fixes() {
 # Main execution
 main() {
     echo "🚀 Starting automated CI/CD issue resolution..."
-    
+
     # Run fixes in order of dependency
     fix_dependencies
     fix_config_helpers
@@ -119,17 +119,17 @@ main() {
     fix_prettier
     fix_build
     fix_test_snapshots
-    
+
     # Commit all fixes
     commit_fixes
-    
+
     echo "✅ Auto-fix process completed!"
-    
+
     # Run a final verification
     echo "🔍 Running final verification..."
     npm run lint && echo "✅ Lint check passed" || echo "❌ Lint issues remain"
     npm run build && echo "✅ Build check passed" || echo "❌ Build issues remain"
-    
+
     echo "🎉 CI/CD pipeline optimization complete!"
 }
 

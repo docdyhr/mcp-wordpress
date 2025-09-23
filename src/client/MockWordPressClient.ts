@@ -334,7 +334,11 @@ export class MockWordPressClient extends WordPressClient {
   /**
    * Mock search
    */
-  async search(query: string, types?: string[], subtype?: string): Promise<import("../types/wordpress.js").WordPressSearchResult[]> {
+  async search(
+    query: string,
+    types?: string[],
+    subtype?: string,
+  ): Promise<import("../types/wordpress.js").WordPressSearchResult[]> {
     if (!query) {
       return [];
     }

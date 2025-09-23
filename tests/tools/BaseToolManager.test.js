@@ -42,7 +42,7 @@ describe("BaseToolUtils", () => {
       ];
 
       const result = BaseToolUtils.validateParams(params, rules);
-      
+
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.id).toBe(123);
@@ -58,7 +58,7 @@ describe("BaseToolUtils", () => {
       ];
 
       const result = BaseToolUtils.validateParams(params, rules);
-      
+
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.message).toContain("id");
@@ -73,7 +73,7 @@ describe("BaseToolUtils", () => {
       ];
 
       const result = BaseToolUtils.validateParams(params, rules);
-      
+
       expect(result.success).toBe(true);
     });
 
@@ -85,18 +85,16 @@ describe("BaseToolUtils", () => {
       ];
 
       const result = BaseToolUtils.validateParams(params, rules);
-      
+
       expect(result.success).toBe(false);
     });
 
     it("should reject non-object parameters", () => {
       const params = "invalid";
-      const rules = [
-        { key: "id", required: true, type: "number" },
-      ];
+      const rules = [{ key: "id", required: true, type: "number" }];
 
       const result = BaseToolUtils.validateParams(params, rules);
-      
+
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.message).toContain("object");
@@ -105,23 +103,19 @@ describe("BaseToolUtils", () => {
 
     it("should reject null parameters", () => {
       const params = null;
-      const rules = [
-        { key: "id", required: true, type: "number" },
-      ];
+      const rules = [{ key: "id", required: true, type: "number" }];
 
       const result = BaseToolUtils.validateParams(params, rules);
-      
+
       expect(result.success).toBe(false);
     });
 
     it("should reject array parameters", () => {
       const params = [];
-      const rules = [
-        { key: "id", required: true, type: "number" },
-      ];
+      const rules = [{ key: "id", required: true, type: "number" }];
 
       const result = BaseToolUtils.validateParams(params, rules);
-      
+
       expect(result.success).toBe(false);
     });
   });
@@ -138,7 +132,7 @@ describe("BaseToolUtils", () => {
       ];
 
       const result = BaseToolUtils.validateParams(params, rules);
-      
+
       expect(result.success).toBe(true);
     });
 
@@ -153,7 +147,7 @@ describe("BaseToolUtils", () => {
       ];
 
       const result = BaseToolUtils.validateParams(params, rules);
-      
+
       expect(result.success).toBe(false);
     });
   });
@@ -170,7 +164,7 @@ describe("BaseToolUtils", () => {
       ];
 
       const result = BaseToolUtils.validateParams(params, rules);
-      
+
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.count).toBe(123);
@@ -191,7 +185,7 @@ describe("BaseToolUtils", () => {
       ];
 
       const result = BaseToolUtils.validateParams(params, rules);
-      
+
       expect(result.success).toBe(false);
       if (!result.success) {
         // The error uses custom message when provided
@@ -216,7 +210,7 @@ describe("BaseToolUtils", () => {
       ];
 
       const result = BaseToolUtils.validateParams(params, rules);
-      
+
       expect(result.success).toBe(true);
     });
 
@@ -225,7 +219,7 @@ describe("BaseToolUtils", () => {
       const rules = []; // no validation rules
 
       const result = BaseToolUtils.validateParams(params, rules);
-      
+
       expect(result.success).toBe(true);
     });
   });

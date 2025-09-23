@@ -28,7 +28,7 @@ check_protection() {
 # Function to adjust dependency review settings
 adjust_dependency_review() {
     echo "🔍 Adjusting Dependency Review Settings..."
-    
+
     # Option 1: Make dependency review non-blocking for automated PRs
     cat > .github/workflows/dependency-review-relaxed.yml << 'EOF'
 name: 🔍 Dependency Review (Relaxed)
@@ -87,7 +87,7 @@ EOF
 # Function to adjust security monitoring
 adjust_security_monitoring() {
     echo "🔒 Adjusting Security Monitoring..."
-    
+
     # Create a conditional security workflow
     cat > .github/workflows/security-monitoring-smart.yml << 'EOF'
 name: '🛡️ Smart Security Monitoring'
@@ -132,7 +132,7 @@ jobs:
       - name: 🔍 Security Audit
         run: |
           npm audit --audit-level=high || echo "::warning::Security vulnerabilities found but not blocking"
-          
+
       - name: 📊 Security Report
         if: always()
         run: |
@@ -146,7 +146,7 @@ EOF
 # Function to adjust performance gates
 adjust_performance_gates() {
     echo "⚡ Adjusting Performance Gates..."
-    
+
     # Create conditional performance testing
     cat > .github/workflows/performance-gates-smart.yml << 'EOF'
 name: Performance Gates (Smart)
@@ -182,28 +182,28 @@ jobs:
         contains(github.event.pull_request.title, 'dependency')
       )
     timeout-minutes: 20
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'npm'
-    
+
     - name: Install dependencies
       run: npm ci
-    
+
     - name: Build project
       run: npm run build
-    
+
     - name: Run performance tests (non-blocking)
       run: |
         npm run test:performance || echo "::warning::Performance tests failed but not blocking dependency updates"
       continue-on-error: true
-      
+
     - name: Performance Summary
       if: always()
       run: |
@@ -217,13 +217,13 @@ EOF
 # Function to create bypass labels
 create_bypass_labels() {
     echo "🏷️  Creating Bypass Labels..."
-    
+
     # Create labels for bypassing certain checks
     gh label create "skip-dependency-review" --description "Skip dependency review checks" --color "d73a4a" 2>/dev/null || echo "Label may already exist"
-    gh label create "skip-security-scan" --description "Skip security scanning" --color "d73a4a" 2>/dev/null || echo "Label may already exist"  
+    gh label create "skip-security-scan" --description "Skip security scanning" --color "d73a4a" 2>/dev/null || echo "Label may already exist"
     gh label create "skip-performance-gates" --description "Skip performance testing" --color "d73a4a" 2>/dev/null || echo "Label may already exist"
     gh label create "dependencies" --description "Dependency updates" --color "0366d6" 2>/dev/null || echo "Label may already exist"
-    
+
     echo "✅ Bypass labels created"
 }
 
@@ -231,7 +231,7 @@ create_bypass_labels() {
 show_menu() {
     echo "Choose an adjustment option:"
     echo "1. 🔍 Relax Dependency Review (recommended)"
-    echo "2. 🔒 Adjust Security Monitoring" 
+    echo "2. 🔒 Adjust Security Monitoring"
     echo "3. ⚡ Adjust Performance Gates"
     echo "4. 🏷️  Create Bypass Labels"
     echo "5. 📋 Apply All Recommended Changes"
@@ -244,10 +244,10 @@ show_menu() {
 # Main execution
 main() {
     check_protection
-    
+
     while true; do
         show_menu
-        
+
         case $choice in
             1)
                 adjust_dependency_review

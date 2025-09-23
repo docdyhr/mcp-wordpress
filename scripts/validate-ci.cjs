@@ -35,10 +35,10 @@ console.log(`📄 Found ${workflowFiles.length} workflow files`);
 // Check each workflow
 workflowFiles.forEach(file => {
   console.log(`\n📋 Checking ${basename(file)}...`);
-  
+
   try {
     const content = readFileSync(file, 'utf8');
-    
+
     // Check 1: Node.js version consistency
     const engineNodeVersion = packageJson.engines?.node;
     if (engineNodeVersion) {
@@ -53,7 +53,7 @@ workflowFiles.forEach(file => {
         });
       }
     }
-    
+
     // Check 2: Outdated actions
     const outdatedActions = [
       { pattern: /actions\/checkout@v3/, suggestion: 'actions/checkout@v4' },
@@ -61,13 +61,13 @@ workflowFiles.forEach(file => {
       { pattern: /actions\/upload-artifact@v3/, suggestion: 'actions/upload-artifact@v4' },
       { pattern: /actions\/cache@v3/, suggestion: 'actions/cache@v4' }
     ];
-    
+
     outdatedActions.forEach(({ pattern, suggestion }) => {
       if (pattern.test(content)) {
         warnings.push(`${file}: Consider updating to ${suggestion}`);
       }
     });
-    
+
     // Check 3: Missing error handling for critical steps
     const criticalSteps = ['npm publish', 'docker push', 'gh release create'];
     criticalSteps.forEach(step => {
@@ -76,33 +76,33 @@ workflowFiles.forEach(file => {
           Math.max(0, content.indexOf(step) - 200),
           content.indexOf(step) + 200
         );
-        
-        if (!stepContext.includes('continue-on-error') && 
-            !stepContext.includes('if:') && 
+
+        if (!stepContext.includes('continue-on-error') &&
+            !stepContext.includes('if:') &&
             !stepContext.includes('|| true')) {
           warnings.push(`${file}: Critical step "${step}" lacks error handling`);
         }
       }
     });
-    
+
     // Check 4: Missing timeouts (simple check for timeout-minutes presence)
     if (content.includes('runs-on:') && !content.includes('timeout-minutes:')) {
       warnings.push(`${file}: Consider adding timeout-minutes for jobs`);
     }
-    
+
     // Check 5: Security best practices
     if (content.includes('secrets.') && content.includes('echo')) {
-      const secretLines = content.split('\n').filter(line => 
-        line.includes('secrets.') && line.includes('echo') && 
+      const secretLines = content.split('\n').filter(line =>
+        line.includes('secrets.') && line.includes('echo') &&
         !line.includes('$GITHUB_STEP_SUMMARY')
       );
       if (secretLines.length > 0) {
         issues.push(`${file}: Potential secret exposure in echo statement`);
       }
     }
-    
+
     console.log(`  ✅ ${basename(file)} validated`);
-    
+
   } catch (error) {
     issues.push(`${file}: Reading error - ${error.message}`);
     console.log(`  ❌ ${basename(file)} failed validation`);
@@ -120,7 +120,7 @@ if (issues.length === 0 && warnings.length === 0) {
     console.log('\n❌ Issues found:');
     issues.forEach(issue => console.log(`  • ${issue}`));
   }
-  
+
   if (warnings.length > 0) {
     console.log('\n⚠️ Warnings:');
     warnings.forEach(warning => console.log(`  • ${warning}`));

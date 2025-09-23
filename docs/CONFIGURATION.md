@@ -6,12 +6,12 @@ Complete configuration reference for MCP WordPress Server supporting single-site
 
 The MCP WordPress Server supports flexible configuration through multiple methods:
 
-| Method | Best For | Configuration File |
-|--------|----------|--------------------|
-| **Environment Variables** | Single site, development | `.env` |
-| **Multi-Site JSON** | Multiple sites, production | `mcp-wordpress.config.json` |
-| **Claude Desktop** | Desktop integration | `claude_desktop_config.json` |
-| **DXT Extension** | Easy desktop setup | Built-in UI |
+| Method                    | Best For                   | Configuration File           |
+| ------------------------- | -------------------------- | ---------------------------- |
+| **Environment Variables** | Single site, development   | `.env`                       |
+| **Multi-Site JSON**       | Multiple sites, production | `mcp-wordpress.config.json`  |
+| **Claude Desktop**        | Desktop integration        | `claude_desktop_config.json` |
+| **DXT Extension**         | Easy desktop setup         | Built-in UI                  |
 
 ## 🌐 Single-Site Configuration
 
@@ -47,33 +47,33 @@ RATE_LIMIT_WINDOW=60000
 
 #### Required Variables
 
-| Variable | Required | Description | Example |
-|----------|----------|-------------|---------|
-| `WORDPRESS_SITE_URL` | Yes | Full WordPress site URL | `https://blog.example.com` |
-| `WORDPRESS_USERNAME` | Yes | WordPress username | `admin` |
-| `WORDPRESS_APP_PASSWORD` | Yes | WordPress application password | `AbCd EfGh IjKl MnOp QrSt UvWx` |
+| Variable                 | Required | Description                    | Example                         |
+| ------------------------ | -------- | ------------------------------ | ------------------------------- |
+| `WORDPRESS_SITE_URL`     | Yes      | Full WordPress site URL        | `https://blog.example.com`      |
+| `WORDPRESS_USERNAME`     | Yes      | WordPress username             | `admin`                         |
+| `WORDPRESS_APP_PASSWORD` | Yes      | WordPress application password | `AbCd EfGh IjKl MnOp QrSt UvWx` |
 
 #### Authentication Variables
 
-| Variable | Default | Description | Options |
-|----------|---------|-------------|---------|
+| Variable                | Default        | Description           | Options                                   |
+| ----------------------- | -------------- | --------------------- | ----------------------------------------- |
 | `WORDPRESS_AUTH_METHOD` | `app-password` | Authentication method | `app-password`, `jwt`, `basic`, `api-key` |
 
 #### Runtime Variables
 
-| Variable | Default | Description | Options |
-|----------|---------|-------------|---------|
-| `NODE_ENV` | `production` | Runtime environment | `development`, `production`, `test`, `dxt` |
-| `DEBUG` | `false` | Enable debug logging | `true`, `false` |
-| `LOG_LEVEL` | `info` | Logging verbosity | `error`, `warn`, `info`, `debug` |
+| Variable    | Default      | Description          | Options                                    |
+| ----------- | ------------ | -------------------- | ------------------------------------------ |
+| `NODE_ENV`  | `production` | Runtime environment  | `development`, `production`, `test`, `dxt` |
+| `DEBUG`     | `false`      | Enable debug logging | `true`, `false`                            |
+| `LOG_LEVEL` | `info`       | Logging verbosity    | `error`, `warn`, `info`, `debug`           |
 
 #### Performance Variables
 
-| Variable | Default | Description | Range |
-|----------|---------|-------------|-------|
-| `DISABLE_CACHE` | `false` | Disable caching system | `true`, `false` |
-| `CACHE_TTL` | `300` | Cache time-to-live (seconds) | `60-3600` |
-| `MAX_CACHE_SIZE` | `1000` | Maximum cache entries | `100-10000` |
+| Variable         | Default | Description                  | Range           |
+| ---------------- | ------- | ---------------------------- | --------------- |
+| `DISABLE_CACHE`  | `false` | Disable caching system       | `true`, `false` |
+| `CACHE_TTL`      | `300`   | Cache time-to-live (seconds) | `60-3600`       |
+| `MAX_CACHE_SIZE` | `1000`  | Maximum cache entries        | `100-10000`     |
 
 ## 🏢 Multi-Site Configuration
 
@@ -86,7 +86,7 @@ Create `mcp-wordpress.config.json` in your project root:
   "sites": [
     {
       "id": "main-site",
-      "name": "Main WordPress Site", 
+      "name": "Main WordPress Site",
       "config": {
         "WORDPRESS_SITE_URL": "https://main-site.com",
         "WORDPRESS_USERNAME": "admin",
@@ -98,7 +98,7 @@ Create `mcp-wordpress.config.json` in your project root:
       "id": "client-blog",
       "name": "Client Blog",
       "config": {
-        "WORDPRESS_SITE_URL": "https://client-blog.com", 
+        "WORDPRESS_SITE_URL": "https://client-blog.com",
         "WORDPRESS_USERNAME": "editor",
         "WORDPRESS_APP_PASSWORD": "yyyy yyyy yyyy yyyy yyyy yyyy",
         "WORDPRESS_AUTH_METHOD": "jwt"
@@ -121,14 +121,17 @@ Create `mcp-wordpress.config.json` in your project root:
 ### Multi-Site Configuration Rules
 
 #### Site Identification
+
 - **`id`**: Unique identifier (alphanumeric, hyphens, underscores only)
 - **`name`**: Human-readable name for documentation
 - **Maximum sites**: 50 sites per configuration
 
 #### Uniqueness Requirements
+
 All of these must be unique across all sites:
+
 - Site IDs
-- Site names  
+- Site names
 - WordPress site URLs
 
 #### Site-Specific Usage
@@ -146,6 +149,7 @@ wp_get_site_settings --site="dev-site"
 ### Multi-Site Example Configurations
 
 #### Agency Setup
+
 ```json
 {
   "sites": [
@@ -159,7 +163,7 @@ wp_get_site_settings --site="dev-site"
       }
     },
     {
-      "id": "client-a", 
+      "id": "client-a",
       "name": "Client A Blog",
       "config": {
         "WORDPRESS_SITE_URL": "https://clienta.com/blog",
@@ -172,7 +176,7 @@ wp_get_site_settings --site="dev-site"
       "name": "Client B E-commerce",
       "config": {
         "WORDPRESS_SITE_URL": "https://clientb-shop.com",
-        "WORDPRESS_USERNAME": "shop_manager", 
+        "WORDPRESS_USERNAME": "shop_manager",
         "WORDPRESS_APP_PASSWORD": "zzzz zzzz zzzz zzzz zzzz zzzz"
       }
     }
@@ -181,6 +185,7 @@ wp_get_site_settings --site="dev-site"
 ```
 
 #### Development Workflow
+
 ```json
 {
   "sites": [
@@ -195,7 +200,7 @@ wp_get_site_settings --site="dev-site"
     },
     {
       "id": "staging",
-      "name": "Staging Environment", 
+      "name": "Staging Environment",
       "config": {
         "WORDPRESS_SITE_URL": "https://staging.mysite.com",
         "WORDPRESS_USERNAME": "admin",
@@ -221,33 +226,38 @@ wp_get_site_settings --site="dev-site"
 ### Application Passwords (Recommended)
 
 **WordPress Setup:**
+
 1. **Enable Application Passwords** (WordPress 5.6+)
 2. **Generate Password**: Users → Profile → Application Passwords
 3. **Copy Password**: Exact format with spaces
 
 **Configuration:**
+
 ```json
 {
   "WORDPRESS_AUTH_METHOD": "app-password",
-  "WORDPRESS_USERNAME": "your-username", 
+  "WORDPRESS_USERNAME": "your-username",
   "WORDPRESS_APP_PASSWORD": "AbCd EfGh IjKl MnOp QrSt UvWx"
 }
 ```
 
 **Security Benefits:**
+
 - ✅ Revocable without changing main password
-- ✅ Scoped permissions 
+- ✅ Scoped permissions
 - ✅ Audit trail
 - ✅ WordPress native support
 
 ### JWT Authentication
 
 **WordPress Setup:**
+
 1. **Install JWT Plugin**: JWT Authentication for WP-API
 2. **Configure JWT Secret** in wp-config.php
 3. **Get JWT Token** via login endpoint
 
 **Configuration:**
+
 ```json
 {
   "WORDPRESS_AUTH_METHOD": "jwt",
@@ -257,6 +267,7 @@ wp_get_site_settings --site="dev-site"
 ```
 
 **WordPress JWT Setup:**
+
 ```php
 // wp-config.php
 define('JWT_AUTH_SECRET_KEY', 'your-secret-key');
@@ -268,6 +279,7 @@ define('JWT_AUTH_CORS_ENABLE', true);
 **⚠️ Development Only - Not recommended for production**
 
 **Configuration:**
+
 ```json
 {
   "WORDPRESS_AUTH_METHOD": "basic",
@@ -279,15 +291,17 @@ define('JWT_AUTH_CORS_ENABLE', true);
 ### API Key Authentication
 
 **WordPress Setup:**
-1. **Install API Key Plugin** 
+
+1. **Install API Key Plugin**
 2. **Generate API Key** in WordPress admin
 3. **Configure Key Permissions**
 
 **Configuration:**
+
 ```json
 {
   "WORDPRESS_AUTH_METHOD": "api-key",
-  "WORDPRESS_USERNAME": "your-username", 
+  "WORDPRESS_USERNAME": "your-username",
   "WORDPRESS_APP_PASSWORD": "your-api-key"
 }
 ```
@@ -306,7 +320,7 @@ Add to `claude_desktop_config.json`:
       "args": ["-y", "mcp-wordpress"],
       "env": {
         "WORDPRESS_SITE_URL": "https://your-site.com",
-        "WORDPRESS_USERNAME": "your-username", 
+        "WORDPRESS_USERNAME": "your-username",
         "WORDPRESS_APP_PASSWORD": "your-app-password",
         "WORDPRESS_AUTH_METHOD": "app-password"
       }
@@ -340,7 +354,7 @@ For multi-site setups, create a configuration file and reference it:
 {
   "mcpServers": {
     "mcp-wordpress": {
-      "command": "npx", 
+      "command": "npx",
       "args": ["-y", "mcp-wordpress"],
       "cwd": "/path/to/your/config/directory"
     }
@@ -365,7 +379,7 @@ docker run -d \
 ### Docker Compose
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   mcp-wordpress:
     image: docdyhr/mcp-wordpress:latest
@@ -383,7 +397,7 @@ services:
 ### Multi-Site with Docker
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   mcp-wordpress:
     image: docdyhr/mcp-wordpress:latest
@@ -397,6 +411,7 @@ services:
 ### Performance Tuning
 
 #### Cache Configuration
+
 ```bash
 # Optimize for high-traffic sites
 CACHE_TTL=600              # 10 minutes
@@ -404,18 +419,19 @@ MAX_CACHE_SIZE=5000        # 5000 entries
 CACHE_CLEANUP_INTERVAL=300 # 5 minutes
 
 # Optimize for low-memory environments
-CACHE_TTL=120              # 2 minutes  
+CACHE_TTL=120              # 2 minutes
 MAX_CACHE_SIZE=100         # 100 entries
 DISABLE_CACHE=false        # Keep basic caching
 ```
 
 #### Rate Limiting
+
 ```bash
 # Conservative limits
 RATE_LIMIT_REQUESTS=100    # 100 requests
 RATE_LIMIT_WINDOW=60000    # per minute
 
-# Aggressive limits  
+# Aggressive limits
 RATE_LIMIT_REQUESTS=1000   # 1000 requests
 RATE_LIMIT_WINDOW=60000    # per minute
 ```
@@ -423,6 +439,7 @@ RATE_LIMIT_WINDOW=60000    # per minute
 ### Security Hardening
 
 #### Network Security
+
 ```bash
 # Bind to specific interface (Docker/production)
 BIND_ADDRESS=127.0.0.1
@@ -435,6 +452,7 @@ FORCE_HTTPS=true
 ```
 
 #### Authentication Security
+
 ```bash
 # Strengthen authentication
 AUTH_TIMEOUT=300           # 5 minute auth timeout
@@ -445,6 +463,7 @@ AUTH_LOCKOUT_DURATION=900  # 15 minute lockout
 ### Monitoring Configuration
 
 #### Logging
+
 ```bash
 # Development logging
 NODE_ENV=development
@@ -452,13 +471,14 @@ DEBUG=true
 LOG_LEVEL=debug
 
 # Production logging
-NODE_ENV=production  
+NODE_ENV=production
 DEBUG=false
 LOG_LEVEL=warn
 LOG_FILE=/var/log/mcp-wordpress.log
 ```
 
 #### Performance Monitoring
+
 ```bash
 # Enable performance tracking
 ENABLE_PERFORMANCE_MONITORING=true
@@ -487,19 +507,21 @@ npm run config:show
 ### Common Validation Errors
 
 #### 1. Invalid URL Format
+
 ```bash
 # ❌ Common mistakes
 WORDPRESS_SITE_URL=mysite.com           # Missing protocol
 WORDPRESS_SITE_URL=https://mysite.com/  # Trailing slash
 WORDPRESS_SITE_URL=http://localhost     # Missing port for local
 
-# ✅ Correct formats  
+# ✅ Correct formats
 WORDPRESS_SITE_URL=https://mysite.com
 WORDPRESS_SITE_URL=http://localhost:8080
 WORDPRESS_SITE_URL=https://blog.mysite.com
 ```
 
 #### 2. Invalid Authentication Method
+
 ```bash
 # ❌ Invalid
 WORDPRESS_AUTH_METHOD=password          # Not supported
@@ -512,18 +534,19 @@ WORDPRESS_AUTH_METHOD=api-key           # With plugin
 ```
 
 #### 3. Multi-Site Configuration Errors
+
 ```bash
 # ❌ Duplicate site IDs
 {"id": "site1", ...}
 {"id": "site1", ...}  # Error: duplicate ID
 
-# ❌ Invalid site ID characters  
+# ❌ Invalid site ID characters
 {"id": "site 1", ...}      # Spaces not allowed
 {"id": "site@1", ...}      # Special chars not allowed
 
 # ✅ Valid site IDs
 {"id": "site-1", ...}      # Hyphens OK
-{"id": "site_1", ...}      # Underscores OK  
+{"id": "site_1", ...}      # Underscores OK
 {"id": "site1", ...}       # Alphanumeric OK
 ```
 
@@ -532,11 +555,13 @@ WORDPRESS_AUTH_METHOD=api-key           # With plugin
 ### From Single-Site to Multi-Site
 
 1. **Backup Current Configuration**
+
    ```bash
    cp .env .env.backup
    ```
 
 2. **Create Multi-Site Config**
+
    ```json
    {
      "sites": [
@@ -545,7 +570,7 @@ WORDPRESS_AUTH_METHOD=api-key           # With plugin
          "name": "Main Site",
          "config": {
            "WORDPRESS_SITE_URL": "your-current-url",
-           "WORDPRESS_USERNAME": "your-current-username", 
+           "WORDPRESS_USERNAME": "your-current-username",
            "WORDPRESS_APP_PASSWORD": "your-current-password"
          }
        }
@@ -570,6 +595,7 @@ WORDPRESS_AUTH_METHOD=api-key           # With plugin
 
 1. **Choose Primary Site** from multi-site config
 2. **Extract Configuration**
+
    ```bash
    # From mcp-wordpress.config.json site
    WORDPRESS_SITE_URL=https://primary-site.com
@@ -584,6 +610,7 @@ WORDPRESS_AUTH_METHOD=api-key           # With plugin
 ### Credential Management
 
 1. **Never commit credentials** to version control
+
    ```bash
    # Add to .gitignore
    .env
@@ -599,6 +626,7 @@ WORDPRESS_AUTH_METHOD=api-key           # With plugin
 ### Configuration Security
 
 1. **File Permissions**
+
    ```bash
    # Secure configuration files
    chmod 600 .env
@@ -606,10 +634,11 @@ WORDPRESS_AUTH_METHOD=api-key           # With plugin
    ```
 
 2. **Environment Isolation**
+
    ```bash
    # Separate configs for different environments
    .env.development
-   .env.staging  
+   .env.staging
    .env.production
    ```
 
@@ -624,6 +653,7 @@ WORDPRESS_AUTH_METHOD=api-key           # With plugin
 ### Example Templates
 
 Complete configuration examples are available in:
+
 - **[Single-Site Template](../examples/basic-setup/.env.example)**
 - **[Multi-Site Template](../examples/multi-site/mcp-wordpress.config.json.example)**
 - **[Docker Template](../examples/docker/docker-compose.yml)**

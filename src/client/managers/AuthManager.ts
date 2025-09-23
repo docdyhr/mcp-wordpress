@@ -22,7 +22,7 @@ export class AuthManager {
 
   constructor(
     private client: WordPressClient,
-    private authConfig: AuthConfig
+    private authConfig: AuthConfig,
   ) {}
 
   /**
@@ -44,12 +44,15 @@ export class AuthManager {
         case "api-key":
           return this.authenticateWithAPIKey();
         default:
-          throw new AuthenticationError(`Unsupported authentication method: ${this.authConfig.method}`, this.authConfig.method);
+          throw new AuthenticationError(
+            `Unsupported authentication method: ${this.authConfig.method}`,
+            this.authConfig.method,
+          );
       }
     } catch (error) {
-      this.logger.error("Authentication failed", { 
+      this.logger.error("Authentication failed", {
         method: this.authConfig.method,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -65,7 +68,9 @@ export class AuthManager {
       case "app-password":
       case "basic":
         if (this.authConfig.username && this.authConfig.appPassword) {
-          const credentials = Buffer.from(`${this.authConfig.username}:${this.authConfig.appPassword}`).toString("base64");
+          const credentials = Buffer.from(`${this.authConfig.username}:${this.authConfig.appPassword}`).toString(
+            "base64",
+          );
           headers.Authorization = `Basic ${credentials}`;
         }
         break;
@@ -96,7 +101,10 @@ export class AuthManager {
    */
   private async authenticateWithJWT(): Promise<boolean> {
     if (!this.authConfig.username || !this.authConfig.password) {
-      throw new AuthenticationError("Username and password are required for JWT authentication", this.authConfig.method);
+      throw new AuthenticationError(
+        "Username and password are required for JWT authentication",
+        this.authConfig.method,
+      );
     }
 
     try {
@@ -115,7 +123,7 @@ export class AuthManager {
       }
 
       // Calculate expiration time (typically 24 hours for JWT)
-      const expiresAt = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+      const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
       this.jwtToken = {
         token: response.token,

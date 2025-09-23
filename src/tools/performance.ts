@@ -39,7 +39,7 @@ export default class PerformanceTools {
   constructor(clients?: Map<string, unknown>) {
     // Initialize logger first
     this.logger = LoggerFactory.performance();
-    
+
     // Initialize performance monitoring system
     this.monitor = new PerformanceMonitor({
       enableRealTimeMonitoring: true,
@@ -944,12 +944,16 @@ export default class PerformanceTools {
   }
 
   private formatAlertMessage(alert: PerformanceAlert): string {
-    return `${alert.severity.toUpperCase()}: ${alert.message} (${alert.metric}: ${alert.actualValue} vs threshold: ${alert.threshold})`;
+    return `${alert.severity.toUpperCase()}: ${alert.message} (${alert.metric}: ${alert.actualValue} vs threshold: ${
+      alert.threshold
+    })`;
   }
 
   private formatAnomalyDescription(anomaly: PerformanceAnomaly): string {
     const direction = anomaly.actualValue > anomaly.expectedValue ? "higher" : "lower";
-    return `${anomaly.metric} is ${Math.abs(anomaly.deviation).toFixed(1)}% ${direction} than expected (${anomaly.expectedValue.toFixed(2)} vs ${anomaly.actualValue.toFixed(2)})`;
+    return `${anomaly.metric} is ${Math.abs(anomaly.deviation).toFixed(
+      1,
+    )}% ${direction} than expected (${anomaly.expectedValue.toFixed(2)} vs ${anomaly.actualValue.toFixed(2)})`;
   }
 
   private calculateAlertStatus(

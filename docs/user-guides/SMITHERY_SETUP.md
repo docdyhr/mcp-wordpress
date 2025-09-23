@@ -73,15 +73,18 @@ The configuration wizard will prompt for:
 ### Creating Application Password
 
 1. **Log into WordPress Admin**
+
    - Navigate to your WordPress admin dashboard
    - Go to **Users** → **Your Profile**
 
 2. **Generate Application Password**
+
    - Scroll to **Application Passwords** section
    - Application Name: `Smithery MCP WordPress`
    - Click **Add New Application Password**
 
 3. **Copy the Password**
+
    - WordPress displays: `AbCd EfGh IjKl MnOp QrSt UvWx`
    - **Important**: Copy exactly with spaces
    - Store securely - you won't see it again
@@ -349,11 +352,13 @@ smithery backup list
 ### Best Practices
 
 1. **Secure Credentials**
+
    - Use Application Passwords (not main password)
    - Regenerate passwords regularly
    - Use minimal WordPress user permissions
 
 2. **Network Security**
+
    - Use HTTPS for WordPress sites
    - Configure firewall rules if needed
    - Monitor access logs

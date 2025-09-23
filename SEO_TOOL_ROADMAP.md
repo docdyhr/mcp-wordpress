@@ -73,16 +73,16 @@ export class SEOTools {
 
   async analyzeContent(params: AnalyzeContentParams): Promise<AnalyzeContentResult> {
     const logger = LoggerFactory.tool("wp_seo_analyze_content", params.site);
-    
+
     return await logger.time("SEO content analysis", async () => {
-      validateRequired(params, ['postId', 'analysisType']);
+      validateRequired(params, ["postId", "analysisType"]);
       const siteClient = this.getSiteClient(params.site);
-      
+
       // Implement analysis logic with caching
       const cacheKey = `seo:analyze:${params.postId}:${params.analysisType}`;
       const cached = await this.cache.get(cacheKey);
       if (cached) return cached;
-      
+
       const result = await this.performAnalysis(siteClient, params);
       await this.cache.set(cacheKey, result, { ttl: 21600 }); // 6 hour cache
       return result;
@@ -96,7 +96,7 @@ const AnalyzeContentParamsSchema = z.object({
   analysisType: z.enum(["readability", "keywords", "structure", "full"]),
   site: z.string().optional(),
   focusKeywords: z.array(z.string()).optional(),
-  locale: z.string().default("en-US")
+  locale: z.string().default("en-US"),
 });
 
 const SEORecommendationSchema = z.object({
@@ -104,7 +104,7 @@ const SEORecommendationSchema = z.object({
   priority: z.enum(["low", "medium", "high", "critical"]),
   message: z.string(),
   impact: z.number().min(0).max(100),
-  autoFixAvailable: z.boolean().default(false)
+  autoFixAvailable: z.boolean().default(false),
 });
 ```
 
@@ -167,11 +167,11 @@ modification triggers regeneration. Cache keys are namespaced by site + tool + i
 export class SEOCacheManager extends CacheManager {
   private readonly SEO_CACHE_PREFIX = "seo:";
   private readonly DEFAULT_TTL = {
-    analysis: 21600,     // 6 hours for content analysis
-    schema: 86400,       // 24 hours for schema markup
-    audit: 3600,         // 1 hour for site audits
-    keywords: 604800,    // 7 days for keyword research
-    serp: 43200         // 12 hours for SERP data
+    analysis: 21600, // 6 hours for content analysis
+    schema: 86400, // 24 hours for schema markup
+    audit: 3600, // 1 hour for site audits
+    keywords: 604800, // 7 days for keyword research
+    serp: 43200, // 12 hours for SERP data
   };
 
   async invalidatePostSEO(postId: number, siteId?: string): Promise<void> {

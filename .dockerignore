@@ -65,7 +65,7 @@ yarn.lock
 .prettierrc
 .markdownlint.json
 
-# Development scripts  
+# Development scripts
 scripts/test-*.js
 scripts/health-check.js
 scripts/verify-*.js

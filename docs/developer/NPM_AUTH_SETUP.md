@@ -35,6 +35,7 @@ The project includes a pre-configured `.npmrc` file that uses environment variab
 ### Method 1: Using NPM Token (Recommended for Automation)
 
 1. **Create an NPM automation token**:
+
    - Log in to npmjs.com
    - Go to Account Settings → Access Tokens
    - Click "Generate New Token" → Choose "Automation" type
@@ -86,10 +87,12 @@ npm config set //registry.npmjs.org/:_authToken YOUR_NPM_TOKEN
 ## Security Best Practices
 
 1. **Never commit `.npmrc` with tokens** to version control
+
    - Add `.npmrc` to `.gitignore` if storing tokens there
    - Use environment variables for tokens
 
 2. **Use different tokens for different purposes**:
+
    - Personal development: Read-only or Publish token
    - CI/CD: Automation token (like your NPM_TOKEN in GitHub secrets)
    - Team projects: Shared organization tokens

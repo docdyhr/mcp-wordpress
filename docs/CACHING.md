@@ -285,10 +285,12 @@ wp_cache_clear --site="site2" --pattern="posts"  # Clear site2 posts only
 ### **Poor Cache Performance**
 
 1. **Monitor hit rates:**
+
    - Good: >60% hit rate after warm-up
    - Poor: <30% hit rate indicates issues
 
 2. **Check TTL settings:**
+
    - Too short: Frequent cache misses
    - Too long: Stale data issues
 

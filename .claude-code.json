@@ -173,12 +173,5 @@
       "failure": true
     }
   },
-  "ignore": [
-    "dist/**/*",
-    "node_modules/**/*",
-    "coverage/**/*",
-    "*.log",
-    ".env*",
-    "mcp-wordpress.config.json"
-  ]
+  "ignore": ["dist/**/*", "node_modules/**/*", "coverage/**/*", "*.log", ".env*", "mcp-wordpress.config.json"]
 }

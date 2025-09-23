@@ -27,7 +27,7 @@
     "noUnusedParameters": false,
     "exactOptionalPropertyTypes": true,
     "types": ["node", "vitest/globals"],
-    
+
     "baseUrl": "./src",
     "paths": {
       "@/*": ["*"],
@@ -42,9 +42,7 @@
       "@/performance/*": ["performance/*"]
     }
   },
-  "include": [
-    "src/**/*"
-  ],
+  "include": ["src/**/*"],
   "exclude": [
     "node_modules",
     "dist",

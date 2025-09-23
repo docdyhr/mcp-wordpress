@@ -1,4 +1,3 @@
-
 import { WordPressClient } from "@/client/api.js";
 
 /**

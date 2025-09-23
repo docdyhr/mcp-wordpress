@@ -1,6 +1,6 @@
 /**
  * Enhanced TypeScript Types for MCP WordPress
- * 
+ *
  * This file provides stronger typing, utility types, and generic constraints
  * to improve type safety throughout the codebase.
  */
@@ -13,22 +13,22 @@ export type DeepReadonly<T> = {
   readonly [P in keyof T]: T[P] extends (infer U)[]
     ? DeepReadonlyArray<U>
     : T[P] extends readonly (infer U)[]
-    ? DeepReadonlyArray<U>
-    : T[P] extends object
-    ? DeepReadonly<T[P]>
-    : T[P];
+      ? DeepReadonlyArray<U>
+      : T[P] extends object
+        ? DeepReadonly<T[P]>
+        : T[P];
 };
 
 interface DeepReadonlyArray<T> extends ReadonlyArray<DeepReadonly<T>> {}
 
 // Branded Types for Domain-Specific Values
-export type WordPressId = number & { readonly __brand: 'WordPressId' };
-export type UserId = number & { readonly __brand: 'UserId' };
-export type PostId = number & { readonly __brand: 'PostId' };
-export type MediaId = number & { readonly __brand: 'MediaId' };
-export type CommentId = number & { readonly __brand: 'CommentId' };
-export type CategoryId = number & { readonly __brand: 'CategoryId' };
-export type TagId = number & { readonly __brand: 'TagId' };
+export type WordPressId = number & { readonly __brand: "WordPressId" };
+export type UserId = number & { readonly __brand: "UserId" };
+export type PostId = number & { readonly __brand: "PostId" };
+export type MediaId = number & { readonly __brand: "MediaId" };
+export type CommentId = number & { readonly __brand: "CommentId" };
+export type CategoryId = number & { readonly __brand: "CategoryId" };
+export type TagId = number & { readonly __brand: "TagId" };
 
 // Helper functions to create branded types
 export const createWordPressId = (id: number): WordPressId => {
@@ -46,7 +46,7 @@ export const createCategoryId = (id: number): CategoryId => id as CategoryId;
 export const createTagId = (id: number): TagId => id as TagId;
 
 // Strict URL type
-export type WordPressURL = string & { readonly __brand: 'WordPressURL' };
+export type WordPressURL = string & { readonly __brand: "WordPressURL" };
 export const createWordPressURL = (url: string): WordPressURL => {
   try {
     new URL(url);
@@ -64,13 +64,13 @@ export interface TypedError<TCode extends string = string> extends Error {
   readonly context?: Record<string, unknown>;
 }
 
-export interface ValidationError extends TypedError<'VALIDATION_ERROR'> {
+export interface ValidationError extends TypedError<"VALIDATION_ERROR"> {
   readonly field: string;
   readonly value: unknown;
   readonly constraint: string;
 }
 
-export interface APIError extends TypedError<'API_ERROR'> {
+export interface APIError extends TypedError<"API_ERROR"> {
   readonly endpoint: string;
   readonly method: string;
   readonly statusCode: number;
@@ -108,7 +108,7 @@ export interface RequestConfig {
 }
 
 export interface HTTPRequestOptions extends RequestConfig {
-  readonly method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  readonly method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   readonly url: WordPressURL;
   readonly data?: unknown;
   readonly params?: DeepReadonly<Record<string, string | number | boolean>>;
@@ -135,7 +135,7 @@ export interface ToolResult<TData = unknown> {
 
 export type ToolHandler<TInput, TOutput> = (
   input: DeepReadonly<TInput>,
-  context: DeepReadonly<ToolContext>
+  context: DeepReadonly<ToolContext>,
 ) => Promise<ToolResult<TOutput>>;
 
 // Cache Types with Enhanced Type Safety
@@ -156,7 +156,7 @@ export interface CacheEntry<TData> {
 export interface CacheOptions {
   readonly ttl: number;
   readonly tags?: readonly string[];
-  readonly priority?: 'low' | 'medium' | 'high';
+  readonly priority?: "low" | "medium" | "high";
 }
 
 // Configuration Types with Better Validation
@@ -165,7 +165,7 @@ export interface StrictSiteConfig {
   readonly name: string;
   readonly url: WordPressURL;
   readonly auth: DeepReadonly<{
-    readonly method: 'app-password' | 'jwt' | 'basic' | 'api-key';
+    readonly method: "app-password" | "jwt" | "basic" | "api-key";
     readonly username: string;
     readonly password: string;
   }>;
@@ -193,7 +193,7 @@ export interface PerformanceThresholds {
 
 // Type Guards for Runtime Validation
 export const isWordPressId = (value: unknown): value is WordPressId => {
-  return typeof value === 'number' && Number.isInteger(value) && value > 0;
+  return typeof value === "number" && Number.isInteger(value) && value > 0;
 };
 
 export const isNonEmptyArray = <T>(value: unknown): value is NonEmptyArray<T> => {
@@ -201,7 +201,7 @@ export const isNonEmptyArray = <T>(value: unknown): value is NonEmptyArray<T> =>
 };
 
 export const isValidURL = (value: unknown): value is WordPressURL => {
-  if (typeof value !== 'string') return false;
+  if (typeof value !== "string") return false;
   try {
     new URL(value);
     return true;
@@ -216,7 +216,7 @@ export type OptionalFields<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, 
 
 // JSON Schema Type Definitions
 export interface JSONSchemaDefinition {
-  readonly type: 'string' | 'number' | 'boolean' | 'object' | 'array' | 'null';
+  readonly type: "string" | "number" | "boolean" | "object" | "array" | "null";
   readonly description?: string;
   readonly required?: boolean;
   readonly enum?: readonly (string | number)[];
@@ -225,21 +225,21 @@ export interface JSONSchemaDefinition {
   readonly minLength?: number;
   readonly maxLength?: number;
   readonly pattern?: string;
-  readonly format?: 'email' | 'uri' | 'date-time' | 'date' | 'time';
+  readonly format?: "email" | "uri" | "date-time" | "date" | "time";
   readonly items?: JSONSchemaDefinition;
   readonly properties?: DeepReadonly<Record<string, JSONSchemaDefinition>>;
 }
 
 // Enhanced MCP Tool Schema
 export interface StrictMCPToolSchema {
-  readonly type: 'object';
+  readonly type: "object";
   readonly properties: DeepReadonly<Record<string, JSONSchemaDefinition>>;
   readonly required: readonly string[];
   readonly additionalProperties: false;
 }
 
 // Result Types for Better Error Handling
-export type Result<TSuccess, TError = Error> = 
+export type Result<TSuccess, TError = Error> =
   | { readonly success: true; readonly data: TSuccess }
   | { readonly success: false; readonly error: TError };
 
@@ -298,14 +298,14 @@ export interface ConfigValidationResult {
 }
 
 // Performance Monitoring Event Types
-export type PerformanceEventType = 
-  | 'request_started'
-  | 'request_completed' 
-  | 'request_failed'
-  | 'cache_hit'
-  | 'cache_miss'
-  | 'auth_success'
-  | 'auth_failure';
+export type PerformanceEventType =
+  | "request_started"
+  | "request_completed"
+  | "request_failed"
+  | "cache_hit"
+  | "cache_miss"
+  | "auth_success"
+  | "auth_failure";
 
 export interface PerformanceEvent extends DomainEvent<PerformanceEventType> {
   readonly payload: {

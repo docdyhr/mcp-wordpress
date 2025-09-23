@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: "20"
   CACHE_VERSION: v3
 
 jobs:
@@ -46,7 +46,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 🔑 Generate Cache Keys
         id: cache-keys
@@ -92,7 +92,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Restore Dependencies
         uses: actions/cache@v4
@@ -143,7 +143,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Restore Dependencies
         uses: actions/cache@v4
@@ -180,7 +180,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Restore Dependencies
         uses: actions/cache@v4
@@ -227,7 +227,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Restore Dependencies
         uses: actions/cache@v4
@@ -265,7 +265,7 @@ jobs:
       - name: 📊 Check Overall Status
         run: |
           echo "🔍 Checking CI results..."
-          
+
           # Check if any required jobs failed
           if [[ "${{ contains(needs.*.result, 'failure') }}" == "true" ]]; then
             echo "❌ CI pipeline failed"
@@ -277,7 +277,7 @@ jobs:
             echo "  Performance: ${{ needs.performance.result }}"
             exit 1
           fi
-          
+
           echo "✅ CI pipeline passed successfully"
           echo "🎉 All quality gates met"
 

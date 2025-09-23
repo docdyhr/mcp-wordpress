@@ -35,8 +35,7 @@ startCommand:
       wordpressAuthMethod:
         type: string
         default: app-password
-        description: "Authentication method: one of app-password, jwt, basic, api-key,
-          cookie"
+        description: "Authentication method: one of app-password, jwt, basic, api-key, cookie"
   exampleConfig:
     wordpressSiteUrl: https://example.com
     wordpressUsername: admin

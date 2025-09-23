@@ -1,4 +1,3 @@
-
 import * as fc from "fast-check";
 
 /**
@@ -47,11 +46,7 @@ describe("Basic Property-Based Testing", () => {
             expect(isInvalidId).toBe(true);
 
             // Additional validation for numbers
-            expect(
-              typeof invalidId === "number"
-                ? invalidId <= 0 || isNaN(invalidId)
-                : true,
-            ).toBe(true);
+            expect(typeof invalidId === "number" ? invalidId <= 0 || isNaN(invalidId) : true).toBe(true);
           },
         ),
       );
@@ -62,9 +57,7 @@ describe("Basic Property-Based Testing", () => {
     it("should handle safe strings without modification", () => {
       fc.assert(
         fc.property(
-          fc
-            .string({ minLength: 1, maxLength: 100 })
-            .filter((s) => !s.includes("<") && !s.includes(">")),
+          fc.string({ minLength: 1, maxLength: 100 }).filter((s) => !s.includes("<") && !s.includes(">")),
           (safeString) => {
             // Property: Safe strings should pass through unchanged
             expect(typeof safeString).toBe("string");
@@ -82,7 +75,7 @@ describe("Basic Property-Based Testing", () => {
       fc.assert(
         fc.property(
           fc.constantFrom(
-            "<script>alert(\"xss\")</script>",
+            '<script>alert("xss")</script>',
             "javascript:alert(1)",
             "../../etc/passwd",
             "'; DROP TABLE posts; --",
@@ -119,9 +112,7 @@ describe("Basic Property-Based Testing", () => {
             expect(typeof postObject.title).toBe("string");
             expect(postObject.title.length).toBeGreaterThan(0);
             expect(typeof postObject.content).toBe("string");
-            expect(["publish", "draft", "private"]).toContain(
-              postObject.status,
-            );
+            expect(["publish", "draft", "private"]).toContain(postObject.status);
             expect(postObject.author).toBeGreaterThan(0);
           },
         ),
@@ -158,22 +149,19 @@ describe("Basic Property-Based Testing", () => {
   describe("Array and Collection Properties", () => {
     it("should handle arrays of IDs consistently", () => {
       fc.assert(
-        fc.property(
-          fc.array(fc.integer({ min: 1, max: 999999 }), { maxLength: 10 }),
-          (idArray) => {
-            // Property: All elements should be valid IDs
-            expect(Array.isArray(idArray)).toBe(true);
+        fc.property(fc.array(fc.integer({ min: 1, max: 999999 }), { maxLength: 10 }), (idArray) => {
+          // Property: All elements should be valid IDs
+          expect(Array.isArray(idArray)).toBe(true);
 
-            idArray.forEach((id) => {
-              expect(id).toBeGreaterThan(0);
-              expect(Number.isInteger(id)).toBe(true);
-            });
+          idArray.forEach((id) => {
+            expect(id).toBeGreaterThan(0);
+            expect(Number.isInteger(id)).toBe(true);
+          });
 
-            // Property: Array operations should preserve validity
-            const filtered = idArray.filter((id) => id > 0);
-            expect(filtered).toHaveLength(idArray.length);
-          },
-        ),
+          // Property: Array operations should preserve validity
+          const filtered = idArray.filter((id) => id > 0);
+          expect(filtered).toHaveLength(idArray.length);
+        }),
       );
     });
 
@@ -219,8 +207,7 @@ describe("Basic Property-Based Testing", () => {
             const perPageValid =
               paginationParams.per_page === null ||
               paginationParams.per_page === undefined ||
-              (paginationParams.per_page > 0 &&
-                paginationParams.per_page <= 100);
+              (paginationParams.per_page > 0 && paginationParams.per_page <= 100);
             expect(perPageValid).toBe(true);
 
             const offsetValid =
@@ -279,25 +266,22 @@ describe("Basic Property-Based Testing", () => {
   describe("Performance Properties", () => {
     it("should complete operations within reasonable time", () => {
       fc.assert(
-        fc.property(
-          fc.array(fc.string({ maxLength: 100 }), { maxLength: 100 }),
-          (stringArray) => {
-            const startTime = Date.now();
+        fc.property(fc.array(fc.string({ maxLength: 100 }), { maxLength: 100 }), (stringArray) => {
+          const startTime = Date.now();
 
-            // Simulate some processing
-            const processed = stringArray
-              .filter((s) => s.length > 0)
-              .map((s) => s.toLowerCase())
-              .slice(0, 50);
+          // Simulate some processing
+          const processed = stringArray
+            .filter((s) => s.length > 0)
+            .map((s) => s.toLowerCase())
+            .slice(0, 50);
 
-            const endTime = Date.now();
-            const duration = endTime - startTime;
+          const endTime = Date.now();
+          const duration = endTime - startTime;
 
-            // Property: Operations should complete quickly
-            expect(duration).toBeLessThan(50); // 50ms threshold
-            expect(processed.length).toBeLessThanOrEqual(stringArray.length);
-          },
-        ),
+          // Property: Operations should complete quickly
+          expect(duration).toBeLessThan(50); // 50ms threshold
+          expect(processed.length).toBeLessThanOrEqual(stringArray.length);
+        }),
       );
     });
   });

@@ -5,24 +5,24 @@
  * Performs various security checks and generates a report
  */
 
-import { promises as fs } from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { promises as fs } from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
+import { exec } from "child_process";
+import { promisify } from "util";
 
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const rootDir = path.resolve(__dirname, '..');
+const rootDir = path.resolve(__dirname, "..");
 
 // Colors for console output
 const colors = {
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  reset: '\x1b[0m',
+  red: "\x1b[31m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  blue: "\x1b[34m",
+  reset: "\x1b[0m",
 };
 
 // Security check results
@@ -58,36 +58,31 @@ function logInfo(message) {
  * Check for exposed secrets in files
  */
 async function checkForSecrets() {
-  logInfo('Checking for exposed secrets...');
-  
+  logInfo("Checking for exposed secrets...");
+
   const patterns = [
     /password\s*[:=]\s*["'](?!your-|example|test|placeholder|xxxx|npm_X)[\w\s]+["']/gi,
     /api[_-]?key\s*[:=]\s*["'](?!your-|example|test|placeholder|npm_X)[\w-]+["']/gi,
     /secret\s*[:=]\s*["'](?!your-|example|test|placeholder|npm_X)[\w-]+["']/gi,
     /token\s*[:=]\s*["'](?!your-|example|test|placeholder|npm_X)[\w-]+["']/gi,
   ];
-  
-  const filesToCheck = [
-    'src/**/*.ts',
-    'src/**/*.js',
-    'tests/**/*.js',
-    'scripts/**/*.js',
-    '*.json',
-    '*.md',
-  ];
-  
+
+  const filesToCheck = ["src/**/*.ts", "src/**/*.js", "tests/**/*.js", "scripts/**/*.js", "*.json", "*.md"];
+
   let secretsFound = false;
-  
+
   // Check each file pattern
   for (const pattern of filesToCheck) {
     try {
-      const { stdout } = await execAsync(`find ${rootDir} -name "${pattern}" -type f | grep -v node_modules | grep -v dist | head -20`);
-      const files = stdout.split('\n').filter(f => f);
-      
+      const { stdout } = await execAsync(
+        `find ${rootDir} -name "${pattern}" -type f | grep -v node_modules | grep -v dist | head -20`,
+      );
+      const files = stdout.split("\n").filter((f) => f);
+
       for (const file of files) {
         try {
-          const content = await fs.readFile(file, 'utf-8');
-          
+          const content = await fs.readFile(file, "utf-8");
+
           for (const regex of patterns) {
             if (regex.test(content)) {
               logError(`Potential secret found in ${path.relative(rootDir, file)}`);
@@ -102,9 +97,9 @@ async function checkForSecrets() {
       // Pattern didn't match any files
     }
   }
-  
+
   if (!secretsFound) {
-    logSuccess('No exposed secrets found in source files');
+    logSuccess("No exposed secrets found in source files");
   }
 }
 
@@ -112,14 +107,14 @@ async function checkForSecrets() {
  * Check npm audit for vulnerabilities
  */
 async function checkDependencies() {
-  logInfo('Checking dependencies for vulnerabilities...');
-  
+  logInfo("Checking dependencies for vulnerabilities...");
+
   try {
-    const { stdout } = await execAsync('npm audit --json', { cwd: rootDir });
+    const { stdout } = await execAsync("npm audit --json", { cwd: rootDir });
     const audit = JSON.parse(stdout);
-    
+
     if (audit.metadata.vulnerabilities.total === 0) {
-      logSuccess('No known vulnerabilities in dependencies');
+      logSuccess("No known vulnerabilities in dependencies");
     } else {
       const { high, critical } = audit.metadata.vulnerabilities;
       if (critical > 0) {
@@ -131,7 +126,7 @@ async function checkDependencies() {
       logInfo('Run "npm audit fix" to resolve vulnerabilities');
     }
   } catch (err) {
-    logWarning('Could not run npm audit');
+    logWarning("Could not run npm audit");
   }
 }
 
@@ -139,13 +134,13 @@ async function checkDependencies() {
  * Check for secure configuration files
  */
 async function checkConfigSecurity() {
-  logInfo('Checking configuration security...');
-  
+  logInfo("Checking configuration security...");
+
   // Check .gitignore
   try {
-    const gitignore = await fs.readFile(path.join(rootDir, '.gitignore'), 'utf-8');
-    const requiredEntries = ['.env', 'mcp-wordpress.config.json', '*.log'];
-    
+    const gitignore = await fs.readFile(path.join(rootDir, ".gitignore"), "utf-8");
+    const requiredEntries = [".env", "mcp-wordpress.config.json", "*.log"];
+
     for (const entry of requiredEntries) {
       if (gitignore.includes(entry)) {
         logSuccess(`${entry} is properly excluded from git`);
@@ -154,11 +149,11 @@ async function checkConfigSecurity() {
       }
     }
   } catch (err) {
-    logError('.gitignore file not found');
+    logError(".gitignore file not found");
   }
-  
+
   // Check for config files with real credentials
-  const configFiles = ['mcp-wordpress.config.json', '.env'];
+  const configFiles = ["mcp-wordpress.config.json", ".env"];
   for (const file of configFiles) {
     const filePath = path.join(rootDir, file);
     try {
@@ -174,17 +169,17 @@ async function checkConfigSecurity() {
  * Check file permissions
  */
 async function checkFilePermissions() {
-  logInfo('Checking file permissions...');
-  
-  const sensitivePaths = ['.env', 'mcp-wordpress.config.json'];
-  
+  logInfo("Checking file permissions...");
+
+  const sensitivePaths = [".env", "mcp-wordpress.config.json"];
+
   for (const file of sensitivePaths) {
     const filePath = path.join(rootDir, file);
     try {
       const stats = await fs.stat(filePath);
-      const mode = stats.mode & parseInt('777', 8);
-      
-      if (mode > parseInt('600', 8)) {
+      const mode = stats.mode & parseInt("777", 8);
+
+      if (mode > parseInt("600", 8)) {
         logWarning(`${file} has permissive permissions (${mode.toString(8)})`);
       } else {
         logSuccess(`${file} has restrictive permissions`);
@@ -199,34 +194,38 @@ async function checkFilePermissions() {
  * Check for security headers in code
  */
 async function checkSecurityPatterns() {
-  logInfo('Checking security patterns in code...');
-  
+  logInfo("Checking security patterns in code...");
+
   // Check for input validation
   try {
-    const { stdout: validationFiles } = await execAsync(`grep -r "validate" ${rootDir}/src --include="*.ts" --include="*.js" | wc -l`);
+    const { stdout: validationFiles } = await execAsync(
+      `grep -r "validate" ${rootDir}/src --include="*.ts" --include="*.js" | wc -l`,
+    );
     const validationCount = parseInt(validationFiles.trim());
-    
+
     if (validationCount > 10) {
       logSuccess(`Found ${validationCount} validation references in code`);
     } else {
-      logWarning('Limited input validation found in code');
+      logWarning("Limited input validation found in code");
     }
   } catch {
-    logWarning('Could not check for validation patterns');
+    logWarning("Could not check for validation patterns");
   }
-  
+
   // Check for rate limiting
   try {
-    const { stdout: rateLimitFiles } = await execAsync(`grep -r "rate.*limit" ${rootDir}/src --include="*.ts" --include="*.js" -i | wc -l`);
+    const { stdout: rateLimitFiles } = await execAsync(
+      `grep -r "rate.*limit" ${rootDir}/src --include="*.ts" --include="*.js" -i | wc -l`,
+    );
     const rateLimitCount = parseInt(rateLimitFiles.trim());
-    
+
     if (rateLimitCount > 0) {
-      logSuccess('Rate limiting implementation found');
+      logSuccess("Rate limiting implementation found");
     } else {
-      logWarning('No rate limiting implementation found');
+      logWarning("No rate limiting implementation found");
     }
   } catch {
-    logWarning('Could not check for rate limiting');
+    logWarning("Could not check for rate limiting");
   }
 }
 
@@ -234,25 +233,25 @@ async function checkSecurityPatterns() {
  * Generate security report
  */
 function generateReport() {
-  console.log('\n' + '='.repeat(50));
-  console.log('Security Check Summary');
-  console.log('='.repeat(50));
-  
+  console.log("\n" + "=".repeat(50));
+  console.log("Security Check Summary");
+  console.log("=".repeat(50));
+
   console.log(`\n${colors.green}Passed:${colors.reset} ${results.passed.length}`);
-  results.passed.forEach(msg => console.log(`  ✓ ${msg}`));
-  
+  results.passed.forEach((msg) => console.log(`  ✓ ${msg}`));
+
   if (results.warnings.length > 0) {
     console.log(`\n${colors.yellow}Warnings:${colors.reset} ${results.warnings.length}`);
-    results.warnings.forEach(msg => console.log(`  ⚠ ${msg}`));
+    results.warnings.forEach((msg) => console.log(`  ⚠ ${msg}`));
   }
-  
+
   if (results.failures.length > 0) {
     console.log(`\n${colors.red}Failures:${colors.reset} ${results.failures.length}`);
-    results.failures.forEach(msg => console.log(`  ✗ ${msg}`));
+    results.failures.forEach((msg) => console.log(`  ✗ ${msg}`));
   }
-  
-  console.log('\n' + '='.repeat(50));
-  
+
+  console.log("\n" + "=".repeat(50));
+
   if (results.failures.length === 0) {
     console.log(`${colors.green}✓ Security check passed with ${results.warnings.length} warnings${colors.reset}`);
     return 0;
@@ -266,19 +265,19 @@ function generateReport() {
  * Main security check function
  */
 async function main() {
-  console.log('🔒 MCP WordPress Security Check\n');
-  
+  console.log("🔒 MCP WordPress Security Check\n");
+
   try {
     await checkForSecrets();
     await checkDependencies();
     await checkConfigSecurity();
     await checkFilePermissions();
     await checkSecurityPatterns();
-    
+
     const exitCode = generateReport();
     process.exit(exitCode);
   } catch (error) {
-    console.error('Error running security check:', error);
+    console.error("Error running security check:", error);
     process.exit(1);
   }
 }

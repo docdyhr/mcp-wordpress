@@ -23,8 +23,7 @@ command line, no configuration files - just click and configure.
 
 **Option A: Direct Download**
 
-- Click here:
-  [`mcp-wordpress.dxt`](https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt)
+- Click here: [`mcp-wordpress.dxt`](https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt)
   (3.4MB)
 
 **Option B: Command Line**
@@ -48,10 +47,12 @@ curl -L -o mcp-wordpress.dxt \
 ### Step 3: Configure WordPress Connection
 
 1. **Extension Settings**
+
    - Find "WordPress MCP Server" in your extensions list
    - Click the settings/configuration button
 
 2. **Enter WordPress Details**
+
    - **Site URL**: Your WordPress site URL (e.g., `https://yoursite.com`)
    - **Username**: Your WordPress username
    - **Application Password**: Generated WordPress app password
@@ -66,10 +67,12 @@ curl -L -o mcp-wordpress.dxt \
 ### Creating Application Password
 
 1. **Log into WordPress Admin**
+
    - Go to your WordPress admin panel
    - Navigate to **Users** → **Your Profile**
 
 2. **Generate Application Password**
+
    - Scroll down to **Application Passwords** section
    - In the "New Application Password Name" field, enter: `Claude Desktop MCP`
    - Click **Add New Application Password**
@@ -114,6 +117,7 @@ For advanced users, the DXT extension supports:
 ### Basic Functionality Test
 
 1. **Restart Claude Desktop**
+
    - Close and reopen Claude Desktop after configuration
    - This ensures the extension loads properly
 
@@ -228,6 +232,7 @@ curl -L -o mcp-wordpress.dxt \
    ```
 
 2. **Check Application Password**
+
    - Ensure password includes spaces: `AbCd EfGh IjKl MnOp`
    - Regenerate if unsure about format
    - Verify WordPress user has sufficient permissions
@@ -273,6 +278,7 @@ curl -L -o mcp-wordpress.dxt \
 **Solutions:**
 
 1. **Enable Caching**
+
    - DXT extension has built-in caching
    - Check cache statistics: `"Show WordPress cache stats"`
 
@@ -286,6 +292,7 @@ curl -L -o mcp-wordpress.dxt \
 Enable debug mode for detailed troubleshooting:
 
 1. **In DXT Configuration**
+
    - Set "Debug Mode" to `true`
    - Save configuration
 
@@ -308,6 +315,7 @@ The DXT extension includes automatic update capabilities:
 To manually update:
 
 1. **Download Latest Version**
+
    - Get newest `mcp-wordpress.dxt` from GitHub
    - Check release notes for changes
 
@@ -400,11 +408,13 @@ DXT combines with Claude's knowledge for enhanced assistance:
 ### Support Resources
 
 1. **Documentation**
+
    - [Complete Documentation](../README.md)
    - [Troubleshooting Guide](../TROUBLESHOOTING.md)
    - [API Reference](../api/README.md)
 
 2. **Community Support**
+
    - [GitHub Discussions](https://github.com/docdyhr/mcp-wordpress/discussions)
    - [Issue Tracker](https://github.com/docdyhr/mcp-wordpress/issues)
 
@@ -426,6 +436,5 @@ When reporting DXT-related issues, include:
 ---
 
 **Ready to get started?**
-[Download the DXT extension](https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt)
-and transform your
-WordPress management experience!
+[Download the DXT extension](https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt) and
+transform your WordPress management experience!

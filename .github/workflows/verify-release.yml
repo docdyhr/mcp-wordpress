@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to verify (e.g., 1.3.1)'
+        description: "Version to verify (e.g., 1.3.1)"
         required: false
         type: string
 
@@ -21,7 +21,7 @@ jobs:
       docker-status: ${{ steps.docker-check.outputs.status }}
       overall-status: ${{ steps.report.outputs.overall_status }}
       version: ${{ steps.version.outputs.version }}
-    
+
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
@@ -29,8 +29,8 @@ jobs:
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -59,12 +59,12 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           echo "Checking NPM for version $VERSION..."
-          
+
           # Check if version exists on NPM
           if npm view mcp-wordpress@$VERSION version 2>/dev/null; then
             echo "✅ Version $VERSION found on NPM"
             echo "status=success" >> $GITHUB_OUTPUT
-            
+
             # Get publish time
             PUBLISH_TIME=$(npm view mcp-wordpress@$VERSION time 2>/dev/null || echo "Unknown")
             echo "publish_time=$PUBLISH_TIME" >> $GITHUB_OUTPUT
@@ -79,19 +79,19 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           echo "Checking Docker Hub for version $VERSION..."
-          
+
           # Check Docker Hub API with more robust verification
           echo "Fetching Docker Hub tags..."
           RESPONSE=$(curl -s "https://hub.docker.com/v2/repositories/docdyhr/mcp-wordpress/tags" || echo '{"results":[]}')
-          
+
           echo "Debug: Raw API response (first 500 chars):"
           echo "$RESPONSE" | head -c 500
           echo ""
-          
+
           # Extract available tags for debugging
           echo "Available tags on Docker Hub:"
           echo "$RESPONSE" | jq -r '.results[]?.name // empty' | sort -V | tail -10 || echo "Failed to parse tags"
-          
+
           # Check for both v-prefixed and non-prefixed versions with better error handling
           FOUND_TAG=""
           if echo "$RESPONSE" | jq -e ".results[]? | select(.name == \"$VERSION\")" > /dev/null 2>&1; then
@@ -99,11 +99,11 @@ jobs:
           elif echo "$RESPONSE" | jq -e ".results[]? | select(.name == \"v$VERSION\")" > /dev/null 2>&1; then
             FOUND_TAG="v$VERSION"
           fi
-          
+
           if [ -n "$FOUND_TAG" ]; then
             echo "✅ Version $VERSION found on Docker Hub as tag: $FOUND_TAG"
             echo "status=success" >> $GITHUB_OUTPUT
-            
+
             # Get last updated time
             LAST_UPDATED=$(echo "$RESPONSE" | jq -r ".results[]? | select(.name == \"$FOUND_TAG\") | .last_updated" | head -1)
             echo "last_updated=$LAST_UPDATED" >> $GITHUB_OUTPUT
@@ -112,7 +112,7 @@ jobs:
             echo "❌ Version $VERSION NOT found on Docker Hub"
             echo "Searched for tags: $VERSION, v$VERSION"
             echo "status=failure" >> $GITHUB_OUTPUT
-            
+
             # Additional verification attempt with docker pull
             echo "Attempting docker pull verification..."
             if docker pull "docdyhr/mcp-wordpress:$VERSION" 2>/dev/null; then
@@ -123,7 +123,7 @@ jobs:
             elif docker pull "docdyhr/mcp-wordpress:v$VERSION" 2>/dev/null; then
               echo "✅ Docker pull successful - image exists as v$VERSION"
               echo "status=success" >> $GITHUB_OUTPUT
-              echo "found_tag=v$VERSION" >> $GITHUB_OUTPUT  
+              echo "found_tag=v$VERSION" >> $GITHUB_OUTPUT
               echo "last_updated=verified-via-pull" >> $GITHUB_OUTPUT
             else
               echo "❌ Docker pull also failed - image definitely not available"
@@ -136,14 +136,14 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           NPM_STATUS="${{ steps.npm-check.outputs.status }}"
           DOCKER_STATUS="${{ steps.docker-check.outputs.status }}"
-          
+
           # Create summary
           echo "## 🔍 Publishing Verification Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
           echo "**Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "### 📦 NPM Publishing" >> $GITHUB_STEP_SUMMARY
           if [ "$NPM_STATUS" == "success" ]; then
             echo "✅ **Status:** Published successfully" >> $GITHUB_STEP_SUMMARY
@@ -154,7 +154,7 @@ jobs:
             echo "⚠️ Version $VERSION was not found on NPM registry" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "### 🐳 Docker Hub Publishing" >> $GITHUB_STEP_SUMMARY
           if [ "$DOCKER_STATUS" == "success" ]; then
             echo "✅ **Status:** Published successfully" >> $GITHUB_STEP_SUMMARY
@@ -165,7 +165,7 @@ jobs:
             echo "⚠️ Version $VERSION was not found on Docker Hub" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check overall status
           if [ "$NPM_STATUS" == "success" ] && [ "$DOCKER_STATUS" == "success" ]; then
             echo "✅ **Overall Status:** All publishing targets verified successfully!" >> $GITHUB_STEP_SUMMARY
@@ -184,26 +184,26 @@ jobs:
             const npmStatus = '${{ steps.npm-check.outputs.status }}';
             const dockerStatus = '${{ steps.docker-check.outputs.status }}';
             const workflowUrl = `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
-            
+
             const issueTitle = `🚨 Publishing Verification Failed for v${version}`;
-            
+
             let failedTargets = [];
             if (npmStatus !== 'success') failedTargets.push('NPM');
             if (dockerStatus !== 'success') failedTargets.push('Docker Hub');
-            
+
             const issueBody = `## 🚨 Publishing Verification Failed
-            
+
             The automated verification check detected that version **v${version}** failed to publish to: **${failedTargets.join(', ')}**
-            
+
             ### 📊 Verification Results
-            
+
             | Target | Status | Details |
             |--------|--------|---------|
             | NPM | ${npmStatus === 'success' ? '✅ Success' : '❌ Failed'} | ${npmStatus === 'success' ? `[View on NPM](https://www.npmjs.com/package/mcp-wordpress/v/${version})` : 'Version not found'} |
             | Docker Hub | ${dockerStatus === 'success' ? '✅ Success' : '❌ Failed'} | ${dockerStatus === 'success' ? `[View on Docker Hub](https://hub.docker.com/r/docdyhr/mcp-wordpress/tags?name=${version})` : 'Version not found'} |
-            
+
             ### 🔧 Recommended Actions
-            
+
             1. Check the [release workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/workflows/release.yml) for errors
             2. Manually verify credentials are still valid:
                - NPM_TOKEN in repository secrets
@@ -212,10 +212,10 @@ jobs:
                \`\`\`bash
                # For NPM
                npm publish
-               
+
                # For Docker (using manual script)
                ./scripts/manual-docker-publish.sh ${version}
-               
+
                # Or trigger workflow manually
                gh workflow run docker-publish.yml -f tag=v${version} -f push=true
                \`\`\`
@@ -223,17 +223,17 @@ jobs:
                \`\`\`bash
                gh workflow run verify-release.yml -f version=${version}
                \`\`\`
-            
+
             ### 📝 Workflow Details
-            
+
             - **Workflow Run:** [View verification workflow](${workflowUrl})
             - **Triggered by:** Release workflow completion
             - **Timestamp:** ${new Date().toISOString()}
-            
+
             ---
-            
+
             *This issue was automatically created by the publishing verification workflow.*`;
-            
+
             // Check if similar issue already exists
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
@@ -241,11 +241,11 @@ jobs:
               labels: 'publishing-failure',
               state: 'open'
             });
-            
-            const existingIssue = issues.data.find(issue => 
+
+            const existingIssue = issues.data.find(issue =>
               issue.title.includes(version)
             );
-            
+
             if (!existingIssue) {
               await github.rest.issues.create({
                 owner: context.repo.owner,
@@ -264,7 +264,7 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           echo "🎉 Publishing verification successful for v$VERSION"
-          
+
           # Log success metrics (can be collected by monitoring tools)
           echo "::notice title=Publishing Verified::Version $VERSION successfully published to NPM and Docker Hub"
 
@@ -277,7 +277,7 @@ jobs:
             const npmStatus = '${{ steps.npm-check.outputs.status }}';
             const dockerStatus = '${{ steps.docker-check.outputs.status }}';
             const overallStatus = '${{ steps.report.outputs.overall_status }}';
-            
+
             // Find the release
             try {
               const release = await github.rest.repos.getReleaseByTag({
@@ -285,14 +285,14 @@ jobs:
                 repo: context.repo.repo,
                 tag: `v${version}`
               });
-              
+
               if (release.data) {
                 const statusEmoji = overallStatus === 'success' ? '✅' : '⚠️';
                 const comment = `${statusEmoji} **Publishing Verification Results**\n\n` +
                   `- NPM: ${npmStatus === 'success' ? '✅ Published' : '❌ Failed'}\n` +
                   `- Docker Hub: ${dockerStatus === 'success' ? '✅ Published' : '❌ Failed'}\n\n` +
                   `[View verification details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
-                
+
                 // Update release with verification status
                 await github.rest.repos.updateRelease({
                   owner: context.repo.owner,
@@ -311,7 +311,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: verify-publishing
     if: needs.verify-publishing.outputs.docker-status == 'failure' && github.event_name == 'workflow_run'
-    
+
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
@@ -324,7 +324,7 @@ jobs:
         run: |
           VERSION="${{ needs.verify-publishing.outputs.version }}"
           echo "Attempting to retry publishing for version $VERSION"
-          
+
           # Trigger Docker publishing if it failed
           if [ "${{ needs.verify-publishing.outputs.docker-status }}" == "failure" ]; then
             echo "Triggering Docker publishing workflow..."
@@ -333,5 +333,5 @@ jobs:
           else
             echo "Docker publishing was successful, no retry needed"
           fi
-          
+
           echo "::notice title=Manual Retry::Automated retry triggered for failed publishing targets"

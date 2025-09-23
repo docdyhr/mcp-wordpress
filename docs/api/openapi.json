@@ -18,9 +18,7 @@
       "post": {
         "summary": "Approves a pending comment.",
         "description": "Execute wp_approve_comment MCP tool",
-        "tags": [
-          "comment"
-        ],
+        "tags": ["comment"],
         "requestBody": {
           "required": true,
           "content": {
@@ -33,9 +31,7 @@
                     "description": "The ID of the comment to approve."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -67,9 +63,7 @@
       "post": {
         "summary": "Clear cache for a WordPress site.",
         "description": "Execute wp_cache_clear MCP tool",
-        "tags": [
-          "cache"
-        ],
+        "tags": ["cache"],
         "requestBody": {
           "required": true,
           "content": {
@@ -117,9 +111,7 @@
       "post": {
         "summary": "Get detailed cache configuration and status information.",
         "description": "Execute wp_cache_info MCP tool",
-        "tags": [
-          "cache"
-        ],
+        "tags": ["cache"],
         "requestBody": {
           "required": true,
           "content": {
@@ -163,9 +155,7 @@
       "post": {
         "summary": "Get cache statistics for a WordPress site.",
         "description": "Execute wp_cache_stats MCP tool",
-        "tags": [
-          "cache"
-        ],
+        "tags": ["cache"],
         "requestBody": {
           "required": true,
           "content": {
@@ -209,9 +199,7 @@
       "post": {
         "summary": "Pre-warm cache with essential WordPress data.",
         "description": "Execute wp_cache_warm MCP tool",
-        "tags": [
-          "cache"
-        ],
+        "tags": ["cache"],
         "requestBody": {
           "required": true,
           "content": {
@@ -255,9 +243,7 @@
       "post": {
         "summary": "Creates a new application password for a user.",
         "description": "Execute wp_create_application_password MCP tool",
-        "tags": [
-          "site"
-        ],
+        "tags": ["site"],
         "requestBody": {
           "required": true,
           "content": {
@@ -274,10 +260,7 @@
                     "description": "The name of the application this password is for."
                   }
                 },
-                "required": [
-                  "user_id",
-                  "app_name"
-                ]
+                "required": ["user_id", "app_name"]
               }
             }
           }
@@ -309,9 +292,7 @@
       "post": {
         "summary": "Creates a new category.",
         "description": "Execute wp_create_category MCP tool",
-        "tags": [
-          "taxonomy"
-        ],
+        "tags": ["taxonomy"],
         "requestBody": {
           "required": true,
           "content": {
@@ -328,9 +309,7 @@
                     "description": "The description for the category."
                   }
                 },
-                "required": [
-                  "name"
-                ]
+                "required": ["name"]
               }
             }
           }
@@ -362,9 +341,7 @@
       "post": {
         "summary": "Creates a new comment on a post.",
         "description": "Execute wp_create_comment MCP tool",
-        "tags": [
-          "comment"
-        ],
+        "tags": ["comment"],
         "requestBody": {
           "required": true,
           "content": {
@@ -389,10 +366,7 @@
                     "description": "The email of the comment author."
                   }
                 },
-                "required": [
-                  "post",
-                  "content"
-                ]
+                "required": ["post", "content"]
               }
             }
           }
@@ -424,9 +398,7 @@
       "post": {
         "summary": "Creates a new page.",
         "description": "Execute wp_create_page MCP tool",
-        "tags": [
-          "page"
-        ],
+        "tags": ["page"],
         "requestBody": {
           "required": true,
           "content": {
@@ -445,19 +417,11 @@
                   "status": {
                     "type": "string",
                     "description": "The publishing status for the page.",
-                    "enum": [
-                      "publish",
-                      "draft",
-                      "private",
-                      "pending",
-                      "future"
-                    ],
+                    "enum": ["publish", "draft", "private", "pending", "future"],
                     "default": "publish"
                   }
                 },
-                "required": [
-                  "title"
-                ]
+                "required": ["title"]
               }
             }
           }
@@ -489,9 +453,7 @@
       "post": {
         "summary": "Creates a new WordPress post with comprehensive validation and detailed success feedback including management links.\n\n**Usage Examples:**\n• Simple post: `wp_create_post --title=\"My New Post\" --content=\"<p>Hello World!</p>\"`\n• Draft post: `wp_create_post --title=\"Draft Post\" --status=\"draft\"`\n• Categorized post: `wp_create_post --title=\"Tech News\" --categories=[1,5] --tags=[10,20]`\n• Post with featured image: `wp_create_post --title=\"My Post\" --content=\"<p>Content</p>\" --featured_media=42`\n• Remove featured image: `wp_create_post --title=\"My Post\" --featured_media=0`\n• Scheduled post: `wp_create_post --title=\"Future Post\" --status=\"future\" --date=\"2024-12-25T10:00:00\"`\n• Complete post: `wp_create_post --title=\"Complete Post\" --content=\"<p>Content</p>\" --excerpt=\"Summary\" --status=\"publish\"`",
         "description": "Execute wp_create_post MCP tool",
-        "tags": [
-          "post"
-        ],
+        "tags": ["post"],
         "requestBody": {
           "required": true,
           "content": {
@@ -510,13 +472,7 @@
                   "status": {
                     "type": "string",
                     "description": "The publishing status for the post.",
-                    "enum": [
-                      "publish",
-                      "draft",
-                      "private",
-                      "pending",
-                      "future"
-                    ],
+                    "enum": ["publish", "draft", "private", "pending", "future"],
                     "default": "publish"
                   },
                   "excerpt": {
@@ -536,9 +492,7 @@
                     "description": "The ID of the featured media (image) for the post. Use wp_upload_media first to get a media ID. Set to 0 or null to remove the featured image."
                   }
                 },
-                "required": [
-                  "title"
-                ]
+                "required": ["title"]
               }
             }
           }
@@ -570,9 +524,7 @@
       "post": {
         "summary": "Creates a new tag.",
         "description": "Execute wp_create_tag MCP tool",
-        "tags": [
-          "taxonomy"
-        ],
+        "tags": ["taxonomy"],
         "requestBody": {
           "required": true,
           "content": {
@@ -585,9 +537,7 @@
                     "description": "The name of the tag."
                   }
                 },
-                "required": [
-                  "name"
-                ]
+                "required": ["name"]
               }
             }
           }
@@ -619,9 +569,7 @@
       "post": {
         "summary": "Creates a new user.",
         "description": "Execute wp_create_user MCP tool",
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "requestBody": {
           "required": true,
           "content": {
@@ -646,11 +594,7 @@
                     "description": "An array of roles to assign to the user."
                   }
                 },
-                "required": [
-                  "username",
-                  "email",
-                  "password"
-                ]
+                "required": ["username", "email", "password"]
               }
             }
           }
@@ -682,9 +626,7 @@
       "post": {
         "summary": "Revokes an existing application password.",
         "description": "Execute wp_delete_application_password MCP tool",
-        "tags": [
-          "site"
-        ],
+        "tags": ["site"],
         "requestBody": {
           "required": true,
           "content": {
@@ -701,10 +643,7 @@
                     "description": "The UUID of the application password to revoke."
                   }
                 },
-                "required": [
-                  "user_id",
-                  "uuid"
-                ]
+                "required": ["user_id", "uuid"]
               }
             }
           }
@@ -736,9 +675,7 @@
       "post": {
         "summary": "Deletes a category.",
         "description": "Execute wp_delete_category MCP tool",
-        "tags": [
-          "taxonomy"
-        ],
+        "tags": ["taxonomy"],
         "requestBody": {
           "required": true,
           "content": {
@@ -751,9 +688,7 @@
                     "description": "The ID of the category to delete."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -785,9 +720,7 @@
       "post": {
         "summary": "Deletes a comment.",
         "description": "Execute wp_delete_comment MCP tool",
-        "tags": [
-          "comment"
-        ],
+        "tags": ["comment"],
         "requestBody": {
           "required": true,
           "content": {
@@ -804,9 +737,7 @@
                     "description": "If true, the comment will be permanently deleted. Defaults to false (moved to trash)."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -838,9 +769,7 @@
       "post": {
         "summary": "Deletes a media item.",
         "description": "Execute wp_delete_media MCP tool",
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "requestBody": {
           "required": true,
           "content": {
@@ -857,9 +786,7 @@
                     "description": "If true, permanently delete. If false, move to trash. Defaults to false."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -891,9 +818,7 @@
       "post": {
         "summary": "Deletes a page.",
         "description": "Execute wp_delete_page MCP tool",
-        "tags": [
-          "page"
-        ],
+        "tags": ["page"],
         "requestBody": {
           "required": true,
           "content": {
@@ -910,9 +835,7 @@
                     "description": "If true, permanently delete. If false, move to trash. Defaults to false."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -944,9 +867,7 @@
       "post": {
         "summary": "Deletes a WordPress post with option for permanent deletion or moving to trash.",
         "description": "Execute wp_delete_post MCP tool",
-        "tags": [
-          "post"
-        ],
+        "tags": ["post"],
         "requestBody": {
           "required": true,
           "content": {
@@ -963,9 +884,7 @@
                     "description": "If true, permanently delete. If false, move to trash. Defaults to false."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -997,9 +916,7 @@
       "post": {
         "summary": "Deletes a tag.",
         "description": "Execute wp_delete_tag MCP tool",
-        "tags": [
-          "taxonomy"
-        ],
+        "tags": ["taxonomy"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1012,9 +929,7 @@
                     "description": "The ID of the tag to delete."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -1046,9 +961,7 @@
       "post": {
         "summary": "Deletes a user.",
         "description": "Execute wp_delete_user MCP tool",
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1065,9 +978,7 @@
                     "description": "The ID of a user to reassign the deleted user's content to."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -1099,9 +1010,7 @@
       "post": {
         "summary": "Lists application passwords for a specific user.",
         "description": "Execute wp_get_application_passwords MCP tool",
-        "tags": [
-          "site"
-        ],
+        "tags": ["site"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1114,9 +1023,7 @@
                     "description": "The ID of the user to get application passwords for."
                   }
                 },
-                "required": [
-                  "user_id"
-                ]
+                "required": ["user_id"]
               }
             }
           }
@@ -1148,9 +1055,7 @@
       "post": {
         "summary": "Gets the current authentication status for a configured WordPress site.",
         "description": "Execute wp_get_auth_status MCP tool",
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1189,9 +1094,7 @@
       "post": {
         "summary": "Retrieves a single category by its ID.",
         "description": "Execute wp_get_category MCP tool",
-        "tags": [
-          "taxonomy"
-        ],
+        "tags": ["taxonomy"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1204,9 +1107,7 @@
                     "description": "The unique identifier for the category."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -1238,9 +1139,7 @@
       "post": {
         "summary": "Retrieves a single comment by its ID.",
         "description": "Execute wp_get_comment MCP tool",
-        "tags": [
-          "comment"
-        ],
+        "tags": ["comment"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1253,9 +1152,7 @@
                     "description": "The unique identifier for the comment."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -1287,9 +1184,7 @@
       "post": {
         "summary": "Retrieves the currently authenticated user with comprehensive profile information including roles, capabilities, and account details.\n\n**Usage Examples:**\n• Get current user: `wp_get_current_user`\n• Check permissions: Use this to verify your current user's capabilities and roles\n• Account verification: Confirm you're authenticated with the correct account\n• Profile details: View registration date, email, and user metadata",
         "description": "Execute wp_get_current_user MCP tool",
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1328,9 +1223,7 @@
       "post": {
         "summary": "Retrieves a single media item by its ID.",
         "description": "Execute wp_get_media MCP tool",
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1343,9 +1236,7 @@
                     "description": "The unique identifier for the media item."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -1377,9 +1268,7 @@
       "post": {
         "summary": "Retrieves a single page by its ID.",
         "description": "Execute wp_get_page MCP tool",
-        "tags": [
-          "page"
-        ],
+        "tags": ["page"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1392,9 +1281,7 @@
                     "description": "The unique identifier for the page."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -1426,9 +1313,7 @@
       "post": {
         "summary": "Retrieves revisions for a specific page.",
         "description": "Execute wp_get_page_revisions MCP tool",
-        "tags": [
-          "page"
-        ],
+        "tags": ["page"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1441,9 +1326,7 @@
                     "description": "The ID of the page to get revisions for."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -1475,9 +1358,7 @@
       "post": {
         "summary": "Retrieves detailed information about a single post including metadata, content statistics, and management links.",
         "description": "Execute wp_get_post MCP tool",
-        "tags": [
-          "post"
-        ],
+        "tags": ["post"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1490,9 +1371,7 @@
                     "description": "The unique identifier for the post."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -1524,9 +1403,7 @@
       "post": {
         "summary": "Retrieves the revision history for a specific post showing author and modification dates.",
         "description": "Execute wp_get_post_revisions MCP tool",
-        "tags": [
-          "post"
-        ],
+        "tags": ["post"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1539,9 +1416,7 @@
                     "description": "The ID of the post to get revisions for."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -1573,9 +1448,7 @@
       "post": {
         "summary": "Retrieves the general settings for a WordPress site.",
         "description": "Execute wp_get_site_settings MCP tool",
-        "tags": [
-          "site"
-        ],
+        "tags": ["site"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1614,9 +1487,7 @@
       "post": {
         "summary": "Retrieves a single tag by its ID.",
         "description": "Execute wp_get_tag MCP tool",
-        "tags": [
-          "taxonomy"
-        ],
+        "tags": ["taxonomy"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1629,9 +1500,7 @@
                     "description": "The unique identifier for the tag."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -1663,9 +1532,7 @@
       "post": {
         "summary": "Retrieves a single user by their ID.",
         "description": "Execute wp_get_user MCP tool",
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1678,9 +1545,7 @@
                     "description": "The unique identifier for the user."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -1712,9 +1577,7 @@
       "post": {
         "summary": "Lists categories from a WordPress site.",
         "description": "Execute wp_list_categories MCP tool",
-        "tags": [
-          "taxonomy"
-        ],
+        "tags": ["taxonomy"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1762,9 +1625,7 @@
       "post": {
         "summary": "Lists comments from a WordPress site, with filters.",
         "description": "Execute wp_list_comments MCP tool",
-        "tags": [
-          "comment"
-        ],
+        "tags": ["comment"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1779,13 +1640,7 @@
                   "status": {
                     "type": "string",
                     "description": "Filter by comment status.",
-                    "enum": [
-                      "publish",
-                      "draft",
-                      "private",
-                      "pending",
-                      "future"
-                    ],
+                    "enum": ["publish", "draft", "private", "pending", "future"],
                     "default": "publish"
                   }
                 }
@@ -1820,9 +1675,7 @@
       "post": {
         "summary": "Lists media items from a WordPress site, with filters.",
         "description": "Execute wp_list_media MCP tool",
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1875,9 +1728,7 @@
       "post": {
         "summary": "Lists pages from a WordPress site, with filters.",
         "description": "Execute wp_list_pages MCP tool",
-        "tags": [
-          "page"
-        ],
+        "tags": ["page"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1897,13 +1748,7 @@
                   "status": {
                     "type": "string",
                     "description": "Filter by page status.",
-                    "enum": [
-                      "publish",
-                      "draft",
-                      "private",
-                      "pending",
-                      "future"
-                    ],
+                    "enum": ["publish", "draft", "private", "pending", "future"],
                     "default": "publish"
                   }
                 }
@@ -1938,9 +1783,7 @@
       "post": {
         "summary": "Lists posts from a WordPress site with comprehensive filtering options. Supports search, status filtering, and category/tag filtering with enhanced metadata display.\n\n**Usage Examples:**\n• Basic listing: `wp_list_posts`\n• Search posts: `wp_list_posts --search=\"AI trends\"`\n• Filter by status: `wp_list_posts --status=\"draft\"`\n• Category filtering: `wp_list_posts --categories=[1,2,3]`\n• Paginated results: `wp_list_posts --per_page=20 --page=2`\n• Combined filters: `wp_list_posts --search=\"WordPress\" --status=\"publish\" --per_page=10`",
         "description": "Execute wp_list_posts MCP tool",
-        "tags": [
-          "post"
-        ],
+        "tags": ["post"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1960,13 +1803,7 @@
                   "status": {
                     "type": "string",
                     "description": "Filter by post status.",
-                    "enum": [
-                      "publish",
-                      "draft",
-                      "private",
-                      "pending",
-                      "future"
-                    ],
+                    "enum": ["publish", "draft", "private", "pending", "future"],
                     "default": "publish"
                   },
                   "categories": {
@@ -2009,9 +1846,7 @@
       "post": {
         "summary": "Lists tags from a WordPress site.",
         "description": "Execute wp_list_tags MCP tool",
-        "tags": [
-          "taxonomy"
-        ],
+        "tags": ["taxonomy"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2055,9 +1890,7 @@
       "post": {
         "summary": "Lists users from a WordPress site with comprehensive filtering and detailed user information including roles, registration dates, and activity status.\n\n**Usage Examples:**\n• List all users: `wp_list_users`\n• Search users: `wp_list_users --search=\"john\"`\n• Filter by role: `wp_list_users --roles=[\"editor\",\"author\"]`\n• Find admins: `wp_list_users --roles=[\"administrator\"]`\n• Combined search: `wp_list_users --search=\"smith\" --roles=[\"subscriber\"]`",
         "description": "Execute wp_list_users MCP tool",
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2105,9 +1938,7 @@
       "post": {
         "summary": "Get performance alerts and anomaly detection results",
         "description": "Execute wp_performance_alerts MCP tool",
-        "tags": [
-          "performance"
-        ],
+        "tags": ["performance"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2126,14 +1957,7 @@
                   "category": {
                     "type": "string",
                     "description": "Filter alerts by category (performance, cache, system, wordpress)",
-                    "enum": [
-                      "overview",
-                      "requests",
-                      "cache",
-                      "system",
-                      "tools",
-                      "all"
-                    ],
+                    "enum": ["overview", "requests", "cache", "system", "tools", "all"],
                     "default": "all"
                   },
                   "limit": {
@@ -2176,9 +2000,7 @@
       "post": {
         "summary": "Compare current performance against industry benchmarks",
         "description": "Execute wp_performance_benchmark MCP tool",
-        "tags": [
-          "performance"
-        ],
+        "tags": ["performance"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2193,14 +2015,7 @@
                   "category": {
                     "type": "string",
                     "description": "Benchmark category (response_time, cache_performance, error_rate, system_resources, all)",
-                    "enum": [
-                      "overview",
-                      "requests",
-                      "cache",
-                      "system",
-                      "tools",
-                      "all"
-                    ],
+                    "enum": ["overview", "requests", "cache", "system", "tools", "all"],
                     "default": "all"
                   },
                   "includeRecommendations": {
@@ -2239,9 +2054,7 @@
       "post": {
         "summary": "Export comprehensive performance report",
         "description": "Execute wp_performance_export MCP tool",
-        "tags": [
-          "performance"
-        ],
+        "tags": ["performance"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2256,11 +2069,7 @@
                   "format": {
                     "type": "string",
                     "description": "Export format (json, csv, summary)",
-                    "enum": [
-                      "summary",
-                      "detailed",
-                      "raw"
-                    ],
+                    "enum": ["summary", "detailed", "raw"],
                     "default": "summary"
                   },
                   "includeHistorical": {
@@ -2307,9 +2116,7 @@
       "post": {
         "summary": "Get historical performance data and trends",
         "description": "Execute wp_performance_history MCP tool",
-        "tags": [
-          "performance"
-        ],
+        "tags": ["performance"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2324,14 +2131,7 @@
                   "timeframe": {
                     "type": "string",
                     "description": "Time period for historical data (1h, 6h, 12h, 24h, 7d)",
-                    "enum": [
-                      "1h",
-                      "6h",
-                      "12h",
-                      "24h",
-                      "7d",
-                      "30d"
-                    ]
+                    "enum": ["1h", "6h", "12h", "24h", "7d", "30d"]
                   },
                   "metrics": {
                     "type": "array",
@@ -2374,9 +2174,7 @@
       "post": {
         "summary": "Get optimization recommendations and insights",
         "description": "Execute wp_performance_optimize MCP tool",
-        "tags": [
-          "performance"
-        ],
+        "tags": ["performance"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2391,22 +2189,12 @@
                   "focus": {
                     "type": "string",
                     "description": "Optimization focus area (speed, reliability, efficiency, scaling)",
-                    "enum": [
-                      "speed",
-                      "reliability",
-                      "efficiency",
-                      "scaling"
-                    ]
+                    "enum": ["speed", "reliability", "efficiency", "scaling"]
                   },
                   "priority": {
                     "type": "string",
                     "description": "Implementation timeline (quick_wins, medium_term, long_term, all)",
-                    "enum": [
-                      "quick_wins",
-                      "medium_term",
-                      "long_term",
-                      "all"
-                    ]
+                    "enum": ["quick_wins", "medium_term", "long_term", "all"]
                   },
                   "includeROI": {
                     "type": "boolean",
@@ -2448,9 +2236,7 @@
       "post": {
         "summary": "Get real-time performance statistics and metrics",
         "description": "Execute wp_performance_stats MCP tool",
-        "tags": [
-          "performance"
-        ],
+        "tags": ["performance"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2465,24 +2251,13 @@
                   "category": {
                     "type": "string",
                     "description": "Category of metrics to return (overview, requests, cache, system, tools, all)",
-                    "enum": [
-                      "overview",
-                      "requests",
-                      "cache",
-                      "system",
-                      "tools",
-                      "all"
-                    ],
+                    "enum": ["overview", "requests", "cache", "system", "tools", "all"],
                     "default": "all"
                   },
                   "format": {
                     "type": "string",
                     "description": "Detail level of the response (summary, detailed, raw)",
-                    "enum": [
-                      "summary",
-                      "detailed",
-                      "raw"
-                    ],
+                    "enum": ["summary", "detailed", "raw"],
                     "default": "summary"
                   }
                 }
@@ -2517,9 +2292,7 @@
       "post": {
         "summary": "Performs a site-wide search for content across posts, pages, and media with comprehensive results and metadata.\n\n**Usage Examples:**\n• Search everything: `wp_search_site --term=\"WordPress\"`\n• Search posts only: `wp_search_site --term=\"tutorial\" --type=\"posts\"`\n• Search pages: `wp_search_site --term=\"about\" --type=\"pages\"`\n• Search media: `wp_search_site --term=\"logo\" --type=\"media\"`\n• Find specific content: `wp_search_site --term=\"contact form\"`",
         "description": "Execute wp_search_site MCP tool",
-        "tags": [
-          "site"
-        ],
+        "tags": ["site"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2536,9 +2309,7 @@
                     "description": "The type of content to search."
                   }
                 },
-                "required": [
-                  "term"
-                ]
+                "required": ["term"]
               }
             }
           }
@@ -2570,9 +2341,7 @@
       "post": {
         "summary": "Marks a comment as spam.",
         "description": "Execute wp_spam_comment MCP tool",
-        "tags": [
-          "comment"
-        ],
+        "tags": ["comment"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2585,9 +2354,7 @@
                     "description": "The ID of the comment to mark as spam."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -2619,9 +2386,7 @@
       "post": {
         "summary": "Switches the authentication method for a site for the current session.",
         "description": "Execute wp_switch_auth_method MCP tool",
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2646,9 +2411,7 @@
                     "description": "The token for 'jwt' authentication."
                   }
                 },
-                "required": [
-                  "method"
-                ]
+                "required": ["method"]
               }
             }
           }
@@ -2680,9 +2443,7 @@
       "post": {
         "summary": "Tests the authentication and connectivity for a configured WordPress site with detailed connection diagnostics.\n\n**Usage Examples:**\n• Test connection: `wp_test_auth`\n• Multi-site test: `wp_test_auth --site=\"my-site\"`\n• Verify setup: Use this after configuring new credentials\n• Troubleshoot: Run when experiencing connection issues\n• Health check: Regular verification of WordPress connectivity",
         "description": "Execute wp_test_auth MCP tool",
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2721,9 +2482,7 @@
       "post": {
         "summary": "Updates an existing category.",
         "description": "Execute wp_update_category MCP tool",
-        "tags": [
-          "taxonomy"
-        ],
+        "tags": ["taxonomy"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2740,9 +2499,7 @@
                     "description": "The new name for the category."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -2774,9 +2531,7 @@
       "post": {
         "summary": "Updates an existing comment.",
         "description": "Execute wp_update_comment MCP tool",
-        "tags": [
-          "comment"
-        ],
+        "tags": ["comment"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2795,19 +2550,11 @@
                   "status": {
                     "type": "string",
                     "description": "The new status for the comment.",
-                    "enum": [
-                      "publish",
-                      "draft",
-                      "private",
-                      "pending",
-                      "future"
-                    ],
+                    "enum": ["publish", "draft", "private", "pending", "future"],
                     "default": "publish"
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -2839,9 +2586,7 @@
       "post": {
         "summary": "Updates the metadata of an existing media item.",
         "description": "Execute wp_update_media MCP tool",
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2870,9 +2615,7 @@
                     "description": "The new description."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -2904,9 +2647,7 @@
       "post": {
         "summary": "Updates an existing page.",
         "description": "Execute wp_update_page MCP tool",
-        "tags": [
-          "page"
-        ],
+        "tags": ["page"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2929,19 +2670,11 @@
                   "status": {
                     "type": "string",
                     "description": "The new status for the page.",
-                    "enum": [
-                      "publish",
-                      "draft",
-                      "private",
-                      "pending",
-                      "future"
-                    ],
+                    "enum": ["publish", "draft", "private", "pending", "future"],
                     "default": "publish"
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -2973,9 +2706,7 @@
       "post": {
         "summary": "Updates an existing WordPress post with validation and detailed confirmation.",
         "description": "Execute wp_update_post MCP tool",
-        "tags": [
-          "post"
-        ],
+        "tags": ["post"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2998,19 +2729,11 @@
                   "status": {
                     "type": "string",
                     "description": "The new status for the post.",
-                    "enum": [
-                      "publish",
-                      "draft",
-                      "private",
-                      "pending",
-                      "future"
-                    ],
+                    "enum": ["publish", "draft", "private", "pending", "future"],
                     "default": "publish"
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -3042,9 +2765,7 @@
       "post": {
         "summary": "Updates one or more general settings for a WordPress site.",
         "description": "Execute wp_update_site_settings MCP tool",
-        "tags": [
-          "site"
-        ],
+        "tags": ["site"],
         "requestBody": {
           "required": true,
           "content": {
@@ -3096,9 +2817,7 @@
       "post": {
         "summary": "Updates an existing tag.",
         "description": "Execute wp_update_tag MCP tool",
-        "tags": [
-          "taxonomy"
-        ],
+        "tags": ["taxonomy"],
         "requestBody": {
           "required": true,
           "content": {
@@ -3115,9 +2834,7 @@
                     "description": "The new name for the tag."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -3149,9 +2866,7 @@
       "post": {
         "summary": "Updates an existing user.",
         "description": "Execute wp_update_user MCP tool",
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "requestBody": {
           "required": true,
           "content": {
@@ -3172,9 +2887,7 @@
                     "description": "The new display name for the user."
                   }
                 },
-                "required": [
-                  "id"
-                ]
+                "required": ["id"]
               }
             }
           }
@@ -3206,9 +2919,7 @@
       "post": {
         "summary": "Uploads a file to the WordPress media library.",
         "description": "Execute wp_upload_media MCP tool",
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "requestBody": {
           "required": true,
           "content": {
@@ -3241,9 +2952,7 @@
                     "description": "The ID of a post to attach this media to."
                   }
                 },
-                "required": [
-                  "file_path"
-                ]
+                "required": ["file_path"]
               }
             }
           }
@@ -3295,12 +3004,7 @@
             "description": "Publication status"
           }
         },
-        "required": [
-          "id",
-          "title",
-          "content",
-          "status"
-        ]
+        "required": ["id", "title", "content", "status"]
       }
     },
     "parameters": {},

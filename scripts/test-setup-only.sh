@@ -95,12 +95,12 @@ if docker-compose -f docker-compose.test.yml exec -T wordpress-test test -f /var
     CONFIG=$(docker-compose -f docker-compose.test.yml exec -T wordpress-test cat /var/www/html/test-config.json)
     echo -e "${GREEN}✅ Test configuration ready${NC}"
     echo "$CONFIG" | jq '.' 2>/dev/null || echo "$CONFIG"
-    
+
     # Test authentication
     APP_PASSWORD=$(echo "$CONFIG" | jq -r '.app_password' 2>/dev/null || echo "")
     if [ -n "$APP_PASSWORD" ] && [ "$APP_PASSWORD" != "null" ]; then
         echo -e "${GREEN}✅ App password generated successfully${NC}"
-        
+
         # Test API with authentication
         echo -e "${YELLOW}🔐 Testing authenticated API access...${NC}"
         AUTH_HEADER="Authorization: Basic $(echo -n "testuser:$APP_PASSWORD" | base64)"

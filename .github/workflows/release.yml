@@ -14,7 +14,7 @@ on:
     types: [published]
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: "20"
   HUSKY: 0
   CI: true
 
@@ -44,7 +44,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -99,8 +99,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
+          cache: "npm"
+          registry-url: "https://registry.npmjs.org"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -151,13 +151,13 @@ jobs:
           registry: docker.io
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          
+
       - name: 🔍 Verify Docker Login
         run: |
           echo "Verifying Docker Hub login..."
           docker info
           echo "Docker Hub login successful"
-          
+
       - name: 🔍 Debug Release Info
         run: |
           echo "Release info debug:"
@@ -173,7 +173,7 @@ jobs:
           git status || true
           echo "Git tags:"
           git tag --sort=-version:refname | head -5 || true
-          
+
       - name: 📝 Extract Metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -248,13 +248,15 @@ jobs:
 
       - name: 📝 Update Docker Hub Description
         uses: peter-evans/dockerhub-description@v3
-        if: github.event_name == 'release' || needs.semantic-release.outputs.new-release-published == 'true' || github.ref == 'refs/heads/main'
+        if:
+          github.event_name == 'release' || needs.semantic-release.outputs.new-release-published == 'true' || github.ref
+          == 'refs/heads/main'
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: docdyhr/mcp-wordpress
           readme-filepath: ./README.md
-          
+
       - name: 🎯 Verify Docker Push Success
         id: verify-docker
         run: |
@@ -263,15 +265,15 @@ jobs:
           echo "${{ steps.meta.outputs.tags }}"
           echo ""
           echo "Version: ${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}"
-          
+
           # Wait for Docker Hub propagation
           echo "Waiting for Docker Hub propagation..."
           sleep 30
-          
+
           # Verify the image was pushed successfully
           VERSION="${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}"
           echo "Verifying Docker Hub publishing for version: $VERSION"
-          
+
           # Try to pull the image to verify it exists
           if docker pull docdyhr/mcp-wordpress:$VERSION; then
             echo "✅ Successfully verified Docker image on Docker Hub"
@@ -281,7 +283,7 @@ jobs:
             echo "verification_status=failure" >> $GITHUB_OUTPUT
             exit 1
           fi
-          
+
       - name: 🚨 Docker Verification Failed - Create Alert
         if: failure() && steps.verify-docker.outputs.verification_status == 'failure'
         run: |
@@ -310,7 +312,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: 📦 Install Dependencies
         run: npm ci
@@ -384,18 +386,22 @@ jobs:
           echo "📦 DXT Package Status: ${{ needs.dxt-package.result }}"
           echo "🔄 Semantic Release: ${{ needs.semantic-release.result }}"
           echo "=========================="
-          
+
       - name: ✅ Success Notification
-        if: needs.semantic-release.result == 'success' && needs.docker-publish.result == 'success' && needs.dxt-package.result == 'success'
+        if:
+          needs.semantic-release.result == 'success' && needs.docker-publish.result == 'success' &&
+          needs.dxt-package.result == 'success'
         run: |
           echo "🎉 Release completed successfully!"
           echo "✅ All components published successfully"
           echo "📦 NPM: Published"
-          echo "🐳 Docker: Published" 
+          echo "🐳 Docker: Published"
           echo "📦 DXT Package: Uploaded"
-          
+
       - name: 🚨 Failure Notification
-        if: needs.semantic-release.result == 'failure' || needs.docker-publish.result == 'failure' || needs.dxt-package.result == 'failure'
+        if:
+          needs.semantic-release.result == 'failure' || needs.docker-publish.result == 'failure' ||
+          needs.dxt-package.result == 'failure'
         run: |
           echo "❌ Release had failures!"
           echo "Please check the workflow logs and fix any issues."

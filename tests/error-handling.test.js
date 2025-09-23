@@ -1,9 +1,4 @@
-import {
-  getErrorMessage,
-  handleToolError,
-  validateRequired,
-  validateSite,
-} from "../dist/utils/error.js";
+import { getErrorMessage, handleToolError, validateRequired, validateSite } from "../dist/utils/error.js";
 
 describe("Error Handling Utilities", () => {
   describe("getErrorMessage", () => {
@@ -59,9 +54,7 @@ describe("Error Handling Utilities", () => {
 
     test("should throw generic error for other cases", () => {
       const error = new Error("Generic error");
-      expect(() => handleToolError(error, "test operation")).toThrow(
-        "Failed to test operation: Generic error",
-      );
+      expect(() => handleToolError(error, "test operation")).toThrow("Failed to test operation: Generic error");
     });
   });
 
@@ -73,9 +66,9 @@ describe("Error Handling Utilities", () => {
 
     test("should throw error when required params are missing", () => {
       const params = { title: "Test" };
-      expect(() =>
-        validateRequired(params, ["id", "title", "content"]),
-      ).toThrow("Missing required parameters: id, content");
+      expect(() => validateRequired(params, ["id", "title", "content"])).toThrow(
+        "Missing required parameters: id, content",
+      );
     });
 
     test("should handle empty required array", () => {

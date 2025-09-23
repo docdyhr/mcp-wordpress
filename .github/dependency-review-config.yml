@@ -40,7 +40,7 @@ exclude_packages:
   - npm:concurrently
 
 # GitHub Security Advisories settings
-allow_ghsas: []  # Empty array means no advisories are allowed
+allow_ghsas: [] # Empty array means no advisories are allowed
 
 # Comment settings for pull requests
 comment_summary_in_pr: always
@@ -55,7 +55,7 @@ summarize_in_pr: true
 external_dependencies: warn
 
 # Development dependencies
-exclude_dev_dependencies: false  # Set to true to ignore dev dependencies
+exclude_dev_dependencies: false # Set to true to ignore dev dependencies
 
 # Package manager specific settings
 package_managers:
@@ -64,7 +64,7 @@ package_managers:
     check_licenses: true
     check_vulnerabilities: true
     exclude_dev: false
-  
+
 # Scope-based exclusions
 exclude_scopes:
   - "@types"

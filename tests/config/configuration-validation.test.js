@@ -1,4 +1,3 @@
-
 import { ConfigurationValidator } from "@/config/ConfigurationSchema.js";
 
 describe("Configuration Validation Tests", () => {
@@ -19,17 +18,15 @@ describe("Configuration Validation Tests", () => {
         ],
       };
 
-      expect(() =>
-        ConfigurationValidator.validateMultiSiteConfig(validConfig),
-      ).not.toThrow();
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(validConfig)).not.toThrow();
     });
 
     it("should reject configuration with missing sites array", () => {
       const invalidConfig = {};
 
-      expect(() =>
-        ConfigurationValidator.validateMultiSiteConfig(invalidConfig),
-      ).toThrow(/Multi-site configuration validation failed/);
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(invalidConfig)).toThrow(
+        /Multi-site configuration validation failed/,
+      );
     });
 
     it("should reject configuration with duplicate site IDs", () => {
@@ -56,9 +53,7 @@ describe("Configuration Validation Tests", () => {
         ],
       };
 
-      expect(() =>
-        ConfigurationValidator.validateMultiSiteConfig(invalidConfig),
-      ).toThrow(/Site IDs must be unique/);
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(invalidConfig)).toThrow(/Site IDs must be unique/);
     });
 
     it("should reject configuration with duplicate site URLs", () => {
@@ -85,9 +80,7 @@ describe("Configuration Validation Tests", () => {
         ],
       };
 
-      expect(() =>
-        ConfigurationValidator.validateMultiSiteConfig(invalidConfig),
-      ).toThrow(/Site URLs must be unique/);
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(invalidConfig)).toThrow(/Site URLs must be unique/);
     });
 
     it("should reject invalid URLs", () => {
@@ -105,9 +98,7 @@ describe("Configuration Validation Tests", () => {
         ],
       };
 
-      expect(() =>
-        ConfigurationValidator.validateMultiSiteConfig(invalidConfig),
-      ).toThrow(/Invalid URL/);
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(invalidConfig)).toThrow(/Invalid URL/);
     });
 
     it("should reject invalid authentication methods", () => {
@@ -126,9 +117,7 @@ describe("Configuration Validation Tests", () => {
         ],
       };
 
-      expect(() =>
-        ConfigurationValidator.validateMultiSiteConfig(invalidConfig),
-      ).toThrow();
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(invalidConfig)).toThrow();
     });
 
     it("should validate all supported authentication methods", () => {
@@ -150,9 +139,7 @@ describe("Configuration Validation Tests", () => {
           ],
         };
 
-        expect(() =>
-          ConfigurationValidator.validateMultiSiteConfig(config),
-        ).not.toThrow();
+        expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).not.toThrow();
       });
     });
 
@@ -172,9 +159,7 @@ describe("Configuration Validation Tests", () => {
       };
 
       const validated = ConfigurationValidator.validateMultiSiteConfig(config);
-      expect(validated.sites[0].config.WORDPRESS_AUTH_METHOD).toBe(
-        "app-password",
-      );
+      expect(validated.sites[0].config.WORDPRESS_AUTH_METHOD).toBe("app-password");
     });
 
     it("should reject site IDs with invalid characters", () => {
@@ -192,9 +177,7 @@ describe("Configuration Validation Tests", () => {
         ],
       };
 
-      expect(() =>
-        ConfigurationValidator.validateMultiSiteConfig(invalidConfig),
-      ).toThrow(/Site ID can only contain/);
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(invalidConfig)).toThrow(/Site ID can only contain/);
     });
 
     it("should reject usernames with invalid characters", () => {
@@ -212,9 +195,9 @@ describe("Configuration Validation Tests", () => {
         ],
       };
 
-      expect(() =>
-        ConfigurationValidator.validateMultiSiteConfig(invalidConfig),
-      ).toThrow(/Username contains invalid characters/);
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(invalidConfig)).toThrow(
+        /Username contains invalid characters/,
+      );
     });
 
     it("should reject passwords that are too short", () => {
@@ -232,9 +215,9 @@ describe("Configuration Validation Tests", () => {
         ],
       };
 
-      expect(() =>
-        ConfigurationValidator.validateMultiSiteConfig(invalidConfig),
-      ).toThrow(/Password must be at least 8 characters/);
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(invalidConfig)).toThrow(
+        /Password must be at least 8 characters/,
+      );
     });
   });
 
@@ -246,9 +229,7 @@ describe("Configuration Validation Tests", () => {
         WORDPRESS_APP_PASSWORD: "test-password-123",
       };
 
-      expect(() =>
-        ConfigurationValidator.validateEnvironmentConfig(validEnv),
-      ).not.toThrow();
+      expect(() => ConfigurationValidator.validateEnvironmentConfig(validEnv)).not.toThrow();
     });
 
     it("should reject missing required fields", () => {
@@ -256,9 +237,7 @@ describe("Configuration Validation Tests", () => {
         WORDPRESS_USERNAME: "testuser",
       };
 
-      expect(() =>
-        ConfigurationValidator.validateEnvironmentConfig(invalidEnv),
-      ).toThrow();
+      expect(() => ConfigurationValidator.validateEnvironmentConfig(invalidEnv)).toThrow();
     });
 
     it("should use default auth method for environment config", () => {
@@ -283,9 +262,7 @@ describe("Configuration Validation Tests", () => {
         LOG_LEVEL: "info",
       };
 
-      expect(() =>
-        ConfigurationValidator.validateEnvironmentConfig(env),
-      ).not.toThrow();
+      expect(() => ConfigurationValidator.validateEnvironmentConfig(env)).not.toThrow();
     });
 
     it("should reject invalid LOG_LEVEL values", () => {
@@ -296,9 +273,7 @@ describe("Configuration Validation Tests", () => {
         LOG_LEVEL: "invalid-level",
       };
 
-      expect(() =>
-        ConfigurationValidator.validateEnvironmentConfig(env),
-      ).toThrow();
+      expect(() => ConfigurationValidator.validateEnvironmentConfig(env)).toThrow();
     });
   });
 
@@ -311,15 +286,11 @@ describe("Configuration Validation Tests", () => {
         wordpressAuthMethod: "jwt",
       };
 
-      expect(() =>
-        ConfigurationValidator.validateMcpConfig(validMcp),
-      ).not.toThrow();
+      expect(() => ConfigurationValidator.validateMcpConfig(validMcp)).not.toThrow();
     });
 
     it("should allow undefined MCP configuration", () => {
-      expect(() =>
-        ConfigurationValidator.validateMcpConfig(undefined),
-      ).not.toThrow();
+      expect(() => ConfigurationValidator.validateMcpConfig(undefined)).not.toThrow();
     });
 
     it("should allow partial MCP configuration", () => {
@@ -327,9 +298,7 @@ describe("Configuration Validation Tests", () => {
         wordpressSiteUrl: "https://example.com",
       };
 
-      expect(() =>
-        ConfigurationValidator.validateMcpConfig(partialMcp),
-      ).not.toThrow();
+      expect(() => ConfigurationValidator.validateMcpConfig(partialMcp)).not.toThrow();
     });
   });
 
@@ -349,14 +318,10 @@ describe("Configuration Validation Tests", () => {
         ],
       };
 
-      expect(ConfigurationValidator.isValidMultiSiteConfig(validConfig)).toBe(
-        true,
-      );
+      expect(ConfigurationValidator.isValidMultiSiteConfig(validConfig)).toBe(true);
 
       const invalidConfig = {};
-      expect(ConfigurationValidator.isValidMultiSiteConfig(invalidConfig)).toBe(
-        false,
-      );
+      expect(ConfigurationValidator.isValidMultiSiteConfig(invalidConfig)).toBe(false);
     });
 
     it("should return validation errors without throwing", () => {
@@ -392,9 +357,7 @@ describe("Configuration Validation Tests", () => {
         ],
       };
 
-      expect(() =>
-        ConfigurationValidator.validateMultiSiteConfig(config),
-      ).not.toThrow();
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).not.toThrow();
     });
 
     it("should accept http URLs", () => {
@@ -412,9 +375,7 @@ describe("Configuration Validation Tests", () => {
         ],
       };
 
-      expect(() =>
-        ConfigurationValidator.validateMultiSiteConfig(config),
-      ).not.toThrow();
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).not.toThrow();
     });
 
     it("should reject other protocols", () => {
@@ -432,9 +393,9 @@ describe("Configuration Validation Tests", () => {
         ],
       };
 
-      expect(() =>
-        ConfigurationValidator.validateMultiSiteConfig(config),
-      ).toThrow(/URL must use http or https protocol/);
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).toThrow(
+        /URL must use http or https protocol/,
+      );
     });
   });
 
@@ -452,17 +413,15 @@ describe("Configuration Validation Tests", () => {
 
       const config = { sites };
 
-      expect(() =>
-        ConfigurationValidator.validateMultiSiteConfig(config),
-      ).toThrow(/Maximum of 50 sites supported/);
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).toThrow(/Maximum of 50 sites supported/);
     });
 
     it("should enforce minimum number of sites", () => {
       const config = { sites: [] };
 
-      expect(() =>
-        ConfigurationValidator.validateMultiSiteConfig(config),
-      ).toThrow(/At least one site must be configured/);
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).toThrow(
+        /At least one site must be configured/,
+      );
     });
 
     it("should enforce maximum string lengths", () => {
@@ -480,9 +439,9 @@ describe("Configuration Validation Tests", () => {
         ],
       };
 
-      expect(() =>
-        ConfigurationValidator.validateMultiSiteConfig(config),
-      ).toThrow(/Site ID must be 50 characters or less/);
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).toThrow(
+        /Site ID must be 50 characters or less/,
+      );
     });
   });
 });

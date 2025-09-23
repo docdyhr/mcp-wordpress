@@ -2,7 +2,8 @@
 
 ## Overview
 
-The incremental coverage guardrail prevents coverage regression by comparing current PR coverage against a baseline from the main branch. This ensures code quality and maintains test coverage standards.
+The incremental coverage guardrail prevents coverage regression by comparing current PR coverage against a baseline from
+the main branch. This ensures code quality and maintains test coverage standards.
 
 ## Features
 
@@ -105,7 +106,7 @@ BASELINE_FILE=coverage/baseline-main.json npm run coverage:baseline
       "metric": "lines",
       "baseline": 30.97,
       "current": 32.17,
-      "diff": 1.20,
+      "diff": 1.2,
       "passed": true,
       "tolerance": 1
     }
@@ -166,16 +167,19 @@ rm coverage-baseline.json && npm run coverage:baseline
 ## Implementation Details
 
 ### Script Location
+
 - `scripts/incremental-coverage-guardrail.js`: Main implementation
 - `scripts/coverage-guardrail.js`: Phase-based coverage validation
 - `.github/workflows/coverage-guard.yml`: CI/CD workflow
 
 ### Baseline Storage
+
 - `coverage-baseline.json`: Baseline metrics from main branch
 - Generated automatically in CI/CD pipeline
 - Contains timestamp, commit info, and detailed metrics
 
 ### Coverage Sources
+
 - Primary: `coverage/coverage-final.json` (Jest output)
 - Fallback: Estimated values from project knowledge
 - Future: Direct TypeScript coverage collection

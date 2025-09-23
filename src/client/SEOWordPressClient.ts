@@ -186,7 +186,7 @@ export class SEOWordPressClient extends WordPressClient {
     try {
       // Get list of installed plugins
       const plugins = await this.get("/wp/v2/plugins");
-      
+
       if (!Array.isArray(plugins)) {
         this.logger.debug("Could not retrieve plugins list");
         return;
@@ -194,19 +194,19 @@ export class SEOWordPressClient extends WordPressClient {
 
       // Check for active SEO plugins in order of preference
       const activePlugins = (plugins as WordPressPlugin[]).filter((plugin) => plugin.status === "active");
-      
+
       // Check for Yoast SEO
       if (activePlugins.some((plugin) => plugin.slug === "wordpress-seo")) {
         this.detectedPlugin = "yoast";
         return;
       }
-      
+
       // Check for RankMath
       if (activePlugins.some((plugin) => plugin.slug === "seo-by-rank-math")) {
         this.detectedPlugin = "rankmath";
         return;
       }
-      
+
       // Check for SEOPress
       if (activePlugins.some((plugin) => plugin.slug === "wp-seopress")) {
         this.detectedPlugin = "seopress";
@@ -246,7 +246,7 @@ export class SEOWordPressClient extends WordPressClient {
 
       // Get raw plugin data for debugging
       const raw = this.getRawPluginData(content);
-      
+
       // For malformed plugin data (detected plugin but no actual data), return null for title/description
       const pluginDetected = this.detectedPlugin !== "none";
       const pluginDataMalformed = pluginDetected && !this.hasPluginData(content);
@@ -259,10 +259,12 @@ export class SEOWordPressClient extends WordPressClient {
         canonical: metadata.canonical || null,
         focusKeyword: metadata.focusKeyword || null,
         openGraph: metadata.openGraph || { title: null, description: null },
-        twitter: metadata.twitterCard ? {
-          title: metadata.twitterCard.title || null,
-          description: metadata.twitterCard.description || null
-        } : { title: null, description: null },
+        twitter: metadata.twitterCard
+          ? {
+              title: metadata.twitterCard.title || null,
+              description: metadata.twitterCard.description || null,
+            }
+          : { title: null, description: null },
         schema,
         raw,
         lastModified: content.modified || content.date || new Date().toISOString(),
@@ -533,17 +535,17 @@ export class SEOWordPressClient extends WordPressClient {
     // Extract OpenGraph and Twitter data based on plugin
     if (this.detectedPlugin === "yoast" && meta.yoast_head_json) {
       const yoastData = meta.yoast_head_json as Record<string, unknown>;
-      
+
       metadata.openGraph = {
         title: (yoastData.og_title as string) || metadata.title,
         description: (yoastData.og_description as string) || metadata.description,
         type: content.type === "page" ? "website" : "article",
         url: content.link,
       };
-      
+
       const twitterTitle = yoastData.twitter_title as string;
       const twitterDescription = yoastData.twitter_description as string;
-      
+
       metadata.twitterCard = {
         card: "summary",
         ...(twitterTitle && { title: twitterTitle }),
@@ -646,19 +648,19 @@ export class SEOWordPressClient extends WordPressClient {
     if (!fieldName) {
       return null;
     }
-    
+
     // For Yoast, check yoast_head_json first
     if (this.detectedPlugin === "yoast" && meta.yoast_head_json) {
       const yoastData = meta.yoast_head_json as Record<string, unknown>;
-      
+
       // Map field names to yoast_head_json properties
       const yoastFieldMap: Record<string, string> = {
-        '_yoast_wpseo_title': 'title',
-        '_yoast_wpseo_metadesc': 'description',
-        '_yoast_wpseo_canonical': 'canonical',
-        '_yoast_wpseo_focuskw': 'focuskw'
+        _yoast_wpseo_title: "title",
+        _yoast_wpseo_metadesc: "description",
+        _yoast_wpseo_canonical: "canonical",
+        _yoast_wpseo_focuskw: "focuskw",
       };
-      
+
       const yoastField = yoastFieldMap[fieldName];
       if (yoastField && yoastData[yoastField]) {
         return yoastData[yoastField] as string;
@@ -805,7 +807,7 @@ export class SEOWordPressClient extends WordPressClient {
     };
   } {
     const hasPlugin = this.detectedPlugin !== "none";
-    
+
     return {
       hasPlugin,
       plugin: this.detectedPlugin,
@@ -830,8 +832,10 @@ export class SEOWordPressClient extends WordPressClient {
     switch (this.detectedPlugin) {
       case "yoast":
         // Check for yoast_head_json or individual meta fields
-        return (meta.yoast_head_json !== null && meta.yoast_head_json !== undefined) ||
-               (meta._yoast_wpseo_title !== null && meta._yoast_wpseo_title !== undefined);
+        return (
+          (meta.yoast_head_json !== null && meta.yoast_head_json !== undefined) ||
+          (meta._yoast_wpseo_title !== null && meta._yoast_wpseo_title !== undefined)
+        );
       case "rankmath":
         return meta.rank_math_title !== null && meta.rank_math_title !== undefined;
       case "seopress":
@@ -854,8 +858,8 @@ export class SEOWordPressClient extends WordPressClient {
       case "rankmath":
         // Extract RankMath specific fields
         const rankMathData: Record<string, unknown> = {};
-        Object.keys(meta).forEach(key => {
-          if (key.startsWith('rank_math_')) {
+        Object.keys(meta).forEach((key) => {
+          if (key.startsWith("rank_math_")) {
             rankMathData[key] = meta[key];
           }
         });
@@ -863,8 +867,8 @@ export class SEOWordPressClient extends WordPressClient {
       case "seopress":
         // Extract SEOPress specific fields
         const seopressData: Record<string, unknown> = {};
-        Object.keys(meta).forEach(key => {
-          if (key.startsWith('_seopress_')) {
+        Object.keys(meta).forEach((key) => {
+          if (key.startsWith("_seopress_")) {
             seopressData[key] = meta[key];
           }
         });

@@ -19,6 +19,7 @@ Authentication testing and management tools
 ## Examples
 
 ### Basic auth Workflow
+
 ```bash
 # List all auth
 wp_list_auth
@@ -26,11 +27,12 @@ wp_list_auth
 # Get specific item
 wp_get_aut --id=123
 
-# Create new item  
+# Create new item
 wp_create_aut --title="Example"
 ```
 
 ### Multi-Site auth Management
+
 ```bash
 # Work with specific site
 wp_list_auth --site=production

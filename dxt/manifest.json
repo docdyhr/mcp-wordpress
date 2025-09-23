@@ -18,16 +18,7 @@
   "documentation": "https://github.com/docdyhr/mcp-wordpress/blob/main/README.md",
   "support": "https://github.com/docdyhr/mcp-wordpress/issues",
   "license": "MIT",
-  "keywords": [
-    "wordpress",
-    "mcp",
-    "content-management",
-    "api",
-    "automation",
-    "multi-site",
-    "performance",
-    "caching"
-  ],
+  "keywords": ["wordpress", "mcp", "content-management", "api", "automation", "multi-site", "performance", "caching"],
   "icon": "icon.png",
   "screenshots": [
     "screenshots/tools-overview.png",
@@ -39,9 +30,7 @@
     "entry_point": "dist/dxt-entry.js",
     "mcp_config": {
       "command": "node",
-      "args": [
-        "${__dirname}/dist/dxt-entry.js"
-      ],
+      "args": ["${__dirname}/dist/dxt-entry.js"],
       "env": {
         "WORDPRESS_SITE_URL": "${user_config.wordpress_site_url}",
         "WORDPRESS_USERNAME": "${user_config.wordpress_username}",
@@ -184,7 +173,7 @@
       "text": "Help me set up and configure my WordPress site using the MCP WordPress tools. Please:\n1. Test the connection and authentication\n2. Get site information and current settings\n3. Show me the available tools and their capabilities\n4. Provide recommendations for optimal configuration"
     },
     {
-      "name": "content_management", 
+      "name": "content_management",
       "description": "WordPress content creation and management workflow. Show recent content, create new posts/pages, manage categories and tags, and optimize media uploads.",
       "arguments": ["content_type", "limit"],
       "text": "I need help managing content on my WordPress site. Please:\n1. Show me recent posts and pages\n2. Help me create new content with proper SEO optimization\n3. Manage categories and tags for better organization\n4. Optimize media uploads and file management"

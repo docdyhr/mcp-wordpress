@@ -42,12 +42,16 @@ export class ParameterValidatorImpl implements ParameterValidator {
   /**
    * Validate string parameters
    */
-  validateString(value: unknown, fieldName: string, options?: {
-    required?: boolean;
-    minLength?: number;
-    maxLength?: number;
-    pattern?: RegExp;
-  }): string {
+  validateString(
+    value: unknown,
+    fieldName: string,
+    options?: {
+      required?: boolean;
+      minLength?: number;
+      maxLength?: number;
+      pattern?: RegExp;
+    },
+  ): string {
     if (options?.required && (value === undefined || value === null || value === "")) {
       throw new WordPressAPIError(`${fieldName} is required`, 400, "missing_parameter");
     }
@@ -62,26 +66,22 @@ export class ParameterValidatorImpl implements ParameterValidator {
 
     if (options?.minLength && value.length < options.minLength) {
       throw new WordPressAPIError(
-        `${fieldName} must be at least ${options.minLength} characters`, 
-        400, 
-        "parameter_too_short"
+        `${fieldName} must be at least ${options.minLength} characters`,
+        400,
+        "parameter_too_short",
       );
     }
 
     if (options?.maxLength && value.length > options.maxLength) {
       throw new WordPressAPIError(
-        `${fieldName} must be no more than ${options.maxLength} characters`, 
-        400, 
-        "parameter_too_long"
+        `${fieldName} must be no more than ${options.maxLength} characters`,
+        400,
+        "parameter_too_long",
       );
     }
 
     if (options?.pattern && !options.pattern.test(value)) {
-      throw new WordPressAPIError(
-        `${fieldName} format is invalid`, 
-        400, 
-        "invalid_parameter_format"
-      );
+      throw new WordPressAPIError(`${fieldName} format is invalid`, 400, "invalid_parameter_format");
     }
 
     return value;
@@ -90,12 +90,16 @@ export class ParameterValidatorImpl implements ParameterValidator {
   /**
    * Validate numeric parameters
    */
-  validateNumber(value: unknown, fieldName: string, options?: {
-    required?: boolean;
-    min?: number;
-    max?: number;
-    integer?: boolean;
-  }): number {
+  validateNumber(
+    value: unknown,
+    fieldName: string,
+    options?: {
+      required?: boolean;
+      min?: number;
+      max?: number;
+      integer?: boolean;
+    },
+  ): number {
     if (options?.required && (value === undefined || value === null)) {
       throw new WordPressAPIError(`${fieldName} is required`, 400, "missing_parameter");
     }
@@ -115,19 +119,11 @@ export class ParameterValidatorImpl implements ParameterValidator {
     }
 
     if (options?.min !== undefined && numValue < options.min) {
-      throw new WordPressAPIError(
-        `${fieldName} must be at least ${options.min}`, 
-        400, 
-        "parameter_too_small"
-      );
+      throw new WordPressAPIError(`${fieldName} must be at least ${options.min}`, 400, "parameter_too_small");
     }
 
     if (options?.max !== undefined && numValue > options.max) {
-      throw new WordPressAPIError(
-        `${fieldName} must be no more than ${options.max}`, 
-        400, 
-        "parameter_too_large"
-      );
+      throw new WordPressAPIError(`${fieldName} must be no more than ${options.max}`, 400, "parameter_too_large");
     }
 
     return numValue;
@@ -136,12 +132,16 @@ export class ParameterValidatorImpl implements ParameterValidator {
   /**
    * Validate array parameters
    */
-  validateArray<T>(value: unknown, fieldName: string, options?: {
-    required?: boolean;
-    minLength?: number;
-    maxLength?: number;
-    itemValidator?: (item: unknown) => T;
-  }): T[] {
+  validateArray<T>(
+    value: unknown,
+    fieldName: string,
+    options?: {
+      required?: boolean;
+      minLength?: number;
+      maxLength?: number;
+      itemValidator?: (item: unknown) => T;
+    },
+  ): T[] {
     if (options?.required && (value === undefined || value === null)) {
       throw new WordPressAPIError(`${fieldName} is required`, 400, "missing_parameter");
     }
@@ -156,17 +156,17 @@ export class ParameterValidatorImpl implements ParameterValidator {
 
     if (options?.minLength && value.length < options.minLength) {
       throw new WordPressAPIError(
-        `${fieldName} must contain at least ${options.minLength} items`, 
-        400, 
-        "array_too_short"
+        `${fieldName} must contain at least ${options.minLength} items`,
+        400,
+        "array_too_short",
       );
     }
 
     if (options?.maxLength && value.length > options.maxLength) {
       throw new WordPressAPIError(
-        `${fieldName} must contain no more than ${options.maxLength} items`, 
-        400, 
-        "array_too_long"
+        `${fieldName} must contain no more than ${options.maxLength} items`,
+        400,
+        "array_too_long",
       );
     }
 
@@ -179,7 +179,7 @@ export class ParameterValidatorImpl implements ParameterValidator {
             throw new WordPressAPIError(
               `${fieldName}[${index}] validation failed: ${getErrorMessage(error)}`,
               400,
-              "array_item_invalid"
+              "array_item_invalid",
             );
           }
         });
@@ -190,7 +190,7 @@ export class ParameterValidatorImpl implements ParameterValidator {
         throw new WordPressAPIError(
           `${fieldName} validation failed: ${getErrorMessage(error)}`,
           400,
-          "array_validation_failed"
+          "array_validation_failed",
         );
       }
     }
@@ -205,7 +205,7 @@ export class ParameterValidatorImpl implements ParameterValidator {
     const id = this.validateNumber(value, fieldName, {
       required: true,
       min: 1,
-      integer: true
+      integer: true,
     });
 
     return id;

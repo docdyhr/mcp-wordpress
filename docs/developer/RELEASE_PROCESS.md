@@ -336,6 +336,7 @@ For critical bugs requiring immediate fixes:
    ```
 
 3. **Create Pull Request**:
+
    - Target: `main` branch
    - Label: `hotfix`, `critical`
    - Skip normal review process if approved

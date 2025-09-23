@@ -209,7 +209,7 @@ describe("CacheManager", () => {
     test("should store and retrieve ETags", () => {
       const key = "etag-test";
       const value = { data: "test" };
-      const etag = "\"abc123\"";
+      const etag = '"abc123"';
 
       cacheManager.set(key, value, 1000, etag);
 
@@ -219,7 +219,7 @@ describe("CacheManager", () => {
 
     test("should support conditional request headers", () => {
       const key = "conditional-test";
-      const etag = "\"abc123\"";
+      const etag = '"abc123"';
       const lastModified = "Wed, 21 Oct 2015 07:28:00 GMT";
 
       cacheManager.set(key, { data: "test" }, 1000, etag, lastModified);
@@ -290,12 +290,8 @@ describe("CacheManager", () => {
   describe("Cache Presets", () => {
     test("should have predefined cache presets", () => {
       expect(CachePresets.STATIC.ttl).toBeGreaterThan(CachePresets.DYNAMIC.ttl);
-      expect(CachePresets.SEMI_STATIC.ttl).toBeGreaterThan(
-        CachePresets.DYNAMIC.ttl,
-      );
-      expect(CachePresets.SESSION.ttl).toBeGreaterThan(
-        CachePresets.DYNAMIC.ttl,
-      );
+      expect(CachePresets.SEMI_STATIC.ttl).toBeGreaterThan(CachePresets.DYNAMIC.ttl);
+      expect(CachePresets.SESSION.ttl).toBeGreaterThan(CachePresets.DYNAMIC.ttl);
 
       expect(CachePresets.STATIC.cacheControl).toContain("public");
       expect(CachePresets.SESSION.cacheControl).toContain("private");

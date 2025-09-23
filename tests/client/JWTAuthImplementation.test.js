@@ -1,6 +1,6 @@
 /**
  * Tests for JWTAuthImplementation
- * 
+ *
  * Tests the complete JWT authentication implementation including
  * token refresh, validation, and error handling.
  */
@@ -84,7 +84,7 @@ describe("JWTAuthImplementation", () => {
         expect.objectContaining({
           skipAuth: true,
           timeout: 10000,
-        })
+        }),
       );
 
       expect(jwtAuth.getToken()).toBe("jwt-token-123");
@@ -95,9 +95,7 @@ describe("JWTAuthImplementation", () => {
       const invalidConfig = { method: "jwt" };
       const invalidJWT = new JWTAuthImplementation(mockRequestManager, invalidConfig);
 
-      await expect(invalidJWT.authenticateJWT()).rejects.toThrow(
-        "JWT authentication requires username and password"
-      );
+      await expect(invalidJWT.authenticateJWT()).rejects.toThrow("JWT authentication requires username and password");
     });
 
     it("should throw error when no token received", async () => {
@@ -106,17 +104,13 @@ describe("JWTAuthImplementation", () => {
         // Missing token
       });
 
-      await expect(jwtAuth.authenticateJWT()).rejects.toThrow(
-        "JWT token not received in response"
-      );
+      await expect(jwtAuth.authenticateJWT()).rejects.toThrow("JWT token not received in response");
     });
 
     it("should handle authentication errors", async () => {
       mockRequestManager.request.mockRejectedValueOnce(new Error("Network error"));
 
-      await expect(jwtAuth.authenticateJWT()).rejects.toThrow(
-        "JWT authentication failed: Network error"
-      );
+      await expect(jwtAuth.authenticateJWT()).rejects.toThrow("JWT authentication failed: Network error");
 
       expect(jwtAuth.getToken()).toBeNull();
       expect(jwtAuth.hasValidToken()).toBe(false);
@@ -148,7 +142,7 @@ describe("JWTAuthImplementation", () => {
             Authorization: "Bearer test-token",
           },
           timeout: 5000,
-        })
+        }),
       );
     });
 
@@ -206,7 +200,7 @@ describe("JWTAuthImplementation", () => {
             Authorization: "Bearer expired-token",
           },
           timeout: 5000,
-        })
+        }),
       );
 
       expect(jwtAuth.getToken()).toBe("refreshed-token-456");
@@ -240,9 +234,7 @@ describe("JWTAuthImplementation", () => {
     it("should throw error when no token to refresh", async () => {
       jwtAuth.clearToken();
 
-      await expect(jwtAuth.refreshToken()).rejects.toThrow(
-        "No JWT token to refresh"
-      );
+      await expect(jwtAuth.refreshToken()).rejects.toThrow("No JWT token to refresh");
     });
 
     it("should throw error when refresh fails and no original credentials", async () => {
@@ -252,7 +244,7 @@ describe("JWTAuthImplementation", () => {
       mockRequestManager.request.mockRejectedValueOnce(new Error("Refresh failed"));
 
       await expect(noCredsJWT.refreshToken()).rejects.toThrow(
-        "Cannot refresh JWT token: original credentials not available"
+        "Cannot refresh JWT token: original credentials not available",
       );
     });
   });
@@ -265,13 +257,13 @@ describe("JWTAuthImplementation", () => {
     });
 
     it("should detect tokens expiring within 5 minutes", () => {
-      jwtAuth.tokenExpiry = Date.now() + (4 * 60 * 1000); // 4 minutes from now
+      jwtAuth.tokenExpiry = Date.now() + 4 * 60 * 1000; // 4 minutes from now
 
       expect(jwtAuth.isTokenExpired()).toBe(true); // Should be considered expired
     });
 
     it("should detect valid tokens", () => {
-      jwtAuth.tokenExpiry = Date.now() + (10 * 60 * 1000); // 10 minutes from now
+      jwtAuth.tokenExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes from now
 
       expect(jwtAuth.isTokenExpired()).toBe(false);
     });
@@ -319,7 +311,7 @@ describe("JWTAuthImplementation", () => {
 
     it("should do nothing when token is still valid", async () => {
       jwtAuth.jwtToken = "valid-token";
-      jwtAuth.tokenExpiry = Date.now() + (10 * 60 * 1000);
+      jwtAuth.tokenExpiry = Date.now() + 10 * 60 * 1000;
 
       await jwtAuth.ensureValidToken();
 
@@ -366,7 +358,7 @@ describe("JWTAuthImplementation", () => {
             Authorization: "Bearer test-token",
           },
           timeout: 5000,
-        })
+        }),
       );
 
       expect(jwtAuth.getToken()).toBeNull();
@@ -393,7 +385,7 @@ describe("JWTAuthImplementation", () => {
 
   describe("Token Info", () => {
     it("should return token info when token exists", () => {
-      const expiryTime = Date.now() + (30 * 60 * 1000); // 30 minutes
+      const expiryTime = Date.now() + 30 * 60 * 1000; // 30 minutes
       jwtAuth.jwtToken = "test-token";
       jwtAuth.tokenExpiry = expiryTime;
 
@@ -425,9 +417,7 @@ describe("JWTAuthImplementation", () => {
     it("should handle network errors during authentication", async () => {
       mockRequestManager.request.mockRejectedValueOnce(new Error("ECONNREFUSED"));
 
-      await expect(jwtAuth.authenticateJWT()).rejects.toThrow(
-        "JWT authentication failed: ECONNREFUSED"
-      );
+      await expect(jwtAuth.authenticateJWT()).rejects.toThrow("JWT authentication failed: ECONNREFUSED");
     });
 
     it("should handle malformed responses", async () => {
@@ -436,9 +426,7 @@ describe("JWTAuthImplementation", () => {
         // Missing required token field
       });
 
-      await expect(jwtAuth.authenticateJWT()).rejects.toThrow(
-        "JWT token not received in response"
-      );
+      await expect(jwtAuth.authenticateJWT()).rejects.toThrow("JWT token not received in response");
     });
 
     it("should handle server errors during refresh", async () => {
@@ -448,9 +436,7 @@ describe("JWTAuthImplementation", () => {
         message: "Internal server error",
       });
 
-      await expect(jwtAuth.refreshToken()).rejects.toThrow(
-        "JWT token refresh failed"
-      );
+      await expect(jwtAuth.refreshToken()).rejects.toThrow("JWT token refresh failed");
     });
   });
 });

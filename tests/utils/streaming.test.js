@@ -231,7 +231,7 @@ describe("Streaming Utilities", () => {
           expect(error.message).toBe("Read error");
           resolve();
         });
-        
+
         // Start reading to trigger the error
         errorStream.read();
       });

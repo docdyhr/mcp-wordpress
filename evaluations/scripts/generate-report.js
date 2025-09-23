@@ -316,7 +316,11 @@ ${evaluations
       5;
     const status = avg >= 3.5 ? "PASS" : "FAIL";
 
-    return `| ${evaluation.name} | ${(evaluation.accuracy || 0).toFixed(1)} | ${(evaluation.completeness || 0).toFixed(1)} | ${(evaluation.relevance || 0).toFixed(1)} | ${(evaluation.clarity || 0).toFixed(1)} | ${(evaluation.reasoning || 0).toFixed(1)} | **${avg.toFixed(2)}** | ${status} |`;
+    return `| ${evaluation.name} | ${(evaluation.accuracy || 0).toFixed(1)} | ${(evaluation.completeness || 0).toFixed(
+      1,
+    )} | ${(evaluation.relevance || 0).toFixed(1)} | ${(evaluation.clarity || 0).toFixed(1)} | ${(
+      evaluation.reasoning || 0
+    ).toFixed(1)} | **${avg.toFixed(2)}** | ${status} |`;
   })
   .join("\n")}
 `;

@@ -1,6 +1,6 @@
 /**
  * Tests for AuthenticationManager
- * 
+ *
  * Comprehensive test coverage for all authentication methods,
  * configuration validation, and error handling.
  */
@@ -14,10 +14,10 @@ import { config } from "../../dist/config/Config.js";
 // Mock the config module
 vi.mock("../../dist/config/Config.js", () => {
   return {
-    config: vi.fn(() => ({ 
+    config: vi.fn(() => ({
       wordpress: {},
       error: { legacyLogsEnabled: false },
-      debug: { enabled: false }
+      debug: { enabled: false },
     })),
     ConfigHelpers: {
       shouldDebug: vi.fn(() => false),
@@ -33,20 +33,20 @@ describe("AuthenticationManager", () => {
   const createMockConfig = (wordpress = {}) => ({
     wordpress,
     error: { legacyLogsEnabled: false },
-    debug: { enabled: false }
+    debug: { enabled: false },
   });
 
   beforeEach(() => {
     // Reset mocks
     vi.clearAllMocks();
-    
+
     // Default valid config
     testConfig = {
       siteUrl: "https://example.wordpress.com",
       authMethod: AUTH_METHODS.APP_PASSWORD,
       username: "testuser",
       appPassword: "test-app-password",
-      timeout: 30000
+      timeout: 30000,
     };
 
     // Reset the config mock to return default config
@@ -58,12 +58,14 @@ describe("AuthenticationManager", () => {
   describe("Constructor", () => {
     it("should initialize with valid config", () => {
       expect(authManager).toBeDefined();
-      expect(authManager.getConfig()).toEqual(expect.objectContaining({
-        siteUrl: "https://example.wordpress.com",
-        authMethod: AUTH_METHODS.APP_PASSWORD,
-        username: "testuser",
-        appPassword: "test-app-password"
-      }));
+      expect(authManager.getConfig()).toEqual(
+        expect.objectContaining({
+          siteUrl: "https://example.wordpress.com",
+          authMethod: AUTH_METHODS.APP_PASSWORD,
+          username: "testuser",
+          appPassword: "test-app-password",
+        }),
+      );
     });
 
     it("should throw error for missing site URL", () => {
@@ -87,82 +89,92 @@ describe("AuthenticationManager", () => {
     it("should normalize site URL by removing trailing slash", () => {
       const manager = new AuthenticationManager({
         ...testConfig,
-        siteUrl: "https://example.com/"
+        siteUrl: "https://example.com/",
       });
-      
+
       expect(manager.getConfig().siteUrl).toBe("https://example.com");
     });
   });
 
   describe("Environment Configuration", () => {
     it("should get app password auth from env", () => {
-      vi.mocked(config).mockReturnValue(createMockConfig({
-        authMethod: AUTH_METHODS.APP_PASSWORD,
-        username: "env-user",
-        appPassword: "env-password"
-      }));
+      vi.mocked(config).mockReturnValue(
+        createMockConfig({
+          authMethod: AUTH_METHODS.APP_PASSWORD,
+          username: "env-user",
+          appPassword: "env-password",
+        }),
+      );
 
       const authConfig = AuthenticationManager.getAuthFromEnv();
-      
+
       expect(authConfig).toEqual({
         method: AUTH_METHODS.APP_PASSWORD,
         username: "env-user",
-        appPassword: "env-password"
+        appPassword: "env-password",
       });
     });
 
     it("should get JWT auth from env", () => {
-      vi.mocked(config).mockReturnValue(createMockConfig({
-        authMethod: AUTH_METHODS.JWT,
-        username: "jwt-user",
-        password: "jwt-password",
-        jwtSecret: "jwt-secret"
-      }));
+      vi.mocked(config).mockReturnValue(
+        createMockConfig({
+          authMethod: AUTH_METHODS.JWT,
+          username: "jwt-user",
+          password: "jwt-password",
+          jwtSecret: "jwt-secret",
+        }),
+      );
 
       const authConfig = AuthenticationManager.getAuthFromEnv();
-      
+
       expect(authConfig).toEqual({
         method: AUTH_METHODS.JWT,
         username: "jwt-user",
         password: "jwt-password",
-        secret: "jwt-secret"
+        secret: "jwt-secret",
       });
     });
 
     it("should get basic auth from env", () => {
-      vi.mocked(config).mockReturnValue(createMockConfig({
-        authMethod: AUTH_METHODS.BASIC,
-        username: "basic-user",
-        password: "basic-password"
-      }));
+      vi.mocked(config).mockReturnValue(
+        createMockConfig({
+          authMethod: AUTH_METHODS.BASIC,
+          username: "basic-user",
+          password: "basic-password",
+        }),
+      );
 
       const authConfig = AuthenticationManager.getAuthFromEnv();
-      
+
       expect(authConfig).toEqual({
         method: AUTH_METHODS.BASIC,
         username: "basic-user",
-        password: "basic-password"
+        password: "basic-password",
       });
     });
 
     it("should get API key auth from env", () => {
-      vi.mocked(config).mockReturnValue(createMockConfig({
-        authMethod: AUTH_METHODS.API_KEY,
-        apiKey: "test-api-key"
-      }));
+      vi.mocked(config).mockReturnValue(
+        createMockConfig({
+          authMethod: AUTH_METHODS.API_KEY,
+          apiKey: "test-api-key",
+        }),
+      );
 
       const authConfig = AuthenticationManager.getAuthFromEnv();
-      
+
       expect(authConfig).toEqual({
         method: AUTH_METHODS.API_KEY,
-        apiKey: "test-api-key"
+        apiKey: "test-api-key",
       });
     });
 
     it("should throw error for unsupported auth method", () => {
-      vi.mocked(config).mockReturnValue(createMockConfig({
-        authMethod: "unsupported-method"
-      }));
+      vi.mocked(config).mockReturnValue(
+        createMockConfig({
+          authMethod: "unsupported-method",
+        }),
+      );
 
       expect(() => {
         AuthenticationManager.getAuthFromEnv();
@@ -173,10 +185,10 @@ describe("AuthenticationManager", () => {
   describe("Authentication Headers", () => {
     it("should generate app password headers", () => {
       const headers = authManager.getAuthHeaders();
-      
+
       expect(headers).toHaveProperty("Authorization");
       expect(headers.Authorization).toMatch(/^Basic /);
-      
+
       // Verify base64 encoding
       const encoded = headers.Authorization.replace("Basic ", "");
       const decoded = Buffer.from(encoded, "base64").toString("utf-8");
@@ -187,14 +199,14 @@ describe("AuthenticationManager", () => {
       const jwtConfig = {
         ...testConfig,
         authMethod: AUTH_METHODS.JWT,
-        jwtToken: "test-jwt-token"
+        jwtToken: "test-jwt-token",
       };
-      
+
       const jwtManager = new AuthenticationManager(jwtConfig);
       const headers = jwtManager.getAuthHeaders();
-      
+
       expect(headers).toEqual({
-        Authorization: "Bearer test-jwt-token"
+        Authorization: "Bearer test-jwt-token",
       });
     });
 
@@ -203,15 +215,15 @@ describe("AuthenticationManager", () => {
         ...testConfig,
         authMethod: AUTH_METHODS.BASIC,
         username: "basicuser",
-        password: "basicpass"
+        password: "basicpass",
       };
-      
+
       const basicManager = new AuthenticationManager(basicConfig);
       const headers = basicManager.getAuthHeaders();
-      
+
       expect(headers).toHaveProperty("Authorization");
       expect(headers.Authorization).toMatch(/^Basic /);
-      
+
       const encoded = headers.Authorization.replace("Basic ", "");
       const decoded = Buffer.from(encoded, "base64").toString("utf-8");
       expect(decoded).toBe("basicuser:basicpass");
@@ -221,37 +233,37 @@ describe("AuthenticationManager", () => {
       const apiConfig = {
         ...testConfig,
         authMethod: AUTH_METHODS.API_KEY,
-        apiKey: "test-api-key"
+        apiKey: "test-api-key",
       };
-      
+
       const apiManager = new AuthenticationManager(apiConfig);
       const headers = apiManager.getAuthHeaders();
-      
+
       expect(headers).toEqual({
-        "X-API-Key": "test-api-key"
+        "X-API-Key": "test-api-key",
       });
     });
 
     it("should generate empty headers for cookie auth", () => {
       const cookieConfig = {
         ...testConfig,
-        authMethod: AUTH_METHODS.COOKIE
+        authMethod: AUTH_METHODS.COOKIE,
       };
-      
+
       const cookieManager = new AuthenticationManager(cookieConfig);
       const headers = cookieManager.getAuthHeaders();
-      
+
       expect(headers).toEqual({});
     });
 
     it("should throw error for missing app password credentials", () => {
       const invalidConfig = {
         ...testConfig,
-        appPassword: undefined
+        appPassword: undefined,
       };
-      
+
       const invalidManager = new AuthenticationManager(invalidConfig);
-      
+
       expect(() => {
         invalidManager.getAuthHeaders();
       }).toThrow(AuthenticationError);
@@ -260,11 +272,11 @@ describe("AuthenticationManager", () => {
     it("should throw error for missing JWT token", () => {
       const jwtConfig = {
         ...testConfig,
-        authMethod: AUTH_METHODS.JWT
+        authMethod: AUTH_METHODS.JWT,
       };
-      
+
       const jwtManager = new AuthenticationManager(jwtConfig);
-      
+
       expect(() => {
         jwtManager.getAuthHeaders();
       }).toThrow(AuthenticationError);
@@ -273,7 +285,7 @@ describe("AuthenticationManager", () => {
     it("should throw error for unsupported auth method", () => {
       // Force invalid method by modifying config after creation
       authManager.config.authMethod = "invalid-method";
-      
+
       expect(() => {
         authManager.getAuthHeaders();
       }).toThrow(AuthenticationError);
@@ -293,11 +305,11 @@ describe("AuthenticationManager", () => {
         authMethod: AUTH_METHODS.JWT,
         username: "jwtuser",
         password: "jwtpass",
-        jwtSecret: "jwtsecret"
+        jwtSecret: "jwtsecret",
       };
-      
+
       const jwtManager = new AuthenticationManager(jwtConfig);
-      
+
       expect(() => {
         jwtManager.validateAuthConfig();
       }).not.toThrow();
@@ -308,11 +320,11 @@ describe("AuthenticationManager", () => {
         ...testConfig,
         authMethod: AUTH_METHODS.BASIC,
         username: "basicuser",
-        password: "basicpass"
+        password: "basicpass",
       };
-      
+
       const basicManager = new AuthenticationManager(basicConfig);
-      
+
       expect(() => {
         basicManager.validateAuthConfig();
       }).not.toThrow();
@@ -322,11 +334,11 @@ describe("AuthenticationManager", () => {
       const apiConfig = {
         ...testConfig,
         authMethod: AUTH_METHODS.API_KEY,
-        apiKey: "test-api-key"
+        apiKey: "test-api-key",
       };
-      
+
       const apiManager = new AuthenticationManager(apiConfig);
-      
+
       expect(() => {
         apiManager.validateAuthConfig();
       }).not.toThrow();
@@ -335,9 +347,9 @@ describe("AuthenticationManager", () => {
     it("should throw error for missing auth method", () => {
       const invalidConfig = { ...testConfig };
       delete invalidConfig.authMethod;
-      
+
       const invalidManager = new AuthenticationManager(invalidConfig);
-      
+
       expect(() => {
         invalidManager.validateAuthConfig();
       }).toThrow(AuthenticationError);
@@ -346,11 +358,11 @@ describe("AuthenticationManager", () => {
     it("should throw error for incomplete app password config", () => {
       const invalidConfig = {
         ...testConfig,
-        appPassword: undefined
+        appPassword: undefined,
       };
-      
+
       const invalidManager = new AuthenticationManager(invalidConfig);
-      
+
       expect(() => {
         invalidManager.validateAuthConfig();
       }).toThrow(AuthenticationError);
@@ -363,9 +375,9 @@ describe("AuthenticationManager", () => {
         username: "user",
         // Missing password and secret
       };
-      
+
       const invalidManager = new AuthenticationManager(invalidConfig);
-      
+
       expect(() => {
         invalidManager.validateAuthConfig();
       }).toThrow(AuthenticationError);
@@ -383,11 +395,11 @@ describe("AuthenticationManager", () => {
       const jwtConfig = {
         ...testConfig,
         authMethod: AUTH_METHODS.JWT,
-        jwtToken: "valid-jwt-token"
+        jwtToken: "valid-jwt-token",
       };
-      
+
       const jwtManager = new AuthenticationManager(jwtConfig);
-      
+
       expect(() => {
         jwtManager.validateCredentials();
       }).not.toThrow();
@@ -396,11 +408,11 @@ describe("AuthenticationManager", () => {
     it("should throw error for missing username", () => {
       const invalidConfig = {
         ...testConfig,
-        username: undefined
+        username: undefined,
       };
-      
+
       const invalidManager = new AuthenticationManager(invalidConfig);
-      
+
       expect(() => {
         invalidManager.validateCredentials();
       }).toThrow(AuthenticationError);
@@ -409,11 +421,11 @@ describe("AuthenticationManager", () => {
     it("should throw error for missing JWT token", () => {
       const jwtConfig = {
         ...testConfig,
-        authMethod: AUTH_METHODS.JWT
+        authMethod: AUTH_METHODS.JWT,
       };
-      
+
       const jwtManager = new AuthenticationManager(jwtConfig);
-      
+
       expect(() => {
         jwtManager.validateCredentials();
       }).toThrow(AuthenticationError);
@@ -421,7 +433,7 @@ describe("AuthenticationManager", () => {
 
     it("should throw error for invalid auth method", () => {
       authManager.config.authMethod = "invalid";
-      
+
       expect(() => {
         authManager.validateCredentials();
       }).toThrow(AuthenticationError);
@@ -432,11 +444,11 @@ describe("AuthenticationManager", () => {
     it("should update to app password authentication", () => {
       const credentials = {
         username: "newuser",
-        appPassword: "new-app-password"
+        appPassword: "new-app-password",
       };
-      
+
       authManager.updateAuthMethod(AUTH_METHODS.APP_PASSWORD, credentials);
-      
+
       expect(authManager.config.authMethod).toBe(AUTH_METHODS.APP_PASSWORD);
       expect(authManager.config.username).toBe("newuser");
       expect(authManager.config.appPassword).toBe("new-app-password");
@@ -445,11 +457,11 @@ describe("AuthenticationManager", () => {
     it("should update to JWT authentication", () => {
       const credentials = {
         jwtToken: "new-jwt-token",
-        username: "jwtuser"
+        username: "jwtuser",
       };
-      
+
       authManager.updateAuthMethod(AUTH_METHODS.JWT, credentials);
-      
+
       expect(authManager.config.authMethod).toBe(AUTH_METHODS.JWT);
       expect(authManager.config.jwtToken).toBe("new-jwt-token");
       expect(authManager.config.username).toBe("jwtuser");
@@ -458,11 +470,11 @@ describe("AuthenticationManager", () => {
     it("should update to basic authentication", () => {
       const credentials = {
         username: "basicuser",
-        password: "basicpass"
+        password: "basicpass",
       };
-      
+
       authManager.updateAuthMethod(AUTH_METHODS.BASIC, credentials);
-      
+
       expect(authManager.config.authMethod).toBe(AUTH_METHODS.BASIC);
       expect(authManager.config.username).toBe("basicuser");
       expect(authManager.config.password).toBe("basicpass");
@@ -470,11 +482,11 @@ describe("AuthenticationManager", () => {
 
     it("should update to API key authentication", () => {
       const credentials = {
-        apiKey: "new-api-key"
+        apiKey: "new-api-key",
       };
-      
+
       authManager.updateAuthMethod(AUTH_METHODS.API_KEY, credentials);
-      
+
       expect(authManager.config.authMethod).toBe(AUTH_METHODS.API_KEY);
       expect(authManager.config.apiKey).toBe("new-api-key");
     });
@@ -482,11 +494,11 @@ describe("AuthenticationManager", () => {
     it("should clear previous credentials when updating method", () => {
       // Start with app password
       expect(authManager.config.appPassword).toBeDefined();
-      
+
       // Update to JWT
       const jwtCredentials = { jwtToken: "jwt-token" };
       authManager.updateAuthMethod(AUTH_METHODS.JWT, jwtCredentials);
-      
+
       // App password should be cleared
       expect(authManager.config.appPassword).toBeUndefined();
       expect(authManager.config.jwtToken).toBe("jwt-token");
@@ -494,7 +506,7 @@ describe("AuthenticationManager", () => {
 
     it("should throw error for invalid auth method", () => {
       const credentials = { username: "user" };
-      
+
       expect(() => {
         authManager.updateAuthMethod("invalid-method", credentials);
       }).toThrow(AuthenticationError);
@@ -502,7 +514,7 @@ describe("AuthenticationManager", () => {
 
     it("should throw error for incomplete credentials", () => {
       const incompleteCredentials = {}; // Missing required fields
-      
+
       expect(() => {
         authManager.updateAuthMethod(AUTH_METHODS.APP_PASSWORD, incompleteCredentials);
       }).toThrow(AuthenticationError);
@@ -515,11 +527,11 @@ describe("AuthenticationManager", () => {
         ...testConfig,
         authMethod: AUTH_METHODS.JWT,
         jwtToken: "expired-token",
-        tokenExpiry: Date.now() - 1000 // Expired 1 second ago
+        tokenExpiry: Date.now() - 1000, // Expired 1 second ago
       };
-      
+
       const jwtManager = new AuthenticationManager(jwtConfig);
-      
+
       expect(jwtManager.isTokenExpired()).toBe(true);
     });
 
@@ -528,11 +540,11 @@ describe("AuthenticationManager", () => {
         ...testConfig,
         authMethod: AUTH_METHODS.JWT,
         jwtToken: "valid-token",
-        tokenExpiry: Date.now() + (60 * 60 * 1000) // Valid for 1 hour
+        tokenExpiry: Date.now() + 60 * 60 * 1000, // Valid for 1 hour
       };
-      
+
       const jwtManager = new AuthenticationManager(jwtConfig);
-      
+
       expect(jwtManager.isTokenExpired()).toBe(false);
     });
 
@@ -540,11 +552,11 @@ describe("AuthenticationManager", () => {
       const jwtConfig = {
         ...testConfig,
         authMethod: AUTH_METHODS.JWT,
-        jwtToken: "token-without-expiry"
+        jwtToken: "token-without-expiry",
       };
-      
+
       const jwtManager = new AuthenticationManager(jwtConfig);
-      
+
       expect(jwtManager.isTokenExpired()).toBe(true);
     });
 
@@ -556,19 +568,19 @@ describe("AuthenticationManager", () => {
       const jwtConfig = {
         ...testConfig,
         authMethod: AUTH_METHODS.JWT,
-        jwtToken: "old-token"
+        jwtToken: "old-token",
       };
-      
+
       const jwtManager = new AuthenticationManager(jwtConfig);
-      
+
       // Mock refresh method for testing
       jwtManager.refreshJwtToken = vi.fn().mockResolvedValue({
         token: "new-token",
-        expires_in: 3600
+        expires_in: 3600,
       });
-      
+
       await jwtManager.refreshToken();
-      
+
       expect(jwtManager.config.jwtToken).toBe("new-token");
       expect(jwtManager.config.tokenExpiry).toBeGreaterThan(Date.now());
     });
@@ -581,10 +593,10 @@ describe("AuthenticationManager", () => {
   describe("Authentication Status", () => {
     it("should return authentication status for app password", () => {
       const status = authManager.getAuthStatus();
-      
+
       expect(status).toEqual({
         method: AUTH_METHODS.APP_PASSWORD,
-        isAuthenticated: true
+        isAuthenticated: true,
       });
     });
 
@@ -593,16 +605,16 @@ describe("AuthenticationManager", () => {
         ...testConfig,
         authMethod: AUTH_METHODS.JWT,
         jwtToken: "valid-token",
-        tokenExpiry: Date.now() + (60 * 60 * 1000)
+        tokenExpiry: Date.now() + 60 * 60 * 1000,
       };
-      
+
       const jwtManager = new AuthenticationManager(jwtConfig);
       const status = jwtManager.getAuthStatus();
-      
+
       expect(status).toEqual({
         method: AUTH_METHODS.JWT,
         isAuthenticated: true,
-        tokenExpiry: expect.any(Date)
+        tokenExpiry: expect.any(Date),
       });
     });
 
@@ -611,16 +623,16 @@ describe("AuthenticationManager", () => {
         ...testConfig,
         authMethod: AUTH_METHODS.JWT,
         jwtToken: "expired-token",
-        tokenExpiry: Date.now() - 1000
+        tokenExpiry: Date.now() - 1000,
       };
-      
+
       const jwtManager = new AuthenticationManager(jwtConfig);
       const status = jwtManager.getAuthStatus();
-      
+
       expect(status).toEqual({
         method: AUTH_METHODS.JWT,
         isAuthenticated: false,
-        tokenExpiry: expect.any(Date)
+        tokenExpiry: expect.any(Date),
       });
     });
   });
@@ -635,7 +647,7 @@ describe("AuthenticationManager", () => {
     it("should handle authentication test failure", async () => {
       // Simulate invalid credentials
       authManager.config.appPassword = undefined;
-      
+
       const result = await authManager.testAuthentication();
       expect(result).toBe(false);
       expect(authManager.isAuthenticated()).toBe(false);
@@ -645,7 +657,7 @@ describe("AuthenticationManager", () => {
   describe("Clear Authentication", () => {
     it("should clear authentication state", () => {
       authManager.clearAuthentication();
-      
+
       expect(authManager.isAuthenticated()).toBe(false);
     });
 
@@ -653,12 +665,12 @@ describe("AuthenticationManager", () => {
       const jwtConfig = {
         ...testConfig,
         authMethod: AUTH_METHODS.JWT,
-        jwtToken: "test-token"
+        jwtToken: "test-token",
       };
-      
+
       const jwtManager = new AuthenticationManager(jwtConfig);
       jwtManager.clearAuthentication();
-      
+
       expect(jwtManager.isAuthenticated()).toBe(false);
     });
   });
@@ -668,7 +680,7 @@ describe("AuthenticationManager", () => {
       expect(() => {
         new AuthenticationManager({
           siteUrl: "",
-          authMethod: AUTH_METHODS.APP_PASSWORD
+          authMethod: AUTH_METHODS.APP_PASSWORD,
         });
       }).toThrow(AuthenticationError);
     });
@@ -677,10 +689,10 @@ describe("AuthenticationManager", () => {
       const invalidManager = new AuthenticationManager({
         siteUrl: "https://example.com",
         authMethod: AUTH_METHODS.APP_PASSWORD,
-        username: "user"
+        username: "user",
         // Missing appPassword
       });
-      
+
       expect(() => {
         invalidManager.validateCredentials();
       }).toThrow(AuthenticationError);

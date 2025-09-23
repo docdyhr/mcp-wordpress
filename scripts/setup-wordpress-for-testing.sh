@@ -23,23 +23,23 @@ app_password_result=$(docker exec wordpress-test bash -c "
 if [[ "$app_password_result" != "FAILED" ]] && [[ "$app_password_result" != *"Error"* ]] && [[ -n "$app_password_result" ]]; then
     app_password="$app_password_result"
     echo "✅ Application password created: $app_password"
-    
+
     # Export the password for the contract tests
     export WORDPRESS_APP_PASSWORD="$app_password"
     echo "export WORDPRESS_APP_PASSWORD=\"$app_password\"" > /tmp/wordpress-test-credentials.sh
     echo "export WORDPRESS_AUTH_METHOD=\"app-password\"" >> /tmp/wordpress-test-credentials.sh
-    
+
     auth_method="app-password"
 else
     echo "⚠️  Application password creation failed, falling back to basic auth"
     echo "Error: $app_password_result"
-    
+
     # Fall back to basic authentication with the admin password
     app_password="test-password-123"
     export WORDPRESS_APP_PASSWORD="$app_password"
     echo "export WORDPRESS_APP_PASSWORD=\"$app_password\"" > /tmp/wordpress-test-credentials.sh
     echo "export WORDPRESS_AUTH_METHOD=\"basic\"" >> /tmp/wordpress-test-credentials.sh
-    
+
     auth_method="basic"
 fi
 
@@ -78,7 +78,7 @@ elif [[ "$basic_status" == "200" ]]; then
 else
     echo "❌ Basic REST API failed (HTTP $basic_status)"
     echo "Response: $(echo "$basic_test" | head -c 300)"
-    
+
     # Try to check if WordPress is using a different URL structure
     echo "Checking alternative endpoints..."
     index_test=$(curl -s http://localhost:8081/index.php?rest_route=/wp/v2/ 2>/dev/null || echo "FAILED")
@@ -158,21 +158,21 @@ if [[ "$create_status" != "201" ]]; then
         -w "%{http_code}" \
         -o /dev/null \
         http://localhost:8081/wp-json/wp/v2/posts 2>/dev/null || echo "000")
-    
+
     echo "Post creation status (admin password): $admin_create_status"
     echo "Admin password response: $(echo "$admin_create_test" | head -c 200)..."
-    
+
     # Test if the user can create posts via WP-CLI (this should work if permissions are correct)
     echo "Testing post creation via WP-CLI..."
     cli_post_result=$(docker exec wordpress-test bash -c "
         cd /var/www/html &&
         wp post create --post_title='CLI Test Post' --post_content='Testing via CLI' --post_status=draft --post_author=1 --allow-root --porcelain
     " 2>/dev/null || echo "FAILED")
-    
+
     if [[ "$cli_post_result" != "FAILED" ]] && [[ "$cli_post_result" =~ ^[0-9]+$ ]]; then
         echo "✅ User can create posts via WP-CLI (post ID: $cli_post_result)"
         echo "⚠️  Issue appears to be with REST API authentication, not user permissions"
-        
+
         # Try to check if there are any REST API restrictions
         echo "Checking REST API settings..."
         rest_settings=$(docker exec wordpress-test bash -c "
@@ -188,7 +188,7 @@ fi
 
 if [[ "$create_status" == "201" ]] && [[ "$create_test" == *"id"* ]]; then
     echo "✅ Authentication working correctly (can create posts)"
-    
+
     # Clean up the test post
     test_post_id=$(echo "$create_test" | grep -o '"id":[0-9]*' | cut -d':' -f2)
     if [[ -n "$test_post_id" ]]; then

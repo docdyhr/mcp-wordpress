@@ -96,25 +96,29 @@ describe("Performance Regression Detection", () => {
     beforeAll(() => {
       // Use mock timers for consistent, fast testing
       vi.useFakeTimers();
-      
+
       // Use mock client with predictable timing for testing
       mockClient = {
-        getPosts: () => new Promise((resolve) => {
-          const delay = 500; // Fixed delay instead of random
-          setTimeout(() => resolve([]), delay);
-        }),
-        createPost: () => new Promise((resolve) => {
-          const delay = 800; // Fixed delay instead of random
-          setTimeout(() => resolve({ id: 1 }), delay);
-        }),
-        uploadMedia: () => new Promise((resolve) => {
-          const delay = 2000; // Fixed delay instead of random
-          setTimeout(() => resolve({ id: 1 }), delay);
-        }),
-        getUser: () => new Promise((resolve) => {
-          const delay = 300; // Fixed delay instead of random
-          setTimeout(() => resolve({ id: 1 }), delay);
-        }),
+        getPosts: () =>
+          new Promise((resolve) => {
+            const delay = 500; // Fixed delay instead of random
+            setTimeout(() => resolve([]), delay);
+          }),
+        createPost: () =>
+          new Promise((resolve) => {
+            const delay = 800; // Fixed delay instead of random
+            setTimeout(() => resolve({ id: 1 }), delay);
+          }),
+        uploadMedia: () =>
+          new Promise((resolve) => {
+            const delay = 2000; // Fixed delay instead of random
+            setTimeout(() => resolve({ id: 1 }), delay);
+          }),
+        getUser: () =>
+          new Promise((resolve) => {
+            const delay = 300; // Fixed delay instead of random
+            setTimeout(() => resolve({ id: 1 }), delay);
+          }),
       };
     });
 
@@ -186,10 +190,10 @@ describe("Performance Regression Detection", () => {
       for (let i = 0; i < iterations; i++) {
         const startTime = process.hrtime.bigint();
         const uploadPromise = mockClient.uploadMedia();
-        
+
         // Advance fake timers to resolve the setTimeout
         vi.advanceTimersByTime(2000);
-        
+
         await uploadPromise;
         const endTime = process.hrtime.bigint();
         const responseTime = Number(endTime - startTime) / 1000000;
@@ -237,7 +241,9 @@ describe("Performance Regression Detection", () => {
 
       if (memoryRegression > threshold) {
         throw new Error(
-          `Memory regression detected: ${memoryIncrease} bytes increase (${(memoryRegression * 100).toFixed(2)}% of baseline)`,
+          `Memory regression detected: ${memoryIncrease} bytes increase (${(memoryRegression * 100).toFixed(
+            2,
+          )}% of baseline)`,
         );
       }
     });
@@ -314,7 +320,9 @@ describe("Performance Regression Detection", () => {
 
       if (throughputRegression > threshold) {
         throw new Error(
-          `Throughput regression detected: ${requestsPerSecond.toFixed(2)} req/s (baseline: ${baselineThroughput} req/s)`,
+          `Throughput regression detected: ${requestsPerSecond.toFixed(
+            2,
+          )} req/s (baseline: ${baselineThroughput} req/s)`,
         );
       }
     });

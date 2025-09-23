@@ -94,6 +94,7 @@
     "test:performance:ci": "npm run build && NODE_OPTIONS=\"--max-old-space-size=4096\" vitest run tests/performance/ --reporter=json --outputFile=performance-results.json",
     "test:safe": "node scripts/run-tests-safe.cjs",
     "test:security": "npm run build && vitest run tests/security/",
+    "test:security:validation": "npm run build && vitest run tests/security/penetration-tests.test.js",
     "test:tools": "node scripts/test-all-tools-fixed.js",
     "test:typescript": "npm run build && npm run typecheck",
     "test:ui": "npm run build && vitest --ui",

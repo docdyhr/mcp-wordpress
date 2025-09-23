@@ -6,9 +6,9 @@ Retrieves detailed information about a single post including metadata, content s
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `id` | `number` | ✅ | The unique identifier for the post. | - | `123`, `456` |
+| Parameter | Type     | Required | Description                         | Default | Examples     |
+| --------- | -------- | -------- | ----------------------------------- | ------- | ------------ |
+| `id`      | `number` | ✅       | The unique identifier for the post. | -       | `123`, `456` |
 
 ## Examples
 
@@ -17,11 +17,13 @@ Retrieves detailed information about a single post including metadata, content s
 Simple example of using wp_get_post
 
 **Command:**
+
 ```bash
 wp_get_post --id="123"
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -36,6 +38,7 @@ wp_get_post --id="123"
 ```
 
 **Error Example (Authentication failure):**
+
 ```json
 {
   "error": "Authentication failed",
@@ -43,19 +46,17 @@ wp_get_post --id="123"
 }
 ```
 
-
 ## WordPress REST API Mapping
 
 **Endpoint:** `/wp-json/wp/v2/posts/{id}`
 
-This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters are determined by WordPress core functionality.
+This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters
+are determined by WordPress core functionality.
 
 ### WordPress Documentation
+
 - [WordPress REST API Handbook](https://developer.wordpress.org/rest-api/)
 - [Endpoint Reference](https://developer.wordpress.org/rest-api/reference/)
-
-
-
 
 ## Response Format
 
@@ -79,34 +80,24 @@ This tool directly interfaces with the WordPress REST API endpoint above. The re
 
 ### AUTHENTICATION_FAILED
 
-**Message:** Authentication failed  
-**Description:** Invalid credentials or insufficient permissions  
-**Resolution:** Check your authentication credentials and user permissions
-
+**Message:** Authentication failed **Description:** Invalid credentials or insufficient permissions **Resolution:**
+Check your authentication credentials and user permissions
 
 ### VALIDATION_ERROR
 
-**Message:** Parameter validation failed  
-**Description:** One or more required parameters are missing or invalid  
+**Message:** Parameter validation failed **Description:** One or more required parameters are missing or invalid
 **Resolution:** Review the required parameters and their formats
-
 
 ### NOT_FOUND
 
-**Message:** Resource not found  
-**Description:** The requested resource does not exist  
-**Resolution:** Verify the resource ID and ensure it exists
-
+**Message:** Resource not found **Description:** The requested resource does not exist **Resolution:** Verify the
+resource ID and ensure it exists
 
 ### PERMISSION_DENIED
 
-**Message:** Insufficient permissions  
-**Description:** The user does not have permission to perform this action  
+**Message:** Insufficient permissions **Description:** The user does not have permission to perform this action
 **Resolution:** Contact an administrator to grant the necessary permissions
-
-
-
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

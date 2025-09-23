@@ -25,10 +25,12 @@ ${this.generateBadges()}
 
 ## Overview
 
-The WordPress MCP Server provides **${summary.totalTools} tools** across **${summary.totalCategories} categories** for comprehensive WordPress management through the Model Context Protocol.
+The WordPress MCP Server provides **${summary.totalTools} tools** across **${
+      summary.totalCategories
+    } categories** for comprehensive WordPress management through the Model Context Protocol.
 
-**Last Updated:** ${new Date(summary.lastUpdated).toLocaleDateString()}  
-**Version:** ${summary.version}  
+**Last Updated:** ${new Date(summary.lastUpdated).toLocaleDateString()}
+**Version:** ${summary.version}
 **Coverage:** ${summary.coverage.toolsWithExamples}/${summary.totalTools} tools with examples
 
 ## Quick Start
@@ -66,7 +68,7 @@ ${this.generateToolsTable(tools)}
 
 All tools support multiple authentication methods:
 - **Application Passwords** (recommended)
-- **JWT Authentication** 
+- **JWT Authentication**
 - **Basic Authentication** (development only)
 - **API Key Authentication**
 
@@ -214,7 +216,7 @@ wp_list_${category.name.toLowerCase()}
 # Get specific item
 wp_get_${category.name.toLowerCase().slice(0, -1)} --id=123
 
-# Create new item  
+# Create new item
 wp_create_${category.name.toLowerCase().slice(0, -1)} --title="Example"
 \`\`\`
 
@@ -272,7 +274,9 @@ ${type.examples.length > 1 ? this.generateAdditionalExamples(type.examples.slice
       const defaultVal = param.defaultValue !== undefined ? `\`${param.defaultValue}\`` : "-";
       const required = param.required ? "✅" : "❌";
 
-      return `| \`${param.name}\` | \`${param.type}\` | ${required} | ${param.description} | ${defaultVal} | ${examples || "-"} |`;
+      return `| \`${param.name}\` | \`${param.type}\` | ${required} | ${param.description} | ${defaultVal} | ${
+        examples || "-"
+      } |`;
     });
 
     return [headers, separator, ...rows].join("\n");
@@ -375,7 +379,7 @@ ${permissions.map((perm) => `- \`${perm}\``).join("\n")}
       return `### Common Errors
 
 - **Authentication Error**: Invalid credentials or insufficient permissions
-- **Validation Error**: Invalid or missing required parameters  
+- **Validation Error**: Invalid or missing required parameters
 - **Not Found Error**: Requested resource does not exist
 - **Server Error**: Internal WordPress or network error
 
@@ -386,8 +390,8 @@ See [Error Handling Guide](../error-handling.md) for complete error reference.`;
       .map(
         (error) => `### ${(error as Record<string, unknown>).code}
 
-**Message:** ${(error as Record<string, unknown>).message}  
-**Description:** ${(error as Record<string, unknown>).description}  
+**Message:** ${(error as Record<string, unknown>).message}
+**Description:** ${(error as Record<string, unknown>).description}
 **Resolution:** ${(error as Record<string, unknown>).resolution}
 `,
       )

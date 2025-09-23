@@ -15,7 +15,7 @@ fi
 
 # GitHub CLI aliases for common operations (optional)
 alias ghpr="gh pr view"
-alias ghprs="gh pr list" 
+alias ghprs="gh pr list"
 alias ghprm="gh pr merge"
 alias ghprc="gh pr create"
 alias ghprco="gh pr comment"

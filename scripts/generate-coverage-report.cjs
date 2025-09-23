@@ -15,12 +15,12 @@ console.log('📊 Running test suite with coverage collection...');
 try {
   // Run tests with coverage on dist files (which have source maps)
   const testCommand = 'NODE_OPTIONS="--experimental-vm-modules" npx jest --config=jest.typescript.config.json --coverage --silent --maxWorkers=1';
-  const testOutput = execSync(testCommand, { 
-    encoding: 'utf8', 
+  const testOutput = execSync(testCommand, {
+    encoding: 'utf8',
     cwd: process.cwd(),
     timeout: 120000 // 2 minute timeout
   });
-  
+
   console.log('✅ Test execution completed');
 } catch (error) {
   console.warn('⚠️ Some tests may have failed, but continuing with coverage analysis');
@@ -49,7 +49,7 @@ console.log('\n📈 Analyzing test coverage...');
 // Get test file counts
 const testFiles = [
   'tests/utils/',
-  'tests/config/', 
+  'tests/config/',
   'tests/server/',
   'tests/managers/',
   'tests/security/',
@@ -72,7 +72,7 @@ const testFiles = [
 const sourceFiles = [
   'src/utils/',
   'src/config/',
-  'src/client/', 
+  'src/client/',
   'src/tools/',
   'src/server/',
   'src/cache/',
@@ -139,14 +139,14 @@ let actualCoverage = null;
 try {
   if (fs.existsSync('coverage/index.html')) {
     const htmlContent = fs.readFileSync('coverage/index.html', 'utf8');
-    
+
     // Try to extract coverage percentages from HTML
     const extractPercentage = (metric) => {
       const regex = new RegExp(`${metric}[^>]*>\\s*([0-9.]+)%`, 'i');
       const match = htmlContent.match(regex);
       return match ? parseFloat(match[1]) : null;
     };
-    
+
     actualCoverage = {
       statements: extractPercentage('statements') || 0,
       branches: extractPercentage('branches') || 0,
@@ -180,10 +180,10 @@ console.log('=========================================');
 
 const lowCoverageModules = Object.entries(moduleAnalysis)
   .filter(([_, stats]) => stats.source > 0 && (stats.tests / stats.source) < 0.5)
-  .map(([module, stats]) => ({ 
-    module, 
+  .map(([module, stats]) => ({
+    module,
     deficit: stats.source - stats.tests,
-    ratio: stats.tests / stats.source 
+    ratio: stats.tests / stats.source
   }))
   .sort((a, b) => b.deficit - a.deficit);
 

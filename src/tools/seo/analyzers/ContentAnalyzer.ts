@@ -179,7 +179,9 @@ export class ContentAnalyzer {
       recommendations.push({
         type: "content",
         priority: "medium",
-        message: `Content readability is low (${metrics.fleschReadingEase.toFixed(1)}). Consider using shorter sentences and simpler words.`,
+        message: `Content readability is low (${metrics.fleschReadingEase.toFixed(
+          1,
+        )}). Consider using shorter sentences and simpler words.`,
         impact: 60,
         autoFixAvailable: false,
         suggestedFix: "Break up long sentences and use more common vocabulary.",
@@ -195,7 +197,9 @@ export class ContentAnalyzer {
         recommendations.push({
           type: "keyword",
           priority: "medium",
-          message: `Focus keyword density is low (${metrics.keywordDensity.toFixed(1)}%). Consider adding the keyword "${params.focusKeywords[0]}" more naturally throughout the content.`,
+          message: `Focus keyword density is low (${metrics.keywordDensity.toFixed(
+            1,
+          )}%). Consider adding the keyword "${params.focusKeywords[0]}" more naturally throughout the content.`,
           impact: 70,
           autoFixAvailable: false,
         });
@@ -203,7 +207,9 @@ export class ContentAnalyzer {
         recommendations.push({
           type: "keyword",
           priority: "medium",
-          message: `Focus keyword density is too high (${metrics.keywordDensity.toFixed(1)}%). This might be considered keyword stuffing.`,
+          message: `Focus keyword density is too high (${metrics.keywordDensity.toFixed(
+            1,
+          )}%). This might be considered keyword stuffing.`,
           impact: 75,
           autoFixAvailable: false,
           suggestedFix: `Reduce keyword usage to around ${targetDensity}%`,

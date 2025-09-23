@@ -129,7 +129,7 @@ describe("SecurityReviewer", () => {
       mockFs.readFileSync.mockReturnValue(`
         const express = require('express');
         const app = express();
-        
+
         app.get('/user', (req, res) => {
           const userId = req.query.id;
           const query = "SELECT * FROM users WHERE id = " + userId;

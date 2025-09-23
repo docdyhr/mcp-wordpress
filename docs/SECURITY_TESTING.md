@@ -11,17 +11,20 @@ This guide covers the comprehensive security testing and validation framework im
 ### Core Security Components
 
 1. **Input Validation** (`src/security/InputValidator.ts`)
+
    - Zod-based schema validation
    - XSS protection patterns
    - SQL injection prevention
    - Path traversal protection
 
 2. **Rate Limiting** (`SecurityLimiter` class)
+
    - Request throttling per user/IP
    - DoS attack prevention
    - Automatic cleanup of expired entries
 
 3. **Input Sanitization** (`InputSanitizer` class)
+
    - HTML content sanitization
    - Search query cleaning
    - File path normalization

@@ -1,11 +1,13 @@
 # NPM Scripts Organization Plan
 
 ## Current State: 95 scripts (excessive)
+
 ## Target: ~40-50 scripts organized by function
 
 ## Proposed Organization:
 
 ### Core Development (5-7 scripts)
+
 ```json
 {
   "dev": "npm run build && DEBUG=true node dist/index.js",
@@ -19,6 +21,7 @@
 ```
 
 ### Testing (8-10 scripts)
+
 ```json
 {
   "test": "npm run build && vitest run",
@@ -35,6 +38,7 @@
 ```
 
 ### Code Quality & Linting (4-5 scripts)
+
 ```json
 {
   "lint": "eslint src/ tests/",
@@ -46,6 +50,7 @@
 ```
 
 ### Security (3-4 scripts)
+
 ```json
 {
   "security:scan": "npm run build && node scripts/security-demo.js || npm audit --audit-level=low",
@@ -56,6 +61,7 @@
 ```
 
 ### Documentation (3-4 scripts)
+
 ```json
 {
   "docs:generate": "npm run build && node scripts/generate-docs.js",
@@ -66,6 +72,7 @@
 ```
 
 ### Deployment & Release (4-5 scripts)
+
 ```json
 {
   "prepublishOnly": "npm run build && npm run check:ignore",
@@ -77,6 +84,7 @@
 ```
 
 ### DXT Development (2-3 scripts)
+
 ```json
 {
   "dxt:package": "npm run dxt:clean && npm run dxt:build",
@@ -86,6 +94,7 @@
 ```
 
 ### Utility & Maintenance (3-5 scripts)
+
 ```json
 {
   "setup": "node bin/setup.js",
@@ -99,25 +108,34 @@
 ## Scripts to Remove/Consolidate:
 
 ### Redundant Coverage Scripts (consolidate 8 → 2):
+
 - Remove: coverage:baseline, coverage:c8, coverage:full, coverage:guard, coverage:strict, coverage:check
 - Keep: test:coverage, test:coverage:report
 
 ### Redundant Test Scripts (consolidate 15 → 5):
-- Remove: test:typescript, test:legacy, test:fast, test:cache, test:config, test:property, test:integration, test:multisite, test:mcp, test:contracts, test:compatibility, test:with-env, test:weekly, test:coverage:baseline, test:coverage:ci, test:security:penetration, test:security:validation, test:performance:ci
+
+- Remove: test:typescript, test:legacy, test:fast, test:cache, test:config, test:property, test:integration,
+  test:multisite, test:mcp, test:contracts, test:compatibility, test:with-env, test:weekly, test:coverage:baseline,
+  test:coverage:ci, test:security:penetration, test:security:validation, test:performance:ci
 - Keep: test, test:coverage, test:auth, test:tools, test:security, test:performance
 
 ### Redundant Security Scripts (consolidate 8 → 4):
-- Remove: security:config, security:monitor, security:pipeline, security:remediate, security:review, security:test, security:check
+
+- Remove: security:config, security:monitor, security:pipeline, security:remediate, security:review, security:test,
+  security:check
 - Keep: security:scan, security:audit, security:fix, security:full
 
 ### Redundant Evaluation Scripts (consolidate 8 → 2):
+
 - Remove: eval:ci, eval:critical, eval:existing, eval:focused, eval:quick, eval:report, eval:watch
 - Keep: eval (primary), eval:report (for CI)
 
 ### Redundant Build/Check Scripts (consolidate 6 → 2):
+
 - Remove: check:ignore, check:npm, check:workflows, dxt:validate, performance:benchmark, performance:sla
 - Keep: check:ci, health
 
 ## Result: 95 → ~45 scripts (53% reduction)
 
-This maintains all essential functionality while dramatically improving developer experience and reducing cognitive overhead.
+This maintains all essential functionality while dramatically improving developer experience and reducing cognitive
+overhead.

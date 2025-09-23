@@ -37,13 +37,13 @@ CREDS=$(curl -s http://localhost:8081/wp-json/test/v1/credentials)
 if [ $? -eq 0 ]; then
     echo "✅ Test environment ready!"
     echo "   Credentials: $CREDS"
-    
+
     # Export credentials for tests
     export WORDPRESS_TEST_URL="http://localhost:8081"
     export WORDPRESS_USERNAME="testuser"
     export WORDPRESS_APP_PASSWORD=$(echo $CREDS | jq -r .app_password)
     export WORDPRESS_AUTH_METHOD="app-password"
-    
+
     # Save to .env.test for tests
     cat > .env.test << EOF
 WORDPRESS_TEST_URL=http://localhost:8081
@@ -51,7 +51,7 @@ WORDPRESS_USERNAME=testuser
 WORDPRESS_APP_PASSWORD=$WORDPRESS_APP_PASSWORD
 WORDPRESS_AUTH_METHOD=app-password
 EOF
-    
+
     echo "   Test environment variables saved to .env.test"
 else
     echo "⚠️  Could not fetch test credentials"

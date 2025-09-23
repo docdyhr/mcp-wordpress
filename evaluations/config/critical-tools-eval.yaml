@@ -18,14 +18,16 @@ server:
 settings:
   timeout: 30000
   retries: 2
-  parallel: false  # Run sequentially to avoid conflicts
+  parallel: false # Run sequentially to avoid conflicts
 
 # Critical tool evaluations only
 evals:
   # Post Management - Critical
   - name: create_publish_post
     description: Test core post creation and publishing
-    prompt: "Create a new blog post titled 'Getting Started with WordPress MCP' with comprehensive content about using this MCP server"
+    prompt:
+      "Create a new blog post titled 'Getting Started with WordPress MCP' with comprehensive content about using this
+      MCP server"
     expected_tools:
       - wp_create_post
     success_criteria:
@@ -127,7 +129,7 @@ typescript_evals:
 
 # Stricter thresholds for critical tools
 thresholds:
-  pass: 4.0      # Higher than general eval
+  pass: 4.0 # Higher than general eval
   good: 4.5
   excellent: 4.8
 

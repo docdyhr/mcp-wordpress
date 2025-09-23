@@ -11,7 +11,7 @@
       }
     },
     {
-      "id": "site2", 
+      "id": "site2",
       "name": "My Second WordPress Site",
       "config": {
         "WORDPRESS_SITE_URL": "https://site2.example.com",
@@ -26,7 +26,7 @@
       "config": {
         "WORDPRESS_SITE_URL": "https://blog.company.com",
         "WORDPRESS_USERNAME": "your_username",
-        "WORDPRESS_JWT_PASSWORD": "your_user_password", 
+        "WORDPRESS_JWT_PASSWORD": "your_user_password",
         "WORDPRESS_JWT_SECRET": "your_jwt_secret_key",
         "WORDPRESS_AUTH_METHOD": "jwt"
       }

@@ -205,7 +205,9 @@ describe("WordPress API Live Contract Tests", () => {
       let authResult;
 
       if (useLive) {
-        const authHeader = `Basic ${Buffer.from(`${process.env.WORDPRESS_USERNAME}:${process.env.WORDPRESS_APP_PASSWORD}`).toString("base64")}`;
+        const authHeader = `Basic ${Buffer.from(
+          `${process.env.WORDPRESS_USERNAME}:${process.env.WORDPRESS_APP_PASSWORD}`,
+        ).toString("base64")}`;
 
         const testPostData = {
           title: "Auth Test Post",

@@ -10,7 +10,7 @@ vi.mock("../../dist/utils/logger.js", () => {
     error: vi.fn(),
     debug: vi.fn(),
     info: vi.fn(),
-    child: vi.fn(() => mockLogger)
+    child: vi.fn(() => mockLogger),
   };
   return {
     Logger: vi.fn(() => mockLogger),
@@ -18,8 +18,8 @@ vi.mock("../../dist/utils/logger.js", () => {
       server: vi.fn(() => mockLogger),
       api: vi.fn(() => mockLogger),
       cache: vi.fn(() => mockLogger),
-      tool: vi.fn(() => mockLogger)
-    }
+      tool: vi.fn(() => mockLogger),
+    },
   };
 });
 
@@ -97,7 +97,7 @@ describe("Enhanced Error Utilities", () => {
       expect(result).toBe("default");
       expect(__errorUtilsLogger.warn).toHaveBeenCalledWith(
         "Error occurred - returning default value",
-        expect.objectContaining({ error: "Test error" })
+        expect.objectContaining({ error: "Test error" }),
       );
     });
 
@@ -106,14 +106,14 @@ describe("Enhanced Error Utilities", () => {
       expect(result).toBe(42);
       expect(__errorUtilsLogger.warn).toHaveBeenCalledWith(
         "Error occurred - returning default value",
-        expect.objectContaining({ error: "String error" })
+        expect.objectContaining({ error: "String error" }),
       );
     });
 
     it("should work with complex default values", () => {
       const defaultObj = { status: "ok", data: [] };
       const result = logAndReturn(new Error(), defaultObj);
-      
+
       expect(result).toBe(defaultObj);
     });
   });
@@ -123,7 +123,7 @@ describe("Enhanced Error Utilities", () => {
       expect(() => {
         handleToolError(new Error("ECONNREFUSED"), "fetch posts");
       }).toThrow("Connection failed during fetch posts. Please check your WordPress site URL and network connection.");
-      
+
       expect(() => {
         handleToolError(new Error("ENOTFOUND"), "update post");
       }).toThrow("Connection failed during update post. Please check your WordPress site URL and network connection.");
@@ -133,7 +133,7 @@ describe("Enhanced Error Utilities", () => {
       expect(() => {
         handleToolError(new Error("401 Unauthorized"), "create post");
       }).toThrow("Authentication failed during create post. Please check your WordPress credentials.");
-      
+
       expect(() => {
         handleToolError(new Error("Request failed with status 401"), "delete post");
       }).toThrow("Authentication failed during delete post. Please check your WordPress credentials.");
@@ -143,7 +143,7 @@ describe("Enhanced Error Utilities", () => {
       expect(() => {
         handleToolError(new Error("403 Forbidden"), "publish post");
       }).toThrow("Permission denied during publish post. Please check your user permissions.");
-      
+
       expect(() => {
         handleToolError(new Error("Status: 403"), "moderate comment");
       }).toThrow("Permission denied during moderate comment. Please check your user permissions.");
@@ -153,7 +153,7 @@ describe("Enhanced Error Utilities", () => {
       expect(() => {
         handleToolError(new Error("429 Too Many Requests"), "batch update");
       }).toThrow("Rate limit exceeded during batch update. Please try again later.");
-      
+
       expect(() => {
         handleToolError(new Error("Too Many Requests"), "bulk delete");
       }).toThrow("Rate limit exceeded during bulk delete. Please try again later.");
@@ -173,7 +173,7 @@ describe("Enhanced Error Utilities", () => {
       }
       expect(__errorUtilsLogger.error).toHaveBeenCalledWith(
         "Error in test operation",
-        expect.objectContaining({ error: "Test error", context: { id: 123 } })
+        expect.objectContaining({ error: "Test error", context: { id: 123 } }),
       );
     });
 
@@ -187,7 +187,7 @@ describe("Enhanced Error Utilities", () => {
       }
       expect(__errorUtilsLogger.debug).toHaveBeenCalledWith(
         "Error stack trace",
-        expect.objectContaining({ stack: error.stack })
+        expect.objectContaining({ stack: error.stack }),
       );
     });
   });
@@ -195,46 +195,31 @@ describe("Enhanced Error Utilities", () => {
   describe("validateRequired", () => {
     it("should pass when all required fields are present", () => {
       expect(() => {
-        validateRequired(
-          { name: "John", email: "john@example.com", age: 30 },
-          ["name", "email"]
-        );
+        validateRequired({ name: "John", email: "john@example.com", age: 30 }, ["name", "email"]);
       }).not.toThrow();
     });
 
     it("should throw when required fields are missing", () => {
       expect(() => {
-        validateRequired(
-          { name: "John" },
-          ["name", "email", "phone"]
-        );
+        validateRequired({ name: "John" }, ["name", "email", "phone"]);
       }).toThrow("Missing required parameters: email, phone");
     });
 
     it("should throw when required fields are null or undefined", () => {
       expect(() => {
-        validateRequired(
-          { name: "John", email: null, phone: undefined },
-          ["name", "email", "phone"]
-        );
+        validateRequired({ name: "John", email: null, phone: undefined }, ["name", "email", "phone"]);
       }).toThrow("Missing required parameters: email, phone");
     });
 
     it("should pass when required fields are empty strings", () => {
       expect(() => {
-        validateRequired(
-          { name: "", email: "" },
-          ["name", "email"]
-        );
+        validateRequired({ name: "", email: "" }, ["name", "email"]);
       }).not.toThrow();
     });
 
     it("should pass when required fields are 0 or false", () => {
       expect(() => {
-        validateRequired(
-          { count: 0, enabled: false },
-          ["count", "enabled"]
-        );
+        validateRequired({ count: 0, enabled: false }, ["count", "enabled"]);
       }).not.toThrow();
     });
 
@@ -290,7 +275,7 @@ describe("Enhanced Error Utilities", () => {
     it("should handle circular references in error objects", () => {
       const circular = { message: "Error" };
       circular.self = circular;
-      
+
       expect(getErrorMessage(circular)).toBe("Error");
     });
 
@@ -314,11 +299,11 @@ describe("Enhanced Error Utilities", () => {
       expect(() => {
         validateRequired(null, ["field"]);
       }).toThrow();
-      
+
       expect(() => {
         validateRequired(undefined, ["field"]);
       }).toThrow();
-      
+
       expect(() => {
         validateRequired("string", ["field"]);
       }).toThrow();

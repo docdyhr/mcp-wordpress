@@ -1,11 +1,11 @@
 model:
   provider: openai
-  name: gpt-4o-mini  # Faster and more cost-effective for CI
+  name: gpt-4o-mini # Faster and more cost-effective for CI
 
 evals:
   # Minimal CI-focused evaluations
   # These test tool availability and basic functionality without requiring live WordPress sites
-  
+
   - name: tool_availability_check
     description: Check that WordPress tools are available
     prompt: "What WordPress tools are available for managing posts?"

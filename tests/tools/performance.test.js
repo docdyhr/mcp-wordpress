@@ -89,18 +89,16 @@ vi.mock("../../dist/performance/PerformanceAnalytics.js", () => ({
     }),
     addDataPoint: vi.fn(),
     benchmarkPerformance: vi.fn().mockReturnValue([{ category: "Response Time", status: "good", improvement: 0 }]),
-    generateInsights: vi
-      .fn()
-      .mockReturnValue([
-        {
-          category: "optimization",
-          title: "Test",
-          description: "Test",
-          priority: "medium",
-          estimatedImprovement: 10,
-          implementationEffort: "low",
-        },
-      ]),
+    generateInsights: vi.fn().mockReturnValue([
+      {
+        category: "optimization",
+        title: "Test",
+        description: "Test",
+        priority: "medium",
+        estimatedImprovement: 10,
+        implementationEffort: "low",
+      },
+    ]),
     generateOptimizationPlan: vi.fn().mockReturnValue({
       quickWins: [],
       mediumTerm: [],

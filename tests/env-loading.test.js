@@ -2,8 +2,6 @@
  * Tests for Environment Variable Loading
  */
 
-
-
 import { writeFileSync, unlinkSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
@@ -107,9 +105,7 @@ DEBUG=false
       WORDPRESS_SITE_URL: expect.stringMatching(/^https?:\/\//),
       WORDPRESS_USERNAME: expect.any(String),
       WORDPRESS_APP_PASSWORD: expect.any(String),
-      WORDPRESS_AUTH_METHOD: expect.stringMatching(
-        /^(app-password|jwt|basic|api-key|cookie)$/,
-      ),
+      WORDPRESS_AUTH_METHOD: expect.stringMatching(/^(app-password|jwt|basic|api-key|cookie)$/),
       DEBUG: expect.stringMatching(/^(true|false)$/),
     });
   });

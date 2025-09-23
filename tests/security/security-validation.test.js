@@ -9,11 +9,7 @@
 const SecuritySchemas = {
   safeString: {
     parse: (val) => {
-      if (
-        val.includes("<script>") ||
-        val.includes("javascript:") ||
-        val.includes("data:")
-      ) {
+      if (val.includes("<script>") || val.includes("javascript:") || val.includes("data:")) {
         throw new Error("Security validation failed");
       }
       if (val.length > 10000) {
@@ -35,12 +31,7 @@ const SecuritySchemas = {
   },
   searchQuery: {
     parse: (val) => {
-      if (
-        val.includes("'") ||
-        val.includes(";") ||
-        val.includes("--") ||
-        val.includes("DROP TABLE")
-      ) {
+      if (val.includes("'") || val.includes(";") || val.includes("--") || val.includes("DROP TABLE")) {
         throw new Error("SQL injection detected");
       }
       if (val.length > 500) {
@@ -59,13 +50,7 @@ const SecuritySchemas = {
   },
   email: {
     parse: (val) => {
-      if (
-        !val ||
-        !val.includes("@") ||
-        val.includes("<script>") ||
-        !val.includes(".") ||
-        val.length < 5
-      ) {
+      if (!val || !val.includes("@") || val.includes("<script>") || !val.includes(".") || val.length < 5) {
         throw new Error("Invalid email");
       }
       return val;
@@ -73,12 +58,7 @@ const SecuritySchemas = {
   },
   wpId: {
     parse: (val) => {
-      if (
-        typeof val !== "number" ||
-        val <= 0 ||
-        val > 999999999 ||
-        !Number.isInteger(val)
-      ) {
+      if (typeof val !== "number" || val <= 0 || val > 999999999 || !Number.isInteger(val)) {
         throw new Error("Invalid ID");
       }
       return val;
@@ -94,11 +74,7 @@ const SecuritySchemas = {
   },
   wpContent: {
     parse: (val) => {
-      if (
-        val.includes("<script>") ||
-        val.includes("javascript:") ||
-        val.length > 1000000
-      ) {
+      if (val.includes("<script>") || val.includes("javascript:") || val.length > 1000000) {
         throw new Error("Invalid content");
       }
       return val;
@@ -173,22 +149,22 @@ const SecurityLimiter = {
 describe("Security Validation Tests", () => {
   describe("XSS Protection", () => {
     test("should reject script tags in safe strings", () => {
-      const maliciousInput = "Hello <script>alert(\"XSS\")</script> World";
+      const maliciousInput = 'Hello <script>alert("XSS")</script> World';
       expect(() => SecuritySchemas.safeString.parse(maliciousInput)).toThrow();
     });
 
     test("should reject javascript URLs", () => {
-      const maliciousInput = "javascript:alert(\"XSS\")";
+      const maliciousInput = 'javascript:alert("XSS")';
       expect(() => SecuritySchemas.url.parse(maliciousInput)).toThrow();
     });
 
     test("should reject data URLs", () => {
-      const maliciousInput = "data:text/html,<script>alert(\"XSS\")</script>";
+      const maliciousInput = 'data:text/html,<script>alert("XSS")</script>';
       expect(() => SecuritySchemas.url.parse(maliciousInput)).toThrow();
     });
 
     test("should sanitize HTML content properly", () => {
-      const input = "<p>Safe content</p><script>alert(\"evil\")</script>";
+      const input = '<p>Safe content</p><script>alert("evil")</script>';
       const sanitized = InputSanitizer.sanitizeHtml(input);
       expect(sanitized).not.toContain("<script>");
       expect(sanitized).toContain("<p>Safe content</p>");
@@ -201,11 +177,9 @@ describe("Security Validation Tests", () => {
     });
 
     test("should encode output safely", () => {
-      const input = "<script>alert(\"test\")</script>";
+      const input = '<script>alert("test")</script>';
       const encoded = InputSanitizer.encodeOutput(input);
-      expect(encoded).toBe(
-        "&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;",
-      );
+      expect(encoded).toBe("&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;");
     });
   });
 
@@ -232,12 +206,7 @@ describe("Security Validation Tests", () => {
     });
 
     test("should allow safe search queries", () => {
-      const safeQueries = [
-        "wordpress tutorial",
-        "how to create posts",
-        "best practices 2024",
-        "PHP development guide",
-      ];
+      const safeQueries = ["wordpress tutorial", "how to create posts", "best practices 2024", "PHP development guide"];
 
       safeQueries.forEach((query) => {
         expect(() => SecuritySchemas.searchQuery.parse(query)).not.toThrow();
@@ -266,11 +235,7 @@ describe("Security Validation Tests", () => {
     });
 
     test("should allow safe file paths", () => {
-      const safePaths = [
-        "uploads/image.jpg",
-        "media/documents/file.pdf",
-        "content/posts/2024/article.html",
-      ];
+      const safePaths = ["uploads/image.jpg", "media/documents/file.pdf", "content/posts/2024/article.html"];
 
       safePaths.forEach((path) => {
         expect(() => SecuritySchemas.filePath.parse(path)).not.toThrow();
@@ -297,11 +262,7 @@ describe("Security Validation Tests", () => {
 
   describe("Email Validation", () => {
     test("should validate proper email formats", () => {
-      const validEmails = [
-        "user@example.com",
-        "test.email@domain.co.uk",
-        "admin@wordpress.org",
-      ];
+      const validEmails = ["user@example.com", "test.email@domain.co.uk", "admin@wordpress.org"];
 
       validEmails.forEach((email) => {
         expect(() => SecuritySchemas.email.parse(email)).not.toThrow();
@@ -319,11 +280,7 @@ describe("Security Validation Tests", () => {
 
   describe("URL Validation", () => {
     test("should validate proper URLs", () => {
-      const validUrls = [
-        "https://example.com",
-        "http://localhost:8080",
-        "https://wordpress.org/plugins",
-      ];
+      const validUrls = ["https://example.com", "http://localhost:8080", "https://wordpress.org/plugins"];
 
       validUrls.forEach((url) => {
         expect(() => SecuritySchemas.url.parse(url)).not.toThrow();
@@ -331,11 +288,7 @@ describe("Security Validation Tests", () => {
     });
 
     test("should reject invalid URLs", () => {
-      const invalidUrls = [
-        "not-a-url",
-        "javascript:alert(\"xss\")",
-        "data:text/html,<script>alert(\"xss\")</script>",
-      ];
+      const invalidUrls = ["not-a-url", 'javascript:alert("xss")', 'data:text/html,<script>alert("xss")</script>'];
 
       invalidUrls.forEach((url) => {
         expect(() => SecuritySchemas.url.parse(url)).toThrow();
@@ -361,24 +314,14 @@ describe("Security Validation Tests", () => {
 
   describe("Site ID Validation", () => {
     test("should validate proper site IDs", () => {
-      const validSiteIds = [
-        "site1",
-        "production-site",
-        "staging_env",
-        "dev123",
-      ];
+      const validSiteIds = ["site1", "production-site", "staging_env", "dev123"];
       validSiteIds.forEach((siteId) => {
         expect(() => SecuritySchemas.siteId.parse(siteId)).not.toThrow();
       });
     });
 
     test("should reject invalid site IDs", () => {
-      const invalidSiteIds = [
-        "",
-        "site with spaces",
-        "site@domain",
-        "a".repeat(51),
-      ];
+      const invalidSiteIds = ["", "site with spaces", "site@domain", "a".repeat(51)];
       invalidSiteIds.forEach((siteId) => {
         expect(() => SecuritySchemas.siteId.parse(siteId)).toThrow();
       });
@@ -436,10 +379,7 @@ describe("Content Security", () => {
   });
 
   test("should reject dangerous WordPress content", () => {
-    const dangerousContent = [
-      "<script>alert(\"xss\")</script>",
-      "javascript:alert(\"xss\")",
-    ];
+    const dangerousContent = ['<script>alert("xss")</script>', 'javascript:alert("xss")'];
 
     dangerousContent.forEach((content) => {
       expect(() => SecuritySchemas.wpContent.parse(content)).toThrow();

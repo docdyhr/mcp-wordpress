@@ -5,8 +5,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'README.md'
-      - '.github/workflows/update-docker-description.yml'
+      - "README.md"
+      - ".github/workflows/update-docker-description.yml"
 
 jobs:
   update-description:
@@ -23,7 +23,9 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: docdyhr/mcp-wordpress
           readme-filepath: ./README.md
-          short-description: "🚀 Complete WordPress MCP Server - 59 management tools, intelligent caching, real-time monitoring, multi-site support. TypeScript, Docker ready, 95%+ test coverage."
+          short-description:
+            "🚀 Complete WordPress MCP Server - 59 management tools, intelligent caching, real-time monitoring,
+            multi-site support. TypeScript, Docker ready, 95%+ test coverage."
 
       - name: ✅ Success Notification
         run: |

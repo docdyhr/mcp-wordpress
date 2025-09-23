@@ -58,11 +58,13 @@ export WORDPRESS_APP_PASSWORD="xxxx xxxx xxxx xxxx xxxx xxxx"
 ### Authentication Security
 
 1. **Use Application Passwords** (Recommended)
+
    - WordPress 5.6+ built-in feature
    - Separate passwords for each application
    - Easy to revoke without affecting main account
 
 2. **Rotate Credentials Regularly**
+
    - Set up automated rotation for production environments
    - Use different credentials for development/staging/production
    - Immediately revoke compromised credentials
@@ -93,11 +95,13 @@ if (!safePath.startsWith(allowedBasePath)) {
 ### API Security
 
 1. **Error Handling**
+
    - Never expose internal error details
    - Log errors server-side for debugging
    - Return generic error messages to clients
 
 2. **Request Limits**
+
    - Implement request size limits
    - Set appropriate timeouts
    - Validate Content-Type headers
@@ -263,16 +267,19 @@ If you discover a security vulnerability:
 The repository includes comprehensive automated security workflows:
 
 1. **CodeQL Analysis** (`.github/workflows/codeql-analysis.yml`)
+
    - Static code analysis for vulnerabilities
    - Daily scheduled scans
    - Custom security queries
 
 2. **Dependency Review** (`.github/workflows/dependency-review.yml`)
+
    - PR-based dependency security analysis
    - License compliance checking
    - Supply chain security validation
 
 3. **Secret Scanning** (`.github/workflows/secret-scanning.yml`)
+
    - TruffleHog and GitLeaks integration
    - Custom pattern detection
    - Environment file analysis

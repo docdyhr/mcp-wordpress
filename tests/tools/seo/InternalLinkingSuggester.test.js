@@ -67,11 +67,11 @@ describe("InternalLinkingSuggester", () => {
       content: {
         rendered: `
           <h1>Complete Guide to WordPress SEO</h1>
-          <p>WordPress SEO is essential for increasing your website's visibility in search engines. 
+          <p>WordPress SEO is essential for increasing your website's visibility in search engines.
           This comprehensive guide covers all aspects of optimizing your WordPress site for better rankings.</p>
-          <p>Search engine optimization helps your content reach more people and drives organic traffic to your site. 
+          <p>Search engine optimization helps your content reach more people and drives organic traffic to your site.
           When you implement proper SEO techniques, your WordPress blog posts will rank higher in Google.</p>
-          <p>One important aspect is keyword research and content optimization. You need to understand what your 
+          <p>One important aspect is keyword research and content optimization. You need to understand what your
           audience is searching for and create content that matches their intent.</p>
         `,
       },
@@ -89,15 +89,15 @@ describe("InternalLinkingSuggester", () => {
         content: {
           rendered: `
             <h1>WordPress Performance Optimization Tips</h1>
-            <p>WordPress performance optimization is crucial for SEO success and user experience. When your site loads faster, 
-            search engines rank it higher and users have a much better experience. Performance affects every aspect of your 
+            <p>WordPress performance optimization is crucial for SEO success and user experience. When your site loads faster,
+            search engines rank it higher and users have a much better experience. Performance affects every aspect of your
             WordPress website including search engine visibility, user engagement, and conversion rates.</p>
-            <p>Site speed affects your search engine rankings directly and indirectly. Google uses page speed as a ranking factor, 
-            so optimizing your WordPress website for speed is absolutely essential for SEO success. Fast loading pages improve 
-            user experience and reduce bounce rates. WordPress optimization includes image compression, caching, minification, 
+            <p>Site speed affects your search engine rankings directly and indirectly. Google uses page speed as a ranking factor,
+            so optimizing your WordPress website for speed is absolutely essential for SEO success. Fast loading pages improve
+            user experience and reduce bounce rates. WordPress optimization includes image compression, caching, minification,
             and database optimization techniques for better performance.</p>
-            <p>Performance monitoring tools help track your WordPress site speed and identify bottlenecks. Regular optimization 
-            ensures your content loads quickly for both users and search engines. WordPress performance best practices include 
+            <p>Performance monitoring tools help track your WordPress site speed and identify bottlenecks. Regular optimization
+            ensures your content loads quickly for both users and search engines. WordPress performance best practices include
             choosing fast hosting, optimizing images, using caching plugins, and minimizing HTTP requests.</p>
           `,
         },
@@ -112,9 +112,9 @@ describe("InternalLinkingSuggester", () => {
         content: {
           rendered: `
             <h1>Best WordPress Plugins for Content Marketing</h1>
-            <p>Content marketing with WordPress requires the right plugins to maximize your reach. 
+            <p>Content marketing with WordPress requires the right plugins to maximize your reach.
             These tools help you create, optimize, and promote your content effectively.</p>
-            <p>WordPress plugins can enhance your content marketing strategy by automating tasks 
+            <p>WordPress plugins can enhance your content marketing strategy by automating tasks
             and providing better analytics for your blog posts.</p>
           `,
         },
@@ -129,9 +129,9 @@ describe("InternalLinkingSuggester", () => {
         content: {
           rendered: `
             <h1>JavaScript Tutorial for Beginners</h1>
-            <p>JavaScript is a programming language used for web development. This tutorial covers 
+            <p>JavaScript is a programming language used for web development. This tutorial covers
             the basics of JavaScript programming for complete beginners.</p>
-            <p>Learning JavaScript takes time and practice. Start with simple concepts and 
+            <p>Learning JavaScript takes time and practice. Start with simple concepts and
             gradually work your way up to more complex programming patterns.</p>
           `,
         },

@@ -1,6 +1,6 @@
 /**
  * Tests for SecurityCIPipeline
- * 
+ *
  * Tests the CI/CD security integration system including gates,
  * checks, reporting, and automated remediation workflows.
  */
@@ -131,7 +131,7 @@ describe("SecurityCIPipeline", () => {
 
     it("should validate configuration on initialization", () => {
       const invalidConfig = { ...mockConfig, projectPath: "" };
-      
+
       expect(() => new SecurityCIPipeline(invalidConfig)).toThrow();
     });
   });
@@ -139,7 +139,7 @@ describe("SecurityCIPipeline", () => {
   describe("Security Gates", () => {
     it("should execute pre-commit gate successfully", async () => {
       const result = await pipeline.executePreCommitGate();
-      
+
       expect(result).toBeDefined();
       expect(result.stage).toBe("pre-commit");
       expect(result.status).toBe("passed");
@@ -148,7 +148,7 @@ describe("SecurityCIPipeline", () => {
 
     it("should execute pre-build gate successfully", async () => {
       const result = await pipeline.executePreBuildGate();
-      
+
       expect(result).toBeDefined();
       expect(result.stage).toBe("pre-build");
       expect(result.status).toBe("passed");
@@ -157,15 +157,13 @@ describe("SecurityCIPipeline", () => {
     it("should execute pre-deploy gate with warnings", async () => {
       // Mock some medium-level issues
       pipeline.scanner.scanCodeForVulnerabilities.mockResolvedValue({
-        vulnerabilities: [
-          { severity: "medium", description: "Minor issue" },
-        ],
+        vulnerabilities: [{ severity: "medium", description: "Minor issue" }],
         riskScore: 0.3,
         confidence: 0.9,
       });
 
       const result = await pipeline.executePreDeployGate();
-      
+
       expect(result).toBeDefined();
       expect(result.stage).toBe("pre-deploy");
       expect(["passed", "warning"]).toContain(result.status);
@@ -182,7 +180,7 @@ describe("SecurityCIPipeline", () => {
       });
 
       const result = await pipeline.executePreCommitGate();
-      
+
       expect(result.status).toBe("failed");
       expect(result.summary.criticalIssues).toBeGreaterThan(0);
     });
@@ -196,9 +194,9 @@ describe("SecurityCIPipeline", () => {
         riskScore: 0.1,
         confidence: 0.95,
       });
-      
+
       const result = await pipeline.runVulnerabilityCheck();
-      
+
       expect(result).toBeDefined();
       expect(result.checkId).toBe("vulnerability-scan");
       expect(result.status).toBe("passed");
@@ -212,9 +210,9 @@ describe("SecurityCIPipeline", () => {
         outdatedPackages: 0,
         securityScore: 95,
       });
-      
+
       const result = await pipeline.runDependencyCheck();
-      
+
       expect(result).toBeDefined();
       expect(result.checkId).toBe("dependency-scan");
       expect(pipeline.scanner.scanDependencies).toHaveBeenCalled();
@@ -227,9 +225,9 @@ describe("SecurityCIPipeline", () => {
         patterns: [],
         confidence: 0.98,
       });
-      
+
       const result = await pipeline.runSecretsCheck();
-      
+
       expect(result).toBeDefined();
       expect(result.checkId).toBe("secrets-scan");
       expect(pipeline.scanner.scanSecrets).toHaveBeenCalled();
@@ -242,21 +240,19 @@ describe("SecurityCIPipeline", () => {
         score: 95,
         recommendations: [],
       });
-      
+
       const result = await pipeline.runCodeReviewCheck();
-      
+
       expect(result).toBeDefined();
       expect(result.checkId).toBe("code-review");
       expect(pipeline.reviewer.reviewCode).toHaveBeenCalled();
     });
 
     it("should handle check failures gracefully", async () => {
-      pipeline.scanner.scanCodeForVulnerabilities.mockRejectedValue(
-        new Error("Scan failed")
-      );
+      pipeline.scanner.scanCodeForVulnerabilities.mockRejectedValue(new Error("Scan failed"));
 
       const result = await pipeline.runVulnerabilityCheck();
-      
+
       expect(result.status).toBe("failed");
       expect(result.error).toBeDefined();
     });
@@ -264,13 +260,13 @@ describe("SecurityCIPipeline", () => {
     it("should respect check timeouts", async () => {
       // Mock slow scan
       pipeline.scanner.scanCodeForVulnerabilities.mockImplementation(
-        () => new Promise(resolve => setTimeout(resolve, 10000))
+        () => new Promise((resolve) => setTimeout(resolve, 10000)),
       );
 
       const startTime = Date.now();
       const result = await pipeline.runVulnerabilityCheck({ timeout: 100 });
       const duration = Date.now() - startTime;
-      
+
       expect(duration).toBeLessThan(200);
       expect(result.status).toBe("timeout");
     });
@@ -295,9 +291,9 @@ describe("SecurityCIPipeline", () => {
       };
 
       pipeline.configureGate(gateConfig);
-      
+
       const gates = pipeline.getConfiguredGates();
-      expect(gates.some(gate => gate.id === "test-gate")).toBe(true);
+      expect(gates.some((gate) => gate.id === "test-gate")).toBe(true);
     });
 
     it("should validate gate configuration", () => {
@@ -313,7 +309,7 @@ describe("SecurityCIPipeline", () => {
     it("should enable/disable gates dynamically", () => {
       pipeline.enableGate("pre-commit");
       expect(pipeline.isGateEnabled("pre-commit")).toBe(true);
-      
+
       pipeline.disableGate("pre-commit");
       expect(pipeline.isGateEnabled("pre-commit")).toBe(false);
     });
@@ -322,7 +318,7 @@ describe("SecurityCIPipeline", () => {
   describe("Reporting", () => {
     it("should generate comprehensive security report", async () => {
       const report = await pipeline.generateReport();
-      
+
       expect(report).toBeDefined();
       expect(report.reportId).toBeDefined();
       expect(report.timestamp).toBeInstanceOf(Date);
@@ -334,7 +330,7 @@ describe("SecurityCIPipeline", () => {
       const jsonReport = await pipeline.exportReport("json");
       const htmlReport = await pipeline.exportReport("html");
       const xmlReport = await pipeline.exportReport("xml");
-      
+
       expect(jsonReport).toBeDefined();
       expect(htmlReport).toBeDefined();
       expect(xmlReport).toBeDefined();
@@ -343,14 +339,14 @@ describe("SecurityCIPipeline", () => {
     it("should include gate results in report", async () => {
       await pipeline.executePreCommitGate();
       const report = await pipeline.generateReport();
-      
+
       expect(report.gates).toHaveLength(1);
       expect(report.gates[0].gateName).toBe("pre-commit");
     });
 
     it("should calculate security metrics correctly", async () => {
       const metrics = await pipeline.calculateSecurityMetrics();
-      
+
       expect(metrics).toBeDefined();
       expect(metrics.overallScore).toBeGreaterThanOrEqual(0);
       expect(metrics.overallScore).toBeLessThanOrEqual(100);
@@ -363,11 +359,11 @@ describe("SecurityCIPipeline", () => {
     it("should trigger auto-remediation for fixable issues", async () => {
       pipeline.scanner.scanCodeForVulnerabilities.mockResolvedValue({
         vulnerabilities: [
-          { 
-            severity: "medium", 
+          {
+            severity: "medium",
             type: "dependency",
             autoFixable: true,
-            description: "Outdated package"
+            description: "Outdated package",
           },
         ],
         riskScore: 0.4,
@@ -375,25 +371,23 @@ describe("SecurityCIPipeline", () => {
       });
 
       const result = await pipeline.executeAutoRemediation();
-      
+
       expect(result).toBeDefined();
       expect(pipeline.remediation.autoFix).toHaveBeenCalled();
     });
 
     it("should generate remediation recommendations", async () => {
       const recommendations = await pipeline.generateRemediationPlan();
-      
+
       expect(recommendations).toBeInstanceOf(Array);
       expect(pipeline.remediation.generateRecommendations).toHaveBeenCalled();
     });
 
     it("should handle remediation failures gracefully", async () => {
-      pipeline.remediation.autoFix.mockRejectedValue(
-        new Error("Remediation failed")
-      );
+      pipeline.remediation.autoFix.mockRejectedValue(new Error("Remediation failed"));
 
       const result = await pipeline.executeAutoRemediation();
-      
+
       expect(result.status).toBe("failed");
       expect(result.error).toBeDefined();
     });
@@ -402,7 +396,7 @@ describe("SecurityCIPipeline", () => {
   describe("Integration Workflow", () => {
     it("should execute complete CI pipeline", async () => {
       const result = await pipeline.executeFullPipeline();
-      
+
       expect(result).toBeDefined();
       expect(result.stages).toBeDefined();
       expect(result.overallStatus).toBeDefined();
@@ -411,15 +405,13 @@ describe("SecurityCIPipeline", () => {
 
     it("should stop pipeline on blocking failures", async () => {
       pipeline.scanner.scanCodeForVulnerabilities.mockResolvedValue({
-        vulnerabilities: [
-          { severity: "critical", description: "Critical vulnerability" },
-        ],
+        vulnerabilities: [{ severity: "critical", description: "Critical vulnerability" }],
         riskScore: 0.95,
         confidence: 0.98,
       });
 
       const result = await pipeline.executeFullPipeline();
-      
+
       expect(result.overallStatus).toBe("failed");
       expect(result.blockedBy).toBeDefined();
     });
@@ -434,34 +426,30 @@ describe("SecurityCIPipeline", () => {
       });
 
       pipeline.scanner.scanCodeForVulnerabilities.mockResolvedValue({
-        vulnerabilities: [
-          { severity: "medium", description: "Medium issue" },
-        ],
+        vulnerabilities: [{ severity: "medium", description: "Medium issue" }],
         riskScore: 0.4,
         confidence: 0.9,
       });
 
       const result = await pipeline.executeFullPipeline();
-      
+
       expect(["passed", "warning"]).toContain(result.overallStatus);
     });
   });
 
   describe("Notifications", () => {
     it("should send notifications on security failures", async () => {
-      const notificationSpy = vi.spyOn(pipeline, 'sendNotification');
-      
+      const notificationSpy = vi.spyOn(pipeline, "sendNotification");
+
       // Ensure the mock is properly set up
       pipeline.scanner.scanCodeForVulnerabilities = vi.fn().mockResolvedValue({
-        vulnerabilities: [
-          { severity: "critical", description: "Critical issue" },
-        ],
+        vulnerabilities: [{ severity: "critical", description: "Critical issue" }],
         riskScore: 0.9,
         confidence: 0.95,
       });
 
       await pipeline.executePreCommitGate();
-      
+
       expect(notificationSpy).toHaveBeenCalled();
     });
 
@@ -472,7 +460,7 @@ describe("SecurityCIPipeline", () => {
         criticalIssues: 1,
         highIssues: 2,
       });
-      
+
       expect(notification).toBeDefined();
       expect(notification.subject).toContain("Security Gate Failed");
       expect(notification.body).toContain("critical");
@@ -484,7 +472,7 @@ describe("SecurityCIPipeline", () => {
       const startTime = Date.now();
       await pipeline.executePreCommitGate();
       const duration = Date.now() - startTime;
-      
+
       expect(duration).toBeLessThan(5000); // Should complete within 5 seconds
     });
 
@@ -496,9 +484,9 @@ describe("SecurityCIPipeline", () => {
       ];
 
       const results = await Promise.all(promises);
-      
+
       expect(results).toHaveLength(3);
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.status).toBeDefined();
       });
     });
@@ -529,7 +517,7 @@ describe("SecurityCIPipeline", () => {
       });
 
       const result = await pipeline.runVulnerabilityCheck({ retries: 1 });
-      
+
       expect(result.status).toBe("passed");
       expect(callCount).toBe(2);
     });
@@ -538,7 +526,7 @@ describe("SecurityCIPipeline", () => {
       pipeline.scanner.scanCodeForVulnerabilities.mockResolvedValue(null);
 
       const result = await pipeline.runVulnerabilityCheck();
-      
+
       expect(result.status).toBe("failed");
       expect(result.error).toContain("Invalid response");
     });
@@ -552,7 +540,7 @@ describe("SecurityCIPipeline", () => {
       };
 
       pipeline.reloadConfiguration(newConfig);
-      
+
       expect(pipeline.config.environment).toBe("production");
     });
 
@@ -567,12 +555,12 @@ describe("SecurityCIPipeline", () => {
 
     it("should preserve gate states across reconfigurations", () => {
       pipeline.disableGate("pre-commit");
-      
+
       pipeline.reloadConfiguration({
         ...mockConfig,
         environment: "staging",
       });
-      
+
       expect(pipeline.isGateEnabled("pre-commit")).toBe(false);
     });
   });

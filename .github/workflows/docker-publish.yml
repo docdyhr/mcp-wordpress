@@ -6,17 +6,17 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Docker tag to build (e.g., v1.2.3, latest, dev)'
+        description: "Docker tag to build (e.g., v1.2.3, latest, dev)"
         required: true
         type: string
-        default: 'latest'
+        default: "latest"
       platforms:
-        description: 'Target platforms (comma-separated)'
+        description: "Target platforms (comma-separated)"
         required: false
         type: string
-        default: 'linux/amd64,linux/arm64'
+        default: "linux/amd64,linux/arm64"
       push:
-        description: 'Push to registry'
+        description: "Push to registry"
         required: false
         type: boolean
         default: true
@@ -34,7 +34,7 @@ jobs:
       packages: write
       attestations: write
       id-token: write
-      
+
     steps:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
@@ -97,7 +97,9 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: ${{ env.IMAGE_NAME }}
           readme-filepath: ./README.md
-          short-description: "🚀 Complete WordPress MCP Server - 59 management tools, intelligent caching, real-time monitoring, multi-site support. TypeScript, Docker ready, 95%+ test coverage."
+          short-description:
+            "🚀 Complete WordPress MCP Server - 59 management tools, intelligent caching, real-time monitoring,
+            multi-site support. TypeScript, Docker ready, 95%+ test coverage."
 
       - name: 📊 Build Summary
         run: |

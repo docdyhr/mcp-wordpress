@@ -1,14 +1,14 @@
 # Automatically apply labels based on file path patterns
 security:
-  - 'src/security/**'
+  - "src/security/**"
 client:
-  - 'src/client/**'
+  - "src/client/**"
 cache:
-  - 'src/cache/**'
+  - "src/cache/**"
 docs:
-  - 'docs/**'
+  - "docs/**"
 config:
-  - '*.json'
-  - '.github/**'
+  - "*.json"
+  - ".github/**"
 ci:
-  - '.github/workflows/**'
+  - ".github/workflows/**"

@@ -245,7 +245,7 @@ import { MigrationAdapter } from '@/client/managers/composed';
 const USE_COMPOSITION = process.env.USE_COMPOSED_MANAGERS === 'true';
 
 const { requestManager, authManager } = await MigrationAdapter.createManagers(
-  config, 
+  config,
   USE_COMPOSITION
 );
 \`\`\`

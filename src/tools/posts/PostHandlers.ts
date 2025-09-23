@@ -204,7 +204,9 @@ export async function handleListPosts(
     // Add pagination guidance for large result sets
     let finalContent = content;
     if (posts.length >= (sanitizedParams.per_page || 10)) {
-      finalContent += `\n\n📄 **Pagination Tip**: Use \`per_page\` parameter to control results (max 100). Current: ${sanitizedParams.per_page || 10}`;
+      finalContent += `\n\n📄 **Pagination Tip**: Use \`per_page\` parameter to control results (max 100). Current: ${
+        sanitizedParams.per_page || 10
+      }`;
     }
 
     return finalContent;

@@ -5,11 +5,11 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to publish'
+        description: "Version to publish"
         required: true
         type: string
       force_publish:
-        description: 'Force publish even if version exists'
+        description: "Force publish even if version exists"
         required: false
         type: boolean
         default: false
@@ -27,8 +27,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
         run: npm ci
@@ -57,7 +57,7 @@ jobs:
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "Current package version: $VERSION"
-          
+
           if npm view mcp-wordpress@$VERSION version 2>/dev/null; then
             echo "version_exists=true" >> $GITHUB_OUTPUT
             echo "Version $VERSION already exists on npm"
@@ -71,7 +71,7 @@ jobs:
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          
+
       - name: Skip publishing notice
         if: steps.version_check.outputs.version_exists == 'true' && github.event.inputs.force_publish != 'true'
         run: |

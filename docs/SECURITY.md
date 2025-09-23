@@ -87,12 +87,12 @@ threat mitigation, and compliance requirements.
 
 ### Authentication Methods Comparison
 
-| Method | Security Level | Production Ready | Use Case |
-|--------|----------------|------------------|----------|
-| **Application Password** | 🟢 High | ✅ Yes | Recommended for all environments |
-| **JWT** | 🟡 Medium | ⚠️ With proper setup | API-heavy applications |
-| **Basic Auth** | 🔴 Low | ❌ No | Development only |
-| **API Key** | 🟡 Medium | ⚠️ Plugin dependent | Plugin-based authentication |
+| Method                   | Security Level | Production Ready     | Use Case                         |
+| ------------------------ | -------------- | -------------------- | -------------------------------- |
+| **Application Password** | 🟢 High        | ✅ Yes               | Recommended for all environments |
+| **JWT**                  | 🟡 Medium      | ⚠️ With proper setup | API-heavy applications           |
+| **Basic Auth**           | 🔴 Low         | ❌ No                | Development only                 |
+| **API Key**              | 🟡 Medium      | ⚠️ Plugin dependent  | Plugin-based authentication      |
 
 ## Input Validation & Sanitization
 
@@ -133,18 +133,18 @@ validateSearchQuery(query);
 ```typescript
 // Post creation with contextual validation
 validatePostParams({
-  title: "My Post",           // Required, sanitized
+  title: "My Post", // Required, sanitized
   content: "<p>Safe HTML</p>", // XSS protection
-  status: "future",           // Valid status
+  status: "future", // Valid status
   date: "2024-01-01T10:00:00", // Required for future posts
-  categories: [1, 2, 3]       // Valid category IDs
+  categories: [1, 2, 3], // Valid category IDs
 });
 
 // Pagination with conflict detection
 validatePaginationParams({
   page: 1,
   per_page: 10,
-  offset: 20  // ERROR: Cannot use page and offset together
+  offset: 20, // ERROR: Cannot use page and offset together
 });
 ```
 
@@ -158,7 +158,7 @@ const dangerousPatterns = [
   /<script[^>]*>[\s\S]*?<\/script>/gi,
   /<iframe[^>]*>/gi,
   /javascript:/gi,
-  /on\w+\s*=/gi  // Event handlers
+  /on\w+\s*=/gi, // Event handlers
 ];
 ```
 
@@ -166,10 +166,7 @@ const dangerousPatterns = [
 
 ```typescript
 // Query sanitization
-sanitized = sanitized.replace(
-  /(\b(union|select|insert|update|delete|drop|create)\b)/gi,
-  ""
-);
+sanitized = sanitized.replace(/(\b(union|select|insert|update|delete|drop|create)\b)/gi, "");
 ```
 
 **Path Traversal Prevention:**
@@ -421,18 +418,21 @@ grep "Security validation failed" /var/log/mcp-wordpress.log
 ### Security Incident Checklist
 
 1. **Immediate Response**
+
    - Disable affected accounts
    - Rotate compromised credentials
    - Enable additional logging
    - Document incident timeline
 
 2. **Investigation**
+
    - Analyze access logs
    - Check WordPress audit logs
    - Review security monitoring
    - Identify attack vectors
 
 3. **Remediation**
+
    - Patch vulnerabilities
    - Update credentials
    - Strengthen security controls
@@ -568,11 +568,13 @@ npm run test:security:penetration
 **Security Validation:**
 
 1. **Authentication Testing**
+
    - Invalid credential handling
    - Brute force protection
    - Session management
 
 2. **Input Validation Testing**
+
    - XSS prevention
    - SQL injection protection
    - Path traversal prevention

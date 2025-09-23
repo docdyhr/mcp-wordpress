@@ -34,13 +34,13 @@ describe("SEO Content Analyzer", () => {
       content: {
         rendered: `
           <h1>Main Heading</h1>
-          <p>This is a test paragraph with some content for SEO analysis. 
+          <p>This is a test paragraph with some content for SEO analysis.
           It contains multiple sentences to test readability scoring.</p>
           <h2>Subheading</h2>
-          <p>Another paragraph with more content. This paragraph also contains 
+          <p>Another paragraph with more content. This paragraph also contains
           important information about SEO optimization.</p>
           <img src="test.jpg" alt="Test image">
-          <p>A paragraph with <a href="/internal-link">internal link</a> and 
+          <p>A paragraph with <a href="/internal-link">internal link</a> and
           <a href="https://external.com">external link</a>.</p>
         `,
       },

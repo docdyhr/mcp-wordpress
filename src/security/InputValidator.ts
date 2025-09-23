@@ -175,7 +175,7 @@ export function validateSecurity(schema: z.ZodSchema) {
         logger.info(`Security validation passed for ${propertyName}`, {
           timestamp: new Date().toISOString(),
           method: propertyName,
-          paramCount: typeof validatedParams === 'object' && validatedParams ? Object.keys(validatedParams).length : 0,
+          paramCount: typeof validatedParams === "object" && validatedParams ? Object.keys(validatedParams).length : 0,
         });
 
         // Call original method with validated params

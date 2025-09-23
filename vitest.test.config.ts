@@ -3,7 +3,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
-  
+
   // Manual alias resolution for compiled JS files
   resolve: {
     alias: {
@@ -30,8 +30,8 @@ export default defineConfig({
     include: ["tests/**/*.test.js", "tests/**/*.spec.js"],
 
     // Timeouts - much shorter for debugging
-    testTimeout: 5000,  // 5 seconds
-    hookTimeout: 3000,  // 3 seconds
+    testTimeout: 5000, // 5 seconds
+    hookTimeout: 3000, // 3 seconds
 
     // Test behavior
     clearMocks: true,
@@ -42,17 +42,17 @@ export default defineConfig({
     // setupFiles: ["./tests/vitest.setup.ts"],
 
     // Performance and debugging - optimized for speed
-    isolate: false,  // Faster test execution by sharing contexts
+    isolate: false, // Faster test execution by sharing contexts
     poolOptions: {
       threads: {
-        singleThread: true,  // Use single thread for debugging
+        singleThread: true, // Use single thread for debugging
         isolate: false,
       },
     },
 
     // Reporter configuration
     reporters: ["basic"],
-    
+
     // Bail on first failure for faster debugging
     bail: 1,
   },

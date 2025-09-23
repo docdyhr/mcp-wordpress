@@ -1,22 +1,22 @@
 /**
  * Enhanced Tool Types for MCP WordPress
- * 
+ *
  * This file provides strongly-typed interfaces for all WordPress MCP tools,
  * replacing loose typing with precise, validated type definitions.
  */
 
-import type { 
-  WordPressId, 
-  PostId, 
-  UserId, 
-  MediaId, 
-  CommentId, 
-  CategoryId, 
+import type {
+  WordPressId,
+  PostId,
+  UserId,
+  MediaId,
+  CommentId,
+  CategoryId,
   TagId,
   DeepReadonly,
   Result,
-  ToolResult
-} from './enhanced.js';
+  ToolResult,
+} from "./enhanced.js";
 
 import type {
   WordPressPost,
@@ -32,8 +32,8 @@ import type {
   CommentStatus,
   PingStatus,
   UserRole,
-  MediaType
-} from './wordpress.js';
+  MediaType,
+} from "./wordpress.js";
 
 // Base Tool Parameter Interface
 export interface BaseToolParams {
@@ -87,17 +87,27 @@ export interface UpdatePostParams extends BaseToolParams {
 
 export interface GetPostParams extends BaseToolParams {
   readonly id: PostId;
-  readonly context?: 'view' | 'embed' | 'edit';
+  readonly context?: "view" | "embed" | "edit";
   readonly password?: string;
 }
 
 export interface ListPostsParams extends BaseToolParams {
-  readonly context?: 'view' | 'embed' | 'edit';
+  readonly context?: "view" | "embed" | "edit";
   readonly page?: number;
   readonly per_page?: number;
   readonly search?: string;
-  readonly order?: 'asc' | 'desc';
-  readonly orderby?: 'author' | 'date' | 'id' | 'include' | 'modified' | 'parent' | 'relevance' | 'slug' | 'include_slugs' | 'title';
+  readonly order?: "asc" | "desc";
+  readonly orderby?:
+    | "author"
+    | "date"
+    | "id"
+    | "include"
+    | "modified"
+    | "parent"
+    | "relevance"
+    | "slug"
+    | "include_slugs"
+    | "title";
   readonly author?: UserId;
   readonly author_exclude?: readonly UserId[];
   readonly before?: string;
@@ -145,17 +155,28 @@ export interface UpdatePageParams extends Partial<CreatePageParams> {
 
 export interface GetPageParams extends BaseToolParams {
   readonly id: PostId;
-  readonly context?: 'view' | 'embed' | 'edit';
+  readonly context?: "view" | "embed" | "edit";
   readonly password?: string;
 }
 
 export interface ListPagesParams extends BaseToolParams {
-  readonly context?: 'view' | 'embed' | 'edit';
+  readonly context?: "view" | "embed" | "edit";
   readonly page?: number;
   readonly per_page?: number;
   readonly search?: string;
-  readonly order?: 'asc' | 'desc';
-  readonly orderby?: 'author' | 'date' | 'id' | 'include' | 'modified' | 'parent' | 'relevance' | 'slug' | 'include_slugs' | 'title' | 'menu_order';
+  readonly order?: "asc" | "desc";
+  readonly orderby?:
+    | "author"
+    | "date"
+    | "id"
+    | "include"
+    | "modified"
+    | "parent"
+    | "relevance"
+    | "slug"
+    | "include_slugs"
+    | "title"
+    | "menu_order";
   readonly author?: UserId;
   readonly author_exclude?: readonly UserId[];
   readonly before?: string;
@@ -209,24 +230,24 @@ export interface UpdateUserParams extends BaseToolParams {
 }
 
 export interface GetUserParams extends BaseToolParams {
-  readonly id: UserId | 'me';
-  readonly context?: 'view' | 'embed' | 'edit';
+  readonly id: UserId | "me";
+  readonly context?: "view" | "embed" | "edit";
 }
 
 export interface ListUsersParams extends BaseToolParams {
-  readonly context?: 'view' | 'embed' | 'edit';
+  readonly context?: "view" | "embed" | "edit";
   readonly page?: number;
   readonly per_page?: number;
   readonly search?: string;
-  readonly order?: 'asc' | 'desc';
-  readonly orderby?: 'id' | 'include' | 'name' | 'registered_date' | 'slug' | 'include_slugs' | 'email' | 'url';
+  readonly order?: "asc" | "desc";
+  readonly orderby?: "id" | "include" | "name" | "registered_date" | "slug" | "include_slugs" | "email" | "url";
   readonly exclude?: readonly UserId[];
   readonly include?: readonly UserId[];
   readonly offset?: number;
   readonly slug?: readonly string[];
   readonly roles?: readonly UserRole[];
   readonly capabilities?: readonly string[];
-  readonly who?: 'authors';
+  readonly who?: "authors";
   readonly has_published_posts?: readonly string[];
 }
 
@@ -263,16 +284,26 @@ export interface UpdateMediaParams extends BaseToolParams {
 
 export interface GetMediaParams extends BaseToolParams {
   readonly id: MediaId;
-  readonly context?: 'view' | 'embed' | 'edit';
+  readonly context?: "view" | "embed" | "edit";
 }
 
 export interface ListMediaParams extends BaseToolParams {
-  readonly context?: 'view' | 'embed' | 'edit';
+  readonly context?: "view" | "embed" | "edit";
   readonly page?: number;
   readonly per_page?: number;
   readonly search?: string;
-  readonly order?: 'asc' | 'desc';
-  readonly orderby?: 'author' | 'date' | 'id' | 'include' | 'modified' | 'parent' | 'relevance' | 'slug' | 'include_slugs' | 'title';
+  readonly order?: "asc" | "desc";
+  readonly orderby?:
+    | "author"
+    | "date"
+    | "id"
+    | "include"
+    | "modified"
+    | "parent"
+    | "relevance"
+    | "slug"
+    | "include_slugs"
+    | "title";
   readonly author?: UserId;
   readonly author_exclude?: readonly UserId[];
   readonly before?: string;
@@ -304,7 +335,7 @@ export interface CreateCommentParams extends BaseToolParams {
   readonly author_url?: string;
   readonly date?: string;
   readonly date_gmt?: string;
-  readonly status?: 'approved' | 'unapproved';
+  readonly status?: "approved" | "unapproved";
   readonly meta?: DeepReadonly<Record<string, unknown>>;
 }
 
@@ -319,23 +350,23 @@ export interface UpdateCommentParams extends BaseToolParams {
   readonly author_url?: string;
   readonly date?: string;
   readonly date_gmt?: string;
-  readonly status?: 'approved' | 'unapproved' | 'spam' | 'trash';
+  readonly status?: "approved" | "unapproved" | "spam" | "trash";
   readonly meta?: DeepReadonly<Record<string, unknown>>;
 }
 
 export interface GetCommentParams extends BaseToolParams {
   readonly id: CommentId;
-  readonly context?: 'view' | 'embed' | 'edit';
+  readonly context?: "view" | "embed" | "edit";
   readonly password?: string;
 }
 
 export interface ListCommentsParams extends BaseToolParams {
-  readonly context?: 'view' | 'embed' | 'edit';
+  readonly context?: "view" | "embed" | "edit";
   readonly page?: number;
   readonly per_page?: number;
   readonly search?: string;
-  readonly order?: 'asc' | 'desc';
-  readonly orderby?: 'date' | 'date_gmt' | 'id' | 'include' | 'post' | 'parent' | 'type';
+  readonly order?: "asc" | "desc";
+  readonly orderby?: "date" | "date_gmt" | "id" | "include" | "post" | "parent" | "type";
   readonly after?: string;
   readonly author?: readonly UserId[];
   readonly author_exclude?: readonly UserId[];
@@ -347,8 +378,8 @@ export interface ListCommentsParams extends BaseToolParams {
   readonly parent?: readonly CommentId[];
   readonly parent_exclude?: readonly CommentId[];
   readonly post?: readonly PostId[];
-  readonly status?: 'approved' | 'unapproved' | 'spam' | 'trash' | 'hold' | 'all';
-  readonly type?: 'comment' | 'trackback' | 'pingback';
+  readonly status?: "approved" | "unapproved" | "spam" | "trash" | "hold" | "all";
+  readonly type?: "comment" | "trackback" | "pingback";
   readonly password?: string;
 }
 
@@ -359,7 +390,7 @@ export interface DeleteCommentParams extends BaseToolParams {
 
 export interface ModerateCommentParams extends BaseToolParams {
   readonly id: CommentId;
-  readonly status: 'approved' | 'unapproved' | 'spam' | 'trash';
+  readonly status: "approved" | "unapproved" | "spam" | "trash";
 }
 
 // Taxonomy Tool Parameters
@@ -382,16 +413,16 @@ export interface UpdateCategoryParams extends BaseToolParams {
 
 export interface GetCategoryParams extends BaseToolParams {
   readonly id: CategoryId;
-  readonly context?: 'view' | 'embed' | 'edit';
+  readonly context?: "view" | "embed" | "edit";
 }
 
 export interface ListCategoriesParams extends BaseToolParams {
-  readonly context?: 'view' | 'embed' | 'edit';
+  readonly context?: "view" | "embed" | "edit";
   readonly page?: number;
   readonly per_page?: number;
   readonly search?: string;
-  readonly order?: 'asc' | 'desc';
-  readonly orderby?: 'id' | 'include' | 'name' | 'slug' | 'include_slugs' | 'term_group' | 'description' | 'count';
+  readonly order?: "asc" | "desc";
+  readonly orderby?: "id" | "include" | "name" | "slug" | "include_slugs" | "term_group" | "description" | "count";
   readonly exclude?: readonly CategoryId[];
   readonly include?: readonly CategoryId[];
   readonly hide_empty?: boolean;
@@ -422,16 +453,16 @@ export interface UpdateTagParams extends BaseToolParams {
 
 export interface GetTagParams extends BaseToolParams {
   readonly id: TagId;
-  readonly context?: 'view' | 'embed' | 'edit';
+  readonly context?: "view" | "embed" | "edit";
 }
 
 export interface ListTagsParams extends BaseToolParams {
-  readonly context?: 'view' | 'embed' | 'edit';
+  readonly context?: "view" | "embed" | "edit";
   readonly page?: number;
   readonly per_page?: number;
   readonly search?: string;
-  readonly order?: 'asc' | 'desc';
-  readonly orderby?: 'id' | 'include' | 'name' | 'slug' | 'include_slugs' | 'term_group' | 'description' | 'count';
+  readonly order?: "asc" | "desc";
+  readonly orderby?: "id" | "include" | "name" | "slug" | "include_slugs" | "term_group" | "description" | "count";
   readonly exclude?: readonly TagId[];
   readonly include?: readonly TagId[];
   readonly hide_empty?: boolean;
@@ -470,7 +501,7 @@ export interface GetSiteInfoParams extends BaseToolParams {}
 // Search Tool Parameters
 export interface SearchParams extends BaseToolParams {
   readonly query: string;
-  readonly type?: readonly ('post' | 'page' | 'attachment' | 'user' | 'comment')[];
+  readonly type?: readonly ("post" | "page" | "attachment" | "user" | "comment")[];
   readonly subtype?: readonly string[];
   readonly include?: readonly WordPressId[];
   readonly exclude?: readonly WordPressId[];
@@ -484,13 +515,13 @@ export interface TestAuthParams extends BaseToolParams {}
 export interface GetCurrentUserParams extends BaseToolParams {}
 
 export interface CreateAppPasswordParams extends BaseToolParams {
-  readonly user_id: UserId | 'me';
+  readonly user_id: UserId | "me";
   readonly name: string;
   readonly app_id?: string;
 }
 
 export interface DeleteAppPasswordParams extends BaseToolParams {
-  readonly user_id: UserId | 'me';
+  readonly user_id: UserId | "me";
   readonly uuid: string;
 }
 
@@ -510,12 +541,12 @@ export interface GetCacheInfoParams extends BaseToolParams {}
 
 // Performance Tool Parameters
 export interface GetPerformanceMetricsParams extends BaseToolParams {
-  readonly timeframe?: '1h' | '24h' | '7d' | '30d';
-  readonly metrics?: readonly ('response_time' | 'error_rate' | 'cache_hit_rate' | 'throughput')[];
+  readonly timeframe?: "1h" | "24h" | "7d" | "30d";
+  readonly metrics?: readonly ("response_time" | "error_rate" | "cache_hit_rate" | "throughput")[];
 }
 
 export interface GetPerformanceReportParams extends BaseToolParams {
-  readonly format?: 'json' | 'csv' | 'html';
+  readonly format?: "json" | "csv" | "html";
   readonly include_recommendations?: boolean;
 }
 
@@ -538,52 +569,74 @@ export interface ListToolResult<T> extends ToolResult<readonly T[]> {
   };
 }
 
-export interface DeleteToolResult extends ToolResult<{
-  readonly deleted: boolean;
-  readonly previous?: unknown;
-}> {}
+export interface DeleteToolResult
+  extends ToolResult<{
+    readonly deleted: boolean;
+    readonly previous?: unknown;
+  }> {}
 
-export interface SearchToolResult extends ToolResult<readonly {
-  readonly id: number;
-  readonly title: string;
-  readonly url: string;
-  readonly type: string;
-  readonly subtype: string;
-}[]> {}
+export interface SearchToolResult
+  extends ToolResult<
+    readonly {
+      readonly id: number;
+      readonly title: string;
+      readonly url: string;
+      readonly type: string;
+      readonly subtype: string;
+    }[]
+  > {}
 
 // Tool Handler Type Definitions
-export type PostToolHandler<TParams extends BaseToolParams, TResult = PostToolResult> = 
-  (params: DeepReadonly<TParams>) => Promise<TResult>;
+export type PostToolHandler<TParams extends BaseToolParams, TResult = PostToolResult> = (
+  params: DeepReadonly<TParams>,
+) => Promise<TResult>;
 
-export type PageToolHandler<TParams extends BaseToolParams, TResult = PageToolResult> = 
-  (params: DeepReadonly<TParams>) => Promise<TResult>;
+export type PageToolHandler<TParams extends BaseToolParams, TResult = PageToolResult> = (
+  params: DeepReadonly<TParams>,
+) => Promise<TResult>;
 
-export type UserToolHandler<TParams extends BaseToolParams, TResult = UserToolResult> = 
-  (params: DeepReadonly<TParams>) => Promise<TResult>;
+export type UserToolHandler<TParams extends BaseToolParams, TResult = UserToolResult> = (
+  params: DeepReadonly<TParams>,
+) => Promise<TResult>;
 
-export type MediaToolHandler<TParams extends BaseToolParams, TResult = MediaToolResult> = 
-  (params: DeepReadonly<TParams>) => Promise<TResult>;
+export type MediaToolHandler<TParams extends BaseToolParams, TResult = MediaToolResult> = (
+  params: DeepReadonly<TParams>,
+) => Promise<TResult>;
 
-export type CommentToolHandler<TParams extends BaseToolParams, TResult = CommentToolResult> = 
-  (params: DeepReadonly<TParams>) => Promise<TResult>;
+export type CommentToolHandler<TParams extends BaseToolParams, TResult = CommentToolResult> = (
+  params: DeepReadonly<TParams>,
+) => Promise<TResult>;
 
-export type CategoryToolHandler<TParams extends BaseToolParams, TResult = CategoryToolResult> = 
-  (params: DeepReadonly<TParams>) => Promise<TResult>;
+export type CategoryToolHandler<TParams extends BaseToolParams, TResult = CategoryToolResult> = (
+  params: DeepReadonly<TParams>,
+) => Promise<TResult>;
 
-export type TagToolHandler<TParams extends BaseToolParams, TResult = TagToolResult> = 
-  (params: DeepReadonly<TParams>) => Promise<TResult>;
+export type TagToolHandler<TParams extends BaseToolParams, TResult = TagToolResult> = (
+  params: DeepReadonly<TParams>,
+) => Promise<TResult>;
 
-export type SiteToolHandler<TParams extends BaseToolParams, TResult = SiteSettingsToolResult> = 
-  (params: DeepReadonly<TParams>) => Promise<TResult>;
+export type SiteToolHandler<TParams extends BaseToolParams, TResult = SiteSettingsToolResult> = (
+  params: DeepReadonly<TParams>,
+) => Promise<TResult>;
 
 // Tool Registry Types
 export interface ToolDefinition<TParams extends BaseToolParams = BaseToolParams, TResult = ToolResult> {
   readonly name: string;
   readonly description: string;
-  readonly category: 'posts' | 'pages' | 'users' | 'media' | 'comments' | 'taxonomies' | 'site' | 'auth' | 'cache' | 'performance';
+  readonly category:
+    | "posts"
+    | "pages"
+    | "users"
+    | "media"
+    | "comments"
+    | "taxonomies"
+    | "site"
+    | "auth"
+    | "cache"
+    | "performance";
   readonly handler: (params: DeepReadonly<TParams>) => Promise<TResult>;
   readonly schema: {
-    readonly type: 'object';
+    readonly type: "object";
     readonly properties: DeepReadonly<Record<string, unknown>>;
     readonly required: readonly string[];
     readonly additionalProperties: false;
@@ -604,5 +657,5 @@ export interface ToolValidationResult {
 
 export interface ToolValidator<TParams extends BaseToolParams> {
   readonly validate: (params: unknown) => Result<TParams, Error>;
-  readonly schema: ToolDefinition['schema'];
+  readonly schema: ToolDefinition["schema"];
 }

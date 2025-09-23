@@ -1,10 +1,10 @@
 name: "🧪 Test & Coverage Badges"
 
 # Coverage Badge Management - Option 1 Approach
-# 
+#
 # This workflow calculates accurate coverage metrics but does NOT automatically
 # commit badge updates due to branch protection rules (security requirement).
-# 
+#
 # Approach:
 # ✅ Coverage calculation: Always accurate and real-time
 # ✅ Security: Fully maintained with branch protection
@@ -15,23 +15,23 @@ name: "🧪 Test & Coverage Badges"
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'package.json'
-      - 'jest.config*'
-      - '.github/workflows/test-coverage-badges.yml'
+      - "src/**"
+      - "tests/**"
+      - "package.json"
+      - "jest.config*"
+      - ".github/workflows/test-coverage-badges.yml"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'package.json'
-      - 'jest.config*'
-      - '.github/workflows/test-coverage-badges.yml'
+      - "src/**"
+      - "tests/**"
+      - "package.json"
+      - "jest.config*"
+      - ".github/workflows/test-coverage-badges.yml"
   schedule:
-    - cron: '15 6 * * *'
+    - cron: "15 6 * * *"
   workflow_dispatch:
 
 env:
@@ -55,8 +55,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
       - name: Install deps (with cache)
         uses: actions/cache@v4
         with:
@@ -73,27 +73,27 @@ jobs:
           npm run test:coverage:ci || echo "Tests completed with warnings"
           echo "test_exit_code=$?" >> $GITHUB_OUTPUT
         continue-on-error: true
-      - name: Skip WordPress services (Option 1 approach)  
+      - name: Skip WordPress services (Option 1 approach)
         run: |
           echo "⚠️ Skipping WordPress services for coverage-only workflow"
-          echo "✅ Coverage tests completed successfully" 
+          echo "✅ Coverage tests completed successfully"
           echo "📊 Proceeding with metric extraction"
       - name: Coverage calculation (replacing live tests)
         run: |
           echo "✅ Live compatibility tests bypassed for coverage-only workflow"
           echo "📊 Coverage data collection completed"
-      - name: Extract test and coverage metrics  
+      - name: Extract test and coverage metrics
         id: metrics
         run: |
           echo "Extracting test and coverage metrics..."
-          
+
           # Initialize default values
           TESTS_TOTAL=0
           TESTS_PASSED=0
           LINE_COV=0
           BRANCH_COV=0
           FUNC_COV=0
-          
+
           # Extract test results with enhanced parsing
           if [ -d "coverage" ]; then
             SUMMARY=$(find . -name "*.txt" -o -name "*.log" | xargs grep -l "Tests:" 2>/dev/null | head -1)
@@ -105,7 +105,7 @@ jobs:
               fi
             fi
           fi
-          
+
           # Fallback: check if we have any test files and estimate
           if [ "$TESTS_TOTAL" = "0" ]; then
             TEST_FILES=$(find tests/ -name "*.test.js" 2>/dev/null | wc -l || echo "0")
@@ -129,7 +129,7 @@ jobs:
           else
             echo "No coverage file found at coverage/coverage-final.json"
           fi
-          
+
           # Ensure numeric values and calculate colors
           TESTS_TOTAL=${TESTS_TOTAL:-0}
           TESTS_PASSED=${TESTS_PASSED:-0}
@@ -144,7 +144,7 @@ jobs:
           elif [ "$INT" -ge 50 ]; then COLOR=yellow
           elif [ "$INT" -ge 30 ]; then COLOR=orange
           fi
-          
+
           # Branch coverage color calculation
           BRANCH_COLOR=red
           BINT=$(echo "$BRANCH_COV" | cut -d'.' -f1)
@@ -153,7 +153,7 @@ jobs:
           elif [ "$BINT" -ge 50 ]; then BRANCH_COLOR=yellow
           elif [ "$BINT" -ge 30 ]; then BRANCH_COLOR=orange
           fi
-          
+
           # Function coverage color calculation
           FUNC_COLOR=red
           FINT=$(echo "$FUNC_COV" | cut -d'.' -f1)
@@ -162,7 +162,7 @@ jobs:
           elif [ "$FINT" -ge 50 ]; then FUNC_COLOR=yellow
           elif [ "$FINT" -ge 30 ]; then FUNC_COLOR=orange
           fi
-          
+
           # Test results color calculation
           TEST_COLOR=red
           if [ "$TESTS_TOTAL" -gt 0 ]; then
@@ -182,10 +182,10 @@ jobs:
           echo "coverage_branches_color=$BRANCH_COLOR" >> $GITHUB_OUTPUT
           echo "coverage_functions=$FUNC_COV" >> $GITHUB_OUTPUT
           echo "coverage_functions_color=$FUNC_COLOR" >> $GITHUB_OUTPUT
-          
+
           # Create metrics JSON file
           echo "{\"tests_passed\":$TESTS_PASSED,\"tests_total\":$TESTS_TOTAL,\"line_coverage\":\"$LINE_COV\",\"branch_coverage\":\"$BRANCH_COV\",\"function_coverage\":\"$FUNC_COV\"}" > metrics.json
-          
+
           # Summary output
           echo "Final metrics: $TESTS_PASSED/$TESTS_TOTAL tests, $LINE_COV% lines, $BRANCH_COV% branches, $FUNC_COV% functions"
       - name: Coverage guardrail (blocking)
@@ -254,7 +254,7 @@ jobs:
           echo "📊 Coverage calculation: SUCCESSFUL"
           echo "🎯 Coverage metrics available for manual PR creation"
           echo "✅ Workflow completed - no errors in coverage calculation"
-      - name: Summary 
+      - name: Summary
         run: |
           echo "✅ Coverage workflow completed successfully!"
           echo "📊 Final metrics: tests ${{ steps.metrics.outputs.tests_passed }}/${{ steps.metrics.outputs.tests_total }}, coverage ${{ steps.metrics.outputs.coverage_lines }}% (lines)"

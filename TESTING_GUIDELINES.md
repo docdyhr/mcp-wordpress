@@ -1,7 +1,7 @@
 # Testing Guidelines & Best Practices
 
-This document establishes comprehensive testing standards for the MCP WordPress project, ensuring code quality, reliability,
-and maintainability across all components.
+This document establishes comprehensive testing standards for the MCP WordPress project, ensuring code quality,
+reliability, and maintainability across all components.
 
 ## Table of Contents
 
@@ -31,11 +31,11 @@ and maintainability across all components.
     🔺 E2E Tests (10%)
        - Full WordPress integration
        - Contract verification
-       
-   🔺🔺 Integration Tests (20%) 
+
+   🔺🔺 Integration Tests (20%)
       - Component interactions
       - API client testing
-      
+
   🔺🔺🔺 Unit Tests (70%)
      - Individual functions
      - Class methods
@@ -66,51 +66,49 @@ tests/
 
 #### 1. Unit Tests (`tests/unit/`)
 
-**Purpose**: Test individual functions and classes in isolation  
-**Coverage Target**: 70-90% of codebase
+**Purpose**: Test individual functions and classes in isolation **Coverage Target**: 70-90% of codebase
 
 ```javascript
 // ✅ Good unit test example
-describe('validateId', () => {
-  it('should validate positive integers', () => {
-    expect(validateId(123, 'user_id')).toBe(123);
-    expect(validateId(1, 'post_id')).toBe(1);
+describe("validateId", () => {
+  it("should validate positive integers", () => {
+    expect(validateId(123, "user_id")).toBe(123);
+    expect(validateId(1, "post_id")).toBe(1);
   });
-  
-  it('should reject invalid IDs with descriptive errors', () => {
-    expect(() => validateId(-1, 'user_id')).toThrow('user_id must be a positive integer');
-    expect(() => validateId(0, 'post_id')).toThrow('post_id must be a positive integer');
-    expect(() => validateId('abc', 'id')).toThrow('id must be a positive integer');
+
+  it("should reject invalid IDs with descriptive errors", () => {
+    expect(() => validateId(-1, "user_id")).toThrow("user_id must be a positive integer");
+    expect(() => validateId(0, "post_id")).toThrow("post_id must be a positive integer");
+    expect(() => validateId("abc", "id")).toThrow("id must be a positive integer");
   });
-  
-  it('should handle edge cases', () => {
-    expect(() => validateId(Number.MAX_SAFE_INTEGER + 1, 'id')).toThrow();
-    expect(() => validateId(1.5, 'id')).toThrow();
+
+  it("should handle edge cases", () => {
+    expect(() => validateId(Number.MAX_SAFE_INTEGER + 1, "id")).toThrow();
+    expect(() => validateId(1.5, "id")).toThrow();
   });
 });
 ```
 
 #### 2. Integration Tests (`tests/integration/`)
 
-**Purpose**: Test component interactions and system behavior  
-**Coverage Target**: Critical integration points
+**Purpose**: Test component interactions and system behavior **Coverage Target**: Critical integration points
 
 ```javascript
 // ✅ Good integration test example
-describe('WordPress Client Integration', () => {
+describe("WordPress Client Integration", () => {
   let client;
-  
+
   beforeEach(() => {
     client = new WordPressClient({
-      baseUrl: 'https://test.example.com',
-      auth: { method: 'app-password', username: 'test', appPassword: 'test' }
+      baseUrl: "https://test.example.com",
+      auth: { method: "app-password", username: "test", appPassword: "test" },
     });
   });
-  
-  it('should handle authentication flow end-to-end', async () => {
+
+  it("should handle authentication flow end-to-end", async () => {
     // Mock successful auth
-    mockHttpResponse(200, { id: 1, name: 'test' });
-    
+    mockHttpResponse(200, { id: 1, name: "test" });
+
     const result = await client.testAuthentication();
     expect(result.authenticated).toBe(true);
     expect(result.user.id).toBe(1);
@@ -120,15 +118,14 @@ describe('WordPress Client Integration', () => {
 
 #### 3. Contract Tests (`tests/contracts/`)
 
-**Purpose**: Verify API compatibility and external integrations  
-**Coverage Target**: All external API interactions
+**Purpose**: Verify API compatibility and external integrations **Coverage Target**: All external API interactions
 
 ```javascript
 // ✅ Contract test with intelligent fallbacks
-describe('WordPress API Contracts', () => {
+describe("WordPress API Contracts", () => {
   let client;
   const useLive = process.env.WORDPRESS_TEST_URL && !process.env.SKIP_LIVE_TESTS;
-  
+
   beforeEach(() => {
     if (useLive) {
       client = createLiveClient();
@@ -136,18 +133,18 @@ describe('WordPress API Contracts', () => {
       client = createMockClient();
     }
   });
-  
+
   it(`should create posts with correct structure (live=${useLive})`, async () => {
     const result = await client.createPost({
-      title: 'Test Post',
-      content: 'Test content'
+      title: "Test Post",
+      content: "Test content",
     });
-    
+
     expect(result).toMatchObject({
       id: expect.any(Number),
-      title: { rendered: expect.stringContaining('Test Post') },
-      content: { rendered: expect.stringContaining('Test content') },
-      status: expect.any(String)
+      title: { rendered: expect.stringContaining("Test Post") },
+      content: { rendered: expect.stringContaining("Test content") },
+      status: expect.any(String),
     });
   });
 });
@@ -159,19 +156,19 @@ describe('WordPress API Contracts', () => {
 
 ```javascript
 // ✅ Performance test with thresholds
-describe('Cache Performance', () => {
-  it('should achieve target throughput', async () => {
+describe("Cache Performance", () => {
+  it("should achieve target throughput", async () => {
     const cache = new CacheManager();
     const startTime = performance.now();
-    
+
     // Perform 1000 operations
     for (let i = 0; i < 1000; i++) {
       await cache.set(`key-${i}`, `value-${i}`);
     }
-    
+
     const endTime = performance.now();
     const opsPerSecond = 1000 / ((endTime - startTime) / 1000);
-    
+
     expect(opsPerSecond).toBeGreaterThan(10000); // 10k ops/sec minimum
   });
 });
@@ -183,19 +180,17 @@ describe('Cache Performance', () => {
 
 ```javascript
 // ✅ Security validation test
-describe('Input Validation Security', () => {
-  it('should prevent XSS attacks', () => {
+describe("Input Validation Security", () => {
+  it("should prevent XSS attacks", () => {
     const maliciousInput = '<script>alert("xss")</script>';
-    
-    expect(() => validateString(maliciousInput, 'content'))
-      .toThrow('contains potentially dangerous content');
+
+    expect(() => validateString(maliciousInput, "content")).toThrow("contains potentially dangerous content");
   });
-  
-  it('should prevent SQL injection patterns', () => {
+
+  it("should prevent SQL injection patterns", () => {
     const sqlInjection = "'; DROP TABLE users; --";
-    
-    expect(() => validateSearchQuery(sqlInjection))
-      .toThrow('contains potentially dangerous patterns');
+
+    expect(() => validateSearchQuery(sqlInjection)).toThrow("contains potentially dangerous patterns");
   });
 });
 ```
@@ -214,30 +209,24 @@ describe('Input Validation Security', () => {
 
 ```typescript
 // vitest.config.ts - Main configuration
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    environment: 'node',
+    environment: "node",
     coverage: {
-      include: [
-        'src/**/*.ts'
-      ],
-      exclude: [
-        'src/**/*.d.ts',
-        'src/types/**',
-        'src/**/index.ts'
-      ],
+      include: ["src/**/*.ts"],
+      exclude: ["src/**/*.d.ts", "src/types/**", "src/**/index.ts"],
       thresholds: {
         global: {
           branches: 50,
           functions: 60,
           lines: 65,
-          statements: 60
-        }
-      }
-    }
-  }
+          statements: 60,
+        },
+      },
+    },
+  },
 });
 ```
 
@@ -250,7 +239,7 @@ npm test
 # Run with coverage
 npm run test:coverage
 
-# Run specific test categories  
+# Run specific test categories
 npm run test:unit
 npm run test:security
 npm run test:performance
@@ -268,16 +257,16 @@ npm run test:watch
 ### Test Structure (AAA Pattern)
 
 ```javascript
-describe('ComponentName', () => {
-  describe('methodName', () => {
-    it('should behavior under condition', () => {
+describe("ComponentName", () => {
+  describe("methodName", () => {
+    it("should behavior under condition", () => {
       // Arrange - Set up test data and mocks
       const input = createTestInput();
       const mockDependency = vi.fn().mockReturnValue(expectedResult);
-      
+
       // Act - Execute the code under test
       const result = methodName(input, mockDependency);
-      
+
       // Assert - Verify the results
       expect(result).toEqual(expectedOutput);
       expect(mockDependency).toHaveBeenCalledWith(expectedArgs);
@@ -298,14 +287,14 @@ describe('ComponentName', () => {
 
 ```javascript
 // ✅ Good: Describes behavior clearly
-it('should return 401 when authentication fails')
-it('should cache responses for 5 minutes')
-it('should validate required parameters before API calls')
+it("should return 401 when authentication fails");
+it("should cache responses for 5 minutes");
+it("should validate required parameters before API calls");
 
-// ❌ Bad: Vague or implementation-focused  
-it('should work correctly')
-it('should call the API')
-it('tests the function')
+// ❌ Bad: Vague or implementation-focused
+it("should work correctly");
+it("should call the API");
+it("tests the function");
 ```
 
 ### Test Data Management
@@ -315,17 +304,17 @@ it('tests the function')
 ```javascript
 // test-factories.js
 export const createMockWordPressClient = (overrides = {}) => ({
-  createPost: vi.fn().mockResolvedValue({ id: 1, title: { rendered: 'Test' } }),
+  createPost: vi.fn().mockResolvedValue({ id: 1, title: { rendered: "Test" } }),
   getPosts: vi.fn().mockResolvedValue([]),
   request: vi.fn(),
-  ...overrides
+  ...overrides,
 });
 
 export const createTestPost = (overrides = {}) => ({
-  title: 'Test Post',
-  content: 'Test content',
-  status: 'draft',
-  ...overrides
+  title: "Test Post",
+  content: "Test content",
+  status: "draft",
+  ...overrides,
 });
 ```
 
@@ -333,16 +322,16 @@ export const createTestPost = (overrides = {}) => ({
 
 ```javascript
 // ✅ Good: Each test is independent
-describe('PostsTools', () => {
+describe("PostsTools", () => {
   let client;
   let postsTools;
-  
+
   beforeEach(() => {
     client = createMockWordPressClient();
     postsTools = new PostsTools(client);
   });
-  
-  it('should create posts', async () => {
+
+  it("should create posts", async () => {
     const result = await postsTools.createPost(createTestPost());
     expect(result.id).toBeDefined();
   });
@@ -350,10 +339,10 @@ describe('PostsTools', () => {
 
 // ❌ Bad: Tests depend on execution order
 let createdPostId;
-it('should create a post', () => {
+it("should create a post", () => {
   createdPostId = createPost().id;
 });
-it('should update the post', () => {
+it("should update the post", () => {
   updatePost(createdPostId); // Depends on previous test
 });
 ```
@@ -363,7 +352,7 @@ it('should update the post', () => {
 ### Global Targets (Phase 1)
 
 - **Lines**: 40% minimum
-- **Branches**: 30% minimum  
+- **Branches**: 30% minimum
 - **Functions**: 35% minimum
 - **Statements**: 38% minimum
 
@@ -375,7 +364,7 @@ it('should update the post', () => {
 // src/utils/validation.ts, src/utils/error.ts
 {
   branches: 80,
-  functions: 90, 
+  functions: 90,
   lines: 85,
   statements: 85
 }
@@ -388,7 +377,7 @@ it('should update the post', () => {
 {
   branches: 40,
   functions: 50,
-  lines: 45, 
+  lines: 45,
   statements: 45
 }
 ```
@@ -401,7 +390,7 @@ it('should update the post', () => {
   branches: 30,
   functions: 40,
   lines: 35,
-  statements: 35  
+  statements: 35
 }
 ```
 
@@ -459,12 +448,12 @@ npm run coverage:check
 
 ```javascript
 // ✅ Test one behavior per test
-it('should validate email format', () => {
-  expect(validateEmail('user@example.com')).toBe('user@example.com');
+it("should validate email format", () => {
+  expect(validateEmail("user@example.com")).toBe("user@example.com");
 });
 
-it('should reject invalid email format', () => {
-  expect(() => validateEmail('invalid-email')).toThrow();
+it("should reject invalid email format", () => {
+  expect(() => validateEmail("invalid-email")).toThrow();
 });
 ```
 
@@ -474,8 +463,8 @@ it('should reject invalid email format', () => {
 // ✅ Clear expectations
 expect(result).toEqual({
   id: expect.any(Number),
-  title: expect.stringContaining('Test'),
-  created: expect.stringMatching(/\d{4}-\d{2}-\d{2}/)
+  title: expect.stringContaining("Test"),
+  created: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
 });
 
 // ❌ Vague assertions
@@ -487,18 +476,18 @@ expect(result.length).toBeGreaterThan(0);
 
 ```javascript
 // ✅ Test both success and failure paths
-describe('createPost', () => {
-  it('should create post successfully', async () => {
+describe("createPost", () => {
+  it("should create post successfully", async () => {
     client.createPost.mockResolvedValue({ id: 1 });
     const result = await postsTools.createPost(validData);
     expect(result.success).toBe(true);
   });
-  
-  it('should handle API errors gracefully', async () => {
-    client.createPost.mockRejectedValue(new Error('API Error'));
+
+  it("should handle API errors gracefully", async () => {
+    client.createPost.mockRejectedValue(new Error("API Error"));
     const result = await postsTools.createPost(validData);
     expect(result.success).toBe(false);
-    expect(result.error).toContain('API Error');
+    expect(result.error).toContain("API Error");
   });
 });
 ```
@@ -507,11 +496,11 @@ describe('createPost', () => {
 
 ```javascript
 // ✅ Mock HTTP requests and external services
-vi.mock('node-fetch');
-import fetch from 'node-fetch';
+vi.mock("node-fetch");
+import fetch from "node-fetch";
 vi.mocked(fetch).mockResolvedValue({
   ok: true,
-  json: () => Promise.resolve({ id: 1, title: 'Test' })
+  json: () => Promise.resolve({ id: 1, title: "Test" }),
 });
 ```
 
@@ -519,14 +508,14 @@ vi.mocked(fetch).mockResolvedValue({
 
 ```javascript
 // ❌ Testing internal implementation
-it('should call private method', () => {
-  const spy = vi.spyOn(instance, '_privateMethod');
+it("should call private method", () => {
+  const spy = vi.spyOn(instance, "_privateMethod");
   instance.publicMethod();
-  expect(spy).toHaveBeenCalled(); 
+  expect(spy).toHaveBeenCalled();
 });
 
 // ✅ Test public behavior
-it('should return processed result', () => {
+it("should return processed result", () => {
   const result = instance.publicMethod(input);
   expect(result).toEqual(expectedOutput);
 });
@@ -536,15 +525,21 @@ it('should return processed result', () => {
 
 ```javascript
 // ❌ Testing too many things at once
-it('should handle complete user workflow', async () => {
+it("should handle complete user workflow", async () => {
   // 50+ lines testing multiple components
 });
 
 // ✅ Break into focused tests
-describe('User Management Workflow', () => {
-  it('should create user account', () => { /* ... */ });
-  it('should authenticate user', () => { /* ... */ });
-  it('should update user profile', () => { /* ... */ });
+describe("User Management Workflow", () => {
+  it("should create user account", () => {
+    /* ... */
+  });
+  it("should authenticate user", () => {
+    /* ... */
+  });
+  it("should update user profile", () => {
+    /* ... */
+  });
 });
 ```
 
@@ -553,20 +548,20 @@ describe('User Management Workflow', () => {
 ### 1. WordPress Client Testing
 
 ```javascript
-describe('WordPressClient', () => {
+describe("WordPressClient", () => {
   let client;
-  
+
   beforeEach(() => {
     client = new WordPressClient({
-      baseUrl: 'https://test.example.com',
-      auth: { method: 'app-password', username: 'test', appPassword: 'test' }
+      baseUrl: "https://test.example.com",
+      auth: { method: "app-password", username: "test", appPassword: "test" },
     });
   });
-  
-  it('should handle authentication errors', async () => {
-    mockHttpResponse(401, { message: 'Unauthorized' });
-    
-    await expect(client.request('/posts')).rejects.toThrow('Authentication failed');
+
+  it("should handle authentication errors", async () => {
+    mockHttpResponse(401, { message: "Unauthorized" });
+
+    await expect(client.request("/posts")).rejects.toThrow("Authentication failed");
   });
 });
 ```
@@ -574,27 +569,26 @@ describe('WordPressClient', () => {
 ### 2. MCP Tool Testing
 
 ```javascript
-describe('PostsTools', () => {
+describe("PostsTools", () => {
   let client;
   let postsTools;
-  
+
   beforeEach(() => {
     client = createMockWordPressClient();
     postsTools = new PostsTools(client);
   });
-  
-  it('should validate parameters before API calls', async () => {
-    await expect(postsTools.createPost({}))
-      .rejects.toThrow('title is required');
+
+  it("should validate parameters before API calls", async () => {
+    await expect(postsTools.createPost({})).rejects.toThrow("title is required");
   });
-  
-  it('should format successful responses', async () => {
-    client.createPost.mockResolvedValue({ id: 1, title: { rendered: 'Test' } });
-    
-    const result = await postsTools.createPost({ title: 'Test' });
+
+  it("should format successful responses", async () => {
+    client.createPost.mockResolvedValue({ id: 1, title: { rendered: "Test" } });
+
+    const result = await postsTools.createPost({ title: "Test" });
     expect(result).toMatchObject({
       success: true,
-      data: expect.objectContaining({ id: 1 })
+      data: expect.objectContaining({ id: 1 }),
     });
   });
 });
@@ -603,20 +597,22 @@ describe('PostsTools', () => {
 ### 3. Configuration Testing
 
 ```javascript
-describe('Configuration Validation', () => {
-  it('should validate multi-site configuration', () => {
+describe("Configuration Validation", () => {
+  it("should validate multi-site configuration", () => {
     const config = {
-      sites: [{
-        id: 'site1',
-        name: 'Test Site',
-        config: {
-          WORDPRESS_SITE_URL: 'https://example.com',
-          WORDPRESS_USERNAME: 'user',
-          WORDPRESS_APP_PASSWORD: 'pass pass pass pass pass pass'
-        }
-      }]
+      sites: [
+        {
+          id: "site1",
+          name: "Test Site",
+          config: {
+            WORDPRESS_SITE_URL: "https://example.com",
+            WORDPRESS_USERNAME: "user",
+            WORDPRESS_APP_PASSWORD: "pass pass pass pass pass pass",
+          },
+        },
+      ],
     };
-    
+
     expect(() => validateMultiSiteConfiguration(config)).not.toThrow();
   });
 });
@@ -625,18 +621,17 @@ describe('Configuration Validation', () => {
 ### 4. Error Handling Testing
 
 ```javascript
-describe('Error Handling', () => {
-  it('should provide helpful error messages', () => {
-    expect(() => validateId(-1, 'user_id'))
-      .toThrow('user_id must be a positive integer, got: -1');
+describe("Error Handling", () => {
+  it("should provide helpful error messages", () => {
+    expect(() => validateId(-1, "user_id")).toThrow("user_id must be a positive integer, got: -1");
   });
-  
-  it('should handle network errors gracefully', async () => {
-    client.request.mockRejectedValue(new Error('ECONNREFUSED'));
-    
+
+  it("should handle network errors gracefully", async () => {
+    client.request.mockRejectedValue(new Error("ECONNREFUSED"));
+
     const result = await toolMethod();
     expect(result.success).toBe(false);
-    expect(result.error).toContain('connection failed');
+    expect(result.error).toContain("connection failed");
   });
 });
 ```
@@ -644,17 +639,16 @@ describe('Error Handling', () => {
 ### 5. Property-Based Testing
 
 ```javascript
-import fc from 'fast-check';
+import fc from "fast-check";
 
-describe('Validation Properties', () => {
-  it('should handle any positive integer as valid ID', () => {
-    fc.assert(fc.property(
-      fc.nat({ min: 1 }),
-      (id) => {
-        expect(() => validateId(id, 'test')).not.toThrow();
-        expect(validateId(id, 'test')).toBe(id);
-      }
-    ));
+describe("Validation Properties", () => {
+  it("should handle any positive integer as valid ID", () => {
+    fc.assert(
+      fc.property(fc.nat({ min: 1 }), (id) => {
+        expect(() => validateId(id, "test")).not.toThrow();
+        expect(validateId(id, "test")).toBe(id);
+      }),
+    );
   });
 });
 ```
@@ -686,13 +680,13 @@ npm test
 
 ```javascript
 // ✅ Use proper async/await patterns
-it('should handle async operations', async () => {
+it("should handle async operations", async () => {
   const promise = asyncOperation();
   await expect(promise).resolves.toEqual(expected);
 });
 
 // ❌ Avoid timing-based tests
-it('should complete within 1 second', (done) => {
+it("should complete within 1 second", (done) => {
   setTimeout(() => done(), 1000); // Flaky!
 });
 ```
@@ -731,7 +725,7 @@ open coverage/lcov-report/index.html
 ### Definition of Done for Testing
 
 - [ ] **Unit tests written** for all new functions/methods
-- [ ] **Integration tests** for component interactions  
+- [ ] **Integration tests** for component interactions
 - [ ] **Error cases covered** with appropriate tests
 - [ ] **Edge cases identified** and tested
 - [ ] **Coverage thresholds met** per component requirements
@@ -755,11 +749,12 @@ open coverage/lcov-report/index.html
 ## Next Steps
 
 1. **Implement Phase 1 Coverage Targets** - Focus on critical components
-2. **Enhance Contract Testing** - Expand WordPress API coverage  
+2. **Enhance Contract Testing** - Expand WordPress API coverage
 3. **Performance Baseline** - Establish benchmarks for all tools
 4. **Security Test Expansion** - Add comprehensive penetration tests
 5. **Documentation Integration** - Auto-generate test examples in API docs
 
-This testing strategy ensures robust, maintainable code while supporting rapid development and deployment of new features.
+This testing strategy ensures robust, maintainable code while supporting rapid development and deployment of new
+features.
 
 Remember: **Good tests are an investment in code quality, developer confidence, and user reliability.** 🚀

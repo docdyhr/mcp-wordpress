@@ -4,26 +4,25 @@
 
 Creates a new WordPress post with comprehensive validation and detailed success feedback including management links.
 
-**Usage Examples:**
-• Simple post: `wp_create_post --title="My New Post" --content="<p>Hello World!</p>"`
-• Draft post: `wp_create_post --title="Draft Post" --status="draft"`
-• Categorized post: `wp_create_post --title="Tech News" --categories=[1,5] --tags=[10,20]`
-• Post with featured image: `wp_create_post --title="My Post" --content="<p>Content</p>" --featured_media=42`
-• Remove featured image: `wp_create_post --title="My Post" --featured_media=0`
-• Scheduled post: `wp_create_post --title="Future Post" --status="future" --date="2024-12-25T10:00:00"`
-• Complete post: `wp_create_post --title="Complete Post" --content="<p>Content</p>" --excerpt="Summary" --status="publish"`
+**Usage Examples:** • Simple post: `wp_create_post --title="My New Post" --content="<p>Hello World!</p>"` • Draft post:
+`wp_create_post --title="Draft Post" --status="draft"` • Categorized post:
+`wp_create_post --title="Tech News" --categories=[1,5] --tags=[10,20]` • Post with featured image:
+`wp_create_post --title="My Post" --content="<p>Content</p>" --featured_media=42` • Remove featured image:
+`wp_create_post --title="My Post" --featured_media=0` • Scheduled post:
+`wp_create_post --title="Future Post" --status="future" --date="2024-12-25T10:00:00"` • Complete post:
+`wp_create_post --title="Complete Post" --content="<p>Content</p>" --excerpt="Summary" --status="publish"`
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `title` | `string` | ✅ | The title for the post. | - | `My Blog Post`, `Hello World` |
-| `content` | `string` | ❌ | The content for the post, in HTML format. | - | `<p>Post content here</p>`, `This is my post content` |
-| `status` | `string` | ❌ | The publishing status for the post. | `publish` | `example` |
-| `excerpt` | `string` | ❌ | The excerpt for the post. | - | `example` |
-| `categories` | `array` | ❌ | An array of category IDs to assign to the post. | - | `example` |
-| `tags` | `array` | ❌ | An array of tag IDs to assign to the post. | - | `example` |
-| `featured_media` | `number` | ❌ | The ID of the featured media (image) for the post. Use wp_upload_media first to get a media ID. Set to 0 or null to remove the featured image. | - | `example` |
+| Parameter        | Type     | Required | Description                                                                                                                                    | Default   | Examples                                              |
+| ---------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ----------------------------------------------------- |
+| `title`          | `string` | ✅       | The title for the post.                                                                                                                        | -         | `My Blog Post`, `Hello World`                         |
+| `content`        | `string` | ❌       | The content for the post, in HTML format.                                                                                                      | -         | `<p>Post content here</p>`, `This is my post content` |
+| `status`         | `string` | ❌       | The publishing status for the post.                                                                                                            | `publish` | `example`                                             |
+| `excerpt`        | `string` | ❌       | The excerpt for the post.                                                                                                                      | -         | `example`                                             |
+| `categories`     | `array`  | ❌       | An array of category IDs to assign to the post.                                                                                                | -         | `example`                                             |
+| `tags`           | `array`  | ❌       | An array of tag IDs to assign to the post.                                                                                                     | -         | `example`                                             |
+| `featured_media` | `number` | ❌       | The ID of the featured media (image) for the post. Use wp_upload_media first to get a media ID. Set to 0 or null to remove the featured image. | -         | `example`                                             |
 
 ## Examples
 
@@ -86,8 +85,8 @@ wp_create_post --title="Example Post Title" --content="This is example content f
 
 **Endpoint:** `/wp-json/wp/v2/posts`
 
-This tool directly interfaces with the WordPress REST API endpoint above. The response format and available
-parameters are determined by WordPress core functionality.
+This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters
+are determined by WordPress core functionality.
 
 ### WordPress Documentation
 
@@ -125,28 +124,24 @@ This tool requires the following WordPress user capabilities:
 
 ### AUTHENTICATION_FAILED
 
-**Message:** Authentication failed  
-**Description:** Invalid credentials or insufficient permissions  
-**Resolution:** Check your authentication credentials and user permissions
+**Message:** Authentication failed **Description:** Invalid credentials or insufficient permissions **Resolution:**
+Check your authentication credentials and user permissions
 
 ### VALIDATION_ERROR
 
-**Message:** Parameter validation failed  
-**Description:** One or more required parameters are missing or invalid  
+**Message:** Parameter validation failed **Description:** One or more required parameters are missing or invalid
 **Resolution:** Review the required parameters and their formats
 
 ### NOT_FOUND
 
-**Message:** Resource not found  
-**Description:** The requested resource does not exist  
-**Resolution:** Verify the resource ID and ensure it exists
+**Message:** Resource not found **Description:** The requested resource does not exist **Resolution:** Verify the
+resource ID and ensure it exists
 
 ### PERMISSION_DENIED
 
-**Message:** Insufficient permissions  
-**Description:** The user does not have permission to perform this action  
+**Message:** Insufficient permissions **Description:** The user does not have permission to perform this action
 **Resolution:** Contact an administrator to grant the necessary permissions
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

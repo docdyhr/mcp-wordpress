@@ -48,9 +48,9 @@ export class AuthenticationManager extends BaseManager {
     } catch {
       throw new AuthenticationError("Invalid site URL", AUTH_METHODS.APP_PASSWORD);
     }
-    
+
     // Normalize URL by removing trailing slash
-    const normalizedSiteUrl = config.siteUrl.replace(/\/$/, '');
+    const normalizedSiteUrl = config.siteUrl.replace(/\/$/, "");
     config.siteUrl = normalizedSiteUrl;
 
     // Validate auth method using centralized constants

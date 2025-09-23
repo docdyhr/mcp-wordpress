@@ -237,7 +237,7 @@ export class SecurityCIPipeline {
       try {
         const scanPromise = scanner.scanCodeForVulnerabilities
           ? scanner.scanCodeForVulnerabilities()
-          : (scanner.performScan?.() ?? Promise.resolve({ vulnerabilities: [], riskScore: 0 }));
+          : scanner.performScan?.() ?? Promise.resolve({ vulnerabilities: [], riskScore: 0 });
 
         if (opts.timeout && opts.timeout > 0) {
           const res = await Promise.race([

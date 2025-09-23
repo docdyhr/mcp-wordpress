@@ -4,10 +4,10 @@
  */
 
 // Main Configuration System
-export { Config, ConfigHelpers, config } from './Config.js';
+export { Config, ConfigHelpers, config } from "./Config.js";
 
 // Configuration Schema and Validation
-export * from './ConfigurationSchema.js';
+export * from "./ConfigurationSchema.js";
 
 // Server Configuration (legacy)
-export * from './ServerConfiguration.js';
+export * from "./ServerConfiguration.js";

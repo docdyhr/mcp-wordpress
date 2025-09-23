@@ -2,8 +2,8 @@
 
 ## Overview
 
-This guide helps troubleshoot and resolve publishing issues for the MCP WordPress project. The project publishes
-to two main targets:
+This guide helps troubleshoot and resolve publishing issues for the MCP WordPress project. The project publishes to two
+main targets:
 
 1. **NPM Registry** - Node.js package
 2. **Docker Hub** - Container images
@@ -200,6 +200,7 @@ If all automated processes fail:
 ### Regular Maintenance
 
 1. **Rotate secrets annually:**
+
    - NPM_TOKEN
    - DOCKER_USERNAME/DOCKER_PASSWORD
 

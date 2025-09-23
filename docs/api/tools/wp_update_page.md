@@ -6,12 +6,12 @@ Updates an existing page.
 
 ## Parameters
 
-| Parameter | Type | Required | Description | Default | Examples |
-|-----------|------|----------|-------------|---------|----------|
-| `id` | `number` | ✅ | The ID of the page to update. | - | `123`, `456` |
-| `title` | `string` | ❌ | The new title for the page. | - | `My Blog Post`, `Hello World` |
-| `content` | `string` | ❌ | The new content for the page, in HTML format. | - | `<p>Post content here</p>`, `This is my post content` |
-| `status` | `string` | ❌ | The new status for the page. | `publish` | `example` |
+| Parameter | Type     | Required | Description                                   | Default   | Examples                                              |
+| --------- | -------- | -------- | --------------------------------------------- | --------- | ----------------------------------------------------- |
+| `id`      | `number` | ✅       | The ID of the page to update.                 | -         | `123`, `456`                                          |
+| `title`   | `string` | ❌       | The new title for the page.                   | -         | `My Blog Post`, `Hello World`                         |
+| `content` | `string` | ❌       | The new content for the page, in HTML format. | -         | `<p>Post content here</p>`, `This is my post content` |
+| `status`  | `string` | ❌       | The new status for the page.                  | `publish` | `example`                                             |
 
 ## Examples
 
@@ -20,11 +20,13 @@ Updates an existing page.
 Simple example of using wp_update_page
 
 **Command:**
+
 ```bash
 wp_update_page --id="123"
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -37,6 +39,7 @@ wp_update_page --id="123"
 ```
 
 **Error Example (Authentication failure):**
+
 ```json
 {
   "error": "Authentication failed",
@@ -44,17 +47,18 @@ wp_update_page --id="123"
 }
 ```
 
-
 ### Advanced page Configuration
 
 Comprehensive example using all available parameters
 
 **Command:**
+
 ```bash
 wp_update_page --id="123" --title="Example Post Title" --content="This is example content for the post." --status="publish"
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -66,11 +70,6 @@ wp_update_page --id="123" --title="Example Post Title" --content="This is exampl
 }
 ```
 
-
-
-
-
-
 ## Required Permissions
 
 This tool requires the following WordPress user capabilities:
@@ -78,7 +77,6 @@ This tool requires the following WordPress user capabilities:
 - `edit_pages`
 
 **Note:** The authenticated user must have these capabilities to successfully execute this tool.
-
 
 ## Response Format
 
@@ -102,34 +100,24 @@ This tool requires the following WordPress user capabilities:
 
 ### AUTHENTICATION_FAILED
 
-**Message:** Authentication failed  
-**Description:** Invalid credentials or insufficient permissions  
-**Resolution:** Check your authentication credentials and user permissions
-
+**Message:** Authentication failed **Description:** Invalid credentials or insufficient permissions **Resolution:**
+Check your authentication credentials and user permissions
 
 ### VALIDATION_ERROR
 
-**Message:** Parameter validation failed  
-**Description:** One or more required parameters are missing or invalid  
+**Message:** Parameter validation failed **Description:** One or more required parameters are missing or invalid
 **Resolution:** Review the required parameters and their formats
-
 
 ### NOT_FOUND
 
-**Message:** Resource not found  
-**Description:** The requested resource does not exist  
-**Resolution:** Verify the resource ID and ensure it exists
-
+**Message:** Resource not found **Description:** The requested resource does not exist **Resolution:** Verify the
+resource ID and ensure it exists
 
 ### PERMISSION_DENIED
 
-**Message:** Insufficient permissions  
-**Description:** The user does not have permission to perform this action  
+**Message:** Insufficient permissions **Description:** The user does not have permission to perform this action
 **Resolution:** Contact an administrator to grant the necessary permissions
-
-
-
 
 ---
 
-*Generated automatically from tool definitions - Do not edit manually*
+_Generated automatically from tool definitions - Do not edit manually_

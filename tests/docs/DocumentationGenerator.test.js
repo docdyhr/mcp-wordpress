@@ -1,6 +1,6 @@
 /**
  * Tests for DocumentationGenerator
- * 
+ *
  * Basic test coverage for the API documentation auto-generation system.
  * Tests the core functionality of extracting and generating documentation.
  */
@@ -50,7 +50,7 @@ describe("DocumentationGenerator", () => {
     };
 
     generator = new DocumentationGenerator(mockConfig);
-    
+
     // Clear all mocks
     vi.clearAllMocks();
   });
@@ -156,13 +156,13 @@ describe("DocumentationGenerator", () => {
       const result = generator.extractToolDocumentation(mockTool);
 
       expect(result.parameters).toHaveLength(3);
-      
-      const titleParam = result.parameters.find(p => p.name === "title");
+
+      const titleParam = result.parameters.find((p) => p.name === "title");
       expect(titleParam).toBeDefined();
       expect(titleParam.required).toBe(true);
       expect(titleParam.type).toBe("string");
 
-      const statusParam = result.parameters.find(p => p.name === "status");
+      const statusParam = result.parameters.find((p) => p.name === "status");
       expect(statusParam).toBeDefined();
       expect(statusParam.required).toBe(false);
       expect(statusParam.allowedValues).toEqual(["draft", "publish"]);

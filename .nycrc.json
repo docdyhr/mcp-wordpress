@@ -1,18 +1,7 @@
 {
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "src/**/*.d.ts",
-    "src/**/*.test.ts",
-    "src/types/**",
-    "tests/**"
-  ],
-  "reporter": [
-    "text",
-    "html",
-    "json"
-  ],
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.d.ts", "src/**/*.test.ts", "src/types/**", "tests/**"],
+  "reporter": ["text", "html", "json"],
   "all": true,
   "check-coverage": false,
   "statements": 30,

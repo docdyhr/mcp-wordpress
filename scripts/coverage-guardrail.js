@@ -315,7 +315,9 @@ if (allFailures.length > 0) {
 
 console.log(`✅ Coverage guardrail passed (Phase ${phase}${strictMode ? " + Strict" : ""})`);
 console.log(
-  `📊 Coverage: Lines ${linePct.toFixed(2)}%, Branches ${branchPct.toFixed(2)}%, Functions ${funcPct.toFixed(2)}%, Statements ${statementPct.toFixed(2)}%`,
+  `📊 Coverage: Lines ${linePct.toFixed(2)}%, Branches ${branchPct.toFixed(2)}%, Functions ${funcPct.toFixed(
+    2,
+  )}%, Statements ${statementPct.toFixed(2)}%`,
 );
 console.log(
   `🎯 Progress toward Phase ${phase} targets: ${((linePct / globalThresholds.lines) * 100).toFixed(1)}% complete`,

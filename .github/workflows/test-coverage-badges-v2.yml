@@ -2,23 +2,23 @@ name: "🧪 Test & Coverage Badges"
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'package.json'
-      - 'jest.config*'
-      - '.github/workflows/test-coverage-badges.yml'
+      - "src/**"
+      - "tests/**"
+      - "package.json"
+      - "jest.config*"
+      - ".github/workflows/test-coverage-badges.yml"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'package.json'
-      - 'jest.config*'
-      - '.github/workflows/test-coverage-badges.yml'
+      - "src/**"
+      - "tests/**"
+      - "package.json"
+      - "jest.config*"
+      - ".github/workflows/test-coverage-badges.yml"
   schedule:
-    - cron: '15 6 * * *'
+    - cron: "15 6 * * *"
   workflow_dispatch:
 
 env:
@@ -41,8 +41,8 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -prootpassword || exit 1"
-          --health-interval=10s --health-timeout=5s --health-retries=15
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -prootpassword || exit 1" --health-interval=10s
+          --health-timeout=5s --health-retries=15
       wordpress:
         image: wordpress:6.4-apache
         env:
@@ -57,11 +57,8 @@ jobs:
         ports:
           - 8081:80
         options: >-
-          --health-cmd="curl --silent --fail --connect-timeout 5 http://localhost || exit 1"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=12
-          --health-start-period=60s
+          --health-cmd="curl --silent --fail --connect-timeout 5 http://localhost || exit 1" --health-interval=10s
+          --health-timeout=5s --health-retries=12 --health-start-period=60s
     permissions:
       contents: write
       pull-requests: write
@@ -73,8 +70,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
       - name: Install deps (with cache)
         uses: actions/cache@v4
         with:
@@ -100,17 +97,17 @@ jobs:
             sleep 10
           done
           curl -fsS http://localhost:8081 > /dev/null || (echo "WordPress did not become ready"; exit 1)
-          
+
           # Initialize WordPress installation
           echo "Initializing WordPress installation..."
           curl -X POST http://localhost:8081/wp-admin/install.php \
             --data "weblog_title=Test+WordPress&user_name=testuser&admin_password=testpass123&admin_password2=testpass123&admin_email=test%40example.com&Submit=Install+WordPress" \
             --header "Content-Type: application/x-www-form-urlencoded" \
             --silent --fail || echo "WordPress installation may have failed"
-          
+
           # Wait a moment for installation to complete
           sleep 5
-          
+
           # Verify WordPress is accessible
           echo "Verifying WordPress installation..."
           RESPONSE=$(curl -s http://localhost:8081/wp-json/ || echo "")
@@ -126,7 +123,7 @@ jobs:
           echo "📊 This step replaces live WordPress tests with local coverage validation"
           echo "✅ Coverage collection infrastructure is working locally (63.43% lines)"
           echo "🎯 Pipeline will complete successfully and generate accurate badges"
-          
+
           # Verify coverage collection is working locally
           if [ -f "coverage/coverage-final.json" ]; then
             echo "✅ Coverage data from previous step confirmed"
@@ -134,18 +131,18 @@ jobs:
           else
             echo "⚠️ No coverage data found from previous test step"
           fi
-      - name: Extract test and coverage metrics  
+      - name: Extract test and coverage metrics
         id: metrics
         run: |
           echo "Extracting test and coverage metrics..."
-          
+
           # Initialize default values
           TESTS_TOTAL=0
           TESTS_PASSED=0
           LINE_COV=0
           BRANCH_COV=0
           FUNC_COV=0
-          
+
           # Extract test results with enhanced parsing
           if [ -d "coverage" ]; then
             SUMMARY=$(find . -name "*.txt" -o -name "*.log" | xargs grep -l "Tests:" 2>/dev/null | head -1)
@@ -157,7 +154,7 @@ jobs:
               fi
             fi
           fi
-          
+
           # Fallback: check if we have any test files and estimate
           if [ "$TESTS_TOTAL" = "0" ]; then
             TEST_FILES=$(find tests/ -name "*.test.js" 2>/dev/null | wc -l || echo "0")
@@ -181,7 +178,7 @@ jobs:
           else
             echo "No coverage file found at coverage/coverage-final.json"
           fi
-          
+
           # Ensure numeric values and calculate colors
           TESTS_TOTAL=${TESTS_TOTAL:-0}
           TESTS_PASSED=${TESTS_PASSED:-0}
@@ -196,7 +193,7 @@ jobs:
           elif [ "$INT" -ge 50 ]; then COLOR=yellow
           elif [ "$INT" -ge 30 ]; then COLOR=orange
           fi
-          
+
           # Branch coverage color calculation
           BRANCH_COLOR=red
           BINT=$(echo "$BRANCH_COV" | cut -d'.' -f1)
@@ -205,7 +202,7 @@ jobs:
           elif [ "$BINT" -ge 50 ]; then BRANCH_COLOR=yellow
           elif [ "$BINT" -ge 30 ]; then BRANCH_COLOR=orange
           fi
-          
+
           # Function coverage color calculation
           FUNC_COLOR=red
           FINT=$(echo "$FUNC_COV" | cut -d'.' -f1)
@@ -214,7 +211,7 @@ jobs:
           elif [ "$FINT" -ge 50 ]; then FUNC_COLOR=yellow
           elif [ "$FINT" -ge 30 ]; then FUNC_COLOR=orange
           fi
-          
+
           # Test results color calculation
           TEST_COLOR=red
           if [ "$TESTS_TOTAL" -gt 0 ]; then
@@ -234,10 +231,10 @@ jobs:
           echo "coverage_branches_color=$BRANCH_COLOR" >> $GITHUB_OUTPUT
           echo "coverage_functions=$FUNC_COV" >> $GITHUB_OUTPUT
           echo "coverage_functions_color=$FUNC_COLOR" >> $GITHUB_OUTPUT
-          
+
           # Create metrics JSON file
           echo "{\"tests_passed\":$TESTS_PASSED,\"tests_total\":$TESTS_TOTAL,\"line_coverage\":\"$LINE_COV\",\"branch_coverage\":\"$BRANCH_COV\",\"function_coverage\":\"$FUNC_COV\"}" > metrics.json
-          
+
           # Summary output
           echo "Final metrics: $TESTS_PASSED/$TESTS_TOTAL tests, $LINE_COV% lines, $BRANCH_COV% branches, $FUNC_COV% functions"
       - name: Coverage guardrail (blocking)
@@ -280,38 +277,38 @@ jobs:
       - name: Update README badges
         run: |
           echo "Updating README badges with improved pattern matching..."
-          
+
           # Create backup
           cp README.md README.md.bak
-          
+
           # Update test badge with enhanced pattern matching
           sed -i "s|tests-[0-9]*%2F[0-9]*%20passing-[a-zA-Z]*|tests-${{ steps.metrics.outputs.tests_passed }}%2F${{ steps.metrics.outputs.tests_total }}%20passing-${{ steps.metrics.outputs.tests_color }}|g" README.md
-          
+
           # Update coverage badges with enhanced patterns
           sed -i "s|lines%20coverage-[0-9]*\.?[0-9]*%25-[a-zA-Z]*|lines%20coverage-${{ steps.metrics.outputs.coverage_lines }}%25-${{ steps.metrics.outputs.coverage_color }}|g" README.md
           sed -i "s|branch%20coverage-[0-9]*\.?[0-9]*%25-[a-zA-Z]*|branch%20coverage-${{ steps.metrics.outputs.coverage_branches }}%25-${{ steps.metrics.outputs.coverage_branches_color }}|g" README.md
           sed -i "s|function%20coverage-[0-9]*\.?[0-9]*%25-[a-zA-Z]*|function%20coverage-${{ steps.metrics.outputs.coverage_functions }}%25-${{ steps.metrics.outputs.coverage_functions_color }}|g" README.md
-          
+
           # Verify badge updates
           echo "Badge update verification:"
           grep -E "(lines|branch|function)%20coverage-" README.md | head -3 || echo "No coverage badges found in README"
-          
+
           # Add missing badges if needed (improved logic)
           if ! grep -q 'lines%20coverage-' README.md; then
             echo "Adding line coverage badge"
             echo "[![Line Coverage](https://img.shields.io/badge/lines%20coverage-${{ steps.metrics.outputs.coverage_lines }}%25-${{ steps.metrics.outputs.coverage_color }}?logo=jest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)" >> README.md
           fi
-          
+
           if ! grep -q 'branch%20coverage-' README.md; then
             echo "Adding branch coverage badge"
             echo "[![Branch Coverage](https://img.shields.io/badge/branch%20coverage-${{ steps.metrics.outputs.coverage_branches }}%25-${{ steps.metrics.outputs.coverage_branches_color }}?logo=jest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)" >> README.md
           fi
-          
+
           if ! grep -q 'function%20coverage-' README.md; then
             echo "Adding function coverage badge"
             echo "[![Function Coverage](https://img.shields.io/badge/function%20coverage-${{ steps.metrics.outputs.coverage_functions }}%25-${{ steps.metrics.outputs.coverage_functions_color }}?logo=jest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)" >> README.md
           fi
-          
+
           # Check if any changes were made
           if diff -q README.md README.md.bak >/dev/null; then
             echo "No changes made to README badges"
@@ -322,7 +319,9 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: update test & coverage badges (${{ steps.metrics.outputs.tests_passed }}/${{ steps.metrics.outputs.tests_total }} tests, ${{ steps.metrics.outputs.coverage_lines }}% lines)"
+          commit-message:
+            "chore: update test & coverage badges (${{ steps.metrics.outputs.tests_passed }}/${{
+            steps.metrics.outputs.tests_total }} tests, ${{ steps.metrics.outputs.coverage_lines }}% lines)"
           title: "🧪 Automated Test & Coverage Badge Updates"
           body: |
             ## 🧪 Test & Coverage Badge Updates

@@ -14,13 +14,13 @@ export * from "./mcp.js";
 export * from "./client.js";
 
 // Enhanced Types (New) - Selective exports to avoid conflicts
-export type { 
-  WordPressId, 
-  PostId, 
-  UserId, 
-  MediaId, 
-  CommentId, 
-  CategoryId, 
+export type {
+  WordPressId,
+  PostId,
+  UserId,
+  MediaId,
+  CommentId,
+  CategoryId,
   TagId,
   Result,
   DeepReadonly,
@@ -28,14 +28,14 @@ export type {
   NonEmptyArray,
   createWordPressId,
   createSuccess,
-  createError
+  createError,
 } from "./enhanced.js";
 
 // Request Types (New)
 export * from "./requests.js";
 
 // Tool Types (New) - Selective exports to avoid conflicts
-export type { 
+export type {
   BaseToolParams,
   CreatePostParams,
   UpdatePostParams,
@@ -48,7 +48,7 @@ export type {
   ListPagesParams,
   DeletePageParams,
   ToolDefinition as EnhancedToolDefinition,
-  ToolRegistry as EnhancedToolRegistry
+  ToolRegistry as EnhancedToolRegistry,
 } from "./tools.js";
 
 // Common Utility Types
@@ -237,7 +237,9 @@ export type CategoryID = Brand<number, "CategoryID">;
 export type TagID = Brand<number, "TagID">;
 
 // Function Types
-export type AsyncFunction<TArgs extends unknown[] = unknown[], TReturn = unknown> = (...args: TArgs) => Promise<TReturn>;
+export type AsyncFunction<TArgs extends unknown[] = unknown[], TReturn = unknown> = (
+  ...args: TArgs
+) => Promise<TReturn>;
 export type SyncFunction<TArgs extends unknown[] = unknown[], TReturn = unknown> = (...args: TArgs) => TReturn;
 export type AnyFunction<TArgs extends unknown[] = unknown[], TReturn = unknown> =
   | SyncFunction<TArgs, TReturn>

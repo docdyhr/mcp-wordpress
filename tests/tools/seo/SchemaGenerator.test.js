@@ -41,7 +41,7 @@ describe("SchemaGenerator", () => {
       content: {
         rendered: `
           <h1>Complete Guide to WordPress SEO</h1>
-          <p>WordPress SEO is essential for increasing your website's visibility in search engines. 
+          <p>WordPress SEO is essential for increasing your website's visibility in search engines.
           This comprehensive guide covers all aspects of optimizing your WordPress site for better rankings.</p>
           <img src="https://example.com/seo-guide.jpg" alt="SEO Guide">
           <h2>Why SEO Matters</h2>

@@ -45,7 +45,7 @@ fi
 for issue in "${ISSUE_NUMBERS[@]}"; do
     echo ""
     echo "📝 Closing issue #$issue..."
-    
+
     # Add a comment explaining the resolution
     COMMENT="🎉 **Issue Resolved**
 
@@ -66,7 +66,7 @@ This issue is now closed."
     if gh issue comment "$issue" \
         -R docdyhr/mcp-wordpress \
         --body "$COMMENT"; then
-        
+
         # Close the issue
         if gh issue close "$issue" \
             -R docdyhr/mcp-wordpress \
@@ -78,7 +78,7 @@ This issue is now closed."
     else
         echo "   ❌ Failed to comment on issue #$issue"
     fi
-    
+
     # Small delay to avoid rate limiting
     sleep 1
 done

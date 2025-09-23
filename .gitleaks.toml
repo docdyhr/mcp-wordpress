@@ -1,4 +1,4 @@
-# Gitleaks configuration file  
+# Gitleaks configuration file
 title = "gitleaks config for mcp-wordpress"
 
 [extend]

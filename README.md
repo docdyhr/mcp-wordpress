@@ -101,14 +101,12 @@ Response: "✅ Authentication successful! Connected to: Your Site Name"
 
 **Easiest installation - just 2 clicks!**
 
-1. **Download**: [`mcp-wordpress.dxt`](https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt)
-   (3.4MB)
+1. **Download**:
+   [`mcp-wordpress.dxt`](https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt) (3.4MB)
 2. **Install**: Claude Desktop → Extensions → Install → Select DXT file
 3. **Configure**: Enter your WordPress site URL and credentials
 
-✅ **Zero command line required**  
-✅ **Automatic updates**  
-✅ **Built-in security**
+✅ **Zero command line required** ✅ **Automatic updates** ✅ **Built-in security**
 
 **[📖 Complete DXT Setup Guide →](docs/integrations/claude-desktop.md)**
 
@@ -132,9 +130,7 @@ smithery install mcp-wordpress
 smithery configure mcp-wordpress
 ```
 
-✅ **Package management**  
-✅ **Version control**  
-✅ **Easy updates**
+✅ **Package management** ✅ **Version control** ✅ **Easy updates**
 
 ### Installing via Smithery
 
@@ -342,15 +338,15 @@ define('JWT_AUTH_CORS_ENABLE', true);
 
 ### 🏆 Feature Comparison
 
-| Feature                    | This Server            | Competition     |
-| -------------------------- | ---------------------- | --------------- |
-| **Tools Available**        | 59 tools               | 20-30 tools     |
-| **Claude Desktop DXT**     | ✅ 2-click install     | ❌ Manual setup |
-| **Multi-Site Support**     | ✅ Unlimited sites     | ❌ Single site  |
-| **TypeScript**             | ✅ 100% coverage       | ⚠️ Partial/None |
-| **Performance Monitoring** | ✅ Real-time analytics | ❌ Basic only   |
+| Feature                    | This Server                          | Competition     |
+| -------------------------- | ------------------------------------ | --------------- |
+| **Tools Available**        | 59 tools                             | 20-30 tools     |
+| **Claude Desktop DXT**     | ✅ 2-click install                   | ❌ Manual setup |
+| **Multi-Site Support**     | ✅ Unlimited sites                   | ❌ Single site  |
+| **TypeScript**             | ✅ 100% coverage                     | ⚠️ Partial/None |
+| **Performance Monitoring** | ✅ Real-time analytics               | ❌ Basic only   |
 | **Test Coverage**          | ✅ 404 tests (100% pass / 30% lines) | ⚠️ Limited      |
-| **Production Ready**       | ✅ Security audited    | ⚠️ Unknown      |
+| **Production Ready**       | ✅ Security audited                  | ⚠️ Unknown      |
 
 ### 🚀 Core Capabilities
 
@@ -1007,10 +1003,12 @@ npm run security:full
 ### Common Issues
 
 1. **"Cannot connect to WordPress"**
+
    - Verify `WORDPRESS_SITE_URL`
    - Test REST API: `curl https://your-site.com/wp-json/wp/v2/`
 
 2. **"Authentication failed"**
+
    - Check username and application password
    - Ensure Application Passwords are enabled
    - Run `npm run setup` to reconfigure
@@ -1119,9 +1117,9 @@ docker pull docdyhr/mcp-wordpress:1.3.1
 
 **Ready to transform your WordPress management?**
 
-1. **🏆 [Download DXT Extension](https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt)** -
-   Easiest setup
-   (2 minutes)
+1. **🏆
+   [Download DXT Extension](https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt)** -
+   Easiest setup (2 minutes)
 2. **⚡ [Try NPX Method](docs/user-guides/NPX_SETUP.md)** - Power user setup (5 minutes)
 3. **📚 [Explore All Tools](docs/api/README.md)** - See what's possible
 4. **💬 [Join Discussions](https://github.com/docdyhr/mcp-wordpress/discussions)** - Get help and share ideas

@@ -168,7 +168,9 @@ export class CommentTools {
         comments
           .map(
             (c) =>
-              `- ID ${c.id}: By **${c.author_name}** on Post ${c.post} (${c.status})\n  > ${c.content.rendered.substring(0, 100)}...`,
+              `- ID ${c.id}: By **${c.author_name}** on Post ${c.post} (${
+                c.status
+              })\n  > ${c.content.rendered.substring(0, 100)}...`,
           )
           .join("\n");
       return content;

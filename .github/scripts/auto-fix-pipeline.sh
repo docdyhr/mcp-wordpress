@@ -9,28 +9,28 @@ echo "🔧 Auto-fixing pipeline issues..."
 add_missing_script() {
     local script_name=$1
     local script_content=$2
-    
+
     echo "➕ Adding missing script: $script_name"
-    
+
     # Use jq to add the script to package.json
     tmp=$(mktemp)
     jq --arg name "$script_name" --arg content "$script_content" \
        '.scripts[$name] = $content' package.json > "$tmp"
     mv "$tmp" package.json
-    
+
     echo "✅ Added script: $script_name"
 }
 
 # Function to fix memory-related issues
 fix_memory_issues() {
     echo "🧠 Fixing memory allocation in test scripts..."
-    
+
     # Check if test scripts have proper memory allocation
     local scripts_to_fix=(
         "test:performance:ci"
         "test:compatibility"
     )
-    
+
     for script in "${scripts_to_fix[@]}"; do
         if grep -q "\"$script\"" package.json; then
             # Update script to include proper memory allocation if missing
@@ -44,13 +44,13 @@ fix_memory_issues() {
 # Function to fix missing scripts
 fix_missing_scripts() {
     echo "🔧 Checking and fixing missing scripts..."
-    
+
     # Add test:performance:ci if missing
     if ! npm run-script test:performance:ci --silent 2>/dev/null; then
         add_missing_script "test:performance:ci" \
             "npm run build && NODE_OPTIONS=\"--max-old-space-size=4096\" vitest run tests/performance/ --reporter=json --outputFile=performance-results.json"
     fi
-    
+
     # Add test:compatibility if missing
     if ! npm run-script test:compatibility --silent 2>/dev/null; then
         add_missing_script "test:compatibility" \
@@ -61,13 +61,13 @@ fix_missing_scripts() {
 # Function to fix dependency issues
 fix_dependencies() {
     echo "📦 Checking dependencies..."
-    
+
     # Check for high/critical vulnerabilities
     if ! npm audit --audit-level=high; then
         echo "🔒 Fixing security vulnerabilities..."
         npm audit fix --force || true
     fi
-    
+
     # Clean and reinstall if package-lock.json is corrupted
     if [ -f package-lock.json ] && ! npm ci --dry-run &>/dev/null; then
         echo "🧹 Cleaning and reinstalling dependencies..."
@@ -79,39 +79,39 @@ fix_dependencies() {
 # Function to verify fixes
 verify_fixes() {
     echo "✅ Verifying fixes..."
-    
+
     # Check that scripts now exist
     npm run test:performance:ci --help >/dev/null 2>&1 || {
         echo "❌ test:performance:ci still not working"
         return 1
     }
-    
+
     npm run test:compatibility --help >/dev/null 2>&1 || {
-        echo "❌ test:compatibility still not working"  
+        echo "❌ test:compatibility still not working"
         return 1
     }
-    
+
     echo "✅ All fixes verified successfully"
 }
 
 # Main execution
 main() {
     echo "🚀 Starting auto-fix process..."
-    
+
     # Backup current package.json
     cp package.json package.json.backup
     echo "💾 Backed up package.json"
-    
+
     fix_missing_scripts
     fix_memory_issues
     fix_dependencies
     verify_fixes
-    
+
     # Check if any changes were made
     if ! diff -q package.json package.json.backup >/dev/null; then
         echo "📝 Changes made to package.json:"
         diff package.json package.json.backup || true
-        
+
         # Offer to commit changes
         if [ -z "${CI:-}" ]; then
             read -p "Commit these changes? (y/n): " -n 1 -r
@@ -133,9 +133,9 @@ main() {
     else
         echo "ℹ️ No changes needed"
     fi
-    
+
     rm -f package.json.backup
-    
+
     echo "🎉 Auto-fix completed successfully!"
 }
 

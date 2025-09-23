@@ -8,7 +8,7 @@ The README.md contains dynamic badges showing:
 
 - Test results (passed/total count)
 - Line coverage percentage
-- Branch coverage percentage  
+- Branch coverage percentage
 - Function coverage percentage
 
 These badges should be updated when test counts or coverage metrics change significantly.
@@ -32,7 +32,7 @@ Replace the badge URLs in README.md with the new ones from the script output.
 **Badge Sections to Update:**
 
 - Line 19: `[![Line Coverage](...)]`
-- Line 20: `[![Branch Coverage](...)]`  
+- Line 20: `[![Branch Coverage](...)]`
 - Line 21: `[![Function Coverage](...)]`
 - Line 22: `[![Test Results](...)]`
 
@@ -40,13 +40,13 @@ Replace the badge URLs in README.md with the new ones from the script output.
 
 The script automatically applies colors based on coverage levels:
 
-| Coverage % | Color | Badge Color Code |
-|-----------|-------|------------------|
-| ≥ 70% | Bright Green | `brightgreen` |
-| ≥ 50% | Green | `green` |
-| ≥ 30% | Yellow | `yellow` |
-| ≥ 20% | Orange | `orange` |
-| < 20% | Red | `red` |
+| Coverage % | Color        | Badge Color Code |
+| ---------- | ------------ | ---------------- |
+| ≥ 70%      | Bright Green | `brightgreen`    |
+| ≥ 50%      | Green        | `green`          |
+| ≥ 30%      | Yellow       | `yellow`         |
+| ≥ 20%      | Orange       | `orange`         |
+| < 20%      | Red          | `red`            |
 
 **Test Results:**
 
@@ -79,7 +79,7 @@ The extraction script:
 Future improvements will include:
 
 1. **Automated Badge Updates**: GitHub Actions workflow to update badges after successful CI runs
-2. **Coverage Reporting**: Enhanced coverage collection from TypeScript sources  
+2. **Coverage Reporting**: Enhanced coverage collection from TypeScript sources
 3. **Historical Tracking**: Track coverage trends over time
 4. **PR Integration**: Show coverage diff in pull requests
 
@@ -125,7 +125,7 @@ Test badge rendering by visiting the URLs directly:
 # Test line coverage badge
 curl -I "https://img.shields.io/badge/lines%20coverage-30.97%25-yellow?logo=jest&logoColor=white"
 
-# Test test results badge  
+# Test test results badge
 curl -I "https://img.shields.io/badge/tests-399%2F404%20passing-yellow?logo=checkmarx&logoColor=white"
 ```
 

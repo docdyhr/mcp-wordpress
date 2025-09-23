@@ -1,8 +1,5 @@
 {
-  "include": [
-    "src/**/*.ts",
-    "dist/**/*.js"
-  ],
+  "include": ["src/**/*.ts", "dist/**/*.js"],
   "exclude": [
     "src/**/*.d.ts",
     "src/**/*.test.ts",
@@ -13,12 +10,7 @@
     "node_modules/**",
     "coverage/**"
   ],
-  "reporter": [
-    "text",
-    "html",
-    "json",
-    "lcov"
-  ],
+  "reporter": ["text", "html", "json", "lcov"],
   "all": true,
   "check-coverage": false,
   "statements": 30,

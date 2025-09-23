@@ -4,20 +4,21 @@ Complete installation guide for MCP WordPress Server with all supported methods.
 
 ## 🎯 Choose Your Installation Method
 
-| Method | Best For | Setup Time | Difficulty |
-|--------|----------|------------|------------|
-| **[DXT Extension](#-dxt-extension-recommended)** | Most users | 2 minutes | Beginner |
-| **[NPX](#-npx-quick-start)** | Power users | 5 minutes | Beginner |
-| **[Smithery](#-smithery-package-manager)** | MCP users | 3 minutes | Beginner |
-| **[NPM Global](#-npm-global-installation)** | Developers | 10 minutes | Intermediate |
-| **[Docker](#-docker-deployment)** | Production | 15 minutes | Intermediate |
-| **[Development](#️-development-setup)** | Contributors | 20 minutes | Advanced |
+| Method                                           | Best For     | Setup Time | Difficulty   |
+| ------------------------------------------------ | ------------ | ---------- | ------------ |
+| **[DXT Extension](#-dxt-extension-recommended)** | Most users   | 2 minutes  | Beginner     |
+| **[NPX](#-npx-quick-start)**                     | Power users  | 5 minutes  | Beginner     |
+| **[Smithery](#-smithery-package-manager)**       | MCP users    | 3 minutes  | Beginner     |
+| **[NPM Global](#-npm-global-installation)**      | Developers   | 10 minutes | Intermediate |
+| **[Docker](#-docker-deployment)**                | Production   | 15 minutes | Intermediate |
+| **[Development](#️-development-setup)**          | Contributors | 20 minutes | Advanced     |
 
 ## 🏆 DXT Extension (Recommended)
 
 The easiest way to get started with WordPress MCP in Claude Desktop.
 
 ### Prerequisites
+
 - Claude Desktop application
 - WordPress site with REST API enabled
 - WordPress Application Password
@@ -25,6 +26,7 @@ The easiest way to get started with WordPress MCP in Claude Desktop.
 ### Installation Steps
 
 1. **Download DXT Package**
+
    ```bash
    # Download the latest DXT package
    curl -L -o mcp-wordpress.dxt \
@@ -32,6 +34,7 @@ The easiest way to get started with WordPress MCP in Claude Desktop.
    ```
 
 2. **Install in Claude Desktop**
+
    - Open Claude Desktop
    - Go to Extensions menu
    - Click "Install Extension"
@@ -59,6 +62,7 @@ The easiest way to get started with WordPress MCP in Claude Desktop.
 Best for users who want the latest version without installation.
 
 ### NPX Prerequisites
+
 - Node.js 16+ and npm
 - WordPress site with REST API enabled
 - WordPress Application Password
@@ -100,6 +104,7 @@ Add to your Claude Desktop config:
 Smithery is a dedicated package manager for MCP servers, providing easy installation and management.
 
 ### Prerequisites
+
 - Smithery package manager installed
 - Claude Desktop application
 - WordPress site with REST API enabled
@@ -202,6 +207,7 @@ WORDPRESS_AUTH_METHOD=app-password
 Production-ready containerized deployment.
 
 ### Docker Prerequisites
+
 - Docker 20.10+
 - Docker Compose (optional)
 
@@ -223,7 +229,7 @@ docker logs mcp-wordpress
 ### Docker Compose
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   mcp-wordpress:
     image: docdyhr/mcp-wordpress:latest
@@ -243,6 +249,7 @@ services:
 For contributors and custom development.
 
 ### Development Prerequisites
+
 - Node.js 18+
 - npm or yarn
 - Git
@@ -287,15 +294,15 @@ WORDPRESS_APP_PASSWORD=dev-password
 
 ### Environment Variables
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `WORDPRESS_SITE_URL` | Yes | - | WordPress site URL |
-| `WORDPRESS_USERNAME` | Yes | - | WordPress username |
-| `WORDPRESS_APP_PASSWORD` | Yes | - | Application password |
-| `WORDPRESS_AUTH_METHOD` | No | `app-password` | Authentication method |
-| `NODE_ENV` | No | `production` | Environment mode |
-| `DEBUG` | No | `false` | Enable debug logging |
-| `DISABLE_CACHE` | No | `false` | Disable caching |
+| Variable                 | Required | Default        | Description           |
+| ------------------------ | -------- | -------------- | --------------------- |
+| `WORDPRESS_SITE_URL`     | Yes      | -              | WordPress site URL    |
+| `WORDPRESS_USERNAME`     | Yes      | -              | WordPress username    |
+| `WORDPRESS_APP_PASSWORD` | Yes      | -              | Application password  |
+| `WORDPRESS_AUTH_METHOD`  | No       | `app-password` | Authentication method |
+| `NODE_ENV`               | No       | `production`   | Environment mode      |
+| `DEBUG`                  | No       | `false`        | Enable debug logging  |
+| `DISABLE_CACHE`          | No       | `false`        | Disable caching       |
 
 ### Multi-Site Configuration
 
@@ -352,11 +359,13 @@ npm run health
 ### Common Verification Issues
 
 **Tools not appearing in Claude:**
+
 - Restart Claude Desktop
 - Check configuration file syntax
 - Verify environment variables
 
 **Connection failed:**
+
 - Test WordPress REST API: `curl https://your-site.com/wp-json/wp/v2/`
 - Verify Application Password format
 - Check WordPress permissions
@@ -366,16 +375,19 @@ npm run health
 ### Common Issues
 
 1. **"Cannot connect to WordPress"**
+
    - Verify `WORDPRESS_SITE_URL` format
    - Check if WordPress REST API is enabled
    - Test manually: `curl https://your-site.com/wp-json/wp/v2/`
 
 2. **"Authentication failed"**
+
    - Verify Application Password format (with spaces)
    - Check WordPress user permissions
    - Ensure Application Passwords are enabled
 
 3. **"Tools not working in Claude"**
+
    - Restart Claude Desktop
    - Check configuration file location
    - Verify JSON syntax
@@ -390,12 +402,14 @@ npm run health
 ## 🔐 Security Considerations
 
 ### WordPress Security
+
 - Use Application Passwords (recommended)
 - Create dedicated MCP user with minimal permissions
 - Enable HTTPS for production
 - Regular security updates
 
 ### MCP Server Security
+
 - Keep dependencies updated
 - Use environment variables for secrets
 - Enable firewall rules for Docker deployments

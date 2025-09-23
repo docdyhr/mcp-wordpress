@@ -196,7 +196,9 @@ export class PerformanceAnalytics {
         category: "optimization",
         priority: "high",
         title: "Improve Cache Hit Rate",
-        description: `Current cache hit rate is ${(currentMetrics.cache.hitRate * 100).toFixed(1)}%, which is below optimal performance.`,
+        description: `Current cache hit rate is ${(currentMetrics.cache.hitRate * 100).toFixed(
+          1,
+        )}%, which is below optimal performance.`,
         impact: "performance",
         recommendation: "Implement cache warming strategies and optimize TTL values for frequently accessed data.",
         estimatedImprovement: "20-40% reduction in response times",
@@ -212,7 +214,9 @@ export class PerformanceAnalytics {
         category: "optimization",
         priority: "high",
         title: "Reduce Response Times",
-        description: `Average response time of ${currentMetrics.requests.averageResponseTime.toFixed(0)}ms is above recommended threshold.`,
+        description: `Average response time of ${currentMetrics.requests.averageResponseTime.toFixed(
+          0,
+        )}ms is above recommended threshold.`,
         impact: "user_experience",
         recommendation: "Enable aggressive caching, optimize database queries, or consider upgrading server resources.",
         estimatedImprovement: "50-70% reduction in response times",
@@ -249,7 +253,9 @@ export class PerformanceAnalytics {
         category: "optimization",
         priority: "low",
         title: "Optimize Frequently Used Tools",
-        description: `Most used tools: ${mostUsed.map(([tool]) => tool).join(", ")}. Consider optimizing these workflows.`,
+        description: `Most used tools: ${mostUsed
+          .map(([tool]) => tool)
+          .join(", ")}. Consider optimizing these workflows.`,
         impact: "performance",
         recommendation: "Create cached workflows or batch operations for frequently used tools.",
         estimatedImprovement: "10-20% reduction in API calls",

@@ -39,9 +39,9 @@ fi
 check_docker_status() {
     local version="$1"
     print_status "Checking Docker Hub status for version $version..."
-    
+
     local response=$(curl -s "https://hub.docker.com/v2/repositories/docdyhr/mcp-wordpress/tags" 2>/dev/null || echo '{"results":[]}')
-    
+
     if echo "$response" | jq -e ".results[]? | select(.name == \"$version\" or .name == \"v$version\")" > /dev/null 2>&1; then
         local found_tag=$(echo "$response" | jq -r ".results[]? | select(.name == \"$version\" or .name == \"v$version\") | .name" | head -1)
         local last_updated=$(echo "$response" | jq -r ".results[]? | select(.name == \"$version\" or .name == \"v$version\") | .last_updated" | head -1)
@@ -58,11 +58,11 @@ check_docker_status() {
 trigger_republish() {
     local version="$1"
     print_status "Triggering manual republish for version $version..."
-    
+
     if gh workflow run manual-docker-republish.yml -f version="$version" -f platforms="linux/amd64,linux/arm64"; then
         print_success "Manual republish workflow triggered successfully"
         print_status "Monitor progress at: https://github.com/docdyhr/mcp-wordpress/actions/workflows/manual-docker-republish.yml"
-        
+
         # Wait a moment and show the latest run
         sleep 2
         print_status "Latest workflow runs:"
@@ -77,7 +77,7 @@ trigger_republish() {
 verify_fix() {
     local version="$1"
     print_status "Verifying fix for version $version..."
-    
+
     if gh workflow run verify-release.yml -f version="$version"; then
         print_success "Verification workflow triggered"
         print_status "Monitor verification at: https://github.com/docdyhr/mcp-wordpress/actions/workflows/verify-release.yml"
@@ -91,7 +91,7 @@ case "${1:-help}" in
     "fix-2.0.4")
         print_status "🚨 Fixing specific issue: v2.0.4 Docker Hub publishing failure"
         echo ""
-        
+
         if check_docker_status "2.0.4"; then
             print_warning "Version 2.0.4 already exists on Docker Hub"
             print_status "The issue may have been resolved already"
@@ -99,12 +99,12 @@ case "${1:-help}" in
             print_status "Confirmed: v2.0.4 is missing from Docker Hub"
             print_status "Triggering manual republish..."
             echo ""
-            
+
             if trigger_republish "2.0.4"; then
                 echo ""
                 print_status "Waiting 60 seconds for workflow to start..."
                 sleep 60
-                
+
                 echo ""
                 print_status "Re-checking Docker Hub status..."
                 if check_docker_status "2.0.4"; then
@@ -116,12 +116,12 @@ case "${1:-help}" in
             fi
         fi
         ;;
-        
+
     "check")
         version="${2:-2.0.4}"
         check_docker_status "$version"
         ;;
-        
+
     "republish")
         version="${2}"
         if [ -z "$version" ]; then
@@ -130,16 +130,16 @@ case "${1:-help}" in
         fi
         trigger_republish "$version"
         ;;
-        
+
     "verify")
         version="${2:-2.0.4}"
         verify_fix "$version"
         ;;
-        
+
     "status")
         print_status "Checking status of recent versions..."
         echo ""
-        
+
         versions=("2.0.4" "2.1.0" "2.2.0" "2.3.0")
         for version in "${versions[@]}"; do
             printf "%-8s: " "v$version"
@@ -150,7 +150,7 @@ case "${1:-help}" in
             fi
         done
         ;;
-        
+
     "help"|*)
         echo "Usage: $0 <command> [args]"
         echo ""

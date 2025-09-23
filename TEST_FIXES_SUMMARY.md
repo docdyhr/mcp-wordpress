@@ -12,7 +12,8 @@
 
 ### 2. Infinite Loop in Streaming Tests
 
-**Problem**: Tests in `tests/utils/streaming.test.js` had infinite loops caused by recreating arrays inside `read()` methods
+**Problem**: Tests in `tests/utils/streaming.test.js` had infinite loops caused by recreating arrays inside `read()`
+methods
 
 **Specific Issues**:
 
@@ -35,7 +36,8 @@
 
 **Problem**: Performance regression tests causing extremely long execution times due to real setTimeout delays
 
-**Fix**: 
+**Fix**:
+
 - Replaced random delays with fixed delays
 - Implemented `vi.useFakeTimers()` and `vi.advanceTimersByTime()`
 - Reduced iterations from 8-10 to 5 for faster execution
@@ -47,7 +49,8 @@
 
 **Problem**: Timeout tests using `nock().delay()` with 2+ second delays causing slow execution
 
-**Fix**: 
+**Fix**:
+
 - Reduced timeout values from 2000ms to 100ms and 50ms
 - Reduced delays to minimum needed for timeout testing
 - Maintained test effectiveness while drastically reducing execution time
@@ -85,7 +88,7 @@ After all fixes applied:
 
 1. `/Users/thomas/Programming/mcp-wordpress/tests/utils/streaming.test.js`
    - Fixed infinite loops in stream read() methods
-2. `/Users/thomas/Programming/mcp-wordpress/tests/vitest.setup.ts`  
+2. `/Users/thomas/Programming/mcp-wordpress/tests/vitest.setup.ts`
    - Removed process.exit() calls
 3. `/Users/thomas/Programming/mcp-wordpress/vitest.config.ts`
    - Reduced test timeouts

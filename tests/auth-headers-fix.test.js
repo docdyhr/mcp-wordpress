@@ -2,7 +2,6 @@
  * Test to verify authentication headers are properly included in POST requests
  */
 
-
 import nock from "nock";
 
 describe("WordPress REST API Authentication Headers", () => {
@@ -51,10 +50,7 @@ describe("WordPress REST API Authentication Headers", () => {
       expect(capturedHeaders.authorization).toMatch(/^Basic /);
 
       // Verify the encoded credentials
-      const decoded = Buffer.from(
-        capturedHeaders.authorization.replace("Basic ", ""),
-        "base64",
-      ).toString();
+      const decoded = Buffer.from(capturedHeaders.authorization.replace("Basic ", ""), "base64").toString();
       expect(decoded).toBe("testuser:xxxx yyyy zzzz aaaa bbbb cccc");
     });
   });
@@ -226,10 +222,7 @@ describe("WordPress REST API Authentication Headers", () => {
       expect(capturedHeaders.authorization).toBeDefined();
       expect(capturedHeaders.authorization).toMatch(/^Basic /);
 
-      const decoded = Buffer.from(
-        capturedHeaders.authorization.replace("Basic ", ""),
-        "base64",
-      ).toString();
+      const decoded = Buffer.from(capturedHeaders.authorization.replace("Basic ", ""), "base64").toString();
       expect(decoded).toBe("testuser:testpassword");
     });
 
