@@ -1,8 +1,11 @@
-name: 🐳 Docker Build & Push (Manual/Fallback)
+name: 🐳 Docker Build & Push (DEPRECATED - Use docker-modern.yml)
+
+# DEPRECATED: This workflow has been replaced by docker-modern.yml
+# Kept for reference only - will be removed in future release
+# Updated 2025-10-02: Consolidated into docker-modern.yml
 
 on:
-  release:
-    types: [created]
+  # Disabled - use docker-modern.yml instead
   workflow_dispatch:
     inputs:
       tag:

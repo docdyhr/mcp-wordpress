@@ -1,6 +1,11 @@
-name: 🚀 Modern Docker Build (v6 Features)
+name: 🐳 Docker Build & Publish (Primary)
+
+# This is the PRIMARY Docker workflow - replaces docker-publish.yml and docker-publish-fix.yml
+# Updated 2025-10-02: Consolidated from 3 workflows into 1 production-ready workflow
 
 on:
+  release:
+    types: [created, published]
   workflow_dispatch:
     inputs:
       tag:

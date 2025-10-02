@@ -295,14 +295,38 @@ The repository includes comprehensive automated security workflows:
 ![Dependencies](https://img.shields.io/badge/dependencies-up%20to%20date-green)
 ![Vulnerabilities](https://img.shields.io/badge/vulnerabilities-0-green)
 
+## 🔍 Known Security Issues
+
+### Development Dependencies (Non-Production)
+
+**jsondiffpatch XSS Vulnerability (CVE-2024-XXXXX)**
+
+- **Severity:** Moderate (CVSS 4.7)
+- **Location:** Transitive dependency: `mcp-evals` → `ai` → `jsondiffpatch@<0.7.2`
+- **Impact:** Development/testing environment only
+- **Status:** No fix available (awaiting upstream update from mcp-evals)
+- **Mitigation:**
+  - Vulnerability is in devDependencies only (not in production)
+  - HTML formatting functionality (affected by XSS) is not used by this project
+  - mcp-evals is only used for evaluation testing, not in production runtime
+  - Production dependencies: **0 vulnerabilities** ✅
+
+**Why This Is Acceptable:**
+
+1. Not shipped to production builds (devDependency only)
+2. XSS requires specific HTML diff rendering feature not used in our codebase
+3. Evaluation tooling (mcp-evals) only runs in controlled development/CI environments
+4. Monitoring for upstream fixes
+
 ## 📋 Security Audit Log
 
-| Date       | Auditor   | Findings                      | Actions Taken                             |
-| ---------- | --------- | ----------------------------- | ----------------------------------------- |
-| 2025-07-19 | Claude AI | Enhanced security workflows   | Added CodeQL, Dependabot, Secret Scanning |
-| 2025-06-29 | Claude AI | Exposed credentials in config | Documentation created                     |
-| -          | -         | Input validation gaps         | Recommendations provided                  |
-| -          | -         | 0 dependency vulnerabilities  | Continue monitoring                       |
+| Date       | Auditor   | Findings                       | Actions Taken                             |
+| ---------- | --------- | ------------------------------ | ----------------------------------------- |
+| 2025-10-02 | Claude AI | 3 moderate dev vulnerabilities | Documented jsondiffpatch XSS as dev-only  |
+| 2025-07-19 | Claude AI | Enhanced security workflows    | Added CodeQL, Dependabot, Secret Scanning |
+| 2025-06-29 | Claude AI | Exposed credentials in config  | Documentation created                     |
+| -          | -         | Input validation gaps          | Recommendations provided                  |
+| -          | -         | 0 production vulnerabilities   | ✅ Maintained clean production deps       |
 
 ---
 

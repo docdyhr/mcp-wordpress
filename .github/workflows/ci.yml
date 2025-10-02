@@ -117,7 +117,7 @@ jobs:
         run: npm run lint
 
       - name: 📊 Test Coverage
-        run: npm run build && NODE_OPTIONS="--max-old-space-size=8192" vitest run --coverage
+        run: npm run build && NODE_OPTIONS="--max-old-space-size=8192" npx vitest run --coverage
 
       - name: 📈 Upload Coverage to Codecov
         uses: codecov/codecov-action@v4
