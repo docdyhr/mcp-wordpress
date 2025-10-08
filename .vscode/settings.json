@@ -1,11 +1,38 @@
 {
-  "jest.disabledWorkspaceFolders": [],
-  "jest.runMode": "on-demand",
-  "jest.jestCommandLine": "NODE_OPTIONS='--experimental-vm-modules' npx jest --config=jest.config.cjs",
-  "jest.rootPath": "./",
-  "jest.configPath": "jest.config.cjs",
-  "jest.debugMode": false,
-  "jest.clearCache": true,
+  // Testing configuration - Using Vitest
   "testExplorer.useNativeTesting": true,
-  "typescript.preferences.includePackageJsonAutoImports": "auto"
+  "vitest.enable": true,
+  "vitest.commandLine": "npx vitest",
+  // TypeScript configuration
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  "typescript.suggest.autoImports": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  // Code formatting and quality
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  // File associations for this MCP WordPress project
+  "files.associations": {
+    "*.config.js": "javascript",
+    "*.config.ts": "typescript",
+    "mcp-wordpress.config.json": "jsonc"
+  },
+  // Search and file exclusions
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/coverage": true,
+    "**/dist": true,
+    "**/logs": true,
+    "**/*.log": true
+  },
+  // Git integration
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  // Markdown settings for documentation
+  "markdownlint.config": {
+    "MD013": false,
+    "MD033": false
+  }
 }
