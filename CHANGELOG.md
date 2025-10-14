@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.10.5](https://github.com/docdyhr/mcp-wordpress/compare/v2.10.4...v2.10.5) (2025-10-14)
+
+### 🐛 Bug Fixes
+
+* **critical:** Fix user role and capabilities retrieval by using context=edit ([632e188](https://github.com/docdyhr/mcp-wordpress/commit/632e188c905f901661aaaaebf9dc7b05ae19ab5b))
+* **tools:** Add inputSchema support to ToolRegistry for wp_create_post ([b6b134e](https://github.com/docdyhr/mcp-wordpress/commit/b6b134e9f5b0fa244cad6892c96a77af45c23c92))
+
 ## [2.10.4](https://github.com/docdyhr/mcp-wordpress/compare/v2.10.3...v2.10.4) (2025-10-08)
 
 ### 🐛 Bug Fixes
