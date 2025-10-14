@@ -945,7 +945,7 @@ export class WordPressClient implements IWordPressClient {
   }
 
   async getCurrentUser(): Promise<WordPressUser> {
-    return this.getUser("me");
+    return this.getUser("me", "edit");
   }
 
   // Comments

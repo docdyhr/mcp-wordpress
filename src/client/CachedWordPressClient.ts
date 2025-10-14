@@ -154,9 +154,10 @@ export class CachedWordPressClient extends WordPressClient {
 
   /**
    * Get current user with session caching
+   * Uses context=edit to ensure roles and capabilities are included
    */
   async getCurrentUser(): Promise<WordPressUser> {
-    return await this.request<WordPressUser>("GET", "users/me");
+    return await this.request<WordPressUser>("GET", "users/me?context=edit");
   }
 
   /**
