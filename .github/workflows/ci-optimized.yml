@@ -111,7 +111,7 @@ jobs:
 
       - name: 🧪 Run Tests (Shard ${{ matrix.shard }}/${{ matrix.total-shards }})
         run: |
-          npm test -- --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --coverage --reporter=verbose
+          NODE_OPTIONS="--max-old-space-size=8192" npx vitest run --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --coverage --reporter=verbose
         env:
           CI: true
           NODE_ENV: test
