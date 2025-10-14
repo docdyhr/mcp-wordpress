@@ -153,7 +153,17 @@ describe("PostTools", () => {
     it("should handle status filter", async () => {
       await postTools.handleListPosts(mockClient, { status: "draft" });
 
-      expect(mockClient.getPosts).toHaveBeenCalledWith(expect.objectContaining({ status: "draft", per_page: 10 }));
+      // WordPress API accepts status as either string or array
+      expect(mockClient.getPosts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: expect.anything(),
+          per_page: 10,
+        }),
+      );
+      const callArgs = mockClient.getPosts.mock.calls[0][0];
+      expect(callArgs.status === "draft" || (Array.isArray(callArgs.status) && callArgs.status[0] === "draft")).toBe(
+        true,
+      );
     });
 
     it("should handle categories filter", async () => {

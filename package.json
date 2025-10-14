@@ -50,6 +50,7 @@
     "docs:serve": "npm run docs:generate && node scripts/serve-docs.js",
     "docs:validate": "npm run docs:generate && node scripts/validate-docs.js",
     "docs:watch": "npm run docs:generate && echo 'Watching for changes...' && npm run docs:serve",
+    "doctor:vscode": "npm run test:vscode && echo '\n🩺 VS Code health check complete'",
     "dxt:clean": "rm -rf dxt-build mcp-wordpress.dxt minimal-dxt-build mcp-wordpress-minimal.dxt mcp-wordpress-official.dxt",
     "dxt:package": "npm run dxt:clean && npm run dxt:build",
     "dxt:package:official": "npm run build && node scripts/build-dxt-clean.cjs",
@@ -73,6 +74,7 @@
     "security:full": "npm run security:scan && npm run security:review && npm run security:monitor && npm run test:security",
     "security:scan": "npm run build && node scripts/security-demo.js || npm audit --audit-level=low",
     "setup": "node bin/setup.js",
+    "setup:vscode": "code --install-extension bradlc.vscode-tailwindcss && code --install-extension continue.continue && code --install-extension ms-python.python && code --install-extension ms-vscode.hexeditor",
     "start": "npm run build && node dist/index.js",
     "status": "node bin/status.js",
     "test": "npm run test:batch",
@@ -82,6 +84,7 @@
     "test:batch:2": "npm run build && NODE_OPTIONS=\"--max-old-space-size=8192\" vitest run tests/client/ tests/config/ tests/utils/ --no-coverage --reporter=basic",
     "test:batch:3": "npm run build && NODE_OPTIONS=\"--max-old-space-size=8192\" vitest run tests/tools/ tests/performance/ --no-coverage --reporter=basic",
     "test:batch:4": "npm run build && NODE_OPTIONS=\"--max-old-space-size=8192\" vitest run tests/*.test.js tests/docs/ --no-coverage --reporter=basic",
+    "test:cache": "npm run build && vitest run tests/cache/",
     "test:ci": "npm run build && CI=true NODE_OPTIONS=\"--max-old-space-size=8192\" vitest run --reporter=basic",
     "test:ci:safe": "NODE_OPTIONS=\"--max-old-space-size=8192\" npx vitest run --config vitest.ci.config.ts",
     "test:compatibility": "npm run build && vitest run tests/compatibility/ || echo 'No compatibility tests found'",
@@ -101,8 +104,6 @@
     "test:vscode": "npm run build && node dist/scripts/test-vscode-setup.js",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "setup:vscode": "code --install-extension bradlc.vscode-tailwindcss && code --install-extension continue.continue && code --install-extension ms-python.python && code --install-extension ms-vscode.hexeditor",
-    "doctor:vscode": "npm run test:vscode && echo '\n🩺 VS Code health check complete'",
     "verify-claude": "node scripts/verify-claude-integration.js"
   },
   "lint-staged": {

@@ -149,7 +149,9 @@ jobs:
         run: npm run build
 
       - name: 📊 Generate Coverage Report
-        run: npm run test:coverage
+        run: NODE_OPTIONS="--max-old-space-size=8192" npm run test:coverage
+        env:
+          CI: true
 
       - name: 📈 Coverage Summary
         run: |
