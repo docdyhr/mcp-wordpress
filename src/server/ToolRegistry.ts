@@ -5,6 +5,7 @@ import { EnhancedError, ErrorHandlers } from "../utils/enhancedError.js";
 import { config } from "../config/Config.js";
 import * as Tools from "../tools/index.js";
 import { z } from "zod";
+import type { MCPToolSchema, JSONSchemaProperty } from "../types/mcp.js";
 
 /**
  * Interface for tool definition
@@ -17,7 +18,10 @@ export interface ToolDefinition {
     type?: string;
     description?: string;
     required?: boolean;
+    enum?: string[];
+    items?: { type?: string };
   }>;
+  inputSchema?: MCPToolSchema;
   handler: (client: WordPressClient, args: Record<string, unknown>) => Promise<unknown>;
 }
 
@@ -186,6 +190,30 @@ export class ToolRegistry {
    * Build Zod parameter schema from tool definition
    */
   private buildParameterSchema(tool: ToolDefinition, baseSchema: Record<string, unknown>): Record<string, unknown> {
+    // If tool has inputSchema (new format), convert it to Zod schema
+    if (tool.inputSchema) {
+      const schema = { ...baseSchema };
+      const properties = tool.inputSchema.properties || {};
+      const required = tool.inputSchema.required || [];
+
+      for (const [propName, propDef] of Object.entries(properties)) {
+        let zodType = this.getZodTypeForProperty(propDef);
+
+        if (propDef.description) {
+          zodType = zodType.describe(propDef.description);
+        }
+
+        if (!required.includes(propName)) {
+          zodType = zodType.optional();
+        }
+
+        schema[propName] = zodType;
+      }
+
+      return schema;
+    }
+
+    // Fall back to old parameters format
     return (
       tool.parameters?.reduce(
         (
@@ -211,7 +239,47 @@ export class ToolRegistry {
   }
 
   /**
-   * Get appropriate Zod type for parameter definition
+   * Get appropriate Zod type for inputSchema property definition
+   */
+  private getZodTypeForProperty(propDef: JSONSchemaProperty): z.ZodType {
+    // Handle enum types
+    if (propDef.enum && propDef.enum.length > 0) {
+      const enumValues = propDef.enum as [string | number, ...(string | number)[]];
+      return z.enum(enumValues as [string, ...string[]]);
+    }
+
+    // Handle array types
+    if (propDef.type === "array") {
+      const itemType = propDef.items?.type || "string";
+      switch (itemType) {
+        case "number":
+          return z.array(z.number());
+        case "boolean":
+          return z.array(z.boolean());
+        case "object":
+          return z.array(z.record(z.string(), z.unknown()));
+        default:
+          return z.array(z.string());
+      }
+    }
+
+    // Handle primitive types
+    switch (propDef.type) {
+      case "string":
+        return z.string();
+      case "number":
+        return z.number();
+      case "boolean":
+        return z.boolean();
+      case "object":
+        return z.record(z.string(), z.unknown());
+      default:
+        return z.string();
+    }
+  }
+
+  /**
+   * Get appropriate Zod type for parameter definition (old format)
    */
   private getZodTypeForParameter(param: { type?: string; required?: boolean; [key: string]: unknown }): z.ZodType {
     switch (param.type) {
