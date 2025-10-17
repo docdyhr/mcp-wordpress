@@ -50,13 +50,18 @@ export class PageTools {
       },
       {
         name: "wp_get_page",
-        description: "Retrieves a single page by its ID.",
+        description: "Retrieves a single page by its ID, optionally including full content for editing.",
         parameters: [
           {
             name: "id",
             type: "number",
             required: true,
             description: "The unique identifier for the page.",
+          },
+          {
+            name: "include_content",
+            type: "boolean",
+            description: "If true, includes the full HTML content of the page. Default: false",
           },
         ],
         handler: this.handleGetPage.bind(this),
@@ -165,15 +170,20 @@ export class PageTools {
   }
 
   public async handleGetPage(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const { id } = params as { id: number };
+    const { id, include_content = false } = params as { id: number; include_content?: boolean };
     try {
       const page = await client.getPage(id);
-      const content =
+      let content =
         `**Page Details (ID: ${page.id})**\n\n` +
         `- **Title:** ${page.title.rendered}\n` +
         `- **Status:** ${page.status}\n` +
         `- **Link:** ${page.link}\n` +
         `- **Date:** ${new Date(page.date).toLocaleString()}`;
+
+      if (include_content) {
+        content += `\n\n**Content:**\n\n` + `${page.content.rendered || "(empty)"}`;
+      }
+
       return content;
     } catch (_error) {
       throw new Error(`Failed to get page: ${getErrorMessage(_error)}`);

@@ -218,7 +218,10 @@ export async function handleListPosts(
 /**
  * Handles retrieving a single WordPress post by ID
  */
-export async function handleGetPost(client: WordPressClient, params: { id: number }): Promise<WordPressPost | string> {
+export async function handleGetPost(
+  client: WordPressClient,
+  params: { id: number; include_content?: boolean },
+): Promise<WordPressPost | string> {
   try {
     const postId = validateId(params.id, "post ID");
     const post = await client.getPost(postId);
@@ -284,7 +287,9 @@ export async function handleGetPost(client: WordPressClient, params: { id: numbe
       response += `\n## Excerpt\n${excerpt}\n`;
     }
 
-    if (content) {
+    // Only include full content if explicitly requested (for backward compatibility, default to true)
+    const includeContent = params.include_content !== false;
+    if (content && includeContent) {
       response += `\n## Content\n${content}\n`;
     }
 

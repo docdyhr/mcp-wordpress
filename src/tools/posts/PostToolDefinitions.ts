@@ -58,13 +58,20 @@ export const listPostsTool: MCPTool = {
 export const getPostTool: MCPTool = {
   name: "wp_get_post",
   description:
-    "Retrieves detailed information about a single post including metadata, content statistics, and management links.",
+    "Retrieves detailed information about a single post including metadata, content statistics, and management links. Optionally includes full HTML content for editing.\n\n" +
+    "**Usage Examples:**\n" +
+    "• Basic metadata: `wp_get_post --id=123`\n" +
+    "• With full content: `wp_get_post --id=123 --include_content=true`",
   inputSchema: {
     type: "object",
     properties: {
       id: {
         type: "number",
         description: "The unique identifier for the post.",
+      },
+      include_content: {
+        type: "boolean",
+        description: "If true, includes the full HTML content of the post for editing. Default: false",
       },
     },
     required: ["id"],
