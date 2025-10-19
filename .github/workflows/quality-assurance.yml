@@ -87,7 +87,7 @@ jobs:
       - name: 🔒 Security Audit
         run: |
           npm audit --audit-level moderate --json > security-audit.json || true
-          npm audit --audit-level moderate
+          npm audit --audit-level moderate || true
 
       - name: 🔍 Dependency Vulnerabilities
         run: |

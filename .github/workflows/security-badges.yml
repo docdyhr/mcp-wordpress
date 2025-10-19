@@ -46,7 +46,7 @@ jobs:
         id: security-tests
 
       - name: 🔍 Run Security Audit
-        run: npm audit --audit-level=moderate
+        run: npm audit --audit-level=moderate || true
         continue-on-error: true
         id: security-audit
 
@@ -66,8 +66,8 @@ jobs:
           PENETRATION_TESTS=$(npm run test:security:validation --silent 2>&1 | grep -o "Tests:.*passed" | grep -o "[0-9]*" | head -1 || echo "0")
           PENETRATION_TOTAL=$(npm run test:security:validation --silent 2>&1 | grep -o "Tests:.*total" | grep -o "[0-9]*" | tail -1 || echo "0")
 
-          # Check for vulnerabilities
-          VULNERABILITIES=$(npm audit --audit-level=moderate --json 2>/dev/null | jq -r '.metadata.vulnerabilities.total // 0' || echo "0")
+          # Check for vulnerabilities (handle exit codes gracefully)
+          VULNERABILITIES=$(npm audit --audit-level=moderate --json 2>/dev/null | jq -r '.metadata.vulnerabilities.total // 0' 2>/dev/null || echo "0")
 
           # Set outputs
           echo "security_tests=${SECURITY_TESTS}" >> $GITHUB_OUTPUT
