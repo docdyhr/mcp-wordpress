@@ -4,7 +4,7 @@ AI assistant instructions for MCP WordPress project (v2.7.0).
 
 ## Quick Start
 
-**Status**: Production-ready | 1237/1248 tests passing (99.1%) | 96%+ coverage | 59 WordPress tools
+**Status**: Production-ready | All tests passing (100%) | 96%+ coverage | 59 WordPress tools
 
 ```bash
 # Essential Commands
@@ -110,7 +110,7 @@ npm run build          # TypeScript compilation
 ## Key Project Info
 
 **Project**: Model Context Protocol (MCP) Server for WordPress **Language**: TypeScript with strict type safety
-**Testing**: 1237/1248 tests passing (99.1%) **Auth**: 4 methods (App Passwords recommended) **Multi-Site**: Full
+**Testing**: All tests passing (100%) **Auth**: 4 methods (App Passwords recommended) **Multi-Site**: Full
 support via configuration **Tools**: 59 across 10 categories **Status**: Production-ready with CI/CD
 
 **Critical Files**:

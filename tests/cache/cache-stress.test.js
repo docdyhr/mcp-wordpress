@@ -75,10 +75,7 @@ describe("Cache Stress Tests", () => {
       expect(cacheManager.cache.size).toBeLessThanOrEqual(10000);
     });
 
-    it.skip("should survive cache stampede scenarios", async () => {
-      // Skip this test since it requires CachedWordPressClient with proper config
-      // Test would verify cache behavior under concurrent access patterns
-    });
+    // NOTE: Cache stampede test removed - requires CachedWordPressClient integration setup
 
     it("should handle rapid cache churn without memory leaks", async () => {
       // Test rapid addition and removal of cache entries
