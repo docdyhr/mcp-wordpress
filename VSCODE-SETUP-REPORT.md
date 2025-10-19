@@ -36,6 +36,7 @@ The VS Code setup for the MCP WordPress project is **fully configured and operat
 ```
 
 **Features**:
+
 - Native VS Code test explorer integration
 - Vitest automatic discovery
 - Run/debug individual tests from UI
@@ -53,6 +54,7 @@ The VS Code setup for the MCP WordPress project is **fully configured and operat
 ```
 
 **Features**:
+
 - Automatic code formatting on save
 - ESLint auto-fix on save
 - Prettier integration
@@ -68,6 +70,7 @@ The VS Code setup for the MCP WordPress project is **fully configured and operat
 ```
 
 **Features**:
+
 - Automatic import suggestions
 - Path-based imports with `@/` aliases
 - Import updates on file moves
@@ -197,6 +200,7 @@ Configured in [tsconfig.json](tsconfig.json):
 ```
 
 **Benefits**:
+
 - Clean imports: `import { Config } from '@/config/Config.js'`
 - IntelliSense support for all aliases
 - Automatic refactoring across aliases
@@ -273,6 +277,7 @@ $ npm run build
 ```
 
 **Process**:
+
 1. TypeScript compilation (`tsc`)
 2. Path alias resolution (`tsc-alias`)
 3. Output to `dist/` directory
@@ -401,6 +406,7 @@ All core functionality is working as expected. No blocking issues found.
 ### For New Developers
 
 1. **Install Extensions**
+
    ```bash
    code --install-extension dbaeumer.vscode-eslint
    code --install-extension esbenp.prettier-vscode
@@ -461,6 +467,7 @@ All core functionality is working as expected. No blocking issues found.
 ### Excluded from Version Control
 
 Ensure these are in `.gitignore`:
+
 - `.env` files (credentials)
 - `node_modules/`
 - `coverage/`

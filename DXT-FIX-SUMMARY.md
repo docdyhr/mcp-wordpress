@@ -9,21 +9,25 @@
 ## Issues Identified
 
 ### 1. Outdated Version Number
+
 **Problem**: Manifest showed v2.6.3 instead of current v2.10.2
 **Impact**: Users saw outdated version information
 **Status**: ✅ **FIXED**
 
 ### 2. Misleading Multi-Site Documentation
+
 **Problem**: Manifest described "multi-site support" but DXT only supports single-site
 **Impact**: Users confused about capabilities
 **Status**: ✅ **FIXED**
 
 ### 3. Multi-Site Management Prompt Included
+
 **Problem**: Manifest included `multi_site_management` prompt that doesn't work in DXT mode
 **Impact**: Users prompted to use unavailable features
 **Status**: ✅ **FIXED**
 
 ### 4. Unclear DXT Entry Logging
+
 **Problem**: Entry point logged `MULTI_SITE_MODE` which isn't relevant for DXT
 **Impact**: Confusing debug output
 **Status**: ✅ **FIXED**
@@ -35,24 +39,29 @@
 ### File: `dxt/manifest.json`
 
 #### Version Update (Line 5)
+
 ```diff
 - "version": "2.6.3",
 + "version": "2.10.2",
 ```
 
 #### Description Clarification (Line 6)
+
 ```diff
 - "description": "Comprehensive WordPress management through 59 MCP tools with multi-site support, performance monitoring, and intelligent caching",
 + "description": "Comprehensive WordPress management through 59 MCP tools with performance monitoring and intelligent caching. Note: DXT installation supports single-site mode. For multi-site support, use NPM installation.",
 ```
 
 #### Long Description Update (Line 7)
+
 Added notice at top:
+
 ```markdown
 **Note**: DXT installation configures a single WordPress site. For managing multiple WordPress sites simultaneously, install via NPM (`npm install -g mcp-wordpress`) and use `mcp-wordpress.config.json`.
 ```
 
 Updated key features:
+
 ```diff
 - **Multi-Site Support** - Manage multiple WordPress sites from one configuration
 + **DXT Mode**: Single-site configuration through Claude Desktop UI
@@ -60,12 +69,14 @@ Updated key features:
 ```
 
 Updated use cases:
+
 ```diff
 - Multi-site WordPress administration
 + WordPress site administration
 ```
 
 #### Removed Multi-Site Prompt (Lines 187-192)
+
 ```diff
 - {
 -   "name": "multi_site_management",
@@ -75,6 +86,7 @@ Updated use cases:
 ```
 
 **Result**: Only 3 prompts remain:
+
 - `setup_wordpress`
 - `content_management`
 - `performance_optimization`
@@ -82,6 +94,7 @@ Updated use cases:
 ### File: `src/dxt-entry.ts`
 
 #### Updated Debug Logging (Lines 12-19)
+
 ```diff
 - logger.debug("DXT entry point starting...");
 + logger.debug("DXT entry point starting (Single-Site Mode)...");
@@ -100,12 +113,14 @@ Updated use cases:
 ## Build Process
 
 ### Commands Run
+
 ```bash
 npm run build                    # Compile TypeScript
 npm run dxt:package:official     # Build and package DXT
 ```
 
 ### Build Output
+
 ```
 🧹 Building clean DXT package...
 📦 Copying essential files...
@@ -116,6 +131,7 @@ npm run dxt:package:official     # Build and package DXT
 ```
 
 ### Package Details
+
 - **Filename**: `mcp-wordpress.dxt` → `mcp-wordpress-2.10.2.dxt`
 - **Package Size**: 4.4MB
 - **Unpacked Size**: 14.0MB
@@ -128,18 +144,21 @@ npm run dxt:package:official     # Build and package DXT
 ## Verification
 
 ### ✅ Manifest Version
+
 ```bash
 $ unzip -p mcp-wordpress.dxt manifest.json | jq '.version'
 "2.10.2"
 ```
 
 ### ✅ Description Updated
+
 ```bash
 $ unzip -p mcp-wordpress.dxt manifest.json | jq '.description'
 "Comprehensive WordPress management through 59 MCP tools with performance monitoring and intelligent caching. Note: DXT installation supports single-site mode. For multi-site support, use NPM installation."
 ```
 
 ### ✅ Multi-Site Prompt Removed
+
 ```bash
 $ unzip -p mcp-wordpress.dxt manifest.json | jq '.prompts[].name'
 "setup_wordpress"
@@ -150,7 +169,9 @@ $ unzip -p mcp-wordpress.dxt manifest.json | jq '.prompts[].name'
 Only 3 prompts remain (was 4 before).
 
 ### ✅ DXT Entry Updated
+
 Compiled `dist/dxt-entry.js` includes new logging:
+
 ```javascript
 logger.debug("DXT entry point starting (Single-Site Mode)...");
 // ... no MULTI_SITE_MODE check
@@ -167,7 +188,7 @@ Users can configure ONE WordPress site through Claude Desktop UI:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| wordpress_site_url | string | Yes | Full URL (e.g., https://yoursite.com) |
+| wordpress_site_url | string | Yes | Full URL (e.g., <https://yoursite.com>) |
 | wordpress_username | string | Yes | WordPress username |
 | wordpress_app_password | string | Yes | Application Password |
 | auth_method | string | No | Auth method (default: app-password) |
@@ -176,6 +197,7 @@ Users can configure ONE WordPress site through Claude Desktop UI:
 ### ✅ Available Tools
 
 All 59 WordPress tools work in single-site mode:
+
 - Posts (6 tools)
 - Pages (6 tools)
 - Media (5 tools)
@@ -206,12 +228,15 @@ All 59 WordPress tools work in single-site mode:
 For users who need to manage multiple WordPress sites:
 
 ### Installation
+
 ```bash
 npm install -g mcp-wordpress
 ```
 
 ### Configuration
+
 Create `mcp-wordpress.config.json`:
+
 ```json
 {
   "sites": [
@@ -238,6 +263,7 @@ Create `mcp-wordpress.config.json`:
 ```
 
 ### Usage
+
 ```bash
 mcp-wordpress
 ```
@@ -275,16 +301,19 @@ public async loadClientConfigurations(mcpConfig?: McpConfigType): Promise<{
 ### Why DXT Can't Do Multi-Site
 
 **DXT Limitation**: The DXT manifest `user_config` schema doesn't support:
+
 - Arrays of objects
 - Dynamic number of configuration sets
 - Multiple sets of credentials
 
 **DXT v0.1 Spec**: Only supports:
+
 - `string`
 - `boolean`
 - `number`
 
 **Not supported** (yet):
+
 - `array`
 - `object` (nested)
 - Dynamic configurations
@@ -329,6 +358,7 @@ Or use Claude Desktop UI to install the `.dxt` file.
 ### 2. Configure Single Site
 
 When prompted, enter:
+
 - **WordPress Site URL**: `https://yoursite.com`
 - **WordPress Username**: `your_username`
 - **WordPress Application Password**: `xxxx xxxx xxxx xxxx xxxx xxxx`
@@ -338,6 +368,7 @@ When prompted, enter:
 ### 3. Verify Prompts
 
 Check that Claude Desktop shows:
+
 - ✅ `setup_wordpress`
 - ✅ `content_management`
 - ✅ `performance_optimization`
@@ -346,6 +377,7 @@ Check that Claude Desktop shows:
 ### 4. Test Tools
 
 Try using WordPress tools:
+
 ```
 wp_test_auth
 wp_get_site_settings
@@ -357,6 +389,7 @@ All should work with configured site.
 ### 5. Check Debug Output (if enabled)
 
 If `debug_mode: true`, logs should show:
+
 ```
 DXT entry point starting (Single-Site Mode)...
 Note: DXT mode supports single-site configuration only. For multi-site, use NPM installation.
@@ -369,16 +402,19 @@ No mention of `MULTI_SITE_MODE`.
 ## Documentation Updates Needed
 
 ### README.md
+
 - [ ] Add section explaining DXT vs NPM installation
 - [ ] Clarify single-site limitation for DXT
 - [ ] Add multi-site configuration instructions for NPM
 
 ### CLAUDE.md
+
 - [ ] Update installation instructions
 - [ ] Document DXT limitations
 - [ ] Add troubleshooting for multi-site
 
 ### GitHub Releases
+
 - [ ] Include note in v2.10.2 release notes
 - [ ] Explain DXT changes
 - [ ] Link to DXT package
@@ -390,16 +426,19 @@ No mention of `MULTI_SITE_MODE`.
 ### For DXT Users
 
 **What changed**:
+
 - Version now correctly shows 2.10.2
 - Description clarifies single-site support
 - Removed confusing multi-site prompt
 
 **What works**:
+
 - All 59 WordPress tools
 - Single WordPress site management
 - Full feature set for one site
 
 **What doesn't work**:
+
 - Managing multiple sites simultaneously
 - Multi-site administration features
 
@@ -409,6 +448,7 @@ Install via NPM for multi-site support.
 ### For NPM Users
 
 **No changes needed**:
+
 - Multi-site configuration works as before
 - No breaking changes
 - Same configuration file format
@@ -420,6 +460,7 @@ Install via NPM for multi-site support.
 ### Waiting for User Log
 
 Still waiting for Claude Desktop log file to:
+
 1. Confirm what errors user experienced
 2. Verify fixes address actual issues
 3. Check for any other problems
@@ -449,12 +490,14 @@ Still waiting for Claude Desktop log file to:
 ## Summary
 
 ### Problems Fixed
+
 1. ✅ Version mismatch (2.6.3 → 2.10.2)
 2. ✅ Misleading multi-site claims
 3. ✅ Removed non-functional multi-site prompt
 4. ✅ Updated debug logging for clarity
 
 ### Package Status
+
 - **Size**: 4.4MB
 - **Version**: 2.10.2 (synced correctly)
 - **Files**: 2,235 files

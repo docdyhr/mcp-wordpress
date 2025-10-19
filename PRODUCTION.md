@@ -238,6 +238,7 @@ HEALTH_CHECK_TIMEOUT=5000
    ```
 
 2. **JWT Authentication**
+
    ```bash
    # Install JWT Authentication plugin
    # Configure JWT secret in wp-config.php

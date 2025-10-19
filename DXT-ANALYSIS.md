@@ -155,12 +155,14 @@ RESULT: Only ONE site configured ❌
 ## Issues Identified
 
 ### Issue #1: No Multi-Site User Configuration
+
 **Severity**: High
 **Impact**: Users cannot configure multiple WordPress sites
 
 The DXT manifest `user_config` only allows one set of credentials. There's no way to define multiple sites through the Claude Desktop UI.
 
 ### Issue #2: Missing Configuration File in DXT Package
+
 **Severity**: High
 **Impact**: Even if user manually creates config, it's not in DXT filesystem
 
@@ -178,6 +180,7 @@ await fs.copy(path.join(rootDir, 'mcp-wordpress.config.json.example'), path.join
 ```
 
 ### Issue #3: Manifest Version Mismatch
+
 **Severity**: Low
 **Impact**: Users may see outdated version
 
@@ -187,10 +190,12 @@ await fs.copy(path.join(rootDir, 'mcp-wordpress.config.json.example'), path.join
 The manifest version is hardcoded and outdated.
 
 ### Issue #4: Missing Multi-Site Prompts
+
 **Severity**: Medium
 **Impact**: Users see multi-site prompts but can't use them
 
 **Manifest prompts include**:
+
 ```json
 {
   "name": "multi_site_management",
@@ -248,11 +253,13 @@ But users can't actually configure multiple sites! This is misleading.
 ```
 
 **Pros**:
+
 - ✅ Clean user experience
 - ✅ Native multi-site support
 - ✅ Matches codebase capability
 
 **Cons**:
+
 - ❌ Requires DXT spec to support array types
 - ❌ May not be supported in DXT 0.1
 
@@ -280,6 +287,7 @@ Allow users to paste a JSON configuration string:
 ```
 
 **DXT Entry Logic**:
+
 ```typescript
 if (process.env.MULTI_SITE_CONFIG) {
   const config = JSON.parse(process.env.MULTI_SITE_CONFIG);
@@ -291,11 +299,13 @@ if (process.env.MULTI_SITE_CONFIG) {
 ```
 
 **Pros**:
+
 - ✅ Works with current DXT spec
 - ✅ Supports advanced users
 - ✅ Minimal code changes
 
 **Cons**:
+
 - ❌ Poor UX (users paste JSON)
 - ❌ Error-prone
 - ❌ Not beginner-friendly
@@ -310,11 +320,13 @@ Create configuration file after DXT installation:
 4. Server detects config file on next startup
 
 **Pros**:
+
 - ✅ Clean separation
 - ✅ Power users can configure
 - ✅ Works with current DXT
 
 **Cons**:
+
 - ❌ Extra manual step
 - ❌ Users need to know file location
 - ❌ May be confusing
@@ -324,6 +336,7 @@ Create configuration file after DXT installation:
 Accept that DXT = single-site only, and document it clearly:
 
 **Update manifest**:
+
 ```json
 {
   "name": "mcp-wordpress-single",
@@ -335,11 +348,13 @@ Accept that DXT = single-site only, and document it clearly:
 Remove multi-site prompts from manifest.
 
 **Pros**:
+
 - ✅ Clear expectations
 - ✅ No code changes
 - ✅ Still useful for most users
 
 **Cons**:
+
 - ❌ Limits DXT functionality
 - ❌ Wastes existing multi-site code
 - ❌ Two different installation experiences
@@ -361,6 +376,7 @@ Remove multi-site prompts from manifest.
    - Add clear single-site mode message
 
 3. **Rebuild DXT package**:
+
    ```bash
    npm run dxt:package:official
    ```
@@ -376,7 +392,7 @@ Remove multi-site prompts from manifest.
 
 ## Files That Need Changes
 
-### Immediate (Phase 1):
+### Immediate (Phase 1)
 
 1. [dxt/manifest.json](dxt/manifest.json)
    - Update version to 2.10.2
@@ -390,7 +406,7 @@ Remove multi-site prompts from manifest.
 3. [scripts/build-dxt-clean.cjs](scripts/build-dxt-clean.cjs)
    - Ensure version sync from package.json
 
-### Future (Phase 2):
+### Future (Phase 2)
 
 4. [dxt/manifest.json](dxt/manifest.json)
    - Add multi-site configuration schema
@@ -406,6 +422,7 @@ Remove multi-site prompts from manifest.
 ## Testing Plan
 
 ### Test 1: Current DXT Package
+
 ```bash
 # Extract and inspect
 unzip -l mcp-wordpress.dxt | grep -E "(manifest|dxt-entry|config)"
@@ -417,6 +434,7 @@ unzip -p mcp-wordpress.dxt manifest.json | jq '.version'
 ```
 
 ### Test 2: Single-Site Installation
+
 1. Install DXT in Claude Desktop
 2. Configure one site
 3. Verify server starts
@@ -424,6 +442,7 @@ unzip -p mcp-wordpress.dxt manifest.json | jq '.version'
 5. Verify only one site is accessible
 
 ### Test 3: Multi-Site Attempt
+
 1. Try to configure multiple sites through UI
 2. Expected: Not possible with current manifest
 3. Document user experience
@@ -475,6 +494,7 @@ Currently waiting for Claude Desktop log file to identify specific runtime error
 **Status**: Analysis complete, awaiting log file for confirmation
 
 **Files to Review**:
+
 - ✅ dxt/manifest.json
 - ✅ src/dxt-entry.ts
 - ✅ src/config/ServerConfiguration.ts

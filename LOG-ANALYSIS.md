@@ -20,6 +20,7 @@
 ```
 
 **Affected Tools**:
+
 - `wp_test_auth` (line 30)
 - `wp_get_auth_status` (line 32)
 - `wp_get_site_settings` (line 34)

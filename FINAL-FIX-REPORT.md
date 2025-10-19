@@ -13,6 +13,7 @@
 **Error**: `keyValidator._parse is not a function`
 
 **Root Cause**:
+
 - **package.json declared**: `"zod": "^4.1.3"` (Zod v4 - doesn't exist yet!)
 - **Actually installed**: `zod@3.25.76` (Zod v3 - from MCP SDK)
 - **Result**: API mismatch causing all tools to fail
@@ -20,6 +21,7 @@
 **Impact**: **100% of tools failed** - Server completely non-functional
 
 **Fix Applied**:
+
 ```diff
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.4",
@@ -31,6 +33,7 @@
 ```
 
 **Verification**:
+
 ```bash
 $ npm list zod
 mcp-wordpress@2.10.2
@@ -48,10 +51,12 @@ mcp-wordpress@2.10.2
 **Issue**: Manifest showed v2.6.3 instead of v2.10.2
 
 **Fix Applied**:
+
 - Updated manifest.json version: `2.6.3` → `2.10.2`
 - Build script now syncs version from package.json
 
 **Verification**:
+
 ```bash
 $ unzip -p mcp-wordpress.dxt manifest.json | jq '.version'
 "2.10.2"
@@ -66,12 +71,14 @@ $ unzip -p mcp-wordpress.dxt manifest.json | jq '.version'
 **Issue**: DXT manifest claimed multi-site support but only supports single-site
 
 **Fix Applied**:
+
 - Updated description to clarify "single-site mode"
 - Updated long_description with DXT vs NPM comparison
 - Removed `multi_site_management` prompt
 - Added note: "For multi-site support, use NPM installation"
 
 **Verification**:
+
 ```bash
 $ unzip -p mcp-wordpress.dxt manifest.json | jq '.prompts[].name'
 "setup_wordpress"
@@ -88,6 +95,7 @@ $ unzip -p mcp-wordpress.dxt manifest.json | jq '.prompts[].name'
 **Issue**: DXT entry point logged irrelevant `MULTI_SITE_MODE` checks
 
 **Fix Applied**:
+
 ```diff
 - logger.debug("DXT entry point starting...");
 + logger.debug("DXT entry point starting (Single-Site Mode)...");
@@ -103,11 +111,13 @@ $ unzip -p mcp-wordpress.dxt manifest.json | jq '.prompts[].name'
 ## Files Modified
 
 ### 1. package.json
+
 - **Change**: Fixed Zod version from `^4.1.3` to `^3.25.0`
 - **Reason**: Compatibility with MCP SDK
 - **Impact**: Critical - Fixes all tool failures
 
 ### 2. dxt/manifest.json
+
 - **Changes**:
   - Version: `2.6.3` → `2.10.2`
   - Description: Added single-site note
@@ -117,6 +127,7 @@ $ unzip -p mcp-wordpress.dxt manifest.json | jq '.prompts[].name'
 - **Impact**: Medium - Reduces user confusion
 
 ### 3. src/dxt-entry.ts
+
 - **Changes**:
   - Updated startup message
   - Removed MULTI_SITE_MODE logging
@@ -125,21 +136,25 @@ $ unzip -p mcp-wordpress.dxt manifest.json | jq '.prompts[].name'
 - **Impact**: Low - Improves troubleshooting
 
 ### 4. package-lock.json
+
 - **Change**: Regenerated with correct Zod version
 - **Reason**: Lock file consistency
 - **Impact**: Critical - Ensures reproducible builds
 
 ### 5. node_modules/
+
 - **Change**: Reinstalled with correct dependencies
 - **Reason**: Apply Zod version fix
 - **Impact**: Critical - Required for functionality
 
 ### 6. dist/
+
 - **Change**: Recompiled with correct dependencies
 - **Reason**: Fresh build with fixes
 - **Impact**: Critical - Contains fixed code
 
 ### 7. mcp-wordpress.dxt
+
 - **Change**: Rebuilt with all fixes
 - **Reason**: Package for distribution
 - **Impact**: Critical - Final deliverable
@@ -256,6 +271,7 @@ cp mcp-wordpress.dxt ~/Downloads/
 ### 3. Configure Site
 
 When prompted:
+
 - **WordPress Site URL**: `https://yoursite.com`
 - **WordPress Username**: `your_username`
 - **WordPress App Password**: `xxxx xxxx xxxx xxxx xxxx xxxx`
@@ -285,11 +301,13 @@ wp_get_current_user
 ### 5. Check Logs
 
 Check the log file:
+
 ```bash
 tail -f ~/Library/Logs/Claude/mcp-server-WordPress\ MCP\ Server.log
 ```
 
 **Expected**:
+
 - No `keyValidator._parse` errors
 - Version shows `2.10.2`
 - Tools execute successfully
@@ -301,6 +319,7 @@ tail -f ~/Library/Logs/Claude/mcp-server-WordPress\ MCP\ Server.log
 ### Errors Found in Log
 
 **Lines 30, 32, 34, 36**:
+
 ```json
 {"jsonrpc":"2.0","id":N,"error":{"code":-32603,"message":"keyValidator._parse is not a function"}}
 ```
@@ -308,6 +327,7 @@ tail -f ~/Library/Logs/Claude/mcp-server-WordPress\ MCP\ Server.log
 **Cause**: Zod v4 syntax used with Zod v3 library
 
 **How It Happened**:
+
 1. Developer mistakenly set `zod: ^4.1.3` in package.json
 2. Zod v4 doesn't exist yet (latest is v3.25.x)
 3. npm installed Zod v3 due to MCP SDK dependency
@@ -323,18 +343,21 @@ tail -f ~/Library/Logs/Claude/mcp-server-WordPress\ MCP\ Server.log
 ### 1. Non-Critical: Method Not Found Errors
 
 **Lines 12, 13, 27, 28, 54, 55**:
+
 ```json
 {"jsonrpc":"2.0","id":2,"error":{"code":-32601,"message":"Method not found"}}
 {"jsonrpc":"2.0","id":3,"error":{"code":-32601,"message":"Method not found"}}
 ```
 
 **Methods**:
+
 - `prompts/list` (id:2)
 - `resources/list` (id:3)
 
 **Cause**: Client requests these but server doesn't implement them
 
 **Status**: **Expected behavior** - Not a bug
+
 - Server only implements `tools/list`
 - Prompts/resources not exposed via MCP protocol
 - This is by design for this server
@@ -344,6 +367,7 @@ tail -f ~/Library/Logs/Claude/mcp-server-WordPress\ MCP\ Server.log
 ### 2. Server Disconnect
 
 **Line 38-39**:
+
 ```
 Server transport closed unexpectedly, this is likely due to the process exiting early.
 ```
@@ -386,12 +410,14 @@ Authentication: ✓ Valid
 ### DXT Installation (Single-Site)
 
 **Pros**:
+
 - ✅ Easy installation via Claude Desktop UI
 - ✅ Visual configuration form
 - ✅ No command-line needed
 - ✅ Perfect for beginners
 
 **Cons**:
+
 - ❌ Single site only
 - ❌ No multi-site support
 - ❌ UI-based configuration only
@@ -401,12 +427,14 @@ Authentication: ✓ Valid
 ### NPM Installation (Multi-Site)
 
 **Pros**:
+
 - ✅ Unlimited sites supported
 - ✅ JSON configuration file
 - ✅ Programmable setup
 - ✅ Advanced features
 
 **Cons**:
+
 - ❌ Requires command-line
 - ❌ Manual configuration
 - ❌ More complex setup

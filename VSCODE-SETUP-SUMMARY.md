@@ -35,6 +35,7 @@ npm run build && npm test
 ## Code Snippets
 
 Type these prefixes and press Tab:
+
 - `mcp-tool` → Full MCP tool class
 - `mcp-test` → Test suite template
 - `wp-api` → WordPress API call

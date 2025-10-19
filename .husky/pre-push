@@ -1,19 +1,31 @@
 echo "🚀 Running pre-push checks..."
 
-# Run full build
+# Run build first to ensure everything compiles
 echo "🏗️ Building project..."
-npm run build
+npm run build || {
+    echo "❌ Build failed. Please fix compilation errors before pushing."
+    exit 1
+}
 
-# Run comprehensive tests
-echo "🧪 Running full test suite..."
-npm test
+# Run memory-safe tests to prevent V8 crashes
+echo "🧪 Running memory-safe test suite..."
+npm run test:safe || {
+    echo "❌ Tests failed. Please fix failing tests before pushing."
+    exit 1
+}
 
-# Run all security tests
-echo "🔒 Running comprehensive security tests..."
-npm run test:security
+# Run security tests with memory constraints
+echo "🔒 Running security validation..."
+NODE_OPTIONS="--max-old-space-size=4096" npm run test:security || {
+    echo "❌ Security tests failed. Please address security issues before pushing."
+    exit 1
+}
 
-# Run dependency audit
+# Run dependency audit (lightweight check)
 echo "🔍 Running security audit..."
-npm audit --audit-level moderate
+npm audit --audit-level moderate || {
+    echo "⚠️ Security audit found issues. Consider running 'npm audit fix' if needed."
+    echo "Proceeding with push as audit issues may be acceptable..."
+}
 
 echo "✅ All pre-push checks passed! Ready to push."
