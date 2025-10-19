@@ -97,6 +97,7 @@
     "test:memory-safe": "npm run build && NODE_OPTIONS=\"--max-old-space-size=6144 --max-semi-space-size=256\" vitest run --no-coverage --reporter=basic",
     "test:performance": "npm run build && vitest run tests/performance/",
     "test:pre-push": "bash scripts/test-pre-push.sh",
+    "test:production-security": "npm audit --omit=dev",
     "test:performance:ci": "npm run build && mkdir -p tests/results && NODE_OPTIONS=\"--max-old-space-size=4096\" vitest run tests/performance/ --reporter=json --outputFile=tests/results/performance-results.json",
     "test:safe": "node scripts/run-tests-safe.cjs",
     "test:security": "npm run build && vitest run tests/security/",
@@ -136,8 +137,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",
-    "@pact-foundation/pact": "^15.0.1",
-    "@pact-foundation/pact-node": "^10.18.0",
+    "@pact-foundation/pact": "^16.0.1",
+    "@pact-foundation/pact-node": "^10.11.4",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@types/node": "^24.3.0",

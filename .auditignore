@@ -1,0 +1,19 @@
+# NPM Audit Ignore File
+# Security vulnerabilities that have been assessed and accepted for development use
+# See SECURITY_AUDIT_REPORT.md for detailed risk assessment
+
+# fast-redact prototype pollution vulnerability
+# Affects: @pact-foundation/pact-node (dev dependency only)
+# Risk: Low - Only impacts test environment logging
+# Justification: Required for Pact contract testing, no production exposure
+https://github.com/advisories/GHSA-ffrw-9mx8-89p8
+
+# jsondiffpatch XSS vulnerability
+# Affects: mcp-evals (dev dependency only)
+# Risk: Low - Only impacts evaluation HTML output in controlled environment
+# Justification: Required for MCP evaluation framework, no user-facing HTML in production
+https://github.com/advisories/GHSA-33vc-wfww-vjfv
+
+# Review Date: 2024-12-19
+# Next Review: 2025-01-19
+# All production dependencies remain secure with zero vulnerabilities
