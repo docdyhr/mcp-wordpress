@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.10.7...v2.11.0) (2025-10-19)
+
+### 🚀 Features
+
+* **tools:** Add include_content parameter to wp_get_page and wp_get_post ([facd43a](https://github.com/docdyhr/mcp-wordpress/commit/facd43ae40c7ee4863bf362675efdc93350624e4)), closes [#119](https://github.com/docdyhr/mcp-wordpress/issues/119) [#119](https://github.com/docdyhr/mcp-wordpress/issues/119)
+
+### 🐛 Bug Fixes
+
+* **ci:** Add missing security:review and security:monitor scripts ([e3a109e](https://github.com/docdyhr/mcp-wordpress/commit/e3a109eaa48e1d3e7f92fc4a696e55c7117e172a))
+* **ci:** Resolve CI/CD pipeline failures in all workflows ([9724153](https://github.com/docdyhr/mcp-wordpress/commit/972415333259801ed9433edc4480321bf9bfa5d2))
+* **ci:** resolve pre-push memory crashes with memory-safe test runner ([fb4cc7e](https://github.com/docdyhr/mcp-wordpress/commit/fb4cc7e3a2736136ce8cac8b04147713b672d72d))
+
+### ♻️ Refactoring
+
+* **tests:** Remove all skipped tests and update documentation ([42fd6a8](https://github.com/docdyhr/mcp-wordpress/commit/42fd6a88301b7ab7e0cae8310d743cc0c7b5ae16))
+
 ## [2.10.7](https://github.com/docdyhr/mcp-wordpress/compare/v2.10.6...v2.10.7) (2025-10-14)
 
 ### 🐛 Bug Fixes
