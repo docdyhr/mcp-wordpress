@@ -10,26 +10,27 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 [Quick Start](#-quick-start) • [Why This MCP Server?](#-why-this-mcp-server)
 [Installation Options](#-installation-options) • [Documentation](#-documentation) • [Examples](#-examples)
 
-[![CI/CD Pipeline](https://github.com/docdyhr/mcp-wordpress/workflows/%F0%9F%9A%80%20CI%2FCD%20Pipeline/badge.svg)](https://github.com/docdyhr/mcp-wordpress/actions)
+[![CI/CD Pipeline](https://github.com/docdyhr/mcp-wordpress/actions/workflows/main-ci.yml/badge.svg)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/main-ci.yml)
 [![GitHub Stars](https://img.shields.io/github/stars/docdyhr/mcp-wordpress?style=social)](https://github.com/docdyhr/mcp-wordpress/stargazers)
 [![NPM Version](https://img.shields.io/npm/v/mcp-wordpress?logo=npm&logoColor=white)](https://www.npmjs.com/package/mcp-wordpress)
 [![NPM Downloads](https://img.shields.io/npm/dm/mcp-wordpress?logo=npm&logoColor=white)](https://www.npmjs.com/package/mcp-wordpress)
 [![NPM Total Downloads](https://img.shields.io/npm/dt/mcp-wordpress?logo=npm&logoColor=white&label=total%20downloads)](https://www.npmjs.com/package/mcp-wordpress)
 [![Docker Pulls](https://img.shields.io/docker/pulls/docdyhr/mcp-wordpress?logo=docker&logoColor=white)](https://hub.docker.com/r/docdyhr/mcp-wordpress)
-[![Line Coverage](https://img.shields.io/badge/lines%20coverage-96.17%25-brightgreen?logo=vitest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
-[![Branch Coverage](https://img.shields.io/badge/branch%20coverage-95.83%25-brightgreen?logo=vitest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
-[![Function Coverage](https://img.shields.io/badge/function%20coverage-100.00%25-brightgreen?logo=vitest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
-[![Test Results](https://img.shields.io/badge/tests-512%2F512%20passing-brightgreen?logo=vitest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
+[![Tests](https://github.com/docdyhr/mcp-wordpress/actions/workflows/main-ci.yml/badge.svg?event=push)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/main-ci.yml)
+[![Coverage Status](https://img.shields.io/codecov/c/github/docdyhr/mcp-wordpress?logo=codecov&logoColor=white)](https://codecov.io/gh/docdyhr/mcp-wordpress)
+[![Quality Gate](https://img.shields.io/badge/quality%20gate-passing-brightgreen?logo=sonarqube&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/main-ci.yml)
+[![Test Results](https://img.shields.io/badge/tests-passing-brightgreen?logo=vitest&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/main-ci.yml)
 [![MCP Evaluation](https://img.shields.io/badge/mcp%20evaluation-4.5%2F5.0-brightgreen?logo=openai&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/mcp-evaluations.yml)
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue?logo=typescript&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
-[![Security Tests](https://img.shields.io/badge/security%20tests-%2F%20passing-brightgreen?logo=shield&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/tree/main/tests/security)
-[![Vulnerabilities](https://img.shields.io/badge/vulnerabilities-0%20known-brightgreen?logo=security&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/security/advisories)
-[![Penetration Testing](https://img.shields.io/badge/penetration%20testing-%2F%20passing-brightgreen?logo=bug&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/blob/main/tests/security/penetration-tests.test.js)
+[![Security Scan](https://github.com/docdyhr/mcp-wordpress/actions/workflows/main-ci.yml/badge.svg?job=security)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/main-ci.yml)
+[![Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/npm/mcp-wordpress?logo=snyk&logoColor=white)](https://snyk.io/test/npm/mcp-wordpress)
+[![CodeQL](https://github.com/docdyhr/mcp-wordpress/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/codeql-analysis.yml)
 [![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker&logoColor=white)](https://hub.docker.com/r/docdyhr/mcp-wordpress)
 [![License](https://img.shields.io/badge/license-MIT-green?logo=opensource&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/blob/main/LICENSE)
 [![smithery badge](https://smithery.ai/badge/@docdyhr/mcp-wordpress)](https://smithery.ai/server/@docdyhr/mcp-wordpress)
 
+<!-- Badges updated: 2025-10-20T12:21:16.087Z -->
 ### 🎉 **NEW:** v2.7.0 - Composition Architecture & Complete SEO Toolkit!
 
 </div>

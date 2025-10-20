@@ -23,8 +23,8 @@ export default defineConfig({
     // Environment
     environment: "node",
 
-    // Pool options - use forks for better memory isolation
-    pool: "forks",
+    // Pool options - use threads for better performance
+    pool: "threads",
 
     // Test file patterns - equivalent to Jest testMatch
     include: ["tests/**/*.test.js", "tests/**/*.spec.js"],
@@ -40,6 +40,9 @@ export default defineConfig({
       // Skip long-running performance tests in CI
       ...(process.env.CI ? ["tests/performance/regression-detection.test.js"] : []),
     ],
+
+    // Better test discovery
+    passWithNoTests: false,
 
     // Global test configuration
     globals: true,
@@ -99,18 +102,18 @@ export default defineConfig({
 
     // Performance and debugging - optimized for memory safety
     isolate: true, // Isolate tests to prevent memory leaks
-    maxConcurrency: 4, // Limit concurrent tests to prevent memory spikes
+    maxConcurrency: 2, // Reduced concurrent tests to prevent memory spikes
     poolOptions: {
       threads: {
         singleThread: false,
         isolate: true,
-        maxThreads: 4,
+        maxThreads: 2,
         minThreads: 1,
       },
       forks: {
         singleFork: false,
         isolate: true,
-        maxForks: 4,
+        maxForks: 2,
         minForks: 1,
       },
     },
@@ -118,8 +121,15 @@ export default defineConfig({
     // Memory management
     forceRerunTriggers: ["**/package.json/**", "**/vitest.config.*/**", "**/vite.config.*/**"],
 
-    // Reporter configuration
-    reporters: ["verbose"],
+    // Reporter configuration - fixed deprecated 'basic' reporter
+    reporters: [
+      [
+        "default",
+        {
+          summary: false,
+        },
+      ],
+    ],
   },
 
   // TypeScript and module resolution - handled by tsconfigPaths plugin
