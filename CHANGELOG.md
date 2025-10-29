@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.2](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.1...v2.11.2) (2025-10-29)
+
+### 🐛 Bug Fixes
+
+* **security:** resolve vite vulnerability and update dependencies ([7a1c918](https://github.com/docdyhr/mcp-wordpress/commit/7a1c9180425852487efc1682698bd7d4fe49bc17)), closes [#141](https://github.com/docdyhr/mcp-wordpress/issues/141)
+
+### 📚 Documentation
+
+* **todo:** update TODO list with completed security fixes ([863d330](https://github.com/docdyhr/mcp-wordpress/commit/863d330fbd023f854e93822d1cc389b471bdfaa2)), closes [#141](https://github.com/docdyhr/mcp-wordpress/issues/141)
+
 ## [2.11.1](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.0...v2.11.1) (2025-10-20)
 
 ### 🐛 Bug Fixes
