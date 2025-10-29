@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.3](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.2...v2.11.3) (2025-10-29)
+
+### 🐛 Bug Fixes
+
+* **docker:** enable Docker publishing on release events ([7a7d304](https://github.com/docdyhr/mcp-wordpress/commit/7a7d304a25982a3ee98a9593dd9d5070ac0809f6)), closes [#141](https://github.com/docdyhr/mcp-wordpress/issues/141)
+
 ## [2.11.2](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.1...v2.11.2) (2025-10-29)
 
 ### 🐛 Bug Fixes
