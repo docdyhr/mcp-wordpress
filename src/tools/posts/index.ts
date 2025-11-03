@@ -119,6 +119,11 @@ export class PostTools {
     client: WordPressClient,
     params: PostQueryParams | Record<string, unknown>,
   ): Promise<WordPressPost[] | string> {
+    // Handle null/undefined params
+    if (!params) {
+      params = {};
+    }
+
     // Extract only the relevant query parameters, excluding MCP-specific fields
     const queryParams: PostQueryParams = {};
 

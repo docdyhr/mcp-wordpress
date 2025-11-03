@@ -7,7 +7,7 @@
  */
 
 import { WordPressClient } from "@/client/api.js";
-import { CreatePostRequest, PostQueryParams, UpdatePostRequest, WordPressPost } from "@/types/wordpress.js";
+import { CreatePostRequest, PostQueryParams, PostStatus, UpdatePostRequest, WordPressPost } from "@/types/wordpress.js";
 import { getErrorMessage } from "@/utils/error.js";
 import { ErrorHandlers } from "@/utils/enhancedError.js";
 import { validateId, validatePaginationParams, validatePostParams } from "@/utils/validation.js";
@@ -22,12 +22,13 @@ export async function handleListPosts(
   params: PostQueryParams,
 ): Promise<WordPressPost[] | string> {
   try {
+    // Handle null/undefined parameters
+    if (!params || typeof params !== "object") {
+      throw ErrorHandlers.validationError("params", params, "valid object");
+    }
+
     // Enhanced input validation and sanitization
-    const paginationValidated = validatePaginationParams({
-      page: params.page,
-      per_page: params.per_page,
-      offset: params.offset,
-    });
+    const paginationValidated = validatePaginationParams(params);
 
     const sanitizedParams = {
       ...params,
@@ -51,7 +52,7 @@ export async function handleListPosts(
       sanitizedParams.tags = sanitizedParams.tags.map((id) => validateId(id, "tag ID"));
     }
 
-    // Validate status parameter
+    // Validate and normalize status parameter to array (WordPress REST API expects array)
     if (sanitizedParams.status) {
       const validStatuses = ["publish", "future", "draft", "pending", "private"];
       const statusesToCheck = Array.isArray(sanitizedParams.status) ? sanitizedParams.status : [sanitizedParams.status];
@@ -61,6 +62,9 @@ export async function handleListPosts(
           throw ErrorHandlers.validationError("status", statusToCheck, "one of: " + validStatuses.join(", "));
         }
       }
+
+      // Normalize to array format as expected by WordPress REST API
+      sanitizedParams.status = statusesToCheck as PostStatus[];
     }
 
     // Performance optimization: set reasonable defaults

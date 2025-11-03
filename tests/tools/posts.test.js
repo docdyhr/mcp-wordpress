@@ -165,8 +165,9 @@ describe("PostTools", () => {
         status: "draft",
       });
 
+      // Status is normalized to array format as per WordPress REST API spec
       expect(mockClient.getPosts).toHaveBeenCalledWith({
-        status: "draft",
+        status: ["draft"],
         per_page: 10,
       });
       expect(typeof result).toBe("string");

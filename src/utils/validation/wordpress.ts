@@ -50,6 +50,11 @@ export function validatePaginationParams(params: { page?: unknown; per_page?: un
   per_page?: number;
   offset?: number;
 } {
+  // Handle null/undefined params object
+  if (!params || typeof params !== "object") {
+    return {};
+  }
+
   const validated: { page?: number; per_page?: number; offset?: number } = {};
 
   // Validate page
