@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.4](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.3...v2.11.4) (2025-11-03)
+
+### 🐛 Bug Fixes
+
+* resolve failing CI/CD tests in posts and quality checks ([e549649](https://github.com/docdyhr/mcp-wordpress/commit/e5496499da17d8f5422eea9c7a66c623e837764f))
+
+### 📚 Documentation
+
+* fix duplicate CI/CD pipeline badges in README ([e6baae8](https://github.com/docdyhr/mcp-wordpress/commit/e6baae8beda31525c355c431860bee98e2b6a31e))
+
 ## [2.11.3](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.2...v2.11.3) (2025-10-29)
 
 ### 🐛 Bug Fixes
