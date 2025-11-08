@@ -100,23 +100,11 @@ export default defineConfig({
       },
     },
 
-    // Performance and debugging - optimized for memory safety
+    // Performance and debugging - optimized for memory safety (Vitest v4)
     isolate: true, // Isolate tests to prevent memory leaks
     maxConcurrency: 2, // Reduced concurrent tests to prevent memory spikes
-    poolOptions: {
-      threads: {
-        singleThread: false,
-        isolate: true,
-        maxThreads: 2,
-        minThreads: 1,
-      },
-      forks: {
-        singleFork: false,
-        isolate: true,
-        maxForks: 2,
-        minForks: 1,
-      },
-    },
+    maxWorkers: 2, // Vitest v4: replaces poolOptions.threads.maxThreads
+    minWorkers: 1, // Vitest v4: replaces poolOptions.threads.minThreads
 
     // Memory management
     forceRerunTriggers: ["**/package.json/**", "**/vitest.config.*/**", "**/vite.config.*/**"],

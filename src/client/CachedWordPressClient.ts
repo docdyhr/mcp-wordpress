@@ -55,41 +55,54 @@ export class CachedWordPressClient extends WordPressClient {
     data: unknown = null,
     options: RequestOptions = {},
   ): Promise<T> {
+    const upperMethod = method.toUpperCase();
+
     // Only cache GET requests
-    if (method.toUpperCase() !== "GET" || !SecurityConfig.cache.enabled) {
+    if (upperMethod !== "GET" || !SecurityConfig.cache.enabled) {
       const response = await super.request<T>(method, endpoint, data, options);
 
       // Trigger cache invalidation for write operations
-      if (["POST", "PUT", "PATCH", "DELETE"].includes(method.toUpperCase())) {
+      if (["POST", "PUT", "PATCH", "DELETE"].includes(upperMethod)) {
         await this.handleCacheInvalidation(method, endpoint, data);
       }
 
       return response;
     }
 
-    // Use cached request for GET operations
-    const requestFn = () => super.request<T>(method, endpoint, data, options);
+    // Normalize endpoint/query params so both the HTTP request and cache key stay in sync
+    const { normalizedEndpoint, normalizedParams } = this.normalizeEndpoint(endpoint, options.params);
 
-    const requestOptions = {
+    // Ensure we don't leak params to the super call (the parent client expects query strings)
+    const baseOptions: RequestOptions = { ...options };
+    delete baseOptions.params;
+
+    const cacheRequestOptions = {
       method,
-      url: `${this.config.baseUrl}/wp-json/wp/v2/${endpoint}`,
-      headers: {},
-      params: {},
+      url: this.buildRequestUrl(normalizedEndpoint),
+      headers: { ...(baseOptions.headers || {}) },
+      params: normalizedParams,
       data,
     };
 
-    const cacheOptions = this.getCacheOptions(endpoint);
+    const cacheOptions = this.getCacheOptions(normalizedEndpoint);
 
     const response = await this.httpCache.request(
-      async () => {
-        const result = await requestFn();
+      async (extraHeaders) => {
+        const mergedOptions: RequestOptions = {
+          ...baseOptions,
+          headers: {
+            ...(baseOptions.headers || {}),
+            ...(extraHeaders || {}),
+          },
+        };
+        const result = await super.request<T>(method, normalizedEndpoint, data, mergedOptions);
         return {
           data: result,
           status: 200,
-          headers: {},
+          headers: mergedOptions.headers || {},
         };
       },
-      requestOptions,
+      cacheRequestOptions,
       cacheOptions,
     );
 
@@ -228,6 +241,63 @@ export class CachedWordPressClient extends WordPressClient {
       ttl: SecurityConfig.cache.ttlPresets.dynamic,
       cacheControl: SecurityConfig.cache.cacheHeaders.dynamic,
     };
+  }
+
+  private normalizeEndpoint(
+    endpoint: string,
+    params: Record<string, unknown> | undefined,
+  ): { normalizedEndpoint: string; normalizedParams: Record<string, unknown> } {
+    const [pathPart, queryPart] = endpoint.split("?");
+    const collectedParams: Record<string, string[]> = {};
+
+    if (queryPart) {
+      const searchParams = new URLSearchParams(queryPart);
+      for (const [key, value] of searchParams.entries()) {
+        if (!collectedParams[key]) {
+          collectedParams[key] = [];
+        }
+        collectedParams[key].push(value);
+      }
+    }
+
+    if (params) {
+      for (const [key, value] of Object.entries(params)) {
+        if (value === undefined || value === null) continue;
+        const values = Array.isArray(value) ? value : [value];
+        collectedParams[key] = values.map((item) => String(item));
+      }
+    }
+
+    const searchParams = new URLSearchParams();
+    Object.keys(collectedParams)
+      .sort()
+      .forEach((key) => {
+        collectedParams[key].forEach((value) => searchParams.append(key, value));
+      });
+
+    const normalizedParams: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(collectedParams)) {
+      normalizedParams[key] = value.length === 1 ? value[0] : [...value];
+    }
+
+    const normalizedEndpoint = searchParams.toString() ? `${pathPart}?${searchParams.toString()}` : pathPart;
+
+    return { normalizedEndpoint, normalizedParams };
+  }
+
+  private buildRequestUrl(endpoint: string): string {
+    if (endpoint.startsWith("http")) {
+      return endpoint;
+    }
+
+    const cleanEndpoint = endpoint.replace(/^\/+/, "");
+    const siteUrl = this.getSiteUrl().replace(/\/$/, "");
+
+    if (cleanEndpoint.startsWith("wp-json/")) {
+      return `${siteUrl}/${cleanEndpoint}`;
+    }
+
+    return `${siteUrl}/wp-json/wp/v2/${cleanEndpoint}`;
   }
 
   /**

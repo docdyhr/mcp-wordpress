@@ -54,29 +54,22 @@ export default defineConfig({
     // Setup files
     setupFiles: ["./tests/vitest.setup.ts"],
 
-    // Memory-optimized settings
+    // Memory-optimized settings (Vitest v4)
     isolate: true,
     sequence: {
       concurrent: false, // Run tests sequentially to prevent memory spikes
     },
     maxConcurrency: 1, // Force sequential execution
+    maxWorkers: 1, // Vitest v4: replaces singleFork: true
     minWorkers: 1,
-    maxWorkers: 1,
-
-    poolOptions: {
-      forks: {
-        singleFork: true, // Use single fork to minimize memory usage
-        isolate: true,
-      },
-    },
 
     // Disable coverage for memory-safe mode
     coverage: {
       enabled: false,
     },
 
-    // Reporter configuration - minimal output
-    reporters: ["basic"],
+    // Reporter configuration - minimal output (Vitest v4: 'basic' removed, using 'default')
+    reporters: ["default"],
 
     // Force garbage collection between tests
     teardownTimeout: 5000,

@@ -5,7 +5,7 @@
  * configuration validation, and error handling.
  */
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterAll, vi } from "vitest";
 import { AuthenticationManager } from "@/client/managers/AuthenticationManager.js";
 import { AuthenticationError } from "@/types/client.js";
 import { AUTH_METHODS } from "@/types/wordpress.js";
@@ -28,6 +28,8 @@ vi.mock("../../dist/config/Config.js", () => {
 describe("AuthenticationManager", () => {
   let authManager;
   let testConfig;
+  const originalFetch = global.fetch;
+  let fetchMock;
 
   // Helper function to create complete mock config
   const createMockConfig = (wordpress = {}) => ({
@@ -39,6 +41,8 @@ describe("AuthenticationManager", () => {
   beforeEach(() => {
     // Reset mocks
     vi.clearAllMocks();
+    fetchMock = vi.fn();
+    global.fetch = fetchMock;
 
     // Default valid config
     testConfig = {
@@ -53,6 +57,10 @@ describe("AuthenticationManager", () => {
     vi.mocked(config).mockReturnValue(createMockConfig({}));
 
     authManager = new AuthenticationManager(testConfig);
+  });
+
+  afterAll(() => {
+    global.fetch = originalFetch;
   });
 
   describe("Constructor", () => {
@@ -289,6 +297,78 @@ describe("AuthenticationManager", () => {
       expect(() => {
         authManager.getAuthHeaders();
       }).toThrow(AuthenticationError);
+    });
+  });
+
+  describe("JWT network authentication", () => {
+    it("should authenticate using JWT endpoint", async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        statusText: "OK",
+        json: async () => ({ token: "jwt-token", expires_in: 3600 }),
+      });
+
+      const jwtManager = new AuthenticationManager({
+        ...testConfig,
+        authMethod: AUTH_METHODS.JWT,
+        username: "jwt-user",
+        password: "jwt-pass",
+      });
+
+      await jwtManager.authenticateJWT();
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        "https://example.wordpress.com/wp-json/jwt-auth/v1/token",
+        expect.objectContaining({ method: "POST" }),
+      );
+      expect(jwtManager.getAuthHeaders()).toEqual({
+        Authorization: "Bearer jwt-token",
+      });
+      expect(jwtManager.config.tokenExpiry).toBeGreaterThan(Date.now());
+    });
+
+    it("should throw if JWT endpoint returns error", async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: false,
+        statusText: "Forbidden",
+        json: async () => ({}),
+      });
+
+      const jwtManager = new AuthenticationManager({
+        ...testConfig,
+        authMethod: AUTH_METHODS.JWT,
+        username: "jwt-user",
+        password: "jwt-pass",
+      });
+
+      await expect(jwtManager.authenticateJWT()).rejects.toThrow(AuthenticationError);
+    });
+
+    it("should validate token before re-auth during refresh", async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        statusText: "OK",
+        json: async () => ({}),
+      });
+
+      const jwtManager = new AuthenticationManager({
+        ...testConfig,
+        authMethod: AUTH_METHODS.JWT,
+        username: "jwt-user",
+        password: "jwt-pass",
+        jwtToken: "existing-token",
+      });
+
+      await jwtManager.refreshToken();
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(fetchMock).toHaveBeenCalledWith(
+        "https://example.wordpress.com/wp-json/jwt-auth/v1/token/validate",
+        expect.objectContaining({
+          method: "POST",
+          headers: expect.objectContaining({ Authorization: "Bearer existing-token" }),
+        }),
+      );
     });
   });
 

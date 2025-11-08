@@ -530,219 +530,309 @@ export class WordPressClient implements IWordPressClient {
     const timer = startTimer();
     this._stats.totalRequests++;
 
-    // Handle endpoint properly - remove leading slash if present to avoid double slashes
     const cleanEndpoint = endpoint.replace(/^\/+/, "");
     const url = endpoint.startsWith("http") ? endpoint : `${this.apiUrl}/${cleanEndpoint}`;
 
-    const headers: Record<string, string> = {
+    const { headers: _ignoredHeaders, retries: retryOverride, params: _ignoredParams, ...restOptions } = options;
+    const baseHeaders: Record<string, string> = {
       "Content-Type": "application/json",
       "User-Agent": getUserAgent(),
-      ...options.headers,
+      ...(_ignoredHeaders || {}),
     };
 
-    // Add authentication headers
-    this.addAuthHeaders(headers);
+    this.addAuthHeaders(baseHeaders);
 
-    // Set up timeout using AbortController - use options timeout if provided
-    const controller = new AbortController();
     const requestTimeout = options.timeout || this.timeout;
-    const timeoutId = setTimeout(() => controller.abort(), requestTimeout);
-
-    const fetchOptions: RequestInit & { headers: Record<string, string> } = {
-      ...options, // Spread options first
-      method,
-      headers, // Headers come after to ensure auth headers aren't overridden
-      signal: controller.signal,
-    };
-
-    // Add body for POST/PUT/PATCH requests
-    if (data && ["POST", "PUT", "PATCH"].includes(method)) {
-      if (
-        data instanceof FormData ||
-        (typeof data === "object" && data && "append" in data && typeof data.append === "function")
-      ) {
-        // For FormData, check if it has getHeaders method (form-data package)
-        if (typeof (data as { getHeaders?: () => Record<string, string> }).getHeaders === "function") {
-          // Use headers from form-data package
-          const formHeaders = (data as unknown as { getHeaders(): Record<string, string> }).getHeaders();
-          Object.assign(headers, formHeaders);
-        } else {
-          // For native FormData, don't set Content-Type (let fetch set it with boundary)
-          delete headers["Content-Type"];
-        }
-        fetchOptions.body = data as FormData;
-      } else if (Buffer.isBuffer(data)) {
-        // For Buffer data (manual multipart), keep Content-Type from headers
-        fetchOptions.body = data;
-      } else if (typeof data === "string") {
-        fetchOptions.body = data;
-      } else {
-        fetchOptions.body = JSON.stringify(data);
-      }
-    }
-
-    // Rate limiting
-    await this.rateLimit();
+    const configuredRetries =
+      typeof retryOverride === "number" && retryOverride > 0 ? retryOverride : this.maxRetries || 1;
+    const canRetryBody = this.isRetryableBody(data);
+    const maxAttempts = canRetryBody ? configuredRetries : 1;
 
     let lastError: Error = new Error("Unknown error");
-    for (let attempt = 0; attempt < this.maxRetries; attempt++) {
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      await this.rateLimit();
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), requestTimeout);
+
+      const headers = { ...baseHeaders };
+      const fetchOptions: RequestInit & { headers: Record<string, string> } = {
+        ...restOptions,
+        method,
+        headers,
+        signal: controller.signal,
+      };
+
+      if (data && ["POST", "PUT", "PATCH"].includes(method)) {
+        this.attachRequestBody(fetchOptions, headers, data);
+      }
+
       try {
         debug.log(`API Request: ${method} ${url}${attempt > 0 ? ` (attempt ${attempt + 1})` : ""}`);
 
         const response = await fetch(url, fetchOptions);
-        clearTimeout(timeoutId);
 
-        // Handle different response types
         if (!response.ok) {
-          const errorText = await response.text();
-          let errorMessage: string;
-
-          try {
-            const errorData = JSON.parse(errorText);
-            errorMessage = errorData.message || errorData.error || `HTTP ${response.status}`;
-          } catch {
-            errorMessage = errorText || `HTTP ${response.status}: ${response.statusText}`;
+          const fallbackResult = await this.handleErrorResponseWithFallback<T>(
+            response,
+            url,
+            endpoint,
+            requestTimeout,
+            fetchOptions,
+            timer,
+          );
+          if (fallbackResult !== undefined) {
+            clearTimeout(timeoutId);
+            return fallbackResult;
           }
-
-          // Handle rate limiting
-          if (response.status === 429) {
-            this._stats.rateLimitHits++;
-            throw new RateLimitError(errorMessage, Date.now() + 60000);
-          }
-
-          // Handle permission errors specifically for uploads
-          if (response.status === 403 && endpoint.includes("media") && method === "POST") {
-            throw new AuthenticationError(
-              "Media upload blocked: WordPress REST API media uploads appear to be disabled or restricted by a plugin/security policy. " +
-                `Error: ${errorMessage}. ` +
-                "Common causes: W3 Total Cache, security plugins, or custom REST API restrictions. " +
-                "Please check WordPress admin settings or contact your system administrator.",
-              this.auth.method,
-            );
-          }
-
-          // Handle general upload permission errors
-          if (errorMessage.includes("Beiträge zu erstellen") && endpoint.includes("media")) {
-            throw new AuthenticationError(
-              `WordPress REST API media upload restriction detected: ${errorMessage}. ` +
-                "This typically indicates that media uploads via REST API are disabled by WordPress configuration, " +
-                "a security plugin (like W3 Total Cache, Borlabs Cookie), or server policy. " +
-                "User has sufficient permissions but WordPress/plugins are blocking the upload.",
-              this.auth.method,
-            );
-          }
-
-          // Fallback for 404 errors - try index.php approach for REST API
-          if (response.status === 404 && attempt === 0 && url.includes("/wp-json/wp/v2")) {
-            debug.log(`404 on pretty permalinks, trying index.php approach`);
-
-            // Parse the URL to handle query parameters correctly
-            const urlObj = new URL(url);
-            const endpoint = urlObj.pathname.replace("/wp-json/wp/v2", "");
-            const queryParams = urlObj.searchParams.toString();
-
-            let fallbackUrl = `${urlObj.origin}/index.php?rest_route=/wp/v2${endpoint}`;
-            if (queryParams) {
-              fallbackUrl += `&${queryParams}`;
-            }
-
-            try {
-              // Create a new timeout for the fallback request
-              const fallbackController = new AbortController();
-              const fallbackTimeoutId = setTimeout(() => {
-                fallbackController.abort();
-              }, requestTimeout);
-
-              const fallbackOptions = { ...fetchOptions, signal: fallbackController.signal };
-              const fallbackResponse = await fetch(fallbackUrl, fallbackOptions);
-              clearTimeout(fallbackTimeoutId);
-
-              if (fallbackResponse.ok) {
-                const responseText = await fallbackResponse.text();
-                if (!responseText) {
-                  this._stats.successfulRequests++;
-                  const duration = timer.end();
-                  this.updateAverageResponseTime(duration);
-                  return null as T;
-                }
-
-                const result = JSON.parse(responseText);
-                this._stats.successfulRequests++;
-                const duration = timer.end();
-                this.updateAverageResponseTime(duration);
-                return result;
-              } else {
-                // If fallback also fails, continue with original error
-                debug.log(`Fallback also failed with status ${fallbackResponse.status}`);
-              }
-            } catch (fallbackError) {
-              debug.log(`Fallback request failed: ${(fallbackError as Error).message}`);
-            }
-          }
-
-          throw new WordPressAPIError(errorMessage, response.status);
+          continue;
         }
 
-        // Parse response
-        const responseText = await response.text();
-        if (!responseText) {
-          this._stats.successfulRequests++;
-          const duration = timer.end();
-          this.updateAverageResponseTime(duration);
-          return null as T;
-        }
-
-        try {
-          const result = JSON.parse(responseText);
-          this._stats.successfulRequests++;
-          const duration = timer.end();
-          this.updateAverageResponseTime(duration);
-          return result as T;
-        } catch (parseError) {
-          // For authentication requests, malformed JSON should be an error
-          if (endpoint.includes("users/me") || endpoint.includes("jwt-auth")) {
-            throw new WordPressAPIError(`Invalid JSON response: ${(parseError as Error).message}`);
-          }
-          this._stats.successfulRequests++;
-          const duration = timer.end();
-          this.updateAverageResponseTime(duration);
-          return responseText as T;
-        }
+        const result = await this.parseResponse<T>(response, endpoint, timer);
+        clearTimeout(timeoutId);
+        return result;
       } catch (_error) {
         clearTimeout(timeoutId);
-        lastError = _error as Error;
-
-        // Handle timeout errors
-        if ((_error as Error & { name?: string }).name === "AbortError") {
-          lastError = new Error(`Request timeout after ${requestTimeout}ms`);
+        if (_error instanceof RateLimitError) {
+          lastError = _error;
+          break;
         }
-
-        // Handle network errors
-        if (lastError.message.includes("socket hang up") || lastError.message.includes("ECONNRESET")) {
-          lastError = new Error(`Network connection lost during upload: ${lastError.message}`);
-        }
-
+        lastError = this.normalizeRequestError(_error, requestTimeout);
         debug.log(`Request failed (attempt ${attempt + 1}): ${lastError.message}`);
 
-        // Don't retry on authentication errors, timeouts, or critical network errors
-        if (
-          lastError.message.includes("401") ||
-          lastError.message.includes("403") ||
-          lastError.message.includes("timeout") ||
-          lastError.message.includes("Network connection lost")
-        ) {
+        const shouldRetry = this.shouldRetryError(lastError) && attempt < maxAttempts - 1;
+        if (!shouldRetry) {
           break;
         }
 
-        if (attempt < this.maxRetries - 1) {
-          await this.delay(1000 * (attempt + 1)); // Exponential backoff
-        }
+        await this.delay(1000 * (attempt + 1));
+      } finally {
+        clearTimeout(timeoutId);
       }
     }
 
     this._stats.failedRequests++;
     timer.end();
-    throw new WordPressAPIError(`Request failed after ${this.maxRetries} attempts: ${lastError.message}`);
+    throw new WordPressAPIError(
+      `Request failed after ${maxAttempts} attempt${maxAttempts === 1 ? "" : "s"}: ${lastError.message}`,
+    );
+  }
+
+  private attachRequestBody(
+    fetchOptions: RequestInit & { headers: Record<string, string> },
+    headers: Record<string, string>,
+    data: unknown,
+  ): void {
+    if (
+      data instanceof FormData ||
+      (typeof data === "object" && data && "append" in data && typeof (data as FormData).append === "function")
+    ) {
+      if (typeof (data as { getHeaders?: () => Record<string, string> }).getHeaders === "function") {
+        const formHeaders = (data as unknown as { getHeaders(): Record<string, string> }).getHeaders();
+        Object.assign(headers, formHeaders);
+      } else {
+        delete headers["Content-Type"];
+      }
+      fetchOptions.body = data as FormData;
+      return;
+    }
+
+    if (Buffer.isBuffer(data)) {
+      fetchOptions.body = data;
+      return;
+    }
+
+    if (typeof data === "string") {
+      fetchOptions.body = data;
+      return;
+    }
+
+    fetchOptions.body = JSON.stringify(data);
+  }
+
+  private normalizeRequestError(error: unknown, timeout: number): Error {
+    if (error instanceof Error) {
+      if (error.name === "AbortError") {
+        return new Error(`Request timeout after ${timeout}ms`);
+      }
+      if (error.message.includes("socket hang up") || error.message.includes("ECONNRESET")) {
+        return new Error(`Network connection lost during request: ${error.message}`);
+      }
+      return error;
+    }
+    return new Error(typeof error === "string" ? error : "Unknown error");
+  }
+
+  private shouldRetryError(error: Error): boolean {
+    const message = error.message.toLowerCase();
+    if (message.includes("401") || message.includes("403")) {
+      return false;
+    }
+    if (message.includes("timeout")) {
+      return false;
+    }
+    if (message.includes("network connection lost")) {
+      return false;
+    }
+    return true;
+  }
+
+  private isRetryableBody(data: unknown): boolean {
+    if (!data) {
+      return true;
+    }
+
+    if (typeof data === "string" || Buffer.isBuffer(data)) {
+      return true;
+    }
+
+    if (data instanceof FormData) {
+      return false;
+    }
+
+    if (typeof data === "object" && data !== null && "pipe" in (data as Record<string, unknown>)) {
+      const potentialStream = (data as Record<string, unknown>).pipe;
+      if (typeof potentialStream === "function") {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private async handleErrorResponseWithFallback<T>(
+    response: Response,
+    url: string,
+    originalEndpoint: string,
+    requestTimeout: number,
+    fetchOptions: RequestInit & { headers: Record<string, string> },
+    timer: ReturnType<typeof startTimer>,
+  ): Promise<T | undefined> {
+    const errorText = await response.text();
+    let errorMessage: string;
+
+    try {
+      const errorData = JSON.parse(errorText);
+      errorMessage = errorData.message || errorData.error || `HTTP ${response.status}`;
+    } catch {
+      errorMessage = errorText || `HTTP ${response.status}: ${response.statusText}`;
+    }
+
+    if (response.status === 429) {
+      this._stats.rateLimitHits++;
+      throw new RateLimitError(errorMessage, Date.now() + 60000);
+    }
+
+    if (response.status === 403 && originalEndpoint.includes("media") && fetchOptions.method === "POST") {
+      throw new AuthenticationError(
+        "Media upload blocked: WordPress REST API media uploads appear to be disabled or restricted by a plugin/security policy. " +
+          `Error: ${errorMessage}. ` +
+          "Common causes: W3 Total Cache, security plugins, or custom REST API restrictions. " +
+          "Please check WordPress admin settings or contact your system administrator.",
+        this.auth.method,
+      );
+    }
+
+    if (errorMessage.includes("Beiträge zu erstellen") && originalEndpoint.includes("media")) {
+      throw new AuthenticationError(
+        `WordPress REST API media upload restriction detected: ${errorMessage}. ` +
+          "This typically indicates that media uploads via REST API are disabled by WordPress configuration, " +
+          "a security plugin (like W3 Total Cache, Borlabs Cookie), or server policy. " +
+          "User has sufficient permissions but WordPress/plugins are blocking the upload.",
+        this.auth.method,
+      );
+    }
+
+    if (response.status === 404 && url.includes("/wp-json/wp/v2")) {
+      const fallbackResult = await this.tryIndexPhpFallback<T>(url, requestTimeout, fetchOptions, timer);
+      if (fallbackResult !== undefined) {
+        return fallbackResult;
+      }
+    }
+
+    throw new WordPressAPIError(errorMessage, response.status);
+  }
+
+  private async tryIndexPhpFallback<T>(
+    url: string,
+    requestTimeout: number,
+    fetchOptions: RequestInit & { headers: Record<string, string> },
+    timer: ReturnType<typeof startTimer>,
+  ): Promise<T | undefined> {
+    debug.log(`404 on pretty permalinks, trying index.php approach`);
+
+    try {
+      const urlObj = new URL(url);
+      const endpointPath = urlObj.pathname.replace("/wp-json/wp/v2", "");
+      const queryParams = urlObj.searchParams.toString();
+
+      let fallbackUrl = `${urlObj.origin}/index.php?rest_route=/wp/v2${endpointPath}`;
+      if (queryParams) {
+        fallbackUrl += `&${queryParams}`;
+      }
+
+      const fallbackController = new AbortController();
+      const fallbackTimeoutId = setTimeout(() => {
+        fallbackController.abort();
+      }, requestTimeout);
+
+      const fallbackOptions = { ...fetchOptions, signal: fallbackController.signal };
+      const fallbackResponse = await fetch(fallbackUrl, fallbackOptions);
+      clearTimeout(fallbackTimeoutId);
+
+      if (!fallbackResponse.ok) {
+        debug.log(`Fallback also failed with status ${fallbackResponse.status}`);
+        return undefined;
+      }
+
+      const responseText = await fallbackResponse.text();
+      if (!responseText) {
+        this._stats.successfulRequests++;
+        const duration = timer.end();
+        this.updateAverageResponseTime(duration);
+        return null as T;
+      }
+
+      const result = JSON.parse(responseText);
+      this._stats.successfulRequests++;
+      const duration = timer.end();
+      this.updateAverageResponseTime(duration);
+      return result as T;
+    } catch (fallbackError) {
+      debug.log(`Fallback request failed: ${(fallbackError as Error).message}`);
+      return undefined;
+    }
+  }
+
+  private async parseResponse<T>(
+    response: Response,
+    endpoint: string,
+    timer: ReturnType<typeof startTimer>,
+  ): Promise<T> {
+    const responseText = await response.text();
+    if (!responseText) {
+      this._stats.successfulRequests++;
+      const duration = timer.end();
+      this.updateAverageResponseTime(duration);
+      return null as T;
+    }
+
+    try {
+      const result = JSON.parse(responseText);
+      this._stats.successfulRequests++;
+      const duration = timer.end();
+      this.updateAverageResponseTime(duration);
+      return result as T;
+    } catch (parseError) {
+      if (endpoint.includes("users/me") || endpoint.includes("jwt-auth")) {
+        throw new WordPressAPIError(`Invalid JSON response: ${(parseError as Error).message}`);
+      }
+      this._stats.successfulRequests++;
+      const duration = timer.end();
+      this.updateAverageResponseTime(duration);
+      return responseText as T;
+    }
   }
 
   private updateAverageResponseTime(duration: number): void {

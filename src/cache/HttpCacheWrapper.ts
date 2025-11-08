@@ -47,7 +47,7 @@ export class HttpCacheWrapper {
    * Execute request with intelligent caching
    */
   async request<T = unknown>(
-    requestFn: () => Promise<{
+    requestFn: (extraHeaders?: Record<string, string>) => Promise<{
       data: T;
       status: number;
       headers: Record<string, string>;
@@ -73,7 +73,7 @@ export class HttpCacheWrapper {
       const conditionalHeaders = this.cacheManager.getConditionalHeaders(cacheKey);
 
       // Add conditional headers to request
-      const requestWithHeaders = {
+      const _requestWithHeaders = {
         ...options,
         headers: {
           ...options.headers,
@@ -82,7 +82,7 @@ export class HttpCacheWrapper {
       };
 
       try {
-        const response = await this.executeRequestWithHeaders(requestFn, requestWithHeaders);
+        const response = await requestFn(conditionalHeaders);
 
         // 304 Not Modified - return cached data
         if (response.status === 304) {
@@ -216,19 +216,6 @@ export class HttpCacheWrapper {
   /**
    * Execute request with modified headers
    */
-  private async executeRequestWithHeaders(
-    requestFn: () => Promise<{
-      data: unknown;
-      status: number;
-      headers: Record<string, string>;
-    }>,
-    options: RequestOptions,
-  ) {
-    // This is a simplified approach - in practice, you'd need to modify the actual request
-    // The actual implementation would depend on your HTTP client (axios, fetch, etc.)
-    return await requestFn();
-  }
-
   /**
    * Cache response and return with cache metadata
    */

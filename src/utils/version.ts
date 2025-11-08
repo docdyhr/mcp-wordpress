@@ -104,11 +104,7 @@ export class VersionManager {
   getPackageInfo(): PackageJson {
     if (!this.packageJson) {
       // Return fallback package info if not loaded
-      this.packageJson = {
-        name: "mcp-wordpress",
-        version: "2.7.0", // Fallback version
-        description: "MCP WordPress Server",
-      };
+      this.packageJson = this.getFallbackPackageInfo();
     }
     return this.packageJson;
   }
@@ -159,11 +155,7 @@ export class VersionManager {
     } catch (_error) {
       // Fallback for runtime environments where package.json might not be available
       // Note: Using fallback version - should match package.json
-      return {
-        name: "mcp-wordpress",
-        version: "2.7.0", // Fallback version - should match package.json
-        description: "MCP WordPress Server",
-      };
+      return this.getFallbackPackageInfo();
     }
   }
 
@@ -352,6 +344,14 @@ export class VersionManager {
     const info = this.getVersion();
     const color = info.prerelease ? "orange" : "blue";
     return `https://img.shields.io/badge/version-${info.version}-${color}`;
+  }
+
+  private getFallbackPackageInfo(): PackageJson {
+    return {
+      name: "mcp-wordpress",
+      version: process.env.npm_package_version || "2.11.3",
+      description: "MCP WordPress Server",
+    };
   }
 }
 

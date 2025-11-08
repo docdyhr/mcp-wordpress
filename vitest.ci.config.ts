@@ -92,27 +92,17 @@ export default defineConfig({
       },
     },
 
-    // Performance and memory optimization for CI
+    // Performance and memory optimization for CI (Vitest v4)
     isolate: true,
     maxConcurrency: 2, // Reduce concurrent tests to save memory
-    poolOptions: {
-      threads: {
-        singleThread: false,
-        isolate: true,
-        maxThreads: 2, // Limit threads to prevent memory spikes
-        minThreads: 1,
-      },
-    },
+    maxWorkers: 2, // Vitest v4: replaces poolOptions.threads.maxThreads
+    minWorkers: 1, // Vitest v4: replaces poolOptions.threads.minThreads
 
     // Memory management
     forceRerunTriggers: ["**/package.json/**", "**/vitest.config.*/**", "**/vite.config.*/**"],
 
-    // Simple reporter for CI
-    reporters: ["basic"],
-
-    // Faster builds
-    minThreads: 1,
-    maxThreads: 2,
+    // Simple reporter for CI (Vitest v4: 'basic' reporter removed, using 'default')
+    reporters: ["default"],
 
     // Bail out on first failure to save CI time
     bail: 1,

@@ -96,9 +96,9 @@
     "test:memory-config": "npm run build && NODE_OPTIONS=\"--max-old-space-size=6144\" vitest run --config vitest.memory-safe.config.ts",
     "test:memory-safe": "npm run build && NODE_OPTIONS=\"--max-old-space-size=6144 --max-semi-space-size=256\" vitest run --no-coverage --reporter=default",
     "test:performance": "npm run build && vitest run tests/performance/",
+    "test:performance:ci": "npm run build && mkdir -p tests/results && NODE_OPTIONS=\"--max-old-space-size=4096\" vitest run tests/performance/ --reporter=json --outputFile=tests/results/performance-results.json",
     "test:pre-push": "bash scripts/test-pre-push.sh",
     "test:production-security": "npm audit --omit=dev",
-    "test:performance:ci": "npm run build && mkdir -p tests/results && NODE_OPTIONS=\"--max-old-space-size=4096\" vitest run tests/performance/ --reporter=json --outputFile=tests/results/performance-results.json",
     "test:safe": "node scripts/run-tests-safe.cjs",
     "test:security": "npm run build && vitest run tests/security/",
     "test:security:validation": "npm run build && vitest run tests/security/penetration-tests.test.js",
@@ -133,7 +133,7 @@
     "@modelcontextprotocol/sdk": "^1.17.4",
     "dotenv": "^17.2.1",
     "form-data": "^4.0.4",
-    "zod": "^3.25.0"
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",
@@ -144,8 +144,8 @@
     "@types/node": "^24.3.0",
     "@typescript-eslint/eslint-plugin": "^8.40.0",
     "@typescript-eslint/parser": "^8.40.0",
-    "@vitest/coverage-v8": "^3.2.4",
-    "@vitest/ui": "^3.2.4",
+    "@vitest/coverage-v8": "^4.0.8",
+    "@vitest/ui": "^4.0.8",
     "archiver": "^7.0.1",
     "conventional-changelog-conventionalcommits": "^9.1.0",
     "eslint": "^9.34.0",
@@ -161,12 +161,12 @@
     "node-fetch": "^3.3.2",
     "open": "^10.2.0",
     "prettier": "^3.6.2",
-    "semantic-release": "^24.2.7",
+    "semantic-release": "^25.0.2",
     "sort-package-json": "^3.4.0",
     "tsc-alias": "^1.8.16",
     "typescript": "^5.9.2",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.8"
   },
   "engines": {
     "node": ">=20.8.1"

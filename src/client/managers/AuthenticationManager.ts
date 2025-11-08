@@ -183,29 +183,56 @@ export class AuthenticationManager extends BaseManager {
   }
 
   /**
-   * Authenticate using JWT
-   *
-   * Note: This method is not fully implemented as it requires integration with
-   * the RequestManager to make HTTP requests to the WordPress JWT endpoint.
-   * JWT authentication requires the JWT Authentication for WP-API plugin.
-   *
-   * @throws {AuthenticationError} - JWT auth requires external dependency injection
+   * Authenticate using the WordPress JWT REST endpoint
    */
   private async authenticateJWT(): Promise<void> {
-    if (this.authConfig.authMethod !== AUTH_METHODS.JWT || !this.authConfig.username || !this.authConfig.password) {
+    if (this.authConfig.authMethod !== AUTH_METHODS.JWT) {
+      throw new AuthenticationError("JWT authentication requires JWT auth method", AUTH_METHODS.JWT);
+    }
+
+    const username = this.authConfig.username;
+    const password = this.authConfig.password;
+
+    if (!username || !password) {
       throw new AuthenticationError("JWT authentication requires username and password", AUTH_METHODS.JWT);
     }
 
     try {
-      // TODO: Implement JWT authentication with RequestManager integration
-      // This would require making a POST request to /wp-json/jwt-auth/v1/token
-      // with username and password to obtain a JWT token
+      const response = await fetch(`${this.authConfig.siteUrl}/wp-json/jwt-auth/v1/token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new AuthenticationError(`JWT authentication failed: ${response.statusText}`, AUTH_METHODS.JWT);
+      }
+
+      const data = (await response.json()) as { token?: string; expires_in?: number };
+
+      if (!data.token) {
+        throw new AuthenticationError("JWT authentication failed: token missing in response", AUTH_METHODS.JWT);
+      }
+
+      this.jwtToken = data.token;
+      this.authConfig.jwtToken = data.token;
+      const expiresIn = data.expires_in || 86400; // Default 24h
+      this.authConfig.tokenExpiry = Date.now() + expiresIn * 1000;
+      this.authenticated = true;
+      debug.log("JWT authentication successful", {
+        expiresIn,
+        expiresAt: new Date(this.authConfig.tokenExpiry).toISOString(),
+      });
+    } catch (_error) {
       throw new AuthenticationError(
-        "JWT authentication requires RequestManager integration - not yet implemented",
+        `JWT authentication failed: ${_error instanceof Error ? _error.message : String(_error)}`,
         AUTH_METHODS.JWT,
       );
-    } catch (_error) {
-      this.handleError(_error, "JWT authentication");
     }
   }
 
@@ -422,13 +449,28 @@ export class AuthenticationManager extends BaseManager {
       }
     }
 
-    // TODO: Implement JWT token refresh with RequestManager integration
-    // This would require making a POST request to /wp-json/jwt-auth/v1/token/validate
-    // and updating the stored token and expiry
-    throw new AuthenticationError(
-      "JWT refresh requires RequestManager integration - not yet implemented",
-      AUTH_METHODS.JWT,
-    );
+    // Attempt to validate existing token before re-authenticating
+    if (this.authConfig.jwtToken) {
+      try {
+        const validateResponse = await fetch(`${this.authConfig.siteUrl}/wp-json/jwt-auth/v1/token/validate`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${this.authConfig.jwtToken}`,
+          },
+        });
+
+        if (validateResponse.ok) {
+          this.authConfig.tokenExpiry = Date.now() + 3600 * 1000; // Extend validity for another hour
+          debug.log("JWT token validated successfully");
+          return;
+        }
+      } catch (error) {
+        debug.log("JWT token validation failed, re-authenticating", { error: String(error) });
+      }
+    }
+
+    await this.authenticateJWT();
   }
 
   /**
