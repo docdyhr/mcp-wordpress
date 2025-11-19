@@ -26,25 +26,27 @@ vi.mock("../../dist/utils/logger.js", () => ({
 
 // Mock the performance dependencies
 vi.mock("../../dist/performance/PerformanceMonitor.js", () => ({
-  PerformanceMonitor: vi.fn().mockImplementation(() => ({
-    startMonitoring: vi.fn().mockResolvedValue({ status: "monitoring_started" }),
-    stopMonitoring: vi.fn().mockResolvedValue({ status: "monitoring_stopped" }),
-    getCurrentMetrics: vi.fn().mockResolvedValue({
-      timestamp: Date.now(),
-      responseTime: 250,
-      memoryUsage: 85.5,
-      cacheHitRate: 0.85,
-      activeConnections: 12,
-    }),
-    getAlerts: vi.fn().mockReturnValue([]),
-    getHistoricalData: vi.fn().mockReturnValue([
-      {
-        requests: { total: 90, failed: 1, averageResponseTime: 240 },
-        cache: { hitRate: 0.8 },
-        system: { uptime: 86300000 },
-      },
-    ]),
-  })),
+  PerformanceMonitor: vi.fn(function () {
+    return {
+      startMonitoring: vi.fn().mockResolvedValue({ status: "monitoring_started" }),
+      stopMonitoring: vi.fn().mockResolvedValue({ status: "monitoring_stopped" }),
+      getCurrentMetrics: vi.fn().mockResolvedValue({
+        timestamp: Date.now(),
+        responseTime: 250,
+        memoryUsage: 85.5,
+        cacheHitRate: 0.85,
+        activeConnections: 12,
+      }),
+      getAlerts: vi.fn().mockReturnValue([]),
+      getHistoricalData: vi.fn().mockReturnValue([
+        {
+          requests: { total: 90, failed: 1, averageResponseTime: 240 },
+          cache: { hitRate: 0.8 },
+          system: { uptime: 86300000 },
+        },
+      ]),
+    };
+  }),
 }));
 
 const mockMetricsCollector = {
@@ -76,47 +78,51 @@ const mockMetricsCollector = {
 };
 
 vi.mock("../../dist/performance/MetricsCollector.js", () => ({
-  MetricsCollector: vi.fn().mockImplementation(() => mockMetricsCollector),
+  MetricsCollector: vi.fn(function () {
+    return mockMetricsCollector;
+  }),
 }));
 
 vi.mock("../../dist/performance/PerformanceAnalytics.js", () => ({
-  PerformanceAnalytics: vi.fn().mockImplementation(() => ({
-    analyzeTrends: vi.fn().mockReturnValue([{ metric: "responseTime", direction: "improving", change: -5.2 }]),
-    detectAnomalies: vi.fn().mockResolvedValue([]),
-    generateReport: vi.fn().mockResolvedValue({
-      summary: "Performance is within normal parameters",
-      recommendations: [],
-    }),
-    addDataPoint: vi.fn(),
-    benchmarkPerformance: vi.fn().mockReturnValue([{ category: "Response Time", status: "good", improvement: 0 }]),
-    generateInsights: vi.fn().mockReturnValue([
-      {
-        category: "optimization",
-        title: "Test",
-        description: "Test",
-        priority: "medium",
-        estimatedImprovement: 10,
-        implementationEffort: "low",
-      },
-    ]),
-    generateOptimizationPlan: vi.fn().mockReturnValue({
-      quickWins: [],
-      mediumTerm: [],
-      longTerm: [],
-      estimatedROI: { timeframe: "3months", improvement: 25 },
-    }),
-    predictPerformance: vi.fn().mockReturnValue({ prediction: "stable" }),
-    exportAnalyticsReport: vi.fn().mockReturnValue({
-      summary: {},
-      trends: [],
-      benchmarks: [],
-      insights: [],
-      anomalies: [],
-      predictions: {},
-      optimizationPlan: {},
-    }),
-    getAnomalies: vi.fn().mockReturnValue([]),
-  })),
+  PerformanceAnalytics: vi.fn(function () {
+    return {
+      analyzeTrends: vi.fn().mockReturnValue([{ metric: "responseTime", direction: "improving", change: -5.2 }]),
+      detectAnomalies: vi.fn().mockResolvedValue([]),
+      generateReport: vi.fn().mockResolvedValue({
+        summary: "Performance is within normal parameters",
+        recommendations: [],
+      }),
+      addDataPoint: vi.fn(),
+      benchmarkPerformance: vi.fn().mockReturnValue([{ category: "Response Time", status: "good", improvement: 0 }]),
+      generateInsights: vi.fn().mockReturnValue([
+        {
+          category: "optimization",
+          title: "Test",
+          description: "Test",
+          priority: "medium",
+          estimatedImprovement: 10,
+          implementationEffort: "low",
+        },
+      ]),
+      generateOptimizationPlan: vi.fn().mockReturnValue({
+        quickWins: [],
+        mediumTerm: [],
+        longTerm: [],
+        estimatedROI: { timeframe: "3months", improvement: 25 },
+      }),
+      predictPerformance: vi.fn().mockReturnValue({ prediction: "stable" }),
+      exportAnalyticsReport: vi.fn().mockReturnValue({
+        summary: {},
+        trends: [],
+        benchmarks: [],
+        insights: [],
+        anomalies: [],
+        predictions: {},
+        optimizationPlan: {},
+      }),
+      getAnomalies: vi.fn().mockReturnValue([]),
+    };
+  }),
 }));
 
 // Note: logger already mocked above
