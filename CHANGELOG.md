@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.6](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.5...v2.11.6) (2025-11-19)
+
+### 🐛 Bug Fixes
+
+* **ci:** resolve memory crashes in test runner ([80c2429](https://github.com/docdyhr/mcp-wordpress/commit/80c24295d2b01286764a9a3998f9c34e0f23001a))
+
 ## [2.11.5](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.4...v2.11.5) (2025-11-19)
 
 ### 🐛 Bug Fixes
