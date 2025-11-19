@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.7](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.6...v2.11.7) (2025-11-19)
+
+### 🐛 Bug Fixes
+
+* **ci:** disable coverage in CI pipelines to prevent memory crashes ([ee7cf1c](https://github.com/docdyhr/mcp-wordpress/commit/ee7cf1c3baeaf6b9d067dd928a69a6ea90a819f2))
+
 ## [2.11.6](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.5...v2.11.6) (2025-11-19)
 
 ### 🐛 Bug Fixes
