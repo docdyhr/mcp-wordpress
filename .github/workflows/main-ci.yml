@@ -88,17 +88,10 @@ jobs:
         run: npm audit --production --audit-level moderate
         continue-on-error: true
 
-      - name: Test coverage
-        run: NODE_OPTIONS="--max-old-space-size=8192 --max-semi-space-size=512" npm run test:coverage
-        timeout-minutes: 10
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v4
-        with:
-          file: ./coverage/lcov.info
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
+      - name: Run tests without coverage
+        run: NODE_OPTIONS="--max-old-space-size=8192" npm run test:batch
+        env:
+          CI: true
 
   # Security scanning
   security:
