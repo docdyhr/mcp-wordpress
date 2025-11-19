@@ -43,7 +43,7 @@ jobs:
         run: npm run build
 
       - name: Run tests
-        run: npm run test:ci
+        run: NODE_OPTIONS="--max-old-space-size=8192" npm run test:batch
         env:
           CI: true
 
@@ -89,7 +89,8 @@ jobs:
         continue-on-error: true
 
       - name: Test coverage
-        run: npm run test:coverage
+        run: NODE_OPTIONS="--max-old-space-size=8192 --max-semi-space-size=512" npm run test:coverage
+        timeout-minutes: 10
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
