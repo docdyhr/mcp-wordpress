@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.10](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.9...v2.11.10) (2025-11-19)
+
+### 🐛 Bug Fixes
+
+* **tests:** resolve all mock constructor errors in test suite ([cec049b](https://github.com/docdyhr/mcp-wordpress/commit/cec049b4307a341882566fad87b64c3b8607c885))
+
 ## [2.11.9](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.8...v2.11.9) (2025-11-19)
 
 ### 🐛 Bug Fixes
