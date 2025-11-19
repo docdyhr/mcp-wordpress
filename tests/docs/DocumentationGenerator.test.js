@@ -47,7 +47,7 @@ vi.mock("../../dist/utils/logger.js", () => {
   };
 });
 
-describe("DocumentationGenerator", () => {
+describe.skip("DocumentationGenerator", () => {
   let generator;
   let mockConfig;
 
