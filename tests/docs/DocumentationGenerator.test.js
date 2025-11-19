@@ -24,16 +24,28 @@ vi.mock("fs", () => ({
 }));
 
 // Mock logger to avoid console output during tests
-vi.mock("../../dist/utils/logger.js", () => ({
-  LoggerFactory: {
-    docs: () => ({
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      debug: vi.fn(),
-    }),
-  },
-}));
+vi.mock("../../dist/utils/logger.js", () => {
+  const mockLogger = {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    child: vi.fn().mockReturnThis(),
+  };
+
+  return {
+    LoggerFactory: {
+      api: vi.fn(() => mockLogger),
+      cache: vi.fn(() => mockLogger),
+      tool: vi.fn(() => mockLogger),
+      auth: vi.fn(() => mockLogger),
+      config: vi.fn(() => mockLogger),
+      security: vi.fn(() => mockLogger),
+      performance: vi.fn(() => mockLogger),
+      server: vi.fn(() => mockLogger),
+    },
+  };
+});
 
 describe("DocumentationGenerator", () => {
   let generator;
