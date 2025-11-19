@@ -91,7 +91,8 @@ jobs:
 
       - name: 🔍 Dependency Vulnerabilities
         run: |
-          npx audit-ci --config .audit-ci.json || echo "Security audit completed with findings"
+          npx audit-ci --config .audit-ci.json
+        continue-on-error: false
 
       - name: 📊 Generate Security Report
         if: always()
