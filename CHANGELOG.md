@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.12](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.11...v2.11.12) (2025-11-20)
+
+### 🐛 Bug Fixes
+
+* **ci:** add missing rollback-deployment.sh script for Performance Gates ([06f2533](https://github.com/docdyhr/mcp-wordpress/commit/06f25336ae48d92a8db2d7f8ce3c2f9b2c2c515b))
+
 ## [2.11.11](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.10...v2.11.11) (2025-11-19)
 
 ### 🐛 Bug Fixes
