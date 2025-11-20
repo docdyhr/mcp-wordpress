@@ -16,15 +16,28 @@ env:
   NODE_OPTIONS: "--max-old-space-size=8192"
 
 jobs:
-  # Test matrix for multiple Node.js versions
+  # Parallel test execution with right-sized memory allocation
   test:
-    name: Test (Node ${{ matrix.node-version }})
+    name: Test (${{ matrix.suite }}, Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         node-version: [20, 22]
+        suite:
+          - name: "security-cache-server"
+            path: "tests/security/ tests/cache/ tests/server/"
+            memory: "4096"
+          - name: "client-config-utils"
+            path: "tests/client/ tests/config/ tests/utils/"
+            memory: "6144"
+          - name: "tools-performance"
+            path: "tests/tools/ tests/performance/"
+            memory: "4096"
+          - name: "root-docs"
+            path: "tests/*.test.js tests/docs/"
+            memory: "2048"
 
     steps:
       - name: Checkout code
@@ -42,8 +55,10 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Run tests
-        run: NODE_OPTIONS="--max-old-space-size=8192" npm run test:batch
+      - name: Run tests - ${{ matrix.suite.name }}
+        run:
+          NODE_OPTIONS="--max-old-space-size=${{ matrix.suite.memory }}" npx vitest run ${{ matrix.suite.path }}
+          --no-coverage --reporter=default
         env:
           CI: true
 
@@ -51,16 +66,16 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-node-${{ matrix.node-version }}
+          name: test-results-${{ matrix.suite.name }}-node-${{ matrix.node-version }}
           path: |
             coverage/
             tests/results/
 
-  # Quality checks (linting, security, etc.)
+  # Quality checks (linting, security, etc.) - no test execution here
   quality:
     name: Quality Checks
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
@@ -87,11 +102,6 @@ jobs:
       - name: Security audit
         run: npm audit --production --audit-level moderate
         continue-on-error: true
-
-      - name: Run tests without coverage
-        run: NODE_OPTIONS="--max-old-space-size=8192" npm run test:batch
-        env:
-          CI: true
 
   # Security scanning
   security:
