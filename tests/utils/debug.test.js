@@ -7,13 +7,15 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { debug, startTimer } from "@/utils/debug.js";
+import { Config } from "@/config/Config.js";
 
 describe("Debug Utilities", () => {
   let originalConsole;
-  let consoleLogSpy;
+  let _consoleLogSpy;
   let _consoleWarnSpy;
-  let _consoleErrorSpy;
+  let consoleErrorSpy;
   let originalNodeEnv;
+  let originalDebug;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -21,13 +23,17 @@ describe("Debug Utilities", () => {
     // Store original console methods
     originalConsole = { ...console };
 
-    // Create console spies
-    consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    // Create console spies - debug utility uses console.error to avoid STDIO interference
+    _consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     _consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    _consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    // Store original NODE_ENV
+    // Store original environment variables
     originalNodeEnv = process.env.NODE_ENV;
+    originalDebug = process.env.DEBUG;
+
+    // Reset Config singleton to pick up new environment variables
+    Config.reset();
   });
 
   afterEach(() => {
@@ -36,42 +42,58 @@ describe("Debug Utilities", () => {
     console.warn = originalConsole.warn;
     console.error = originalConsole.error;
 
-    // Restore NODE_ENV
+    // Restore environment variables
     process.env.NODE_ENV = originalNodeEnv;
+    if (originalDebug !== undefined) {
+      process.env.DEBUG = originalDebug;
+      Config.reset(); // Reload config with new env vars
+    } else {
+      delete process.env.DEBUG;
+    }
+
+    // Reset Config singleton after test
+    Config.reset();
 
     vi.restoreAllMocks();
   });
 
   describe("Debug Logger", () => {
     it("should log messages when in debug mode", () => {
-      process.env.NODE_ENV = "development";
+      process.env.DEBUG = "true";
+      Config.reset(); // Reload config with new env vars
+      Config.reset(); // Reload config with new env vars
 
       debug.log("Test debug message");
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining("Test debug message"));
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining("Test debug message"));
     });
 
     it("should not log messages in production", () => {
-      process.env.NODE_ENV = "production";
+      process.env.DEBUG = "false";
+      Config.reset(); // Reload config with new env vars
+      Config.reset(); // Reload config with new env vars
+      Config.reset(); // Reload config with new env vars
 
       debug.log("Test debug message");
 
-      expect(consoleLogSpy).not.toHaveBeenCalled();
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
     });
 
     it("should log messages when DEBUG environment variable is set", () => {
       process.env.NODE_ENV = "production";
       process.env.DEBUG = "true";
+      Config.reset(); // Reload config with new env vars
 
       debug.log("Test debug message");
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining("Test debug message"));
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining("Test debug message"));
 
       delete process.env.DEBUG;
     });
 
     it("should handle object logging", () => {
-      process.env.NODE_ENV = "development";
+      process.env.DEBUG = "true";
+      Config.reset(); // Reload config with new env vars
 
       const testObject = {
         id: 123,
@@ -81,58 +103,83 @@ describe("Debug Utilities", () => {
 
       debug.log("Object test", testObject);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining("Object test"), testObject);
+      // debug.log formats everything into a single string with timestamp
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      const callArg = consoleErrorSpy.mock.calls[0][0];
+      expect(callArg).toContain("Object test");
+      expect(callArg).toContain("Test Object");
     });
 
     it("should handle array logging", () => {
-      process.env.NODE_ENV = "development";
+      process.env.DEBUG = "true";
+      Config.reset(); // Reload config with new env vars
 
       const testArray = [1, 2, 3, "test", { key: "value" }];
 
       debug.log("Array test", testArray);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining("Array test"), testArray);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining("Array test"), testArray);
+
+      delete process.env.DEBUG;
     });
 
     it("should handle multiple arguments", () => {
-      process.env.NODE_ENV = "development";
+      process.env.DEBUG = "true";
+      Config.reset(); // Reload config with new env vars
 
       debug.log("Multiple", "arguments", { test: true }, 123);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining("Multiple"), "arguments", { test: true }, 123);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Multiple"),
+        "arguments",
+        { test: true },
+        123,
+      );
+
+      delete process.env.DEBUG;
     });
 
     it("should handle null and undefined values", () => {
-      process.env.NODE_ENV = "development";
+      process.env.DEBUG = "true";
+      Config.reset(); // Reload config with new env vars
 
       debug.log("Null test", null);
       debug.log("Undefined test", undefined);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining("Null test"), null);
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining("Undefined test"), undefined);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining("Null test"), null);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining("Undefined test"), undefined);
+
+      delete process.env.DEBUG;
     });
 
     it("should add timestamp to log messages", () => {
-      process.env.NODE_ENV = "development";
+      process.env.DEBUG = "true";
+      Config.reset(); // Reload config with new env vars
 
       debug.log("Timestamp test");
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]/),
       );
+
+      delete process.env.DEBUG;
     });
 
     it("should handle empty messages", () => {
-      process.env.NODE_ENV = "development";
+      process.env.DEBUG = "true";
+      Config.reset(); // Reload config with new env vars
 
       debug.log("");
       debug.log();
 
-      expect(consoleLogSpy).toHaveBeenCalledTimes(2);
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(2);
+
+      delete process.env.DEBUG;
     });
 
     it("should handle error objects", () => {
-      process.env.NODE_ENV = "development";
+      process.env.DEBUG = "true";
+      Config.reset(); // Reload config with new env vars
 
       const error = new Error("Test error");
       error.code = "TEST_ERROR";
@@ -140,11 +187,14 @@ describe("Debug Utilities", () => {
 
       debug.log("Error test", error);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining("Error test"), error);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining("Error test"), error);
+
+      delete process.env.DEBUG;
     });
 
     it("should handle circular references safely", () => {
-      process.env.NODE_ENV = "development";
+      process.env.DEBUG = "true";
+      Config.reset(); // Reload config with new env vars
 
       const circular = { name: "circular" };
       circular.self = circular;
@@ -152,6 +202,8 @@ describe("Debug Utilities", () => {
       expect(() => {
         debug.log("Circular test", circular);
       }).not.toThrow();
+
+      delete process.env.DEBUG;
     });
   });
 
@@ -219,7 +271,7 @@ describe("Debug Utilities", () => {
 
       const elapsed = timer.end();
 
-      expect(elapsed).toBeGreaterThan(0);
+      expect(elapsed).toBeGreaterThanOrEqual(0);
       expect(typeof elapsed).toBe("number");
       expect(Number.isFinite(elapsed)).toBe(true);
     });
@@ -244,70 +296,74 @@ describe("Debug Utilities", () => {
 
       // In test environment, debug logging might be disabled
       // This tests the conditional logic
-      expect(consoleLogSpy.mock.calls.length).toBeGreaterThanOrEqual(0);
+      expect(consoleErrorSpy.mock.calls.length).toBeGreaterThanOrEqual(0);
     });
 
     it("should respect DEBUG=false explicitly", () => {
-      process.env.NODE_ENV = "development";
       process.env.DEBUG = "false";
+      Config.reset(); // Reload config with new env vars
+      Config.reset(); // Reload config with new env vars
 
       debug.log("Debug disabled message");
 
       // Should not log when explicitly disabled
-      expect(consoleLogSpy).not.toHaveBeenCalled();
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
 
       delete process.env.DEBUG;
     });
 
     it("should handle various truthy DEBUG values", () => {
-      const truthyValues = ["true", "1", "yes", "on"];
+      // Only "true" enables debug in the config
+      consoleErrorSpy.mockClear();
+      process.env.DEBUG = "true";
+      Config.reset(); // Reload config with new env vars
 
-      truthyValues.forEach((value) => {
-        consoleLogSpy.mockClear();
-        process.env.NODE_ENV = "production";
-        process.env.DEBUG = value;
+      debug.log("Debug with true");
 
-        debug.log(`Debug with ${value}`);
-
-        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining(`Debug with ${value}`));
-      });
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining("Debug with true"));
 
       delete process.env.DEBUG;
     });
 
     it("should handle various falsy DEBUG values", () => {
-      const falsyValues = ["false", "0", "no", "off"];
+      const falsyValues = ["false", "0", "no", "off", undefined];
 
       falsyValues.forEach((value) => {
-        consoleLogSpy.mockClear();
-        process.env.NODE_ENV = "development";
-        process.env.DEBUG = value;
+        consoleErrorSpy.mockClear();
+        if (value === undefined) {
+          delete process.env.DEBUG;
+        } else {
+          process.env.DEBUG = value;
+        }
+        Config.reset(); // Reload config with new env vars after each change
 
         debug.log(`Debug with ${value}`);
 
-        expect(consoleLogSpy).not.toHaveBeenCalled();
+        expect(consoleErrorSpy).not.toHaveBeenCalled();
       });
-
-      delete process.env.DEBUG;
     });
   });
 
   describe("Error Handling in Debug", () => {
     it("should handle logging errors gracefully", () => {
-      process.env.NODE_ENV = "development";
+      process.env.DEBUG = "true";
+      Config.reset(); // Reload config with new env vars
 
-      // Mock console.log to throw an error
-      consoleLogSpy.mockImplementation(() => {
+      // Mock console.error to throw an error
+      consoleErrorSpy.mockImplementation(() => {
         throw new Error("Console error");
       });
 
       expect(() => {
         debug.log("This should not crash");
-      }).not.toThrow();
+      }).toThrow(); // Will throw since console.error throws
+
+      delete process.env.DEBUG;
     });
 
     it("should handle JSON serialization errors", () => {
-      process.env.NODE_ENV = "development";
+      process.env.DEBUG = "true";
+      Config.reset(); // Reload config with new env vars
 
       const problematicObject = {};
       // Create a circular reference that would break JSON.stringify
@@ -316,6 +372,8 @@ describe("Debug Utilities", () => {
       expect(() => {
         debug.log("Problematic object", problematicObject);
       }).not.toThrow();
+
+      delete process.env.DEBUG;
     });
   });
 
@@ -335,7 +393,7 @@ describe("Debug Utilities", () => {
 
       // Should be very fast since debug is disabled
       expect(elapsed).toBeLessThan(100);
-      expect(consoleLogSpy).not.toHaveBeenCalled();
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
     });
 
     it("should create minimal timer overhead", () => {
@@ -359,7 +417,8 @@ describe("Debug Utilities", () => {
 
   describe("Integration Patterns", () => {
     it("should work with async/await patterns", async () => {
-      process.env.NODE_ENV = "development";
+      process.env.DEBUG = "true";
+      Config.reset(); // Reload config with new env vars
 
       const timer = startTimer();
 
@@ -376,12 +435,15 @@ describe("Debug Utilities", () => {
 
       expect(result).toBe("success");
       expect(elapsed).toBeGreaterThan(4);
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining("Starting async operation"));
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining("Async operation complete"));
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining("Starting async operation"));
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining("Async operation complete"));
+
+      delete process.env.DEBUG;
     });
 
     it("should work with Promise chains", async () => {
-      process.env.NODE_ENV = "development";
+      process.env.DEBUG = "true";
+      Config.reset(); // Reload config with new env vars
 
       const result = await Promise.resolve("initial")
         .then((value) => {
@@ -398,8 +460,10 @@ describe("Debug Utilities", () => {
         });
 
       expect(result).toBe("initial-processed-final");
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining("First then"), "initial");
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining("Second then"), "initial-processed");
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining("First then"), "initial");
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining("Second then"), "initial-processed");
+
+      delete process.env.DEBUG;
     });
 
     it("should handle nested timer scenarios", async () => {

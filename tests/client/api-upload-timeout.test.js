@@ -211,7 +211,7 @@ describe("WordPress API Client Upload Timeout", () => {
       nock(testBaseUrl).post("/wp-json/wp/v2/media").replyWithError("socket hang up");
 
       await expect(client.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: 1000 })).rejects.toThrow(
-        /Network connection lost during upload/,
+        /Network connection lost during request/,
       );
     });
 

@@ -149,7 +149,7 @@ describe("RequestManager", () => {
       expect(requestOptions.headers).toEqual(
         expect.objectContaining({
           "Content-Type": "application/json",
-          "User-Agent": "mcp-wordpress/2.7.0",
+          "User-Agent": expect.stringMatching(/^mcp-wordpress\/\d+\.\d+\.\d+$/),
           Authorization: expect.any(String),
         }),
       );
@@ -175,7 +175,7 @@ describe("RequestManager", () => {
         expect.objectContaining({
           "Content-Type": "application/xml",
           "Custom-Header": "custom-value",
-          "User-Agent": "mcp-wordpress/2.7.0",
+          "User-Agent": expect.stringMatching(/^mcp-wordpress\/\d+\.\d+\.\d+$/),
           Authorization: expect.any(String),
         }),
       );
@@ -616,7 +616,7 @@ describe("RequestManager", () => {
       expect(fetchCall[1].headers).toEqual(
         expect.objectContaining({
           "Content-Type": "application/json",
-          "User-Agent": "mcp-wordpress/2.7.0",
+          "User-Agent": expect.stringMatching(/^mcp-wordpress\/\d+\.\d+\.\d+$/),
           "Custom-Header": "value",
           Authorization: expect.any(String),
         }),
