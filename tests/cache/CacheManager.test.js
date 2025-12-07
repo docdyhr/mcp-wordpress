@@ -125,7 +125,8 @@ describe("CacheManager", () => {
 
     it("should generate keys with parameters hash", () => {
       const key = cacheManager.generateKey("site1", "posts", { status: "publish", per_page: 10 });
-      expect(key).toMatch(/^site1:posts:[a-f0-9]{8}$/);
+      // fastHash uses base36 encoding (0-9, a-z) for compact keys
+      expect(key).toMatch(/^site1:posts:[a-z0-9]+$/);
     });
 
     it("should generate consistent keys for same parameters", () => {
