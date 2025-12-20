@@ -25,8 +25,6 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 [![Security Monitoring](https://github.com/docdyhr/mcp-wordpress/actions/workflows/security-monitoring.yml/badge.svg)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/security-monitoring.yml)
 [![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker&logoColor=white)](https://hub.docker.com/r/docdyhr/mcp-wordpress)
 [![License](https://img.shields.io/badge/license-MIT-green?logo=opensource&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/blob/main/LICENSE)
-[![smithery badge](https://smithery.ai/badge/@docdyhr/mcp-wordpress)](https://smithery.ai/server/@docdyhr/mcp-wordpress)
-
 <!-- Badges updated: 2025-10-20T12:21:16.087Z -->
 ### 🎉 **NEW:** v2.7.0 - Composition Architecture & Complete SEO Toolkit!
 
@@ -118,32 +116,10 @@ npx -y mcp-wordpress
 npm run setup
 ```
 
-### 📦 Secondary: Smithery Package Manager
-
-```bash
-# Install via Smithery (MCP package manager)
-smithery install mcp-wordpress
-
-# Configure and start
-smithery configure mcp-wordpress
-```
-
-✅ **Package management** ✅ **Version control** ✅ **Easy updates**
-
-### Installing via Smithery
-
-To install mcp-wordpress for Claude Desktop automatically via
-[Smithery](https://smithery.ai/server/@docdyhr/mcp-wordpress):
-
-```bash
-npx -y @smithery/cli install @docdyhr/mcp-wordpress --client claude
-```
-
 ### 🔧 Other Options
 
 - 💻 **[NPM Setup](docs/user-guides/NPM_SETUP.md)** - Local development
 - 🐳 **[Docker Setup](docs/user-guides/DOCKER_SETUP.md)** - Production deployment
-- 📦 **[Smithery Setup](docs/user-guides/SMITHERY_SETUP.md)** - MCP package manager (detailed guide)
 - 🔧 **[Manual Build](docs/developer/BUILD_SYSTEM.md)** - Custom builds
 
 ## 📋 Configuration Examples
