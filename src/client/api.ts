@@ -1,12 +1,13 @@
 /**
  * WordPress API Client
  * Handles all REST API communication with WordPress
+ *
+ * This module has been refactored to use a modular architecture with
+ * domain-specific operations extracted into separate modules under ./operations/
  */
 
 // Use native fetch in Node.js 18+
 import FormData from "form-data";
-import { promises as fsPromises } from "fs";
-import * as path from "path";
 import { getUserAgent } from "@/utils/version.js";
 import type {
   IWordPressClient,
@@ -53,6 +54,15 @@ import type {
 import { debug, logError, startTimer } from "@/utils/debug.js";
 import type { QueuedRequest } from "@/types/requests.js";
 
+// Import domain-specific operations
+import { PostsOperations } from "./operations/posts.js";
+import { PagesOperations } from "./operations/pages.js";
+import { MediaOperations } from "./operations/media.js";
+import { UsersOperations } from "./operations/users.js";
+import { CommentsOperations } from "./operations/comments.js";
+import { TaxonomiesOperations } from "./operations/taxonomies.js";
+import { SiteOperations } from "./operations/site.js";
+
 /**
  * WordPress REST API Client
  *
@@ -68,6 +78,7 @@ import type { QueuedRequest } from "@/types/requests.js";
  * - Performance monitoring and request statistics
  * - Caching support for improved performance
  * - Multi-site configuration support
+ * - Modular architecture with domain-specific operations
  *
  * @example
  * ```typescript
@@ -113,6 +124,15 @@ export class WordPressClient implements IWordPressClient {
   private jwtToken: string | null = null;
   private _stats: ClientStats;
 
+  // Domain-specific operation handlers
+  private readonly postsOps: PostsOperations;
+  private readonly pagesOps: PagesOperations;
+  private readonly mediaOps: MediaOperations;
+  private readonly usersOps: UsersOperations;
+  private readonly commentsOps: CommentsOperations;
+  private readonly taxonomiesOps: TaxonomiesOperations;
+  private readonly siteOps: SiteOperations;
+
   /**
    * Creates a new WordPress API client instance.
    *
@@ -126,31 +146,6 @@ export class WordPressClient implements IWordPressClient {
    * @param {AuthConfig} [options.auth] - Authentication configuration (auto-detected from env if not provided)
    * @param {boolean} [options.enableCache=true] - Whether to enable response caching
    * @param {number} [options.cacheMaxAge=300000] - Cache max age in milliseconds (5 minutes default)
-   *
-   * @example
-   * ```typescript
-   * // Basic configuration with app password
-   * const client = new WordPressClient({
-   *   baseUrl: 'https://mysite.com',
-   *   auth: {
-   *     method: 'app-password',
-   *     username: 'admin',
-   *     password: 'xxxx xxxx xxxx xxxx xxxx xxxx'
-   *   }
-   * });
-   *
-   * // Configuration with environment variables
-   * // Set WORDPRESS_SITE_URL, WORDPRESS_USERNAME, WORDPRESS_APP_PASSWORD
-   * const client = new WordPressClient(); // Auto-detects from env
-   *
-   * // Custom timeout and retry settings
-   * const client = new WordPressClient({
-   *   baseUrl: 'https://mysite.com',
-   *   timeout: 60000,      // 60 seconds
-   *   maxRetries: 5,       // 5 retry attempts
-   *   auth: { method: 'app-password', username: 'user', password: 'pass' }
-   * });
-   * ```
    *
    * @throws {Error} When required configuration is missing or invalid
    *
@@ -211,6 +206,15 @@ export class WordPressClient implements IWordPressClient {
 
     // Validate configuration
     this.validateConfig();
+
+    // Initialize domain-specific operations with this client as the base
+    this.postsOps = new PostsOperations(this);
+    this.pagesOps = new PagesOperations(this);
+    this.mediaOps = new MediaOperations(this);
+    this.usersOps = new UsersOperations(this);
+    this.commentsOps = new CommentsOperations(this);
+    this.taxonomiesOps = new TaxonomiesOperations(this);
+    this.siteOps = new SiteOperations(this);
   }
 
   get config(): WordPressClientConfig {
@@ -777,7 +781,10 @@ export class WordPressClient implements IWordPressClient {
         fallbackController.abort();
       }, requestTimeout);
 
-      const fallbackOptions = { ...fetchOptions, signal: fallbackController.signal };
+      const fallbackOptions = {
+        ...fetchOptions,
+        signal: fallbackController.signal,
+      };
       const fallbackResponse = await fetch(fallbackUrl, fallbackOptions);
       clearTimeout(fallbackTimeoutId);
 
@@ -842,7 +849,10 @@ export class WordPressClient implements IWordPressClient {
     this._stats.lastRequestTime = Date.now();
   }
 
-  // HTTP method helpers
+  // ============================================================================
+  // HTTP Method Helpers
+  // ============================================================================
+
   async get<T = unknown>(endpoint: string, options?: RequestOptions): Promise<T> {
     return this.request<T>("GET", endpoint, null, options);
   }
@@ -863,107 +873,76 @@ export class WordPressClient implements IWordPressClient {
     return this.request<T>("DELETE", endpoint, null, options);
   }
 
-  // WordPress API Methods
+  // ============================================================================
+  // Posts Operations (delegated to PostsOperations)
+  // ============================================================================
 
-  // Posts
   async getPosts(params?: PostQueryParams): Promise<WordPressPost[]> {
-    const queryString = params ? "?" + new URLSearchParams(params as Record<string, string>).toString() : "";
-    return this.get<WordPressPost[]>(`posts${queryString}`);
+    return this.postsOps.getPosts(params);
   }
 
   async getPost(id: number, context: "view" | "embed" | "edit" = "view"): Promise<WordPressPost> {
-    return this.get<WordPressPost>(`posts/${id}?context=${context}`);
+    return this.postsOps.getPost(id, context);
   }
 
   async createPost(data: CreatePostRequest): Promise<WordPressPost> {
-    return this.post<WordPressPost>("posts", data);
+    return this.postsOps.createPost(data);
   }
 
   async updatePost(data: UpdatePostRequest): Promise<WordPressPost> {
-    const { id, ...updateData } = data;
-    return this.put<WordPressPost>(`posts/${id}`, updateData);
+    return this.postsOps.updatePost(data);
   }
 
   async deletePost(id: number, force = false): Promise<{ deleted: boolean; previous?: WordPressPost }> {
-    return this.delete(`posts/${id}?force=${force}`);
+    return this.postsOps.deletePost(id, force);
   }
 
   async getPostRevisions(id: number): Promise<WordPressPost[]> {
-    return this.get<WordPressPost[]>(`posts/${id}/revisions`);
+    return this.postsOps.getPostRevisions(id);
   }
 
-  // Pages
+  // ============================================================================
+  // Pages Operations (delegated to PagesOperations)
+  // ============================================================================
+
   async getPages(params?: PostQueryParams): Promise<WordPressPage[]> {
-    const normalizedParams = params
-      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
-      : undefined;
-    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
-    return this.get<WordPressPage[]>(`pages${queryString}`);
+    return this.pagesOps.getPages(params);
   }
 
   async getPage(id: number, context: "view" | "embed" | "edit" = "view"): Promise<WordPressPage> {
-    return this.get<WordPressPage>(`pages/${id}?context=${context}`);
+    return this.pagesOps.getPage(id, context);
   }
 
   async createPage(data: CreatePageRequest): Promise<WordPressPage> {
-    return this.post<WordPressPage>("pages", data);
+    return this.pagesOps.createPage(data);
   }
 
   async updatePage(data: UpdatePageRequest): Promise<WordPressPage> {
-    const { id, ...updateData } = data;
-    return this.put<WordPressPage>(`pages/${id}`, updateData);
+    return this.pagesOps.updatePage(data);
   }
 
   async deletePage(id: number, force = false): Promise<{ deleted: boolean; previous?: WordPressPage }> {
-    return this.delete(`pages/${id}?force=${force}`);
+    return this.pagesOps.deletePage(id, force);
   }
 
   async getPageRevisions(id: number): Promise<WordPressPage[]> {
-    return this.get<WordPressPage[]>(`pages/${id}/revisions`);
+    return this.pagesOps.getPageRevisions(id);
   }
 
-  // Media
+  // ============================================================================
+  // Media Operations (delegated to MediaOperations)
+  // ============================================================================
+
   async getMedia(params?: MediaQueryParams): Promise<WordPressMedia[]> {
-    const normalizedParams = params
-      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
-      : undefined;
-    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
-    return this.get<WordPressMedia[]>(`media${queryString}`);
+    return this.mediaOps.getMedia(params);
   }
 
   async getMediaItem(id: number, context: "view" | "embed" | "edit" = "view"): Promise<WordPressMedia> {
-    return this.get<WordPressMedia>(`media/${id}?context=${context}`);
+    return this.mediaOps.getMediaItem(id, context);
   }
 
   async uploadMedia(data: UploadMediaRequest): Promise<WordPressMedia> {
-    // Use file handle to avoid TOCTOU race condition
-    let fileHandle;
-    try {
-      fileHandle = await fsPromises.open(data.file_path, "r");
-    } catch {
-      throw new Error(`File not found: ${data.file_path}`);
-    }
-
-    try {
-      const stats = await fileHandle.stat();
-      const filename = data.title || path.basename(data.file_path);
-
-      // Check if file is too large (WordPress default is 2MB for most installs)
-      const maxSize = 10 * 1024 * 1024; // 10MB reasonable limit
-      if (stats.size > maxSize) {
-        throw new Error(
-          `File too large: ${(stats.size / 1024 / 1024).toFixed(2)}MB. Maximum allowed: ${maxSize / 1024 / 1024}MB`,
-        );
-      }
-
-      const fileBuffer = await fileHandle.readFile();
-
-      debug.log(`Uploading file: ${filename} (${(stats.size / 1024).toFixed(2)}KB)`);
-
-      return this.uploadFile(fileBuffer, filename, this.getMimeType(data.file_path), data);
-    } finally {
-      await fileHandle.close();
-    }
+    return this.mediaOps.uploadMedia(data);
   }
 
   async uploadFile(
@@ -973,185 +952,143 @@ export class WordPressClient implements IWordPressClient {
     meta: Partial<UploadMediaRequest> = {},
     options?: RequestOptions,
   ): Promise<WordPressMedia> {
-    debug.log(`Uploading file: ${filename} (${fileData.length} bytes)`);
-
-    // Use FormData but with correct configuration for node-fetch
-    const formData = new FormData();
-    formData.setMaxListeners(20);
-
-    // Add file with correct options
-    formData.append("file", fileData, {
-      filename,
-      contentType: mimeType,
-    });
-
-    // Add metadata
-    if (meta.title) formData.append("title", meta.title);
-    if (meta.alt_text) formData.append("alt_text", meta.alt_text);
-    if (meta.caption) formData.append("caption", meta.caption);
-    if (meta.description) formData.append("description", meta.description);
-    if (meta.post) formData.append("post", meta.post.toString());
-
-    // Use longer timeout for file uploads
-    const uploadTimeout = options?.timeout !== undefined ? options.timeout : 600000; // 10 minutes default
-    const uploadOptions: RequestOptions = {
-      ...options,
-      timeout: uploadTimeout,
-    };
-
-    debug.log(`Upload prepared with FormData, timeout: ${uploadTimeout}ms`);
-
-    // Use the regular post method which handles FormData correctly
-    return this.post<WordPressMedia>("media", formData, uploadOptions);
+    return this.mediaOps.uploadFile(fileData, filename, mimeType, meta, options);
   }
 
   async updateMedia(data: UpdateMediaRequest): Promise<WordPressMedia> {
-    const { id, ...updateData } = data;
-    return this.put<WordPressMedia>(`media/${id}`, updateData);
+    return this.mediaOps.updateMedia(data);
   }
 
   async deleteMedia(id: number, force = false): Promise<{ deleted: boolean; previous?: WordPressMedia }> {
-    return this.delete(`media/${id}?force=${force}`);
+    return this.mediaOps.deleteMedia(id, force);
   }
 
-  // Users
+  // ============================================================================
+  // Users Operations (delegated to UsersOperations)
+  // ============================================================================
+
   async getUsers(params?: UserQueryParams): Promise<WordPressUser[]> {
-    const normalizedParams = params
-      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
-      : undefined;
-    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
-    return this.get<WordPressUser[]>(`users${queryString}`);
+    return this.usersOps.getUsers(params);
   }
 
   async getUser(id: number | "me", context: "view" | "embed" | "edit" = "view"): Promise<WordPressUser> {
-    return this.get<WordPressUser>(`users/${id}?context=${context}`);
+    return this.usersOps.getUser(id, context);
   }
 
   async createUser(data: CreateUserRequest): Promise<WordPressUser> {
-    return this.post<WordPressUser>("users", data);
+    return this.usersOps.createUser(data);
   }
 
   async updateUser(data: UpdateUserRequest): Promise<WordPressUser> {
-    const { id, ...updateData } = data;
-    return this.put<WordPressUser>(`users/${id}`, updateData);
+    return this.usersOps.updateUser(data);
   }
 
   async deleteUser(id: number, reassign?: number): Promise<{ deleted: boolean; previous?: WordPressUser }> {
-    const params = reassign ? `?reassign=${reassign}&force=true` : "?force=true";
-    return this.delete(`users/${id}${params}`);
+    return this.usersOps.deleteUser(id, reassign);
   }
 
   async getCurrentUser(): Promise<WordPressUser> {
-    return this.getUser("me", "edit");
+    return this.usersOps.getCurrentUser();
   }
 
-  // Comments
+  // ============================================================================
+  // Comments Operations (delegated to CommentsOperations)
+  // ============================================================================
+
   async getComments(params?: CommentQueryParams): Promise<WordPressComment[]> {
-    const normalizedParams = params
-      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
-      : undefined;
-    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
-    return this.get<WordPressComment[]>(`comments${queryString}`);
+    return this.commentsOps.getComments(params);
   }
 
   async getComment(id: number, context: "view" | "embed" | "edit" = "view"): Promise<WordPressComment> {
-    return this.get<WordPressComment>(`comments/${id}?context=${context}`);
+    return this.commentsOps.getComment(id, context);
   }
 
   async createComment(data: CreateCommentRequest): Promise<WordPressComment> {
-    return this.post<WordPressComment>("comments", data);
+    return this.commentsOps.createComment(data);
   }
 
   async updateComment(data: UpdateCommentRequest): Promise<WordPressComment> {
-    const { id, ...updateData } = data;
-    return this.put<WordPressComment>(`comments/${id}`, updateData);
+    return this.commentsOps.updateComment(data);
   }
 
   async deleteComment(id: number, force = false): Promise<{ deleted: boolean; previous?: WordPressComment }> {
-    return this.delete(`comments/${id}?force=${force}`);
+    return this.commentsOps.deleteComment(id, force);
   }
 
   async approveComment(id: number): Promise<WordPressComment> {
-    return this.put<WordPressComment>(`comments/${id}`, { status: "approved" });
+    return this.commentsOps.approveComment(id);
   }
 
   async rejectComment(id: number): Promise<WordPressComment> {
-    return this.put<WordPressComment>(`comments/${id}`, {
-      status: "unapproved",
-    });
+    return this.commentsOps.rejectComment(id);
   }
 
   async spamComment(id: number): Promise<WordPressComment> {
-    return this.put<WordPressComment>(`comments/${id}`, { status: "spam" });
+    return this.commentsOps.spamComment(id);
   }
 
-  // Taxonomies
+  // ============================================================================
+  // Taxonomies Operations (delegated to TaxonomiesOperations)
+  // ============================================================================
+
   async getCategories(params?: Record<string, string | number | boolean>): Promise<WordPressCategory[]> {
-    const normalizedParams = params
-      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
-      : undefined;
-    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
-    return this.get<WordPressCategory[]>(`categories${queryString}`);
+    return this.taxonomiesOps.getCategories(params);
   }
 
   async getCategory(id: number): Promise<WordPressCategory> {
-    return this.get<WordPressCategory>(`categories/${id}`);
+    return this.taxonomiesOps.getCategory(id);
   }
 
   async createCategory(data: CreateCategoryRequest): Promise<WordPressCategory> {
-    return this.post<WordPressCategory>("categories", data);
+    return this.taxonomiesOps.createCategory(data);
   }
 
   async updateCategory(data: UpdateCategoryRequest): Promise<WordPressCategory> {
-    const { id, ...updateData } = data;
-    return this.put<WordPressCategory>(`categories/${id}`, updateData);
+    return this.taxonomiesOps.updateCategory(data);
   }
 
   async deleteCategory(id: number, force = false): Promise<{ deleted: boolean; previous?: WordPressCategory }> {
-    return this.delete(`categories/${id}?force=${force}`);
+    return this.taxonomiesOps.deleteCategory(id, force);
   }
 
   async getTags(params?: Record<string, string | number | boolean>): Promise<WordPressTag[]> {
-    const normalizedParams = params
-      ? Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
-      : undefined;
-    const queryString = normalizedParams ? "?" + new URLSearchParams(normalizedParams).toString() : "";
-    return this.get<WordPressTag[]>(`tags${queryString}`);
+    return this.taxonomiesOps.getTags(params);
   }
 
   async getTag(id: number): Promise<WordPressTag> {
-    return this.get<WordPressTag>(`tags/${id}`);
+    return this.taxonomiesOps.getTag(id);
   }
 
   async createTag(data: CreateTagRequest): Promise<WordPressTag> {
-    return this.post<WordPressTag>("tags", data);
+    return this.taxonomiesOps.createTag(data);
   }
 
   async updateTag(data: UpdateTagRequest): Promise<WordPressTag> {
-    const { id, ...updateData } = data;
-    return this.put<WordPressTag>(`tags/${id}`, updateData);
+    return this.taxonomiesOps.updateTag(data);
   }
 
   async deleteTag(id: number, force = false): Promise<{ deleted: boolean; previous?: WordPressTag }> {
-    return this.delete(`tags/${id}?force=${force}`);
+    return this.taxonomiesOps.deleteTag(id, force);
   }
 
-  // Site Management
+  // ============================================================================
+  // Site Operations (delegated to SiteOperations)
+  // ============================================================================
+
   async getSiteSettings(): Promise<WordPressSiteSettings> {
-    return this.get<WordPressSiteSettings>("settings");
+    return this.siteOps.getSiteSettings();
   }
 
   async updateSiteSettings(settings: Partial<WordPressSiteSettings>): Promise<WordPressSiteSettings> {
-    return this.post<WordPressSiteSettings>("settings", settings);
+    return this.siteOps.updateSiteSettings(settings);
   }
 
   async getSiteInfo(): Promise<WordPressSiteInfo> {
-    return this.get("");
+    return this.siteOps.getSiteInfo();
   }
 
-  // Application Passwords
   async getApplicationPasswords(userId: number | "me" = "me"): Promise<WordPressApplicationPassword[]> {
-    return this.get<WordPressApplicationPassword[]>(`users/${userId}/application-passwords`);
+    return this.siteOps.getApplicationPasswords(userId);
   }
 
   async createApplicationPassword(
@@ -1159,37 +1096,28 @@ export class WordPressClient implements IWordPressClient {
     name: string,
     appId?: string,
   ): Promise<WordPressApplicationPassword> {
-    const data: Record<string, unknown> = { name };
-    if (appId) data.app_id = appId;
-    return this.post<WordPressApplicationPassword>(`users/${userId}/application-passwords`, data);
+    return this.siteOps.createApplicationPassword(userId, name, appId);
   }
 
   async deleteApplicationPassword(userId: number | "me", uuid: string): Promise<{ deleted: boolean }> {
-    return this.delete(`users/${userId}/application-passwords/${uuid}`);
+    return this.siteOps.deleteApplicationPassword(userId, uuid);
   }
 
-  // Search
   async search(query: string, types?: string[], subtype?: string): Promise<WordPressSearchResult[]> {
-    const params = new URLSearchParams({ search: query });
-    if (types) params.append("type", types.join(","));
-    if (subtype) params.append("subtype", subtype);
-
-    return this.get<WordPressSearchResult[]>(`search?${params.toString()}`);
+    return this.siteOps.search(query, types, subtype);
   }
 
-  // Utility Methods
   async ping(): Promise<boolean> {
-    try {
-      await this.get("");
-      return true;
-    } catch {
-      return false;
-    }
+    return this.siteOps.ping();
   }
 
   async getServerInfo(): Promise<Record<string, unknown>> {
-    return this.get("");
+    return this.siteOps.getServerInfo();
   }
+
+  // ============================================================================
+  // Utility Methods
+  // ============================================================================
 
   validateEndpoint(endpoint: string): boolean {
     return /^[a-zA-Z0-9\/\-_]+$/.test(endpoint);
@@ -1203,26 +1131,5 @@ export class WordPressClient implements IWordPressClient {
       return `${url}?${searchParams.toString()}`;
     }
     return url;
-  }
-
-  private getMimeType(filePath: string): string {
-    const ext = path.extname(filePath).toLowerCase();
-    const mimeTypes: Record<string, string> = {
-      ".jpg": "image/jpeg",
-      ".jpeg": "image/jpeg",
-      ".png": "image/png",
-      ".gif": "image/gif",
-      ".webp": "image/webp",
-      ".svg": "image/svg+xml",
-      ".pdf": "application/pdf",
-      ".doc": "application/msword",
-      ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      ".txt": "text/plain",
-      ".mp4": "video/mp4",
-      ".mp3": "audio/mpeg",
-      ".wav": "audio/wav",
-    };
-
-    return mimeTypes[ext] || "application/octet-stream";
   }
 }
