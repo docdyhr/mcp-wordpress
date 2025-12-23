@@ -21,3 +21,6 @@ export * from "./toolWrapper.js";
 
 // Streaming utilities (if any exports exist)
 export * from "./streaming.js";
+
+// Circuit breaker for fault tolerance
+export * from "./CircuitBreaker.js";
