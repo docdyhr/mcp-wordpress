@@ -9,8 +9,8 @@
  */
 
 import { CacheManager, type CacheConfig } from "./CacheManager.js";
-import { Config } from "../config/Config.js";
-import { LoggerFactory } from "../utils/logger.js";
+import { Config } from "@/config/Config.js";
+import { LoggerFactory } from "@/utils/logger.js";
 
 /**
  * SEO-specific cache manager

@@ -17,9 +17,9 @@
  * @since 2.7.0
  */
 
-import { LoggerFactory } from "../../../utils/logger.js";
-import type { SchemaMarkup, SEOToolParams } from "../../../types/seo.js";
-import type { WordPressPost } from "../../../types/wordpress.js";
+import { LoggerFactory } from "@/utils/logger.js";
+import type { SchemaMarkup, SEOToolParams } from "@/types/seo.js";
+import type { WordPressPost } from "@/types/wordpress.js";
 
 /**
  * Schema generation options

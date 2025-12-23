@@ -2,7 +2,7 @@
  * Error handling utilities
  */
 import { LoggerFactory } from "./logger.js";
-import { config } from "../config/Config.js";
+import { config } from "@/config/Config.js";
 
 const logger = LoggerFactory.server().child({ component: "ErrorUtils" });
 

@@ -4,10 +4,10 @@
  */
 
 import type { WordPressClientConfig, HTTPMethod } from "@/types/client.js";
-import { RequestManager } from "../RequestManager.js";
-import { AuthenticationManager } from "../AuthenticationManager.js";
-import { ComposedRequestManager } from "../ComposedRequestManager.js";
-import { ComposedAuthenticationManager } from "../ComposedAuthenticationManager.js";
+import { RequestManager } from "@/client/managers/RequestManager.js";
+import { AuthenticationManager } from "@/client/managers/AuthenticationManager.js";
+import { ComposedRequestManager } from "@/client/managers/ComposedRequestManager.js";
+import { ComposedAuthenticationManager } from "@/client/managers/ComposedAuthenticationManager.js";
 
 /**
  * Adapter that wraps composed managers to provide the same interface as inheritance-based ones

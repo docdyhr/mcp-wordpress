@@ -18,10 +18,10 @@
  * @since 2.7.0
  */
 
-import { WordPressClient } from "../../../client/api.js";
-import { LoggerFactory } from "../../../utils/logger.js";
-import type { SiteAuditResult, SEOToolParams, AuditIssue, AuditSection } from "../../../types/seo.js";
-import type { WordPressPost, WordPressPage } from "../../../types/wordpress.js";
+import { WordPressClient } from "@/client/api.js";
+import { LoggerFactory } from "@/utils/logger.js";
+import type { SiteAuditResult, SEOToolParams, AuditIssue, AuditSection } from "@/types/seo.js";
+import type { WordPressPost, WordPressPage } from "@/types/wordpress.js";
 
 /**
  * Configuration for site audit behavior

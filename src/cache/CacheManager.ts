@@ -3,7 +3,7 @@
  * Implements multi-layer caching with TTL, LRU eviction, and site-specific keys
  */
 
-import { ConfigHelpers } from "../config/Config.js";
+import { ConfigHelpers } from "@/config/Config.js";
 
 export interface CacheEntry<T = unknown> {
   value: T;

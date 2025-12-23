@@ -4,7 +4,7 @@
 
 import { randomBytes } from "crypto";
 import * as path from "path";
-import { LoggerFactory } from "../utils/logger.js";
+import { LoggerFactory } from "@/utils/logger.js";
 
 const logger = LoggerFactory.security();
 

@@ -13,7 +13,7 @@
 export { PostTools as default, PostTools } from "./posts/index.js";
 
 // Re-export types and handlers for advanced usage
-export type { CreatePostRequest, PostQueryParams, UpdatePostRequest, WordPressPost } from "../types/wordpress.js";
+export type { CreatePostRequest, PostQueryParams, UpdatePostRequest, WordPressPost } from "@/types/wordpress.js";
 
 // Re-export specific components for granular imports
 export { postToolDefinitions } from "./posts/PostToolDefinitions.js";

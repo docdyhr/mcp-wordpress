@@ -24,16 +24,16 @@ export type {
   ComposedManager,
   ManagerFactory,
   ManagerCompositionConfig,
-} from "../interfaces/ManagerInterfaces.js";
+} from "@/client/managers/interfaces/ManagerInterfaces.js";
 
 // Implementations
-export { ConfigurationProviderImpl } from "../implementations/ConfigurationProviderImpl.js";
-export { ErrorHandlerImpl } from "../implementations/ErrorHandlerImpl.js";
-export { ParameterValidatorImpl } from "../implementations/ParameterValidatorImpl.js";
+export { ConfigurationProviderImpl } from "@/client/managers/implementations/ConfigurationProviderImpl.js";
+export { ErrorHandlerImpl } from "@/client/managers/implementations/ErrorHandlerImpl.js";
+export { ParameterValidatorImpl } from "@/client/managers/implementations/ParameterValidatorImpl.js";
 
 // Composed Managers
-export { ComposedAuthenticationManager } from "../ComposedAuthenticationManager.js";
-export { ComposedRequestManager } from "../ComposedRequestManager.js";
+export { ComposedAuthenticationManager } from "@/client/managers/ComposedAuthenticationManager.js";
+export { ComposedRequestManager } from "@/client/managers/ComposedRequestManager.js";
 
 // Factory and Client
 export {
@@ -41,7 +41,7 @@ export {
   ComposedWordPressClient,
   createComposedWordPressClient,
   type ComposedWordPressClientDependencies,
-} from "../ComposedManagerFactory.js";
+} from "@/client/managers/ComposedManagerFactory.js";
 
 // Migration utilities (for gradual migration from inheritance to composition)
 export { MigrationAdapter } from "./MigrationAdapter.js";

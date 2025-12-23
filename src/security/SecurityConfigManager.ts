@@ -8,7 +8,7 @@ import * as path from "path";
 import { z } from "zod";
 import { SecurityUtils } from "./SecurityConfig.js";
 import { SecurityValidationError } from "./InputValidator.js";
-import { LoggerFactory } from "../utils/logger.js";
+import { LoggerFactory } from "@/utils/logger.js";
 
 const logger = LoggerFactory.security();
 

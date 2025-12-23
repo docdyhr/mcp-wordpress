@@ -5,7 +5,7 @@
  * Integrates with the centralized Config system for environment-aware behavior.
  */
 
-import { ConfigHelpers } from "../config/Config.js";
+import { ConfigHelpers } from "@/config/Config.js";
 
 export type LogLevel = "trace" | "debug" | "info" | "warn" | "error" | "fatal";
 export type LogContext = Record<string, unknown>;

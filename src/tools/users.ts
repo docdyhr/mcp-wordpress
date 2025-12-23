@@ -1,7 +1,7 @@
-import { WordPressClient } from "../client/api.js";
-import { CreateUserRequest, UpdateUserRequest, UserQueryParams } from "../types/wordpress.js";
-import { getErrorMessage } from "../utils/error.js";
-import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "../utils/streaming.js";
+import { WordPressClient } from "@/client/api.js";
+import { CreateUserRequest, UpdateUserRequest, UserQueryParams } from "@/types/wordpress.js";
+import { getErrorMessage } from "@/utils/error.js";
+import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "@/utils/streaming.js";
 
 /**
  * Provides tools for managing users on a WordPress site.

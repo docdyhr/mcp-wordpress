@@ -6,7 +6,7 @@
 export { CacheManager, CachePresets } from "./CacheManager.js";
 export { HttpCacheWrapper } from "./HttpCacheWrapper.js";
 export { CacheInvalidation, WordPressCachePatterns, CacheWarmer } from "./CacheInvalidation.js";
-export { CachedWordPressClient } from "../client/CachedWordPressClient.js";
+export { CachedWordPressClient } from "@/client/CachedWordPressClient.js";
 
 export type { CacheEntry, CacheStats, CacheConfig } from "./CacheManager.js";
 

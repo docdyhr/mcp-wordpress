@@ -7,7 +7,7 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import { SecurityUtils } from "./SecurityConfig.js";
 import { SecurityValidationError } from "./InputValidator.js";
-import { LoggerFactory } from "../utils/logger.js";
+import { LoggerFactory } from "@/utils/logger.js";
 
 export interface SecurityVulnerability {
   id: string;

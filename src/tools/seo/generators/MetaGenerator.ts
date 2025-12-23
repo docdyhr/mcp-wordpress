@@ -7,10 +7,10 @@
  * @since 2.7.0
  */
 
-import { LoggerFactory } from "../../../utils/logger.js";
-import { Config } from "../../../config/Config.js";
-import type { WordPressPost } from "../../../types/wordpress.js";
-import type { SEOMetadata, SEOToolParams } from "../../../types/seo.js";
+import { LoggerFactory } from "@/utils/logger.js";
+import { Config } from "@/config/Config.js";
+import type { WordPressPost } from "@/types/wordpress.js";
+import type { SEOMetadata, SEOToolParams } from "@/types/seo.js";
 
 /**
  * Content safety filters and validation rules

@@ -7,22 +7,22 @@
  * Provides comprehensive performance insights and management
  */
 
-import type { ToolDefinition } from "../server/ToolRegistry.js";
+import type { ToolDefinition } from "@/server/ToolRegistry.js";
 import {
   PerformanceMonitor,
   type PerformanceMetrics,
   type PerformanceAlert,
-} from "../performance/PerformanceMonitor.js";
-import { MetricsCollector } from "../performance/MetricsCollector.js";
+} from "@/performance/PerformanceMonitor.js";
+import { MetricsCollector } from "@/performance/MetricsCollector.js";
 import {
   PerformanceAnalytics,
   type BenchmarkComparison,
   type PerformanceAnomaly,
-} from "../performance/PerformanceAnalytics.js";
-import { toolWrapper } from "../utils/toolWrapper.js";
-import { ConfigHelpers } from "../config/Config.js";
-import { LoggerFactory } from "../utils/logger.js";
-import type { WordPressClient } from "../client/api.js";
+} from "@/performance/PerformanceAnalytics.js";
+import { toolWrapper } from "@/utils/toolWrapper.js";
+import { ConfigHelpers } from "@/config/Config.js";
+import { LoggerFactory } from "@/utils/logger.js";
+import type { WordPressClient } from "@/client/api.js";
 
 // Using existing performance interfaces from PerformanceMonitor/PerformanceAnalytics
 

@@ -5,7 +5,7 @@
 
 import { CacheManager, CachePresets } from "./CacheManager.js";
 import * as crypto from "crypto";
-import { LoggerFactory } from "../utils/logger.js";
+import { LoggerFactory } from "@/utils/logger.js";
 
 export interface HttpCacheOptions {
   ttl?: number;

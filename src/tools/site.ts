@@ -1,6 +1,6 @@
-import { WordPressClient } from "../client/api.js";
-import { WordPressApplicationPassword } from "../types/wordpress.js";
-import { getErrorMessage } from "../utils/error.js";
+import { WordPressClient } from "@/client/api.js";
+import { WordPressApplicationPassword } from "@/types/wordpress.js";
+import { getErrorMessage } from "@/utils/error.js";
 
 /**
  * Provides tools for managing general site settings and operations on a WordPress site.

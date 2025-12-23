@@ -6,7 +6,7 @@
 // Core Security Components
 export { SecurityConfig, SecurityUtils, createSecureError, getEnvironmentSecurity } from "./SecurityConfig.js";
 import { SecurityValidationError } from "./InputValidator.js";
-import { LoggerFactory } from "../utils/logger.js";
+import { LoggerFactory } from "@/utils/logger.js";
 export {
   InputSanitizer,
   SecuritySchemas,

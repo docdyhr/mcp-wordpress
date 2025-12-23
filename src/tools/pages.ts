@@ -1,6 +1,6 @@
-import { WordPressClient } from "../client/api.js";
-import { CreatePageRequest, PostQueryParams as PageQueryParams, UpdatePageRequest } from "../types/wordpress.js";
-import { getErrorMessage } from "../utils/error.js";
+import { WordPressClient } from "@/client/api.js";
+import { CreatePageRequest, PostQueryParams as PageQueryParams, UpdatePageRequest } from "@/types/wordpress.js";
+import { getErrorMessage } from "@/utils/error.js";
 
 /**
  * Provides tools for managing pages on a WordPress site.

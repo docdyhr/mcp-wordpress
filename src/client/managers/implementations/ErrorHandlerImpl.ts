@@ -6,7 +6,7 @@
 import { WordPressAPIError } from "@/types/client.js";
 import { debug, logError } from "@/utils/debug.js";
 import { getErrorMessage } from "@/utils/error.js";
-import type { ErrorHandler, ConfigurationProvider } from "../interfaces/ManagerInterfaces.js";
+import type { ErrorHandler, ConfigurationProvider } from "@/client/managers/interfaces/ManagerInterfaces.js";
 
 export class ErrorHandlerImpl implements ErrorHandler {
   constructor(private configProvider: ConfigurationProvider) {}

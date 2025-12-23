@@ -3,9 +3,9 @@
  * Provides cache inspection, clearing, and warming capabilities
  */
 
-import type { WordPressClient } from "../client/api.js";
-import { CachedWordPressClient } from "../client/CachedWordPressClient.js";
-import { toolWrapper } from "../utils/toolWrapper.js";
+import type { WordPressClient } from "@/client/api.js";
+import { CachedWordPressClient } from "@/client/CachedWordPressClient.js";
+import { toolWrapper } from "@/utils/toolWrapper.js";
 
 /**
  * Cache management tools class

@@ -1,6 +1,6 @@
 import { WordPressClient } from "./api.js";
-import { WordPressClientConfig } from "../types/client.js";
-import { LoggerFactory } from "../utils/logger.js";
+import { WordPressClientConfig } from "@/types/client.js";
+import { LoggerFactory } from "@/utils/logger.js";
 import type {
   WordPressPost,
   WordPressUser,
@@ -8,7 +8,7 @@ import type {
   PostQueryParams,
   CreatePostRequest,
   UpdatePostRequest,
-} from "../types/wordpress.js";
+} from "@/types/wordpress.js";
 
 /**
  * Mock WordPress client for CI environments

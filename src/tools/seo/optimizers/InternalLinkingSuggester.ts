@@ -16,10 +16,10 @@
  * @since 2.7.0
  */
 
-import { WordPressClient } from "../../../client/api.js";
-import { LoggerFactory } from "../../../utils/logger.js";
-import type { InternalLinkSuggestion, SEOToolParams } from "../../../types/seo.js";
-import type { WordPressPost } from "../../../types/wordpress.js";
+import { WordPressClient } from "@/client/api.js";
+import { LoggerFactory } from "@/utils/logger.js";
+import type { InternalLinkSuggestion, SEOToolParams } from "@/types/seo.js";
+import type { WordPressPost } from "@/types/wordpress.js";
 
 /**
  * Configuration for internal linking suggestions

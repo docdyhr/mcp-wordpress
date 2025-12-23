@@ -4,7 +4,7 @@
  */
 
 import { HttpCacheWrapper } from "./HttpCacheWrapper.js";
-import { LoggerFactory } from "../utils/logger.js";
+import { LoggerFactory } from "@/utils/logger.js";
 
 export interface InvalidationRule {
   trigger: string;

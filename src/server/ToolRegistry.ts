@@ -1,11 +1,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { WordPressClient } from "../client/api.js";
-import { getErrorMessage } from "../utils/error.js";
-import { EnhancedError, ErrorHandlers } from "../utils/enhancedError.js";
-import { config } from "../config/Config.js";
-import * as Tools from "../tools/index.js";
+import { WordPressClient } from "@/client/api.js";
+import { getErrorMessage } from "@/utils/error.js";
+import { EnhancedError, ErrorHandlers } from "@/utils/enhancedError.js";
+import { config } from "@/config/Config.js";
+import * as Tools from "@/tools/index.js";
 import { z } from "zod";
-import type { MCPToolSchema, JSONSchemaProperty } from "../types/mcp.js";
+import type { MCPToolSchema, JSONSchemaProperty } from "@/types/mcp.js";
 
 /**
  * Interface for tool definition

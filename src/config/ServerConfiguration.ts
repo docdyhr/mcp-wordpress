@@ -2,12 +2,12 @@ import dotenv from "dotenv";
 import { promises as fsPromises } from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
-import { WordPressClient } from "../client/api.js";
-import { CachedWordPressClient } from "../client/CachedWordPressClient.js";
-import { MockWordPressClient } from "../client/MockWordPressClient.js";
-import { WordPressClientConfig } from "../types/client.js";
-import { getErrorMessage } from "../utils/error.js";
-import { LoggerFactory } from "../utils/logger.js";
+import { WordPressClient } from "@/client/api.js";
+import { CachedWordPressClient } from "@/client/CachedWordPressClient.js";
+import { MockWordPressClient } from "@/client/MockWordPressClient.js";
+import { WordPressClientConfig } from "@/types/client.js";
+import { getErrorMessage } from "@/utils/error.js";
+import { LoggerFactory } from "@/utils/logger.js";
 import { ConfigHelpers } from "./Config.js";
 import {
   ConfigurationValidator,

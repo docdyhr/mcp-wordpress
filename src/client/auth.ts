@@ -3,7 +3,7 @@
  * Manages different authentication methods for WordPress REST API
  */
 
-import { logger } from "../utils/debug.js";
+import { logger } from "@/utils/debug.js";
 import { URL } from "url";
 import type {
   IAuthProvider,
@@ -11,8 +11,8 @@ import type {
   AuthMethod,
   AuthConfig,
   AuthenticationError as _AuthenticationError,
-} from "../types/client.js";
-import type { WordPressUser } from "../types/wordpress.js";
+} from "@/types/client.js";
+import type { WordPressUser } from "@/types/wordpress.js";
 
 export class WordPressAuth {
   private client: IWordPressClient;

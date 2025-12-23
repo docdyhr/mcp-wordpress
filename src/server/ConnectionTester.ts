@@ -1,7 +1,7 @@
-import { WordPressClient } from "../client/api.js";
-import { getErrorMessage } from "../utils/error.js";
-import { LoggerFactory } from "../utils/logger.js";
-import { ConfigHelpers } from "../config/Config.js";
+import { WordPressClient } from "@/client/api.js";
+import { getErrorMessage } from "@/utils/error.js";
+import { LoggerFactory } from "@/utils/logger.js";
+import { ConfigHelpers } from "@/config/Config.js";
 
 interface ErrorWithResponse {
   response?: {

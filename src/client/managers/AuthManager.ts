@@ -3,7 +3,7 @@
  * Handles all authentication methods for WordPress REST API
  */
 
-import type { WordPressClient } from "../api.js";
+import type { WordPressClient } from "@/client/api.js";
 import type { AuthConfig, AuthMethod } from "@/types/client.js";
 import { AuthenticationError } from "@/types/client.js";
 import { LoggerFactory } from "@/utils/logger.js";

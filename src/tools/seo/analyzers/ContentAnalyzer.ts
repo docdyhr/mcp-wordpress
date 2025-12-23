@@ -8,10 +8,10 @@
  * @since 2.7.0
  */
 
-import { LoggerFactory } from "../../../utils/logger.js";
-import { Config } from "../../../config/Config.js";
-import type { WordPressPost } from "../../../types/wordpress.js";
-import type { SEOAnalysisResult, SEOMetrics, SEORecommendation, SEOToolParams } from "../../../types/seo.js";
+import { LoggerFactory } from "@/utils/logger.js";
+import { Config } from "@/config/Config.js";
+import type { WordPressPost } from "@/types/wordpress.js";
+import type { SEOAnalysisResult, SEOMetrics, SEORecommendation, SEOToolParams } from "@/types/seo.js";
 
 /**
  * Content analyzer for SEO evaluation

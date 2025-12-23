@@ -17,12 +17,12 @@
  */
 
 import { WordPressClient } from "./api.js";
-import { LoggerFactory } from "../utils/logger.js";
-import { handleToolError } from "../utils/error.js";
-import type { WordPressPost, WordPressPage } from "../types/wordpress.js";
-import type { WordPressClientConfig } from "../types/client.js";
-import type { SchemaType } from "../types/seo.js";
-import type { SEOMetadata, SchemaMarkup } from "../types/seo.js";
+import { LoggerFactory } from "@/utils/logger.js";
+import { handleToolError } from "@/utils/error.js";
+import type { WordPressPost, WordPressPage } from "@/types/wordpress.js";
+import type { WordPressClientConfig } from "@/types/client.js";
+import type { SchemaType } from "@/types/seo.js";
+import type { SEOMetadata, SchemaMarkup } from "@/types/seo.js";
 
 /**
  * WordPress Plugin interface for API responses

@@ -5,7 +5,7 @@
 
 import { EventEmitter } from "events";
 import { SecurityUtils } from "./SecurityConfig.js";
-import { LoggerFactory } from "../utils/logger.js";
+import { LoggerFactory } from "@/utils/logger.js";
 
 const logger = LoggerFactory.security();
 

@@ -4,7 +4,7 @@
  */
 
 import { WordPressAPIError } from "@/types/client.js";
-import type { ParameterValidator } from "../interfaces/ManagerInterfaces.js";
+import type { ParameterValidator } from "@/client/managers/interfaces/ManagerInterfaces.js";
 
 export class ParameterValidatorImpl implements ParameterValidator {
   /**

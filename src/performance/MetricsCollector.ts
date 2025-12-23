@@ -4,10 +4,10 @@
  */
 
 import { PerformanceMonitor, PerformanceMetrics } from "./PerformanceMonitor.js";
-import type { CacheStats } from "../cache/CacheManager.js";
-import type { ClientStats } from "../types/client.js";
-import { ConfigHelpers } from "../config/Config.js";
-import { LoggerFactory } from "../utils/logger.js";
+import type { CacheStats } from "@/cache/CacheManager.js";
+import type { ClientStats } from "@/types/client.js";
+import { ConfigHelpers } from "@/config/Config.js";
+import { LoggerFactory } from "@/utils/logger.js";
 
 export interface CollectorConfig {
   enableRealTime: boolean;

@@ -1,11 +1,11 @@
-import { WordPressClient } from "../client/api.js";
+import { WordPressClient } from "@/client/api.js";
 import {
   CreateCategoryRequest,
   CreateTagRequest,
   UpdateCategoryRequest,
   UpdateTagRequest,
-} from "../types/wordpress.js";
-import { getErrorMessage } from "../utils/error.js";
+} from "@/types/wordpress.js";
+import { getErrorMessage } from "@/utils/error.js";
 
 /**
  * Provides tools for managing taxonomies (categories and tags) on a WordPress site.

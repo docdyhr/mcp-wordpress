@@ -13,7 +13,7 @@ import { AutomatedRemediation } from "./AutomatedRemediation.js";
 import { SecurityReviewer } from "./SecurityReviewer.js";
 import { SecurityConfigManager } from "./SecurityConfigManager.js";
 import { SecurityUtils } from "./SecurityConfig.js";
-import { LoggerFactory } from "../utils/logger.js";
+import { LoggerFactory } from "@/utils/logger.js";
 import { SecurityGateExecutor } from "./SecurityGateExecutor.js";
 import { SecurityReportGenerator } from "./SecurityReportGenerator.js";
 import type {

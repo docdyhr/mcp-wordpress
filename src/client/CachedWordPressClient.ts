@@ -4,11 +4,11 @@
  */
 
 import { WordPressClient } from "./api.js";
-import { CacheManager, type CacheStats } from "../cache/CacheManager.js";
-import { HttpCacheWrapper } from "../cache/HttpCacheWrapper.js";
-import { CacheInvalidation } from "../cache/CacheInvalidation.js";
-import { SecurityConfig } from "../security/SecurityConfig.js";
-import type { WordPressClientConfig, HTTPMethod, RequestOptions } from "../types/client.js";
+import { CacheManager, type CacheStats } from "@/cache/CacheManager.js";
+import { HttpCacheWrapper } from "@/cache/HttpCacheWrapper.js";
+import { CacheInvalidation } from "@/cache/CacheInvalidation.js";
+import { SecurityConfig } from "@/security/SecurityConfig.js";
+import type { WordPressClientConfig, HTTPMethod, RequestOptions } from "@/types/client.js";
 import type {
   WordPressPost,
   WordPressUser,
@@ -18,7 +18,7 @@ import type {
   PostQueryParams,
   CreatePostRequest,
   UpdatePostRequest,
-} from "../types/wordpress.js";
+} from "@/types/wordpress.js";
 
 /**
  * WordPress client with intelligent caching

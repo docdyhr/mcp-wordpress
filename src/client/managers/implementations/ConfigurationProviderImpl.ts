@@ -4,7 +4,7 @@
  */
 
 import type { WordPressClientConfig } from "@/types/client.js";
-import type { ConfigurationProvider } from "../interfaces/ManagerInterfaces.js";
+import type { ConfigurationProvider } from "@/client/managers/interfaces/ManagerInterfaces.js";
 
 export class ConfigurationProviderImpl implements ConfigurationProvider {
   public readonly config: WordPressClientConfig;

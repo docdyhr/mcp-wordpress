@@ -1,7 +1,7 @@
 import * as fs from "fs";
-import { WordPressClient } from "../client/api.js";
-import { MediaQueryParams, UpdateMediaRequest, UploadMediaRequest } from "../types/wordpress.js";
-import { getErrorMessage } from "../utils/error.js";
+import { WordPressClient } from "@/client/api.js";
+import { MediaQueryParams, UpdateMediaRequest, UploadMediaRequest } from "@/types/wordpress.js";
+import { getErrorMessage } from "@/utils/error.js";
 
 /**
  * Comprehensive media management tools for WordPress sites.

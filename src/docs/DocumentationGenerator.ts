@@ -5,9 +5,9 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import * as Tools from "../tools/index.js";
-import type { ToolDefinition } from "../server/ToolRegistry.js";
-import { LoggerFactory } from "../utils/logger.js";
+import * as Tools from "@/tools/index.js";
+import type { ToolDefinition } from "@/server/ToolRegistry.js";
+import { LoggerFactory } from "@/utils/logger.js";
 
 export interface DocumentationConfig {
   outputDir: string;

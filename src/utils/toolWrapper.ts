@@ -4,8 +4,8 @@
  */
 
 import { getErrorMessage } from "./error.js";
-import type { IWordPressClient } from "../types/client.js";
-import type { BaseToolParams } from "../types/tools.js";
+import type { IWordPressClient } from "@/types/client.js";
+import type { BaseToolParams } from "@/types/tools.js";
 
 /**
  * Wrapper for tool methods that standardizes error handling

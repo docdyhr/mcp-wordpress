@@ -1,6 +1,6 @@
-import { WordPressClient } from "../client/api.js";
-import { CommentQueryParams, CreateCommentRequest, UpdateCommentRequest } from "../types/wordpress.js";
-import { getErrorMessage } from "../utils/error.js";
+import { WordPressClient } from "@/client/api.js";
+import { CommentQueryParams, CreateCommentRequest, UpdateCommentRequest } from "@/types/wordpress.js";
+import { getErrorMessage } from "@/utils/error.js";
 
 /**
  * Provides tools for managing comments on a WordPress site.

@@ -7,7 +7,7 @@
 import FormData from "form-data";
 import { promises as fsPromises } from "fs";
 import * as path from "path";
-import { getUserAgent } from "../utils/version.js";
+import { getUserAgent } from "@/utils/version.js";
 import type {
   IWordPressClient,
   WordPressClientConfig,
@@ -16,9 +16,9 @@ import type {
   HTTPMethod,
   RequestOptions,
   ClientStats,
-} from "../types/client.js";
-import { WordPressAPIError, AuthenticationError, RateLimitError } from "../types/client.js";
-import { config } from "../config/Config.js";
+} from "@/types/client.js";
+import { WordPressAPIError, AuthenticationError, RateLimitError } from "@/types/client.js";
+import { config } from "@/config/Config.js";
 import type {
   WordPressPost,
   WordPressPage,
@@ -49,9 +49,9 @@ import type {
   UpdateMediaRequest,
   WordPressSiteInfo,
   WordPressSearchResult,
-} from "../types/wordpress.js";
-import { debug, logError, startTimer } from "../utils/debug.js";
-import type { QueuedRequest } from "../types/requests.js";
+} from "@/types/wordpress.js";
+import { debug, logError, startTimer } from "@/utils/debug.js";
+import type { QueuedRequest } from "@/types/requests.js";
 
 /**
  * WordPress REST API Client

@@ -2,8 +2,8 @@
  * Base utility class for tool managers with enhanced type safety
  */
 
-import { getErrorMessage } from "../utils/error.js";
-import { WordPressId, createWordPressId, DeepReadonly, Result, createSuccess, createError } from "../types/enhanced.js";
+import { getErrorMessage } from "@/utils/error.js";
+import { WordPressId, createWordPressId, DeepReadonly, Result, createSuccess, createError } from "@/types/enhanced.js";
 
 interface EnhancedError extends Error {
   originalError?: unknown;

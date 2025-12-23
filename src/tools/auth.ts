@@ -1,6 +1,6 @@
-import { WordPressClient } from "../client/api.js";
-import { AuthMethod } from "../types/client.js";
-import { getErrorMessage } from "../utils/error.js";
+import { WordPressClient } from "@/client/api.js";
+import { AuthMethod } from "@/types/client.js";
+import { getErrorMessage } from "@/utils/error.js";
 
 /**
  * Provides authentication-related tools for WordPress sites.

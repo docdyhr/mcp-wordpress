@@ -5,8 +5,8 @@
  * This prevents console.log from interfering with MCP STDIO communication.
  */
 
-import type { DebugInfo } from "../types/index.js";
-import { config } from "../config/Config.js";
+import type { DebugInfo } from "@/types/index.js";
+import { config } from "@/config/Config.js";
 
 // Log levels
 export type LogLevel = "debug" | "info" | "warn" | "error";
@@ -25,7 +25,7 @@ export interface StructuredLogger extends Logger {
   child(context: Record<string, unknown>): StructuredLogger;
 }
 
-import { ConfigHelpers } from "../config/Config.js";
+import { ConfigHelpers } from "@/config/Config.js";
 
 // Check if debug mode is enabled
 const isDebugMode = (): boolean => ConfigHelpers.shouldDebug();

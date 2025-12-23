@@ -3,7 +3,7 @@
  * Handles execution of security gates and individual security checks
  */
 
-import { LoggerFactory } from "../utils/logger.js";
+import { LoggerFactory } from "@/utils/logger.js";
 import type { AISecurityScanner } from "./AISecurityScanner.js";
 import type { SecurityReviewer } from "./SecurityReviewer.js";
 import type { SecurityConfigManager } from "./SecurityConfigManager.js";

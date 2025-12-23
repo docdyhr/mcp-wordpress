@@ -3,7 +3,7 @@
  * Collects, analyzes, and reports performance metrics
  */
 
-import { ConfigHelpers } from "../config/Config.js";
+import { ConfigHelpers } from "@/config/Config.js";
 
 export interface PerformanceMetrics {
   // Request Performance
