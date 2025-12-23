@@ -25,8 +25,8 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 [![Security Monitoring](https://github.com/docdyhr/mcp-wordpress/actions/workflows/security-monitoring.yml/badge.svg)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/security-monitoring.yml)
 [![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker&logoColor=white)](https://hub.docker.com/r/docdyhr/mcp-wordpress)
 [![License](https://img.shields.io/badge/license-MIT-green?logo=opensource&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/blob/main/LICENSE)
-<!-- Badges updated: 2025-10-20T12:21:16.087Z -->
-### 🎉 **NEW:** v2.7.0 - Composition Architecture & Complete SEO Toolkit!
+<!-- Badges updated: 2025-12-23 -->
+### 🎉 **v2.12.0** - Modular Architecture & Fault Tolerance!
 
 </div>
 
@@ -43,7 +43,7 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 
 - 🏆 **Most Complete**: 59 tools vs 20-30 in alternatives
 - ⚡ **Fastest Setup**: 2-click Claude Desktop installation via DXT
-- 🔒 **Production Ready**: 512 tests (100% pass rate), security audited, battle-tested
+- 🔒 **Production Ready**: 2200+ tests, security audited, battle-tested
 - 🎯 **TypeScript Native**: 100% type safety, best-in-class developer experience
 - 🌐 **Multi-Site**: Manage unlimited WordPress sites from one place
 
@@ -319,7 +319,7 @@ define('JWT_AUTH_CORS_ENABLE', true);
 | **Multi-Site Support**     | ✅ Unlimited sites                   | ❌ Single site  |
 | **TypeScript**             | ✅ 100% coverage                     | ⚠️ Partial/None |
 | **Performance Monitoring** | ✅ Real-time analytics               | ❌ Basic only   |
-| **Test Coverage**          | ✅ 404 tests (100% pass / 30% lines) | ⚠️ Limited      |
+| **Test Coverage**          | ✅ 2200+ tests, comprehensive coverage | ⚠️ Limited      |
 | **Production Ready**       | ✅ Security audited                  | ⚠️ Unknown      |
 
 ### 🚀 Core Capabilities
@@ -1111,7 +1111,15 @@ Looking for alternatives or complementary tools? Check out these WordPress MCP i
 
 ## 📋 Changelog
 
-### v2.5.4+ (August 2024) 🎉
+### v2.12.0 (December 2024) 🎉
+
+- **🏗️ Modular Architecture** - Split large files into domain-specific operation modules
+- **🔄 Circuit Breaker Pattern** - Fault tolerance for external API calls with automatic recovery
+- **📊 2200+ Tests** - Comprehensive test suite with operations and performance helper coverage
+- **📚 Deprecation Documentation** - Clear migration timeline for deprecated modules
+- **🔒 Security Improvements** - Updated dependencies and consolidated CI/CD workflows
+
+### v2.5.4+ (August 2024)
 
 - **🆕 Multi-Site DXT Extension** - New UI toggle for managing multiple WordPress sites in Claude Desktop
 - **🔧 Enhanced Configuration** - Auto-detection of multi-site configuration files
