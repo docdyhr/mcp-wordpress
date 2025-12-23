@@ -375,10 +375,10 @@ describe("Streaming Utilities", () => {
         },
       });
 
+      const words = ["hello", "world", null]; // null signals end of stream
       const readable = new Readable({
         read() {
-          const words = ["hello", "world"];
-          this.push(words.shift() || null);
+          this.push(words.shift());
         },
       });
 
@@ -398,11 +398,11 @@ describe("Streaming Utilities", () => {
     });
 
     it("should handle parallel stream processing", async () => {
+      const items = [1, 2, 3, 4, 5, null]; // null signals end of stream
       const source = new Readable({
         objectMode: true,
         read() {
-          const items = [1, 2, 3, 4, 5];
-          this.push(items.shift() || null);
+          this.push(items.shift());
         },
       });
 

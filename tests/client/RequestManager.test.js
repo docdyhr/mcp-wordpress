@@ -398,7 +398,7 @@ describe("RequestManager", () => {
       } catch (_error) {
         // Should have taken some time due to backoff delays
         const duration = Date.now() - startTime;
-        expect(duration).toBeGreaterThan(1000); // At least 1 second delay total
+        expect(duration).toBeGreaterThanOrEqual(1000); // At least 1 second delay total
       }
 
       expect(global.fetch).toHaveBeenCalledTimes(2);

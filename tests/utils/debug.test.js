@@ -434,7 +434,7 @@ describe("Debug Utilities", () => {
       const elapsed = timer.end();
 
       expect(result).toBe("success");
-      expect(elapsed).toBeGreaterThan(4);
+      expect(elapsed).toBeGreaterThanOrEqual(4);
       expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining("Starting async operation"));
       expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining("Async operation complete"));
 

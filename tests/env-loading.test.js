@@ -1,10 +1,15 @@
 /**
  * Tests for Environment Variable Loading
+ *
+ * Note: These tests verify dotenv loading logic using absolute paths.
+ * process.chdir() is not supported in Vitest workers, so we test
+ * path resolution logic without changing the working directory.
  */
 
 import { writeFileSync, unlinkSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -12,7 +17,6 @@ const rootDir = join(__dirname, "..");
 
 describe("Environment Variable Loading", () => {
   const testEnvPath = join(rootDir, ".env.test");
-  const originalCwd = process.cwd();
   let originalEnv;
 
   beforeEach(() => {
@@ -38,24 +42,17 @@ DEBUG=false
     if (existsSync(testEnvPath)) {
       unlinkSync(testEnvPath);
     }
-
-    // Restore original working directory
-    process.chdir(originalCwd);
   });
 
-  it("should load .env from project root when called from same directory", async () => {
-    // Change to project root
-    process.chdir(rootDir);
-
+  it("should load .env from absolute path", async () => {
     // Clear environment variables
     delete process.env.WORDPRESS_SITE_URL;
     delete process.env.WORDPRESS_USERNAME;
 
-    // Test the dotenv loading logic manually
+    // Test the dotenv loading logic with absolute path
     const { config } = await import("dotenv");
-    const envPath = join(rootDir, ".env.test");
 
-    const result = config({ path: envPath });
+    const result = config({ path: testEnvPath });
 
     expect(result.error).toBeUndefined();
     expect(result.parsed).toBeDefined();
@@ -63,16 +60,12 @@ DEBUG=false
     expect(result.parsed.WORDPRESS_USERNAME).toBe("testuser");
   });
 
-  it("should load .env from project root when called from different directory", async () => {
-    // Change to a different directory (e.g., home directory)
-    const tempDir = process.env.HOME || "/tmp";
-    process.chdir(tempDir);
-
+  it("should load environment variables using project root path", async () => {
     // Clear environment variables
     delete process.env.WORDPRESS_SITE_URL;
     delete process.env.WORDPRESS_USERNAME;
 
-    // Test the dotenv loading logic manually
+    // Test using path relative to project root (absolute)
     const { config } = await import("dotenv");
     const envPath = join(rootDir, ".env.test");
 
@@ -97,9 +90,8 @@ DEBUG=false
 
   it("should load environment variables in the correct format", async () => {
     const { config } = await import("dotenv");
-    const envPath = join(rootDir, ".env.test");
 
-    const result = config({ path: envPath });
+    const result = config({ path: testEnvPath });
 
     expect(result.parsed).toMatchObject({
       WORDPRESS_SITE_URL: expect.stringMatching(/^https?:\/\//),
@@ -124,7 +116,7 @@ DEBUG=false
     expect(existsSync(resolvedEnvPath)).toBe(true);
   });
 
-  it("should work when server is started from dist directory", async () => {
+  it("should work when server path resolves from dist directory", async () => {
     // Test path resolution logic that would be used in dist/index.js
     const mockDistPath = join(rootDir, "dist", "index.js");
     const mockDistDir = dirname(mockDistPath);
@@ -143,25 +135,19 @@ DEBUG=false
     expect(result.parsed.WORDPRESS_SITE_URL).toBe("https://test.example.com");
   });
 
-  it("should work when server is started from parent directory", async () => {
-    // Test that the absolute path approach works regardless of working directory
+  it("should work with absolute paths regardless of resolution method", async () => {
+    // The absolute path approach should always work
     const absoluteEnvPath = join(rootDir, ".env.test");
 
-    // Change to parent directory to simulate running from different location
-    const originalCwd = process.cwd();
-    try {
-      const parentDir = dirname(rootDir);
-      process.chdir(parentDir);
+    // Verify path exists
+    expect(existsSync(absoluteEnvPath)).toBe(true);
 
-      // The absolute path should still work
-      const { config } = await import("dotenv");
-      const result = config({ path: absoluteEnvPath });
+    // The absolute path should work
+    const { config } = await import("dotenv");
+    const result = config({ path: absoluteEnvPath });
 
-      expect(result.error).toBeUndefined();
-      expect(result.parsed.WORDPRESS_SITE_URL).toBe("https://test.example.com");
-      expect(result.parsed.WORDPRESS_USERNAME).toBe("testuser");
-    } finally {
-      process.chdir(originalCwd);
-    }
+    expect(result.error).toBeUndefined();
+    expect(result.parsed.WORDPRESS_SITE_URL).toBe("https://test.example.com");
+    expect(result.parsed.WORDPRESS_USERNAME).toBe("testuser");
   });
 });

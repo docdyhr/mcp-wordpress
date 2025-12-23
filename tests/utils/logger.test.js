@@ -4,7 +4,9 @@
 import { vi } from "vitest";
 // Import from source for proper coverage collection
 import { Logger, LoggerFactory, createLogger, createSiteLogger, createRequestLogger } from "../../src/utils/logger.ts";
-import { Config } from "../../src/config/Config.ts";
+// IMPORTANT: Import Config from the same path the logger uses (@/config/Config.js -> dist)
+// to ensure we're resetting the same singleton instance
+import { Config } from "../../dist/config/Config.js";
 
 // Mock console methods
 const originalConsoleError = console.error;
