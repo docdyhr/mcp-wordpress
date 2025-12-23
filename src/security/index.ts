@@ -41,6 +41,11 @@ export { SecurityMonitor, SecurityEvent } from "./SecurityMonitoring.js";
 import { SecurityCIPipeline, PipelineSecurityReport as _PipelineSecurityReport } from "./SecurityCIPipeline.js";
 export { SecurityCIPipeline, PipelineSecurityReport } from "./SecurityCIPipeline.js";
 
+// Security Types (new modular exports)
+export * from "./SecurityTypes.js";
+export { SecurityGateExecutor } from "./SecurityGateExecutor.js";
+export { SecurityReportGenerator } from "./SecurityReportGenerator.js";
+
 // Type definitions for external use
 export interface SecurityScanOptions {
   targets?: string[];
