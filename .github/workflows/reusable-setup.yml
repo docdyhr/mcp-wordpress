@@ -1,0 +1,41 @@
+name: Reusable Node.js Setup
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: 'Node.js version to use'
+        required: false
+        default: '20'
+        type: string
+      install-deps:
+        description: 'Install dependencies'
+        required: false
+        default: true
+        type: boolean
+      build:
+        description: 'Build project'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        if: ${{ inputs.install-deps }}
+        run: npm ci
+
+      - name: Build project
+        if: ${{ inputs.build }}
+        run: npm run build
