@@ -418,9 +418,20 @@ export class MetaGenerator {
   }
 
   private stripHtml(html: string): string {
-    return html
-      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    // Apply repeatedly to handle nested/malformed tags
+    let result = html;
+    let previous = "";
+
+    while (result !== previous) {
+      previous = result;
+      result = result
+        .replace(/<script[^>]*>/gi, "")
+        .replace(/<\/script[^>]*>/gi, "")
+        .replace(/<style[^>]*>/gi, "")
+        .replace(/<\/style[^>]*>/gi, "");
+    }
+
+    return result
       .replace(/<[^>]*>/g, "")
       .replace(/&nbsp;/g, " ")
       .replace(/&[#\w]+;/g, "")
@@ -683,11 +694,21 @@ export class MetaGenerator {
   }
 
   private sanitizeText(text: string): string {
-    return text
-      .replace(/<[^>]*>/g, "") // Remove HTML tags
-      .replace(/javascript:/gi, "") // Remove javascript: urls
-      .replace(/on\w+\s*=/gi, "") // Remove event handlers
-      .trim();
+    let result = text;
+    let previous = "";
+
+    // Apply repeatedly to prevent bypass via nested patterns
+    while (result !== previous) {
+      previous = result;
+      result = result
+        .replace(/<[^>]*>/g, "") // Remove HTML tags
+        .replace(/javascript\s*:/gi, "") // Remove javascript: urls
+        .replace(/data\s*:/gi, "") // Remove data: urls
+        .replace(/vbscript\s*:/gi, "") // Remove vbscript: urls
+        .replace(/on\w+\s*=/gi, ""); // Remove event handlers
+    }
+
+    return result.trim();
   }
 }
 

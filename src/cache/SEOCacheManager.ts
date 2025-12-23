@@ -242,7 +242,13 @@ export class SEOCacheManager extends CacheManager {
   private async invalidatePattern(pattern: string): Promise<void> {
     // Get all cache keys and filter by pattern
     const allKeys = await this.getAllKeys();
-    const regex = new RegExp("^" + pattern.replace(/\*/g, ".*").replace(/:/g, "\\:") + "$");
+
+    // Escape regex special characters first, then convert glob * to regex .*
+    // This prevents regex injection and handles patterns correctly
+    const escapedPattern = pattern
+      .replace(/[.+?^${}()|[\]\\]/g, "\\$&") // Escape regex special chars except *
+      .replace(/\*/g, ".*"); // Convert glob wildcards to regex
+    const regex = new RegExp("^" + escapedPattern + "$");
 
     const matchingKeys = allKeys.filter((key) => regex.test(key));
 

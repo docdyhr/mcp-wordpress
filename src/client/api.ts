@@ -691,7 +691,7 @@ export class WordPressClient implements IWordPressClient {
       return false;
     }
 
-    if (typeof data === "object" && data !== null && "pipe" in (data as Record<string, unknown>)) {
+    if (typeof data === "object" && data && "pipe" in (data as Record<string, unknown>)) {
       const potentialStream = (data as Record<string, unknown>).pipe;
       if (typeof potentialStream === "function") {
         return false;
@@ -936,27 +936,34 @@ export class WordPressClient implements IWordPressClient {
   }
 
   async uploadMedia(data: UploadMediaRequest): Promise<WordPressMedia> {
+    // Use file handle to avoid TOCTOU race condition
+    let fileHandle;
     try {
-      await fsPromises.access(data.file_path);
+      fileHandle = await fsPromises.open(data.file_path, "r");
     } catch {
       throw new Error(`File not found: ${data.file_path}`);
     }
 
-    const stats = await fsPromises.stat(data.file_path);
-    const filename = data.title || path.basename(data.file_path);
-    const fileBuffer = await fsPromises.readFile(data.file_path);
+    try {
+      const stats = await fileHandle.stat();
+      const filename = data.title || path.basename(data.file_path);
 
-    // Check if file is too large (WordPress default is 2MB for most installs)
-    const maxSize = 10 * 1024 * 1024; // 10MB reasonable limit
-    if (stats.size > maxSize) {
-      throw new Error(
-        `File too large: ${(stats.size / 1024 / 1024).toFixed(2)}MB. Maximum allowed: ${maxSize / 1024 / 1024}MB`,
-      );
+      // Check if file is too large (WordPress default is 2MB for most installs)
+      const maxSize = 10 * 1024 * 1024; // 10MB reasonable limit
+      if (stats.size > maxSize) {
+        throw new Error(
+          `File too large: ${(stats.size / 1024 / 1024).toFixed(2)}MB. Maximum allowed: ${maxSize / 1024 / 1024}MB`,
+        );
+      }
+
+      const fileBuffer = await fileHandle.readFile();
+
+      debug.log(`Uploading file: ${filename} (${(stats.size / 1024).toFixed(2)}KB)`);
+
+      return this.uploadFile(fileBuffer, filename, this.getMimeType(data.file_path), data);
+    } finally {
+      await fileHandle.close();
     }
-
-    debug.log(`Uploading file: ${filename} (${(stats.size / 1024).toFixed(2)}KB)`);
-
-    return this.uploadFile(fileBuffer, filename, this.getMimeType(data.file_path), data);
   }
 
   async uploadFile(

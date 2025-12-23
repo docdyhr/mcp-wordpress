@@ -88,14 +88,28 @@ export class ContentAnalyzer {
    */
   private stripHtml(html: string): string {
     // Remove HTML tags, scripts, and styles
-    return html
-      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    // Apply repeatedly to handle nested/malformed tags
+    let result = html;
+    let previous = "";
+
+    while (result !== previous) {
+      previous = result;
+      result = result
+        .replace(/<script[^>]*>/gi, "")
+        .replace(/<\/script[^>]*>/gi, "")
+        .replace(/<style[^>]*>/gi, "")
+        .replace(/<\/style[^>]*>/gi, "");
+    }
+
+    // Remove remaining content between script/style tags and other HTML
+    result = result
       .replace(/<[^>]*>/g, "")
       .replace(/&nbsp;/g, " ")
       .replace(/&[#\w]+;/g, "")
       .replace(/\s+/g, " ")
       .trim();
+
+    return result;
   }
 
   /**

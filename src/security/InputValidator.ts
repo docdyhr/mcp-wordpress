@@ -12,7 +12,9 @@ const logger = LoggerFactory.security();
 const URL_PATTERN = /^https?:\/\/[^\s<>'"{}|\\^`\[\]]+$/;
 const EMAIL_PATTERN = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const SLUG_PATTERN = /^[a-z0-9-]+$/;
-const SCRIPT_PATTERN = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
+// Patterns for detecting dangerous content (used for validation, not sanitization)
+const SCRIPT_TAG_PATTERN = /<script/gi;
+const SCRIPT_END_PATTERN = /<\/script/gi;
 const SQL_INJECTION_PATTERN = /('|(\\')|(;)|(\\x00)|(\\n)|(\\r)|(\\x1a)|(\\x22)|(\\x27)|(\\x5c)|(\\x60))/i;
 
 /**
@@ -23,9 +25,9 @@ export const SecuritySchemas = {
   safeString: z
     .string()
     .max(10000, "String too long")
-    .refine((val) => !SCRIPT_PATTERN.test(val), "Script tags not allowed")
-    .refine((val) => !val.includes("javascript:"), "JavaScript URLs not allowed")
-    .refine((val) => !val.includes("data:"), "Data URLs not allowed")
+    .refine((val) => !SCRIPT_TAG_PATTERN.test(val) && !SCRIPT_END_PATTERN.test(val), "Script tags not allowed")
+    .refine((val) => !/javascript\s*:/i.test(val), "JavaScript URLs not allowed")
+    .refine((val) => !/data\s*:/i.test(val), "Data URLs not allowed")
     .refine((val) => !val.includes("onerror="), "Event handlers not allowed")
     .refine((val) => !val.includes("onload="), "Event handlers not allowed")
     .refine((val) => !val.includes("onfocus="), "Event handlers not allowed"),
@@ -34,8 +36,8 @@ export const SecuritySchemas = {
   htmlContent: z
     .string()
     .max(100000, "Content too long")
-    .refine((val) => !SCRIPT_PATTERN.test(val), "Script tags not allowed")
-    .refine((val) => !val.includes("javascript:"), "JavaScript URLs not allowed")
+    .refine((val) => !SCRIPT_TAG_PATTERN.test(val) && !SCRIPT_END_PATTERN.test(val), "Script tags not allowed")
+    .refine((val) => !/javascript\s*:/i.test(val), "JavaScript URLs not allowed")
     .refine((val) => !val.includes("on[a-z]+="), "Event handlers not allowed"),
 
   // URL validation
@@ -43,8 +45,8 @@ export const SecuritySchemas = {
     .string()
     .url("Invalid URL format")
     .regex(URL_PATTERN, "URL contains invalid characters")
-    .refine((val) => !val.includes("javascript:"), "JavaScript URLs not allowed")
-    .refine((val) => !val.includes("data:"), "Data URLs not allowed"),
+    .refine((val) => !/javascript\s*:/i.test(val), "JavaScript URLs not allowed")
+    .refine((val) => !/data\s*:/i.test(val), "Data URLs not allowed"),
 
   // Email validation
   email: z
@@ -64,8 +66,11 @@ export const SecuritySchemas = {
   wpContent: z
     .string()
     .max(1000000, "Content too long")
-    .refine((val) => !SCRIPT_PATTERN.test(val), "Script tags not allowed in content")
-    .refine((val) => !val.includes("javascript:"), "JavaScript URLs not allowed"),
+    .refine(
+      (val) => !SCRIPT_TAG_PATTERN.test(val) && !SCRIPT_END_PATTERN.test(val),
+      "Script tags not allowed in content",
+    )
+    .refine((val) => !/javascript\s*:/i.test(val), "JavaScript URLs not allowed"),
 
   // Site ID validation
   siteId: z
@@ -111,14 +116,26 @@ export class InputSanitizer {
    * Sanitize HTML content by removing dangerous elements
    */
   static sanitizeHtml(input: string): string {
-    return input
-      .replace(SCRIPT_PATTERN, "") // Remove script tags
-      .replace(/javascript:/gi, "") // Remove javascript: URLs
-      .replace(/data:/gi, "") // Remove data: URLs
-      .replace(/on[a-z]+\s*=/gi, "") // Remove event handlers
-      .replace(/<iframe[^>]*>/gi, "") // Remove iframes
-      .replace(/<object[^>]*>/gi, "") // Remove objects
-      .replace(/<embed[^>]*>/gi, ""); // Remove embeds
+    let result = input;
+    let previous = "";
+
+    // Apply sanitization repeatedly until no more changes occur
+    // This prevents bypass via nested dangerous patterns like "jajavascript:vascript:"
+    while (result !== previous) {
+      previous = result;
+      result = result
+        .replace(/<script[^>]*>/gi, "") // Remove script open tags
+        .replace(/<\/script[^>]*>/gi, "") // Remove script close tags
+        .replace(/javascript\s*:/gi, "") // Remove javascript: URLs (with optional whitespace)
+        .replace(/data\s*:/gi, "") // Remove data: URLs (with optional whitespace)
+        .replace(/vbscript\s*:/gi, "") // Remove vbscript: URLs
+        .replace(/on[a-z]+\s*=/gi, "") // Remove event handlers
+        .replace(/<iframe[^>]*>/gi, "") // Remove iframes
+        .replace(/<object[^>]*>/gi, "") // Remove objects
+        .replace(/<embed[^>]*>/gi, ""); // Remove embeds
+    }
+
+    return result;
   }
 
   /**

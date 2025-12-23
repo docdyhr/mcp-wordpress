@@ -130,15 +130,14 @@ export class RequestManager extends BaseManager {
       if (data && method !== "GET") {
         if (
           data instanceof FormData ||
-          (typeof data === "object" && data && "append" in data && typeof data.append === "function")
+          (typeof data === "object" &&
+            "append" in data &&
+            typeof (data as Record<string, unknown>).append === "function")
         ) {
           // For FormData, don't set Content-Type (let fetch set it with boundary)
-          if (
-            fetchOptions.headers &&
-            typeof fetchOptions.headers === "object" &&
-            "Content-Type" in fetchOptions.headers
-          ) {
-            delete (fetchOptions.headers as Record<string, string>)["Content-Type"];
+          const headers = fetchOptions.headers as Record<string, string>;
+          if ("Content-Type" in headers) {
+            delete headers["Content-Type"];
           }
           fetchOptions.body = data as FormData;
         } else if (Buffer.isBuffer(data)) {

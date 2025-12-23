@@ -736,9 +736,20 @@ export class SiteAuditor {
    * Extract text content from HTML
    */
   private extractTextContent(html: string): string {
-    return html
-      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    // Apply repeatedly to handle nested/malformed tags
+    let result = html;
+    let previous = "";
+
+    while (result !== previous) {
+      previous = result;
+      result = result
+        .replace(/<script[^>]*>/gi, "")
+        .replace(/<\/script[^>]*>/gi, "")
+        .replace(/<style[^>]*>/gi, "")
+        .replace(/<\/style[^>]*>/gi, "");
+    }
+
+    return result
       .replace(/<[^>]*>/g, " ")
       .replace(/&[^;]+;/g, " ")
       .replace(/\s+/g, " ")
