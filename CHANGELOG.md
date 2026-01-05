@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.12.0...v3.0.0) (2026-01-05)
+
+### ⚠ BREAKING CHANGES
+
+* None - all exports remain compatible
+
+### 🚀 Features
+
+* add circuit breaker pattern and deprecation documentation ([aedac5b](https://github.com/docdyhr/mcp-wordpress/commit/aedac5b159abe4ddd133898224ca7c12e5cc20cc))
+
+### 🐛 Bug Fixes
+
+* resolve CodeQL security warnings ([bcbbb03](https://github.com/docdyhr/mcp-wordpress/commit/bcbbb03e5c406489411db345063a276a5126f839)), closes [#19](https://github.com/docdyhr/mcp-wordpress/issues/19) [#22](https://github.com/docdyhr/mcp-wordpress/issues/22) [#25-27](https://github.com/docdyhr/mcp-wordpress/issues/25-27) [#94](https://github.com/docdyhr/mcp-wordpress/issues/94) [#96](https://github.com/docdyhr/mcp-wordpress/issues/96) [#98](https://github.com/docdyhr/mcp-wordpress/issues/98) [#125-140](https://github.com/docdyhr/mcp-wordpress/issues/125-140) [#144](https://github.com/docdyhr/mcp-wordpress/issues/144)
+* **security:** run npm audit fix for js-yaml vulnerability ([bd4344c](https://github.com/docdyhr/mcp-wordpress/commit/bd4344cf78ef8cdc8180c149173d805301a30da4))
+* **security:** update MCP SDK and body-parser to fix vulnerabilities ([9bb73f7](https://github.com/docdyhr/mcp-wordpress/commit/9bb73f79614df97994c9a6e83563c1b3b9d9d047))
+* **tests:** align getAuthStatus tests with actual AuthStatus type ([3629bf1](https://github.com/docdyhr/mcp-wordpress/commit/3629bf1827d172e9bca0604d1a35f59b1a868e19))
+* **tests:** resolve flaky tests in env-loading, logger, and timing tests ([85229b6](https://github.com/docdyhr/mcp-wordpress/commit/85229b6186721e34b0570116e62e590b3d8581b5))
+* **tests:** update cache key regex to match base36 hash format ([07f9da0](https://github.com/docdyhr/mcp-wordpress/commit/07f9da04faf7c9853599a476c745d0a73fcf71ff))
+
+### ♻️ Refactoring
+
+* migrate relative imports to path aliases ([87eec2a](https://github.com/docdyhr/mcp-wordpress/commit/87eec2a2fb80956160f9612ddc407cf70be85540)), closes [#160](https://github.com/docdyhr/mcp-wordpress/issues/160)
+* modularize api.ts and performance.ts for improved maintainability ([3828459](https://github.com/docdyhr/mcp-wordpress/commit/382845975cd522093fa32792947b737f53b0ca26))
+* **security:** extract SecurityCIPipeline into modular components ([c041b18](https://github.com/docdyhr/mcp-wordpress/commit/c041b1873c35d8f84ac1b296e5f2d2f8759fcb63)), closes [#159](https://github.com/docdyhr/mcp-wordpress/issues/159)
+
+### 📚 Documentation
+
+* add sprint implementation documentation ([c3fb7b0](https://github.com/docdyhr/mcp-wordpress/commit/c3fb7b020312f53e5fafa66001aa0027c9cd3c14))
+* remove Smithery references (service no longer available) ([bfe0fd2](https://github.com/docdyhr/mcp-wordpress/commit/bfe0fd2a9d2912e3487593c04a7a8d8984a0b57a)), closes [#155](https://github.com/docdyhr/mcp-wordpress/issues/155)
+* update README with v2.12.0 features and test counts ([c4601ec](https://github.com/docdyhr/mcp-wordpress/commit/c4601ec2d7528aab20d327df050366335f6a8553))
+
 ## [2.12.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.13...v2.12.0) (2025-11-20)
 
 ### 🚀 Features
