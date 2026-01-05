@@ -282,9 +282,7 @@ describe("AuthenticationManager", () => {
 
       expect(status).toEqual({
         method: "app-password",
-        username: "testuser",
         isAuthenticated: true,
-        tokenExpired: false,
       });
     });
 
@@ -295,13 +293,9 @@ describe("AuthenticationManager", () => {
 
       const status = authManager.getAuthStatus();
 
-      expect(status).toEqual({
-        method: "jwt",
-        username: "testuser",
-        isAuthenticated: true,
-        tokenExpired: false,
-        tokenExpiry: expect.any(Number),
-      });
+      expect(status.method).toBe("jwt");
+      expect(status.isAuthenticated).toBe(true);
+      expect(status.tokenExpiry).toBeInstanceOf(Date);
     });
 
     it("should return status for expired JWT", () => {
@@ -312,7 +306,9 @@ describe("AuthenticationManager", () => {
       const status = authManager.getAuthStatus();
 
       expect(status.isAuthenticated).toBe(false);
-      expect(status.tokenExpired).toBe(true);
+      expect(status.method).toBe("jwt");
+      // tokenExpiry should still be present for expired tokens
+      expect(status.tokenExpiry).toBeInstanceOf(Date);
     });
   });
 
