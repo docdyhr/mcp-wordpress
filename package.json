@@ -156,7 +156,6 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.1.5",
     "markdownlint-cli": "^0.47.0",
-    "mcp-evals": "^2.0.1",
     "nock": "^14.0.10",
     "node-fetch": "^3.3.2",
     "open": "^10.2.0",
