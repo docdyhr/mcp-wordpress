@@ -1156,3 +1156,4 @@ implementation.
 **⭐ Found this helpful? [Give us a star on GitHub!](https://github.com/docdyhr/mcp-wordpress) ⭐**
 
 </div>
+
