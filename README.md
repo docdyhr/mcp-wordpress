@@ -102,7 +102,7 @@ Response: "✅ Authentication successful! Connected to: Your Site Name"
 2. **Install**: Claude Desktop → Extensions → Install → Select DXT file
 3. **Configure**: Enter your WordPress site URL and credentials
 
-✅ **Zero command line required** ✅ **Automatic updates** ✅ **Built-in security**
+✅ **Zero command line required** ✅ **Easy updates** ✅ **Built-in security**
 
 **[📖 Complete DXT Setup Guide →](docs/integrations/claude-desktop.md)**
 

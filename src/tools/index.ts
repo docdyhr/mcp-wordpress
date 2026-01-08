@@ -7,5 +7,6 @@ export { default as PerformanceTools } from "./performance.js";
 export { default as PostTools } from "./posts.js";
 export { default as SEOTools } from "./seo/index.js";
 export { default as SiteTools } from "./site.js";
+export { default as SystemTools } from "./system.js";
 export { default as TaxonomyTools } from "./taxonomies.js";
 export { default as UserTools } from "./users.js";
