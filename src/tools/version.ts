@@ -44,7 +44,7 @@ function getCurrentVersion(): string {
     const packageJsonPath = join(__dirname, "..", "..", "package.json");
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
     return packageJson.version;
-  } catch (error) {
+  } catch (_error) {
     return "unknown";
   }
 }
@@ -88,7 +88,7 @@ async function getLatestRelease(): Promise<GitHubRelease | null> {
     }
 
     return (await response.json()) as GitHubRelease;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }
