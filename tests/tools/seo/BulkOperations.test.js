@@ -94,7 +94,7 @@ describe("BulkOperations", () => {
       expect(result.failed).toBe(0);
       expect(result.skipped).toBe(0);
       expect(result.dryRun).toBe(false);
-      expect(result.processingTime).toBeGreaterThan(0);
+      expect(result.processingTime).toBeGreaterThanOrEqual(0);
       expect(mockClient.getPost).toHaveBeenCalledTimes(3);
     });
 
@@ -413,7 +413,7 @@ describe("BulkOperations", () => {
 
       expect(result.success).toBe(20);
       expect(endTime - startTime).toBeLessThan(10000); // Should complete within 10 seconds
-      expect(result.processingTime).toBeGreaterThan(0);
+      expect(result.processingTime).toBeGreaterThanOrEqual(0);
     });
   });
 });

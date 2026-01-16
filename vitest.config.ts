@@ -29,16 +29,15 @@ export default defineConfig({
     // Test file patterns - equivalent to Jest testMatch
     include: ["tests/**/*.test.js", "tests/**/*.spec.js"],
 
-    // Exclude problematic tests in CI due to memory/performance issues
+    // Exclude patterns - all tests now run in CI with proper isolation (forks + singleFork)
     exclude: [
       "node_modules/**",
       "dist/**",
       "coverage/**",
-      // Skip long-running performance tests in CI
-      ...(process.env.CI ? ["tests/performance/regression-detection.test.js"] : []),
-      // Exclude tests with heavy dynamic imports that cause memory issues in CI
-      ...(process.env.CI ? ["tests/env-loading.test.js"] : []),
-      ...(process.env.CI ? ["tests/client/WordPressClientRefactored.test.js"] : []),
+      // NOTE: Previously excluded tests are now enabled with better memory isolation:
+      // - tests/performance/regression-detection.test.js (uses fake timers, memory-safe)
+      // - tests/env-loading.test.js (lightweight file operations)
+      // - tests/client/WordPressClientRefactored.test.js (uses mocks, no real network calls)
     ],
 
     // Better test discovery
