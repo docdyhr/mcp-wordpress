@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.2](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.1...v3.1.2) (2026-01-30)
+
+### 🐛 Bug Fixes
+
+* **security:** update tar override to 7.5.7 and pact-node to 10.18.0 ([2c9794e](https://github.com/docdyhr/mcp-wordpress/commit/2c9794eb68840d0badc5b12bfe6ac62863c34d82))
+
 ## [3.1.1](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.0...v3.1.1) (2026-01-16)
 
 ### 🐛 Bug Fixes
