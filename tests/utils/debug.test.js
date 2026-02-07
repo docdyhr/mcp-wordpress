@@ -280,7 +280,7 @@ describe("Debug Utilities", () => {
       const timer = startTimer();
 
       await Promise.resolve("test");
-      await new Promise((resolve) => setTimeout(resolve, 1));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       const elapsed = timer.end();
 
