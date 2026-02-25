@@ -17,6 +17,10 @@ services:
     # Expose port if running in HTTP mode (uncomment if needed)
     # ports:
     #   - "3000:3000"
+    # Resource limits (compatible with standard docker compose)
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 1.0
     # Health check
     healthcheck:
       test: ["CMD", "node", "dist/index.js", "--health-check"]

@@ -128,7 +128,8 @@
         "form-data": "^4.0.3"
       }
     },
-    "tar": "7.5.7"
+    "minimatch": "10.2.3",
+    "tar": "7.5.8"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.4",

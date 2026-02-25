@@ -41,17 +41,12 @@ export default defineConfig({
     // No setup files for debugging
     // setupFiles: ["./tests/vitest.setup.ts"],
 
-    // Performance and debugging - optimized for speed
+    // Performance and debugging - optimized for speed (Vitest v4: poolOptions removed)
     isolate: false, // Faster test execution by sharing contexts
-    poolOptions: {
-      threads: {
-        singleThread: true, // Use single thread for debugging
-        isolate: false,
-      },
-    },
+    maxWorkers: 1, // Single worker for debugging
 
-    // Reporter configuration
-    reporters: ["basic"],
+    // Reporter configuration (Vitest v4: 'basic' removed, using 'default')
+    reporters: ["default"],
 
     // Bail on first failure for faster debugging
     bail: 1,

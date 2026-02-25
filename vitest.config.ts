@@ -105,17 +105,7 @@ export default defineConfig({
     maxWorkers: process.env.CI ? 1 : 2, // Single worker in CI for memory stability
     minWorkers: 1, // Vitest v4: replaces poolOptions.threads.minThreads
 
-    // Pool-specific options for memory management
-    poolOptions: {
-      threads: {
-        singleThread: process.env.CI ? true : false, // Force single-threaded in CI
-      },
-      forks: {
-        singleFork: process.env.CI ? true : false, // Force single-forked process in CI
-      },
-    },
-
-    // Memory management
+    // Memory management (Vitest v4: poolOptions removed, maxWorkers/isolate are top-level)
     forceRerunTriggers: ["**/package.json/**", "**/vitest.config.*/**", "**/vite.config.*/**"],
 
     // Reporter configuration - fixed deprecated 'basic' reporter
