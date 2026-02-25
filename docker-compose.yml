@@ -17,6 +17,15 @@ services:
     # Expose port if running in HTTP mode (uncomment if needed)
     # ports:
     #   - "3000:3000"
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
     # Health check
     healthcheck:
       test: ["CMD", "node", "dist/index.js", "--health-check"]
