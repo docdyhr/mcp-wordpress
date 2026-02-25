@@ -10,8 +10,9 @@ name: 🚀 Release & Publish
 on:
   push:
     branches: [main]
-  release:
-    types: [published]
+  # NOTE: release trigger removed — semantic-release on push handles NPM, Docker, and DXT.
+  # The release: [published] event caused duplicate runs (E403 on NPM, redundant Docker/DXT)
+  # because semantic-release creates the GitHub release, which re-triggered this workflow.
 
 env:
   NODE_VERSION: "20"
@@ -82,59 +83,16 @@ jobs:
           HUSKY: 0
           NODE_OPTIONS: "--max-old-space-size=4096"
 
-  # 📦 NPM Publish (Fallback for release events when semantic-release is skipped)
-  npm-publish:
-    name: 📦 Fallback NPM Publish
-    runs-on: ubuntu-latest
-    needs: semantic-release
-    if: always() && github.event_name == 'release' && needs.semantic-release.result == 'skipped'
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-          registry-url: "https://registry.npmjs.org"
-
-      - name: 📦 Install Dependencies
-        run: npm ci
-        env:
-          HUSKY: 0
-
-      - name: 🏗️ Build Project
-        run: npm run build
-        env:
-          HUSKY: 0
-
-      - name: 🧪 Verify Build
-        run: |
-          npm run typecheck
-          npm run lint
-          npm pack --dry-run
-        env:
-          HUSKY: 0
-
-      - name: 🔍 Check Ignore Files
-        run: npm run check:ignore
-
-      - name: 📦 Publish to NPM
-        run: npm publish --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          HUSKY: 0
+  # NOTE: Fallback NPM Publish job removed — semantic-release handles NPM publishing
+  # via its @semantic-release/npm plugin. The fallback was only useful for manual GitHub
+  # releases, but those no longer trigger this workflow (release event removed above).
 
   # 🐳 Docker Publish
   docker-publish:
     name: 🐳 Publish to Docker Hub
     runs-on: ubuntu-latest
     needs: semantic-release
-    if: needs.semantic-release.outputs.new-release-published == 'true' || github.event_name == 'release'
+    if: needs.semantic-release.outputs.new-release-published == 'true'
     permissions:
       contents: read
       packages: write
@@ -181,10 +139,6 @@ jobs:
           images: docker.io/docdyhr/mcp-wordpress
           tags: |
             type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}},enable=${{ github.event_name == 'release' }}
-            type=semver,pattern={{major}}.{{minor}},enable=${{ github.event_name == 'release' }}
-            type=semver,pattern={{major}},enable=${{ github.event_name == 'release' }}
             type=raw,value=${{ needs.semantic-release.outputs.new-release-version }},enable=${{ needs.semantic-release.outputs.new-release-published == 'true' }}
             type=raw,value=latest,enable={{is_default_branch}}
           labels: |
@@ -252,9 +206,6 @@ jobs:
 
       - name: 📝 Update Docker Hub Description
         uses: peter-evans/dockerhub-description@v4
-        if:
-          github.event_name == 'release' || needs.semantic-release.outputs.new-release-published == 'true' || github.ref
-          == 'refs/heads/main'
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -302,11 +253,7 @@ jobs:
     name: 📦 Build and Upload DXT Package
     runs-on: ubuntu-latest
     needs: [semantic-release]
-    if: |
-      always() && (
-        (needs.semantic-release.result == 'success' && needs.semantic-release.outputs.new-release-published == 'true') ||
-        github.event_name == 'release'
-      )
+    if: needs.semantic-release.result == 'success' && needs.semantic-release.outputs.new-release-published == 'true'
     permissions:
       contents: write
     steps:
@@ -350,13 +297,8 @@ jobs:
       - name: 🏷️ Get Release Info
         id: release-info
         run: |
-          if [ "${{ github.event_name }}" == "release" ]; then
-            echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-          else
-            echo "version=${{ needs.semantic-release.outputs.new-release-version }}" >> $GITHUB_OUTPUT
-            echo "tag=v${{ needs.semantic-release.outputs.new-release-version }}" >> $GITHUB_OUTPUT
-          fi
+          echo "version=${{ needs.semantic-release.outputs.new-release-version }}" >> $GITHUB_OUTPUT
+          echo "tag=v${{ needs.semantic-release.outputs.new-release-version }}" >> $GITHUB_OUTPUT
 
       - name: 📤 Upload DXT Package to Release
         uses: softprops/action-gh-release@v2
@@ -376,19 +318,15 @@ jobs:
   post-release:
     name: 🎉 Post-Release Actions
     runs-on: ubuntu-latest
-    needs: [semantic-release, npm-publish, docker-publish, dxt-package]
-    if: |
-      always() && (
-        (needs.semantic-release.result == 'success' && needs.semantic-release.outputs.new-release-published == 'true') ||
-        github.event_name == 'release'
-      )
+    needs: [semantic-release, docker-publish, dxt-package]
+    if: always() && needs.semantic-release.outputs.new-release-published == 'true'
     steps:
       - name: 📊 Release Summary
         run: |
           echo "🎉 Release Pipeline Summary"
           echo "=========================="
-          echo "🏷️ Version: ${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}"
-          echo "📦 NPM Status: ${{ needs.npm-publish.result }}"
+          echo "🏷️ Version: ${{ needs.semantic-release.outputs.new-release-version }}"
+          echo "📦 NPM: Published (via semantic-release)"
           echo "🐳 Docker Status: ${{ needs.docker-publish.result }}"
           echo "📦 DXT Package Status: ${{ needs.dxt-package.result }}"
           echo "🔄 Semantic Release: ${{ needs.semantic-release.result }}"
