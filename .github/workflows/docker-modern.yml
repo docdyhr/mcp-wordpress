@@ -95,12 +95,14 @@ jobs:
           fi
 
       - name: 📊 Test Summary
+        env:
+          META_TAGS: ${{ steps.meta.outputs.tags }}
         run: |
           echo "## 🧪 Docker Test Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Status:** ✅ Build successful" >> $GITHUB_STEP_SUMMARY
           echo "**Platform:** linux/amd64 (test)" >> $GITHUB_STEP_SUMMARY
-          echo "**Tags:** ${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tags:** ${META_TAGS}" >> $GITHUB_STEP_SUMMARY
 
   # Full build and push with all v6 features
   build-and-push:
@@ -196,25 +198,32 @@ jobs:
           outputs: ${{ inputs.push && 'type=image,push=true' || 'type=oci,dest=/tmp/image.tar' }}
 
       - name: 📊 Build Analysis
+        env:
+          BUILD_DIGEST: ${{ steps.build.outputs.digest }}
+          BUILD_METADATA: ${{ steps.build.outputs.metadata }}
         run: |
-          echo "## 🚀 Modern Docker Build Summary (v6)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Build Configuration" >> $GITHUB_STEP_SUMMARY
-          echo "**Image:** \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Tags:** ${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Platforms:** linux/amd64, linux/arm64, linux/arm64/v8" >> $GITHUB_STEP_SUMMARY
-          echo "**Push to Registry:** ${{ inputs.push }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### v6 Features Enabled" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **Provenance Attestation**: Cryptographic proof of build integrity" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **SBOM Generation**: Software Bill of Materials for security auditing" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **Advanced Caching**: Multi-level GitHub Actions + Registry cache" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **OCI Annotations**: Enhanced metadata compliance" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **Multi-platform**: AMD64, ARM64, ARM64v8 support" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Build Details" >> $GITHUB_STEP_SUMMARY
-          echo "**Build ID:** ${{ steps.build.outputs.digest }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Metadata:** ${{ steps.build.outputs.metadata }}" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## 🚀 Modern Docker Build Summary (v6)"
+            echo ""
+            echo "### Build Configuration"
+            echo "**Image:** \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}\`"
+            echo "**Platforms:** linux/amd64, linux/arm64, linux/arm64/v8"
+            echo "**Push to Registry:** ${{ inputs.push }}"
+            echo ""
+            echo "### v6 Features Enabled"
+            echo "- ✅ **Provenance Attestation**: Cryptographic proof of build integrity"
+            echo "- ✅ **SBOM Generation**: Software Bill of Materials for security auditing"
+            echo "- ✅ **Advanced Caching**: Multi-level GitHub Actions + Registry cache"
+            echo "- ✅ **OCI Annotations**: Enhanced metadata compliance"
+            echo "- ✅ **Multi-platform**: AMD64, ARM64, ARM64v8 support"
+            echo ""
+            echo "### Build Details"
+            echo "**Build ID:** ${BUILD_DIGEST}"
+            echo "**Metadata:**"
+            echo '```json'
+            echo "${BUILD_METADATA}" | jq . 2>/dev/null || echo "${BUILD_METADATA}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: 🔍 Security Scan (if pushed)
         if: inputs.push

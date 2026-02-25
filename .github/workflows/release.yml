@@ -199,15 +199,19 @@ jobs:
             org.opencontainers.image.licenses=MIT
 
       - name: 🔍 Debug Extracted Tags
+        env:
+          META_TAGS: ${{ steps.meta.outputs.tags }}
+          META_LABELS: ${{ steps.meta.outputs.labels }}
+          META_JSON: ${{ steps.meta.outputs.json }}
         run: |
           echo "Extracted tags:"
-          echo "${{ steps.meta.outputs.tags }}"
+          echo "${META_TAGS}"
           echo ""
           echo "Extracted labels:"
-          echo "${{ steps.meta.outputs.labels }}"
+          echo "${META_LABELS}"
           echo ""
           echo "Metadata JSON:"
-          echo "${{ steps.meta.outputs.json }}"
+          echo "${META_JSON}" | jq . 2>/dev/null || echo "${META_JSON}"
 
       - name: 🏗️ Build and Push Docker Image
         id: docker-build
@@ -259,19 +263,22 @@ jobs:
 
       - name: 🎯 Verify Docker Push Success
         id: verify-docker
+        env:
+          META_TAGS: ${{ steps.meta.outputs.tags }}
+          RELEASE_VERSION: ${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}
         run: |
           echo "Docker build and push completed successfully"
           echo "Published tags:"
-          echo "${{ steps.meta.outputs.tags }}"
+          echo "${META_TAGS}"
           echo ""
-          echo "Version: ${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}"
+          echo "Version: ${RELEASE_VERSION}"
 
           # Wait for Docker Hub propagation
           echo "Waiting for Docker Hub propagation..."
           sleep 30
 
           # Verify the image was pushed successfully
-          VERSION="${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}"
+          VERSION="${RELEASE_VERSION}"
           echo "Verifying Docker Hub publishing for version: $VERSION"
 
           # Try to pull the image to verify it exists
