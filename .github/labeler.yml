@@ -1,14 +1,21 @@
-# Automatically apply labels based on file path patterns
+# Automatically apply labels based on file path patterns (labeler v5 format)
 security:
-  - "src/security/**"
+  - changed-files:
+      - any-glob-to-any-file: "src/security/**"
 client:
-  - "src/client/**"
+  - changed-files:
+      - any-glob-to-any-file: "src/client/**"
 cache:
-  - "src/cache/**"
+  - changed-files:
+      - any-glob-to-any-file: "src/cache/**"
 docs:
-  - "docs/**"
+  - changed-files:
+      - any-glob-to-any-file: "docs/**"
 config:
-  - "*.json"
-  - ".github/**"
+  - changed-files:
+      - any-glob-to-any-file:
+          - "*.json"
+          - ".github/**"
 ci:
-  - ".github/workflows/**"
+  - changed-files:
+      - any-glob-to-any-file: ".github/workflows/**"
