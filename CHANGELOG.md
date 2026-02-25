@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.6](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.5...v3.1.6) (2026-02-25)
+
+### 🐛 Bug Fixes
+
+* remove release event trigger to prevent duplicate publish runs ([#166](https://github.com/docdyhr/mcp-wordpress/issues/166)) ([95abda0](https://github.com/docdyhr/mcp-wordpress/commit/95abda001cc7a242fa8efc43471b15842de4beac))
+
 ## [3.1.5](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.4...v3.1.5) (2026-02-25)
 
 ### 🐛 Bug Fixes
