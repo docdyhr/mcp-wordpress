@@ -10,6 +10,7 @@ name: 🚀 Release & Publish
 on:
   push:
     branches: [main]
+  workflow_dispatch:
   # NOTE: release trigger removed — semantic-release on push handles NPM, Docker, and DXT.
   # The release: [published] event caused duplicate runs (E403 on NPM, redundant Docker/DXT)
   # because semantic-release creates the GitHub release, which re-triggered this workflow.
@@ -24,7 +25,7 @@ jobs:
   semantic-release:
     name: 🏷️ Semantic Release
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     permissions:
       contents: write
       issues: write
