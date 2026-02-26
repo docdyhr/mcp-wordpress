@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.7](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.6...v3.1.7) (2026-02-26)
+
+### 🐛 Bug Fixes
+
+* add workflow_dispatch trigger to release workflow for manual runs ([608f33f](https://github.com/docdyhr/mcp-wordpress/commit/608f33fee72ca88ca68c2c024b45bb721a308735))
+* correct semantic-release output variable names to restore DXT and Docker publishing ([bf771cb](https://github.com/docdyhr/mcp-wordpress/commit/bf771cbcbbe5a04eccc87065c17d9d6267b8e836))
+
 ## [3.1.6](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.5...v3.1.6) (2026-02-25)
 
 ### 🐛 Bug Fixes
