@@ -30,8 +30,8 @@ jobs:
       issues: write
       pull-requests: write
     outputs:
-      new-release-published: ${{ steps.semantic.outputs.new-release-published }}
-      new-release-version: ${{ steps.semantic.outputs.new-release-version }}
+      new-release-published: ${{ steps.semantic.outputs.new_release_published }}
+      new-release-version: ${{ steps.semantic.outputs.new_release_version }}
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
@@ -257,9 +257,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: 📥 Checkout Code
+      - name: 📥 Checkout Release Tag
         uses: actions/checkout@v4
         with:
+          # Checkout the release tag so package.json has the bumped version
+          ref: v${{ needs.semantic-release.outputs.new-release-version }}
           fetch-depth: 0
 
       - name: 📦 Setup Node.js
@@ -270,11 +272,6 @@ jobs:
 
       - name: 📦 Install Dependencies
         run: npm ci
-        env:
-          HUSKY: 0
-
-      - name: 🏗️ Build Project
-        run: npm run build
         env:
           HUSKY: 0
 
@@ -293,17 +290,13 @@ jobs:
           ls -la mcp-wordpress.dxt
           echo "DXT package size: $(du -h mcp-wordpress.dxt | cut -f1)"
           file mcp-wordpress.dxt
-
-      - name: 🏷️ Get Release Info
-        id: release-info
-        run: |
-          echo "version=${{ needs.semantic-release.outputs.new-release-version }}" >> $GITHUB_OUTPUT
-          echo "tag=v${{ needs.semantic-release.outputs.new-release-version }}" >> $GITHUB_OUTPUT
+          # Verify version matches the release
+          node -e "const m = require('./package.json'); if (m.version !== '${{ needs.semantic-release.outputs.new-release-version }}') { console.error('Version mismatch:', m.version, 'vs', '${{ needs.semantic-release.outputs.new-release-version }}'); process.exit(1); } else { console.log('Version verified:', m.version); }"
 
       - name: 📤 Upload DXT Package to Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.release-info.outputs.tag }}
+          tag_name: v${{ needs.semantic-release.outputs.new-release-version }}
           files: mcp-wordpress.dxt
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -311,8 +304,8 @@ jobs:
         run: |
           echo "✅ DXT package uploaded successfully!"
           echo "📦 Package: mcp-wordpress.dxt"
-          echo "🏷️ Version: ${{ steps.release-info.outputs.version }}"
-          echo "🔗 Download URL: https://github.com/docdyhr/mcp-wordpress/releases/download/${{ steps.release-info.outputs.tag }}/mcp-wordpress.dxt"
+          echo "🏷️ Version: ${{ needs.semantic-release.outputs.new-release-version }}"
+          echo "🔗 Download URL: https://github.com/docdyhr/mcp-wordpress/releases/download/v${{ needs.semantic-release.outputs.new-release-version }}/mcp-wordpress.dxt"
 
   # 🎉 Post-Release Actions
   post-release:
