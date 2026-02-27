@@ -7,7 +7,8 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { readFileSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 
 const CheckVersionArgsSchema = z.object({
   current_version: z.string().optional().describe("Override current version for testing"),
@@ -41,6 +42,8 @@ interface GitHubRelease {
  */
 function getCurrentVersion(): string {
   try {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
     const packageJsonPath = join(__dirname, "..", "..", "package.json");
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
     return packageJson.version;
