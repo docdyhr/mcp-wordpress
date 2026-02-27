@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.8](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.7...v3.1.8) (2026-02-27)
+
+### 🐛 Bug Fixes
+
+* use ESM-compatible path resolution in wp_check_version tool ([f1d3e65](https://github.com/docdyhr/mcp-wordpress/commit/f1d3e65b2da56358c48a8c81c114dd372802ec66))
+
 ## [3.1.7](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.6...v3.1.7) (2026-02-26)
 
 ### 🐛 Bug Fixes
