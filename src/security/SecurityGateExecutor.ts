@@ -105,8 +105,8 @@ export class SecurityGateExecutor {
   ): Promise<CheckResult> {
     const startTime = Date.now();
     const findings: SecurityFinding[] = [];
-    let score: number = 100;
-    let details = "";
+    let score: number | undefined;
+    let details: string;
 
     if (options.dryRun) {
       return {

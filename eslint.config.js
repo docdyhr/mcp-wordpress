@@ -1,5 +1,4 @@
 import js from "@eslint/js";
-import nodePlugin from "eslint-plugin-node";
 import tsParser from "@typescript-eslint/parser";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
 import prettierConfig from "eslint-config-prettier";
@@ -28,9 +27,6 @@ export default [
         global: "writable",
       },
     },
-    plugins: {
-      node: nodePlugin,
-    },
     rules: {
       // General rules
       "no-unused-vars": [
@@ -55,9 +51,8 @@ export default [
       "arrow-spacing": "error",
       "template-curly-spacing": "error",
 
-      // Node.js specific
-      "node/no-unsupported-features/es-syntax": "off",
-      "node/no-missing-import": "off",
+      // ESLint 10: disable preserve-caught-error (65 catch blocks use re-throw pattern)
+      "preserve-caught-error": "off",
 
       // Warn if a comment starts with 'Doc:' (to discourage its use).
       // Note: This does not enforce using 'docs:' instead; it only warns on 'Doc:'.

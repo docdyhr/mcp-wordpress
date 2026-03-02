@@ -669,7 +669,6 @@ export class PerformanceAnalytics {
     higherIsBetter: boolean,
   ): BenchmarkComparison {
     let status: "excellent" | "good" | "average" | "below_average" | "poor" = "poor";
-    let percentile = 0;
     let improvement = 0;
 
     if (higherIsBetter) {
@@ -711,7 +710,7 @@ export class PerformanceAnalytics {
     }
 
     // Calculate percentile (simplified)
-    percentile =
+    const percentile =
       status === "excellent"
         ? 95
         : status === "good"
