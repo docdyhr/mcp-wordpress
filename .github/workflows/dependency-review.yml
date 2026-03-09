@@ -4,12 +4,8 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     branches: [main, develop]
-    # Skip dependency review for automated dependency updates
+    # Skip dependency review for non-dependency files
     paths-ignore:
-      - "package-lock.json"
-      - "npm-shrinkwrap.json"
-      - "yarn.lock"
-      - "pnpm-lock.yaml"
       - "security-fixes.txt"
       - "update-report-*.md"
       - "updates-*.json"
@@ -35,7 +31,7 @@ jobs:
       )
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 🔍 Dependency Review
         uses: actions/dependency-review-action@v4
@@ -63,10 +59,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 📦 Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "npm"
@@ -116,10 +112,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 📦 Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "npm"
@@ -168,7 +164,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 🔍 Package Lock Analysis
         run: |
