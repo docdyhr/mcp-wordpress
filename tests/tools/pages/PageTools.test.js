@@ -65,8 +65,8 @@ describe("PageTools", () => {
       const listPagesTool = tools.find((t) => t.name === "wp_list_pages");
 
       expect(listPagesTool.description).toContain("Lists pages from a WordPress site");
-      expect(listPagesTool.parameters).toBeDefined();
-      expect(Array.isArray(listPagesTool.parameters)).toBe(true);
+      expect(listPagesTool.inputSchema).toBeDefined();
+      expect(typeof listPagesTool.inputSchema).toBe("object");
     });
   });
 

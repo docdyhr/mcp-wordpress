@@ -61,31 +61,30 @@ describe("PageTools", () => {
       });
 
       // wp_list_pages should have optional parameters
-      expect(toolsByName["wp_list_pages"].parameters).toHaveLength(3);
-      const listParams = toolsByName["wp_list_pages"].parameters;
-      expect(listParams.find((p) => p.name === "per_page")).toBeTruthy();
-      expect(listParams.find((p) => p.name === "search")).toBeTruthy();
-      expect(listParams.find((p) => p.name === "status")).toBeTruthy();
+      const listProps = toolsByName["wp_list_pages"].inputSchema.properties;
+      expect(Object.keys(listProps)).toHaveLength(3);
+      expect(listProps.per_page).toBeTruthy();
+      expect(listProps.search).toBeTruthy();
+      expect(listProps.status).toBeTruthy();
 
       // wp_get_page should require id
-      const getPageParams = toolsByName["wp_get_page"].parameters;
-      const idParam = getPageParams.find((p) => p.name === "id");
-      expect(idParam).toBeTruthy();
-      expect(idParam.required).toBe(true);
+      const getPageSchema = toolsByName["wp_get_page"].inputSchema;
+      expect(getPageSchema.properties.id).toBeTruthy();
+      expect(getPageSchema.required).toContain("id");
 
       // wp_create_page should have title and content parameters
-      const createParams = toolsByName["wp_create_page"].parameters;
-      expect(createParams.find((p) => p.name === "title")).toBeTruthy();
-      expect(createParams.find((p) => p.name === "content")).toBeTruthy();
-      expect(createParams.find((p) => p.name === "title").required).toBe(true);
+      const createSchema = toolsByName["wp_create_page"].inputSchema;
+      expect(createSchema.properties.title).toBeTruthy();
+      expect(createSchema.properties.content).toBeTruthy();
+      expect(createSchema.required).toContain("title");
 
       // wp_update_page should require id
-      const updateParams = toolsByName["wp_update_page"].parameters;
-      expect(updateParams.find((p) => p.name === "id").required).toBe(true);
+      const updateSchema = toolsByName["wp_update_page"].inputSchema;
+      expect(updateSchema.required).toContain("id");
 
       // wp_delete_page should require id
-      const deleteParams = toolsByName["wp_delete_page"].parameters;
-      expect(deleteParams.find((p) => p.name === "id").required).toBe(true);
+      const deleteSchema = toolsByName["wp_delete_page"].inputSchema;
+      expect(deleteSchema.required).toContain("id");
     });
   });
 

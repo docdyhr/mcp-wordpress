@@ -60,36 +60,35 @@ describe("UserTools", () => {
       });
 
       // wp_list_users should have optional search and roles parameters
-      const listParams = toolsByName["wp_list_users"].parameters;
-      expect(listParams.find((p) => p.name === "search")).toBeTruthy();
-      expect(listParams.find((p) => p.name === "roles")).toBeTruthy();
-      expect(listParams.find((p) => p.name === "roles").type).toBe("array");
+      const listProps = toolsByName["wp_list_users"].inputSchema.properties;
+      expect(listProps.search).toBeTruthy();
+      expect(listProps.roles).toBeTruthy();
+      expect(listProps.roles.type).toBe("array");
 
       // wp_get_user should require id
-      const getUserParams = toolsByName["wp_get_user"].parameters;
-      const idParam = getUserParams.find((p) => p.name === "id");
-      expect(idParam).toBeTruthy();
-      expect(idParam.required).toBe(true);
+      const getUserSchema = toolsByName["wp_get_user"].inputSchema;
+      expect(getUserSchema.properties.id).toBeTruthy();
+      expect(getUserSchema.required).toContain("id");
 
       // wp_get_current_user should have no parameters
-      const getCurrentUserParams = toolsByName["wp_get_current_user"].parameters;
-      expect(getCurrentUserParams).toHaveLength(0);
+      const getCurrentUserProps = toolsByName["wp_get_current_user"].inputSchema.properties;
+      expect(Object.keys(getCurrentUserProps)).toHaveLength(0);
 
       // wp_create_user should have required username, email, password
-      const createParams = toolsByName["wp_create_user"].parameters;
-      expect(createParams.find((p) => p.name === "username").required).toBe(true);
-      expect(createParams.find((p) => p.name === "email").required).toBe(true);
-      expect(createParams.find((p) => p.name === "password").required).toBe(true);
-      expect(createParams.find((p) => p.name === "roles")).toBeTruthy();
+      const createSchema = toolsByName["wp_create_user"].inputSchema;
+      expect(createSchema.required).toContain("username");
+      expect(createSchema.required).toContain("email");
+      expect(createSchema.required).toContain("password");
+      expect(createSchema.properties.roles).toBeTruthy();
 
       // wp_update_user should require id
-      const updateParams = toolsByName["wp_update_user"].parameters;
-      expect(updateParams.find((p) => p.name === "id").required).toBe(true);
+      const updateSchema = toolsByName["wp_update_user"].inputSchema;
+      expect(updateSchema.required).toContain("id");
 
       // wp_delete_user should require id
-      const deleteParams = toolsByName["wp_delete_user"].parameters;
-      expect(deleteParams.find((p) => p.name === "id").required).toBe(true);
-      expect(deleteParams.find((p) => p.name === "reassign")).toBeTruthy();
+      const deleteSchema = toolsByName["wp_delete_user"].inputSchema;
+      expect(deleteSchema.required).toContain("id");
+      expect(deleteSchema.properties.reassign).toBeTruthy();
     });
   });
 

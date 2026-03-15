@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import { WordPressClient } from "@/client/api.js";
+import type { MCPToolSchema } from "@/types/mcp.js";
 import { MediaQueryParams, UpdateMediaRequest, UploadMediaRequest } from "@/types/wordpress.js";
 import { getErrorMessage } from "@/utils/error.js";
 import { toolParams } from "./params.js";
@@ -55,140 +56,131 @@ export class MediaTools {
   public getTools(): Array<{
     name: string;
     description: string;
-    parameters?: Array<{
-      name: string;
-      type?: string;
-      description?: string;
-      required?: boolean;
-      enum?: string[];
-      items?: unknown;
-    }>;
+    inputSchema?: MCPToolSchema;
     handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
   }> {
     return [
       {
         name: "wp_list_media",
         description: "Lists media items from a WordPress site, with filters.",
-        parameters: [
-          {
-            name: "per_page",
-            type: "number",
-            description: "Number of items to return per page (max 100).",
+        inputSchema: {
+          type: "object",
+          properties: {
+            per_page: {
+              type: "number",
+              description: "Number of items to return per page (max 100).",
+            },
+            search: {
+              type: "string",
+              description: "Limit results to those matching a search term.",
+            },
+            media_type: {
+              type: "string",
+              description: "Limit results to a specific media type.",
+              enum: ["image", "video", "audio", "application"],
+            },
           },
-          {
-            name: "search",
-            type: "string",
-            description: "Limit results to those matching a search term.",
-          },
-          {
-            name: "media_type",
-            type: "string",
-            description: "Limit results to a specific media type.",
-            enum: ["image", "video", "audio", "application"],
-          },
-        ],
+        },
         handler: this.handleListMedia.bind(this),
       },
       {
         name: "wp_get_media",
         description: "Retrieves a single media item by its ID.",
-        parameters: [
-          {
-            name: "id",
-            type: "number",
-            required: true,
-            description: "The unique identifier for the media item.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "The unique identifier for the media item.",
+            },
           },
-        ],
+          required: ["id"],
+        },
         handler: this.handleGetMedia.bind(this),
       },
       {
         name: "wp_upload_media",
         description: "Uploads a file to the WordPress media library.",
-        parameters: [
-          {
-            name: "file_path",
-            type: "string",
-            required: true,
-            description: "The local, absolute path to the file to upload.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            file_path: {
+              type: "string",
+              description: "The local, absolute path to the file to upload.",
+            },
+            title: {
+              type: "string",
+              description: "The title for the media item.",
+            },
+            alt_text: {
+              type: "string",
+              description: "Alternative text for the media item (for accessibility).",
+            },
+            caption: {
+              type: "string",
+              description: "The caption for the media item.",
+            },
+            description: {
+              type: "string",
+              description: "The description for the media item.",
+            },
+            post: {
+              type: "number",
+              description: "The ID of a post to attach this media to.",
+            },
           },
-          {
-            name: "title",
-            type: "string",
-            description: "The title for the media item.",
-          },
-          {
-            name: "alt_text",
-            type: "string",
-            description: "Alternative text for the media item (for accessibility).",
-          },
-          {
-            name: "caption",
-            type: "string",
-            description: "The caption for the media item.",
-          },
-          {
-            name: "description",
-            type: "string",
-            description: "The description for the media item.",
-          },
-          {
-            name: "post",
-            type: "number",
-            description: "The ID of a post to attach this media to.",
-          },
-        ],
+          required: ["file_path"],
+        },
         handler: this.handleUploadMedia.bind(this),
       },
       {
         name: "wp_update_media",
         description: "Updates the metadata of an existing media item.",
-        parameters: [
-          {
-            name: "id",
-            type: "number",
-            required: true,
-            description: "The ID of the media item to update.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "The ID of the media item to update.",
+            },
+            title: {
+              type: "string",
+              description: "The new title for the media item.",
+            },
+            alt_text: {
+              type: "string",
+              description: "The new alternative text.",
+            },
+            caption: {
+              type: "string",
+              description: "The new caption.",
+            },
+            description: {
+              type: "string",
+              description: "The new description.",
+            },
           },
-          {
-            name: "title",
-            type: "string",
-            description: "The new title for the media item.",
-          },
-          {
-            name: "alt_text",
-            type: "string",
-            description: "The new alternative text.",
-          },
-          {
-            name: "caption",
-            type: "string",
-            description: "The new caption.",
-          },
-          {
-            name: "description",
-            type: "string",
-            description: "The new description.",
-          },
-        ],
+          required: ["id"],
+        },
         handler: this.handleUpdateMedia.bind(this),
       },
       {
         name: "wp_delete_media",
         description: "Deletes a media item.",
-        parameters: [
-          {
-            name: "id",
-            type: "number",
-            required: true,
-            description: "The ID of the media item to delete.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "The ID of the media item to delete.",
+            },
+            force: {
+              type: "boolean",
+              description: "If true, permanently delete. If false, move to trash. Defaults to false.",
+            },
           },
-          {
-            name: "force",
-            type: "boolean",
-            description: "If true, permanently delete. If false, move to trash. Defaults to false.",
-          },
-        ],
+          required: ["id"],
+        },
         handler: this.handleDeleteMedia.bind(this),
       },
     ];

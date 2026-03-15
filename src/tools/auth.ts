@@ -1,4 +1,5 @@
 import { WordPressClient } from "@/client/api.js";
+import type { MCPToolSchema } from "@/types/mcp.js";
 import { AuthMethod } from "@/types/client.js";
 import { getErrorMessage } from "@/utils/error.js";
 
@@ -14,14 +15,7 @@ export class AuthTools {
   public getTools(): Array<{
     name: string;
     description: string;
-    parameters?: Array<{
-      name: string;
-      type?: string;
-      description?: string;
-      required?: boolean;
-      enum?: string[];
-      items?: unknown;
-    }>;
+    inputSchema?: MCPToolSchema;
     handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
   }> {
     return [
@@ -35,42 +29,48 @@ export class AuthTools {
           "• Verify setup: Use this after configuring new credentials\n" +
           "• Troubleshoot: Run when experiencing connection issues\n" +
           "• Health check: Regular verification of WordPress connectivity",
-        parameters: [], // The 'site' parameter is added dynamically by the server
+        // The 'site' parameter is added dynamically by the server
+        inputSchema: {
+          type: "object",
+          properties: {},
+        },
         handler: this.handleTestAuth.bind(this),
       },
       {
         name: "wp_get_auth_status",
         description: "Gets the current authentication status for a configured WordPress site.",
-        parameters: [],
+        inputSchema: {
+          type: "object",
+          properties: {},
+        },
         handler: this.handleGetAuthStatus.bind(this),
       },
       {
         name: "wp_switch_auth_method",
         description: "Switches the authentication method for a site for the current session.",
-        parameters: [
-          {
-            name: "method",
-            type: "string",
-            required: true,
-            description: "The new authentication method to use.",
-            enum: ["app-password", "jwt", "basic", "api-key", "cookie"],
+        inputSchema: {
+          type: "object",
+          properties: {
+            method: {
+              type: "string",
+              description: "The new authentication method to use.",
+              enum: ["app-password", "jwt", "basic", "api-key", "cookie"],
+            },
+            username: {
+              type: "string",
+              description: "The username for 'app-password' or 'basic' authentication.",
+            },
+            password: {
+              type: "string",
+              description: "The Application Password for 'app-password' or password for 'basic' auth.",
+            },
+            jwt_token: {
+              type: "string",
+              description: "The token for 'jwt' authentication.",
+            },
           },
-          {
-            name: "username",
-            type: "string",
-            description: "The username for 'app-password' or 'basic' authentication.",
-          },
-          {
-            name: "password",
-            type: "string",
-            description: "The Application Password for 'app-password' or password for 'basic' auth.",
-          },
-          {
-            name: "jwt_token",
-            type: "string",
-            description: "The token for 'jwt' authentication.",
-          },
-        ],
+          required: ["method"],
+        },
         handler: this.handleSwitchAuthMethod.bind(this),
       },
     ];

@@ -67,24 +67,24 @@ describe("CommentTools", () => {
       const listCommentsTool = tools.find((t) => t.name === "wp_list_comments");
 
       expect(listCommentsTool.description).toContain("Lists comments from a WordPress site");
-      expect(listCommentsTool.parameters).toBeDefined();
-      expect(Array.isArray(listCommentsTool.parameters)).toBe(true);
+      expect(listCommentsTool.inputSchema).toBeDefined();
+      expect(typeof listCommentsTool.inputSchema).toBe("object");
     });
 
     it("should include status enum for comment filters", () => {
       const tools = commentTools.getTools();
       const listCommentsTool = tools.find((t) => t.name === "wp_list_comments");
-      const statusParam = listCommentsTool.parameters.find((p) => p.name === "status");
+      const statusProp = listCommentsTool.inputSchema.properties.status;
 
-      expect(statusParam.enum).toEqual(["hold", "approve", "spam", "trash"]);
+      expect(statusProp.enum).toEqual(["hold", "approve", "spam", "trash"]);
     });
 
     it("should include status enum for comment updates", () => {
       const tools = commentTools.getTools();
       const updateCommentTool = tools.find((t) => t.name === "wp_update_comment");
-      const statusParam = updateCommentTool.parameters.find((p) => p.name === "status");
+      const statusProp = updateCommentTool.inputSchema.properties.status;
 
-      expect(statusParam.enum).toEqual(["hold", "approve", "spam", "trash"]);
+      expect(statusProp.enum).toEqual(["hold", "approve", "spam", "trash"]);
     });
   });
 

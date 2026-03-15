@@ -1,4 +1,5 @@
 import { WordPressClient } from "@/client/api.js";
+import type { MCPToolSchema } from "@/types/mcp.js";
 import { WordPressApplicationPassword } from "@/types/wordpress.js";
 import { getErrorMessage } from "@/utils/error.js";
 
@@ -14,43 +15,39 @@ export class SiteTools {
   public getTools(): Array<{
     name: string;
     description: string;
-    parameters?: Array<{
-      name: string;
-      type?: string;
-      description?: string;
-      required?: boolean;
-      enum?: string[];
-      items?: unknown;
-    }>;
+    inputSchema?: MCPToolSchema;
     handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
   }> {
     return [
       {
         name: "wp_get_site_settings",
         description: "Retrieves the general settings for a WordPress site.",
-        parameters: [],
+        inputSchema: {
+          type: "object",
+          properties: {},
+        },
         handler: this.handleGetSiteSettings.bind(this),
       },
       {
         name: "wp_update_site_settings",
         description: "Updates one or more general settings for a WordPress site.",
-        parameters: [
-          {
-            name: "title",
-            type: "string",
-            description: "The title of the site.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            title: {
+              type: "string",
+              description: "The title of the site.",
+            },
+            description: {
+              type: "string",
+              description: "The tagline or description of the site.",
+            },
+            timezone: {
+              type: "string",
+              description: "A city in the same timezone, e.g., 'America/New_York'.",
+            },
           },
-          {
-            name: "description",
-            type: "string",
-            description: "The tagline or description of the site.",
-          },
-          {
-            name: "timezone",
-            type: "string",
-            description: "A city in the same timezone, e.g., 'America/New_York'.",
-          },
-        ],
+        },
         handler: this.handleUpdateSiteSettings.bind(this),
       },
       {
@@ -63,71 +60,74 @@ export class SiteTools {
           '• Search pages: `wp_search_site --term="about" --type="pages"`\n' +
           '• Search media: `wp_search_site --term="logo" --type="media"`\n' +
           '• Find specific content: `wp_search_site --term="contact form"`',
-        parameters: [
-          {
-            name: "term",
-            type: "string",
-            required: true,
-            description: "The search term to look for.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            term: {
+              type: "string",
+              description: "The search term to look for.",
+            },
+            type: {
+              type: "string",
+              description: "The type of content to search.",
+              enum: ["posts", "pages", "media"],
+            },
           },
-          {
-            name: "type",
-            type: "string",
-            description: "The type of content to search.",
-            enum: ["posts", "pages", "media"],
-          },
-        ],
+          required: ["term"],
+        },
         handler: this.handleSearchSite.bind(this),
       },
       {
         name: "wp_get_application_passwords",
         description: "Lists application passwords for a specific user.",
-        parameters: [
-          {
-            name: "user_id",
-            type: "number",
-            required: true,
-            description: "The ID of the user to get application passwords for.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            user_id: {
+              type: "number",
+              description: "The ID of the user to get application passwords for.",
+            },
           },
-        ],
+          required: ["user_id"],
+        },
         handler: this.handleGetApplicationPasswords.bind(this),
       },
       {
         name: "wp_create_application_password",
         description: "Creates a new application password for a user.",
-        parameters: [
-          {
-            name: "user_id",
-            type: "number",
-            required: true,
-            description: "The ID of the user to create the password for.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            user_id: {
+              type: "number",
+              description: "The ID of the user to create the password for.",
+            },
+            app_name: {
+              type: "string",
+              description: "The name of the application this password is for.",
+            },
           },
-          {
-            name: "app_name",
-            type: "string",
-            required: true,
-            description: "The name of the application this password is for.",
-          },
-        ],
+          required: ["user_id", "app_name"],
+        },
         handler: this.handleCreateApplicationPassword.bind(this),
       },
       {
         name: "wp_delete_application_password",
         description: "Revokes an existing application password.",
-        parameters: [
-          {
-            name: "user_id",
-            type: "number",
-            required: true,
-            description: "The ID of the user who owns the password.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            user_id: {
+              type: "number",
+              description: "The ID of the user who owns the password.",
+            },
+            uuid: {
+              type: "string",
+              description: "The UUID of the application password to revoke.",
+            },
           },
-          {
-            name: "uuid",
-            type: "string",
-            required: true,
-            description: "The UUID of the application password to revoke.",
-          },
-        ],
+          required: ["user_id", "uuid"],
+        },
         handler: this.handleDeleteApplicationPassword.bind(this),
       },
     ];
