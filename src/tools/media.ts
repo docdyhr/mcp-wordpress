@@ -2,6 +2,7 @@ import * as fs from "fs";
 import { WordPressClient } from "@/client/api.js";
 import { MediaQueryParams, UpdateMediaRequest, UploadMediaRequest } from "@/types/wordpress.js";
 import { getErrorMessage } from "@/utils/error.js";
+import { toolParams } from "./params.js";
 
 /**
  * Comprehensive media management tools for WordPress sites.
@@ -228,7 +229,7 @@ export class MediaTools {
   }
 
   public async handleUploadMedia(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const uploadParams = params as unknown as UploadMediaRequest & { file_path: string };
+    const uploadParams = toolParams<UploadMediaRequest & { file_path: string }>(params);
     try {
       try {
         await fs.promises.access(uploadParams.file_path);
@@ -244,7 +245,7 @@ export class MediaTools {
   }
 
   public async handleUpdateMedia(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const updateParams = params as unknown as UpdateMediaRequest & { id: number };
+    const updateParams = toolParams<UpdateMediaRequest & { id: number }>(params);
     try {
       const media = await client.updateMedia(updateParams);
       return `✅ Media ${media.id} updated successfully.`;
