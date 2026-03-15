@@ -9,7 +9,9 @@ import { WordPressAPIError, RateLimitError } from "@/types/client.js";
 import { config } from "@/config/Config.js";
 import { BaseManager } from "./BaseManager.js";
 import { AuthenticationManager } from "./AuthenticationManager.js";
-import { debug, startTimer } from "@/utils/debug.js";
+import { LoggerFactory, startTimer } from "@/utils/logger.js";
+
+const log = LoggerFactory.client("REQUEST");
 import { getUserAgent } from "@/utils/version.js";
 
 export class RequestManager extends BaseManager {
@@ -86,7 +88,7 @@ export class RequestManager extends BaseManager {
         }
 
         const errorMessage = isErrorLike(error) && error.message ? error.message : String(error);
-        debug.log(`Request failed (attempt ${attempt}/${maxRetries}):`, errorMessage);
+        log.debug(`Request failed (attempt ${attempt}/${maxRetries})`, { error: errorMessage });
 
         // Exponential backoff
         const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
@@ -150,7 +152,7 @@ export class RequestManager extends BaseManager {
         }
       }
 
-      debug.log(`API Request: ${method} ${url}`);
+      log.debug(`API Request: ${method} ${url}`);
 
       const response = await fetch(url, fetchOptions);
 

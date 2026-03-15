@@ -3,7 +3,9 @@
  * Manages different authentication methods for WordPress REST API
  */
 
-import { logger } from "@/utils/debug.js";
+import { LoggerFactory } from "@/utils/logger.js";
+
+const log = LoggerFactory.client("AUTH");
 import { URL } from "url";
 import type {
   IAuthProvider,
@@ -43,7 +45,7 @@ export class WordPressAuth {
           throw new Error(`Unsupported authentication type: ${this.authType}`);
       }
     } catch (_error) {
-      logger.error("Authentication failed:", _error);
+      log.error("Authentication failed", { error: String(_error) });
       throw _error;
     }
   }
@@ -64,12 +66,12 @@ export class WordPressAuth {
     // Test the credentials by attempting to get current user
     try {
       const user = await this.client.getCurrentUser();
-      logger.log(`✅ Application Password authentication successful for user: ${user.name} (${user.username})`);
+      log.debug(`Application Password authentication successful for user: ${user.name} (${user.username})`);
       return true;
     } catch (_error) {
       const message =
         "Application Password authentication failed. Please check your credentials and ensure the application password is valid.";
-      logger.error(message, _error);
+      log.error(message, { error: String(_error) });
       throw new Error(message);
     }
   }
@@ -86,11 +88,11 @@ export class WordPressAuth {
 
     try {
       const user = await this.client.getCurrentUser();
-      logger.log(`✅ Basic authentication successful for user: ${user.name} (${user.username})`);
+      log.debug(`Basic authentication successful for user: ${user.name} (${user.username})`);
       return true;
     } catch (_error) {
       const message = "Basic authentication failed. Please check your username and password.";
-      logger.error(message, _error);
+      log.error(message, { error: String(_error) });
       throw new Error(message);
     }
   }
@@ -111,12 +113,12 @@ export class WordPressAuth {
     try {
       // The JWT token should be obtained during client authentication
       const user = await this.client.getCurrentUser();
-      logger.log(`✅ JWT authentication successful for user: ${user.name} (${user.username})`);
+      log.debug(`JWT authentication successful for user: ${user.name} (${user.username})`);
       return true;
     } catch (_error) {
       const message =
         "JWT authentication failed. Please check your credentials and ensure the JWT plugin is installed and configured.";
-      logger.error(message, _error);
+      log.error(message, { error: String(_error) });
       throw new Error(message);
     }
   }
@@ -134,11 +136,11 @@ export class WordPressAuth {
     try {
       // Test API key by making a simple request
       await this.client.getSiteInfo();
-      logger.log("✅ API Key authentication successful");
+      log.debug("API Key authentication successful");
       return true;
     } catch (_error) {
       const message = "API Key authentication failed. Please check your API key.";
-      logger.error(message, _error);
+      log.error(message, { error: String(_error) });
       throw new Error(message);
     }
   }
@@ -150,17 +152,17 @@ export class WordPressAuth {
     const { nonce } = this.client.config.auth;
 
     if (!nonce) {
-      logger.warn("Cookie authentication: No nonce provided, authentication may fail for write operations");
+      log.warn("Cookie authentication: No nonce provided, authentication may fail for write operations");
     }
 
     try {
       // Test with a simple read operation
       await this.client.getSiteInfo();
-      logger.log("✅ Cookie authentication configured (note: write operations may require valid nonce)");
+      log.debug("Cookie authentication configured (note: write operations may require valid nonce)");
       return true;
     } catch (_error) {
       const message = "Cookie authentication failed. Please ensure you are properly logged into WordPress.";
-      logger.error(message, _error);
+      log.error(message, { error: String(_error) });
       throw new Error(message);
     }
   }
@@ -173,7 +175,7 @@ export class WordPressAuth {
       case "jwt":
         return await this.refreshJWTToken();
       default:
-        logger.log(`Authentication refresh not supported for ${this.authType}`);
+        log.debug(`Authentication refresh not supported for ${this.authType}`);
         return true;
     }
   }
@@ -186,7 +188,7 @@ export class WordPressAuth {
       // Re-authenticate to get a new token
       return await this.handleJWTAuth();
     } catch (_error) {
-      logger.error("Failed to refresh JWT token:", _error);
+      log.error("Failed to refresh JWT token", { error: String(_error) });
       return false;
     }
   }
@@ -199,7 +201,7 @@ export class WordPressAuth {
       await this.client.getCurrentUser();
       return true;
     } catch (_error) {
-      logger.error("Authentication validation failed:", _error);
+      log.error("Authentication validation failed", { error: String(_error) });
       return false;
     }
   }

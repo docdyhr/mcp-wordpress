@@ -12,25 +12,27 @@ import { SEOWordPressClient } from "../../dist/client/SEOWordPressClient.js";
 // import { LoggerFactory } from "../../dist/utils/logger.js";
 
 // Mock the logger to avoid console output during tests
-const mockLogger = {
-  debug: vi.fn(),
-  info: vi.fn(),
-  warn: vi.fn(),
-  error: vi.fn(),
-  time: vi.fn().mockImplementation((name, fn) => fn()),
-  child: vi.fn().mockReturnThis(),
-};
-
-vi.mock("../../dist/utils/logger.js", () => ({
-  LoggerFactory: {
-    api: () => mockLogger,
-    tool: () => mockLogger,
-    server: () => mockLogger,
-    cache: () => mockLogger,
-    security: () => mockLogger,
-  },
-}));
-
+vi.mock("../../dist/utils/logger.js", () => {
+  const createMockLogger = () => ({
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    time: vi.fn().mockImplementation((_name, fn) => fn()),
+    child: vi.fn().mockReturnThis(),
+  });
+  return {
+    LoggerFactory: {
+      api: createMockLogger,
+      client: createMockLogger,
+      tool: createMockLogger,
+      server: createMockLogger,
+      cache: createMockLogger,
+      security: createMockLogger,
+    },
+    startTimer: () => ({ end: () => 0 }),
+  };
+});
 // Also mock error handling utilities
 vi.mock("../../dist/utils/error.js", () => ({
   handleToolError: vi.fn(),

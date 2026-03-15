@@ -51,7 +51,9 @@ import type {
   WordPressSiteInfo,
   WordPressSearchResult,
 } from "@/types/wordpress.js";
-import { debug, logError, startTimer } from "@/utils/debug.js";
+import { LoggerFactory, startTimer } from "@/utils/logger.js";
+
+const log = LoggerFactory.client("API");
 import type { QueuedRequest } from "@/types/requests.js";
 
 // Import domain-specific operations
@@ -345,7 +347,7 @@ export class WordPressClient implements IWordPressClient {
     this.baseUrl = this.baseUrl.replace(/\/$/, "");
     this.apiUrl = `${this.baseUrl}/wp-json/wp/v2`;
 
-    debug.log(`WordPress API Client initialized for: ${this.apiUrl}`);
+    log.debug(`WordPress API Client initialized for: ${this.apiUrl}`);
   }
 
   async initialize(): Promise<void> {
@@ -355,7 +357,7 @@ export class WordPressClient implements IWordPressClient {
   async disconnect(): Promise<void> {
     this.authenticated = false;
     this.jwtToken = null;
-    debug.log("WordPress client disconnected");
+    log.debug("WordPress client disconnected");
   }
 
   /**
@@ -441,7 +443,7 @@ export class WordPressClient implements IWordPressClient {
       }
     } catch (_error) {
       this._stats.authFailures++;
-      logError(_error as Error, { method });
+      log.error(_error as Error, { method });
       throw _error;
     }
   }
@@ -466,7 +468,7 @@ export class WordPressClient implements IWordPressClient {
       // Test authentication by getting current user
       await this.request<WordPressUser>("GET", "users/me");
       this.authenticated = true;
-      debug.log("Basic/Application Password authentication successful");
+      log.debug("Basic/Application Password authentication successful");
       return true;
     } catch (_error) {
       throw new AuthenticationError(`Basic authentication failed: ${(_error as Error).message}`, this.auth.method);
@@ -503,7 +505,7 @@ export class WordPressClient implements IWordPressClient {
       const data = (await response.json()) as { token: string };
       this.jwtToken = data.token;
       this.authenticated = true;
-      debug.log("JWT authentication successful");
+      log.debug("JWT authentication successful");
       return true;
     } catch (_error) {
       throw new AuthenticationError(`JWT authentication failed: ${(_error as Error).message}`, this.auth.method);
@@ -518,7 +520,7 @@ export class WordPressClient implements IWordPressClient {
       throw new AuthenticationError("Nonce is required for cookie authentication", this.auth.method);
     }
     this.authenticated = true;
-    debug.log("Cookie authentication configured");
+    log.debug("Cookie authentication configured");
     return true;
   }
 
@@ -573,7 +575,7 @@ export class WordPressClient implements IWordPressClient {
       }
 
       try {
-        debug.log(`API Request: ${method} ${url}${attempt > 0 ? ` (attempt ${attempt + 1})` : ""}`);
+        log.debug(`API Request: ${method} ${url}${attempt > 0 ? ` (attempt ${attempt + 1})` : ""}`);
 
         const response = await fetch(url, fetchOptions);
 
@@ -603,7 +605,7 @@ export class WordPressClient implements IWordPressClient {
           break;
         }
         lastError = this.normalizeRequestError(_error, requestTimeout);
-        debug.log(`Request failed (attempt ${attempt + 1}): ${lastError.message}`);
+        log.debug(`Request failed (attempt ${attempt + 1}): ${lastError.message}`);
 
         const shouldRetry = this.shouldRetryError(lastError) && attempt < maxAttempts - 1;
         if (!shouldRetry) {
@@ -765,7 +767,7 @@ export class WordPressClient implements IWordPressClient {
     fetchOptions: RequestInit & { headers: Record<string, string> },
     timer: ReturnType<typeof startTimer>,
   ): Promise<T | undefined> {
-    debug.log(`404 on pretty permalinks, trying index.php approach`);
+    log.debug(`404 on pretty permalinks, trying index.php approach`);
 
     try {
       const urlObj = new URL(url);
@@ -790,7 +792,7 @@ export class WordPressClient implements IWordPressClient {
       clearTimeout(fallbackTimeoutId);
 
       if (!fallbackResponse.ok) {
-        debug.log(`Fallback also failed with status ${fallbackResponse.status}`);
+        log.debug(`Fallback also failed with status ${fallbackResponse.status}`);
         return undefined;
       }
 
@@ -808,7 +810,7 @@ export class WordPressClient implements IWordPressClient {
       this.updateAverageResponseTime(duration);
       return result as T;
     } catch (fallbackError) {
-      debug.log(`Fallback request failed: ${(fallbackError as Error).message}`);
+      log.debug(`Fallback request failed: ${(fallbackError as Error).message}`);
       return undefined;
     }
   }
