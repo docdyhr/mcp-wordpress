@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.11](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.10...v3.1.11) (2026-03-15)
+
+### ♻️ Refactoring
+
+* unify dual logging systems (debug.ts → logger.ts) ([#169](https://github.com/docdyhr/mcp-wordpress/issues/169)) ([9303e2f](https://github.com/docdyhr/mcp-wordpress/commit/9303e2f12b438e30c5e4b866bcd2d8cdf2fc4c1b))
+
 ## [3.1.10](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.9...v3.1.10) (2026-03-15)
 
 ### ♻️ Refactoring
