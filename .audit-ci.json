@@ -4,13 +4,7 @@
   "high": true,
   "critical": true,
   "report-type": "summary",
-  "allowlist": [
-    "GHSA-7r86-cg39-jmmj",
-    "GHSA-23c5-xmqv-rm74",
-    "GHSA-qffp-2rhf-9h96",
-    "GHSA-9ppj-qmqm-q256",
-    "GHSA-qpx9-hpmf-5gmw"
-  ],
+  "allowlist": [],
   "skip-dev": true,
   "output-format": "text"
 }
