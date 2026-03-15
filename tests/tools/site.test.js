@@ -42,7 +42,7 @@ describe("SiteTools", () => {
       tools.forEach((tool) => {
         expect(tool).toHaveProperty("name");
         expect(tool).toHaveProperty("description");
-        expect(tool).toHaveProperty("parameters");
+        expect(tool).toHaveProperty("inputSchema");
         expect(tool).toHaveProperty("handler");
         expect(typeof tool.handler).toBe("function");
       });
@@ -157,14 +157,14 @@ describe("SiteTools", () => {
       const tools = siteTools.getTools();
 
       const updateTool = tools.find((t) => t.name === "wp_update_site_settings");
-      expect(updateTool.parameters.length).toBeGreaterThan(2);
-      const titleParam = updateTool.parameters.find((p) => p.name === "title");
-      expect(titleParam.type).toBe("string");
+      expect(Object.keys(updateTool.inputSchema.properties).length).toBeGreaterThan(2);
+      const titleProp = updateTool.inputSchema.properties.title;
+      expect(titleProp.type).toBe("string");
 
       const searchTool = tools.find((t) => t.name === "wp_search_site");
-      expect(searchTool.parameters.length).toBeGreaterThan(0);
-      const termParam = searchTool.parameters.find((p) => p.name === "term");
-      expect(termParam.type).toBe("string");
+      expect(Object.keys(searchTool.inputSchema.properties).length).toBeGreaterThan(0);
+      const termProp = searchTool.inputSchema.properties.term;
+      expect(termProp.type).toBe("string");
     });
   });
 });

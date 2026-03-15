@@ -1,4 +1,5 @@
 import { WordPressClient } from "@/client/api.js";
+import type { MCPToolSchema } from "@/types/mcp.js";
 import { CreatePageRequest, PostQueryParams as PageQueryParams, UpdatePageRequest } from "@/types/wordpress.js";
 import { getErrorMessage } from "@/utils/error.js";
 import { toolParams } from "./params.js";
@@ -15,140 +16,137 @@ export class PageTools {
   public getTools(): Array<{
     name: string;
     description: string;
-    parameters?: Array<{
-      name: string;
-      type?: string;
-      description?: string;
-      required?: boolean;
-      enum?: string[];
-      items?: unknown;
-    }>;
+    inputSchema?: MCPToolSchema;
     handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
   }> {
     return [
       {
         name: "wp_list_pages",
         description: "Lists pages from a WordPress site, with filters.",
-        parameters: [
-          {
-            name: "per_page",
-            type: "number",
-            description: "Number of items to return per page (max 100).",
+        inputSchema: {
+          type: "object",
+          properties: {
+            per_page: {
+              type: "number",
+              description: "Number of items to return per page (max 100).",
+            },
+            search: {
+              type: "string",
+              description: "Limit results to those matching a search term.",
+            },
+            status: {
+              type: "string",
+              description: "Filter by page status.",
+              enum: ["publish", "future", "draft", "pending", "private"],
+            },
           },
-          {
-            name: "search",
-            type: "string",
-            description: "Limit results to those matching a search term.",
-          },
-          {
-            name: "status",
-            type: "string",
-            description: "Filter by page status.",
-            enum: ["publish", "future", "draft", "pending", "private"],
-          },
-        ],
+          required: [],
+        },
         handler: this.handleListPages.bind(this),
       },
       {
         name: "wp_get_page",
         description: "Retrieves a single page by its ID, optionally including full content for editing.",
-        parameters: [
-          {
-            name: "id",
-            type: "number",
-            required: true,
-            description: "The unique identifier for the page.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "The unique identifier for the page.",
+            },
+            include_content: {
+              type: "boolean",
+              description: "If true, includes the full HTML content of the page. Default: false",
+            },
           },
-          {
-            name: "include_content",
-            type: "boolean",
-            description: "If true, includes the full HTML content of the page. Default: false",
-          },
-        ],
+          required: ["id"],
+        },
         handler: this.handleGetPage.bind(this),
       },
       {
         name: "wp_create_page",
         description: "Creates a new page.",
-        parameters: [
-          {
-            name: "title",
-            type: "string",
-            required: true,
-            description: "The title for the page.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            title: {
+              type: "string",
+              description: "The title for the page.",
+            },
+            content: {
+              type: "string",
+              description: "The content for the page, in HTML format.",
+            },
+            status: {
+              type: "string",
+              description: "The publishing status for the page.",
+              enum: ["publish", "draft", "pending", "private"],
+            },
           },
-          {
-            name: "content",
-            type: "string",
-            description: "The content for the page, in HTML format.",
-          },
-          {
-            name: "status",
-            type: "string",
-            description: "The publishing status for the page.",
-            enum: ["publish", "draft", "pending", "private"],
-          },
-        ],
+          required: ["title"],
+        },
         handler: this.handleCreatePage.bind(this),
       },
       {
         name: "wp_update_page",
         description: "Updates an existing page.",
-        parameters: [
-          {
-            name: "id",
-            type: "number",
-            required: true,
-            description: "The ID of the page to update.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "The ID of the page to update.",
+            },
+            title: {
+              type: "string",
+              description: "The new title for the page.",
+            },
+            content: {
+              type: "string",
+              description: "The new content for the page, in HTML format.",
+            },
+            status: {
+              type: "string",
+              description: "The new status for the page.",
+              enum: ["publish", "draft", "pending", "private"],
+            },
           },
-          {
-            name: "title",
-            type: "string",
-            description: "The new title for the page.",
-          },
-          {
-            name: "content",
-            type: "string",
-            description: "The new content for the page, in HTML format.",
-          },
-          {
-            name: "status",
-            type: "string",
-            description: "The new status for the page.",
-            enum: ["publish", "draft", "pending", "private"],
-          },
-        ],
+          required: ["id"],
+        },
         handler: this.handleUpdatePage.bind(this),
       },
       {
         name: "wp_delete_page",
         description: "Deletes a page.",
-        parameters: [
-          {
-            name: "id",
-            type: "number",
-            required: true,
-            description: "The ID of the page to delete.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "The ID of the page to delete.",
+            },
+            force: {
+              type: "boolean",
+              description: "If true, permanently delete. If false, move to trash. Defaults to false.",
+            },
           },
-          {
-            name: "force",
-            type: "boolean",
-            description: "If true, permanently delete. If false, move to trash. Defaults to false.",
-          },
-        ],
+          required: ["id"],
+        },
         handler: this.handleDeletePage.bind(this),
       },
       {
         name: "wp_get_page_revisions",
         description: "Retrieves revisions for a specific page.",
-        parameters: [
-          {
-            name: "id",
-            type: "number",
-            required: true,
-            description: "The ID of the page to get revisions for.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "The ID of the page to get revisions for.",
+            },
           },
-        ],
+          required: ["id"],
+        },
         handler: this.handleGetPageRevisions.bind(this),
       },
     ];

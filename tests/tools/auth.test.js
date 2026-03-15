@@ -40,11 +40,11 @@ describe("AuthTools", () => {
       tools.forEach((tool) => {
         expect(tool).toHaveProperty("name");
         expect(tool).toHaveProperty("description");
-        expect(tool).toHaveProperty("parameters");
+        expect(tool).toHaveProperty("inputSchema");
         expect(tool).toHaveProperty("handler");
         expect(typeof tool.name).toBe("string");
         expect(typeof tool.description).toBe("string");
-        expect(Array.isArray(tool.parameters)).toBe(true);
+        expect(typeof tool.inputSchema).toBe("object");
         expect(typeof tool.handler).toBe("function");
       });
     });
@@ -67,24 +67,24 @@ describe("AuthTools", () => {
       const tools = authTools.getTools();
       const switchTool = tools.find((t) => t.name === "wp_switch_auth_method");
 
-      expect(switchTool.parameters).toHaveLength(4);
+      expect(Object.keys(switchTool.inputSchema.properties)).toHaveLength(4);
 
-      const methodParam = switchTool.parameters.find((p) => p.name === "method");
-      expect(methodParam).toBeDefined();
-      expect(methodParam.required).toBe(true);
-      expect(methodParam.enum).toEqual(["app-password", "jwt", "basic", "api-key", "cookie"]);
+      const methodProp = switchTool.inputSchema.properties.method;
+      expect(methodProp).toBeDefined();
+      expect(switchTool.inputSchema.required).toContain("method");
+      expect(methodProp.enum).toEqual(["app-password", "jwt", "basic", "api-key", "cookie"]);
 
-      const usernameParam = switchTool.parameters.find((p) => p.name === "username");
-      expect(usernameParam).toBeDefined();
-      expect(usernameParam.required).toBeFalsy();
+      const usernameProp = switchTool.inputSchema.properties.username;
+      expect(usernameProp).toBeDefined();
+      expect(switchTool.inputSchema.required).not.toContain("username");
 
-      const passwordParam = switchTool.parameters.find((p) => p.name === "password");
-      expect(passwordParam).toBeDefined();
-      expect(passwordParam.required).toBeFalsy();
+      const passwordProp = switchTool.inputSchema.properties.password;
+      expect(passwordProp).toBeDefined();
+      expect(switchTool.inputSchema.required).not.toContain("password");
 
-      const jwtParam = switchTool.parameters.find((p) => p.name === "jwt_token");
-      expect(jwtParam).toBeDefined();
-      expect(jwtParam.required).toBeFalsy();
+      const jwtProp = switchTool.inputSchema.properties.jwt_token;
+      expect(jwtProp).toBeDefined();
+      expect(switchTool.inputSchema.required).not.toContain("jwt_token");
     });
   });
 
@@ -326,13 +326,13 @@ describe("AuthTools", () => {
     it("should accept all valid authentication methods in tool parameters", () => {
       const tools = authTools.getTools();
       const switchTool = tools.find((t) => t.name === "wp_switch_auth_method");
-      const methodParam = switchTool.parameters.find((p) => p.name === "method");
+      const methodProp = switchTool.inputSchema.properties.method;
 
       const validMethods = ["app-password", "jwt", "basic", "api-key", "cookie"];
-      expect(methodParam.enum).toEqual(validMethods);
+      expect(methodProp.enum).toEqual(validMethods);
 
       // Ensure all methods are strings
-      methodParam.enum.forEach((method) => {
+      methodProp.enum.forEach((method) => {
         expect(typeof method).toBe("string");
         expect(method.length).toBeGreaterThan(0);
       });
@@ -342,13 +342,12 @@ describe("AuthTools", () => {
       const tools = authTools.getTools();
       const switchTool = tools.find((t) => t.name === "wp_switch_auth_method");
 
-      switchTool.parameters.forEach((param) => {
-        expect(param).toHaveProperty("name");
-        expect(param).toHaveProperty("type");
-        expect(param).toHaveProperty("description");
-        expect(typeof param.name).toBe("string");
-        expect(typeof param.type).toBe("string");
-        expect(typeof param.description).toBe("string");
+      Object.entries(switchTool.inputSchema.properties).forEach(([name, prop]) => {
+        expect(typeof name).toBe("string");
+        expect(prop).toHaveProperty("type");
+        expect(prop).toHaveProperty("description");
+        expect(typeof prop.type).toBe("string");
+        expect(typeof prop.description).toBe("string");
       });
     });
   });

@@ -60,43 +60,41 @@ describe("CommentTools", () => {
       });
 
       // wp_list_comments should have optional post and status parameters
-      const listParams = toolsByName["wp_list_comments"].parameters;
-      expect(listParams.find((p) => p.name === "post")).toBeTruthy();
-      expect(listParams.find((p) => p.name === "status")).toBeTruthy();
-      const statusParam = listParams.find((p) => p.name === "status");
-      expect(statusParam.enum).toEqual(["hold", "approve", "spam", "trash"]);
+      const listProps = toolsByName["wp_list_comments"].inputSchema.properties;
+      expect(listProps.post).toBeTruthy();
+      expect(listProps.status).toBeTruthy();
+      expect(listProps.status.enum).toEqual(["hold", "approve", "spam", "trash"]);
 
       // wp_get_comment should require id
-      const getCommentParams = toolsByName["wp_get_comment"].parameters;
-      const idParam = getCommentParams.find((p) => p.name === "id");
-      expect(idParam).toBeTruthy();
-      expect(idParam.required).toBe(true);
+      const getCommentSchema = toolsByName["wp_get_comment"].inputSchema;
+      expect(getCommentSchema.properties.id).toBeTruthy();
+      expect(getCommentSchema.required).toContain("id");
 
       // wp_create_comment should have required post and content parameters
-      const createParams = toolsByName["wp_create_comment"].parameters;
-      expect(createParams.find((p) => p.name === "post").required).toBe(true);
-      expect(createParams.find((p) => p.name === "content").required).toBe(true);
-      expect(createParams.find((p) => p.name === "author_name")).toBeTruthy();
-      expect(createParams.find((p) => p.name === "author_email")).toBeTruthy();
+      const createSchema = toolsByName["wp_create_comment"].inputSchema;
+      expect(createSchema.required).toContain("post");
+      expect(createSchema.required).toContain("content");
+      expect(createSchema.properties.author_name).toBeTruthy();
+      expect(createSchema.properties.author_email).toBeTruthy();
 
       // wp_update_comment should require id
-      const updateParams = toolsByName["wp_update_comment"].parameters;
-      expect(updateParams.find((p) => p.name === "id").required).toBe(true);
-      expect(updateParams.find((p) => p.name === "content")).toBeTruthy();
-      expect(updateParams.find((p) => p.name === "status")).toBeTruthy();
+      const updateSchema = toolsByName["wp_update_comment"].inputSchema;
+      expect(updateSchema.required).toContain("id");
+      expect(updateSchema.properties.content).toBeTruthy();
+      expect(updateSchema.properties.status).toBeTruthy();
 
       // wp_delete_comment should require id
-      const deleteParams = toolsByName["wp_delete_comment"].parameters;
-      expect(deleteParams.find((p) => p.name === "id").required).toBe(true);
-      expect(deleteParams.find((p) => p.name === "force")).toBeTruthy();
+      const deleteSchema = toolsByName["wp_delete_comment"].inputSchema;
+      expect(deleteSchema.required).toContain("id");
+      expect(deleteSchema.properties.force).toBeTruthy();
 
       // wp_approve_comment should require id
-      const approveParams = toolsByName["wp_approve_comment"].parameters;
-      expect(approveParams.find((p) => p.name === "id").required).toBe(true);
+      const approveSchema = toolsByName["wp_approve_comment"].inputSchema;
+      expect(approveSchema.required).toContain("id");
 
       // wp_spam_comment should require id
-      const spamParams = toolsByName["wp_spam_comment"].parameters;
-      expect(spamParams.find((p) => p.name === "id").required).toBe(true);
+      const spamSchema = toolsByName["wp_spam_comment"].inputSchema;
+      expect(spamSchema.required).toContain("id");
     });
   });
 

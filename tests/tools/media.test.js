@@ -62,39 +62,37 @@ describe("MediaTools", () => {
       });
 
       // wp_list_media should have optional parameters
-      expect(toolsByName["wp_list_media"].parameters).toHaveLength(3);
-      const listParams = toolsByName["wp_list_media"].parameters;
-      expect(listParams.find((p) => p.name === "per_page")).toBeTruthy();
-      expect(listParams.find((p) => p.name === "search")).toBeTruthy();
-      expect(listParams.find((p) => p.name === "media_type")).toBeTruthy();
+      const listProps = toolsByName["wp_list_media"].inputSchema.properties;
+      expect(Object.keys(listProps)).toHaveLength(3);
+      expect(listProps.per_page).toBeTruthy();
+      expect(listProps.search).toBeTruthy();
+      expect(listProps.media_type).toBeTruthy();
 
       // Check media_type enum values
-      const mediaTypeParam = listParams.find((p) => p.name === "media_type");
-      expect(mediaTypeParam.enum).toEqual(["image", "video", "audio", "application"]);
+      expect(listProps.media_type.enum).toEqual(["image", "video", "audio", "application"]);
 
       // wp_get_media should require id
-      const getMediaParams = toolsByName["wp_get_media"].parameters;
-      const idParam = getMediaParams.find((p) => p.name === "id");
-      expect(idParam).toBeTruthy();
-      expect(idParam.required).toBe(true);
+      const getMediaSchema = toolsByName["wp_get_media"].inputSchema;
+      expect(getMediaSchema.properties.id).toBeTruthy();
+      expect(getMediaSchema.required).toContain("id");
 
       // wp_upload_media should have file_path as required and other optional params
-      const uploadParams = toolsByName["wp_upload_media"].parameters;
-      expect(uploadParams.find((p) => p.name === "file_path")).toBeTruthy();
-      expect(uploadParams.find((p) => p.name === "file_path").required).toBe(true);
-      expect(uploadParams.find((p) => p.name === "title")).toBeTruthy();
-      expect(uploadParams.find((p) => p.name === "alt_text")).toBeTruthy();
-      expect(uploadParams.find((p) => p.name === "caption")).toBeTruthy();
-      expect(uploadParams.find((p) => p.name === "description")).toBeTruthy();
-      expect(uploadParams.find((p) => p.name === "post")).toBeTruthy();
+      const uploadSchema = toolsByName["wp_upload_media"].inputSchema;
+      expect(uploadSchema.properties.file_path).toBeTruthy();
+      expect(uploadSchema.required).toContain("file_path");
+      expect(uploadSchema.properties.title).toBeTruthy();
+      expect(uploadSchema.properties.alt_text).toBeTruthy();
+      expect(uploadSchema.properties.caption).toBeTruthy();
+      expect(uploadSchema.properties.description).toBeTruthy();
+      expect(uploadSchema.properties.post).toBeTruthy();
 
       // wp_update_media should require id
-      const updateParams = toolsByName["wp_update_media"].parameters;
-      expect(updateParams.find((p) => p.name === "id").required).toBe(true);
+      const updateSchema = toolsByName["wp_update_media"].inputSchema;
+      expect(updateSchema.required).toContain("id");
 
       // wp_delete_media should require id
-      const deleteParams = toolsByName["wp_delete_media"].parameters;
-      expect(deleteParams.find((p) => p.name === "id").required).toBe(true);
+      const deleteSchema = toolsByName["wp_delete_media"].inputSchema;
+      expect(deleteSchema.required).toContain("id");
     });
   });
 

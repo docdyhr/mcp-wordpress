@@ -1,4 +1,5 @@
 import { WordPressClient } from "@/client/api.js";
+import type { MCPToolSchema } from "@/types/mcp.js";
 import { CreateUserRequest, UpdateUserRequest, UserQueryParams } from "@/types/wordpress.js";
 import { getErrorMessage } from "@/utils/error.js";
 import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "@/utils/streaming.js";
@@ -16,14 +17,7 @@ export class UserTools {
   public getTools(): Array<{
     name: string;
     description: string;
-    parameters?: Array<{
-      name: string;
-      type?: string;
-      description?: string;
-      required?: boolean;
-      enum?: string[];
-      items?: unknown;
-    }>;
+    inputSchema?: MCPToolSchema;
     handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
   }> {
     return [
@@ -37,32 +31,35 @@ export class UserTools {
           '• Filter by role: `wp_list_users --roles=["editor","author"]`\n' +
           '• Find admins: `wp_list_users --roles=["administrator"]`\n' +
           '• Combined search: `wp_list_users --search="smith" --roles=["subscriber"]`',
-        parameters: [
-          {
-            name: "search",
-            type: "string",
-            description: "Limit results to those matching a search term.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            search: {
+              type: "string",
+              description: "Limit results to those matching a search term.",
+            },
+            roles: {
+              type: "array",
+              items: { type: "string" },
+              description: "Limit results to users with specific roles.",
+            },
           },
-          {
-            name: "roles",
-            type: "array",
-            items: { type: "string" },
-            description: "Limit results to users with specific roles.",
-          },
-        ],
+        },
         handler: this.handleListUsers.bind(this),
       },
       {
         name: "wp_get_user",
         description: "Retrieves a single user by their ID.",
-        parameters: [
-          {
-            name: "id",
-            type: "number",
-            required: true,
-            description: "The unique identifier for the user.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "The unique identifier for the user.",
+            },
           },
-        ],
+          required: ["id"],
+        },
         handler: this.handleGetUser.bind(this),
       },
       {
@@ -74,79 +71,80 @@ export class UserTools {
           "• Check permissions: Use this to verify your current user's capabilities and roles\n" +
           "• Account verification: Confirm you're authenticated with the correct account\n" +
           "• Profile details: View registration date, email, and user metadata",
-        parameters: [],
+        inputSchema: {
+          type: "object",
+          properties: {},
+        },
         handler: this.handleGetCurrentUser.bind(this),
       },
       {
         name: "wp_create_user",
         description: "Creates a new user.",
-        parameters: [
-          {
-            name: "username",
-            type: "string",
-            required: true,
-            description: "The username for the new user.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            username: {
+              type: "string",
+              description: "The username for the new user.",
+            },
+            email: {
+              type: "string",
+              description: "The email address for the new user.",
+            },
+            password: {
+              type: "string",
+              description: "The password for the new user.",
+            },
+            roles: {
+              type: "array",
+              items: { type: "string" },
+              description: "An array of roles to assign to the user.",
+            },
           },
-          {
-            name: "email",
-            type: "string",
-            required: true,
-            description: "The email address for the new user.",
-          },
-          {
-            name: "password",
-            type: "string",
-            required: true,
-            description: "The password for the new user.",
-          },
-          {
-            name: "roles",
-            type: "array",
-            items: { type: "string" },
-            description: "An array of roles to assign to the user.",
-          },
-        ],
+          required: ["username", "email", "password"],
+        },
         handler: this.handleCreateUser.bind(this),
       },
       {
         name: "wp_update_user",
         description: "Updates an existing user.",
-        parameters: [
-          {
-            name: "id",
-            type: "number",
-            required: true,
-            description: "The ID of the user to update.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "The ID of the user to update.",
+            },
+            email: {
+              type: "string",
+              description: "The new email address for the user.",
+            },
+            name: {
+              type: "string",
+              description: "The new display name for the user.",
+            },
           },
-          {
-            name: "email",
-            type: "string",
-            description: "The new email address for the user.",
-          },
-          {
-            name: "name",
-            type: "string",
-            description: "The new display name for the user.",
-          },
-        ],
+          required: ["id"],
+        },
         handler: this.handleUpdateUser.bind(this),
       },
       {
         name: "wp_delete_user",
         description: "Deletes a user.",
-        parameters: [
-          {
-            name: "id",
-            type: "number",
-            required: true,
-            description: "The ID of the user to delete.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "The ID of the user to delete.",
+            },
+            reassign: {
+              type: "number",
+              description: "The ID of a user to reassign the deleted user's content to.",
+            },
           },
-          {
-            name: "reassign",
-            type: "number",
-            description: "The ID of a user to reassign the deleted user's content to.",
-          },
-        ],
+          required: ["id"],
+        },
         handler: this.handleDeleteUser.bind(this),
       },
     ];

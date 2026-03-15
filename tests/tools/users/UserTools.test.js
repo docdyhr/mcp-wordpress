@@ -111,17 +111,17 @@ describe("UserTools", () => {
       const listUsersTool = tools.find((t) => t.name === "wp_list_users");
 
       expect(listUsersTool.description).toContain("Lists users from a WordPress site");
-      expect(listUsersTool.parameters).toBeDefined();
-      expect(Array.isArray(listUsersTool.parameters)).toBe(true);
+      expect(listUsersTool.inputSchema).toBeDefined();
+      expect(typeof listUsersTool.inputSchema).toBe("object");
     });
 
     it("should include roles parameter for list users", () => {
       const tools = userTools.getTools();
       const listUsersTool = tools.find((t) => t.name === "wp_list_users");
-      const rolesParam = listUsersTool.parameters.find((p) => p.name === "roles");
+      const rolesProp = listUsersTool.inputSchema.properties.roles;
 
-      expect(rolesParam.type).toBe("array");
-      expect(rolesParam.items).toEqual({ type: "string" });
+      expect(rolesProp.type).toBe("array");
+      expect(rolesProp.items).toEqual({ type: "string" });
     });
 
     it("should include usage examples in descriptions", () => {

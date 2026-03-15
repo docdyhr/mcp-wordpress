@@ -1,4 +1,5 @@
 import { WordPressClient } from "@/client/api.js";
+import { MCPToolSchema } from "@/types/mcp.js";
 import { CommentQueryParams, CreateCommentRequest, UpdateCommentRequest } from "@/types/wordpress.js";
 import { getErrorMessage } from "@/utils/error.js";
 import { toolParams } from "./params.js";
@@ -15,143 +16,142 @@ export class CommentTools {
   public getTools(): Array<{
     name: string;
     description: string;
-    parameters?: Array<{
-      name: string;
-      type?: string;
-      description?: string;
-      required?: boolean;
-      enum?: string[];
-      items?: unknown;
-    }>;
+    inputSchema?: MCPToolSchema;
     handler: (client: WordPressClient, params: Record<string, unknown>) => Promise<unknown>;
   }> {
     return [
       {
         name: "wp_list_comments",
         description: "Lists comments from a WordPress site, with filters.",
-        parameters: [
-          {
-            name: "post",
-            type: "number",
-            description: "Limit results to comments assigned to a specific post ID.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            post: {
+              type: "number",
+              description: "Limit results to comments assigned to a specific post ID.",
+            },
+            status: {
+              type: "string",
+              description: "Filter by comment status.",
+              enum: ["hold", "approve", "spam", "trash"],
+            },
           },
-          {
-            name: "status",
-            type: "string",
-            description: "Filter by comment status.",
-            enum: ["hold", "approve", "spam", "trash"],
-          },
-        ],
+        },
         handler: this.handleListComments.bind(this),
       },
       {
         name: "wp_get_comment",
         description: "Retrieves a single comment by its ID.",
-        parameters: [
-          {
-            name: "id",
-            type: "number",
-            required: true,
-            description: "The unique identifier for the comment.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "The unique identifier for the comment.",
+            },
           },
-        ],
+          required: ["id"],
+        },
         handler: this.handleGetComment.bind(this),
       },
       {
         name: "wp_create_comment",
         description: "Creates a new comment on a post.",
-        parameters: [
-          {
-            name: "post",
-            type: "number",
-            required: true,
-            description: "The ID of the post to comment on.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            post: {
+              type: "number",
+              description: "The ID of the post to comment on.",
+            },
+            content: {
+              type: "string",
+              description: "The content of the comment.",
+            },
+            author_name: {
+              type: "string",
+              description: "The name of the comment author.",
+            },
+            author_email: {
+              type: "string",
+              description: "The email of the comment author.",
+            },
           },
-          {
-            name: "content",
-            type: "string",
-            required: true,
-            description: "The content of the comment.",
-          },
-          {
-            name: "author_name",
-            type: "string",
-            description: "The name of the comment author.",
-          },
-          {
-            name: "author_email",
-            type: "string",
-            description: "The email of the comment author.",
-          },
-        ],
+          required: ["post", "content"],
+        },
         handler: this.handleCreateComment.bind(this),
       },
       {
         name: "wp_update_comment",
         description: "Updates an existing comment.",
-        parameters: [
-          {
-            name: "id",
-            type: "number",
-            required: true,
-            description: "The ID of the comment to update.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "The ID of the comment to update.",
+            },
+            content: {
+              type: "string",
+              description: "The updated content for the comment.",
+            },
+            status: {
+              type: "string",
+              description: "The new status for the comment.",
+              enum: ["hold", "approve", "spam", "trash"],
+            },
           },
-          {
-            name: "content",
-            type: "string",
-            description: "The updated content for the comment.",
-          },
-          {
-            name: "status",
-            type: "string",
-            description: "The new status for the comment.",
-            enum: ["hold", "approve", "spam", "trash"],
-          },
-        ],
+          required: ["id"],
+        },
         handler: this.handleUpdateComment.bind(this),
       },
       {
         name: "wp_delete_comment",
         description: "Deletes a comment.",
-        parameters: [
-          {
-            name: "id",
-            type: "number",
-            required: true,
-            description: "The ID of the comment to delete.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "The ID of the comment to delete.",
+            },
+            force: {
+              type: "boolean",
+              description: "If true, the comment will be permanently deleted. Defaults to false (moved to trash).",
+            },
           },
-          {
-            name: "force",
-            type: "boolean",
-            description: "If true, the comment will be permanently deleted. Defaults to false (moved to trash).",
-          },
-        ],
+          required: ["id"],
+        },
         handler: this.handleDeleteComment.bind(this),
       },
       {
         name: "wp_approve_comment",
         description: "Approves a pending comment.",
-        parameters: [
-          {
-            name: "id",
-            type: "number",
-            required: true,
-            description: "The ID of the comment to approve.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "The ID of the comment to approve.",
+            },
           },
-        ],
+          required: ["id"],
+        },
         handler: this.handleApproveComment.bind(this),
       },
       {
         name: "wp_spam_comment",
         description: "Marks a comment as spam.",
-        parameters: [
-          {
-            name: "id",
-            type: "number",
-            required: true,
-            description: "The ID of the comment to mark as spam.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "The ID of the comment to mark as spam.",
+            },
           },
-        ],
+          required: ["id"],
+        },
         handler: this.handleSpamComment.bind(this),
       },
     ];

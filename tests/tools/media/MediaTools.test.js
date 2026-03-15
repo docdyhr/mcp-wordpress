@@ -88,16 +88,16 @@ describe("MediaTools", () => {
       const listMediaTool = tools.find((t) => t.name === "wp_list_media");
 
       expect(listMediaTool.description).toContain("Lists media items from a WordPress site");
-      expect(listMediaTool.parameters).toBeDefined();
-      expect(Array.isArray(listMediaTool.parameters)).toBe(true);
+      expect(listMediaTool.inputSchema).toBeDefined();
+      expect(typeof listMediaTool.inputSchema).toBe("object");
     });
 
     it("should include media type enum in list tool", () => {
       const tools = mediaTools.getTools();
       const listMediaTool = tools.find((t) => t.name === "wp_list_media");
-      const mediaTypeParam = listMediaTool.parameters.find((p) => p.name === "media_type");
+      const mediaTypeProp = listMediaTool.inputSchema.properties.media_type;
 
-      expect(mediaTypeParam.enum).toEqual(["image", "video", "audio", "application"]);
+      expect(mediaTypeProp.enum).toEqual(["image", "video", "audio", "application"]);
     });
   });
 

@@ -68,38 +68,38 @@ describe("TaxonomyTools", () => {
       });
 
       // Category tools
-      const listCatParams = toolsByName["wp_list_categories"].parameters;
-      expect(listCatParams.find((p) => p.name === "search")).toBeTruthy();
-      expect(listCatParams.find((p) => p.name === "hide_empty")).toBeTruthy();
+      const listCatProps = toolsByName["wp_list_categories"].inputSchema.properties;
+      expect(listCatProps.search).toBeTruthy();
+      expect(listCatProps.hide_empty).toBeTruthy();
 
-      const getCatParams = toolsByName["wp_get_category"].parameters;
-      expect(getCatParams.find((p) => p.name === "id").required).toBe(true);
+      const getCatSchema = toolsByName["wp_get_category"].inputSchema;
+      expect(getCatSchema.required).toContain("id");
 
-      const createCatParams = toolsByName["wp_create_category"].parameters;
-      expect(createCatParams.find((p) => p.name === "name").required).toBe(true);
-      expect(createCatParams.find((p) => p.name === "description")).toBeTruthy();
+      const createCatSchema = toolsByName["wp_create_category"].inputSchema;
+      expect(createCatSchema.required).toContain("name");
+      expect(createCatSchema.properties.description).toBeTruthy();
 
-      const updateCatParams = toolsByName["wp_update_category"].parameters;
-      expect(updateCatParams.find((p) => p.name === "id").required).toBe(true);
+      const updateCatSchema = toolsByName["wp_update_category"].inputSchema;
+      expect(updateCatSchema.required).toContain("id");
 
-      const deleteCatParams = toolsByName["wp_delete_category"].parameters;
-      expect(deleteCatParams.find((p) => p.name === "id").required).toBe(true);
+      const deleteCatSchema = toolsByName["wp_delete_category"].inputSchema;
+      expect(deleteCatSchema.required).toContain("id");
 
       // Tag tools
-      const listTagParams = toolsByName["wp_list_tags"].parameters;
-      expect(listTagParams.find((p) => p.name === "search")).toBeTruthy();
+      const listTagProps = toolsByName["wp_list_tags"].inputSchema.properties;
+      expect(listTagProps.search).toBeTruthy();
 
-      const getTagParams = toolsByName["wp_get_tag"].parameters;
-      expect(getTagParams.find((p) => p.name === "id").required).toBe(true);
+      const getTagSchema = toolsByName["wp_get_tag"].inputSchema;
+      expect(getTagSchema.required).toContain("id");
 
-      const createTagParams = toolsByName["wp_create_tag"].parameters;
-      expect(createTagParams.find((p) => p.name === "name").required).toBe(true);
+      const createTagSchema = toolsByName["wp_create_tag"].inputSchema;
+      expect(createTagSchema.required).toContain("name");
 
-      const updateTagParams = toolsByName["wp_update_tag"].parameters;
-      expect(updateTagParams.find((p) => p.name === "id").required).toBe(true);
+      const updateTagSchema = toolsByName["wp_update_tag"].inputSchema;
+      expect(updateTagSchema.required).toContain("id");
 
-      const deleteTagParams = toolsByName["wp_delete_tag"].parameters;
-      expect(deleteTagParams.find((p) => p.name === "id").required).toBe(true);
+      const deleteTagSchema = toolsByName["wp_delete_tag"].inputSchema;
+      expect(deleteTagSchema.required).toContain("id");
     });
   });
 

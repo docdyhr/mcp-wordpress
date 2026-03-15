@@ -77,8 +77,8 @@ describe("TaxonomyTools", () => {
 
       expect(listCategoriesTool.description).toContain("Lists categories from a WordPress site");
       expect(listTagsTool.description).toContain("Lists tags from a WordPress site");
-      expect(listCategoriesTool.parameters).toBeDefined();
-      expect(listTagsTool.parameters).toBeDefined();
+      expect(listCategoriesTool.inputSchema).toBeDefined();
+      expect(listTagsTool.inputSchema).toBeDefined();
     });
 
     it("should include hide_empty parameter for categories only", () => {
@@ -86,12 +86,12 @@ describe("TaxonomyTools", () => {
       const listCategoriesTool = tools.find((t) => t.name === "wp_list_categories");
       const listTagsTool = tools.find((t) => t.name === "wp_list_tags");
 
-      const categoriesHideEmptyParam = listCategoriesTool.parameters.find((p) => p.name === "hide_empty");
-      const tagsHideEmptyParam = listTagsTool.parameters.find((p) => p.name === "hide_empty");
+      const categoriesHideEmptyProp = listCategoriesTool.inputSchema.properties.hide_empty;
+      const tagsHideEmptyProp = listTagsTool.inputSchema.properties.hide_empty;
 
-      expect(categoriesHideEmptyParam).toBeDefined();
-      expect(categoriesHideEmptyParam.type).toBe("boolean");
-      expect(tagsHideEmptyParam).toBeUndefined();
+      expect(categoriesHideEmptyProp).toBeDefined();
+      expect(categoriesHideEmptyProp.type).toBe("boolean");
+      expect(tagsHideEmptyProp).toBeUndefined();
     });
 
     it("should include description parameter for categories only", () => {
@@ -99,11 +99,11 @@ describe("TaxonomyTools", () => {
       const createCategoryTool = tools.find((t) => t.name === "wp_create_category");
       const createTagTool = tools.find((t) => t.name === "wp_create_tag");
 
-      const categoryDescParam = createCategoryTool.parameters.find((p) => p.name === "description");
-      const tagDescParam = createTagTool.parameters.find((p) => p.name === "description");
+      const categoryDescProp = createCategoryTool.inputSchema.properties.description;
+      const tagDescProp = createTagTool.inputSchema.properties.description;
 
-      expect(categoryDescParam).toBeDefined();
-      expect(tagDescParam).toBeUndefined();
+      expect(categoryDescProp).toBeDefined();
+      expect(tagDescProp).toBeUndefined();
     });
   });
 
