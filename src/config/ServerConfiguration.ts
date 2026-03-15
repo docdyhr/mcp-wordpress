@@ -150,11 +150,9 @@ export class ServerConfiguration {
 
       return { clients, configs: validConfigs };
     } catch (_error) {
-      this.logger.fatal("Failed to load multi-site configuration", {
-        configPath,
-        _error: getErrorMessage(_error),
-      });
-      process.exit(1);
+      const message = `Failed to load multi-site configuration: ${getErrorMessage(_error)}`;
+      this.logger.fatal(message, { configPath });
+      throw new Error(message);
     }
   }
 

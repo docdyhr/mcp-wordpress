@@ -39,9 +39,10 @@ updates:
         dependency-type: "production"
         patterns:
           - "@modelcontextprotocol/*"
-          - "axios"
-          - "express*"
           - "zod*"
+          - "dotenv"
+          - "form-data"
+          - "hono"
         exclude-patterns:
           - "@types/*"
       development-dependencies:
@@ -50,9 +51,8 @@ updates:
           - "@types/*"
           - "eslint*"
           - "prettier*"
-          - "jest*"
-          - "typescript*"
           - "vitest*"
+          - "typescript*"
           - "@typescript-eslint/*"
       wordpress-packages:
         patterns:

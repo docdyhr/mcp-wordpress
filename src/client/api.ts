@@ -537,11 +537,11 @@ export class WordPressClient implements IWordPressClient {
     const cleanEndpoint = endpoint.replace(/^\/+/, "");
     const url = endpoint.startsWith("http") ? endpoint : `${this.apiUrl}/${cleanEndpoint}`;
 
-    const { headers: _ignoredHeaders, retries: retryOverride, params: _ignoredParams, ...restOptions } = options;
+    const { headers: customHeaders, retries: retryOverride, params: _unusedParams, ...restOptions } = options;
     const baseHeaders: Record<string, string> = {
       "Content-Type": "application/json",
       "User-Agent": getUserAgent(),
-      ...(_ignoredHeaders || {}),
+      ...(customHeaders || {}),
     };
 
     this.addAuthHeaders(baseHeaders);
@@ -617,6 +617,7 @@ export class WordPressClient implements IWordPressClient {
     }
 
     this._stats.failedRequests++;
+    this._stats.errors++;
     timer.end();
     throw new WordPressAPIError(
       `Request failed after ${maxAttempts} attempt${maxAttempts === 1 ? "" : "s"}: ${lastError.message}`,
@@ -738,7 +739,7 @@ export class WordPressClient implements IWordPressClient {
       );
     }
 
-    if (errorMessage.includes("Beiträge zu erstellen") && originalEndpoint.includes("media")) {
+    if (response.status === 401 && originalEndpoint.includes("media") && fetchOptions.method === "POST") {
       throw new AuthenticationError(
         `WordPress REST API media upload restriction detected: ${errorMessage}. ` +
           "This typically indicates that media uploads via REST API are disabled by WordPress configuration, " +
@@ -812,6 +813,8 @@ export class WordPressClient implements IWordPressClient {
     }
   }
 
+  // Note: Returns null cast as T for empty responses. Callers should handle
+  // potential null values when the WordPress API returns empty bodies (e.g. DELETE).
   private async parseResponse<T>(
     response: Response,
     endpoint: string,
