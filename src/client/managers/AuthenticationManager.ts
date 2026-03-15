@@ -16,7 +16,9 @@ import { AuthenticationError } from "@/types/client.js";
 import { AUTH_METHODS, type AuthMethod } from "@/types/wordpress.js";
 import { config } from "@/config/Config.js";
 import { BaseManager } from "./BaseManager.js";
-import { debug } from "@/utils/debug.js";
+import { LoggerFactory } from "@/utils/logger.js";
+
+const log = LoggerFactory.client("AUTH_MGR");
 
 interface AuthManagerConfig extends WordPressClientConfig {
   siteUrl: string; // Required based on constructor validation
@@ -224,7 +226,7 @@ export class AuthenticationManager extends BaseManager {
       const expiresIn = data.expires_in || 86400; // Default 24h
       this.authConfig.tokenExpiry = Date.now() + expiresIn * 1000;
       this.authenticated = true;
-      debug.log("JWT authentication successful", {
+      log.debug("JWT authentication successful", {
         expiresIn,
         expiresAt: new Date(this.authConfig.tokenExpiry).toISOString(),
       });
@@ -242,7 +244,7 @@ export class AuthenticationManager extends BaseManager {
   async testAuthentication(): Promise<boolean> {
     try {
       const _headers = await this.getAuthHeaders();
-      debug.log("Authentication headers prepared", {
+      log.debug("Authentication headers prepared", {
         method: this.authConfig.authMethod,
       });
 
@@ -252,7 +254,7 @@ export class AuthenticationManager extends BaseManager {
       return true;
     } catch (_error) {
       this.authenticated = false;
-      debug.log("Authentication test failed", _error);
+      log.debug("Authentication test failed", { error: String(_error) });
       return false;
     }
   }
@@ -462,11 +464,11 @@ export class AuthenticationManager extends BaseManager {
 
         if (validateResponse.ok) {
           this.authConfig.tokenExpiry = Date.now() + 3600 * 1000; // Extend validity for another hour
-          debug.log("JWT token validated successfully");
+          log.debug("JWT token validated successfully");
           return;
         }
       } catch (error) {
-        debug.log("JWT token validation failed, re-authenticating", { error: String(error) });
+        log.debug("JWT token validation failed, re-authenticating", { error: String(error) });
       }
     }
 

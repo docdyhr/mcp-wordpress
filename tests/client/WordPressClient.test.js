@@ -14,17 +14,22 @@ const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
 // Mock logger to avoid console output
-vi.mock("../../dist/utils/logger.js", () => ({
-  LoggerFactory: {
-    api: () => ({
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      debug: vi.fn(),
-      time: vi.fn().mockImplementation((name, fn) => fn()),
-    }),
-  },
-}));
+vi.mock("../../dist/utils/logger.js", () => {
+  const mockLog = () => ({
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    time: vi.fn().mockImplementation((name, fn) => fn()),
+  });
+  return {
+    LoggerFactory: {
+      api: mockLog,
+      client: mockLog,
+    },
+    startTimer: () => ({ end: () => 0 }),
+  };
+});
 
 // Mock config
 vi.mock("../../dist/config/Config.js", () => ({

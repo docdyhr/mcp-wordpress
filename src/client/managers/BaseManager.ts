@@ -5,7 +5,9 @@
 
 import type { WordPressClientConfig } from "@/types/client.js";
 import { WordPressAPIError } from "@/types/client.js";
-import { debug, logError } from "@/utils/debug.js";
+import { LoggerFactory } from "@/utils/logger.js";
+
+const log = LoggerFactory.client("BASE");
 import { getErrorMessage } from "@/utils/error.js";
 
 export abstract class BaseManager {
@@ -19,7 +21,7 @@ export abstract class BaseManager {
    * Standardized error handling for all managers
    */
   protected handleError(error: unknown, operation: string): never {
-    logError(`${operation} failed:`, error as Record<string, unknown>);
+    log.error(`${operation} failed`, { error: String(error) });
 
     if (error instanceof WordPressAPIError) {
       throw error;
@@ -67,7 +69,7 @@ export abstract class BaseManager {
    * Standardized success logging
    */
   protected logSuccess(operation: string, details?: unknown): void {
-    debug.log(`${operation} completed successfully`, details);
+    log.debug(`${operation} completed successfully`, details as Record<string, unknown> | undefined);
   }
 
   /**

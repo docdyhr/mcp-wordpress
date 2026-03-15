@@ -4,7 +4,9 @@
  */
 
 import { WordPressAPIError } from "@/types/client.js";
-import { debug, logError } from "@/utils/debug.js";
+import { LoggerFactory } from "@/utils/logger.js";
+
+const log = LoggerFactory.client("ERROR_HANDLER");
 import { getErrorMessage } from "@/utils/error.js";
 import type { ErrorHandler, ConfigurationProvider } from "@/client/managers/interfaces/ManagerInterfaces.js";
 
@@ -15,7 +17,7 @@ export class ErrorHandlerImpl implements ErrorHandler {
    * Handle and transform errors with context
    */
   handleError(error: unknown, operation: string): never {
-    logError(`${operation} failed:`, error as Record<string, unknown>);
+    log.error(`${operation} failed`, { error: String(error) });
 
     if (error instanceof WordPressAPIError) {
       throw error;
@@ -48,14 +50,14 @@ export class ErrorHandlerImpl implements ErrorHandler {
    * Log successful operations
    */
   logSuccess(operation: string, details?: unknown): void {
-    debug.log(`${operation} completed successfully`, details);
+    log.debug(`${operation} completed successfully`, details as Record<string, unknown> | undefined);
   }
 
   /**
    * Handle authentication errors specifically
    */
   handleAuthError(error: unknown, operation: string): never {
-    logError(`Authentication failed during ${operation}:`, error as Record<string, unknown>);
+    log.error(`Authentication failed during ${operation}`, { error: String(error) });
 
     if (error instanceof WordPressAPIError) {
       throw error;

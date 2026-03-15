@@ -8,7 +8,9 @@ import { promises as fsPromises } from "fs";
 import * as path from "path";
 import type { WordPressMedia, MediaQueryParams, UploadMediaRequest, UpdateMediaRequest } from "@/types/wordpress.js";
 import type { RequestOptions } from "@/types/client.js";
-import { debug } from "@/utils/debug.js";
+import { LoggerFactory } from "@/utils/logger.js";
+
+const log = LoggerFactory.client("MEDIA");
 
 /**
  * Interface for the base client methods needed by media operations
@@ -71,7 +73,7 @@ export class MediaOperations {
 
       const fileBuffer = await fileHandle.readFile();
 
-      debug.log(`Uploading file: ${filename} (${(stats.size / 1024).toFixed(2)}KB)`);
+      log.debug(`Uploading file: ${filename} (${(stats.size / 1024).toFixed(2)}KB)`);
 
       return this.uploadFile(fileBuffer, filename, this.getMimeType(data.file_path), data);
     } finally {
@@ -89,7 +91,7 @@ export class MediaOperations {
     meta: Partial<UploadMediaRequest> = {},
     options?: RequestOptions,
   ): Promise<WordPressMedia> {
-    debug.log(`Uploading file: ${filename} (${fileData.length} bytes)`);
+    log.debug(`Uploading file: ${filename} (${fileData.length} bytes)`);
 
     // Use FormData but with correct configuration for node-fetch
     const formData = new FormData();
@@ -115,7 +117,7 @@ export class MediaOperations {
       timeout: uploadTimeout,
     };
 
-    debug.log(`Upload prepared with FormData, timeout: ${uploadTimeout}ms`);
+    log.debug(`Upload prepared with FormData, timeout: ${uploadTimeout}ms`);
 
     // Use the regular post method which handles FormData correctly
     return this.client.post<WordPressMedia>("media", formData, uploadOptions);

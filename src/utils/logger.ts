@@ -44,10 +44,14 @@ const LOG_LEVELS: Record<LogLevel, number> = {
  * Get minimum log level from configuration
  */
 function getMinLogLevel(): LogLevel {
-  const configInstance = ConfigHelpers.get();
-  const appConfig = configInstance.get();
-  const configLevel = appConfig.debug.logLevel.toLowerCase();
-  return LOG_LEVELS[configLevel as LogLevel] !== undefined ? (configLevel as LogLevel) : "info";
+  try {
+    const configInstance = ConfigHelpers.get();
+    const appConfig = configInstance.get();
+    const configLevel = appConfig.debug.logLevel.toLowerCase();
+    return LOG_LEVELS[configLevel as LogLevel] !== undefined ? (configLevel as LogLevel) : "info";
+  } catch {
+    return "info";
+  }
 }
 
 /**
@@ -113,14 +117,18 @@ function sanitizeContext(context: LogContext): LogContext {
  * Output log entry to appropriate destination
  */
 function outputLog(entry: LogEntry): void {
-  // In test environment, only log errors and fatals
-  if (ConfigHelpers.isTest() && LOG_LEVELS[entry.level] < LOG_LEVELS.error) {
-    return;
-  }
+  try {
+    // In test environment, only log errors and fatals
+    if (ConfigHelpers.isTest() && LOG_LEVELS[entry.level] < LOG_LEVELS.error) {
+      return;
+    }
 
-  // In DXT mode, suppress most logging
-  if (ConfigHelpers.isDXT() && LOG_LEVELS[entry.level] < LOG_LEVELS.warn) {
-    return;
+    // In DXT mode, suppress most logging
+    if (ConfigHelpers.isDXT() && LOG_LEVELS[entry.level] < LOG_LEVELS.warn) {
+      return;
+    }
+  } catch {
+    // Config not available — fall through to output
   }
 
   const formatted = formatLogEntry(entry);
@@ -348,4 +356,27 @@ export const LoggerFactory = {
    * Create logger for server operations
    */
   server: () => createLogger("SERVER"),
+
+  /**
+   * Create logger for client-layer operations
+   */
+  client: (component?: string | undefined, siteId?: string | undefined) =>
+    createLogger(component || "CLIENT", siteId ? { siteId } : {}),
+};
+
+/**
+ * Performance measurement utility
+ * Re-exported here so client code can import from a single module.
+ */
+export interface PerformanceTimer {
+  end(): number;
+}
+
+export const startTimer = (): PerformanceTimer => {
+  const start = Date.now();
+  return {
+    end(): number {
+      return Date.now() - start;
+    },
+  };
 };

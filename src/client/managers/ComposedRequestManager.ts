@@ -6,7 +6,7 @@
 import type { HTTPMethod, RequestOptions, ClientStats, WordPressClientConfig } from "@/types/client.js";
 import { WordPressAPIError, RateLimitError } from "@/types/client.js";
 import { config } from "@/config/Config.js";
-import { startTimer } from "@/utils/debug.js";
+import { startTimer } from "@/utils/logger.js";
 import { getUserAgent } from "@/utils/version.js";
 
 import type {

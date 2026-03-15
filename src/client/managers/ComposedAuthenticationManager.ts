@@ -12,7 +12,9 @@ import type {
 } from "@/types/client.js";
 import { AuthenticationError } from "@/types/client.js";
 import { AUTH_METHODS, type AuthMethod } from "@/types/wordpress.js";
-import { debug } from "@/utils/debug.js";
+import { LoggerFactory } from "@/utils/logger.js";
+
+const log = LoggerFactory.client("COMPOSED_AUTH");
 
 import type {
   ConfigurationProvider,
@@ -135,7 +137,7 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
    * Handle authentication failure
    */
   async handleAuthFailure(error: unknown): Promise<boolean> {
-    debug.log("Handling authentication failure", { error: String(error), method: this.authMethod });
+    log.debug("Handling authentication failure", { error: String(error), method: this.authMethod });
 
     this.isAuth = false;
     this.authToken = null;
@@ -177,7 +179,7 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
     this.dependencies.validator.validateString(credentials.appPassword, "appPassword", { required: true });
 
     this.isAuth = true;
-    debug.log("App password authentication configured");
+    log.debug("App password authentication configured");
     return true;
   }
 
@@ -217,7 +219,7 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
       const expiresIn = data.expires_in || 86400; // 24 hours in seconds
       this.tokenExpiry = new Date(Date.now() + expiresIn * 1000);
 
-      debug.log("JWT authentication successful", {
+      log.debug("JWT authentication successful", {
         expiresIn,
         expiry: this.tokenExpiry.toISOString(),
       });
@@ -238,7 +240,7 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
     this.dependencies.validator.validateString(credentials.password, "password", { required: true });
 
     this.isAuth = true;
-    debug.log("Basic authentication configured");
+    log.debug("Basic authentication configured");
     return true;
   }
 
@@ -251,7 +253,7 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
     this.dependencies.validator.validateString(apiKey, "apiKey", { required: true });
 
     this.isAuth = true;
-    debug.log("API key authentication configured");
+    log.debug("API key authentication configured");
     return true;
   }
 
@@ -276,7 +278,7 @@ export class ComposedAuthenticationManager implements AuthenticationProvider {
 
       if (response.ok) {
         // Token is still valid
-        debug.log("JWT token validated successfully");
+        log.debug("JWT token validated successfully");
         return true;
       }
 
