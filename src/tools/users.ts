@@ -2,6 +2,7 @@ import { WordPressClient } from "@/client/api.js";
 import { CreateUserRequest, UpdateUserRequest, UserQueryParams } from "@/types/wordpress.js";
 import { getErrorMessage } from "@/utils/error.js";
 import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "@/utils/streaming.js";
+import { toolParams } from "./params.js";
 
 /**
  * Provides tools for managing users on a WordPress site.
@@ -313,7 +314,7 @@ export class UserTools {
   }
 
   public async handleCreateUser(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const createParams = params as unknown as CreateUserRequest;
+    const createParams = toolParams<CreateUserRequest>(params);
     try {
       const user = await client.createUser(createParams);
       return `✅ User "${user.name}" created successfully with ID: ${user.id}.`;
@@ -323,7 +324,7 @@ export class UserTools {
   }
 
   public async handleUpdateUser(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const updateParams = params as unknown as UpdateUserRequest;
+    const updateParams = toolParams<UpdateUserRequest>(params);
     try {
       const user = await client.updateUser(updateParams);
       return `✅ User ${user.id} updated successfully.`;

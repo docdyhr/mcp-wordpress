@@ -1,6 +1,7 @@
 import { WordPressClient } from "@/client/api.js";
 import { CreatePageRequest, PostQueryParams as PageQueryParams, UpdatePageRequest } from "@/types/wordpress.js";
 import { getErrorMessage } from "@/utils/error.js";
+import { toolParams } from "./params.js";
 
 /**
  * Provides tools for managing pages on a WordPress site.
@@ -154,7 +155,7 @@ export class PageTools {
   }
 
   public async handleListPages(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const queryParams = params as unknown as PageQueryParams;
+    const queryParams = toolParams<PageQueryParams>(params);
     try {
       const pages = await client.getPages(queryParams);
       if (pages.length === 0) {
@@ -191,7 +192,7 @@ export class PageTools {
   }
 
   public async handleCreatePage(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const createParams = params as unknown as CreatePageRequest;
+    const createParams = toolParams<CreatePageRequest>(params);
     try {
       const page = await client.createPage(createParams);
       return `✅ Page created successfully!\n- ID: ${page.id}\n- Title: ${page.title.rendered}\n- Link: ${page.link}`;
@@ -201,7 +202,7 @@ export class PageTools {
   }
 
   public async handleUpdatePage(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const updateParams = params as unknown as UpdatePageRequest & { id: number };
+    const updateParams = toolParams<UpdatePageRequest & { id: number }>(params);
     try {
       const page = await client.updatePage(updateParams);
       return `✅ Page ${page.id} updated successfully.`;

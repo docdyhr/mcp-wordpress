@@ -1,6 +1,7 @@
 import { WordPressClient } from "@/client/api.js";
 import { CommentQueryParams, CreateCommentRequest, UpdateCommentRequest } from "@/types/wordpress.js";
 import { getErrorMessage } from "@/utils/error.js";
+import { toolParams } from "./params.js";
 
 /**
  * Provides tools for managing comments on a WordPress site.
@@ -197,7 +198,7 @@ export class CommentTools {
   }
 
   public async handleCreateComment(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const createParams = params as unknown as CreateCommentRequest;
+    const createParams = toolParams<CreateCommentRequest>(params);
     try {
       const comment = await client.createComment(createParams);
       return `✅ Comment created successfully with ID: ${comment.id}`;
@@ -208,7 +209,7 @@ export class CommentTools {
 
   public async handleUpdateComment(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     try {
-      const updateParams = params as unknown as UpdateCommentRequest & { id: number };
+      const updateParams = toolParams<UpdateCommentRequest & { id: number }>(params);
       const comment = await client.updateComment(updateParams);
       return `✅ Comment ${comment.id} updated successfully. New status: ${comment.status}.`;
     } catch (_error) {

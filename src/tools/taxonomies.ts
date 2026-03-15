@@ -1,11 +1,7 @@
 import { WordPressClient } from "@/client/api.js";
-import {
-  CreateCategoryRequest,
-  CreateTagRequest,
-  UpdateCategoryRequest,
-  UpdateTagRequest,
-} from "@/types/wordpress.js";
+import { CreateCategoryRequest, CreateTagRequest, UpdateCategoryRequest, UpdateTagRequest } from "@/types/wordpress.js";
 import { getErrorMessage } from "@/utils/error.js";
+import { toolParams } from "./params.js";
 
 /**
  * Provides tools for managing taxonomies (categories and tags) on a WordPress site.
@@ -216,7 +212,7 @@ export class TaxonomyTools {
   }
 
   public async handleCreateCategory(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const createParams = params as unknown as CreateCategoryRequest;
+    const createParams = toolParams<CreateCategoryRequest>(params);
     try {
       const category = await client.createCategory(createParams);
       return `✅ Category "${category.name}" created successfully with ID: ${category.id}.`;
@@ -226,7 +222,7 @@ export class TaxonomyTools {
   }
 
   public async handleUpdateCategory(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const updateParams = params as unknown as UpdateCategoryRequest;
+    const updateParams = toolParams<UpdateCategoryRequest>(params);
     try {
       const category = await client.updateCategory(updateParams);
       return `✅ Category ${category.id} updated successfully.`;
@@ -277,7 +273,7 @@ export class TaxonomyTools {
   }
 
   public async handleCreateTag(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const createParams = params as unknown as CreateTagRequest;
+    const createParams = toolParams<CreateTagRequest>(params);
     try {
       const tag = await client.createTag(createParams);
       return `✅ Tag "${tag.name}" created successfully with ID: ${tag.id}.`;
@@ -287,7 +283,7 @@ export class TaxonomyTools {
   }
 
   public async handleUpdateTag(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const updateParams = params as unknown as UpdateTagRequest;
+    const updateParams = toolParams<UpdateTagRequest>(params);
     try {
       const tag = await client.updateTag(updateParams);
       return `✅ Tag ${tag.id} updated successfully.`;
