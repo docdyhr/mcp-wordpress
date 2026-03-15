@@ -34,7 +34,6 @@
     "bin/",
     "docs/",
     "examples/",
-    "cache/",
     "README.md",
     "LICENSE"
   ],

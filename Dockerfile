@@ -91,7 +91,7 @@ CMD ["node", "dist/index.js"]
 
 # OCI metadata labels (enhanced for v6 compliance)
 LABEL org.opencontainers.image.title="MCP WordPress Server"
-LABEL org.opencontainers.image.description="Complete WordPress MCP Server with 59 management tools, intelligent caching, real-time monitoring, multi-site support, and 95%+ test coverage"
+LABEL org.opencontainers.image.description="Complete WordPress MCP Server with 59 management tools, intelligent caching, real-time monitoring, and multi-site support"
 LABEL org.opencontainers.image.version="${VERSION}"
 LABEL org.opencontainers.image.created="${BUILD_DATE}"
 LABEL org.opencontainers.image.revision="${VCS_REF}"
@@ -103,12 +103,5 @@ LABEL org.opencontainers.image.vendor="docdyhr"
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.base.name="node:20-alpine"
 
-# Additional metadata for container registries
+# Additional metadata
 LABEL maintainer="Thomas Dyhr <thomas@docdyhr.dk>"
-LABEL org.label-schema.schema-version="1.0"
-LABEL org.label-schema.name="mcp-wordpress"
-LABEL org.label-schema.description="Complete WordPress MCP Server"
-LABEL org.label-schema.version="${VERSION}"
-LABEL org.label-schema.build-date="${BUILD_DATE}"
-LABEL org.label-schema.vcs-ref="${VCS_REF}"
-LABEL org.label-schema.vcs-url="https://github.com/docdyhr/mcp-wordpress"

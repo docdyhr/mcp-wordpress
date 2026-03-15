@@ -1,10 +1,10 @@
 # CLAUDE.md
 
-AI assistant instructions for MCP WordPress project (v2.7.0).
+AI assistant instructions for MCP WordPress project (v3.1.8).
 
 ## Quick Start
 
-**Status**: Production-ready | All tests passing (100%) | 96%+ coverage | 59 WordPress tools
+**Status**: Production-ready | All tests passing (100%) | ~58% line coverage | 59 WordPress tools
 
 ```bash
 # Essential Commands
@@ -109,9 +109,13 @@ npm run build          # TypeScript compilation
 
 ## Key Project Info
 
-**Project**: Model Context Protocol (MCP) Server for WordPress **Language**: TypeScript with strict type safety
-**Testing**: All tests passing (100%) **Auth**: 4 methods (App Passwords recommended) **Multi-Site**: Full
-support via configuration **Tools**: 59 across 10 categories **Status**: Production-ready with CI/CD
+**Project**: Model Context Protocol (MCP) Server for WordPress
+**Language**: TypeScript with strict type safety
+**Testing**: All tests passing (100%), ~58% line coverage
+**Auth**: 4 methods (App Passwords recommended)
+**Multi-Site**: Full support via configuration
+**Tools**: 59 across 10 categories
+**Status**: Production-ready with CI/CD
 
 **Critical Files**:
 

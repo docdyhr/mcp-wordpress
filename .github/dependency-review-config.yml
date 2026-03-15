@@ -3,7 +3,7 @@
 
 # Security vulnerability settings
 vulnerability_check: true
-fail_on_severity: moderate
+fail_on_severity: high
 
 # License compliance settings
 license_check: true

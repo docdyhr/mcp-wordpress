@@ -37,8 +37,6 @@ Fixes #(issue_number) Closes #(issue_number) Related to #(issue_number)
 ### Tests Performed
 
 - [ ] Unit tests pass (`npm test`)
-- [ ] Tool tests pass (`npm run test:tools`)
-- [ ] Integration tests pass (`npm run test:integration`)
 - [ ] Health check passes (`npm run health`)
 - [ ] TypeScript compilation (`npm run build`)
 - [ ] Linting passes (`npm run lint`)

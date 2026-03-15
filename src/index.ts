@@ -54,21 +54,11 @@ class MCPWordPressServer {
     await this.loadConfiguration(this.mcpConfig);
 
     if (this.wordpressClients.size === 0) {
-      // In test environments, don't exit the process
-      if (
-        ConfigHelpers.isCI() ||
-        ConfigHelpers.isTest() ||
-        (globalThis as Record<string, unknown>).__EXECUTION_CONTEXT__ === "jest"
-      ) {
-        this.logger.warn("No WordPress sites configured in test environment");
-        // Create a dummy client for testing
-        this.wordpressClients.set("test", {} as WordPressClient);
-      } else {
-        this.logger.fatal("No WordPress sites configured. Server cannot start.", {
-          expectedEnvVars: ["WORDPRESS_SITE_URL", "WORDPRESS_USERNAME", "WORDPRESS_APP_PASSWORD"],
-        });
-        process.exit(1);
-      }
+      const message = "No WordPress sites configured. Server cannot start.";
+      this.logger.fatal(message, {
+        expectedEnvVars: ["WORDPRESS_SITE_URL", "WORDPRESS_USERNAME", "WORDPRESS_APP_PASSWORD"],
+      });
+      throw new Error(message);
     }
 
     this.toolRegistry = new ToolRegistry(this.server, this.wordpressClients);
@@ -103,8 +93,7 @@ class MCPWordPressServer {
 
     // Add timeout protection for server connection
     const connectionTimeout = setTimeout(() => {
-      this.logger.fatal("Server connection timed out", { timeoutMs: 30000 });
-      process.exit(1);
+      throw new Error("Server connection timed out after 30000ms");
     }, 30000);
 
     try {
