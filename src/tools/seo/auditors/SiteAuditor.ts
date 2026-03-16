@@ -599,10 +599,22 @@ export class SiteAuditor {
     }
 
     // Check for external dependencies (basic analysis)
+    let siteHostname: string;
+    try {
+      siteHostname = new URL(siteData.siteUrl).hostname;
+    } catch {
+      siteHostname = siteData.siteUrl.replace(/^https?:\/\//, "").replace(/[/:].*/g, "");
+    }
     const externalDependencies = [...siteData.posts, ...siteData.pages].reduce((count, item) => {
       const content = item.content?.rendered || "";
-      const siteHost = siteData.siteUrl.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
-      const externalLinks = content.match(/https?:\/\/[^"'\s>]*/gi)?.filter((url) => !url.includes(siteHost)) || [];
+      const externalLinks =
+        content.match(/https?:\/\/[^"'\s>]*/gi)?.filter((url) => {
+          try {
+            return new URL(url).hostname !== siteHostname;
+          } catch {
+            return true;
+          }
+        }) || [];
       return count + externalLinks.length;
     }, 0);
 

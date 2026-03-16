@@ -215,12 +215,15 @@ export class PageTools {
       const result = await client.deletePage(id, force);
       const action = force ? "permanently deleted" : "moved to trash";
 
+      if (result?.deleted === false) {
+        throw new Error(
+          `WordPress refused to delete page ${id}. The page may be protected or the operation was rejected.`,
+        );
+      }
+
       if (result?.deleted) {
-        let response = `✅ Page ${id} has been ${action}.`;
-        if (result.previous) {
-          response = `✅ Page "${result.previous.title?.rendered || id}" has been ${action}.`;
-        }
-        return response;
+        const title = result.previous?.title?.rendered;
+        return title ? `✅ Page "${title}" has been ${action}.` : `✅ Page ${id} has been ${action}.`;
       }
 
       // Some WordPress installations return empty/null responses on successful deletion

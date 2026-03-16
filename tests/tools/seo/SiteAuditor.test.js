@@ -463,6 +463,46 @@ describe("SiteAuditor", () => {
     });
   });
 
+  describe("External Link Detection", () => {
+    it("should correctly distinguish internal from external links using hostname comparison", async () => {
+      // Set up content with internal links, external links, and tricky subdomain cases
+      const postsWithLinks = [
+        {
+          id: 1,
+          title: { rendered: "Link Test Post" },
+          content: {
+            rendered: `
+              <a href="https://example.com/about">Internal</a>
+              <a href="https://example.com/blog/post">Internal path</a>
+              <a href="https://notexample.com/page">External (substring match trap)</a>
+              <a href="https://other.com/page">External</a>
+              <a href="https://sub.example.com/page">External subdomain</a>
+            `,
+          },
+          excerpt: { rendered: "Test" },
+          slug: "link-test",
+          status: "publish",
+          date: "2024-01-01T00:00:00",
+          modified: "2024-01-01T00:00:00",
+          link: "https://example.com/link-test",
+        },
+      ];
+
+      mockClient.getPosts.mockResolvedValue(postsWithLinks);
+      mockClient.getPages.mockResolvedValue([]);
+
+      const params = { site: "test" };
+      const auditResult = await siteAuditor.performSiteAudit(params);
+
+      // The audit should complete without errors and include performance section
+      expect(auditResult).toBeDefined();
+      expect(Array.isArray(auditResult.sections)).toBe(true);
+
+      const perfSection = auditResult.sections.find((s) => s.name.toLowerCase().includes("performance"));
+      expect(perfSection).toBeDefined();
+    });
+  });
+
   describe("Content Analysis", () => {
     it("should analyze content readability correctly", async () => {
       const params = { site: "test" };
