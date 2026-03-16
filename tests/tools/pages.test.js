@@ -453,7 +453,9 @@ describe("PageTools", () => {
 
       expect(mockClient.deletePage).toHaveBeenCalledWith(1, undefined);
       expect(typeof result).toBe("string");
-      expect(result).toContain("✅ Page 1 has been moved to trash");
+      expect(result).toContain("✅ Page");
+      expect(result).toContain("Deleted Page");
+      expect(result).toContain("moved to trash");
     });
 
     it("should handle forced deletion", async () => {
@@ -474,7 +476,36 @@ describe("PageTools", () => {
 
       expect(mockClient.deletePage).toHaveBeenCalledWith(1, true);
       expect(typeof result).toBe("string");
+      expect(result).toContain("✅ Page");
+      expect(result).toContain("Permanently Deleted Page");
+      expect(result).toContain("permanently deleted");
+    });
+
+    it("should handle deletion with null response (legacy WordPress)", async () => {
+      mockClient.deletePage.mockResolvedValueOnce(null);
+
+      const result = await pageTools.handleDeletePage(mockClient, { id: 1 });
+
+      expect(mockClient.deletePage).toHaveBeenCalledWith(1, undefined);
+      expect(typeof result).toBe("string");
+      expect(result).toContain("✅ Page 1 has been moved to trash");
+    });
+
+    it("should handle deletion with empty object response", async () => {
+      mockClient.deletePage.mockResolvedValueOnce({});
+
+      const result = await pageTools.handleDeletePage(mockClient, { id: 1, force: true });
+
+      expect(typeof result).toBe("string");
       expect(result).toContain("✅ Page 1 has been permanently deleted");
+    });
+
+    it("should throw when WordPress refuses deletion (deleted: false)", async () => {
+      mockClient.deletePage.mockResolvedValueOnce({ deleted: false });
+
+      await expect(pageTools.handleDeletePage(mockClient, { id: 1 })).rejects.toThrow(
+        "WordPress refused to delete page 1",
+      );
     });
 
     it("should handle deletion errors", async () => {

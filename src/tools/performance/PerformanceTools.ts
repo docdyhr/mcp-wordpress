@@ -99,7 +99,10 @@ export default class PerformanceTools {
     return [
       {
         name: "wp_performance_stats",
-        description: "Get real-time performance statistics and metrics",
+        description:
+          "Get real-time performance statistics and metrics. " +
+          "Note: Top-level metrics (totalRequests, averageResponseTime, errorRate) are session-wide aggregates across all sites. " +
+          "Per-site cache and client stats are shown in the siteSpecific section when a site parameter is provided.",
         parameters: [
           {
             name: "site",
@@ -156,7 +159,9 @@ export default class PerformanceTools {
       },
       {
         name: "wp_performance_benchmark",
-        description: "Compare current performance against industry benchmarks",
+        description:
+          "Compare current performance against industry benchmarks. " +
+          "Note: Benchmarks are based on session-wide aggregated metrics across all sites, not per-site metrics.",
         parameters: [
           {
             name: "site",
@@ -318,6 +323,7 @@ export default class PerformanceTools {
 
       if (category === "overview" || category === "all") {
         result.overview = {
+          scope: site ? "session-wide (all sites combined)" : "session-wide",
           overallHealth: calculateHealthStatus(metrics),
           performanceScore: calculatePerformanceScore(metrics),
           totalRequests: metrics.requests.total,
