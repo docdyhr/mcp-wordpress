@@ -15,6 +15,7 @@ import { SiteAuditor } from "../../../dist/tools/seo/auditors/SiteAuditor.js";
 const createMockClient = () => ({
   getPosts: vi.fn(),
   getPages: vi.fn(),
+  getSiteUrl: vi.fn().mockReturnValue("https://example.com"),
   authenticate: vi.fn().mockResolvedValue(true),
 });
 

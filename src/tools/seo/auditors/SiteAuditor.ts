@@ -237,8 +237,8 @@ export class SiteAuditor {
     const posts = await this.client.getPosts({ per_page: this.config.maxPagesForContentAudit, status: ["publish"] });
     const pages = await this.client.getPages({ per_page: this.config.maxPagesForContentAudit, status: ["publish"] });
 
-    // Get site info (mock for now)
-    const siteUrl = "https://example.com"; // Would come from WordPress REST API
+    // Get site URL from the WordPress client configuration
+    const siteUrl = this.client.getSiteUrl();
 
     return {
       siteUrl,
@@ -601,7 +601,8 @@ export class SiteAuditor {
     // Check for external dependencies (basic analysis)
     const externalDependencies = [...siteData.posts, ...siteData.pages].reduce((count, item) => {
       const content = item.content?.rendered || "";
-      const externalLinks = content.match(/https?:\/\/(?!example\.com)[^"'\s>]*/gi) || [];
+      const siteHost = siteData.siteUrl.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+      const externalLinks = content.match(/https?:\/\/[^"'\s>]*/gi)?.filter((url) => !url.includes(siteHost)) || [];
       return count + externalLinks.length;
     }, 0);
 

@@ -213,9 +213,7 @@ describe("UserTools", () => {
       const result = await userTools.handleListUsers(mockClient, {});
 
       expect(result).toContain("No display name");
-      expect(result).toContain("No email");
-      expect(result).toContain("No roles");
-      expect(result).toContain("Unknown");
+      expect(result).toContain("Restricted (requires admin)");
       expect(result).toContain("No description");
       expect(result).toContain("No URL");
     });

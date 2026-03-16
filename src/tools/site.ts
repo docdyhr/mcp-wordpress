@@ -21,7 +21,8 @@ export class SiteTools {
     return [
       {
         name: "wp_get_site_settings",
-        description: "Retrieves the general settings for a WordPress site.",
+        description:
+          "Retrieves the general settings for a WordPress site. Requires administrator role (manage_options capability).",
         inputSchema: {
           type: "object",
           properties: {},
@@ -30,7 +31,8 @@ export class SiteTools {
       },
       {
         name: "wp_update_site_settings",
-        description: "Updates one or more general settings for a WordPress site.",
+        description:
+          "Updates one or more general settings for a WordPress site. Requires administrator role (manage_options capability).",
         inputSchema: {
           type: "object",
           properties: {

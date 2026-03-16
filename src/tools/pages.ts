@@ -212,8 +212,18 @@ export class PageTools {
   public async handleDeletePage(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     const { id, force } = params as { id: number; force?: boolean };
     try {
-      await client.deletePage(id, force);
-      const action = params.force ? "permanently deleted" : "moved to trash";
+      const result = await client.deletePage(id, force);
+      const action = force ? "permanently deleted" : "moved to trash";
+
+      if (result?.deleted) {
+        let response = `✅ Page ${id} has been ${action}.`;
+        if (result.previous) {
+          response = `✅ Page "${result.previous.title?.rendered || id}" has been ${action}.`;
+        }
+        return response;
+      }
+
+      // Some WordPress installations return empty/null responses on successful deletion
       return `✅ Page ${id} has been ${action}.`;
     } catch (_error) {
       throw new Error(`Failed to delete page: ${getErrorMessage(_error)}`);

@@ -25,6 +25,8 @@ export class UserTools {
         name: "wp_list_users",
         description:
           "Lists users from a WordPress site with comprehensive filtering and detailed user information including roles, registration dates, and activity status.\n\n" +
+          "**Note:** Role, email, and registration date fields require **administrator** privileges. " +
+          "Non-admin users will see limited metadata due to WordPress REST API restrictions.\n\n" +
           "**Usage Examples:**\n" +
           "• List all users: `wp_list_users`\n" +
           '• Search users: `wp_list_users --search="john"`\n' +
@@ -206,16 +208,16 @@ export class UserTools {
                   month: "short",
                   day: "numeric",
                 })
-              : "Unknown";
+              : "Restricted (requires admin)";
 
-            const roles = u.roles?.join(", ") || "No roles";
+            const roles = u.roles?.length ? u.roles.join(", ") : "Restricted (requires admin)";
             const description = u.description || "No description";
             const displayName = u.name || "No display name";
             const userUrl = u.url || "No URL";
 
             return (
               `- **ID ${u.id}**: ${displayName} (@${u.slug})\n` +
-              `  📧 Email: ${u.email || "No email"}\n` +
+              `  📧 Email: ${u.email || "Restricted (requires admin)"}\n` +
               `  🎭 Roles: ${roles}\n` +
               `  📅 Registered: ${registrationDate}\n` +
               `  🔗 URL: ${userUrl}\n` +

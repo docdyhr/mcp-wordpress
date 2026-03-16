@@ -21,55 +21,42 @@ export class CacheTools {
       {
         name: "wp_cache_stats",
         description: "Get cache statistics for a WordPress site.",
-        parameters: [
-          {
-            name: "site",
-            type: "string",
-            description:
-              "Site ID to get cache stats for. If not provided, uses default site or fails if multiple sites configured.",
-          },
-        ],
+        inputSchema: {
+          type: "object" as const,
+          properties: {},
+        },
         handler: this.handleGetCacheStats.bind(this),
       },
       {
         name: "wp_cache_clear",
         description: "Clear cache for a WordPress site.",
-        parameters: [
-          {
-            name: "site",
-            type: "string",
-            description: "Site ID to clear cache for.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            pattern: {
+              type: "string",
+              description: 'Optional pattern to clear specific cache entries (e.g., "posts", "categories").',
+            },
           },
-          {
-            name: "pattern",
-            type: "string",
-            description: 'Optional pattern to clear specific cache entries (e.g., "posts", "categories").',
-          },
-        ],
+        },
         handler: this.handleClearCache.bind(this),
       },
       {
         name: "wp_cache_warm",
         description: "Pre-warm cache with essential WordPress data.",
-        parameters: [
-          {
-            name: "site",
-            type: "string",
-            description: "Site ID to warm cache for.",
-          },
-        ],
+        inputSchema: {
+          type: "object" as const,
+          properties: {},
+        },
         handler: this.handleWarmCache.bind(this),
       },
       {
         name: "wp_cache_info",
         description: "Get detailed cache configuration and status information.",
-        parameters: [
-          {
-            name: "site",
-            type: "string",
-            description: "Site ID to get cache info for.",
-          },
-        ],
+        inputSchema: {
+          type: "object" as const,
+          properties: {},
+        },
         handler: this.handleGetCacheInfo.bind(this),
       },
     ];
@@ -78,10 +65,8 @@ export class CacheTools {
   /**
    * Get cache statistics
    */
-  async handleGetCacheStats(params: { site?: string }) {
+  async handleGetCacheStats(client: WordPressClient, _params: Record<string, unknown>) {
     return toolWrapper(async () => {
-      const client = this.resolveClient(params.site);
-
       if (!(client instanceof CachedWordPressClient)) {
         return {
           caching_enabled: false,
@@ -112,10 +97,8 @@ export class CacheTools {
   /**
    * Clear cache
    */
-  async handleClearCache(params: { site?: string; pattern?: string }) {
+  async handleClearCache(client: WordPressClient, params: Record<string, unknown>) {
     return toolWrapper(async () => {
-      const client = this.resolveClient(params.site);
-
       if (!(client instanceof CachedWordPressClient)) {
         return {
           success: false,
@@ -124,14 +107,15 @@ export class CacheTools {
       }
 
       let cleared: number;
+      const pattern = params.pattern as string | undefined;
 
-      if (params.pattern) {
-        cleared = client.clearCachePattern(params.pattern);
+      if (pattern) {
+        cleared = client.clearCachePattern(pattern);
         return {
           success: true,
-          message: `Cleared ${cleared} cache entries matching pattern "${params.pattern}".`,
+          message: `Cleared ${cleared} cache entries matching pattern "${pattern}".`,
           cleared_entries: cleared,
-          pattern: params.pattern,
+          pattern,
         };
       } else {
         cleared = client.clearCache();
@@ -147,10 +131,8 @@ export class CacheTools {
   /**
    * Warm cache with essential data
    */
-  async handleWarmCache(params: { site?: string }) {
+  async handleWarmCache(client: WordPressClient, _params: Record<string, unknown>) {
     return toolWrapper(async () => {
-      const client = this.resolveClient(params.site);
-
       if (!(client instanceof CachedWordPressClient)) {
         return {
           success: false,
@@ -174,10 +156,8 @@ export class CacheTools {
   /**
    * Get detailed cache information
    */
-  async handleGetCacheInfo(params: { site?: string }) {
+  async handleGetCacheInfo(client: WordPressClient, _params: Record<string, unknown>) {
     return toolWrapper(async () => {
-      const client = this.resolveClient(params.site);
-
       if (!(client instanceof CachedWordPressClient)) {
         return {
           caching_enabled: false,
@@ -223,32 +203,6 @@ export class CacheTools {
         ],
       };
     });
-  }
-
-  /**
-   * Resolve client from site parameter
-   */
-  private resolveClient(siteId?: string): WordPressClient {
-    if (!siteId) {
-      if (this.clients.size === 1) {
-        return Array.from(this.clients.values())[0];
-      } else if (this.clients.size === 0) {
-        throw new Error("No WordPress sites configured.");
-      } else {
-        throw new Error(
-          `Multiple sites configured. Please specify --site parameter. Available sites: ${Array.from(
-            this.clients.keys(),
-          ).join(", ")}`,
-        );
-      }
-    }
-
-    const client = this.clients.get(siteId);
-    if (!client) {
-      throw new Error(`Site "${siteId}" not found. Available sites: ${Array.from(this.clients.keys()).join(", ")}`);
-    }
-
-    return client;
   }
 }
 

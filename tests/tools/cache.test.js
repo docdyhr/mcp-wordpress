@@ -10,7 +10,7 @@ describe("CacheTools", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Mock regular client
+    // Mock regular client (no caching)
     mockClient = {
       cacheManager: {
         getStats: vi.fn(),
@@ -56,7 +56,7 @@ describe("CacheTools", () => {
       tools.forEach((tool) => {
         expect(tool).toHaveProperty("name");
         expect(tool).toHaveProperty("description");
-        expect(tool).toHaveProperty("parameters");
+        expect(tool).toHaveProperty("inputSchema");
         expect(tool).toHaveProperty("handler");
         expect(typeof tool.handler).toBe("function");
       });
@@ -84,7 +84,7 @@ describe("CacheTools", () => {
 
       const tools = cacheTools.getTools();
       const statsTool = tools.find((t) => t.name === "wp_cache_stats");
-      const result = await statsTool.handler({ site: "cached" });
+      const result = await statsTool.handler(mockCachedClient, {});
 
       expect(result.caching_enabled).toBe(true);
       expect(result.cache_stats).toEqual({
@@ -104,7 +104,7 @@ describe("CacheTools", () => {
     it("should return disabled message when caching is disabled", async () => {
       const tools = cacheTools.getTools();
       const statsTool = tools.find((t) => t.name === "wp_cache_stats");
-      const result = await statsTool.handler({ site: "default" });
+      const result = await statsTool.handler(mockClient, {});
 
       expect(result.caching_enabled).toBe(false);
       expect(result.message).toContain("Caching is disabled for this site");
@@ -118,7 +118,7 @@ describe("CacheTools", () => {
       const tools = cacheTools.getTools();
       const statsTool = tools.find((t) => t.name === "wp_cache_stats");
 
-      await expect(statsTool.handler({ site: "cached" })).rejects.toThrow("Failed to get stats");
+      await expect(statsTool.handler(mockCachedClient, {})).rejects.toThrow("Failed to get stats");
     });
   });
 
@@ -128,7 +128,7 @@ describe("CacheTools", () => {
 
       const tools = cacheTools.getTools();
       const clearTool = tools.find((t) => t.name === "wp_cache_clear");
-      const result = await clearTool.handler({ site: "cached" });
+      const result = await clearTool.handler(mockCachedClient, {});
 
       expect(result.success).toBe(true);
       expect(result.message).toContain("Cleared all cache entries (75 total)");
@@ -141,7 +141,7 @@ describe("CacheTools", () => {
 
       const tools = cacheTools.getTools();
       const clearTool = tools.find((t) => t.name === "wp_cache_clear");
-      const result = await clearTool.handler({ site: "cached", pattern: "posts" });
+      const result = await clearTool.handler(mockCachedClient, { pattern: "posts" });
 
       expect(result.success).toBe(true);
       expect(result.message).toContain('Cleared 25 cache entries matching pattern "posts"');
@@ -153,7 +153,7 @@ describe("CacheTools", () => {
     it("should return disabled message when caching is disabled", async () => {
       const tools = cacheTools.getTools();
       const clearTool = tools.find((t) => t.name === "wp_cache_clear");
-      const result = await clearTool.handler({ site: "default" });
+      const result = await clearTool.handler(mockClient, {});
 
       expect(result.success).toBe(false);
       expect(result.message).toContain("Caching is not enabled for this site");
@@ -167,7 +167,7 @@ describe("CacheTools", () => {
       const tools = cacheTools.getTools();
       const clearTool = tools.find((t) => t.name === "wp_cache_clear");
 
-      await expect(clearTool.handler({ site: "cached" })).rejects.toThrow("Clear failed");
+      await expect(clearTool.handler(mockCachedClient, {})).rejects.toThrow("Clear failed");
     });
   });
 
@@ -184,7 +184,7 @@ describe("CacheTools", () => {
 
       const tools = cacheTools.getTools();
       const warmTool = tools.find((t) => t.name === "wp_cache_warm");
-      const result = await warmTool.handler({ site: "cached" });
+      const result = await warmTool.handler(mockCachedClient, {});
 
       expect(result.success).toBe(true);
       expect(result.message).toContain("Cache warmed with essential WordPress data");
@@ -196,7 +196,7 @@ describe("CacheTools", () => {
     it("should return disabled message when caching is disabled", async () => {
       const tools = cacheTools.getTools();
       const warmTool = tools.find((t) => t.name === "wp_cache_warm");
-      const result = await warmTool.handler({ site: "default" });
+      const result = await warmTool.handler(mockClient, {});
 
       expect(result.success).toBe(false);
       expect(result.message).toContain("Caching is not enabled for this site");
@@ -208,7 +208,7 @@ describe("CacheTools", () => {
       const tools = cacheTools.getTools();
       const warmTool = tools.find((t) => t.name === "wp_cache_warm");
 
-      await expect(warmTool.handler({ site: "cached" })).rejects.toThrow("Warm failed");
+      await expect(warmTool.handler(mockCachedClient, {})).rejects.toThrow("Warm failed");
     });
   });
 
@@ -233,7 +233,7 @@ describe("CacheTools", () => {
 
       const tools = cacheTools.getTools();
       const infoTool = tools.find((t) => t.name === "wp_cache_info");
-      const result = await infoTool.handler({ site: "cached" });
+      const result = await infoTool.handler(mockCachedClient, {});
 
       expect(result.caching_enabled).toBe(true);
       expect(result.cache_configuration).toBeDefined();
@@ -256,7 +256,7 @@ describe("CacheTools", () => {
     it("should return disabled message when caching is disabled", async () => {
       const tools = cacheTools.getTools();
       const infoTool = tools.find((t) => t.name === "wp_cache_info");
-      const result = await infoTool.handler({ site: "default" });
+      const result = await infoTool.handler(mockClient, {});
 
       expect(result.caching_enabled).toBe(false);
       expect(result.message).toContain("Caching is disabled for this site");
@@ -271,44 +271,7 @@ describe("CacheTools", () => {
       const tools = cacheTools.getTools();
       const infoTool = tools.find((t) => t.name === "wp_cache_info");
 
-      await expect(infoTool.handler({ site: "cached" })).rejects.toThrow("Info failed");
-    });
-  });
-
-  describe("parameter validation", () => {
-    it("should have proper parameter definitions", () => {
-      const tools = cacheTools.getTools();
-
-      tools.forEach((tool) => {
-        expect(tool.parameters).toBeDefined();
-        expect(Array.isArray(tool.parameters)).toBe(true);
-
-        tool.parameters.forEach((param) => {
-          expect(param).toHaveProperty("name");
-          expect(param).toHaveProperty("type");
-          expect(param).toHaveProperty("description");
-          expect(typeof param.name).toBe("string");
-          expect(typeof param.type).toBe("string");
-          expect(typeof param.description).toBe("string");
-        });
-      });
-    });
-  });
-
-  describe("site resolution", () => {
-    it("should handle invalid site gracefully", async () => {
-      const tools = cacheTools.getTools();
-      const statsTool = tools.find((t) => t.name === "wp_cache_stats");
-
-      await expect(statsTool.handler({ site: "nonexistent" })).rejects.toThrow('Site "nonexistent" not found');
-    });
-
-    it("should handle multiple sites configuration", async () => {
-      const tools = cacheTools.getTools();
-      const statsTool = tools.find((t) => t.name === "wp_cache_stats");
-
-      // Should fail when no site is specified with multiple sites
-      await expect(statsTool.handler({})).rejects.toThrow("Multiple sites configured. Please specify --site parameter");
+      await expect(infoTool.handler(mockCachedClient, {})).rejects.toThrow("Info failed");
     });
   });
 });

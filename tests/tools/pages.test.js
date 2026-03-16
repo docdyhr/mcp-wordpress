@@ -453,7 +453,9 @@ describe("PageTools", () => {
 
       expect(mockClient.deletePage).toHaveBeenCalledWith(1, undefined);
       expect(typeof result).toBe("string");
-      expect(result).toContain("✅ Page 1 has been moved to trash");
+      expect(result).toContain("✅ Page");
+      expect(result).toContain("Deleted Page");
+      expect(result).toContain("moved to trash");
     });
 
     it("should handle forced deletion", async () => {
@@ -474,7 +476,9 @@ describe("PageTools", () => {
 
       expect(mockClient.deletePage).toHaveBeenCalledWith(1, true);
       expect(typeof result).toBe("string");
-      expect(result).toContain("✅ Page 1 has been permanently deleted");
+      expect(result).toContain("✅ Page");
+      expect(result).toContain("Permanently Deleted Page");
+      expect(result).toContain("permanently deleted");
     });
 
     it("should handle deletion errors", async () => {
