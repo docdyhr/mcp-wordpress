@@ -16,7 +16,7 @@ on:
   # because semantic-release creates the GitHub release, which re-triggered this workflow.
 
 env:
-  NODE_VERSION: "20"
+  NODE_VERSION: "22"
   HUSKY: 0
   CI: true
 
@@ -71,9 +71,8 @@ jobs:
 
       - name: 🏷️ Semantic Release
         id: semantic
-        uses: cycjimmy/semantic-release-action@v4
+        uses: cycjimmy/semantic-release-action@v6
         with:
-          semantic_version: 24
           extra_plugins: |
             @semantic-release/changelog@6.0.3
             @semantic-release/git@10.0.1
@@ -206,7 +205,7 @@ jobs:
           sbom: true
 
       - name: 📝 Update Docker Hub Description
-        uses: peter-evans/dockerhub-description@v4
+        uses: peter-evans/dockerhub-description@v5
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
