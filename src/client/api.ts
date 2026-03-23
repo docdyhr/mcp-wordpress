@@ -256,8 +256,9 @@ export class WordPressClient implements IWordPressClient {
         throw new Error("Only HTTP and HTTPS protocols are allowed");
       }
 
-      // Prevent localhost/private IP access in production
-      if (config().app.isProduction) {
+      // Prevent localhost/private IP access unless explicitly allowed
+      // Set ALLOW_PRIVATE_URLS=true for local development with a local WordPress
+      if (process.env.ALLOW_PRIVATE_URLS !== "true") {
         const hostname = parsed.hostname.toLowerCase();
         if (
           hostname === "localhost" ||
@@ -267,7 +268,7 @@ export class WordPressClient implements IWordPressClient {
           hostname.match(/^172\.(1[6-9]|2[0-9]|3[01])\./) ||
           hostname.match(/^192\.168\./)
         ) {
-          throw new Error("Private/localhost URLs not allowed in production");
+          throw new Error("Private/localhost URLs not allowed. Set ALLOW_PRIVATE_URLS=true for local development.");
         }
       }
 
