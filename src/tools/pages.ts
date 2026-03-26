@@ -2,7 +2,7 @@ import { WordPressClient } from "@/client/api.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
 import { CreatePageRequest, PostQueryParams as PageQueryParams, UpdatePageRequest } from "@/types/wordpress.js";
 import { getErrorMessage } from "@/utils/error.js";
-import { toolParams } from "./params.js";
+import { parseId, parseIdAndForce, toolParams } from "./params.js";
 
 /**
  * Provides tools for managing pages on a WordPress site.
@@ -169,7 +169,8 @@ export class PageTools {
   }
 
   public async handleGetPage(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const { id, include_content = false } = params as { id: number; include_content?: boolean };
+    const id = parseId(params);
+    const { include_content = false } = params as { include_content?: boolean };
     try {
       const page = await client.getPage(id);
       let content =
@@ -210,7 +211,7 @@ export class PageTools {
   }
 
   public async handleDeletePage(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const { id, force } = params as { id: number; force?: boolean };
+    const { id, force } = parseIdAndForce(params);
     try {
       const result = await client.deletePage(id, force);
       const action = force ? "permanently deleted" : "moved to trash";
@@ -234,7 +235,7 @@ export class PageTools {
   }
 
   public async handleGetPageRevisions(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const { id } = params as { id: number };
+    const id = parseId(params);
     try {
       const revisions = await client.getPageRevisions(id);
       if (revisions.length === 0) {

@@ -304,11 +304,7 @@ describe("MediaTools", () => {
     });
 
     it("should handle invalid ID parameter", async () => {
-      mockClient.getMediaItem.mockRejectedValueOnce(new Error("Invalid ID"));
-
-      await expect(mediaTools.handleGetMedia(mockClient, { id: "invalid" })).rejects.toThrow(
-        "Failed to get media item",
-      );
+      await expect(mediaTools.handleGetMedia(mockClient, { id: "invalid" })).rejects.toThrow();
     });
 
     it("should format date correctly", async () => {
@@ -488,11 +484,7 @@ describe("MediaTools", () => {
     });
 
     it("should handle invalid ID", async () => {
-      mockClient.deleteMedia.mockRejectedValueOnce(new Error("Invalid ID"));
-
-      await expect(mediaTools.handleDeleteMedia(mockClient, { id: "invalid" })).rejects.toThrow(
-        "Failed to delete media",
-      );
+      await expect(mediaTools.handleDeleteMedia(mockClient, { id: "invalid" })).rejects.toThrow();
     });
 
     it("should properly handle force parameter", async () => {

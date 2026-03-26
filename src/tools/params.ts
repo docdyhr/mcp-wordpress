@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 /**
  * Type-safe parameter casting for tool handlers.
  *
@@ -11,4 +13,27 @@
  */
 export function toolParams<T>(params: Record<string, unknown>): T {
   return params as T;
+}
+
+const IdSchema = z.object({
+  id: z.number().int().positive("ID must be a positive integer"),
+});
+
+const IdForceSchema = IdSchema.extend({
+  force: z.boolean().optional(),
+});
+
+/**
+ * Validates and returns a positive integer `id` from params.
+ * Throws a ZodError with a clear message if the value is missing, not a number, or not a positive integer.
+ */
+export function parseId(params: Record<string, unknown>): number {
+  return IdSchema.parse(params).id;
+}
+
+/**
+ * Validates and returns `id` (positive integer) and optional `force` (boolean | undefined) from params.
+ */
+export function parseIdAndForce(params: Record<string, unknown>): { id: number; force?: boolean | undefined } {
+  return IdForceSchema.parse(params);
 }

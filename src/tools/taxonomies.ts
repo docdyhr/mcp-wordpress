@@ -2,7 +2,7 @@ import { WordPressClient } from "@/client/api.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
 import { CreateCategoryRequest, CreateTagRequest, UpdateCategoryRequest, UpdateTagRequest } from "@/types/wordpress.js";
 import { getErrorMessage } from "@/utils/error.js";
-import { toolParams } from "./params.js";
+import { parseId, toolParams } from "./params.js";
 
 /**
  * Provides tools for managing taxonomies (categories and tags) on a WordPress site.
@@ -206,7 +206,7 @@ export class TaxonomyTools {
   }
 
   public async handleGetCategory(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const { id } = params as { id: number };
+    const id = parseId(params);
     try {
       const category = await client.getCategory(id);
       const content =
@@ -242,7 +242,7 @@ export class TaxonomyTools {
   }
 
   public async handleDeleteCategory(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const { id } = params as { id: number };
+    const id = parseId(params);
     try {
       await client.deleteCategory(id);
       return `✅ Category ${id} has been deleted.`;
@@ -268,7 +268,7 @@ export class TaxonomyTools {
   }
 
   public async handleGetTag(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const { id } = params as { id: number };
+    const id = parseId(params);
     try {
       const tag = await client.getTag(id);
       const content =
@@ -303,7 +303,7 @@ export class TaxonomyTools {
   }
 
   public async handleDeleteTag(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const { id } = params as { id: number };
+    const id = parseId(params);
     try {
       await client.deleteTag(id);
       return `✅ Tag ${id} has been deleted.`;

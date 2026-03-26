@@ -567,11 +567,7 @@ describe("CommentTools", () => {
     });
 
     it("should handle invalid ID", async () => {
-      mockClient.deleteComment.mockRejectedValueOnce(new Error("Invalid ID"));
-
-      await expect(commentTools.handleDeleteComment(mockClient, { id: "invalid" })).rejects.toThrow(
-        "Failed to delete comment",
-      );
+      await expect(commentTools.handleDeleteComment(mockClient, { id: "invalid" })).rejects.toThrow();
     });
 
     it("should properly handle force parameter", async () => {
@@ -626,11 +622,7 @@ describe("CommentTools", () => {
     });
 
     it("should handle invalid ID for approval", async () => {
-      mockClient.updateComment.mockRejectedValueOnce(new Error("Invalid ID"));
-
-      await expect(commentTools.handleApproveComment(mockClient, { id: "invalid" })).rejects.toThrow(
-        "Failed to approve comment",
-      );
+      await expect(commentTools.handleApproveComment(mockClient, { id: "invalid" })).rejects.toThrow();
     });
 
     it("should handle approval of non-existent comment", async () => {
@@ -672,11 +664,7 @@ describe("CommentTools", () => {
     });
 
     it("should handle invalid ID for spam marking", async () => {
-      mockClient.updateComment.mockRejectedValueOnce(new Error("Invalid ID"));
-
-      await expect(commentTools.handleSpamComment(mockClient, { id: "invalid" })).rejects.toThrow(
-        "Failed to mark comment as spam",
-      );
+      await expect(commentTools.handleSpamComment(mockClient, { id: "invalid" })).rejects.toThrow();
     });
 
     it("should handle spam marking of non-existent comment", async () => {

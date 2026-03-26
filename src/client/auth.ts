@@ -3,6 +3,7 @@
  * Manages different authentication methods for WordPress REST API
  */
 
+import { randomBytes } from "crypto";
 import { LoggerFactory } from "@/utils/logger.js";
 
 const log = LoggerFactory.client("AUTH");
@@ -282,12 +283,9 @@ export class WordPressAuth {
    * Generate random state for OAuth
    */
   private generateRandomState(length = 32): string {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
+    return randomBytes(Math.ceil((length * 3) / 4))
+      .toString("base64url")
+      .slice(0, length);
   }
 
   /**

@@ -286,9 +286,7 @@ describe("UserTools", () => {
     });
 
     it("should handle invalid ID parameter", async () => {
-      mockClient.getUser.mockRejectedValueOnce(new Error("Invalid ID"));
-
-      await expect(userTools.handleGetUser(mockClient, { id: "invalid" })).rejects.toThrow("Failed to get user");
+      await expect(userTools.handleGetUser(mockClient, { id: "invalid" })).rejects.toThrow();
     });
 
     it("should handle user with missing roles", async () => {
@@ -626,9 +624,7 @@ describe("UserTools", () => {
     });
 
     it("should handle invalid ID", async () => {
-      mockClient.deleteUser.mockRejectedValueOnce(new Error("Invalid ID"));
-
-      await expect(userTools.handleDeleteUser(mockClient, { id: "invalid" })).rejects.toThrow("Failed to delete user");
+      await expect(userTools.handleDeleteUser(mockClient, { id: "invalid" })).rejects.toThrow();
     });
 
     it("should handle reassignment parameter correctly", async () => {

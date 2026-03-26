@@ -538,7 +538,8 @@ export class WordPressClient implements IWordPressClient {
     this._stats.totalRequests++;
 
     const cleanEndpoint = endpoint.replace(/^\/+/, "");
-    const url = endpoint.startsWith("http") ? endpoint : `${this.apiUrl}/${cleanEndpoint}`;
+    // Validate absolute URLs through the same SSRF guard as the site URL
+    const url = endpoint.startsWith("http") ? this.validateAndSanitizeUrl(endpoint) : `${this.apiUrl}/${cleanEndpoint}`;
 
     const { headers: customHeaders, retries: retryOverride, params: _unusedParams, ...restOptions } = options;
     const baseHeaders: Record<string, string> = {
