@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.14](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.13...v3.1.14) (2026-03-26)
+
+### 🐛 Bug Fixes
+
+* **security:** enable SSRF protection by default, add path traversal guard on uploads ([#177](https://github.com/docdyhr/mcp-wordpress/issues/177)) ([fcf7157](https://github.com/docdyhr/mcp-wordpress/commit/fcf71579cbdae4deeb68fea60fe8cac0096689a6)), closes [#176](https://github.com/docdyhr/mcp-wordpress/issues/176)
+
 ## [3.1.13](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.12...v3.1.13) (2026-03-16)
 
 ### 🐛 Bug Fixes
