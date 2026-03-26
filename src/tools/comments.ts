@@ -2,7 +2,7 @@ import { WordPressClient } from "@/client/api.js";
 import { MCPToolSchema } from "@/types/mcp.js";
 import { CommentQueryParams, CreateCommentRequest, UpdateCommentRequest } from "@/types/wordpress.js";
 import { getErrorMessage } from "@/utils/error.js";
-import { toolParams } from "./params.js";
+import { parseId, parseIdAndForce, toolParams } from "./params.js";
 
 /**
  * Provides tools for managing comments on a WordPress site.
@@ -182,7 +182,7 @@ export class CommentTools {
 
   public async handleGetComment(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     try {
-      const { id } = params as { id: number };
+      const id = parseId(params);
       const comment = await client.getComment(id);
       const content =
         `**Comment Details (ID: ${comment.id})**\n\n` +
@@ -218,7 +218,7 @@ export class CommentTools {
   }
 
   public async handleDeleteComment(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const { id, force } = params as { id: number; force?: boolean };
+    const { id, force } = parseIdAndForce(params);
     try {
       await client.deleteComment(id, force);
       const action = force ? "permanently deleted" : "moved to trash";
@@ -229,7 +229,7 @@ export class CommentTools {
   }
 
   public async handleApproveComment(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const { id } = params as { id: number };
+    const id = parseId(params);
     try {
       const comment = await client.updateComment({
         id,
@@ -242,7 +242,7 @@ export class CommentTools {
   }
 
   public async handleSpamComment(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const { id } = params as { id: number };
+    const id = parseId(params);
     try {
       const comment = await client.updateComment({
         id,

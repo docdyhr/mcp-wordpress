@@ -243,11 +243,7 @@ describe("TaxonomyTools", () => {
       });
 
       it("should handle invalid ID parameter", async () => {
-        mockClient.getCategory.mockRejectedValueOnce(new Error("Invalid ID"));
-
-        await expect(taxonomyTools.handleGetCategory(mockClient, { id: "invalid" })).rejects.toThrow(
-          "Failed to get category",
-        );
+        await expect(taxonomyTools.handleGetCategory(mockClient, { id: "invalid" })).rejects.toThrow();
       });
 
       it("should handle category with no description", async () => {
@@ -440,11 +436,7 @@ describe("TaxonomyTools", () => {
       });
 
       it("should handle invalid ID", async () => {
-        mockClient.deleteCategory.mockRejectedValueOnce(new Error("Invalid ID"));
-
-        await expect(taxonomyTools.handleDeleteCategory(mockClient, { id: "invalid" })).rejects.toThrow(
-          "Failed to delete category",
-        );
+        await expect(taxonomyTools.handleDeleteCategory(mockClient, { id: "invalid" })).rejects.toThrow();
       });
 
       it("should handle non-existent category", async () => {
@@ -578,9 +570,7 @@ describe("TaxonomyTools", () => {
       });
 
       it("should handle invalid ID parameter", async () => {
-        mockClient.getTag.mockRejectedValueOnce(new Error("Invalid ID"));
-
-        await expect(taxonomyTools.handleGetTag(mockClient, { id: "invalid" })).rejects.toThrow("Failed to get tag");
+        await expect(taxonomyTools.handleGetTag(mockClient, { id: "invalid" })).rejects.toThrow();
       });
 
       it("should handle tag with zero count", async () => {
@@ -748,11 +738,7 @@ describe("TaxonomyTools", () => {
       });
 
       it("should handle invalid ID", async () => {
-        mockClient.deleteTag.mockRejectedValueOnce(new Error("Invalid ID"));
-
-        await expect(taxonomyTools.handleDeleteTag(mockClient, { id: "invalid" })).rejects.toThrow(
-          "Failed to delete tag",
-        );
+        await expect(taxonomyTools.handleDeleteTag(mockClient, { id: "invalid" })).rejects.toThrow();
       });
 
       it("should handle non-existent tag", async () => {

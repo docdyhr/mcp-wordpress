@@ -4,7 +4,7 @@ import type { MCPToolSchema } from "@/types/mcp.js";
 import { MediaQueryParams, UpdateMediaRequest, UploadMediaRequest } from "@/types/wordpress.js";
 import { getErrorMessage } from "@/utils/error.js";
 import { validateFilePath } from "@/utils/validation/security.js";
-import { toolParams } from "./params.js";
+import { parseId, parseIdAndForce, toolParams } from "./params.js";
 
 /**
  * Comprehensive media management tools for WordPress sites.
@@ -204,7 +204,7 @@ export class MediaTools {
   }
 
   public async handleGetMedia(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const { id } = params as { id: number };
+    const id = parseId(params);
     try {
       const media = await client.getMediaItem(id);
       const content =
@@ -254,7 +254,7 @@ export class MediaTools {
   }
 
   public async handleDeleteMedia(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const { id, force } = params as { id: number; force?: boolean };
+    const { id, force } = parseIdAndForce(params);
     try {
       await client.deleteMedia(id, force);
       const action = force ? "permanently deleted" : "moved to trash";

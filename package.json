@@ -127,6 +127,7 @@
         "form-data": "^4.0.3"
       }
     },
+    "flatted": ">=3.4.2",
     "minimatch": "10.2.3",
     "tar": "7.5.11",
     "underscore": "1.13.8"
@@ -146,8 +147,8 @@
     "@types/node": "^25.3.3",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
-    "@vitest/coverage-v8": "^4.0.18",
-    "@vitest/ui": "^4.0.18",
+    "@vitest/coverage-v8": "^4.1.1",
+    "@vitest/ui": "^4.1.1",
     "archiver": "^7.0.1",
     "conventional-changelog-conventionalcommits": "^9.2.0",
     "eslint": "^10.0.2",
@@ -166,7 +167,7 @@
     "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.1"
   },
   "engines": {
     "node": ">=20.8.1"

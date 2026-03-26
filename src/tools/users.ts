@@ -3,7 +3,7 @@ import type { MCPToolSchema } from "@/types/mcp.js";
 import { CreateUserRequest, UpdateUserRequest, UserQueryParams } from "@/types/wordpress.js";
 import { getErrorMessage } from "@/utils/error.js";
 import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "@/utils/streaming.js";
-import { toolParams } from "./params.js";
+import { parseId, toolParams } from "./params.js";
 
 /**
  * Provides tools for managing users on a WordPress site.
@@ -232,7 +232,7 @@ export class UserTools {
   }
 
   public async handleGetUser(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const { id } = params as { id: number };
+    const id = parseId(params);
     try {
       const user = await client.getUser(id);
       const content =
@@ -334,7 +334,8 @@ export class UserTools {
   }
 
   public async handleDeleteUser(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const { id, reassign } = params as { id: number; reassign?: number };
+    const id = parseId(params);
+    const { reassign } = params as { reassign?: number };
     try {
       await client.deleteUser(id, reassign);
       let content = `✅ User ${id} has been deleted.`;

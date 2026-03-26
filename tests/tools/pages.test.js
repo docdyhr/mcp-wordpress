@@ -246,9 +246,7 @@ describe("PageTools", () => {
     });
 
     it("should handle invalid ID parameter", async () => {
-      mockClient.getPage.mockRejectedValueOnce(new Error("Invalid ID"));
-
-      await expect(pageTools.handleGetPage(mockClient, { id: "invalid" })).rejects.toThrow("Failed to get page");
+      await expect(pageTools.handleGetPage(mockClient, { id: "invalid" })).rejects.toThrow();
     });
 
     it("should format date correctly", async () => {
@@ -515,9 +513,7 @@ describe("PageTools", () => {
     });
 
     it("should handle invalid ID", async () => {
-      mockClient.deletePage.mockRejectedValueOnce(new Error("Invalid ID"));
-
-      await expect(pageTools.handleDeletePage(mockClient, { id: "invalid" })).rejects.toThrow("Failed to delete page");
+      await expect(pageTools.handleDeletePage(mockClient, { id: "invalid" })).rejects.toThrow();
     });
 
     it("should properly handle force parameter", async () => {
@@ -584,11 +580,7 @@ describe("PageTools", () => {
     });
 
     it("should handle invalid ID for revisions", async () => {
-      mockClient.getPageRevisions.mockRejectedValueOnce(new Error("Invalid ID"));
-
-      await expect(pageTools.handleGetPageRevisions(mockClient, { id: "invalid" })).rejects.toThrow(
-        "Failed to get page revisions",
-      );
+      await expect(pageTools.handleGetPageRevisions(mockClient, { id: "invalid" })).rejects.toThrow();
     });
 
     it("should format revision dates correctly", async () => {
