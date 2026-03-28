@@ -98,10 +98,10 @@ LABEL org.opencontainers.image.revision="${VCS_REF}"
 LABEL org.opencontainers.image.url="https://github.com/docdyhr/mcp-wordpress"
 LABEL org.opencontainers.image.source="https://github.com/docdyhr/mcp-wordpress"
 LABEL org.opencontainers.image.documentation="https://github.com/docdyhr/mcp-wordpress#readme"
-LABEL org.opencontainers.image.authors="Thomas Dyhr <thomas@docdyhr.dk>"
+LABEL org.opencontainers.image.authors="Thomas Dyhr <thomas@dyhr.com>"
 LABEL org.opencontainers.image.vendor="docdyhr"
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.base.name="node:20-alpine"
 
 # Additional metadata
-LABEL maintainer="Thomas Dyhr <thomas@docdyhr.dk>"
+LABEL maintainer="Thomas Dyhr <thomas@dyhr.com>"
