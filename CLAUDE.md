@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-AI assistant instructions for MCP WordPress project (v3.1.8).
+AI assistant instructions for MCP WordPress project (v3.1.15).
 
 ## Quick Start
 

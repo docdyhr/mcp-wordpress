@@ -365,12 +365,16 @@ describe("BulkOperations", () => {
     });
 
     it("should calculate estimated completion time", async () => {
+      const beforeTime = Date.now();
       let hasEta = false;
       const progressCallback = (progress) => {
         if (progress.eta && progress.processed < progress.total) {
           hasEta = true;
           expect(progress.eta).toBeInstanceOf(Date);
-          expect(progress.eta.getTime()).toBeGreaterThan(Date.now());
+          // ETA must be at or after the test start time; using beforeTime avoids
+          // a race where Date.now() inside the callback equals eta when mock
+          // processing time rounds to 0ms (flaky with toBeGreaterThan(Date.now())).
+          expect(progress.eta.getTime()).toBeGreaterThanOrEqual(beforeTime);
         }
       };
 
