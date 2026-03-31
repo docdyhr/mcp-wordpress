@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.20](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.19...v3.1.20) (2026-03-31)
+
+### 🐛 Bug Fixes
+
+* **ci:** add id-token: write to release job for NPM Trusted Publishing ([cbfefcd](https://github.com/docdyhr/mcp-wordpress/commit/cbfefcd6ca1a364e9f16384e4472a92a19e57640))
+
 ## [3.1.19](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.18...v3.1.19) (2026-03-31)
 
 ### 🐛 Bug Fixes
