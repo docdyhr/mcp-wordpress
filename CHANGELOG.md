@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.19](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.18...v3.1.19) (2026-03-31)
+
+### 🐛 Bug Fixes
+
+* detect bin wrapper entry point in isMainModule check ([#179](https://github.com/docdyhr/mcp-wordpress/issues/179)) ([dcf65a6](https://github.com/docdyhr/mcp-wordpress/commit/dcf65a6bce27666a38df08294d69da19c464c9fc))
+
 ## [3.1.18](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.17...v3.1.18) (2026-03-31)
 
 ### 🐛 Bug Fixes
