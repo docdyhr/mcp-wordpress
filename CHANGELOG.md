@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.21](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.20...v3.1.21) (2026-03-31)
+
+### 🐛 Bug Fixes
+
+* **config:** update .npmrc.example to reflect OIDC Trusted Publishing ([090afda](https://github.com/docdyhr/mcp-wordpress/commit/090afda67607eebe586cdfbf2161562d63ad02c5))
+
 ## [3.1.20](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.19...v3.1.20) (2026-03-31)
 
 ### 🐛 Bug Fixes
