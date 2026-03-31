@@ -1,18 +1,13 @@
 # NPM Configuration Example
-# Copy this to .npmrc and replace YOUR_NPM_TOKEN with your actual token
+# CI/CD publishing uses OIDC Trusted Publishing (no token required).
+# For local publishing, set NPM_TOKEN in your environment:
+#   export NPM_TOKEN="npm_your_token_here"
 
-# Using environment variable (recommended)
+# Using environment variable
 //registry.npmjs.org/:_authToken=${NPM_TOKEN}
-
-# Or direct token (less secure - only for development)
-# //registry.npmjs.org/:_authToken=npm_your_token_here
 
 # Registry configuration
 registry=https://registry.npmjs.org/
 
 # Access level for publishing
 access=public
-
-# Other useful configurations
-# save-exact=true
-# engine-strict=true
