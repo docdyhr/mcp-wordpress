@@ -140,12 +140,17 @@ async function main() {
   }
 }
 
-// Check if running as main module - handle both direct execution and DXT entry point
+// Check if running as main module - handle direct execution, DXT, and bin wrapper entry points
+const currentFile = fileURLToPath(import.meta.url);
+const callerFile = process.argv[1];
+
 const isMainModule =
-  process.argv[1] === fileURLToPath(import.meta.url) ||
-  process.argv[1]?.endsWith("/index.js") ||
-  process.argv[1]?.endsWith("\\index.js") ||
-  !process.argv[1]; // When run through DXT, process.argv[1] might be undefined
+  callerFile === currentFile ||
+  callerFile?.endsWith("/index.js") ||
+  callerFile?.endsWith("\\index.js") ||
+  callerFile?.endsWith("/mcp-wordpress.js") || // invoked via bin/mcp-wordpress.js wrapper
+  callerFile?.endsWith("\\mcp-wordpress.js") ||
+  !callerFile; // When run through DXT, process.argv[1] might be undefined
 
 if (isMainModule) {
   main();
