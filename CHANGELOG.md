@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.18](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.17...v3.1.18) (2026-03-31)
+
+### 🐛 Bug Fixes
+
+* **ci:** skip claude-review for fork PRs (OIDC unavailable on forks) ([693c22e](https://github.com/docdyhr/mcp-wordpress/commit/693c22eccc21ce24e379e3de426c96d2e55b2ee9))
+
 ## [3.1.17](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.16...v3.1.17) (2026-03-31)
 
 ### 🐛 Bug Fixes
