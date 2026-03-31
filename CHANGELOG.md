@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.16](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.15...v3.1.16) (2026-03-31)
+
+### 🐛 Bug Fixes
+
+* security hardening, dependency updates, and flaky test fix ([45df431](https://github.com/docdyhr/mcp-wordpress/commit/45df431d243c0420d5225792f4b68abc0e8ae7b1))
+* **tests:** stabilise flaky ETA timing assertion in BulkOperations ([4a9975d](https://github.com/docdyhr/mcp-wordpress/commit/4a9975d5cca7754efda8e4a4e5668f57ab7ccb69))
+
 ## [3.1.15](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.14...v3.1.15) (2026-03-26)
 
 ### 🐛 Bug Fixes
