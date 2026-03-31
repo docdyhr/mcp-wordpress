@@ -4,8 +4,8 @@ name: 🚀 Release & Publish
 # The token needs the following permissions:
 # - repo (full control)
 # - workflow
-# - write:packages (for npm publishing)
-# Without RELEASE_TOKEN, the workflow will fail if branch protection rules are enabled
+# Without RELEASE_TOKEN, the workflow will fall back to GITHUB_TOKEN.
+# NPM publishing uses OIDC Trusted Publishing (no NPM_TOKEN needed).
 
 on:
   push:
@@ -80,9 +80,6 @@ jobs:
         env:
           # Use RELEASE_TOKEN if available for bypassing branch protection rules
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
-          # NPM_TOKEN kept as fallback; Trusted Publishing (OIDC) is preferred
-          # when id-token: write is set and a Trusted Publisher is configured on npmjs.com
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           HUSKY: 0
           NODE_OPTIONS: "--max-old-space-size=4096"
 
