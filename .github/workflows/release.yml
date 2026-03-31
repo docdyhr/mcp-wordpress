@@ -30,6 +30,7 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
+      id-token: write # Required for NPM Trusted Publishing (OIDC)
     outputs:
       new-release-published: ${{ steps.semantic.outputs.new_release_published }}
       new-release-version: ${{ steps.semantic.outputs.new_release_version }}
@@ -79,6 +80,8 @@ jobs:
         env:
           # Use RELEASE_TOKEN if available for bypassing branch protection rules
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          # NPM_TOKEN kept as fallback; Trusted Publishing (OIDC) is preferred
+          # when id-token: write is set and a Trusted Publisher is configured on npmjs.com
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           HUSKY: 0
           NODE_OPTIONS: "--max-old-space-size=4096"
