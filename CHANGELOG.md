@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.22](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.21...v3.1.22) (2026-04-26)
+
+### 🐛 Bug Fixes
+
+* **deps:** upgrade hono and MCP SDK to resolve 7 medium CVEs ([58aa4f0](https://github.com/docdyhr/mcp-wordpress/commit/58aa4f0182792f369f090c2549a8d0957acbce74))
+
 ## [Unreleased]
 
 ### 🔒 Security
