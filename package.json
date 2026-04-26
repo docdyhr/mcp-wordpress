@@ -122,6 +122,7 @@
     ]
   },
   "overrides": {
+    "@hono/node-server": "^1.19.13",
     "@pact-foundation/pact-node": {
       "@types/request": {
         "form-data": "^4.0.3"
@@ -129,13 +130,14 @@
     },
     "brace-expansion": ">=5.0.5",
     "flatted": ">=3.4.2",
+    "hono": ">=4.12.15",
     "minimatch": "10.2.3",
     "path-to-regexp": ">=8.4.0",
     "tar": "7.5.11",
     "underscore": "1.13.8"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.27.1",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "dotenv": "^17.3.1",
     "form-data": "^4.0.5",
     "zod": "^4.3.6"

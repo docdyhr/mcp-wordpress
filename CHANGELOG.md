@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 🔒 Security
+
+* **deps:** upgrade `@modelcontextprotocol/sdk` to 1.29.0, pin `hono` to ≥4.12.15 and `@hono/node-server` to ^1.19.13 to resolve 7 medium-severity CVEs (JSX injection, cookie name bypass, IP matching bypass, path traversal, serveStatic middleware bypass)
+
 ## [3.1.21](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.20...v3.1.21) (2026-03-31)
 
 ### 🐛 Bug Fixes
