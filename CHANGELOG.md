@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.24](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.23...v3.1.24) (2026-04-29)
+
+### 🐛 Bug Fixes
+
+* **dx:** resolve D5/D8/D10 from live DXT diagnostic report ([db338b2](https://github.com/docdyhr/mcp-wordpress/commit/db338b2494ed8c64f8444beeb80ac494a87fbadf))
+
 ## [3.1.23](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.22...v3.1.23) (2026-04-29)
 
 ### 🐛 Bug Fixes
