@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.23](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.22...v3.1.23) (2026-04-29)
+
+### 🐛 Bug Fixes
+
+* resolve 5 live-test defects (D1/D2/D3/D7/D9) ([e504aef](https://github.com/docdyhr/mcp-wordpress/commit/e504aef84de2c9f7af3cd57e81458acc8c9c6d80))
+
+### 📚 Documentation
+
+* **changelog:** add Unreleased entries for D1–D9 live-test defect fixes ([f622cf6](https://github.com/docdyhr/mcp-wordpress/commit/f622cf6e97a1f7b2cd37f06f54eb44422a0b79da))
+
 ## [3.1.22](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.21...v3.1.22) (2026-04-26)
 
 ### 🐛 Bug Fixes
