@@ -1,4 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { WordPressClient } from "@/client/api.js";
 import { getErrorMessage } from "@/utils/error.js";
 import { EnhancedError, ErrorHandlers } from "@/utils/enhancedError.js";
@@ -33,6 +34,7 @@ export class ToolRegistry {
   // Exposed for tests that assert presence of these fields
   public server: McpServer;
   public wordpressClients: Map<string, WordPressClient>;
+  private _cachedToolsListResponse: { tools: unknown[] } | null = null;
 
   constructor(server: McpServer, wordpressClients: Map<string, WordPressClient>) {
     this.server = server;
@@ -60,6 +62,22 @@ export class ToolRegistry {
         this.registerTool(tool as ToolDefinition);
       });
     });
+
+    // After all tools are registered, install a cached tools/list handler to avoid
+    // repeated Zod→JSON-Schema conversion on every tools/list request.
+    this.installCachedToolsListHandler();
+  }
+
+  /**
+   * Build and install a cached tools/list handler, bypassing the SDK's per-request
+   * Zod→JSON-Schema conversion for all 59 tools.
+   */
+  private installCachedToolsListHandler(): void {
+    if (!this._cachedToolsListResponse) return;
+    const cachedResponse = this._cachedToolsListResponse;
+    // Replace the MCP SDK's tools/list handler (which re-converts Zod schemas on
+    // every request) with one that returns the pre-built JSON Schema response.
+    this.server.server.setRequestHandler(ListToolsRequestSchema, () => cachedResponse);
   }
 
   /**
@@ -184,6 +202,52 @@ export class ToolRegistry {
         }
       },
     );
+
+    // Accumulate into the tools/list cache (built in JSON Schema format so we can
+    // avoid per-request Zod→JSON-Schema conversion once all tools are registered).
+    if (!this._cachedToolsListResponse) {
+      this._cachedToolsListResponse = { tools: [] };
+    }
+    this._cachedToolsListResponse.tools.push({
+      name: tool.name,
+      description: tool.description || `WordPress tool: ${tool.name}`,
+      inputSchema: this.buildCachedInputSchema(tool),
+    });
+  }
+
+  /**
+   * Build a plain JSON Schema object for a tool's input, including the `site` parameter.
+   * Used to pre-build the tools/list response so the SDK's per-request Zod conversion
+   * is replaced by a single pre-computed snapshot.
+   */
+  private buildCachedInputSchema(tool: ToolDefinition): Record<string, unknown> {
+    const siteDescription =
+      this.wordpressClients.size > 1
+        ? "The ID of the WordPress site to target (from mcp-wordpress.config.json). Required when multiple sites are configured."
+        : "The ID of the WordPress site to target (from mcp-wordpress.config.json). Required if multiple sites are configured.";
+
+    const properties: Record<string, unknown> = {
+      site: { type: "string", description: siteDescription },
+    };
+    const required: string[] = [];
+
+    if (tool.inputSchema) {
+      Object.assign(properties, tool.inputSchema.properties || {});
+      required.push(...(tool.inputSchema.required || []));
+    } else if (tool.parameters) {
+      for (const param of tool.parameters) {
+        const propDef: Record<string, unknown> = { type: param.type || "string" };
+        if (param.description) propDef.description = param.description;
+        if (param.enum) propDef.enum = param.enum;
+        if (param.items) propDef.items = param.items;
+        properties[param.name] = propDef;
+        if (param.required) required.push(param.name);
+      }
+    }
+
+    const schema: Record<string, unknown> = { type: "object", properties };
+    if (required.length > 0) schema.required = required;
+    return schema;
   }
 
   /**

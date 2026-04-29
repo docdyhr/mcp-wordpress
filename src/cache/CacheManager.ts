@@ -19,6 +19,7 @@ export interface CacheStats {
   hits: number;
   misses: number;
   evictions: number;
+  expirations: number;
   totalSize: number;
   hitRate: number;
 }
@@ -42,6 +43,7 @@ export class CacheManager {
     hits: 0,
     misses: 0,
     evictions: 0,
+    expirations: 0,
     totalSize: 0,
     hitRate: 0,
   };
@@ -107,7 +109,9 @@ export class CacheManager {
     if (this.isExpired(entry)) {
       this.cache.delete(key);
       this.removeFromAccessOrder(key);
+      this.stats.expirations++;
       this.stats.misses++;
+      this.stats.totalSize = this.cache.size;
       this.updateHitRate();
       return null;
     }
@@ -380,6 +384,7 @@ export class CacheManager {
     for (const key of keysToDelete) {
       this.cache.delete(key);
       this.removeFromAccessOrder(key);
+      this.stats.expirations++;
     }
 
     this.stats.totalSize = this.cache.size;

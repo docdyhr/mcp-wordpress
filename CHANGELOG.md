@@ -28,8 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * **D1 version:** `loadVersionSync` now reads `package.json` via `readFileSync` before falling back to the hardcoded constant; fallback bumped from `2.11.3` → `3.1.22`. Fixes MCP `serverInfo` reporting a stale version in DXT bundles.
 * **D2 auth:** `wp_get_auth_status` now performs a live `getCurrentUser` probe on every call instead of reading a stale in-memory flag; a failed probe returns a clear "not connected" message rather than throwing.
 * **D3 cache:** `warmCache` now caps each HTTP call at 10 s and the whole operation at 25 s via `Promise.race`; a single unresponsive WordPress endpoint can no longer hang the MCP request. Entry-log lines added to `wp_cache_warm` and `wp_cache_info` handlers for future diagnostics.
+* **D5 perf:** `ToolRegistry.registerAllTools` now installs a pre-built JSON Schema cache as the `tools/list` handler, replacing the MCP SDK's per-request Zod→JSON-Schema conversion for all 59 tools. Reduces repeated `tools/list` serialization overhead.
 * **D7 alerts:** `PerformanceMonitor.addAlert` now tracks a per-`(metric, severity)` cooldown (15 min); duplicate conditions update the existing alert in-place instead of appending, eliminating "Low cache hit rate" spam.
+* **D8 encoding:** All HTTP response bodies in `WordPressClient` are now decoded with an explicit `new TextDecoder('utf-8')` on an `arrayBuffer()` read instead of relying on `response.text()` charset inference, guaranteeing correct UTF-8 decoding for multi-byte characters (Chinese, Arabic, emoji, etc.).
 * **D9 SEO:** `MetaGenerator.generateDescription` now strips HTML from the WordPress excerpt via `stripHtml()` before using it as the `openGraph`/`twitter` description base, preventing raw `<p>` tags from appearing in social-share previews.
+* **D10 cache:** `CacheStats` gains an `expirations` counter, incremented when a TTL-expired entry is lazily removed on `get()` and during the periodic cleanup sweep. Exposed in `wp_cache_stats` and `wp_cache_info` outputs to explain non-monotonic `total_entries`.
 
 ### 🔒 Security
 

@@ -718,7 +718,7 @@ export class WordPressClient implements IWordPressClient {
     fetchOptions: RequestInit & { headers: Record<string, string> },
     timer: ReturnType<typeof startTimer>,
   ): Promise<T | undefined> {
-    const errorText = await response.text();
+    const errorText = new TextDecoder("utf-8").decode(await response.arrayBuffer());
     let errorMessage: string;
 
     try {
@@ -798,7 +798,7 @@ export class WordPressClient implements IWordPressClient {
         return undefined;
       }
 
-      const responseText = await fallbackResponse.text();
+      const responseText = new TextDecoder("utf-8").decode(await fallbackResponse.arrayBuffer());
       if (!responseText) {
         this._stats.successfulRequests++;
         const duration = timer.end();
@@ -824,7 +824,7 @@ export class WordPressClient implements IWordPressClient {
     endpoint: string,
     timer: ReturnType<typeof startTimer>,
   ): Promise<T> {
-    const responseText = await response.text();
+    const responseText = new TextDecoder("utf-8").decode(await response.arrayBuffer());
     if (!responseText) {
       this._stats.successfulRequests++;
       const duration = timer.end();

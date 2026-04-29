@@ -145,6 +145,7 @@ export class MetricsCollector {
       hits: 0,
       misses: 0,
       evictions: 0,
+      expirations: 0,
       totalSize: 0,
       hitRate: 0,
     };
@@ -156,6 +157,7 @@ export class MetricsCollector {
         aggregated.hits += stats.hits || 0;
         aggregated.misses += stats.misses || 0;
         aggregated.evictions += stats.evictions || 0;
+        aggregated.expirations += stats.expirations || 0;
         aggregated.totalSize += stats.totalSize || 0;
       }
     }

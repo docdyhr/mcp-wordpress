@@ -70,6 +70,9 @@ vi.mock("../../dist/config/Config.js", () => ({
   },
 }));
 
+// Helper: encode a string to UTF-8 Buffer (TextDecoder.decode() accepts Uint8Array/Buffer)
+const utf8Buf = (text) => Buffer.from(text, "utf-8");
+
 describe("WordPressClient", () => {
   let client;
   let mockResponse;
@@ -82,6 +85,7 @@ describe("WordPressClient", () => {
       headers: new Map([["content-type", "application/json"]]),
       json: vi.fn().mockResolvedValue({ id: 1, title: "Test" }),
       text: vi.fn().mockResolvedValue('{"id": 1, "title": "Test"}'),
+      arrayBuffer: vi.fn().mockResolvedValue(utf8Buf('{"id": 1, "title": "Test"}')),
     };
 
     mockFetch.mockResolvedValue(mockResponse);
@@ -157,6 +161,7 @@ describe("WordPressClient", () => {
         headers: new Map([["content-type", "application/json"]]),
         json: vi.fn().mockResolvedValue({ token: "jwt-token-123" }),
         text: vi.fn().mockResolvedValue('{"token": "jwt-token-123"}'),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf('{"token": "jwt-token-123"}')),
       });
 
       await jwtClient.authenticate();
@@ -249,6 +254,7 @@ describe("WordPressClient", () => {
           code: "rest_post_invalid_id",
           message: "Invalid post ID",
         }),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf('{"code":"rest_post_invalid_id","message":"Invalid post ID"}')),
       });
 
       await expect(client.get("posts/999")).rejects.toThrow(WordPressAPIError);
@@ -264,6 +270,9 @@ describe("WordPressClient", () => {
           code: "rest_forbidden",
           message: "Sorry, you are not allowed to do that",
         }),
+        arrayBuffer: vi
+          .fn()
+          .mockResolvedValue(utf8Buf('{"code":"rest_forbidden","message":"Sorry, you are not allowed to do that"}')),
       });
 
       await expect(client.get("posts")).rejects.toThrow(AuthenticationError);
@@ -282,6 +291,9 @@ describe("WordPressClient", () => {
           code: "rest_too_many_requests",
           message: "Too many requests",
         }),
+        arrayBuffer: vi
+          .fn()
+          .mockResolvedValue(utf8Buf('{"code":"rest_too_many_requests","message":"Too many requests"}')),
       });
 
       await expect(client.get("posts")).rejects.toThrow(RateLimitError);
@@ -300,6 +312,7 @@ describe("WordPressClient", () => {
         headers: new Map([["content-type", "application/json"]]),
         json: vi.fn().mockRejectedValue(new Error("Invalid JSON")),
         text: vi.fn().mockResolvedValue("invalid json"),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf("invalid json")),
       });
 
       const result = await client.get("posts");
@@ -364,6 +377,10 @@ describe("WordPressClient", () => {
 
   describe("WordPress-specific Methods", () => {
     it("should get posts", async () => {
+      const postsBody = JSON.stringify([
+        { id: 1, title: { rendered: "Post 1" } },
+        { id: 2, title: { rendered: "Post 2" } },
+      ]);
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -372,12 +389,8 @@ describe("WordPressClient", () => {
           { id: 1, title: { rendered: "Post 1" } },
           { id: 2, title: { rendered: "Post 2" } },
         ]),
-        text: vi.fn().mockResolvedValue(
-          JSON.stringify([
-            { id: 1, title: { rendered: "Post 1" } },
-            { id: 2, title: { rendered: "Post 2" } },
-          ]),
-        ),
+        text: vi.fn().mockResolvedValue(postsBody),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf(postsBody)),
       });
 
       const posts = await client.getPosts();
@@ -400,6 +413,7 @@ describe("WordPressClient", () => {
         headers: new Map([["content-type", "application/json"]]),
         json: vi.fn().mockResolvedValue({ id: 1, title: { rendered: "Single Post" } }),
         text: vi.fn().mockResolvedValue('{"id": 1, "title": {"rendered": "Single Post"}}'),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf('{"id": 1, "title": {"rendered": "Single Post"}}')),
       });
 
       const post = await client.getPost(1);
@@ -414,12 +428,14 @@ describe("WordPressClient", () => {
         status: "draft",
       };
 
+      const createBody = JSON.stringify({ id: 3, ...newPost });
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 201,
         headers: new Map([["content-type", "application/json"]]),
         json: vi.fn().mockResolvedValue({ id: 3, ...newPost }),
-        text: vi.fn().mockResolvedValue(JSON.stringify({ id: 3, ...newPost })),
+        text: vi.fn().mockResolvedValue(createBody),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf(createBody)),
       });
 
       const result = await client.createPost(newPost);
@@ -430,12 +446,14 @@ describe("WordPressClient", () => {
     it("should update posts", async () => {
       const updatedPost = { id: 1, title: "Updated Title" };
 
+      const updateBody = JSON.stringify(updatedPost);
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: new Map([["content-type", "application/json"]]),
         json: vi.fn().mockResolvedValue(updatedPost),
-        text: vi.fn().mockResolvedValue(JSON.stringify(updatedPost)),
+        text: vi.fn().mockResolvedValue(updateBody),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf(updateBody)),
       });
 
       const result = await client.updatePost(updatedPost);
@@ -449,6 +467,7 @@ describe("WordPressClient", () => {
         headers: new Map([["content-type", "application/json"]]),
         json: vi.fn().mockResolvedValue({ deleted: true, previous: { id: 1 } }),
         text: vi.fn().mockResolvedValue('{"deleted": true, "previous": {"id": 1}}'),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf('{"deleted": true, "previous": {"id": 1}}')),
       });
 
       const result = await client.deletePost(1);
@@ -489,6 +508,7 @@ describe("WordPressClient", () => {
         headers: new Map([["content-type", "application/json"]]),
         json: vi.fn().mockResolvedValue(null),
         text: vi.fn().mockResolvedValue("null"),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf("null")),
       });
 
       const result = await client.get("posts");
@@ -502,6 +522,7 @@ describe("WordPressClient", () => {
         headers: new Map([["content-type", "text/html"]]),
         json: vi.fn().mockRejectedValue(new Error("Not JSON")),
         text: vi.fn().mockResolvedValue("<html>Not JSON</html>"),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf("<html>Not JSON</html>")),
       });
 
       const result = await client.get("posts");
@@ -510,12 +531,14 @@ describe("WordPressClient", () => {
 
     it("should handle very large responses", async () => {
       const largeArray = Array.from({ length: 1000 }, (_, i) => ({ id: i, title: `Post ${i}` }));
+      const largeBody = JSON.stringify(largeArray);
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: new Map([["content-type", "application/json"]]),
         json: vi.fn().mockResolvedValue(largeArray),
-        text: vi.fn().mockResolvedValue(JSON.stringify(largeArray)),
+        text: vi.fn().mockResolvedValue(largeBody),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf(largeBody)),
       });
 
       const result = await client.get("posts");

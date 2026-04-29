@@ -87,6 +87,7 @@ export class CacheTools {
           hit_rate: Math.round(stats.cache.hitRate * 100) + "%",
           total_entries: stats.cache.totalSize,
           evictions: stats.cache.evictions,
+          expirations: stats.cache.expirations,
         },
         invalidation_stats: {
           queue_size: stats.invalidation.queueSize,
@@ -194,6 +195,7 @@ export class CacheTools {
           hits: stats.cache.hits,
           misses: stats.cache.misses,
           evictions: stats.cache.evictions,
+          expirations: stats.cache.expirations,
         },
         invalidation_info: {
           queue_size: stats.invalidation.queueSize,
