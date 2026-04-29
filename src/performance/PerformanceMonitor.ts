@@ -102,6 +102,8 @@ export class PerformanceMonitor {
   private startTime: number;
   private responseTimes: number[] = [];
   private collectionTimer?: NodeJS.Timeout;
+  private lastAlertTime: Map<string, number> = new Map();
+  private static readonly ALERT_COOLDOWN_MS = 15 * 60 * 1000; // 15 minutes
 
   constructor(config: Partial<PerformanceConfig> = {}) {
     this.startTime = Date.now();
@@ -481,7 +483,9 @@ export class PerformanceMonitor {
   }
 
   /**
-   * Add performance alert
+   * Add performance alert with per-metric cooldown to prevent spam.
+   * If the same (metric, severity) fired within the cooldown window,
+   * only the timestamp and actual value on the existing alert are updated.
    */
   private addAlert(
     severity: "info" | "warning" | "error" | "critical",
@@ -492,9 +496,29 @@ export class PerformanceMonitor {
     actualValue: number,
     suggestion?: string,
   ): void {
+    const now = Date.now();
+    const cooldownKey = `${metric}:${severity}`;
+    const lastFired = this.lastAlertTime.get(cooldownKey) ?? 0;
+
+    if (now - lastFired < PerformanceMonitor.ALERT_COOLDOWN_MS) {
+      // Update the most recent matching alert in-place instead of appending
+      for (let i = this.alerts.length - 1; i >= 0; i--) {
+        const a = this.alerts[i];
+        if (a.metric === metric && a.severity === severity) {
+          a.timestamp = now;
+          a.actualValue = actualValue;
+          a.message = message;
+          break;
+        }
+      }
+      return;
+    }
+
+    this.lastAlertTime.set(cooldownKey, now);
+
     const alert: PerformanceAlert = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      timestamp: Date.now(),
+      id: `${now}-${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: now,
       severity,
       category,
       message,

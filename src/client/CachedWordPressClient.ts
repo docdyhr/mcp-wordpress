@@ -413,23 +413,23 @@ export class CachedWordPressClient extends WordPressClient {
   }
 
   /**
-   * Warm cache with essential data
+   * Warm cache with essential data.
+   * Each individual operation is capped at 10 s; the whole warm is capped at 25 s
+   * so a single unresponsive WordPress endpoint can never hang the MCP request.
    */
   async warmCache(): Promise<void> {
-    try {
-      // Pre-load frequently accessed data
-      const warmupOperations = [
-        () => this.getCurrentUser().catch(() => null),
-        () => this.getCategories().catch(() => null),
-        () => this.getTags().catch(() => null),
-        () => this.getSiteSettings().catch(() => null),
-      ];
+    const withTimeout = <T>(op: () => Promise<T>, ms: number): Promise<T | null> =>
+      Promise.race([op().catch(() => null), new Promise<null>((resolve) => setTimeout(() => resolve(null), ms))]);
 
-      // Execute warmup operations in parallel
-      await Promise.allSettled(warmupOperations.map((op) => op()));
-    } catch (_error) {
-      // Ignore warmup errors - they shouldn't fail the cache warming
-    }
+    const warmupOperations = [
+      withTimeout(() => this.getCurrentUser(), 10000),
+      withTimeout(() => this.getCategories(), 10000),
+      withTimeout(() => this.getTags(), 10000),
+      withTimeout(() => this.getSiteSettings(), 10000),
+    ];
+
+    const totalTimeout = new Promise<void>((resolve) => setTimeout(resolve, 25000));
+    await Promise.race([Promise.allSettled(warmupOperations), totalTimeout]);
   }
 
   /**

@@ -6,11 +6,14 @@
 import type { WordPressClient } from "@/client/api.js";
 import { CachedWordPressClient } from "@/client/CachedWordPressClient.js";
 import { toolWrapper } from "@/utils/toolWrapper.js";
+import { LoggerFactory } from "@/utils/logger.js";
 
 /**
  * Cache management tools class
  */
 export class CacheTools {
+  private readonly logger = LoggerFactory.tool("cache");
+
   constructor(private clients: Map<string, WordPressClient>) {}
 
   /**
@@ -132,6 +135,7 @@ export class CacheTools {
    * Warm cache with essential data
    */
   async handleWarmCache(client: WordPressClient, _params: Record<string, unknown>) {
+    this.logger.info("wp_cache_warm: tool call received");
     return toolWrapper(async () => {
       if (!(client instanceof CachedWordPressClient)) {
         return {
@@ -157,6 +161,7 @@ export class CacheTools {
    * Get detailed cache information
    */
   async handleGetCacheInfo(client: WordPressClient, _params: Record<string, unknown>) {
+    this.logger.info("wp_cache_info: tool call received");
     return toolWrapper(async () => {
       if (!(client instanceof CachedWordPressClient)) {
         return {

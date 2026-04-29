@@ -118,18 +118,21 @@ export class AuthTools {
     params: Record<string, unknown>,
   ): Promise<Record<string, unknown>> {
     try {
-      const isAuthenticated = client.isAuthenticated;
       const config = client.config;
-      let content =
-        `**Authentication Status for ${config.baseUrl}**\n\n` +
-        `**Authenticated:** ${isAuthenticated ? "✅ Yes" : "❌ No"}\n` +
-        `**Method:** ${config.auth.method}\n`;
+      let content = `**Authentication Status for ${config.baseUrl}**\n\n` + `**Method:** ${config.auth.method}\n`;
 
-      if (isAuthenticated) {
+      // Always do a live probe so the status reflects current reality,
+      // not a stale in-memory flag that may not have been set yet.
+      try {
         const user = await client.getCurrentUser();
-        content += `**User:** ${user.name} (@${user.slug})\n`;
-      } else {
-        content += "**Status:** Not connected. Use 'wp_test_auth' to connect and verify credentials.";
+        content =
+          `**Authentication Status for ${config.baseUrl}**\n\n` +
+          `**Authenticated:** ✅ Yes\n` +
+          `**Method:** ${config.auth.method}\n` +
+          `**User:** ${user.name} (@${user.slug})\n`;
+      } catch {
+        content +=
+          `**Authenticated:** ❌ No\n` + "**Status:** Not connected. Use 'wp_test_auth' to verify credentials.";
       }
 
       return { content };

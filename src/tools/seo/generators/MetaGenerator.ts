@@ -218,11 +218,12 @@ export class MetaGenerator {
     focusKeyword: string,
     options: MetaGenerationOptions,
   ): Promise<string> {
-    const excerpt = typeof post.excerpt === "object" ? post.excerpt.rendered : post.excerpt || "";
+    const rawExcerpt = typeof post.excerpt === "object" ? post.excerpt.rendered : post.excerpt || "";
+    const plainExcerpt = this.stripHtml(rawExcerpt);
     const plainContent = this.stripHtml(content);
 
-    // Use excerpt as starting point if available
-    let description = excerpt || this.extractFirstSentences(plainContent, 2);
+    // Use excerpt as starting point if available; strip HTML so <p> tags don't leak into OG descriptions
+    let description = plainExcerpt || this.extractFirstSentences(plainContent, 2);
 
     // Ensure focus keyword is included
     if (focusKeyword && !description.toLowerCase().includes(focusKeyword.toLowerCase())) {

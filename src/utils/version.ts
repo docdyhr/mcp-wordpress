@@ -9,6 +9,7 @@
  */
 
 import { readFile } from "fs/promises";
+import { readFileSync } from "fs";
 import { join } from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
@@ -110,12 +111,22 @@ export class VersionManager {
   }
 
   /**
-   * Load version synchronously (with fallback)
-   * @deprecated Use initialize() followed by getVersion() for better performance
+   * Load version synchronously — reads package.json from disk first,
+   * falls back to the hardcoded constant only if the file isn't found
+   * (e.g. inside a DXT bundle without package.json at ../../package.json).
    */
   private loadVersionSync(): VersionInfo {
-    const pkg = this.getPackageInfo(); // Uses fallback if needed
-    return this.loadVersionFromPackage(pkg);
+    try {
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = dirname(__filename);
+      const packagePath = join(__dirname, "..", "..", "package.json");
+      const pkg = JSON.parse(readFileSync(packagePath, "utf-8")) as PackageJson;
+      this.packageJson = pkg;
+      return this.loadVersionFromPackage(pkg);
+    } catch {
+      const pkg = this.getFallbackPackageInfo();
+      return this.loadVersionFromPackage(pkg);
+    }
   }
 
   /**
@@ -349,7 +360,7 @@ export class VersionManager {
   private getFallbackPackageInfo(): PackageJson {
     return {
       name: "mcp-wordpress",
-      version: process.env.npm_package_version || "2.11.3",
+      version: process.env.npm_package_version || "3.1.22",
       description: "MCP WordPress Server",
     };
   }

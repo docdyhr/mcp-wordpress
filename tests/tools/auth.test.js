@@ -198,25 +198,25 @@ describe("AuthTools", () => {
     });
 
     it("should return not authenticated status for unauthenticated client", async () => {
-      mockClient.isAuthenticated = false;
+      // Simulate WordPress rejecting the credentials (live probe behaviour)
+      mockClient.getCurrentUser.mockRejectedValue(new Error("Unauthorized"));
 
       const result = await authTools.handleGetAuthStatus(mockClient, {});
 
       expect(result.content).toContain("**Authenticated:** ❌ No");
-      expect(result.content).toContain(
-        "**Status:** Not connected. Use 'wp_test_auth' to connect and verify credentials.",
-      );
+      expect(result.content).toContain("**Status:** Not connected. Use 'wp_test_auth' to verify credentials.");
 
-      expect(mockClient.getCurrentUser).not.toHaveBeenCalled();
+      expect(mockClient.getCurrentUser).toHaveBeenCalledTimes(1);
     });
 
-    it("should handle getCurrentUser failure for authenticated client", async () => {
-      mockClient.isAuthenticated = true;
+    it("should handle getCurrentUser failure gracefully and report not-connected", async () => {
+      // A failed live probe means not connected — should not throw
       mockClient.getCurrentUser.mockRejectedValue(new Error("User fetch failed"));
 
-      await expect(authTools.handleGetAuthStatus(mockClient, {})).rejects.toThrow(
-        "Failed to get auth status: User fetch failed",
-      );
+      const result = await authTools.handleGetAuthStatus(mockClient, {});
+
+      expect(result.content).toContain("**Authenticated:** ❌ No");
+      expect(result.content).toContain("Not connected");
     });
 
     it("should handle different base URLs", async () => {
@@ -312,13 +312,13 @@ describe("AuthTools", () => {
       );
     });
 
-    it("should handle unexpected error types in handleGetAuthStatus", async () => {
-      mockClient.isAuthenticated = true;
+    it("should handle unexpected error types in handleGetAuthStatus gracefully", async () => {
+      // A non-Error rejection from the live probe should still return not-connected, not throw
       mockClient.getCurrentUser.mockRejectedValue(123); // Number as error
 
-      await expect(authTools.handleGetAuthStatus(mockClient, {})).rejects.toThrow(
-        "Failed to get auth status: Unknown error occurred",
-      );
+      const result = await authTools.handleGetAuthStatus(mockClient, {});
+
+      expect(result.content).toContain("**Authenticated:** ❌ No");
     });
   });
 
