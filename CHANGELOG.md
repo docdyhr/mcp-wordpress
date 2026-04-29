@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🐛 Bug Fixes
+
+* **D1 version:** `loadVersionSync` now reads `package.json` via `readFileSync` before falling back to the hardcoded constant; fallback bumped from `2.11.3` → `3.1.22`. Fixes MCP `serverInfo` reporting a stale version in DXT bundles.
+* **D2 auth:** `wp_get_auth_status` now performs a live `getCurrentUser` probe on every call instead of reading a stale in-memory flag; a failed probe returns a clear "not connected" message rather than throwing.
+* **D3 cache:** `warmCache` now caps each HTTP call at 10 s and the whole operation at 25 s via `Promise.race`; a single unresponsive WordPress endpoint can no longer hang the MCP request. Entry-log lines added to `wp_cache_warm` and `wp_cache_info` handlers for future diagnostics.
+* **D7 alerts:** `PerformanceMonitor.addAlert` now tracks a per-`(metric, severity)` cooldown (15 min); duplicate conditions update the existing alert in-place instead of appending, eliminating "Low cache hit rate" spam.
+* **D9 SEO:** `MetaGenerator.generateDescription` now strips HTML from the WordPress excerpt via `stripHtml()` before using it as the `openGraph`/`twitter` description base, preventing raw `<p>` tags from appearing in social-share previews.
+
 ### 🔒 Security
 
 * **deps:** upgrade `@modelcontextprotocol/sdk` to 1.29.0, pin `hono` to ≥4.12.15 and `@hono/node-server` to ^1.19.13 to resolve 7 medium-severity CVEs (JSX injection, cookie name bypass, IP matching bypass, path traversal, serveStatic middleware bypass)
