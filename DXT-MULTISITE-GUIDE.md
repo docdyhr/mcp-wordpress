@@ -1,6 +1,6 @@
 # DXT Multi-Site Configuration Guide
 
-**Updated**: 2025-10-08
+**Updated**: 2026-04-30
 **Status**: ✅ Multi-Site Support CONFIRMED
 
 ---
@@ -17,7 +17,7 @@ The DXT package **DOES support multi-site** configuration. I was wrong to say it
 
 When you install the DXT package, Claude Desktop shows a configuration form:
 
-```
+```text
 WordPress Site URL:     [Enter URL]
 WordPress Username:     [Enter username]
 App Password:           [Enter password]
@@ -67,7 +67,7 @@ After installing the DXT package, the server files are located in the Claude Des
 
 **Typical location** (may vary):
 
-```
+```text
 ~/Library/Application Support/Claude/Claude Extensions/local.dxt.thomas-dyhr.mcp-wordpress/
 ```
 
@@ -86,6 +86,21 @@ The DXT package **includes** `mcp-wordpress.config.json.example`:
 cd /path/to/dxt/installation
 cp mcp-wordpress.config.json.example mcp-wordpress.config.json
 ```
+
+> **💡 Pro tip — use a symlink instead of a copy**
+>
+> If you keep your `mcp-wordpress.config.json` in a fixed location (e.g. `~/mcp-wordpress.config.json`),
+> create a symlink rather than a copy. The symlink survives every DXT reinstall automatically —
+> no re-copying required after updates:
+>
+> ```bash
+> ln -sf ~/mcp-wordpress.config.json \
+>   ~/Library/Application\ Support/Claude/Claude\ Extensions/local.dxt.thomas-dyhr.mcp-wordpress/mcp-wordpress.config.json
+> ```
+>
+> The DXT installer only extracts files that are in the `.dxt` archive. Since
+> `mcp-wordpress.config.json` is never packaged (it is user data), the symlink is left untouched
+> on every update. Edit your source file once; the extension always sees the latest version.
 
 ### Step 3: Edit the Config File
 
@@ -142,7 +157,7 @@ tail -f ~/Library/Logs/Claude/mcp-server-WordPress\ MCP\ Server.log
 
 You should see:
 
-```
+```text
 Found multi-site configuration file
 Loading 3 WordPress sites from configuration
 ✓ Loaded site: site1 (My First Site)
@@ -154,7 +169,7 @@ Loading 3 WordPress sites from configuration
 
 Now when calling tools, specify the site:
 
-```
+```shell
 # Test auth for specific site
 wp_test_auth --site="site1"
 
@@ -170,7 +185,7 @@ wp_get_site_settings --site="site3"
 ## Configuration Comparison
 
 | Method | Configuration | Priority | Sites |
-|--------|--------------|----------|-------|
+| ------ | ------------- | -------- | ----- |
 | **UI Form** (default) | Claude Desktop UI | Low | 1 site |
 | **Config File** (advanced) | `mcp-wordpress.config.json` | **HIGH** (overrides UI) | Unlimited |
 
@@ -230,7 +245,9 @@ The new manifest now correctly states:
 
 And the long description explains:
 
-> **Multi-Site (Advanced)**: Create `mcp-wordpress.config.json` in the DXT installation directory. Copy from included `mcp-wordpress.config.json.example` file, configure multiple sites, and restart Claude Desktop.
+> **Multi-Site (Advanced)**: Create `mcp-wordpress.config.json` in the DXT installation directory.
+> Copy from included `mcp-wordpress.config.json.example` file, configure multiple sites, and
+> restart Claude Desktop.
 
 ---
 
@@ -243,13 +260,13 @@ And the long description explains:
 
 ### What I Fixed (Incorrectly)
 
-3. ❌ ~~Removed multi_site_management prompt~~ - **SHOULD KEEP THIS**
-4. ❌ ~~Updated docs to say "no multi-site"~~ - **WRONG**
+1. ❌ ~~Removed multi_site_management prompt~~ - **SHOULD KEEP THIS**
+2. ❌ ~~Updated docs to say "no multi-site"~~ - **WRONG**
 
 ### What Should Be Fixed
 
-3. ✅ **Restore** `multi_site_management` prompt
-4. ✅ **Update** docs to correctly explain multi-site config file method
+1. ✅ **Restore** `multi_site_management` prompt
+2. ✅ **Update** docs to correctly explain multi-site config file method
 
 ---
 
@@ -277,7 +294,9 @@ And the long description explains:
 
 You were absolutely correct:
 
-**Multi-site works in DXT** by creating `mcp-wordpress.config.json` in the DXT installation directory. The server detects it on startup and loads all configured sites, completely overriding the UI single-site configuration.
+**Multi-site works in DXT** by creating `mcp-wordpress.config.json` in the DXT installation
+directory. The server detects it on startup and loads all configured sites, completely overriding
+the UI single-site configuration.
 
 The DXT package **includes everything needed**:
 
