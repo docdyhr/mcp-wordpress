@@ -68,8 +68,6 @@ import type { WordPressPost } from "@/types/wordpress.js";
  */
 export class SEOTools {
   private logger = LoggerFactory.tool("seo");
-  private clients: Map<string, WordPressClient> = new Map();
-  private seoClients: Map<string, SEOWordPressClient> = new Map();
   private contentAnalyzer: ContentAnalyzer;
   private metaGenerator: MetaGenerator;
   private schemaGenerator: SchemaGenerator;
@@ -102,13 +100,12 @@ export class SEOTools {
    * @param params - Analysis parameters including post ID and analysis type
    * @returns Detailed SEO analysis with scores and recommendations
    */
-  async analyzeContent(params: SEOToolParams): Promise<SEOAnalysisResult> {
+  async analyzeContent(client: WordPressClient, params: SEOToolParams): Promise<SEOAnalysisResult> {
     const siteLogger = LoggerFactory.tool("wp_seo_analyze_content", params.site);
 
     return await siteLogger.time("SEO content analysis", async () => {
       try {
         validateRequired(params, ["postId", "analysisType"]);
-        const client = this.getSiteClient(params.site);
 
         // Check cache first
         const cacheKey = `seo:analyze:${params.site}:${params.postId as number}:${params.analysisType}`;
@@ -147,13 +144,12 @@ export class SEOTools {
    * @param params - Generation parameters including content and constraints
    * @returns Generated metadata with safety filters applied
    */
-  async generateMetadata(params: SEOToolParams): Promise<SEOMetadata> {
+  async generateMetadata(client: WordPressClient, params: SEOToolParams): Promise<SEOMetadata> {
     const siteLogger = LoggerFactory.tool("wp_seo_generate_meta", params.site);
 
     return await siteLogger.time("Generate SEO metadata", async () => {
       try {
         validateRequired(params, ["postId"]);
-        const client = this.getSiteClient(params.site);
 
         // Implementation will be added in generators
         const metadata = await this.createMetadata(client, params);
@@ -181,13 +177,12 @@ export class SEOTools {
    * @param params - Bulk operation parameters
    * @returns Operation results with success/failure counts
    */
-  async bulkUpdateMetadata(params: SEOToolParams): Promise<BulkOperationResult> {
+  async bulkUpdateMetadata(client: WordPressClient, params: SEOToolParams): Promise<BulkOperationResult> {
     const siteLogger = LoggerFactory.tool("wp_seo_bulk_update", params.site);
 
     return await siteLogger.time("Bulk metadata update", async () => {
       try {
         validateRequired(params, ["postIds", "updates"]);
-        const client = this.getSiteClient(params.site);
 
         // Implementation will be added
         const result = await this.processBulkUpdate(client, params);
@@ -214,13 +209,12 @@ export class SEOTools {
    * @param params - Schema generation parameters
    * @returns Valid JSON-LD schema markup
    */
-  async generateSchema(params: SEOToolParams): Promise<SchemaMarkup> {
+  async generateSchema(client: WordPressClient, params: SEOToolParams): Promise<SchemaMarkup> {
     const siteLogger = LoggerFactory.tool("wp_seo_generate_schema", params.site);
 
     return await siteLogger.time("Generate schema markup", async () => {
       try {
         validateRequired(params, ["postId", "schemaType"]);
-        const client = this.getSiteClient(params.site);
 
         // Check cache
         const cacheKey = `seo:schema:${params.site}:${params.postId as number}:${params.schemaType}`;
@@ -290,13 +284,12 @@ export class SEOTools {
    * @param params - Linking parameters including post ID
    * @returns Internal linking suggestions with confidence scores
    */
-  async suggestInternalLinks(params: SEOToolParams): Promise<unknown> {
+  async suggestInternalLinks(client: WordPressClient, params: SEOToolParams): Promise<unknown> {
     const siteLogger = LoggerFactory.tool("wp_seo_internal_linking", params.site);
 
     return await siteLogger.time("Suggest internal links", async () => {
       try {
         validateRequired(params, ["postId"]);
-        const client = this.getSiteClient(params.site);
 
         // Implementation will be added in optimizers
         const suggestions = await this.findLinkingOpportunities(client, params);
@@ -325,13 +318,11 @@ export class SEOTools {
    * @param params - Audit parameters including scope and depth
    * @returns Detailed audit results with prioritized recommendations
    */
-  async performSiteAudit(params: SEOToolParams): Promise<SiteAuditResult> {
+  async performSiteAudit(client: WordPressClient, params: SEOToolParams): Promise<SiteAuditResult> {
     const siteLogger = LoggerFactory.tool("wp_seo_site_audit", params.site);
 
     return await siteLogger.time("Perform site audit", async () => {
       try {
-        const client = this.getSiteClient(params.site);
-
         // Cache key for audit results (1 hour TTL)
         const cacheKey = `seo:audit:${params.site}:${params.auditType || "full"}`;
         const cached = await this.getCachedResult(cacheKey);
@@ -396,45 +387,6 @@ export class SEOTools {
         throw new Error(`Unknown SEO tool: ${toolName}`);
       })
     );
-  }
-
-  /**
-   * Gets or creates a WordPress client for the specified site.
-   *
-   * @param site - Site identifier
-   * @returns WordPress client instance
-   * @private
-   */
-  private getSiteClient(site?: string): WordPressClient {
-    const siteId = site || "default";
-
-    if (!this.clients.has(siteId)) {
-      // Create new client for site (implementation depends on multi-site config)
-      const client = new WordPressClient();
-      this.clients.set(siteId, client);
-    }
-
-    return this.clients.get(siteId)!;
-  }
-
-  /**
-   * Get SEO-enhanced WordPress client for a specific site
-   */
-  private async getSEOClient(site?: string): Promise<SEOWordPressClient> {
-    const siteId = site || "default";
-
-    if (!this.seoClients.has(siteId)) {
-      // Get base client config and create SEO client
-      const baseClient = this.getSiteClient(site);
-      const seoClient = new SEOWordPressClient(baseClient.config);
-
-      // Initialize SEO capabilities
-      await seoClient.initializeSEO();
-
-      this.seoClients.set(siteId, seoClient);
-    }
-
-    return this.seoClients.get(siteId)!;
   }
 
   /**
@@ -606,12 +558,13 @@ export class SEOTools {
   /**
    * Test SEO plugin integration and WordPress API connectivity
    */
-  async testSEOIntegration(params: SEOToolParams): Promise<unknown> {
+  async testSEOIntegration(client: WordPressClient, params: SEOToolParams): Promise<unknown> {
     const siteLogger = LoggerFactory.tool("wp_seo_test_integration", params.site);
 
     return await siteLogger.time("Test SEO integration", async () => {
       try {
-        const seoClient = await this.getSEOClient(params.site);
+        const seoClient = new SEOWordPressClient(client.config);
+        await seoClient.initializeSEO();
 
         // Test the integration
         const integrationTest = await seoClient.testSEOIntegration();
@@ -657,12 +610,13 @@ export class SEOTools {
   /**
    * Get live SEO data for multiple posts
    */
-  async getLiveSEOData(params: SEOToolParams & { maxPosts?: number }): Promise<unknown> {
+  async getLiveSEOData(client: WordPressClient, params: SEOToolParams & { maxPosts?: number }): Promise<unknown> {
     const siteLogger = LoggerFactory.tool("wp_seo_get_live_data", params.site);
 
     return await siteLogger.time("Get live SEO data", async () => {
       try {
-        const seoClient = await this.getSEOClient(params.site);
+        const seoClient = new SEOWordPressClient(client.config);
+        await seoClient.initializeSEO();
 
         // Get all posts with SEO data
         const postsWithSEO = await seoClient.getAllPostsWithSEO({
