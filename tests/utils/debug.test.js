@@ -6,7 +6,19 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { debug, startTimer } from "@/utils/debug.js";
+import {
+  debug,
+  startTimer,
+  silent,
+  createStructuredLogger,
+  createLogger,
+  logError,
+  logIf,
+  sanitizeEnvValue,
+  getEnvSummary,
+  getEnvVar,
+  validateEnvVars,
+} from "@/utils/debug.js";
 import { Config } from "@/config/Config.js";
 
 describe("Debug Utilities", () => {
@@ -482,5 +494,166 @@ describe("Debug Utilities", () => {
       expect(outerElapsed).toBeGreaterThan(innerElapsed);
       expect(outerElapsed).toBeGreaterThan(13);
     });
+  });
+});
+
+describe("silent logger", () => {
+  it("log/info/warn/error are all no-ops", () => {
+    expect(() => silent.log("x")).not.toThrow();
+    expect(() => silent.info("x")).not.toThrow();
+    expect(() => silent.warn("x")).not.toThrow();
+    expect(() => silent.error("x")).not.toThrow();
+  });
+});
+
+describe("createStructuredLogger / createLogger", () => {
+  it("returns a logger with expected interface", () => {
+    const logger = createStructuredLogger({ component: "test" });
+    expect(typeof logger.log).toBe("function");
+    expect(typeof logger.info).toBe("function");
+    expect(typeof logger.warn).toBe("function");
+    expect(typeof logger.error).toBe("function");
+    expect(typeof logger.logStructured).toBe("function");
+    expect(typeof logger.child).toBe("function");
+  });
+
+  it("createLogger is equivalent", () => {
+    expect(createLogger({ x: 1 })).toBeDefined();
+  });
+
+  it("all methods do not throw", () => {
+    const logger = createStructuredLogger();
+    expect(() => logger.log("msg")).not.toThrow();
+    expect(() => logger.info("msg")).not.toThrow();
+    expect(() => logger.warn("msg")).not.toThrow();
+    expect(() => logger.error("msg")).not.toThrow();
+  });
+
+  it("logStructured does not throw", () => {
+    const logger = createStructuredLogger();
+    expect(() => logger.logStructured({ timestamp: Date.now(), level: "info", message: "test" })).not.toThrow();
+  });
+
+  it("child() returns a functional logger", () => {
+    const parent = createStructuredLogger({ component: "parent" });
+    const child = parent.child({ subcomponent: "child" });
+    expect(() => child.info("from child")).not.toThrow();
+  });
+});
+
+describe("logError", () => {
+  it("logs Error instance without throwing", () => {
+    expect(() => logError(new Error("Test error"))).not.toThrow();
+  });
+
+  it("logs string error without throwing", () => {
+    expect(() => logError("Something went wrong")).not.toThrow();
+  });
+
+  it("accepts optional context object", () => {
+    expect(() => logError(new Error("Err"), { requestId: "123" })).not.toThrow();
+  });
+});
+
+describe("logIf", () => {
+  it("returns silent when condition is false", () => {
+    expect(logIf(false)).toBe(silent);
+  });
+
+  it("returns a function when condition is true", () => {
+    expect(typeof logIf(true, "info")).toBe("function");
+  });
+
+  it("returned function does not throw", () => {
+    const fn = logIf(true, "warn");
+    expect(() => fn("msg")).not.toThrow();
+  });
+
+  it("works for debug/info/warn/error levels", () => {
+    for (const level of ["debug", "info", "warn", "error"]) {
+      const fn = logIf(true, level);
+      expect(() => fn("test")).not.toThrow();
+    }
+  });
+});
+
+describe("sanitizeEnvValue", () => {
+  it("redacts password values", () => {
+    const result = sanitizeEnvValue("WORDPRESS_PASSWORD", "mysecret123");
+    expect(result).toMatch(/REDACTED/);
+    expect(result).not.toContain("mysecret123");
+  });
+
+  it("returns [EMPTY] for empty sensitive values", () => {
+    expect(sanitizeEnvValue("PASSWORD", "")).toBe("[EMPTY]");
+  });
+
+  it("returns plain value for non-sensitive keys", () => {
+    expect(sanitizeEnvValue("NODE_ENV", "production")).toBe("production");
+  });
+
+  it("includes char count in redacted message", () => {
+    const result = sanitizeEnvValue("SECRET_KEY", "abcde12345");
+    expect(result).toContain("10chars");
+  });
+});
+
+describe("getEnvSummary", () => {
+  it("returns [NOT_SET] for unset env vars", () => {
+    const summary = getEnvSummary(["NONEXISTENT_VAR_XYZ_DEBUG_TEST"]);
+    expect(summary["NONEXISTENT_VAR_XYZ_DEBUG_TEST"]).toBe("[NOT_SET]");
+  });
+
+  it("includes set env vars sanitized", () => {
+    process.env.DEBUG_TEST_PLAIN = "test-value";
+    const summary = getEnvSummary(["DEBUG_TEST_PLAIN"]);
+    expect(summary["DEBUG_TEST_PLAIN"]).toBe("test-value");
+    delete process.env.DEBUG_TEST_PLAIN;
+  });
+
+  it("sanitizes sensitive env var names", () => {
+    process.env.DEBUG_TEST_PASSWORD = "secretvalue";
+    const summary = getEnvSummary(["DEBUG_TEST_PASSWORD"]);
+    expect(summary["DEBUG_TEST_PASSWORD"]).toMatch(/REDACTED/);
+    delete process.env.DEBUG_TEST_PASSWORD;
+  });
+
+  it("handles empty keys array", () => {
+    expect(getEnvSummary([])).toEqual({});
+  });
+});
+
+describe("getEnvVar", () => {
+  it("returns the env var value when set", () => {
+    process.env.DEBUG_TEST_GET_ENV = "hello";
+    expect(getEnvVar("DEBUG_TEST_GET_ENV")).toBe("hello");
+    delete process.env.DEBUG_TEST_GET_ENV;
+  });
+
+  it("returns default when env var not set", () => {
+    delete process.env.NONEXISTENT_GETENV_DEBUG;
+    expect(getEnvVar("NONEXISTENT_GETENV_DEBUG", "fallback")).toBe("fallback");
+  });
+
+  it("returns undefined when not set and no default", () => {
+    delete process.env.NONEXISTENT_GETENV_DEBUG_2;
+    expect(getEnvVar("NONEXISTENT_GETENV_DEBUG_2")).toBeUndefined();
+  });
+});
+
+describe("validateEnvVars", () => {
+  it("does not throw when all required vars are set", () => {
+    process.env.DEBUG_TEST_VALIDATE = "value";
+    expect(() => validateEnvVars(["DEBUG_TEST_VALIDATE"])).not.toThrow();
+    delete process.env.DEBUG_TEST_VALIDATE;
+  });
+
+  it("throws when a required var is missing", () => {
+    delete process.env.MISSING_VAR_DEBUG_VALIDATE;
+    expect(() => validateEnvVars(["MISSING_VAR_DEBUG_VALIDATE"])).toThrow();
+  });
+
+  it("does not throw for empty array", () => {
+    expect(() => validateEnvVars([])).not.toThrow();
   });
 });
