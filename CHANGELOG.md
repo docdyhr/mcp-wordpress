@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.28...v3.2.0) (2026-04-30)
+
+### 🚀 Features
+
+* **seo:** implement wp_seo_track_serp_positions and wp_seo_keyword_research tools ([35f66d2](https://github.com/docdyhr/mcp-wordpress/commit/35f66d2c7e6ea005f5a0c796808551f2f25789c6)), closes [#180](https://github.com/docdyhr/mcp-wordpress/issues/180) [#181](https://github.com/docdyhr/mcp-wordpress/issues/181)
+
+### 🐛 Bug Fixes
+
+* **ci:** remove DXT git-commit step that fails on gitignored artifact ([4b8c72c](https://github.com/docdyhr/mcp-wordpress/commit/4b8c72c709789db42f4c3cded207745ca13fd89a))
+
 ## [3.1.28](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.27...v3.1.28) (2026-04-30)
 
 ### 🐛 Bug Fixes
