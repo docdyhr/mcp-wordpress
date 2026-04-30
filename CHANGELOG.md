@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.27](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.26...v3.1.27) (2026-04-30)
+
+### 🐛 Bug Fixes
+
+* guard main() against unhandled rejection and surface silent audit errors ([f9d9fea](https://github.com/docdyhr/mcp-wordpress/commit/f9d9fead2392cd55d64ddd6614b57f35e839e3ac))
+* **seo:** route wp_seo_* tools to correct site in multi-site configs ([487c036](https://github.com/docdyhr/mcp-wordpress/commit/487c036ab82ef227cba4823b677cc2a1f670cb6e))
+
+### ♻️ Refactoring
+
+* address remaining audit suggestions ([11c8195](https://github.com/docdyhr/mcp-wordpress/commit/11c8195d049b54943d1115bf895fb97d0ffc661c))
+
+### 📚 Documentation
+
+* **dxt:** add symlink pro tip for persisting multi-site config across updates ([768ea90](https://github.com/docdyhr/mcp-wordpress/commit/768ea903004783179781bbe7797f8919f72f8e03))
+
 ## [3.1.26](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.25...v3.1.26) (2026-04-30)
 
 ### 🐛 Bug Fixes
