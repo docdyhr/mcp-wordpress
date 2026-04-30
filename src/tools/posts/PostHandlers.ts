@@ -14,7 +14,7 @@ import { validateId, validatePaginationParams, validatePostParams } from "@/util
 import { sanitizeHtml } from "@/utils/validation/security.js";
 import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "@/utils/streaming.js";
 
-function buildListParams(params: PostQueryParams): PostQueryParams {
+export function buildListParams(params: PostQueryParams): PostQueryParams {
   if (!params || typeof params !== "object") {
     throw ErrorHandlers.validationError("params", params, "valid object");
   }
@@ -53,7 +53,7 @@ function buildListParams(params: PostQueryParams): PostQueryParams {
   return sanitized;
 }
 
-function formatPostsResponse(
+export function formatPostsResponse(
   posts: WordPressPost[],
   siteUrl: string,
   sanitizedParams: PostQueryParams,

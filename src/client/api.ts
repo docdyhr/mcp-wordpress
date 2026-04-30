@@ -674,17 +674,13 @@ export class WordPressClient implements IWordPressClient {
   }
 
   private shouldRetryError(error: Error): boolean {
-    const message = error.message.toLowerCase();
-    if (message.includes("401") || message.includes("403")) {
-      return false;
+    if (error instanceof WordPressAPIError && error.statusCode !== undefined) {
+      // Only retry server-side (5xx) errors; all 4xx are client errors that won't resolve on retry
+      return error.statusCode >= 500;
     }
-    if (message.includes("timeout")) {
-      return false;
-    }
-    if (message.includes("network connection lost")) {
-      return false;
-    }
-    return true;
+    // Network-level errors worth retrying
+    const retryableCodes = ["ECONNRESET", "ETIMEDOUT", "ENOTFOUND", "EAI_AGAIN"];
+    return retryableCodes.some((code) => error.message.includes(code));
   }
 
   private isRetryableBody(data: unknown): boolean {
