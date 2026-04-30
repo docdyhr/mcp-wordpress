@@ -926,11 +926,21 @@ export class SEOTools {
     };
   }
 
+  private stripHtml(html: string): string {
+    let s = html,
+      prev = "";
+    while (s !== prev) {
+      prev = s;
+      s = s.replace(/<[^>]*>/g, "");
+    }
+    return s;
+  }
+
   private scorePostRelevance(post: WordPressPost, keyword: string): number {
     const kw = keyword.toLowerCase();
-    const title = (post.title?.rendered ?? "").toLowerCase().replace(/<[^>]+>/g, "");
-    const excerpt = (post.excerpt?.rendered ?? "").toLowerCase().replace(/<[^>]+>/g, "");
-    const content = (post.content?.rendered ?? "").toLowerCase().replace(/<[^>]+>/g, "");
+    const title = this.stripHtml(post.title?.rendered ?? "").toLowerCase();
+    const excerpt = this.stripHtml(post.excerpt?.rendered ?? "").toLowerCase();
+    const content = this.stripHtml(post.content?.rendered ?? "").toLowerCase();
 
     let score = 0;
     if (title.includes(kw)) score += 50;
@@ -971,9 +981,8 @@ export class SEOTools {
     const termFreq = new Map<string, number>();
 
     for (const post of posts) {
-      const words = (post.title?.rendered ?? "")
+      const words = this.stripHtml(post.title?.rendered ?? "")
         .toLowerCase()
-        .replace(/<[^>]+>/g, "")
         .split(/\W+/)
         .filter((w) => w.length > 3 && !stopWords.has(w) && !seedWords.has(w));
 
