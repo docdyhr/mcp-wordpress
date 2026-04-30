@@ -54,47 +54,6 @@ interface RemediationPlan {
 }
 
 /**
- * Automated remediation patterns for common vulnerabilities
- */
-const REMEDIATION_PATTERNS = {
-  sqlInjection: {
-    pattern: /(SELECT|INSERT|UPDATE|DELETE).*?[\'\"].*?[\'\"].*?(WHERE|FROM|INTO)/gi,
-    replacement: "// TODO: Replace with parameterized query",
-    confidence: 0.7,
-  },
-
-  xssSimple: {
-    pattern: /innerHTML\s*=\s*[^;]+;?/gi,
-    replacement: "textContent = $1; // XSS remediation",
-    confidence: 0.8,
-  },
-
-  pathTraversal: {
-    pattern: /\.\.[\/\\]/g,
-    replacement: "",
-    confidence: 0.9,
-  },
-
-  credentialExposure: {
-    pattern: /(password|secret|key|token)\s*[:=]\s*['"][^'"]+['"]/gi,
-    replacement: "$1 = process.env.$1?.toUpperCase() || '[REQUIRED]'",
-    confidence: 0.85,
-  },
-
-  httpToHttps: {
-    pattern: /http:\/\//gi,
-    replacement: "https://",
-    confidence: 0.95,
-  },
-
-  insecureConfig: {
-    pattern: /(ssl|secure|verify)\s*[:=]\s*false/gi,
-    replacement: "$1: true",
-    confidence: 0.9,
-  },
-};
-
-/**
  * Automated Security Remediation Engine
  */
 export class AutomatedRemediation {
@@ -186,7 +145,7 @@ export class AutomatedRemediation {
       target: {
         file: vulnerability.location.file,
         line: vulnerability.location.line,
-        pattern: REMEDIATION_PATTERNS.sqlInjection.pattern,
+        pattern: /(SELECT|INSERT|UPDATE|DELETE).*?['"'].*?['"'].*?(WHERE|FROM|INTO)/gi,
       },
       replacement: {
         content:

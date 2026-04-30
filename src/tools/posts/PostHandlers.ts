@@ -14,6 +14,103 @@ import { validateId, validatePaginationParams, validatePostParams } from "@/util
 import { sanitizeHtml } from "@/utils/validation/security.js";
 import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "@/utils/streaming.js";
 
+function buildListParams(params: PostQueryParams): PostQueryParams {
+  if (!params || typeof params !== "object") {
+    throw ErrorHandlers.validationError("params", params, "valid object");
+  }
+
+  const sanitized: PostQueryParams = {
+    ...params,
+    ...validatePaginationParams(params),
+  };
+
+  if (sanitized.search) {
+    sanitized.search = sanitized.search.trim();
+    if (sanitized.search.length === 0) delete sanitized.search;
+  }
+
+  if (sanitized.categories) {
+    sanitized.categories = sanitized.categories.map((id) => validateId(id, "category ID"));
+  }
+
+  if (sanitized.tags) {
+    sanitized.tags = sanitized.tags.map((id) => validateId(id, "tag ID"));
+  }
+
+  if (sanitized.status) {
+    const validStatuses = ["publish", "future", "draft", "pending", "private"];
+    const statusesToCheck = Array.isArray(sanitized.status) ? sanitized.status : [sanitized.status];
+    for (const s of statusesToCheck) {
+      if (!validStatuses.includes(s)) {
+        throw ErrorHandlers.validationError("status", s, "one of: " + validStatuses.join(", "));
+      }
+    }
+    sanitized.status = statusesToCheck as PostStatus[];
+  }
+
+  if (!sanitized.per_page) sanitized.per_page = 10;
+
+  return sanitized;
+}
+
+function formatPostsResponse(
+  posts: WordPressPost[],
+  siteUrl: string,
+  sanitizedParams: PostQueryParams,
+  authorMap: Map<number, string>,
+  categoryMap: Map<number, string>,
+  tagMap: Map<number, string>,
+): string {
+  const statusCounts = posts.reduce(
+    (acc, p) => {
+      acc[p.status] = (acc[p.status] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+  const metadata = [
+    `📊 **Posts Summary**: ${posts.length} total`,
+    `📝 **Status Breakdown**: ${Object.entries(statusCounts)
+      .map(([status, count]) => `${status}: ${count}`)
+      .join(", ")}`,
+    `🌐 **Source**: ${siteUrl}`,
+    `📅 **Retrieved**: ${new Date().toLocaleString()}`,
+    ...(sanitizedParams.search ? [`🔍 **Search Term**: "${sanitizedParams.search}"`] : []),
+    ...(sanitizedParams.categories ? [`📁 **Categories**: ${sanitizedParams.categories.join(", ")}`] : []),
+    ...(sanitizedParams.tags ? [`🏷️ **Tags**: ${sanitizedParams.tags.join(", ")}`] : []),
+  ];
+
+  const postLines = posts
+    .map((p) => {
+      const formattedDate = new Date(p.date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+      const excerpt = p.excerpt?.rendered ? sanitizeHtml(p.excerpt.rendered).substring(0, 80) + "..." : "";
+      const authorName = authorMap.get(p.author) || (p.author != null ? `User ${p.author}` : "Unknown Author");
+      const postCategories = (p.categories || []).map((id) => categoryMap.get(id) || `Category ${id}`);
+      const postTags = (p.tags || []).map((id) => tagMap.get(id) || `Tag ${id}`);
+
+      let postInfo = `- ID ${p.id}: **${p.title.rendered}** (${p.status})\n`;
+      postInfo += `  👤 Author: ${authorName}\n`;
+      postInfo += `  📅 Published: ${formattedDate}\n`;
+      if (postCategories.length > 0) postInfo += `  📁 Categories: ${postCategories.join(", ")}\n`;
+      if (postTags.length > 0) postInfo += `  🏷️ Tags: ${postTags.join(", ")}\n`;
+      if (excerpt) postInfo += `  📝 Excerpt: ${excerpt}\n`;
+      postInfo += `  🔗 Link: ${p.link}`;
+      return postInfo;
+    })
+    .join("\n\n");
+
+  let content = metadata.join("\n") + "\n\n" + postLines;
+  if (posts.length >= (sanitizedParams.per_page || 10)) {
+    content += `\n\n📄 **Pagination Tip**: Use \`per_page\` parameter to control results (max 100). Current: ${sanitizedParams.per_page || 10}`;
+  }
+  return content;
+}
+
 /**
  * Handles listing WordPress posts with advanced filtering and pagination
  */
@@ -22,55 +119,7 @@ export async function handleListPosts(
   params: PostQueryParams,
 ): Promise<WordPressPost[] | string> {
   try {
-    // Handle null/undefined parameters
-    if (!params || typeof params !== "object") {
-      throw ErrorHandlers.validationError("params", params, "valid object");
-    }
-
-    // Enhanced input validation and sanitization
-    const paginationValidated = validatePaginationParams(params);
-
-    const sanitizedParams = {
-      ...params,
-      ...paginationValidated,
-    };
-
-    // Validate and sanitize search term
-    if (sanitizedParams.search) {
-      sanitizedParams.search = sanitizedParams.search.trim();
-      if (sanitizedParams.search.length === 0) {
-        delete sanitizedParams.search;
-      }
-    }
-
-    // Validate category and tag IDs if provided
-    if (sanitizedParams.categories) {
-      sanitizedParams.categories = sanitizedParams.categories.map((id) => validateId(id, "category ID"));
-    }
-
-    if (sanitizedParams.tags) {
-      sanitizedParams.tags = sanitizedParams.tags.map((id) => validateId(id, "tag ID"));
-    }
-
-    // Validate and normalize status parameter to array (WordPress REST API expects array)
-    if (sanitizedParams.status) {
-      const validStatuses = ["publish", "future", "draft", "pending", "private"];
-      const statusesToCheck = Array.isArray(sanitizedParams.status) ? sanitizedParams.status : [sanitizedParams.status];
-
-      for (const statusToCheck of statusesToCheck) {
-        if (!validStatuses.includes(statusToCheck)) {
-          throw ErrorHandlers.validationError("status", statusToCheck, "one of: " + validStatuses.join(", "));
-        }
-      }
-
-      // Normalize to array format as expected by WordPress REST API
-      sanitizedParams.status = statusesToCheck as PostStatus[];
-    }
-
-    // Performance optimization: set reasonable defaults
-    if (!sanitizedParams.per_page) {
-      sanitizedParams.per_page = 10; // Default to 10 posts for better performance
-    }
+    const sanitizedParams = buildListParams(params);
 
     const posts = await client.getPosts(sanitizedParams);
     if (posts.length === 0) {
@@ -82,7 +131,6 @@ export async function handleListPosts(
     // Use streaming for large result sets (>50 posts)
     if (posts.length > 50) {
       const streamResults: StreamingResult<unknown>[] = [];
-
       for await (const result of WordPressDataStreamer.streamPosts(posts, {
         includeAuthor: true,
         includeCategories: true,
@@ -91,40 +139,14 @@ export async function handleListPosts(
       })) {
         streamResults.push(result);
       }
-
       return StreamingUtils.formatStreamingResponse(streamResults, "posts");
     }
 
-    // Add comprehensive site context information
     const siteUrl = client.getSiteUrl ? client.getSiteUrl() : "Unknown site";
-    const totalPosts = posts.length;
-    const statusCounts = posts.reduce(
-      (acc, p) => {
-        acc[p.status] = (acc[p.status] || 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
-
-    // Enhanced metadata
-    const metadata = [
-      `📊 **Posts Summary**: ${totalPosts} total`,
-      `📝 **Status Breakdown**: ${Object.entries(statusCounts)
-        .map(([status, count]) => `${status}: ${count}`)
-        .join(", ")}`,
-      `🌐 **Source**: ${siteUrl}`,
-      `📅 **Retrieved**: ${new Date().toLocaleString()}`,
-      ...(params.search ? [`🔍 **Search Term**: "${params.search}"`] : []),
-      ...(params.categories ? [`📁 **Categories**: ${params.categories.join(", ")}`] : []),
-      ...(params.tags ? [`🏷️ **Tags**: ${params.tags.join(", ")}`] : []),
-    ];
-
-    // Fetch additional metadata for enhanced responses
     const authorIds = [...new Set(posts.map((p) => p.author).filter(Boolean))];
     const categoryIds = [...new Set(posts.flatMap((p) => p.categories || []))];
     const tagIds = [...new Set(posts.flatMap((p) => p.tags || []))];
 
-    // Fetch authors, categories, and tags in parallel for better performance
     const [authors, categories, tags] = await Promise.all([
       authorIds.length > 0
         ? Promise.all(
@@ -164,56 +186,11 @@ export async function handleListPosts(
         : [],
     ]);
 
-    // Create lookup maps for performance
     const authorMap = new Map(authors.map((a) => [a.id, a.name]));
     const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
     const tagMap = new Map(tags.map((t) => [t.id, t.name]));
 
-    const content =
-      metadata.join("\n") +
-      "\n\n" +
-      posts
-        .map((p) => {
-          const date = new Date(p.date);
-          const formattedDate = date.toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          });
-          const excerpt = p.excerpt?.rendered ? sanitizeHtml(p.excerpt.rendered).substring(0, 80) + "..." : "";
-
-          // Enhanced metadata
-          const authorName = authorMap.get(p.author) || `User ${p.author}`;
-          const postCategories = (p.categories || []).map((id) => categoryMap.get(id) || `Category ${id}`);
-          const postTags = (p.tags || []).map((id) => tagMap.get(id) || `Tag ${id}`);
-
-          let postInfo = `- ID ${p.id}: **${p.title.rendered}** (${p.status})\n`;
-          postInfo += `  👤 Author: ${authorName}\n`;
-          postInfo += `  📅 Published: ${formattedDate}\n`;
-          if (postCategories.length > 0) {
-            postInfo += `  📁 Categories: ${postCategories.join(", ")}\n`;
-          }
-          if (postTags.length > 0) {
-            postInfo += `  🏷️ Tags: ${postTags.join(", ")}\n`;
-          }
-          if (excerpt) {
-            postInfo += `  📝 Excerpt: ${excerpt}\n`;
-          }
-          postInfo += `  🔗 Link: ${p.link}`;
-
-          return postInfo;
-        })
-        .join("\n\n");
-
-    // Add pagination guidance for large result sets
-    let finalContent = content;
-    if (posts.length >= (sanitizedParams.per_page || 10)) {
-      finalContent += `\n\n📄 **Pagination Tip**: Use \`per_page\` parameter to control results (max 100). Current: ${
-        sanitizedParams.per_page || 10
-      }`;
-    }
-
-    return finalContent;
+    return formatPostsResponse(posts, siteUrl, sanitizedParams, authorMap, categoryMap, tagMap);
   } catch (_error) {
     throw new Error(`Failed to list posts: ${getErrorMessage(_error)}`);
   }
