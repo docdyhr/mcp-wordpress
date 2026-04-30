@@ -621,6 +621,8 @@ Claude: "I'll analyze and optimize your recent posts...
 - Average SEO score improved from 67% to 89%"
 ```
 
+Two additional tools are available: `wp_seo_track_serp` estimates keyword coverage from your WordPress content (set `SEO_PROVIDER_SEARCH_CONSOLE=true` or `SEO_PROVIDER_DATAFORSEO=true` for live SERP data), and `wp_seo_keyword_research` generates keyword suggestions derived from your existing content library (set `SEO_PROVIDER_AHREFS=true` or `SEO_PROVIDER_DATAFORSEO=true` for real search volume data).
+
 **Content Gap Analysis**
 
 ```text

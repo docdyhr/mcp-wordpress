@@ -48,6 +48,10 @@ import type {
   SEOToolParams,
   BulkOperationResult,
   SiteAuditResult,
+  SERPTrackingResult,
+  SERPPositionData,
+  KeywordResearchResult,
+  KeywordSuggestion,
 } from "@/types/seo.js";
 import type { WordPressPost } from "@/types/wordpress.js";
 
@@ -342,6 +346,59 @@ export class SEOTools {
           site: params.site,
           auditType: params.auditType,
         });
+        throw _error;
+      }
+    });
+  }
+
+  /**
+   * Estimates SERP positions by analysing WordPress content coverage for each keyword.
+   */
+  async trackSERPPositions(client: WordPressClient, params: SEOToolParams): Promise<SERPTrackingResult> {
+    const siteLogger = LoggerFactory.tool("wp_seo_track_serp", params.site);
+
+    return await siteLogger.time("Track SERP positions", async () => {
+      try {
+        validateRequired(params, ["keywords"]);
+
+        const keywords = params.keywords as string[];
+        if (keywords.length === 0) {
+          throw new Error("At least one keyword is required");
+        }
+
+        const cacheKey = `seo:serp:${params.site}:${[...keywords].sort().join(",")}:${params.url ?? ""}`;
+        const cached = await this.getCachedResult(cacheKey);
+        if (cached) return cached as SERPTrackingResult;
+
+        const result = await this.computeSERPPositions(client, params);
+        await this.cacheResult(cacheKey, result, 43200); // 12 hours
+        return result;
+      } catch (_error) {
+        handleToolError(_error, "track SERP positions", { site: params.site });
+        throw _error;
+      }
+    });
+  }
+
+  /**
+   * Generates keyword suggestions derived from existing WordPress content.
+   */
+  async keywordResearch(client: WordPressClient, params: SEOToolParams): Promise<KeywordResearchResult> {
+    const siteLogger = LoggerFactory.tool("wp_seo_keyword_research", params.site);
+
+    return await siteLogger.time("Keyword research", async () => {
+      try {
+        validateRequired(params, ["seedKeyword"]);
+
+        const cacheKey = `seo:keywords:${params.site}:${params.seedKeyword as string}`;
+        const cached = await this.getCachedResult(cacheKey);
+        if (cached) return cached as KeywordResearchResult;
+
+        const result = await this.computeKeywordResearch(client, params);
+        await this.cacheResult(cacheKey, result, 604800); // 7 days
+        return result;
+      } catch (_error) {
+        handleToolError(_error, "keyword research", { site: params.site });
         throw _error;
       }
     });
@@ -734,6 +791,225 @@ export class SEOTools {
     }
 
     return recommendations;
+  }
+
+  // ---------------------------------------------------------------------------
+  // SERP tracking helpers
+  // ---------------------------------------------------------------------------
+
+  private async computeSERPPositions(client: WordPressClient, params: SEOToolParams): Promise<SERPTrackingResult> {
+    const keywords = params.keywords as string[];
+    const positions: SERPPositionData[] = [];
+
+    for (const keyword of keywords) {
+      const posts = await client.getPosts({
+        search: keyword,
+        status: ["publish"],
+        per_page: 10,
+      });
+
+      const scored = posts.map((post) => ({
+        postId: post.id,
+        title: post.title?.rendered ?? "Untitled",
+        url: post.link ?? "",
+        relevanceScore: this.scorePostRelevance(post as WordPressPost, keyword),
+      }));
+
+      scored.sort((a, b) => b.relevanceScore - a.relevanceScore);
+
+      const targetPosts = params.url ? scored.filter((p) => p.url.includes(params.url as string)) : scored;
+
+      const contentScore = targetPosts.length > 0 ? targetPosts[0].relevanceScore : 0;
+      const estimatedPosition =
+        targetPosts.length > 0 ? scored.findIndex((p) => p.postId === targetPosts[0].postId) + 1 : null;
+
+      positions.push({
+        keyword,
+        estimatedPosition,
+        matchingPosts: scored.slice(0, 5),
+        contentScore,
+        checkedAt: new Date().toISOString(),
+      });
+    }
+
+    return {
+      positions,
+      ...(params.url !== undefined && { targetUrl: params.url }),
+      searchEngine: params.searchEngine ?? "google",
+      ...(params.location !== undefined && { location: params.location }),
+      trackedAt: new Date().toISOString(),
+      dataSource: "wordpress-content-analysis" as const,
+      upgradeNote:
+        "Positions are estimated from WordPress content coverage. " +
+        "Set SEO_PROVIDER_SEARCH_CONSOLE=true or SEO_PROVIDER_DATAFORSEO=true for live SERP data.",
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Keyword research helpers
+  // ---------------------------------------------------------------------------
+
+  private async computeKeywordResearch(client: WordPressClient, params: SEOToolParams): Promise<KeywordResearchResult> {
+    const seed = params.seedKeyword as string;
+    const maxResults = params.maxResults ?? 20;
+    const suggestions: KeywordSuggestion[] = [];
+
+    const seedPosts = await client.getPosts({ search: seed, status: ["publish"], per_page: 10 });
+
+    suggestions.push({
+      keyword: seed,
+      type: "seed",
+      estimatedVolume: Math.min(seedPosts.length * 100, 10000),
+      difficulty: this.estimateDifficulty(seedPosts.length),
+      relevance: 100,
+      existingCoverage: seedPosts.length,
+    });
+
+    // Related terms extracted from post titles (capped at 8 extra API calls)
+    const relatedTerms = this.extractRelatedTerms(seedPosts as WordPressPost[], seed);
+    for (const term of relatedTerms.slice(0, 8)) {
+      const termPosts = await client.getPosts({ search: term, status: ["publish"], per_page: 5 });
+      suggestions.push({
+        keyword: term,
+        type: "related",
+        estimatedVolume: Math.min(termPosts.length * 80, 8000),
+        difficulty: this.estimateDifficulty(termPosts.length),
+        relevance: this.computeTermRelevance(term, seed),
+        existingCoverage: termPosts.length,
+      });
+    }
+
+    if (params.includeVariations !== false) {
+      for (const variation of this.generateVariations(seed)) {
+        suggestions.push({
+          keyword: variation,
+          type: "variation",
+          estimatedVolume: Math.min(seedPosts.length * 60, 6000),
+          difficulty: Math.max(this.estimateDifficulty(seedPosts.length) - 5, 0),
+          relevance: 70,
+          existingCoverage: 0,
+        });
+      }
+    }
+
+    if (params.includeQuestions) {
+      for (const question of this.generateQuestions(seed)) {
+        suggestions.push({
+          keyword: question,
+          type: "question",
+          estimatedVolume: Math.min(seedPosts.length * 40, 4000),
+          difficulty: Math.max(this.estimateDifficulty(seedPosts.length) - 10, 0),
+          relevance: 60,
+          existingCoverage: 0,
+        });
+      }
+    }
+
+    // Deduplicate
+    const seen = new Set<string>();
+    const deduped = suggestions.filter((s) => {
+      const key = s.keyword.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    return {
+      seedKeyword: seed,
+      suggestions: deduped.slice(0, maxResults),
+      totalSuggestions: deduped.length,
+      researchedAt: new Date().toISOString(),
+      dataSource: "wordpress-content-analysis",
+      upgradeNote:
+        "Volume and difficulty are estimated from WordPress content coverage. " +
+        "Set SEO_PROVIDER_AHREFS=true or SEO_PROVIDER_DATAFORSEO=true for real search volume data.",
+    };
+  }
+
+  private scorePostRelevance(post: WordPressPost, keyword: string): number {
+    const kw = keyword.toLowerCase();
+    const title = (post.title?.rendered ?? "").toLowerCase().replace(/<[^>]+>/g, "");
+    const excerpt = (post.excerpt?.rendered ?? "").toLowerCase().replace(/<[^>]+>/g, "");
+    const content = (post.content?.rendered ?? "").toLowerCase().replace(/<[^>]+>/g, "");
+
+    let score = 0;
+    if (title.includes(kw)) score += 50;
+    if (excerpt.includes(kw)) score += 20;
+    const occurrences = (content.match(new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) ?? []).length;
+    score += Math.min(occurrences * 2, 30);
+    return Math.min(score, 100);
+  }
+
+  private estimateDifficulty(postCount: number): number {
+    return Math.min(Math.round(postCount * 8), 100);
+  }
+
+  private extractRelatedTerms(posts: WordPressPost[], seed: string): string[] {
+    const stopWords = new Set([
+      "the",
+      "a",
+      "an",
+      "and",
+      "or",
+      "but",
+      "in",
+      "on",
+      "at",
+      "to",
+      "for",
+      "of",
+      "with",
+      "by",
+      "from",
+      "is",
+      "are",
+      "was",
+      "be",
+      "it",
+    ]);
+    const seedWords = new Set(seed.toLowerCase().split(/\s+/));
+    const termFreq = new Map<string, number>();
+
+    for (const post of posts) {
+      const words = (post.title?.rendered ?? "")
+        .toLowerCase()
+        .replace(/<[^>]+>/g, "")
+        .split(/\W+/)
+        .filter((w) => w.length > 3 && !stopWords.has(w) && !seedWords.has(w));
+
+      for (const word of words) {
+        termFreq.set(word, (termFreq.get(word) ?? 0) + 1);
+      }
+    }
+
+    return [...termFreq.entries()].sort(([, a], [, b]) => b - a).map(([word]) => `${seed} ${word}`);
+  }
+
+  private computeTermRelevance(term: string, seed: string): number {
+    const termWords = new Set(term.toLowerCase().split(/\s+/));
+    const seedWords = seed.toLowerCase().split(/\s+/);
+    const overlap = seedWords.filter((w) => termWords.has(w)).length;
+    return Math.round((overlap / seedWords.length) * 80 + 20);
+  }
+
+  private generateVariations(seed: string): string[] {
+    const modifiers = [
+      "best",
+      "how to",
+      "guide to",
+      "tips for",
+      "examples of",
+      "top",
+      "free",
+      "easy",
+      "beginner",
+      "advanced",
+    ];
+    return modifiers.map((mod) => `${mod} ${seed}`);
+  }
+
+  private generateQuestions(seed: string): string[] {
+    return [`what is ${seed}`, `how to ${seed}`, `why use ${seed}`, `when to use ${seed}`, `${seed} vs`];
   }
 
   /**

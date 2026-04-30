@@ -132,6 +132,30 @@ export interface SEOToolParams {
 
   /** Minimum severity level for audit */
   minSeverity?: "low" | "medium" | "high" | "critical";
+
+  /** Keywords to track SERP positions for */
+  keywords?: string[];
+
+  /** Specific URL to evaluate for SERP tracking */
+  url?: string;
+
+  /** Search engine context for SERP tracking */
+  searchEngine?: string;
+
+  /** Geographic location context for SERP tracking */
+  location?: string;
+
+  /** Seed keyword for keyword research */
+  seedKeyword?: string;
+
+  /** Include modifier-based keyword variations */
+  includeVariations?: boolean;
+
+  /** Include question-form keywords */
+  includeQuestions?: boolean;
+
+  /** Maximum number of keyword suggestions to return */
+  maxResults?: number;
 }
 
 /**
@@ -455,6 +479,54 @@ export interface SiteAuditResult {
 
   /** Processing time in milliseconds */
   processingTime: number;
+}
+
+/**
+ * Position data for a single tracked keyword
+ */
+export interface SERPPositionData {
+  keyword: string;
+  estimatedPosition: number | null;
+  matchingPosts: Array<{ postId: number; title: string; url: string; relevanceScore: number }>;
+  contentScore: number;
+  checkedAt: string;
+}
+
+/**
+ * Result returned by wp_seo_track_serp
+ */
+export interface SERPTrackingResult {
+  positions: SERPPositionData[];
+  targetUrl?: string;
+  searchEngine: string;
+  location?: string;
+  trackedAt: string;
+  dataSource: "wordpress-content-analysis";
+  upgradeNote: string;
+}
+
+/**
+ * A single keyword suggestion from wp_seo_keyword_research
+ */
+export interface KeywordSuggestion {
+  keyword: string;
+  type: "seed" | "variation" | "question" | "related";
+  estimatedVolume: number;
+  difficulty: number;
+  relevance: number;
+  existingCoverage: number;
+}
+
+/**
+ * Result returned by wp_seo_keyword_research
+ */
+export interface KeywordResearchResult {
+  seedKeyword: string;
+  suggestions: KeywordSuggestion[];
+  totalSuggestions: number;
+  researchedAt: string;
+  dataSource: "wordpress-content-analysis";
+  upgradeNote: string;
 }
 
 /**

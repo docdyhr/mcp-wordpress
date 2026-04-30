@@ -21,6 +21,8 @@ const seoMock = vi.hoisted(() => ({
   performSiteAudit: vi.fn(),
   testSEOIntegration: vi.fn(),
   getLiveSEOData: vi.fn(),
+  trackSERPPositions: vi.fn(),
+  keywordResearch: vi.fn(),
 }));
 
 vi.mock("../../../dist/tools/seo/SEOTools.js", () => ({
@@ -58,18 +60,90 @@ beforeEach(() => {
 });
 
 // ---------------------------------------------------------------------------
-// Unimplemented stubs — throw immediately
+// handleTrackSERPPositions
 // ---------------------------------------------------------------------------
 
 describe("handleTrackSERPPositions()", () => {
-  it("throws 'not yet implemented' error", async () => {
-    await expect(handleTrackSERPPositions(mockClient, {})).rejects.toThrow("not yet implemented");
+  it("propagates errors from SEOTools.trackSERPPositions", async () => {
+    seoMock.trackSERPPositions.mockRejectedValue(new Error("serp failed"));
+    await expect(handleTrackSERPPositions(mockClient, { keywords: ["wordpress"] })).rejects.toThrow("serp failed");
+  });
+
+  it("returns position data on success", async () => {
+    const expected = {
+      positions: [{ keyword: "wordpress", estimatedPosition: 1, matchingPosts: [], contentScore: 80 }],
+      trackedAt: "2026-04-30T00:00:00.000Z",
+      dataSource: "wordpress-content-analysis",
+      searchEngine: "google",
+      upgradeNote: "...",
+    };
+    seoMock.trackSERPPositions.mockResolvedValue(expected);
+    const result = await handleTrackSERPPositions(mockClient, { keywords: ["wordpress"], site: "s1" });
+    expect(result).toEqual(expected);
+  });
+
+  it("passes optional url/searchEngine/location through to SEOTools", async () => {
+    seoMock.trackSERPPositions.mockResolvedValue({});
+    await handleTrackSERPPositions(mockClient, {
+      keywords: ["wordpress"],
+      url: "https://example.com",
+      searchEngine: "bing",
+      location: "US",
+      site: "s1",
+    });
+    expect(seoMock.trackSERPPositions).toHaveBeenCalledWith(
+      mockClient,
+      expect.objectContaining({
+        keywords: ["wordpress"],
+        url: "https://example.com",
+        searchEngine: "bing",
+        location: "US",
+      }),
+    );
   });
 });
 
+// ---------------------------------------------------------------------------
+// handleKeywordResearch
+// ---------------------------------------------------------------------------
+
 describe("handleKeywordResearch()", () => {
-  it("throws 'not yet implemented' error", async () => {
-    await expect(handleKeywordResearch(mockClient, {})).rejects.toThrow("not yet implemented");
+  it("propagates errors from SEOTools.keywordResearch", async () => {
+    seoMock.keywordResearch.mockRejectedValue(new Error("research failed"));
+    await expect(handleKeywordResearch(mockClient, { seedKeyword: "wordpress" })).rejects.toThrow("research failed");
+  });
+
+  it("returns keyword suggestions on success", async () => {
+    const expected = {
+      seedKeyword: "wordpress",
+      suggestions: [{ keyword: "best wordpress", type: "variation", estimatedVolume: 300 }],
+      totalSuggestions: 1,
+      dataSource: "wordpress-content-analysis",
+      upgradeNote: "...",
+    };
+    seoMock.keywordResearch.mockResolvedValue(expected);
+    const result = await handleKeywordResearch(mockClient, { seedKeyword: "wordpress", site: "s1" });
+    expect(result).toEqual(expected);
+  });
+
+  it("passes optional flags through to SEOTools", async () => {
+    seoMock.keywordResearch.mockResolvedValue({});
+    await handleKeywordResearch(mockClient, {
+      seedKeyword: "seo",
+      includeVariations: true,
+      includeQuestions: true,
+      maxResults: 10,
+      site: "s1",
+    });
+    expect(seoMock.keywordResearch).toHaveBeenCalledWith(
+      mockClient,
+      expect.objectContaining({
+        seedKeyword: "seo",
+        includeVariations: true,
+        includeQuestions: true,
+        maxResults: 10,
+      }),
+    );
   });
 });
 

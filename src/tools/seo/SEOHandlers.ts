@@ -11,7 +11,14 @@
 import { WordPressClient } from "@/client/api.js";
 import { SEOTools } from "./SEOTools.js";
 import { LoggerFactory } from "@/utils/logger.js";
-import type { SEOToolParams, SEOAnalysisType, SEOMetadata, SchemaType } from "@/types/seo.js";
+import type {
+  SEOToolParams,
+  SEOAnalysisType,
+  SEOMetadata,
+  SchemaType,
+  SERPTrackingResult,
+  KeywordResearchResult,
+} from "@/types/seo.js";
 
 let _seoTools: SEOTools | null = null;
 function getSeoTools(): SEOTools {
@@ -208,12 +215,19 @@ export async function handlePerformSiteAudit(client: WordPressClient, args: Reco
 export async function handleTrackSERPPositions(
   client: WordPressClient,
   args: Record<string, unknown>,
-): Promise<unknown> {
+): Promise<SERPTrackingResult> {
   const logger = LoggerFactory.tool("wp_seo_track_serp");
 
   try {
-    // This would need implementation in SEOTools
-    throw new Error("SERP tracking not yet implemented");
+    const params: SEOToolParams = {
+      keywords: args.keywords as string[],
+      site: args.site as string,
+    };
+    if (args.url) params.url = args.url as string;
+    if (args.searchEngine) params.searchEngine = args.searchEngine as string;
+    if (args.location) params.location = args.location as string;
+
+    return await getSeoTools().trackSERPPositions(client, params);
   } catch (error) {
     logger.error("Failed to track SERP positions", { error, args });
     throw error;
@@ -223,12 +237,22 @@ export async function handleTrackSERPPositions(
 /**
  * Handle keyword research request
  */
-export async function handleKeywordResearch(client: WordPressClient, args: Record<string, unknown>): Promise<unknown> {
+export async function handleKeywordResearch(
+  client: WordPressClient,
+  args: Record<string, unknown>,
+): Promise<KeywordResearchResult> {
   const logger = LoggerFactory.tool("wp_seo_keyword_research");
 
   try {
-    // This would need implementation in SEOTools
-    throw new Error("Keyword research not yet implemented");
+    const params: SEOToolParams = {
+      seedKeyword: args.seedKeyword as string,
+      site: args.site as string,
+    };
+    if (args.includeVariations !== undefined) params.includeVariations = args.includeVariations as boolean;
+    if (args.includeQuestions !== undefined) params.includeQuestions = args.includeQuestions as boolean;
+    if (args.maxResults !== undefined) params.maxResults = args.maxResults as number;
+
+    return await getSeoTools().keywordResearch(client, params);
   } catch (error) {
     logger.error("Failed to perform keyword research", { error, args });
     throw error;
