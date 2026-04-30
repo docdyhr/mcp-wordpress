@@ -300,20 +300,6 @@ jobs:
           files: mcp-wordpress.dxt
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 📝 Commit updated DXT to main
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git checkout main
-          git pull --rebase origin main
-          git add mcp-wordpress.dxt
-          git diff --cached --quiet && echo "ℹ️ DXT unchanged, skipping commit" && exit 0
-          git commit -m "chore(dxt): update mcp-wordpress.dxt to v${{ needs.semantic-release.outputs.new-release-version }} [skip ci]"
-          git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
-
       - name: ✅ DXT Package Upload Success
         run: |
           echo "✅ DXT package uploaded successfully!"
