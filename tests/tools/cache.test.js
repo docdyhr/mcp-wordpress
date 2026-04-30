@@ -263,15 +263,47 @@ describe("CacheTools", () => {
       expect(result.how_to_enable).toBeDefined();
     });
 
-    it("should handle cache info errors", async () => {
+    it("should return a graceful error response when getCacheStats throws", async () => {
       mockCachedClient.getCacheStats.mockImplementation(() => {
         throw new Error("Info failed");
       });
 
       const tools = cacheTools.getTools();
       const infoTool = tools.find((t) => t.name === "wp_cache_info");
+      const result = await infoTool.handler(mockCachedClient, {});
 
-      await expect(infoTool.handler(mockCachedClient, {})).rejects.toThrow("Info failed");
+      expect(result.caching_enabled).toBe(false);
+      expect(result.status).toBe("unavailable");
+      expect(result.error).toContain("Info failed");
+    });
+
+    it("should return within 1s with no cache backend configured", async () => {
+      const tools = cacheTools.getTools();
+      const infoTool = tools.find((t) => t.name === "wp_cache_info");
+
+      const start = Date.now();
+      const result = await infoTool.handler(mockClient, {});
+      const elapsed = Date.now() - start;
+
+      expect(elapsed).toBeLessThan(1000);
+      expect(result).toBeDefined();
+      expect(result.caching_enabled).toBe(false);
+    });
+
+    it("should resolve within 1s when getCacheStats succeeds", async () => {
+      const mockStats = {
+        cache: { totalSize: 10, hitRate: 0.9, hits: 90, misses: 10, evictions: 0, expirations: 0 },
+        invalidation: { queueSize: 0, rulesCount: 5, processing: false },
+      };
+      mockCachedClient.getCacheStats.mockReturnValue(mockStats);
+
+      const tools = cacheTools.getTools();
+      const infoTool = tools.find((t) => t.name === "wp_cache_info");
+
+      const start = Date.now();
+      const result = await infoTool.handler(mockCachedClient, {});
+      expect(Date.now() - start).toBeLessThan(1000);
+      expect(result.caching_enabled).toBe(true);
     });
   });
 });

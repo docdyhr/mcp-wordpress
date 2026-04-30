@@ -471,75 +471,108 @@ export default class PerformanceTools {
    * Get benchmark comparison
    */
   private async getBenchmarkComparison(_client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    return toolWrapper(async () => {
-      const {
-        site,
-        category = "all",
-        includeRecommendations = true,
-      } = params as {
-        site?: string;
-        category?: string;
-        includeRecommendations?: boolean;
-      };
+    const start = Date.now();
+    this.logger.debug("performance benchmark: enter", { tool: "wp_performance_benchmark" });
 
-      // Get benchmark comparisons
-      const benchmarks = this.analytics.benchmarkPerformance() as BenchmarkComparison[];
-
-      // Filter by category if specified
-      let filteredBenchmarks = benchmarks;
-      if (category !== "all") {
-        const categoryMap: Record<string, string> = {
-          response_time: "Response Time",
-          cache_performance: "Cache Hit Rate",
-          error_rate: "Error Rate",
-          system_resources: "Memory Usage",
-        };
-        const targetCategory = categoryMap[category as string];
-        if (targetCategory) {
-          filteredBenchmarks = benchmarks.filter((b) => b.category === targetCategory);
-        }
-      }
-
-      // Get recommendations if requested
-      let recommendations = null;
-      if (includeRecommendations) {
-        const insights = this.analytics.generateInsights();
-        recommendations = insights
-          .filter((insight) => insight.category === "optimization")
-          .map((insight) => ({
-            title: insight.title,
-            description: insight.description,
-            priority: insight.priority,
-            estimatedImprovement: insight.estimatedImprovement,
-            implementationEffort: insight.implementationEffort,
-          }));
-      }
-
-      return {
-        success: true,
-        data: {
-          benchmarks: filteredBenchmarks.map((benchmark) => ({
-            ...benchmark,
-            status: formatBenchmarkStatus(benchmark.status),
-            improvement:
-              benchmark.improvement > 0
-                ? {
-                    needed: benchmark.improvement,
-                    description: getBenchmarkImprovementDescription(benchmark),
-                  }
-                : null,
-          })),
-          overallRanking: calculateOverallRanking(benchmarks),
-          recommendations: recommendations || [],
-          metadata: {
-            timestamp: new Date().toISOString(),
-            category,
-            site: site || "all",
-            benchmarkVersion: "2024-industry-standards",
-          },
-        },
-      };
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => reject(new Error("wp_performance_benchmark timed out after 5000ms")), 5000);
     });
+
+    try {
+      const result = await Promise.race([
+        toolWrapper(async () => {
+          const {
+            site,
+            category = "all",
+            includeRecommendations = true,
+          } = params as {
+            site?: string;
+            category?: string;
+            includeRecommendations?: boolean;
+          };
+
+          // Get benchmark comparisons
+          const benchmarks = this.analytics.benchmarkPerformance() as BenchmarkComparison[];
+
+          // Filter by category if specified
+          let filteredBenchmarks = benchmarks;
+          if (category !== "all") {
+            const categoryMap: Record<string, string> = {
+              response_time: "Response Time",
+              cache_performance: "Cache Hit Rate",
+              error_rate: "Error Rate",
+              system_resources: "Memory Usage",
+            };
+            const targetCategory = categoryMap[category as string];
+            if (targetCategory) {
+              filteredBenchmarks = benchmarks.filter((b) => b.category === targetCategory);
+            }
+          }
+
+          // Get recommendations if requested
+          let recommendations = null;
+          if (includeRecommendations) {
+            const insights = this.analytics.generateInsights();
+            recommendations = insights
+              .filter((insight) => insight.category === "optimization")
+              .map((insight) => ({
+                title: insight.title,
+                description: insight.description,
+                priority: insight.priority,
+                estimatedImprovement: insight.estimatedImprovement,
+                implementationEffort: insight.implementationEffort,
+              }));
+          }
+
+          return {
+            success: true,
+            data: {
+              benchmarks: filteredBenchmarks.map((benchmark) => ({
+                ...benchmark,
+                status: formatBenchmarkStatus(benchmark.status),
+                improvement:
+                  benchmark.improvement > 0
+                    ? {
+                        needed: benchmark.improvement,
+                        description: getBenchmarkImprovementDescription(benchmark),
+                      }
+                    : null,
+              })),
+              overallRanking: calculateOverallRanking(benchmarks),
+              recommendations: recommendations || [],
+              metadata: {
+                timestamp: new Date().toISOString(),
+                category,
+                site: site || "all",
+                benchmarkVersion: "2024-industry-standards",
+              },
+            },
+          };
+        }),
+        timeoutPromise,
+      ]);
+
+      this.logger.debug("performance benchmark: exit", {
+        tool: "wp_performance_benchmark",
+        durationMs: Date.now() - start,
+      });
+      return result;
+    } catch (err) {
+      this.logger.error("performance benchmark: failed", {
+        tool: "wp_performance_benchmark",
+        durationMs: Date.now() - start,
+        error: err instanceof Error ? err.message : String(err),
+      });
+      return {
+        success: false,
+        status: "unavailable",
+        error: err instanceof Error ? err.message : String(err),
+        data: { benchmarks: [], recommendations: [], metadata: { timestamp: new Date().toISOString() } },
+      };
+    } finally {
+      if (timer !== undefined) clearTimeout(timer);
+    }
   }
 
   /**

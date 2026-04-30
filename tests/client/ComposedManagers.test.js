@@ -339,6 +339,22 @@ describe("Composed Managers", () => {
 
       await expect(uninitializedManager.request("GET", "/wp/v2/posts")).rejects.toThrow("not initialized");
     });
+
+    it("should decode non-JSON responses as UTF-8 (D8 regression)", async () => {
+      const utf8Text = "自然拳 — Natural Boxing";
+      const buf = Buffer.from(utf8Text, "utf8");
+      const arrayBuf = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: new Map([["content-type", "text/plain"]]),
+        arrayBuffer: vi.fn().mockResolvedValue(arrayBuf),
+      });
+
+      const result = await requestManager.request("GET", "/wp/v2/custom-endpoint");
+      expect(result).toBe(utf8Text);
+    });
   });
 
   describe("ComposedManagerFactory", () => {

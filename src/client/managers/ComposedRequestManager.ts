@@ -207,7 +207,7 @@ export class ComposedRequestManager implements RequestHandler {
       return (await response.json()) as T;
     }
 
-    return (await response.text()) as unknown as T;
+    return new TextDecoder("utf-8").decode(await response.arrayBuffer()) as unknown as T;
   }
 
   /**

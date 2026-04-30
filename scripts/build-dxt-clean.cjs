@@ -78,7 +78,7 @@ async function buildCleanDXT() {
 
     // Create the DXT package
     console.log("🎁 Creating DXT package...");
-    execSync(`dxt pack . ${path.join(rootDir, "mcp-wordpress.dxt")}`, { stdio: "inherit" });
+    execSync(`npx @anthropic-ai/dxt pack . ${path.join(rootDir, "mcp-wordpress.dxt")}`, { stdio: "inherit" });
 
     // Clean up
     process.chdir(rootDir);

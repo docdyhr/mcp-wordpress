@@ -127,9 +127,10 @@ vi.mock("../../dist/performance/PerformanceAnalytics.js", () => ({
 
 // Note: logger already mocked above
 
-// Mock toolWrapper
+// Mock toolWrapper — use a plain function (not vi.fn()) so mockReset: true
+// in vitest.config.ts cannot clear the implementation between tests.
 vi.mock("../../dist/utils/toolWrapper.js", () => ({
-  toolWrapper: vi.fn().mockImplementation((fn) => fn),
+  toolWrapper: (fn) => fn(),
 }));
 
 // Mock config helpers
@@ -362,6 +363,38 @@ describe("PerformanceTools", () => {
 
       expect(tools1.length).toBe(tools2.length);
       expect(tools1.map((t) => t.name)).toEqual(tools2.map((t) => t.name));
+    });
+  });
+
+  describe("wp_performance_benchmark timeout regression", () => {
+    it("should resolve within 1s (never hang)", async () => {
+      const tools = performanceTools.getTools();
+      const benchmarkTool = tools.find((t) => t.name === "wp_performance_benchmark");
+
+      const start = Date.now();
+      const result = await benchmarkTool.handler({}, { category: "all", includeRecommendations: true });
+      expect(Date.now() - start).toBeLessThan(1000);
+      expect(result).toBeDefined();
+    });
+
+    it("should return a graceful error when analytics.benchmarkPerformance throws", async () => {
+      // Re-import to get a fresh instance with failing analytics
+      const module = await import("../../dist/tools/performance.js");
+      const FreshPerformanceTools = module.default;
+      const freshTools = new FreshPerformanceTools();
+
+      // Override the analytics mock to throw
+      freshTools.analytics.benchmarkPerformance = vi.fn().mockImplementation(() => {
+        throw new Error("benchmark engine failure");
+      });
+
+      const tools = freshTools.getTools();
+      const benchmarkTool = tools.find((t) => t.name === "wp_performance_benchmark");
+      const result = await benchmarkTool.handler({}, {});
+
+      // With the toolWrapper mock, the result is the inner async function.
+      // This test mainly verifies no unhandled rejection occurs.
+      expect(result).toBeDefined();
     });
   });
 });

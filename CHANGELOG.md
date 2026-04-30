@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [3.1.25](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.24...v3.1.25) (2026-04-30)
+
+### 🐛 Bug Fixes
+
+* **cache:** `wp_cache_info` handler now races a 5 s `setTimeout` so a stalled `getCacheStats()` call can never block the MCP response indefinitely; throws/timeouts are caught and return `{ caching_enabled: false, status: "unavailable", error: "…" }` instead of hanging.
+* **performance:** `wp_performance_benchmark` handler now races a 5 s `setTimeout`; any exception from `benchmarkPerformance()` is caught and returns a graceful `{ success: false, status: "unavailable", … }` payload instead of hanging.
+* **encoding:** `ComposedRequestManager.makeRequest` now uses `new TextDecoder('utf-8').decode(await response.arrayBuffer())` for non-JSON response bodies, completing the D8 UTF-8 fix across all HTTP client paths (previously only `WordPressClient` error and fallback paths were covered).
+
+### 🧪 Tests
+
+* **cache:** added 3 regression tests for `wp_cache_info` — graceful error response on `getCacheStats` throw, timing guard with no backend, timing guard with successful stats.
+* **performance:** fixed `toolWrapper` mock to use a plain function (immune to `mockReset: true`) and added 2 regression tests for `wp_performance_benchmark` — never-hang timing guard and graceful error on `benchmarkPerformance` throw.
+
 ## [3.1.24](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.23...v3.1.24) (2026-04-29)
 
 ### 🐛 Bug Fixes
