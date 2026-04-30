@@ -603,8 +603,12 @@ export class SiteAuditor {
     try {
       siteHostname = new URL(siteData.siteUrl).hostname;
     } catch {
+      this.logger.warn("Could not parse siteUrl as URL, falling back to regex hostname extraction", {
+        siteUrl: siteData.siteUrl,
+      });
       siteHostname = siteData.siteUrl.replace(/^https?:\/\//, "").replace(/[/:].*/g, "");
     }
+    let malformedUrlCount = 0;
     const externalDependencies = [...siteData.posts, ...siteData.pages].reduce((count, item) => {
       const content = item.content?.rendered || "";
       const externalLinks =
@@ -612,11 +616,17 @@ export class SiteAuditor {
           try {
             return new URL(url).hostname !== siteHostname;
           } catch {
+            malformedUrlCount++;
             return true;
           }
         }) || [];
       return count + externalLinks.length;
     }, 0);
+    if (malformedUrlCount > 0) {
+      this.logger.warn("Malformed URLs counted as external links; external dependency score may be inflated", {
+        malformedUrlCount,
+      });
+    }
 
     if (externalDependencies > 30) {
       score -= 5;

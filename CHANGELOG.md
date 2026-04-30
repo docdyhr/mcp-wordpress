@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🐛 Bug Fixes
 
 * **seo:** all `wp_seo_*` tools now route to the correct site in multi-site configurations — handlers pass the framework-provided `WordPressClient` (already resolved to the requested site by the tool registry) directly to `SEOTools` methods, replacing a broken singleton that always created a default `new WordPressClient()` and therefore always hit site1 regardless of the `site` parameter
+* **server:** add `.catch()` to top-level `main()` call so unhandled rejections exit cleanly with a message instead of hanging the process
+* **seo:** log a warning when site URL cannot be parsed as a URL or when malformed content links are silently counted as external, preventing inflated external-dependency scores in audit results
 * **deps:** resolve transitive audit vulnerabilities via overrides ([03540c0](https://github.com/docdyhr/mcp-wordpress/commit/03540c0fcb7e9c5728992a642d6be3415e894048))
 
 ## [Unreleased]

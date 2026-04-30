@@ -153,7 +153,10 @@ const isMainModule =
   !callerFile; // When run through DXT, process.argv[1] might be undefined
 
 if (isMainModule) {
-  main();
+  main().catch((error) => {
+    process.stderr.write(`Fatal: ${error instanceof Error ? error.message : String(error)}\n`);
+    process.exit(1);
+  });
 }
 
 export default MCPWordPressServer;
