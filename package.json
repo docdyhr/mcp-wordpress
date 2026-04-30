@@ -128,13 +128,17 @@
         "form-data": "^4.0.3"
       }
     },
+    "axios": ">=1.15.0",
     "brace-expansion": ">=5.0.5",
     "flatted": ">=3.4.2",
+    "follow-redirects": ">=1.15.12",
     "hono": ">=4.12.15",
     "minimatch": "10.2.3",
     "path-to-regexp": ">=8.4.0",
+    "postcss": ">=8.5.10",
     "tar": "7.5.11",
-    "underscore": "1.13.8"
+    "underscore": "1.13.8",
+    "vite": ">=7.3.2"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
