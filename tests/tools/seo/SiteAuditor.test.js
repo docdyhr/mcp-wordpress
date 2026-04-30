@@ -532,6 +532,35 @@ describe("SiteAuditor", () => {
       }
     });
 
+    it("completes audit without throwing when siteUrl is not a valid URL", async () => {
+      // Triggers the URL-parse fallback + logger.warn in auditPerformance
+      mockClient.getSiteUrl.mockReturnValue("not-a-valid-url");
+      const params = { site: "test" };
+      await expect(siteAuditor.performSiteAudit(params)).resolves.toBeDefined();
+    });
+
+    it("completes audit without throwing when content contains malformed URLs", async () => {
+      // Malformed URLs (e.g. `http://[invalid`) cause new URL() to throw;
+      // the auditor should count them and warn but not propagate the error.
+      const postWithBadUrls = {
+        id: 99,
+        title: { rendered: "Bad URL Post" },
+        content: {
+          rendered: `<p>See <a href="http://[invalid">link</a> and https://external.com/ok</p>`,
+        },
+        excerpt: { rendered: "excerpt" },
+        date: "2024-01-01T00:00:00Z",
+        modified: "2024-01-01T00:00:00Z",
+        status: "publish",
+        featured_media: 0,
+        link: "https://example.com/bad-url-post",
+      };
+      mockClient.getPosts.mockResolvedValue([postWithBadUrls]);
+      mockClient.getPages.mockResolvedValue([]);
+      const params = { site: "test" };
+      await expect(siteAuditor.performSiteAudit(params)).resolves.toBeDefined();
+    });
+
     it("should identify heading structure problems", async () => {
       const params = { site: "test" };
       const auditResult = await siteAuditor.performSiteAudit(params);

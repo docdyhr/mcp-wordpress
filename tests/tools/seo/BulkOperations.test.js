@@ -397,6 +397,52 @@ describe("BulkOperations", () => {
     });
   });
 
+  describe("Multi-batch partial failure accumulation", () => {
+    const goodPost = {
+      id: 1,
+      title: { rendered: "Good Post" },
+      content: { rendered: "<p>Content</p>" },
+      status: "publish",
+    };
+
+    it("accumulates failures across batches — totals reflect all batches", async () => {
+      // batchSize=3, so 7 posts → batches [1,2,3], [4,5,6], [7]
+      // batch 1: post 2 returns null (not found)
+      // batch 2: post 5 throws a network error
+      // batch 3: post 7 succeeds
+      mockClient.getPost
+        .mockResolvedValueOnce(goodPost) // post 1 — ok
+        .mockResolvedValueOnce(null) // post 2 — not found → failed
+        .mockResolvedValueOnce(goodPost) // post 3 — ok
+        .mockResolvedValueOnce(goodPost) // post 4 — ok
+        .mockRejectedValueOnce(new Error("ECONNRESET")) // post 5 — network error → failed after retries
+        .mockResolvedValueOnce(goodPost) // post 6 — ok
+        .mockResolvedValueOnce(goodPost); // post 7 — ok
+
+      const result = await bulkOps.bulkUpdateMetadata({ postIds: [1, 2, 3, 4, 5, 6, 7], site: "test" });
+
+      expect(result.total).toBe(7);
+      expect(result.success).toBe(5);
+      expect(result.failed).toBe(2);
+      expect(result.errors).toHaveLength(2);
+      expect(result.errors.map((e) => e.postId)).toEqual(expect.arrayContaining([2, 5]));
+    });
+
+    it("records distinct error messages per failed post", async () => {
+      mockClient.getPost
+        .mockResolvedValueOnce(goodPost)
+        .mockResolvedValueOnce(null) // → "not found"
+        .mockRejectedValueOnce(new Error("rate limit exceeded")); // → propagated message
+
+      const result = await bulkOps.bulkUpdateMetadata({ postIds: [1, 2, 3], site: "test" });
+
+      expect(result.failed).toBe(2);
+      const errMessages = result.errors.map((e) => e.error);
+      expect(errMessages.some((m) => m.includes("not found"))).toBe(true);
+      expect(errMessages.some((m) => m.includes("rate limit"))).toBe(true);
+    });
+  });
+
   describe("Performance", () => {
     it("should complete bulk operations within reasonable time", async () => {
       mockClient.getPost.mockResolvedValue({
