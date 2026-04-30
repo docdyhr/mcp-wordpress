@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.28](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.27...v3.1.28) (2026-04-30)
+
+### 🐛 Bug Fixes
+
+* **security:** remove duplicate single-quote in regex character class ([2a2e48d](https://github.com/docdyhr/mcp-wordpress/commit/2a2e48d950e7769c13d2cfa55af6492a95a80e15))
+
 ## [3.1.27](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.26...v3.1.27) (2026-04-30)
 
 ### 🐛 Bug Fixes
