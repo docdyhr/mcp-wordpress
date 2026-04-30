@@ -145,7 +145,7 @@ export class AutomatedRemediation {
       target: {
         file: vulnerability.location.file,
         line: vulnerability.location.line,
-        pattern: /(SELECT|INSERT|UPDATE|DELETE).*?['"'].*?['"'].*?(WHERE|FROM|INTO)/gi,
+        pattern: /(SELECT|INSERT|UPDATE|DELETE).*?['"].*?['"].*?(WHERE|FROM|INTO)/gi,
       },
       replacement: {
         content:
