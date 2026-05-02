@@ -13,6 +13,7 @@ import { LoggerFactory, startTimer } from "@/utils/logger.js";
 
 const log = LoggerFactory.client("REQUEST");
 import { getUserAgent } from "@/utils/version.js";
+import { assertNoMojibake } from "@/utils/mojibake.js";
 
 export class RequestManager extends BaseManager {
   private stats: ClientStats;
@@ -148,6 +149,7 @@ export class RequestManager extends BaseManager {
         } else if (typeof data === "string") {
           fetchOptions.body = data;
         } else {
+          assertNoMojibake(data, "request body");
           fetchOptions.body = JSON.stringify(data);
         }
       }

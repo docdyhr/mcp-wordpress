@@ -8,6 +8,7 @@ import { WordPressAPIError, RateLimitError } from "@/types/client.js";
 import { config } from "@/config/Config.js";
 import { startTimer } from "@/utils/logger.js";
 import { getUserAgent } from "@/utils/version.js";
+import { assertNoMojibake } from "@/utils/mojibake.js";
 
 import type {
   ConfigurationProvider,
@@ -247,6 +248,7 @@ export class ComposedRequestManager implements RequestHandler {
     };
 
     if (data && (method === "POST" || method === "PUT" || method === "PATCH")) {
+      assertNoMojibake(data, "request body");
       requestOptions.body = JSON.stringify(data);
     }
 

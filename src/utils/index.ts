@@ -24,3 +24,6 @@ export * from "./streaming.js";
 
 // Circuit breaker for fault tolerance
 export * from "./CircuitBreaker.js";
+
+// Mojibake write-path guard
+export * from "./mojibake.js";

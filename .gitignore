@@ -214,6 +214,12 @@ private/*
 private*
 PRIVATE*
 
+# Security audit backups (auto-generated)
+security-backups/
+
+# Site-specific mojibake scan data
+scripts/mojibake-scan-*.json
+
 # Evaluation results (keep config, ignore results)
 evaluations/results/
 evaluations/reports/
