@@ -621,7 +621,24 @@ Claude: "I'll analyze and optimize your recent posts...
 - Average SEO score improved from 67% to 89%"
 ```
 
-Two additional tools are available: `wp_seo_track_serp` estimates keyword coverage from your WordPress content (set `SEO_PROVIDER_SEARCH_CONSOLE=true` or `SEO_PROVIDER_DATAFORSEO=true` for live SERP data), and `wp_seo_keyword_research` generates keyword suggestions derived from your existing content library (set `SEO_PROVIDER_AHREFS=true` or `SEO_PROVIDER_DATAFORSEO=true` for real search volume data).
+Two additional tools are available: `wp_seo_track_serp_positions` and `wp_seo_keyword_research`. By default they estimate keyword coverage from your WordPress content. You can upgrade to real Google Search Console data:
+
+**Google Search Console Integration (optional)**
+
+1. Create OAuth2 credentials (Desktop app) in [Google Cloud Console](https://console.cloud.google.com) and enable the Search Console API.
+2. Run the setup helper to obtain a refresh token:
+   ```bash
+   GOOGLE_CLIENT_ID=xxx GOOGLE_CLIENT_SECRET=yyy node scripts/google-auth.mjs
+   ```
+3. Add the credentials to your `.env`:
+   ```bash
+   SEO_PROVIDER_SEARCH_CONSOLE=true
+   GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=GOCSPX-your-secret
+   GOOGLE_REFRESH_TOKEN=1//your-refresh-token
+   ```
+
+When enabled, `wp_seo_track_serp_positions` returns real average positions, clicks, impressions, and CTR from your Search Console property. `wp_seo_keyword_research` returns top queries containing the seed keyword, sorted by impressions. If credentials are missing or the API is unreachable, both tools fall back silently to WordPress content analysis.
 
 **Content Gap Analysis**
 

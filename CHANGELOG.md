@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 🚀 Features
+
+* **seo:** add optional Google Search Console OAuth2 integration for `wp_seo_track_serp_positions` and `wp_seo_keyword_research` — returns real SERP positions, clicks, impressions, and top queries when `SEO_PROVIDER_SEARCH_CONSOLE=true` and Google OAuth2 credentials are configured; WordPress content-analysis remains the default fallback
+
+### 🐛 Bug Fixes
+
+* **security:** add write-path mojibake guard (`assertNoMojibake`) to both request managers; any POST/PUT/PATCH payload containing cp1252-double-encoded sequences is now refused with a `MOJIBAKE_REFUSED` error before reaching WordPress, preventing database corruption from read→write loops with non-ASCII content
+
+### 🛠 Maintenance
+
+* **scripts:** add `scripts/neigong-mojibake-scan.py` — standalone Python scanner and surgical repair tool for WordPress sites with mojibake-corrupted content (UTF-8 bytes decoded as cp1252). Repaired 214 posts on neigong.net (CJK characters, em-dashes, smart quotes). Supports `--repair --apply` for safe programmatic recovery.
+
 ## [3.2.1](https://github.com/docdyhr/mcp-wordpress/compare/v3.2.0...v3.2.1) (2026-04-30)
 
 ### 🐛 Bug Fixes

@@ -83,6 +83,11 @@ export interface AppConfig {
       readonly dataForSEO: boolean;
       readonly ahrefs: boolean;
     };
+    readonly googleOAuth: {
+      readonly clientId: string | null;
+      readonly clientSecret: string | null;
+      readonly refreshToken: string | null;
+    };
     readonly limits: {
       readonly bulkOperationSize: number;
       readonly rateLimitPerMinute: number;
@@ -213,6 +218,11 @@ export class Config {
           searchConsole: process.env.SEO_PROVIDER_SEARCH_CONSOLE === "true",
           dataForSEO: process.env.SEO_PROVIDER_DATAFORSEO === "true",
           ahrefs: process.env.SEO_PROVIDER_AHREFS === "true",
+        },
+        googleOAuth: {
+          clientId: process.env.GOOGLE_CLIENT_ID ?? null,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? null,
+          refreshToken: process.env.GOOGLE_REFRESH_TOKEN ?? null,
         },
         limits: {
           bulkOperationSize: parseInt(process.env.SEO_BULK_OPERATION_SIZE || "10", 10),

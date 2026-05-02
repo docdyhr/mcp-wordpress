@@ -27,6 +27,8 @@ import { InternalLinkingSuggester } from "./optimizers/InternalLinkingSuggester.
 import { SiteAuditor } from "./auditors/SiteAuditor.js";
 import { BulkOperations } from "./BulkOperations.js";
 import { SEOCacheManager } from "@/cache/SEOCacheManager.js";
+import { SearchConsoleProvider } from "./providers/SearchConsoleProvider.js";
+import { config } from "@/config/Config.js";
 import { seoToolDefinitions } from "./SEOToolDefinitions.js";
 import {
   handleAnalyzeContent,
@@ -797,8 +799,33 @@ export class SEOTools {
   // SERP tracking helpers
   // ---------------------------------------------------------------------------
 
+  private buildSearchConsoleProvider(): SearchConsoleProvider | null {
+    const cfg = config();
+    if (!cfg.seo.providers.searchConsole) return null;
+    const { clientId, clientSecret, refreshToken } = cfg.seo.googleOAuth;
+    if (!clientId || !clientSecret || !refreshToken) return null;
+    return new SearchConsoleProvider(clientId, clientSecret, refreshToken);
+  }
+
   private async computeSERPPositions(client: WordPressClient, params: SEOToolParams): Promise<SERPTrackingResult> {
     const keywords = params.keywords as string[];
+
+    const provider = this.buildSearchConsoleProvider();
+
+    if (provider) {
+      const siteUrl = client.getSiteUrl();
+      const positions = await provider.getPositions(siteUrl, keywords);
+      return {
+        positions,
+        ...(params.url !== undefined && { targetUrl: params.url }),
+        searchEngine: "google",
+        ...(params.location !== undefined && { location: params.location }),
+        trackedAt: new Date().toISOString(),
+        dataSource: "google-search-console",
+      };
+    }
+
+    // Default: WordPress content-analysis fallback
     const positions: SERPPositionData[] = [];
 
     for (const keyword of keywords) {
@@ -838,7 +865,7 @@ export class SEOTools {
       searchEngine: params.searchEngine ?? "google",
       ...(params.location !== undefined && { location: params.location }),
       trackedAt: new Date().toISOString(),
-      dataSource: "wordpress-content-analysis" as const,
+      dataSource: "wordpress-content-analysis",
       upgradeNote:
         "Positions are estimated from WordPress content coverage. " +
         "Set SEO_PROVIDER_SEARCH_CONSOLE=true or SEO_PROVIDER_DATAFORSEO=true for live SERP data.",
@@ -852,6 +879,21 @@ export class SEOTools {
   private async computeKeywordResearch(client: WordPressClient, params: SEOToolParams): Promise<KeywordResearchResult> {
     const seed = params.seedKeyword as string;
     const maxResults = params.maxResults ?? 20;
+
+    const provider = this.buildSearchConsoleProvider();
+
+    if (provider) {
+      const siteUrl = client.getSiteUrl();
+      const suggestions = await provider.getTopQueries(siteUrl, seed, maxResults);
+      return {
+        seedKeyword: seed,
+        suggestions: suggestions.slice(0, maxResults),
+        totalSuggestions: suggestions.length,
+        researchedAt: new Date().toISOString(),
+        dataSource: "google-search-console",
+      };
+    }
+
     const suggestions: KeywordSuggestion[] = [];
 
     const seedPosts = await client.getPosts({ search: seed, status: ["publish"], per_page: 10 });

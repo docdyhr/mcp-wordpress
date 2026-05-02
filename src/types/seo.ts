@@ -490,6 +490,10 @@ export interface SERPPositionData {
   matchingPosts: Array<{ postId: number; title: string; url: string; relevanceScore: number }>;
   contentScore: number;
   checkedAt: string;
+  // Search Console fields — only present when dataSource is "google-search-console"
+  clicks?: number;
+  impressions?: number;
+  ctr?: number;
 }
 
 /**
@@ -501,8 +505,8 @@ export interface SERPTrackingResult {
   searchEngine: string;
   location?: string;
   trackedAt: string;
-  dataSource: "wordpress-content-analysis";
-  upgradeNote: string;
+  dataSource: "wordpress-content-analysis" | "google-search-console";
+  upgradeNote?: string;
 }
 
 /**
@@ -525,8 +529,8 @@ export interface KeywordResearchResult {
   suggestions: KeywordSuggestion[];
   totalSuggestions: number;
   researchedAt: string;
-  dataSource: "wordpress-content-analysis";
-  upgradeNote: string;
+  dataSource: "wordpress-content-analysis" | "google-search-console";
+  upgradeNote?: string;
 }
 
 /**
