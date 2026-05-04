@@ -9,6 +9,8 @@
  */
 
 const { spawn, execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 
 // Test batch configuration
 const TEST_BATCHES = [
@@ -34,13 +36,28 @@ const TEST_BATCHES = [
   },
 ];
 
-// Node.js memory options
+// Node.js memory options (only heap-size flags are allowed in NODE_OPTIONS)
 const NODE_OPTIONS = [
   '--max-old-space-size=4096',
   '--max-semi-space-size=256',
-  '--optimize-for-size',
-  '--gc-interval=100',
 ].join(' ');
+
+// Expand a simple glob like "tests/*.test.js" into real file paths.
+// Handles only single-level wildcards (no **). Passes non-glob paths through.
+function expandGlob(pattern) {
+  if (!pattern.includes('*')) return [pattern];
+  const dir = path.dirname(pattern);
+  const ext = path.extname(pattern);
+  const prefix = path.basename(pattern).replace(/\*.*/, '');
+  try {
+    return fs
+      .readdirSync(dir)
+      .filter((f) => f.startsWith(prefix) && f.endsWith(ext))
+      .map((f) => path.join(dir, f));
+  } catch {
+    return [];
+  }
+}
 
 class TestRunner {
   constructor() {
@@ -65,13 +82,15 @@ class TestRunner {
         return;
       }
 
+      // Expand any glob patterns (spawn doesn't go through a shell)
+      const expandedPaths = batch.paths.flatMap(expandGlob).filter(Boolean);
+
       // Run tests with memory limits
       const vitestCmd = [
         'vitest', 'run',
         '--config', 'vitest.memory-safe.config.ts',
-        '--reporter=basic',
         '--no-coverage',
-        ...batch.paths
+        ...expandedPaths
       ];
 
       const child = spawn('npx', vitestCmd, {
@@ -219,7 +238,8 @@ class TestRunner {
     console.log(`   Tests: ${this.totalPassed} passed, ${this.totalFailed} failed`);
     console.log(`   Total: ${this.totalTests} tests`);
 
-    if (this.totalFailed > 0) {
+    const anyBatchFailed = this.results.some((r) => !r.success);
+    if (this.totalFailed > 0 || anyBatchFailed) {
       console.log('\n❌ Some tests failed. Check individual batch output above.');
       process.exit(1);
     } else {
