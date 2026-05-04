@@ -366,6 +366,15 @@ describe("validation utilities", () => {
       expect(() => validatePostParams({})).toThrow(/title is required/);
     });
 
+    it("should not require title on update (isUpdate=true)", () => {
+      // content-only update must not throw
+      expect(() => validatePostParams({ content: "Updated content" }, true)).not.toThrow();
+      const result = validatePostParams({ content: "Updated content", status: "publish" }, true);
+      expect(result.content).toBe("Updated content");
+      expect(result.status).toBe("publish");
+      expect(result.title).toBeUndefined();
+    });
+
     it("should validate date parameters", () => {
       const params = {
         title: "Test Post",

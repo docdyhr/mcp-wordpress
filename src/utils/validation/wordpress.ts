@@ -108,7 +108,7 @@ export function validatePaginationParams(params: { page?: unknown; per_page?: un
 /**
  * Validates complex post creation parameters
  */
-export function validatePostParams(params: unknown): Record<string, unknown> {
+export function validatePostParams(params: unknown, isUpdate = false): Record<string, unknown> {
   const validated: Record<string, unknown> = {};
 
   // Type guard to ensure params is an object
@@ -118,11 +118,15 @@ export function validatePostParams(params: unknown): Record<string, unknown> {
 
   const typedParams = params as Record<string, unknown>;
 
-  // Title validation
-  if (!typedParams.title || typeof typedParams.title !== "string") {
-    throw new WordPressAPIError("Post title is required and must be a string", 400, "INVALID_PARAMETER");
+  // Title validation — required on create, optional on update
+  if (!isUpdate) {
+    if (!typedParams.title || typeof typedParams.title !== "string") {
+      throw new WordPressAPIError("Post title is required and must be a string", 400, "INVALID_PARAMETER");
+    }
   }
-  validated.title = validateString(typedParams.title, "title", 1, 200);
+  if (typedParams.title !== undefined) {
+    validated.title = validateString(typedParams.title as string, "title", 1, 200);
+  }
 
   // Content validation
   if (typedParams.content !== undefined) {

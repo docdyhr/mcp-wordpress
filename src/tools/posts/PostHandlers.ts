@@ -341,7 +341,7 @@ export async function handleUpdatePost(
     const originalPost = await client.getPost(postId);
 
     const { id: _id, ...updateData } = params;
-    validatePostParams(updateData);
+    validatePostParams(updateData, true);
 
     const updatedPost = await client.updatePost({ id: postId, ...updateData });
 

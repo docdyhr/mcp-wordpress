@@ -363,6 +363,43 @@ describe("PostTools", () => {
       expect(result).toContain("Updated Post");
     });
 
+    it("should update a post with content only (no title)", async () => {
+      const mockOriginalPost = {
+        id: 1,
+        title: { rendered: "Original Post" },
+        content: { rendered: "Original Content" },
+        status: "publish",
+        author: 1,
+        categories: [],
+        tags: [],
+      };
+
+      const mockUpdatedPost = {
+        id: 1,
+        title: { rendered: "Original Post" },
+        content: { rendered: "New content only" },
+        status: "publish",
+        author: 1,
+        categories: [],
+        tags: [],
+        modified: "2024-01-01T12:00:00",
+        link: "https://test-site.com/original-post",
+      };
+
+      mockClient.getPost.mockResolvedValueOnce(mockOriginalPost);
+      mockClient.updatePost.mockResolvedValueOnce(mockUpdatedPost);
+
+      const result = await postTools.handleUpdatePost(mockClient, {
+        id: 1,
+        content: "New content only",
+        status: "publish",
+      });
+
+      expect(mockClient.updatePost).toHaveBeenCalledWith({ id: 1, content: "New content only", status: "publish" });
+      expect(typeof result).toBe("string");
+      expect(result).toContain("Post Updated Successfully");
+    });
+
     it("should handle update errors", async () => {
       mockClient.updatePost.mockRejectedValueOnce(new Error("Update failed"));
 
