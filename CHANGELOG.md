@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.1](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.0...v3.3.1) (2026-05-04)
+
+### 🐛 Bug Fixes
+
+* **encoding:** replace response.json() with explicit TextDecoder UTF-8 on read path ([a692c10](https://github.com/docdyhr/mcp-wordpress/commit/a692c100b28b7d8a57d7700386065afd190b08d3))
+* **validation:** accept content-only wp_update_post without title ([3de1d3e](https://github.com/docdyhr/mcp-wordpress/commit/3de1d3ec9decfcccb1bb753013dc48403651d5fc))
+
+### 📚 Documentation
+
+* **changelog:** add Unreleased entries for read-path encoding fix and mojibake tests ([30c7d5f](https://github.com/docdyhr/mcp-wordpress/commit/30c7d5f9548e8ed193ad27e66753fcbca7a3205e))
+
 ## [3.3.0](https://github.com/docdyhr/mcp-wordpress/compare/v3.2.1...v3.3.0) (2026-05-02)
 
 ### 🚀 Features
