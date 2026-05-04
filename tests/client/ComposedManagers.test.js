@@ -60,12 +60,12 @@ describe("Composed Managers", () => {
     // Reset fetch mock
     mockFetch.mockReset();
 
-    // Default successful response
+    // Default successful response — explicit UTF-8 decode, not response.json()
     mockFetch.mockResolvedValue({
       ok: true,
       status: 200,
       headers: new Map([["content-type", "application/json"]]),
-      json: vi.fn().mockResolvedValue({ id: 1, title: "Test Post" }),
+      arrayBuffer: vi.fn().mockResolvedValue(Buffer.from(JSON.stringify({ id: 1, title: "Test Post" }), "utf-8")),
     });
   });
 
@@ -355,6 +355,25 @@ describe("Composed Managers", () => {
       const result = await requestManager.request("GET", "/wp/v2/custom-endpoint");
       expect(result).toBe(utf8Text);
     });
+
+    it("should decode JSON responses with CJK content without mojibake", async () => {
+      const { isMojibake } = await import("../../dist/utils/mojibake.js");
+      const original = { title: "自然拳" };
+      const buf = Buffer.from(JSON.stringify(original), "utf-8");
+      const arrayBuf = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: new Map([["content-type", "application/json"]]),
+        arrayBuffer: vi.fn().mockResolvedValue(arrayBuf),
+      });
+
+      const result = await requestManager.request("GET", "/wp/v2/posts/1");
+
+      expect(result.title).toBe("自然拳");
+      expect(isMojibake(result.title)).toBe(false);
+    });
   });
 
   describe("ComposedManagerFactory", () => {
@@ -410,10 +429,15 @@ describe("Composed Managers", () => {
         ok: true,
         status: 200,
         headers: new Map([["content-type", "application/json"]]),
-        json: vi.fn().mockResolvedValue([
-          { id: 1, title: "Post 1" },
-          { id: 2, title: "Post 2" },
-        ]),
+        arrayBuffer: vi.fn().mockResolvedValue(
+          Buffer.from(
+            JSON.stringify([
+              { id: 1, title: "Post 1" },
+              { id: 2, title: "Post 2" },
+            ]),
+            "utf-8",
+          ),
+        ),
       });
 
       const posts = await client.getPosts();
@@ -439,7 +463,7 @@ describe("Composed Managers", () => {
         ok: true,
         status: 201,
         headers: new Map([["content-type", "application/json"]]),
-        json: vi.fn().mockResolvedValue({ id: 3, ...postData }),
+        arrayBuffer: vi.fn().mockResolvedValue(Buffer.from(JSON.stringify({ id: 3, ...postData }), "utf-8")),
       });
 
       const result = await client.createPost(postData);

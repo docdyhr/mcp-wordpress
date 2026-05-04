@@ -14,6 +14,13 @@ import { AUTH_METHODS } from "@/types/wordpress.js";
 // Mock fetch globally
 global.fetch = vi.fn();
 
+/** Build a successful fetch response that returns JSON via arrayBuffer (explicit UTF-8). */
+const mkJsonResponse = (data, status = 200) => ({
+  ok: true,
+  status,
+  arrayBuffer: vi.fn().mockResolvedValue(Buffer.from(JSON.stringify(data), "utf-8")),
+});
+
 describe("RequestManager", () => {
   let requestManager;
   let authManager;
@@ -70,10 +77,7 @@ describe("RequestManager", () => {
 
   describe("URL Building", () => {
     it("should build correct API URLs", async () => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ data: "test" }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ data: "test" }));
 
       await requestManager.request("GET", "posts");
 
@@ -84,10 +88,7 @@ describe("RequestManager", () => {
     });
 
     it("should handle endpoints with leading slash", async () => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ data: "test" }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ data: "test" }));
 
       await requestManager.request("GET", "/posts");
 
@@ -105,10 +106,7 @@ describe("RequestManager", () => {
 
       const manager = new RequestManager(config, authManager);
 
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ data: "test" }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ data: "test" }));
 
       await manager.request("GET", "posts");
 
@@ -121,10 +119,7 @@ describe("RequestManager", () => {
 
   describe("Authentication Integration", () => {
     it("should include auth headers in requests", async () => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ data: "test" }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ data: "test" }));
 
       await requestManager.request("GET", "posts");
 
@@ -136,10 +131,7 @@ describe("RequestManager", () => {
     });
 
     it("should include default headers", async () => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ data: "test" }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ data: "test" }));
 
       await requestManager.request("GET", "posts");
 
@@ -156,10 +148,7 @@ describe("RequestManager", () => {
     });
 
     it("should allow custom headers to override defaults", async () => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ data: "test" }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ data: "test" }));
 
       await requestManager.request("GET", "posts", undefined, {
         headers: {
@@ -184,10 +173,7 @@ describe("RequestManager", () => {
 
   describe("HTTP Methods", () => {
     beforeEach(() => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ success: true }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ success: true }));
     });
 
     it("should handle GET requests", async () => {
@@ -239,10 +225,7 @@ describe("RequestManager", () => {
 
   describe("FormData Handling", () => {
     it("should handle FormData uploads", async () => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ id: 123 }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ id: 123 }));
 
       const formData = new FormData();
       formData.append("file", "test-content");
@@ -257,10 +240,7 @@ describe("RequestManager", () => {
     });
 
     it("should handle Buffer data", async () => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ id: 123 }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ id: 123 }));
 
       const buffer = Buffer.from("test buffer content");
 
@@ -271,10 +251,7 @@ describe("RequestManager", () => {
     });
 
     it("should handle string data", async () => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ success: true }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ success: true }));
 
       const stringData = "raw string data";
 
@@ -287,10 +264,7 @@ describe("RequestManager", () => {
 
   describe("Timeout Handling", () => {
     it("should use default timeout", async () => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ data: "test" }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ data: "test" }));
 
       await requestManager.request("GET", "posts");
 
@@ -300,10 +274,7 @@ describe("RequestManager", () => {
     });
 
     it("should use custom timeout from options", async () => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ data: "test" }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ data: "test" }));
 
       await requestManager.request("GET", "posts", undefined, {
         timeout: 5000,
@@ -331,10 +302,7 @@ describe("RequestManager", () => {
           statusText: "Internal Server Error",
           json: vi.fn().mockResolvedValue({ message: "Server error" }),
         })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: vi.fn().mockResolvedValue({ success: true }),
-        });
+        .mockResolvedValueOnce(mkJsonResponse({ success: true }));
 
       const result = await requestManager.request("GET", "posts");
 
@@ -473,10 +441,7 @@ describe("RequestManager", () => {
 
   describe("Statistics Tracking", () => {
     it("should track successful requests", async () => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ data: "test" }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ data: "test" }));
 
       await requestManager.request("GET", "posts");
 
@@ -543,10 +508,7 @@ describe("RequestManager", () => {
     });
 
     it("should calculate average response time", async () => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ data: "test" }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ data: "test" }));
 
       // Make multiple requests
       await requestManager.request("GET", "posts");
@@ -560,10 +522,7 @@ describe("RequestManager", () => {
 
   describe("Rate Limiting", () => {
     it("should enforce rate limits between requests", async () => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ data: "test" }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ data: "test" }));
 
       const startTime = Date.now();
 
@@ -577,10 +536,7 @@ describe("RequestManager", () => {
     });
 
     it("should handle concurrent requests with rate limiting", async () => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ data: "test" }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ data: "test" }));
 
       const promises = [
         requestManager.request("GET", "posts"),
@@ -597,10 +553,7 @@ describe("RequestManager", () => {
 
   describe("Request Configuration", () => {
     it("should merge custom options with defaults", async () => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ data: "test" }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ data: "test" }));
 
       await requestManager.request(
         "POST",
@@ -624,10 +577,7 @@ describe("RequestManager", () => {
     });
 
     it("should handle requests without data parameter", async () => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ data: "test" }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ data: "test" }));
 
       await requestManager.request("GET", "posts");
 
@@ -640,10 +590,7 @@ describe("RequestManager", () => {
     });
 
     it("should handle requests without options parameter", async () => {
-      global.fetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ data: "test" }),
-      });
+      global.fetch.mockResolvedValue(mkJsonResponse({ data: "test" }));
 
       await requestManager.request("POST", "posts", { title: "Test" });
 
@@ -661,7 +608,7 @@ describe("RequestManager", () => {
     it("should handle empty response body", async () => {
       global.fetch.mockResolvedValue({
         ok: true,
-        json: vi.fn().mockResolvedValue(null),
+        arrayBuffer: vi.fn().mockResolvedValue(Buffer.from("null", "utf-8")),
       });
 
       const result = await requestManager.request("DELETE", "posts/1");
@@ -670,17 +617,7 @@ describe("RequestManager", () => {
 
     it("should handle very large response times", async () => {
       global.fetch.mockImplementation(
-        () =>
-          new Promise((resolve) =>
-            setTimeout(
-              () =>
-                resolve({
-                  ok: true,
-                  json: vi.fn().mockResolvedValue({ data: "slow response" }),
-                }),
-              100,
-            ),
-          ),
+        () => new Promise((resolve) => setTimeout(() => resolve(mkJsonResponse({ data: "slow response" })), 100)),
       );
 
       await requestManager.request("GET", "posts");
@@ -698,6 +635,42 @@ describe("RequestManager", () => {
       });
 
       await expect(requestManager.request("GET", "posts")).rejects.toThrow(WordPressAPIError);
+    });
+  });
+
+  describe("UTF-8 Decoding", () => {
+    it("should decode CJK JSON responses without mojibake", async () => {
+      const { isMojibake } = await import("@/utils/mojibake.js");
+      const original = { title: "自然拳" };
+      const buf = Buffer.from(JSON.stringify(original), "utf-8");
+      const arrayBuf = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+
+      global.fetch.mockResolvedValue({
+        ok: true,
+        arrayBuffer: vi.fn().mockResolvedValue(arrayBuf),
+      });
+
+      const result = await requestManager.request("GET", "posts/1");
+
+      expect(result.title).toBe("自然拳");
+      expect(isMojibake(result.title)).toBe(false);
+    });
+
+    it("should decode em-dash and typographic punctuation without mojibake", async () => {
+      const { isMojibake } = await import("@/utils/mojibake.js");
+      const original = { title: "Ziran Quan — Natural Boxing" };
+      const buf = Buffer.from(JSON.stringify(original), "utf-8");
+      const arrayBuf = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+
+      global.fetch.mockResolvedValue({
+        ok: true,
+        arrayBuffer: vi.fn().mockResolvedValue(arrayBuf),
+      });
+
+      const result = await requestManager.request("GET", "posts/1");
+
+      expect(result.title).toBe("Ziran Quan — Natural Boxing");
+      expect(isMojibake(result.title)).toBe(false);
     });
   });
 });

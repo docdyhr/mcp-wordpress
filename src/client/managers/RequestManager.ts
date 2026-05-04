@@ -162,7 +162,9 @@ export class RequestManager extends BaseManager {
         await this.handleErrorResponse(response);
       }
 
-      const responseData = await response.json();
+      const buffer = await response.arrayBuffer();
+      const body = new TextDecoder("utf-8", { fatal: false }).decode(buffer);
+      const responseData = JSON.parse(body);
       return responseData as T;
     } finally {
       clearTimeout(timeoutId);

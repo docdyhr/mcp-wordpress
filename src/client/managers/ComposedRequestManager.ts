@@ -202,13 +202,15 @@ export class ComposedRequestManager implements RequestHandler {
       await this.handleHttpError(response);
     }
 
-    const contentType = response.headers.get("content-type");
+    const buffer = await response.arrayBuffer();
+    const body = new TextDecoder("utf-8", { fatal: false }).decode(buffer);
 
+    const contentType = response.headers.get("content-type");
     if (contentType && contentType.includes("application/json")) {
-      return (await response.json()) as T;
+      return JSON.parse(body) as T;
     }
 
-    return new TextDecoder("utf-8").decode(await response.arrayBuffer()) as unknown as T;
+    return body as unknown as T;
   }
 
   /**
