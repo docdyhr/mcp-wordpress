@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.1](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.0...v3.3.1) (2026-05-04)
+
+### 🐛 Bug Fixes
+
+* **encoding:** replace `response.json()` with explicit `TextDecoder('utf-8')` on the read path in both `RequestManager` and `ComposedRequestManager`; prevents silent CJK and em-dash mojibake in environments where the runtime honours an incorrect `Content-Type` charset header ([a692c10](https://github.com/docdyhr/mcp-wordpress/commit/a692c10))
+* **validation:** `wp_update_post` now accepts content-only updates without a `title`; `validatePostParams` gained an `isUpdate` flag (defaults `false`) so the title-required check is skipped on the update path — callers no longer need to re-send the title when only changing content or status ([3de1d3e](https://github.com/docdyhr/mcp-wordpress/commit/3de1d3e))
+
 ## [3.3.0](https://github.com/docdyhr/mcp-wordpress/compare/v3.2.1...v3.3.0) (2026-05-02)
 
 ### 🚀 Features
@@ -14,30 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🐛 Bug Fixes
 
 * **security:** add write-path mojibake guard and repair tooling ([2f6320c](https://github.com/docdyhr/mcp-wordpress/commit/2f6320cc57cc093bb0705494cb17fddce6e63cbf))
-
-## [Unreleased]
-
-### 🚀 Features
-
-* **seo:** add optional Google Search Console OAuth2 integration for `wp_seo_track_serp_positions` and `wp_seo_keyword_research` — returns real SERP positions, clicks, impressions, and top queries when `SEO_PROVIDER_SEARCH_CONSOLE=true` and Google OAuth2 credentials are configured; WordPress content-analysis remains the default fallback
-
-### 🐛 Bug Fixes
-
-* **encoding:** replace `response.json()` with explicit `TextDecoder('utf-8')` on the read path in both `RequestManager` and `ComposedRequestManager`; prevents silent CJK and em-dash mojibake in environments where the runtime honours an incorrect `Content-Type` charset header
-* **security:** add write-path mojibake guard (`assertNoMojibake`) to both request managers; any POST/PUT/PATCH payload containing cp1252-double-encoded sequences is now refused with a `MOJIBAKE_REFUSED` error before reaching WordPress, preventing database corruption from read→write loops with non-ASCII content
-
-### 🐛 Bug Fixes
-
-* **validation:** `wp_update_post` now accepts content-only updates without a `title`; `validatePostParams` gained an `isUpdate` flag (defaults `false`) so the title-required check is skipped on the update path — callers no longer need to re-send the title when only changing content or status
-
-### 🧪 Tests
-
-* add `tests/utils/mojibake.test.js` (23 tests) — positive cases (clean CJK/em-dash preserved through `isMojibake`) and negative cases (`assertNoMojibake` throws `[MOJIBAKE_REFUSED]` for all known cp1252 double-encoding patterns)
-* add regression tests for content-only `wp_update_post` in `validation.test.js` and `posts.test.js`
-
-### 🛠 Maintenance
-
-* **scripts:** add `scripts/neigong-mojibake-scan.py` — standalone Python scanner and surgical repair tool for WordPress sites with mojibake-corrupted content (UTF-8 bytes decoded as cp1252). Repaired 214 posts on neigong.net (CJK characters, em-dashes, smart quotes). Supports `--repair --apply` for safe programmatic recovery.
 
 ## [3.2.1](https://github.com/docdyhr/mcp-wordpress/compare/v3.2.0...v3.2.1) (2026-04-30)
 
