@@ -23,7 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Bug Fixes
 
+* **encoding:** replace `response.json()` with explicit `TextDecoder('utf-8')` on the read path in both `RequestManager` and `ComposedRequestManager`; prevents silent CJK and em-dash mojibake in environments where the runtime honours an incorrect `Content-Type` charset header
 * **security:** add write-path mojibake guard (`assertNoMojibake`) to both request managers; any POST/PUT/PATCH payload containing cp1252-double-encoded sequences is now refused with a `MOJIBAKE_REFUSED` error before reaching WordPress, preventing database corruption from read→write loops with non-ASCII content
+
+### 🧪 Tests
+
+* add `tests/utils/mojibake.test.js` (23 tests) — positive cases (clean CJK/em-dash preserved through `isMojibake`) and negative cases (`assertNoMojibake` throws `[MOJIBAKE_REFUSED]` for all known cp1252 double-encoding patterns)
 
 ### 🛠 Maintenance
 
