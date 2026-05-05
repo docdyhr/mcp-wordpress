@@ -65,33 +65,29 @@ jobs:
           context: .
           platforms: linux/amd64 # Single platform for faster testing
           push: false
+          load: true # load into local daemon (works for single-platform)
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          # v6 features enabled for testing
-          provenance: true
-          sbom: true
-          outputs: type=oci,dest=/tmp/image.tar
+          # provenance/sbom require registry push or OCI export; skip for local test
+          provenance: false
+          sbom: false
 
       - name: 🧪 Test Image Structure
         run: |
-          # Import OCI image and test basic functionality
-          docker import /tmp/image.tar test-image:latest
-
-          # Test image runs
           IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
           echo "Testing image: $IMAGE_TAG"
 
-          # Basic smoke test - check that container starts and has expected structure
-          docker run --rm test-image:latest node --version || echo "Node version check failed"
+          # Smoke test — verify Node runs and the entrypoint is wired up
+          docker run --rm "$IMAGE_TAG" node --version
 
           # Check image size
-          docker images test-image:latest --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"
+          docker images "$IMAGE_TAG" --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"
 
           # Security scan (if trivy is available)
           if command -v trivy &> /dev/null; then
-            trivy image --exit-code 0 --severity HIGH,CRITICAL test-image:latest
+            trivy image --exit-code 0 --severity HIGH,CRITICAL "$IMAGE_TAG"
           fi
 
       - name: 📊 Test Summary
