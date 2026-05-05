@@ -132,6 +132,10 @@ jobs:
           echo "Git tags:"
           git tag --sort=-version:refname | head -5 || true
 
+      - name: 📅 Get Build Date
+        id: build-date
+        run: echo "value=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
+
       - name: 📝 Extract Metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -180,7 +184,7 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             VERSION=${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}
-            BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+            BUILD_DATE=${{ steps.build-date.outputs.value }}
             VCS_REF=${{ github.sha }}
           # v6 features
           provenance: true
@@ -199,7 +203,7 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             VERSION=${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}
-            BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+            BUILD_DATE=${{ steps.build-date.outputs.value }}
             VCS_REF=${{ github.sha }}
           provenance: true
           sbom: true
