@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.4](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.3...v3.3.4) (2026-05-07)
+
+### 🐛 Bug Fixes
+
+* **ci:** fix docker test job to use load instead of OCI export ([7df8603](https://github.com/docdyhr/mcp-wordpress/commit/7df8603977a89f3dd4faa004c8ebd88810059f61))
+* **ci:** node 22, docker load, and BUILD_DATE shell expansion ([bb4cef6](https://github.com/docdyhr/mcp-wordpress/commit/bb4cef6d23603063698556291b2356797b39486a))
+
 ## [3.3.3](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.2...v3.3.3) (2026-05-04)
 
 ### 🐛 Bug Fixes
