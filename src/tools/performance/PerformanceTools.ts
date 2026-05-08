@@ -144,6 +144,7 @@ export default class PerformanceTools {
           {
             name: "metrics",
             type: "array",
+            items: { type: "string" },
             description:
               "Specific metrics to include (responseTime, cacheHitRate, errorRate, memoryUsage, requestVolume)",
             required: false,
