@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.5](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.4...v3.3.5) (2026-05-08)
+
+### 🐛 Bug Fixes
+
+* **deps:** patch moderate vulns in hono and express-rate-limit ([d995987](https://github.com/docdyhr/mcp-wordpress/commit/d9959877859c419fe9b7136b54456837437fb684))
+* **schema:** add missing items type to metrics array in wp_performance_history ([face5c7](https://github.com/docdyhr/mcp-wordpress/commit/face5c76609f5a83a6caaf7ea8a984fef9ae573b))
+
 ## [3.3.4](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.3...v3.3.4) (2026-05-07)
 
 ### 🐛 Bug Fixes
