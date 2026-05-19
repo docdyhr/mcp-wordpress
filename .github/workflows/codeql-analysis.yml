@@ -55,6 +55,8 @@ jobs:
               - .github
             paths:
               - src
+              - "*.js"
+              - "*.ts"
 
       - name: Analyze
         uses: github/codeql-action/analyze@v4
