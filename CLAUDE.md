@@ -80,6 +80,20 @@ DEBUG=true npm run dev     # Debug logging
 **Automated Release**: Conventional commits trigger versioning **Publishing**: NPM + Docker Hub **Quality Gates**: All
 tests must pass, security scans clean
 
+### Workflow Architecture (known audit deviation)
+
+All `.github/workflows/` files are intentionally self-contained inline definitions, not thin callers to
+`docdyhr/.github`. This is an accepted deviation from the docdyhr standard because:
+
+- `main-ci.yml` — 4-suite × 2-Node-version matrix with MCP-specific test groupings
+- `wordpress-compatibility.yml` — tests against live WordPress APIs
+- `release.yml` — coordinates DXT packaging, Docker Hub, and npm in one pipeline
+- `docker-modern.yml` — MCP-specific Docker build requirements
+- `dependency-review.yml` — project-specific allowlist configuration
+
+The `docdyhr/.github` shared library has no matching reusable workflows for Node.js/TypeScript.
+`/repo-audit` will flag these as P1 — that is expected and acceptable.
+
 ## Development Workflow
 
 ### Branch Strategy
