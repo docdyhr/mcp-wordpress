@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.8](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.7...v3.3.8) (2026-05-26)
+
+### 🐛 Bug Fixes
+
+* **deps:** patch qs CVE-2026-8723 via override to >=6.15.2 ([#184](https://github.com/docdyhr/mcp-wordpress/issues/184)) ([6a4d53a](https://github.com/docdyhr/mcp-wordpress/commit/6a4d53a507382e0d95a0bdcb37faa69718886868))
+
 ## [3.3.7](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.6...v3.3.7) (2026-05-20)
 
 ### 🐛 Bug Fixes
