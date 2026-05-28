@@ -1,11 +1,10 @@
-<table>
-<tr>
-<td><h1>🚀 MCP WordPress Server</h1></td>
-<td align="right" valign="top">
-<a href="https://railway.com?referralCode=QhjuBc"><img width="160" src="https://raw.githubusercontent.com/docdyhr/.github/main/assets/railway-corner-v2@2x.png" alt="Deploy on Railway — $20 free credits"></a>
-</td>
-</tr>
-</table>
+<div align="right">
+<a href="https://railway.com?referralCode=QhjuBc">
+  <img width="160" src="https://raw.githubusercontent.com/docdyhr/.github/main/assets/railway-corner-v2@2x.png" alt="Deploy on Railway — $20 free credits">
+</a>
+</div>
+
+# 🚀 MCP WordPress Server
 
 <div align="center">
 <img src="images/wordpress-mcp-logo.png" width="50%" alt="WordPress MCP Logo">
