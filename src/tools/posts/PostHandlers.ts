@@ -337,9 +337,6 @@ export async function handleUpdatePost(
   try {
     const postId = validateId(params.id, "post ID");
 
-    // Get original post to show what changed
-    const originalPost = await client.getPost(postId);
-
     const { id: _id, ...updateData } = params;
     validatePostParams(updateData, true);
 
@@ -352,20 +349,12 @@ export async function handleUpdatePost(
     response += `**Status**: ${updatedPost.status}\n`;
     response += `**Modified**: ${new Date(updatedPost.modified).toLocaleString()}\n`;
 
-    // Show what changed
+    // Show which fields were updated
     const changes: string[] = [];
-    if (params.title && originalPost.title.rendered !== updatedPost.title.rendered) {
-      changes.push(`Title: "${originalPost.title.rendered}" → "${updatedPost.title.rendered}"`);
-    }
-    if (params.status && originalPost.status !== updatedPost.status) {
-      changes.push(`Status: "${originalPost.status}" → "${updatedPost.status}"`);
-    }
-    if (params.content && originalPost.content?.rendered !== updatedPost.content?.rendered) {
-      changes.push("Content updated");
-    }
-    if (params.excerpt && originalPost.excerpt?.rendered !== updatedPost.excerpt?.rendered) {
-      changes.push("Excerpt updated");
-    }
+    if (params.title) changes.push(`Title: "${updatedPost.title.rendered}"`);
+    if (params.status) changes.push(`Status: "${updatedPost.status}"`);
+    if (params.content) changes.push("Content updated");
+    if (params.excerpt) changes.push("Excerpt updated");
 
     if (changes.length > 0) {
       response += `\n**Changes Made**:\n${changes.map((c) => `- ${c}`).join("\n")}\n`;

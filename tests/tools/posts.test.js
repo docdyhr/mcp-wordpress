@@ -322,16 +322,6 @@ describe("PostTools", () => {
 
   describe("handleUpdatePost", () => {
     it("should update a post successfully", async () => {
-      const mockOriginalPost = {
-        id: 1,
-        title: { rendered: "Original Post" },
-        content: { rendered: "Original Content" },
-        status: "draft",
-        author: 1,
-        categories: [],
-        tags: [],
-      };
-
       const mockUpdatedPost = {
         id: 1,
         title: { rendered: "Updated Post" },
@@ -344,8 +334,6 @@ describe("PostTools", () => {
         link: "https://test-site.com/updated-post",
       };
 
-      // First call to getPost for original post, then updatePost
-      mockClient.getPost.mockResolvedValueOnce(mockOriginalPost);
       mockClient.updatePost.mockResolvedValueOnce(mockUpdatedPost);
 
       const updateData = {
@@ -356,7 +344,7 @@ describe("PostTools", () => {
 
       const result = await postTools.handleUpdatePost(mockClient, updateData);
 
-      expect(mockClient.getPost).toHaveBeenCalledWith(1);
+      expect(mockClient.getPost).not.toHaveBeenCalled();
       expect(mockClient.updatePost).toHaveBeenCalledWith({ id: 1, title: "Updated Post", content: "Updated Content" });
       expect(typeof result).toBe("string");
       expect(result).toContain("Post Updated Successfully");
@@ -364,16 +352,6 @@ describe("PostTools", () => {
     });
 
     it("should update a post with content only (no title)", async () => {
-      const mockOriginalPost = {
-        id: 1,
-        title: { rendered: "Original Post" },
-        content: { rendered: "Original Content" },
-        status: "publish",
-        author: 1,
-        categories: [],
-        tags: [],
-      };
-
       const mockUpdatedPost = {
         id: 1,
         title: { rendered: "Original Post" },
@@ -386,7 +364,6 @@ describe("PostTools", () => {
         link: "https://test-site.com/original-post",
       };
 
-      mockClient.getPost.mockResolvedValueOnce(mockOriginalPost);
       mockClient.updatePost.mockResolvedValueOnce(mockUpdatedPost);
 
       const result = await postTools.handleUpdatePost(mockClient, {
@@ -395,8 +372,37 @@ describe("PostTools", () => {
         status: "publish",
       });
 
+      expect(mockClient.getPost).not.toHaveBeenCalled();
       expect(mockClient.updatePost).toHaveBeenCalledWith({ id: 1, content: "New content only", status: "publish" });
       expect(typeof result).toBe("string");
+      expect(result).toContain("Post Updated Successfully");
+    });
+
+    it("should not pre-fetch original post before updating (avoids double HTTP round-trip)", async () => {
+      const mockUpdatedPost = {
+        id: 1,
+        title: { rendered: "Updated Post" },
+        content: { rendered: "Updated Content" },
+        status: "publish",
+        author: 1,
+        categories: [],
+        tags: [],
+        modified: "2024-01-01T12:00:00",
+        link: "https://test-site.com/updated-post",
+      };
+
+      mockClient.updatePost.mockResolvedValueOnce(mockUpdatedPost);
+
+      const result = await postTools.handleUpdatePost(mockClient, {
+        id: 1,
+        title: "Updated Post",
+        content: "Updated Content",
+      });
+
+      // Fix for hang bug: update must make exactly ONE API call (updatePost), not two (getPost + updatePost).
+      // The pre-fetch getPost was unnecessary and caused accumulated timeouts on slow WordPress servers.
+      expect(mockClient.getPost).not.toHaveBeenCalled();
+      expect(mockClient.updatePost).toHaveBeenCalledTimes(1);
       expect(result).toContain("Post Updated Successfully");
     });
 

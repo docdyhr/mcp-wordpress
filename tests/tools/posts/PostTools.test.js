@@ -359,14 +359,6 @@ describe("PostTools", () => {
 
   describe("handleUpdatePost", () => {
     beforeEach(() => {
-      mockClient.getPost.mockResolvedValue({
-        id: 1,
-        title: { rendered: "Original Post" },
-        content: { rendered: "<p>Original content</p>" },
-        status: "draft",
-        excerpt: { rendered: "Original excerpt" },
-      });
-
       mockClient.updatePost.mockResolvedValue({
         id: 1,
         title: { rendered: "Updated Post" },
@@ -387,7 +379,7 @@ describe("PostTools", () => {
         title: "Updated Post",
       });
 
-      expect(mockClient.getPost).toHaveBeenCalledWith(1);
+      expect(mockClient.getPost).not.toHaveBeenCalled();
       expect(mockClient.updatePost).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 1,
@@ -427,7 +419,7 @@ describe("PostTools", () => {
     });
 
     it("should handle update errors", async () => {
-      mockClient.getPost.mockRejectedValue(new Error("404 Post not found"));
+      mockClient.updatePost.mockRejectedValue(new Error("404 Post not found"));
 
       const result = await postTools.handleUpdatePost(mockClient, {
         id: 999,
