@@ -1,3 +1,9 @@
+<div align="right">
+<a href="https://railway.com?referralCode=QhjuBc">
+  <img align="right" width="240" src="https://raw.githubusercontent.com/docdyhr/.github/main/assets/railway-corner@2x.png" alt="Deploy on Railway — $20 free credits">
+</a>
+</div>
+
 # 🚀 MCP WordPress Server
 
 <div align="center">
@@ -21,8 +27,6 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue?logo=typescript&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
 [![CodeQL](https://github.com/docdyhr/mcp-wordpress/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/codeql-analysis.yml)
-[![Quality Assurance](https://github.com/docdyhr/mcp-wordpress/actions/workflows/quality-assurance.yml/badge.svg)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/quality-assurance.yml)
-[![Security Monitoring](https://github.com/docdyhr/mcp-wordpress/actions/workflows/security-monitoring.yml/badge.svg)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/security-monitoring.yml)
 [![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker&logoColor=white)](https://hub.docker.com/r/docdyhr/mcp-wordpress)
 [![License](https://img.shields.io/badge/license-MIT-green?logo=opensource&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/blob/main/LICENSE)
 <!-- Badges updated: 2025-12-23 -->
@@ -1175,4 +1179,3 @@ implementation.
 **⭐ Found this helpful? [Give us a star on GitHub!](https://github.com/docdyhr/mcp-wordpress) ⭐**
 
 </div>
-
