@@ -1,3 +1,7 @@
+<a href="https://railway.com?referralCode=YOUR_CODE">
+  <img align="right" width="240" src="https://raw.githubusercontent.com/docdyhr/.github/main/assets/railway-corner@2x.png" alt="Deploy on Railway — $20 free credits">
+</a>
+
 # 🚀 MCP WordPress Server
 
 <div align="center">
