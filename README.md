@@ -1,6 +1,6 @@
 <div align="right">
 <a href="https://railway.com?referralCode=QhjuBc">
-  <img align="right" width="240" src="https://raw.githubusercontent.com/docdyhr/.github/main/assets/railway-corner@2x.png" alt="Deploy on Railway — $20 free credits">
+  <img align="right" width="240" src="https://raw.githubusercontent.com/docdyhr/.github/main/assets/railway-corner-v2@2x.png" alt="Deploy on Railway — $20 free credits">
 </a>
 </div>
 
