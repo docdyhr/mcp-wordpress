@@ -298,7 +298,7 @@ jobs:
           node -e "const m = require('./package.json'); if (m.version !== '${{ needs.semantic-release.outputs.new-release-version }}') { console.error('Version mismatch:', m.version, 'vs', '${{ needs.semantic-release.outputs.new-release-version }}'); process.exit(1); } else { console.log('Version verified:', m.version); }"
 
       - name: 📤 Upload DXT Package to Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ needs.semantic-release.outputs.new-release-version }}
           files: mcp-wordpress.dxt
