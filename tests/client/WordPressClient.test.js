@@ -305,6 +305,22 @@ describe("WordPressClient", () => {
       await expect(client.get("posts")).rejects.toThrow("Network error");
     });
 
+    it("should retry on ECONNRESET (normalized to 'Network connection lost')", async () => {
+      const successResponse = {
+        ok: true,
+        status: 200,
+        headers: new Map([["content-type", "application/json"]]),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf('{"id": 1}')),
+      };
+
+      mockFetch.mockRejectedValueOnce(new Error("ECONNRESET")).mockResolvedValueOnce(successResponse);
+
+      const result = await client.get("posts");
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({ id: 1 });
+    });
+
     it("should handle malformed JSON responses", async () => {
       mockFetch.mockResolvedValue({
         ok: true,

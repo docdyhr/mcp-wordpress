@@ -681,7 +681,8 @@ export class WordPressClient implements IWordPressClient {
     // Network-level errors worth retrying — includes "Network connection lost" which is the
     // normalized form of both ECONNRESET and "socket hang up" from normalizeRequestError
     const retryablePatterns = ["ECONNRESET", "ETIMEDOUT", "ENOTFOUND", "EAI_AGAIN", "Network connection lost"];
-    return retryablePatterns.some((pattern) => error.message.includes(pattern));
+    const message = String(error.message ?? "");
+    return retryablePatterns.some((pattern) => message.includes(pattern));
   }
 
   private isRetryableBody(data: unknown): boolean {
@@ -791,8 +792,8 @@ export class WordPressClient implements IWordPressClient {
       clearTimeout(fallbackTimeoutId);
 
       if (!fallbackResponse.ok) {
-        // Drain body to return the connection to the pool before giving up
-        await fallbackResponse.arrayBuffer().catch(() => {});
+        // Cancel body stream to return the connection to the pool without buffering
+        await fallbackResponse.body?.cancel().catch(() => {});
         log.debug(`Fallback also failed with status ${fallbackResponse.status}`);
         return undefined;
       }
