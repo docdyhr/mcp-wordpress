@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.10](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.9...v3.3.10) (2026-05-29)
+
+### 🐛 Bug Fixes
+
+* update Railway banner image to v2 asset ([#189](https://github.com/docdyhr/mcp-wordpress/issues/189)) ([5cee550](https://github.com/docdyhr/mcp-wordpress/commit/5cee550dbb4c588aaaa36b720206b43f731eaf3b))
+
+### 📚 Documentation
+
+* add Railway deployment banner and remove broken badges ([76f3a59](https://github.com/docdyhr/mcp-wordpress/commit/76f3a594f8e1c09c062ce61055b2fe5c330e6733))
+* replace table with div for Railway banner — no borders, title below ([c18b9b6](https://github.com/docdyhr/mcp-wordpress/commit/c18b9b6813d076f12cb4ad3b83b585c0eb5d4f97))
+* use table layout for Railway banner — fixes logo centering ([54029b5](https://github.com/docdyhr/mcp-wordpress/commit/54029b5c8ebf5f9233ba30b4522df6c31d4ec634))
+
 ## [3.3.9](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.8...v3.3.9) (2026-05-28)
 
 ### 🐛 Bug Fixes
