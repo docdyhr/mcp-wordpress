@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.12](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.11...v3.3.12) (2026-05-29)
+
+### 🐛 Bug Fixes
+
+* tighten security overrides for axios and brace-expansion ([#190](https://github.com/docdyhr/mcp-wordpress/issues/190)) ([149293d](https://github.com/docdyhr/mcp-wordpress/commit/149293dfb1f29dafcb744e94432b2552115d0a45))
+
 ## [3.3.11](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.10...v3.3.11) (2026-05-29)
 
 ### 🐛 Bug Fixes
