@@ -65,7 +65,8 @@ class MCPWordPressServer {
     this.setupTools();
 
     // Skip connection testing in DXT environment to prevent timeouts
-    const isDXTMode = ConfigHelpers.isDXT() || process.argv[0]?.includes("dxt-entry");
+    // process.argv[1] is the entry script path (e.g. dist/dxt-entry.js), not argv[0] which is the node binary
+    const isDXTMode = ConfigHelpers.isDXT() || process.argv[1]?.includes("dxt-entry");
 
     if (!this.initialized && !isDXTMode) {
       this.logger.info("Testing connections to configured WordPress sites...", {
