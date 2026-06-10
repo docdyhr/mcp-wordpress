@@ -78,14 +78,14 @@ DEBUG=true npm run dev     # Debug logging
 ## CI/CD Pipeline
 
 **Automated Release**: Conventional commits trigger versioning **Publishing**: NPM + Docker Hub **Quality Gates**: All
-tests must pass, security scans clean
+tests must pass, security scans clean **Node versions tested**: 20, 22, 24 (LTS)
 
 ### Workflow Architecture (known audit deviation)
 
 All `.github/workflows/` files are intentionally self-contained inline definitions, not thin callers to
 `docdyhr/.github`. This is an accepted deviation from the docdyhr standard because:
 
-- `main-ci.yml` — 4-suite × 2-Node-version matrix with MCP-specific test groupings
+- `main-ci.yml` — 4-suite × 3-Node-version matrix (20, 22, 24) with MCP-specific test groupings
 - `wordpress-compatibility.yml` — tests against live WordPress APIs
 - `release.yml` — coordinates DXT packaging, Docker Hub, and npm in one pipeline
 - `docker-modern.yml` — MCP-specific Docker build requirements
