@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.14](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.13...v3.3.14) (2026-06-10)
+
+### 🐛 Bug Fixes
+
+* **deps:** patch hono moderate vulns and allowlist npm-bundled advisories ([#195](https://github.com/docdyhr/mcp-wordpress/issues/195)) ([cabc95e](https://github.com/docdyhr/mcp-wordpress/commit/cabc95ebe52fa66edecc4987eaf5801055a109dd))
+
+### 📚 Documentation
+
+* note Node 24 in CLAUDE.md CI section ([d94a412](https://github.com/docdyhr/mcp-wordpress/commit/d94a412a63bebaa1003685ca4db10cf37f435174))
+
 ## [3.3.13](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.12...v3.3.13) (2026-06-10)
 
 ### 🐛 Bug Fixes
