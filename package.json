@@ -134,7 +134,7 @@
     "fast-uri": ">=3.1.2",
     "flatted": ">=3.4.2",
     "follow-redirects": ">=1.15.12",
-    "hono": ">=4.12.16",
+    "hono": ">=4.12.21",
     "minimatch": "10.2.3",
     "path-to-regexp": ">=8.4.0",
     "postcss": ">=8.5.10",
