@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [20, 22]
+        node-version: [20, 22, 24]
         suite:
           - name: "security-cache-server"
             path: "tests/security/ tests/cache/ tests/server/"
