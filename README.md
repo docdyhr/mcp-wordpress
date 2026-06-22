@@ -1136,7 +1136,7 @@ Looking for alternatives or complementary tools? Check out these WordPress MCP i
 
 ### v3.3.14 (June 2026)
 
-- **🔒 Security Updates** - Patch hono moderate vulnerabilities, update allowlisted npm-bundled advisories
+- **🔒 Security Updates** - Patch moderate Hono vulnerabilities, update allowlisted npm-bundled advisories
 - **🧪 CI** - Smoke-test improvements and Node 24 validation
 
 ### v3.x Series (2025–2026)

@@ -37,12 +37,15 @@ export class ServerConfiguration {
 
     // Load environment variables silently. dotenv v17 logs an injection summary to
     // console.log unless quiet:true is set, which would corrupt MCP stdio JSON-RPC.
-    dotenv.config({
+    const dotenvResult = dotenv.config({
       path: this.envPath,
       debug: false,
       quiet: true,
       override: false,
     });
+    if (dotenvResult.error && ConfigHelpers.shouldDebug()) {
+      this.logger.debug("dotenv: .env file not loaded", { reason: dotenvResult.error.message });
+    }
 
     // Debug output for DXT troubleshooting (reduced in DXT mode)
     if (ConfigHelpers.shouldDebug()) {
