@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 📚 Documentation
 
-* Trim README from 1168 to 342 lines — remove duplicate sections and verbose examples, replace with links to existing docs
+* Trim README from 1168 to 343 lines — remove duplicate sections and verbose examples, replace with links to existing docs
 
 ## [3.3.15](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.14...v3.3.15) (2026-06-22)
 
