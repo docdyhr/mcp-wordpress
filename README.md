@@ -163,7 +163,7 @@ WordPress Application Passwords are recommended:
 1. **WordPress Admin** → **Users** → **Profile** → **Application Passwords** → **Add New**
 2. Copy the generated password into your config
 
-Alternative methods: JWT, Basic Auth, API Key — see **[Authentication Guide](docs/user-guides/NPX_SETUP.md#authentication)**
+Alternative methods: JWT, Basic Auth, API Key — see **[Authentication Configuration](docs/CONFIGURATION.md#authentication-configuration)**
 
 ## 🌟 What Makes This Special
 
