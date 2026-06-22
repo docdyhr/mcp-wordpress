@@ -35,28 +35,14 @@ export class ServerConfiguration {
     this.rootDir = path.resolve(__dirname, "../..");
     this.envPath = path.resolve(this.rootDir, ".env");
 
-    // Load environment variables (completely silent for MCP compatibility)
-    // Suppress dotenv output that could interfere with JSON-RPC communication
-    // eslint-disable-next-line no-console
-    const originalConsoleLog = console.log;
-    // eslint-disable-next-line no-console
-    const originalConsoleError = console.error;
-    try {
-      // eslint-disable-next-line no-console
-      console.log = () => {};
-      // eslint-disable-next-line no-console
-      console.error = () => {};
-      dotenv.config({
-        path: this.envPath,
-        debug: false,
-        override: false,
-      });
-    } finally {
-      // eslint-disable-next-line no-console
-      console.log = originalConsoleLog;
-      // eslint-disable-next-line no-console
-      console.error = originalConsoleError;
-    }
+    // Load environment variables silently. dotenv v17 logs an injection summary to
+    // console.log unless quiet:true is set, which would corrupt MCP stdio JSON-RPC.
+    dotenv.config({
+      path: this.envPath,
+      debug: false,
+      quiet: true,
+      override: false,
+    });
 
     // Debug output for DXT troubleshooting (reduced in DXT mode)
     if (ConfigHelpers.shouldDebug()) {

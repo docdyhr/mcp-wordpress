@@ -30,7 +30,7 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 [![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker&logoColor=white)](https://hub.docker.com/r/docdyhr/mcp-wordpress)
 [![License](https://img.shields.io/badge/license-MIT-green?logo=opensource&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/blob/main/LICENSE)
 <!-- Badges updated: 2025-12-23 -->
-### 🎉 **v2.12.0** - Modular Architecture & Fault Tolerance!
+### 🎉 **v3.3.14** - Production Ready!
 
 </div>
 
@@ -1134,36 +1134,22 @@ Looking for alternatives or complementary tools? Check out these WordPress MCP i
 
 ## 📋 Changelog
 
-### v2.12.0 (December 2024) 🎉
+### v3.3.14 (June 2026)
 
-- **🏗️ Modular Architecture** - Split large files into domain-specific operation modules
-- **🔄 Circuit Breaker Pattern** - Fault tolerance for external API calls with automatic recovery
-- **📊 2200+ Tests** - Comprehensive test suite with operations and performance helper coverage
-- **📚 Deprecation Documentation** - Clear migration timeline for deprecated modules
-- **🔒 Security Improvements** - Updated dependencies and consolidated CI/CD workflows
+- **🔒 Security Updates** - Patch hono moderate vulnerabilities, update allowlisted npm-bundled advisories
+- **🧪 CI** - Smoke-test improvements and Node 24 validation
 
-### v2.5.4+ (August 2024)
+### v3.x Series (2025–2026)
 
-- **🆕 Multi-Site DXT Extension** - New UI toggle for managing multiple WordPress sites in Claude Desktop
-- **🔧 Enhanced Configuration** - Auto-detection of multi-site configuration files
-- **⚡ Performance Improvements** - Optimized caching and request handling
-- **🛡️ Security Updates** - Enhanced input validation and dependency updates
-- **🐛 Bug Fixes** - Resolved hook path issues and improved error handling
-- **📚 Documentation** - Updated setup guides and troubleshooting information
+- **🏗️ Modular Architecture** - Domain-specific operation modules and composition pattern
+- **🔄 Fault Tolerance** - Circuit breaker pattern for external API calls with automatic recovery
+- **📊 2200+ Tests** - Comprehensive test suite across security, cache, server, client, config, utils, tools, and performance
+- **⚡ Caching Layer** - `CachedWordPressClient` with configurable TTL; 50–70% faster repeat requests
+- **🌐 Multi-Site** - Unlimited WordPress sites from one configuration file
+- **🔐 4 Auth Methods** - App Passwords (recommended), JWT, Basic, API Key
+- **🐳 Docker & DXT** - One-click Claude Desktop extension and Docker Hub image
 
-### v2.5.0 (July 2024)
-
-- **🚀 Production Ready** - Comprehensive testing suite with 96%+ coverage
-- **🔒 Security Framework** - Full security validation and penetration testing
-- **📊 Performance Analytics** - Real-time monitoring and optimization tools
-- **🎯 Tool Enhancements** - 59 WordPress management tools across 10 categories
-
-### v2.0.0 (June 2024)
-
-- **🏗️ Architecture Overhaul** - Migrated to modern TypeScript architecture
-- **🌐 Multi-Site Support** - Complete multi-site WordPress management
-- **💾 Intelligent Caching** - 50-70% performance improvement
-- **🔐 Authentication Methods** - Support for 4 authentication types
+For the full history see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 

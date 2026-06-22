@@ -3,7 +3,6 @@ import { ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { WordPressClient } from "@/client/api.js";
 import { getErrorMessage } from "@/utils/error.js";
 import { EnhancedError, ErrorHandlers } from "@/utils/enhancedError.js";
-import { config } from "@/config/Config.js";
 import * as Tools from "@/tools/index.js";
 import { z } from "zod";
 import type { MCPToolSchema, JSONSchemaProperty } from "@/types/mcp.js";
@@ -132,9 +131,9 @@ export class ToolRegistry {
             };
           }
 
-          // Intelligent site selection for single-site configurations
+          // Auto-select the only site in single-site configurations.
           if (!siteId) {
-            siteId = this.selectBestSite(tool.name, args);
+            siteId = this.selectBestSite();
           }
 
           const client = this.wordpressClients.get(siteId as string);
@@ -363,49 +362,13 @@ export class ToolRegistry {
   }
 
   /**
-   * Intelligent site selection based on context
+   * Return the single configured site ID.
+   * Only called after the multi-site guard (which requires an explicit `site` param),
+   * so this path is only reached in single-site mode.
    */
-  private selectBestSite(toolName: string, args: Record<string, unknown>): string {
-    const availableSites = Array.from(this.wordpressClients.keys());
-
-    // Single site scenario - use it directly
-    if (availableSites.length === 1) {
-      return availableSites[0];
-    }
-
-    // Multiple sites scenario - intelligent selection
-    if (availableSites.length > 1) {
-      // Try to find a site based on context clues
-
-      // 1. Check if there's a 'default' site
-      if (availableSites.includes("default")) {
-        return "default";
-      }
-
-      // 2. Check if there's a 'main' or 'primary' site
-      const primarySites = availableSites.filter((site) =>
-        ["main", "primary", "prod", "production"].includes(site.toLowerCase()),
-      );
-      if (primarySites.length > 0) {
-        return primarySites[0];
-      }
-
-      // 3. For development/test operations, prefer dev sites
-      if (toolName.includes("test") || config().app.isDevelopment) {
-        const devSites = availableSites.filter((site) =>
-          ["dev", "test", "staging", "local"].includes(site.toLowerCase()),
-        );
-        if (devSites.length > 0) {
-          return devSites[0];
-        }
-      }
-
-      // 4. Default to first available site
-      return availableSites[0];
-    }
-
-    // Fallback to 'default' if no sites available
-    return "default";
+  private selectBestSite(): string {
+    const keys = Array.from(this.wordpressClients.keys());
+    return keys[0] ?? "default";
   }
 
   /**
