@@ -87,21 +87,42 @@ export class AuthTools {
     client: WordPressClient,
     params: Record<string, unknown>,
   ): Promise<Record<string, unknown>> {
+    const TIMEOUT_MS = 10_000;
+    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+
+    const timeoutSignal = new Promise<never>((_, reject) => {
+      timeoutHandle = setTimeout(
+        () => reject(new Error(`Connection timed out after ${TIMEOUT_MS / 1000}s`)),
+        TIMEOUT_MS,
+      );
+    });
+
     try {
-      await client.ping();
-      const user = await client.getCurrentUser();
-      const siteConfig = client.config;
+      const result = await Promise.race([
+        (async () => {
+          const reachable = await client.ping();
+          if (!reachable) {
+            throw new Error(`Site unreachable: ${client.config.baseUrl}`);
+          }
+          const user = await client.getCurrentUser();
+          const siteConfig = client.config;
 
-      const content =
-        "✅ **Authentication successful!**\n\n" +
-        `**Site:** ${siteConfig.baseUrl}\n` +
-        `**Method:** ${siteConfig.auth.method}\n` +
-        `**User:** ${user.name} (@${user.slug})\n` +
-        `**Roles:** ${user.roles?.join(", ") || "N/A"}\n\n` +
-        "Your WordPress connection is working properly.";
+          const content =
+            "✅ **Authentication successful!**\n\n" +
+            `**Site:** ${siteConfig.baseUrl}\n` +
+            `**Method:** ${siteConfig.auth.method}\n` +
+            `**User:** ${user.name} (@${user.slug})\n` +
+            `**Roles:** ${user.roles?.join(", ") || "N/A"}\n\n` +
+            "Your WordPress connection is working properly.";
 
-      return { content };
+          return { content };
+        })(),
+        timeoutSignal,
+      ]);
+      clearTimeout(timeoutHandle);
+      return result;
     } catch (_error) {
+      clearTimeout(timeoutHandle);
       throw new Error(`Authentication test failed: ${getErrorMessage(_error)}`);
     }
   }
