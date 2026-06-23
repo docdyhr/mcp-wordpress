@@ -124,6 +124,31 @@ describe("AuthTools", () => {
       expect(mockClient.getCurrentUser).not.toHaveBeenCalled();
     });
 
+    it("should fail immediately when ping returns false without calling getCurrentUser", async () => {
+      // Real ping() never throws — it returns false on failure
+      mockClient.ping.mockResolvedValue(false);
+
+      await expect(authTools.handleTestAuth(mockClient, {})).rejects.toThrow(
+        "Authentication test failed: Site unreachable: https://example.com",
+      );
+
+      expect(mockClient.ping).toHaveBeenCalledTimes(1);
+      expect(mockClient.getCurrentUser).not.toHaveBeenCalled();
+    });
+
+    it("should time out after 10 seconds and not hang indefinitely", async () => {
+      vi.useFakeTimers();
+      // Simulate an unreachable site: ping never resolves
+      mockClient.ping.mockImplementation(() => new Promise(() => {}));
+
+      const authPromise = authTools.handleTestAuth(mockClient, {});
+      vi.advanceTimersByTime(10_000);
+
+      await expect(authPromise).rejects.toThrow("Authentication test failed: Connection timed out after 10s");
+
+      vi.useRealTimers();
+    });
+
     it("should handle getCurrentUser failures after successful ping", async () => {
       // Mock successful ping but failed user fetch
       mockClient.ping.mockResolvedValue(true);
