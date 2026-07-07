@@ -60,7 +60,12 @@ export class MediaOperations {
 
     try {
       const stats = await fileHandle.stat();
-      const filename = data.title || path.basename(data.file_path);
+      // Always derive the filename from the actual file path, never from
+      // `title`. `title` is separate WordPress metadata (sent to uploadFile()
+      // via `data` below); it commonly has no file extension, and using it
+      // as the multipart filename trips WordPress's filetype check with
+      // "Sorry, you are not allowed to upload this file type."
+      const filename = path.basename(data.file_path);
 
       // Check if file is too large (WordPress default is 2MB for most installs)
       const maxSize = 10 * 1024 * 1024; // 10MB reasonable limit
