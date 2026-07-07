@@ -208,7 +208,11 @@ describe("WordPress API Client Upload Timeout", () => {
 
   describe("upload permission handling", () => {
     it("should handle network connection errors during upload", async () => {
-      nock(testBaseUrl).post("/wp-json/wp/v2/media").replyWithError("socket hang up");
+      // Native FormData/Blob bodies are reusable, so each retry attempt
+      // resends the file and hits the network again (unlike the old
+      // form-data stream, which was consumed after the first attempt).
+      // Persist the mock so all retry attempts see the same error.
+      nock(testBaseUrl).persist().post("/wp-json/wp/v2/media").replyWithError("socket hang up");
 
       await expect(client.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: 1000 })).rejects.toThrow(
         /Network connection lost during request/,

@@ -639,6 +639,14 @@ export class WordPressClient implements IWordPressClient {
     ) {
       if (typeof (data as { getHeaders?: () => Record<string, string> }).getHeaders === "function") {
         const formHeaders = (data as unknown as { getHeaders(): Record<string, string> }).getHeaders();
+        // The form-data package returns a lowercase "content-type" key. If an
+        // existing header uses a different case ("Content-Type"), both keys
+        // survive Object.assign and the request ends up with two conflicting
+        // Content-Type headers, which the WP REST API rejects. Drop any
+        // existing Content-Type header (case-insensitively) before merging.
+        for (const key of Object.keys(headers)) {
+          if (key.toLowerCase() === "content-type") delete headers[key];
+        }
         Object.assign(headers, formHeaders);
       } else {
         delete headers["Content-Type"];
