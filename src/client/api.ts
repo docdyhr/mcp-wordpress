@@ -6,8 +6,7 @@
  * domain-specific operations extracted into separate modules under ./operations/
  */
 
-// Use native fetch in Node.js 18+
-import FormData from "form-data";
+// Use native fetch and FormData in Node.js 18+ (both are globals, no import needed)
 import { getUserAgent } from "@/utils/version.js";
 import type {
   IWordPressClient,
@@ -637,20 +636,11 @@ export class WordPressClient implements IWordPressClient {
       data instanceof FormData ||
       (typeof data === "object" && data && "append" in data && typeof (data as FormData).append === "function")
     ) {
-      if (typeof (data as { getHeaders?: () => Record<string, string> }).getHeaders === "function") {
-        const formHeaders = (data as unknown as { getHeaders(): Record<string, string> }).getHeaders();
-        // The form-data package returns a lowercase "content-type" key. If an
-        // existing header uses a different case ("Content-Type"), both keys
-        // survive Object.assign and the request ends up with two conflicting
-        // Content-Type headers, which the WP REST API rejects. Drop any
-        // existing Content-Type header (case-insensitively) before merging.
-        for (const key of Object.keys(headers)) {
-          if (key.toLowerCase() === "content-type") delete headers[key];
-        }
-        Object.assign(headers, formHeaders);
-      } else {
-        delete headers["Content-Type"];
-      }
+      // Native FormData needs no explicit Content-Type: fetch computes the
+      // correct multipart boundary and sets the header itself once given a
+      // FormData body. Drop whatever default we set earlier so it can't
+      // collide with fetch's own header.
+      delete headers["Content-Type"];
       fetchOptions.body = data as FormData;
       return;
     }
@@ -703,6 +693,9 @@ export class WordPressClient implements IWordPressClient {
     }
 
     if (data instanceof FormData) {
+      // Never retry FormData uploads: retrying a mutating upload risks
+      // creating a duplicate media item if the first attempt actually
+      // succeeded server-side but the client never saw the response.
       return false;
     }
 

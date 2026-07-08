@@ -19,6 +19,7 @@ export default [
         __filename: "readonly",
         fetch: "readonly",
         FormData: "readonly",
+        Blob: "readonly",
         URLSearchParams: "readonly",
         setTimeout: "readonly",
         clearTimeout: "readonly",

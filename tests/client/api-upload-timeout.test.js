@@ -206,17 +206,48 @@ describe("WordPress API Client Upload Timeout", () => {
     });
   });
 
+  describe("Content-Type header integrity", () => {
+    it("should send a single clean multipart Content-Type header (regression: form-data package used to collide with the default JSON header)", async () => {
+      let capturedHeaders;
+
+      nock(testBaseUrl)
+        .post("/wp-json/wp/v2/media")
+        .reply(function () {
+          capturedHeaders = this.req.headers;
+          return [200, { id: 321, title: "uploaded" }];
+        });
+
+      await client.uploadFile(testFile, "test.txt", "text/plain");
+
+      const contentTypeKeys = Object.keys(capturedHeaders).filter((key) => key.toLowerCase() === "content-type");
+      expect(contentTypeKeys).toHaveLength(1);
+
+      const contentType = capturedHeaders[contentTypeKeys[0]];
+      expect(contentType).not.toContain("application/json");
+      expect(contentType).toMatch(/^multipart\/form-data;\s*boundary=/);
+    });
+  });
+
   describe("upload permission handling", () => {
-    it("should handle network connection errors during upload", async () => {
-      // Native FormData/Blob bodies are reusable, so each retry attempt
-      // resends the file and hits the network again (unlike the old
-      // form-data stream, which was consumed after the first attempt).
-      // Persist the mock so all retry attempts see the same error.
-      nock(testBaseUrl).persist().post("/wp-json/wp/v2/media").replyWithError("socket hang up");
+    it("should handle network connection errors during upload without retrying (regression: retrying a mutating upload risks duplicate media)", async () => {
+      // Uploads must never retry: a retry after a network error can't tell
+      // whether the first attempt actually succeeded server-side, so
+      // retrying risks creating duplicate media items. Only mock a single
+      // attempt; a second, un-mocked attempt would need its own interceptor.
+      const firstAttempt = nock(testBaseUrl).post("/wp-json/wp/v2/media").replyWithError("socket hang up");
+
+      // If a regression reintroduces retries, the 2nd attempt would hit this
+      // interceptor instead of running out of mocks — assert it's never used.
+      const unexpectedRetry = nock(testBaseUrl)
+        .post("/wp-json/wp/v2/media")
+        .reply(200, { id: -1, title: "unexpected retry" });
 
       await expect(client.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: 1000 })).rejects.toThrow(
         /Network connection lost during request/,
       );
+
+      expect(firstAttempt.isDone()).toBe(true);
+      expect(unexpectedRetry.isDone()).toBe(false);
     });
 
     it("should set max listeners to prevent EventEmitter warnings", async () => {

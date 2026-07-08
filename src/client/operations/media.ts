@@ -110,8 +110,14 @@ export class MediaOperations {
     // Content-Type and Content-Length itself when given a native FormData body.
     const formData = new FormData();
 
-    // Add file with correct options
-    formData.append("file", new Blob([new Uint8Array(fileData)], { type: mimeType }), filename);
+    // Add file with correct options. fileData is already a Buffer, which is
+    // a valid BlobPart at runtime (Buffer extends Uint8Array) — no need to
+    // re-wrap it and copy the bytes. The cast is needed because Buffer's
+    // type is generic over ArrayBufferLike (including SharedArrayBuffer),
+    // while BlobPart requires the narrower Uint8Array<ArrayBuffer>; every
+    // Buffer this method receives (from fs reads or Buffer.from) is backed
+    // by a plain ArrayBuffer.
+    formData.append("file", new Blob([fileData as Uint8Array<ArrayBuffer>], { type: mimeType }), filename);
 
     // Add metadata
     if (meta.title) formData.append("title", meta.title);
