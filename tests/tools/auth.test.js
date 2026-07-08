@@ -138,15 +138,20 @@ describe("AuthTools", () => {
 
     it("should time out after 10 seconds and not hang indefinitely", async () => {
       vi.useFakeTimers();
-      // Simulate an unreachable site: ping never resolves
-      mockClient.ping.mockImplementation(() => new Promise(() => {}));
+      try {
+        // Simulate an unreachable site: ping never resolves
+        mockClient.ping.mockImplementation(() => new Promise(() => {}));
 
-      const authPromise = authTools.handleTestAuth(mockClient, {});
-      vi.advanceTimersByTime(10_000);
+        const authPromise = authTools.handleTestAuth(mockClient, {});
+        vi.advanceTimersByTime(10_000);
 
-      await expect(authPromise).rejects.toThrow("Authentication test failed: Connection timed out after 10s");
+        await expect(authPromise).rejects.toThrow("Authentication test failed: Connection timed out after 10s");
 
-      vi.useRealTimers();
+        expect(mockClient.ping).toHaveBeenCalledTimes(1);
+        expect(mockClient.getCurrentUser).not.toHaveBeenCalled();
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it("should handle getCurrentUser failures after successful ping", async () => {

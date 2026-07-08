@@ -98,7 +98,7 @@ export class AuthTools {
     });
 
     try {
-      const result = await Promise.race([
+      return await Promise.race([
         (async () => {
           const reachable = await client.ping();
           if (!reachable) {
@@ -119,11 +119,10 @@ export class AuthTools {
         })(),
         timeoutSignal,
       ]);
-      clearTimeout(timeoutHandle);
-      return result;
     } catch (_error) {
-      clearTimeout(timeoutHandle);
       throw new Error(`Authentication test failed: ${getErrorMessage(_error)}`);
+    } finally {
+      clearTimeout(timeoutHandle);
     }
   }
 
