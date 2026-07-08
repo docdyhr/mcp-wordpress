@@ -89,18 +89,26 @@ export class AuthTools {
   ): Promise<Record<string, unknown>> {
     const TIMEOUT_MS = 10_000;
     let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+    let timedOut = false;
 
     const timeoutSignal = new Promise<never>((_, reject) => {
-      timeoutHandle = setTimeout(
-        () => reject(new Error(`Connection timed out after ${TIMEOUT_MS / 1000}s`)),
-        TIMEOUT_MS,
-      );
+      timeoutHandle = setTimeout(() => {
+        timedOut = true;
+        reject(new Error(`Connection timed out after ${TIMEOUT_MS / 1000}s`));
+      }, TIMEOUT_MS);
     });
 
     try {
       return await Promise.race([
         (async () => {
           const reachable = await client.ping();
+          // Promise.race doesn't cancel the losing branch — if ping() was
+          // still pending when the timeout fired, the race has already
+          // settled by the time it resolves. Stop here instead of making
+          // an unnecessary (and unobserved) getCurrentUser() request.
+          if (timedOut) {
+            throw new Error("Superseded by timeout");
+          }
           if (!reachable) {
             throw new Error(`Site unreachable: ${client.config.baseUrl}`);
           }
