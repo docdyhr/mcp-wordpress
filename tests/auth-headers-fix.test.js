@@ -169,14 +169,10 @@ describe("WordPress REST API Authentication Headers", () => {
     });
 
     it("should handle FormData requests without breaking auth headers", async () => {
-      // Create mock FormData
-      const FormData = (await import("form-data")).default;
+      // Native FormData (global, no import needed) — fetch computes the
+      // multipart Content-Type with boundary itself once given this body.
       const formData = new FormData();
-      formData.append("file", Buffer.from("test"), "test.jpg");
-
-      // Test that FormData gets proper content-type headers from form-data library
-      const headers = formData.getHeaders();
-      expect(headers["content-type"]).toContain("multipart/form-data");
+      formData.append("file", new Blob([Buffer.from("test")]), "test.jpg");
 
       // Mock successful response
       nock(testBaseUrl)
