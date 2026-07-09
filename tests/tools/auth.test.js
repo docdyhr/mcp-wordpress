@@ -124,6 +124,68 @@ describe("AuthTools", () => {
       expect(mockClient.getCurrentUser).not.toHaveBeenCalled();
     });
 
+    it("should fail immediately when ping returns false without calling getCurrentUser", async () => {
+      // Real ping() never throws — it returns false on failure
+      mockClient.ping.mockResolvedValue(false);
+
+      await expect(authTools.handleTestAuth(mockClient, {})).rejects.toThrow(
+        "Authentication test failed: Site unreachable: https://example.com",
+      );
+
+      expect(mockClient.ping).toHaveBeenCalledTimes(1);
+      expect(mockClient.getCurrentUser).not.toHaveBeenCalled();
+    });
+
+    it("should time out after 10 seconds and not hang indefinitely", async () => {
+      vi.useFakeTimers();
+      try {
+        // Simulate an unreachable site: ping never resolves
+        mockClient.ping.mockImplementation(() => new Promise(() => {}));
+
+        const authPromise = authTools.handleTestAuth(mockClient, {});
+        vi.advanceTimersByTime(10_000);
+
+        await expect(authPromise).rejects.toThrow("Authentication test failed: Connection timed out after 10s");
+
+        expect(mockClient.ping).toHaveBeenCalledTimes(1);
+        expect(mockClient.getCurrentUser).not.toHaveBeenCalled();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("should not call getCurrentUser if ping resolves after the timeout already fired", async () => {
+      vi.useFakeTimers();
+      try {
+        let resolvePing;
+        mockClient.ping.mockImplementation(
+          () =>
+            new Promise((resolve) => {
+              resolvePing = resolve;
+            }),
+        );
+
+        const authPromise = authTools.handleTestAuth(mockClient, {});
+        // Attach a handler immediately so the eventual rejection isn't
+        // reported as unhandled while timers/microtasks advance below.
+        const assertion = expect(authPromise).rejects.toThrow(
+          "Authentication test failed: Connection timed out after 10s",
+        );
+
+        vi.advanceTimersByTime(10_000);
+        await assertion;
+
+        // ping() finally resolves, but only after the race already settled
+        resolvePing(true);
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(mockClient.getCurrentUser).not.toHaveBeenCalled();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it("should handle getCurrentUser failures after successful ping", async () => {
       // Mock successful ping but failed user fetch
       mockClient.ping.mockResolvedValue(true);

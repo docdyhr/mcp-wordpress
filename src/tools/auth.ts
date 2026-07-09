@@ -87,22 +87,50 @@ export class AuthTools {
     client: WordPressClient,
     params: Record<string, unknown>,
   ): Promise<Record<string, unknown>> {
+    const TIMEOUT_MS = 10_000;
+    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+    let timedOut = false;
+
+    const timeoutSignal = new Promise<never>((_, reject) => {
+      timeoutHandle = setTimeout(() => {
+        timedOut = true;
+        reject(new Error(`Connection timed out after ${TIMEOUT_MS / 1000}s`));
+      }, TIMEOUT_MS);
+    });
+
     try {
-      await client.ping();
-      const user = await client.getCurrentUser();
-      const siteConfig = client.config;
+      return await Promise.race([
+        (async () => {
+          const reachable = await client.ping();
+          // Promise.race doesn't cancel the losing branch — if ping() was
+          // still pending when the timeout fired, the race has already
+          // settled by the time it resolves. Stop here instead of making
+          // an unnecessary (and unobserved) getCurrentUser() request.
+          if (timedOut) {
+            throw new Error("Superseded by timeout");
+          }
+          if (!reachable) {
+            throw new Error(`Site unreachable: ${client.config.baseUrl}`);
+          }
+          const user = await client.getCurrentUser();
+          const siteConfig = client.config;
 
-      const content =
-        "✅ **Authentication successful!**\n\n" +
-        `**Site:** ${siteConfig.baseUrl}\n` +
-        `**Method:** ${siteConfig.auth.method}\n` +
-        `**User:** ${user.name} (@${user.slug})\n` +
-        `**Roles:** ${user.roles?.join(", ") || "N/A"}\n\n` +
-        "Your WordPress connection is working properly.";
+          const content =
+            "✅ **Authentication successful!**\n\n" +
+            `**Site:** ${siteConfig.baseUrl}\n` +
+            `**Method:** ${siteConfig.auth.method}\n` +
+            `**User:** ${user.name} (@${user.slug})\n` +
+            `**Roles:** ${user.roles?.join(", ") || "N/A"}\n\n` +
+            "Your WordPress connection is working properly.";
 
-      return { content };
+          return { content };
+        })(),
+        timeoutSignal,
+      ]);
     } catch (_error) {
       throw new Error(`Authentication test failed: ${getErrorMessage(_error)}`);
+    } finally {
+      clearTimeout(timeoutHandle);
     }
   }
 
