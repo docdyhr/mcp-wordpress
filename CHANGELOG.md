@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.16](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.15...v3.3.16) (2026-07-09)
+
+### 🐛 Bug Fixes
+
+* resolve media upload 400 error caused by duplicate Content-Type header ([#199](https://github.com/docdyhr/mcp-wordpress/issues/199)) ([0df639b](https://github.com/docdyhr/mcp-wordpress/commit/0df639bcec6eaf1060a2e43dc5c325e20177db19)), closes [#2](https://github.com/docdyhr/mcp-wordpress/issues/2)
+
+### 📚 Documentation
+
+* trim README from 1168 to 342 lines ([#197](https://github.com/docdyhr/mcp-wordpress/issues/197)) ([3bdef35](https://github.com/docdyhr/mcp-wordpress/commit/3bdef35b24a5902855a771577806238fcf268dd3))
+
 ## [Unreleased]
 
 ### 📚 Documentation
