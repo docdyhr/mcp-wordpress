@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.17](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.16...v3.3.17) (2026-07-09)
+
+### 🐛 Bug Fixes
+
+* **auth:** bound wp_test_auth with 10s timeout and check ping() return value ([#202](https://github.com/docdyhr/mcp-wordpress/issues/202)) ([7e2fdac](https://github.com/docdyhr/mcp-wordpress/commit/7e2fdac9d5a28a1d9cc96f497d52f22d5bccbbe9))
+
 ## [3.3.16](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.15...v3.3.16) (2026-07-09)
 
 ### 🐛 Bug Fixes
