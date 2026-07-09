@@ -3,7 +3,6 @@
  * Handles all media-related WordPress REST API operations
  */
 
-import FormData from "form-data";
 import { promises as fsPromises } from "fs";
 import * as path from "path";
 import type { WordPressMedia, MediaQueryParams, UploadMediaRequest, UpdateMediaRequest } from "@/types/wordpress.js";
@@ -61,7 +60,12 @@ export class MediaOperations {
 
     try {
       const stats = await fileHandle.stat();
-      const filename = data.title || path.basename(data.file_path);
+      // Always derive the filename from the actual file path, never from
+      // `title`. `title` is separate WordPress metadata (sent to uploadFile()
+      // via `data` below); it commonly has no file extension, and using it
+      // as the multipart filename trips WordPress's filetype check with
+      // "Sorry, you are not allowed to upload this file type."
+      const filename = path.basename(data.file_path);
 
       // Check if file is too large (WordPress default is 2MB for most installs)
       const maxSize = 10 * 1024 * 1024; // 10MB reasonable limit
@@ -96,15 +100,24 @@ export class MediaOperations {
   ): Promise<WordPressMedia> {
     log.debug(`Uploading file: ${filename} (${fileData.length} bytes)`);
 
-    // Use FormData but with correct configuration for node-fetch
+    // Use Node/Web-native FormData + Blob (global, no import needed) instead of
+    // the "form-data" npm package. The npm package's getHeaders() returns a
+    // lowercase "content-type" that collides with fetch's own "Content-Type"
+    // header (case-insensitively different keys survive Object.assign, so
+    // both end up on the request) and its byte length can drift from the
+    // Content-Length it computes, both of which the WP REST API rejects.
+    // Native FormData avoids both: fetch sets the correct multipart boundary
+    // Content-Type and Content-Length itself when given a native FormData body.
     const formData = new FormData();
-    formData.setMaxListeners(20);
 
-    // Add file with correct options
-    formData.append("file", fileData, {
-      filename,
-      contentType: mimeType,
-    });
+    // Add file with correct options. fileData is already a Buffer, which is
+    // a valid BlobPart at runtime (Buffer extends Uint8Array) — no need to
+    // re-wrap it and copy the bytes. The cast is needed because Buffer's
+    // type is generic over ArrayBufferLike (including SharedArrayBuffer),
+    // while BlobPart requires the narrower Uint8Array<ArrayBuffer>; every
+    // Buffer this method receives (from fs reads or Buffer.from) is backed
+    // by a plain ArrayBuffer.
+    formData.append("file", new Blob([fileData as Uint8Array<ArrayBuffer>], { type: mimeType }), filename);
 
     // Add metadata
     if (meta.title) formData.append("title", meta.title);
