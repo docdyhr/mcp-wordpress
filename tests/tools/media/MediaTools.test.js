@@ -4,25 +4,9 @@
  */
 
 import { vi } from "vitest";
-
-// Mock fs module BEFORE any other imports
-const mockExistsSync = vi.fn();
-const mockAccess = vi.fn();
-
-vi.mock("fs", () => ({
-  existsSync: mockExistsSync,
-  statSync: vi.fn().mockReturnValue({ size: 1024 }),
-  readFileSync: vi.fn().mockReturnValue(Buffer.from("test file content")),
-  writeFileSync: vi.fn(),
-  unlinkSync: vi.fn(),
-  promises: {
-    access: mockAccess,
-    readFile: vi.fn().mockResolvedValue(Buffer.from("test file content")),
-    writeFile: vi.fn(),
-    unlink: vi.fn(),
-    stat: vi.fn().mockResolvedValue({ size: 1024 }),
-  },
-}));
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
 
 // Mock the dependencies
 vi.mock("../../../dist/client/api.js");
@@ -34,14 +18,18 @@ const { WordPressClient } = await import("../../../dist/client/api.js"); // esli
 describe("MediaTools", () => {
   let mediaTools;
   let mockClient;
+  let tmpUploadDir;
+  let previousUploadBaseDir;
 
   beforeEach(() => {
     // Reset mocks
     vi.clearAllMocks();
 
-    // Default to file exists (resolved promise means file exists)
-    mockAccess.mockResolvedValue(undefined);
-    mockExistsSync.mockReturnValue(true);
+    // Uploads are validated against a real, explicitly configured directory
+    // (local uploads are disabled unless MCP_UPLOAD_BASE_DIR is set).
+    previousUploadBaseDir = process.env.MCP_UPLOAD_BASE_DIR;
+    tmpUploadDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "mcp-wp-media-test-")));
+    process.env.MCP_UPLOAD_BASE_DIR = tmpUploadDir;
 
     // Create mock client instance with all necessary methods
     mockClient = {
@@ -58,6 +46,15 @@ describe("MediaTools", () => {
 
     // Create MediaTools instance
     mediaTools = new MediaTools();
+  });
+
+  afterEach(() => {
+    if (previousUploadBaseDir === undefined) {
+      delete process.env.MCP_UPLOAD_BASE_DIR;
+    } else {
+      process.env.MCP_UPLOAD_BASE_DIR = previousUploadBaseDir;
+    }
+    fs.rmSync(tmpUploadDir, { recursive: true, force: true });
   });
 
   describe("getTools", () => {
@@ -268,7 +265,6 @@ describe("MediaTools", () => {
 
   describe("handleUploadMedia", () => {
     beforeEach(() => {
-      // File exists by default (mockAccess already resolves in main beforeEach)
       mockClient.uploadMedia.mockResolvedValue({
         id: 100,
         title: { rendered: "Uploaded Image" },
@@ -279,13 +275,15 @@ describe("MediaTools", () => {
     });
 
     it("should upload media with file path only", async () => {
+      const filePath = path.join(tmpUploadDir, "image.jpg");
+      fs.writeFileSync(filePath, "fake image bytes");
+
       const result = await mediaTools.handleUploadMedia(mockClient, {
-        file_path: "/path/to/image.jpg",
+        file_path: filePath,
       });
 
-      expect(mockAccess).toHaveBeenCalledWith("/path/to/image.jpg");
       expect(mockClient.uploadMedia).toHaveBeenCalledWith({
-        file_path: "/path/to/image.jpg",
+        file_path: filePath,
       });
       expect(typeof result).toBe("string");
       expect(result).toContain("Media uploaded successfully");
@@ -293,8 +291,10 @@ describe("MediaTools", () => {
     });
 
     it("should upload media with full metadata", async () => {
+      const filePath = path.join(tmpUploadDir, "image.jpg");
+      fs.writeFileSync(filePath, "fake image bytes");
       const uploadData = {
-        file_path: "/path/to/image.jpg",
+        file_path: filePath,
         title: "My Image",
         alt_text: "Image description",
         caption: "Image caption",
@@ -310,46 +310,49 @@ describe("MediaTools", () => {
     });
 
     it("should handle file not found error", async () => {
-      // Mock fs.promises.access to reject (file doesn't exist)
-      mockAccess.mockRejectedValue(new Error("ENOENT"));
-      mockExistsSync.mockReturnValue(false);
+      const missingPath = path.join(tmpUploadDir, "non-existent-file.jpg");
 
       await expect(
         mediaTools.handleUploadMedia(mockClient, {
-          file_path: "/non/existent/file.jpg",
+          file_path: missingPath,
         }),
-      ).rejects.toThrow("Failed to upload media: File not found at path: /non/existent/file.jpg");
+      ).rejects.toThrow(`Failed to upload media: File not found at path: ${missingPath}`);
 
-      expect(mockAccess).toHaveBeenCalledWith("/non/existent/file.jpg");
       expect(mockClient.uploadMedia).not.toHaveBeenCalled();
     });
 
     it("should handle upload errors", async () => {
+      const filePath = path.join(tmpUploadDir, "image.jpg");
+      fs.writeFileSync(filePath, "fake image bytes");
       mockClient.uploadMedia.mockRejectedValue(new Error("Upload failed"));
 
       await expect(
         mediaTools.handleUploadMedia(mockClient, {
-          file_path: "/path/to/image.jpg",
+          file_path: filePath,
         }),
       ).rejects.toThrow("Failed to upload media: Upload failed");
     });
 
     it("should handle invalid file types", async () => {
+      const filePath = path.join(tmpUploadDir, "file.exe");
+      fs.writeFileSync(filePath, "fake binary bytes");
       mockClient.uploadMedia.mockRejectedValue(new Error("Invalid file type"));
 
       await expect(
         mediaTools.handleUploadMedia(mockClient, {
-          file_path: "/path/to/file.exe",
+          file_path: filePath,
         }),
       ).rejects.toThrow("Failed to upload media: Invalid file type");
     });
 
     it("should handle file size limits", async () => {
+      const filePath = path.join(tmpUploadDir, "huge-file.jpg");
+      fs.writeFileSync(filePath, "fake image bytes");
       mockClient.uploadMedia.mockRejectedValue(new Error("File too large"));
 
       await expect(
         mediaTools.handleUploadMedia(mockClient, {
-          file_path: "/path/to/huge-file.jpg",
+          file_path: filePath,
         }),
       ).rejects.toThrow("Failed to upload media: File too large");
     });
@@ -512,10 +515,11 @@ describe("MediaTools", () => {
     });
 
     it("should handle authentication errors", async () => {
-      // File exists by default (mockAccess resolves)
+      const filePath = path.join(tmpUploadDir, "file.jpg");
+      fs.writeFileSync(filePath, "fake image bytes");
       mockClient.uploadMedia.mockRejectedValue(new Error("401 Unauthorized"));
 
-      await expect(mediaTools.handleUploadMedia(mockClient, { file_path: "/path/to/file.jpg" })).rejects.toThrow(
+      await expect(mediaTools.handleUploadMedia(mockClient, { file_path: filePath })).rejects.toThrow(
         "Failed to upload media: 401 Unauthorized",
       );
     });
@@ -543,29 +547,31 @@ describe("MediaTools", () => {
       ).rejects.toThrow("Failed to update media: 500 Internal Server Error");
     });
 
-    it("should handle file system permission errors", async () => {
-      // Mock fs.promises.access to reject with permission error
-      mockAccess.mockRejectedValue(new Error("Permission denied"));
+    it("should handle inaccessible files", async () => {
+      const restrictedPath = path.join(tmpUploadDir, "restricted-file.jpg");
+      // Not created — simulates a file this process can't see/reach.
 
-      await expect(mediaTools.handleUploadMedia(mockClient, { file_path: "/restricted/file.jpg" })).rejects.toThrow(
-        "Failed to upload media: File not found at path: /restricted/file.jpg",
+      await expect(mediaTools.handleUploadMedia(mockClient, { file_path: restrictedPath })).rejects.toThrow(
+        `Failed to upload media: File not found at path: ${restrictedPath}`,
       );
     });
 
     it("should handle large file uploads", async () => {
-      // File exists by default (mockAccess resolves)
+      const filePath = path.join(tmpUploadDir, "large-file.jpg");
+      fs.writeFileSync(filePath, "fake image bytes");
       mockClient.uploadMedia.mockRejectedValue(new Error("Request entity too large"));
 
-      await expect(mediaTools.handleUploadMedia(mockClient, { file_path: "/path/to/large-file.jpg" })).rejects.toThrow(
+      await expect(mediaTools.handleUploadMedia(mockClient, { file_path: filePath })).rejects.toThrow(
         "Failed to upload media: Request entity too large",
       );
     });
 
     it("should handle unsupported file formats", async () => {
-      mockExistsSync.mockReturnValue(true);
+      const filePath = path.join(tmpUploadDir, "file.xyz");
+      fs.writeFileSync(filePath, "fake bytes");
       mockClient.uploadMedia.mockRejectedValue(new Error("Unsupported file format"));
 
-      await expect(mediaTools.handleUploadMedia(mockClient, { file_path: "/path/to/file.xyz" })).rejects.toThrow(
+      await expect(mediaTools.handleUploadMedia(mockClient, { file_path: filePath })).rejects.toThrow(
         "Failed to upload media: Unsupported file format",
       );
     });

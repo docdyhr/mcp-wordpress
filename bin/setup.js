@@ -249,8 +249,11 @@ class WordPressSetup {
       .map(([key, value]) => `${key}=${value}`)
       .join("\n");
 
-    writeFileSync(this.envPath, envContent);
-    console.log("✅ Configuration saved to .env file");
+    // Owner-only permissions: the file holds plaintext credentials.
+    // mode on writeFileSync only applies at creation time on POSIX; Windows
+    // has no equivalent and silently ignores it.
+    writeFileSync(this.envPath, envContent, { mode: 0o600 });
+    console.log("✅ Configuration saved to .env file (permissions set to owner-only where supported)");
   }
 
   async showNextSteps() {

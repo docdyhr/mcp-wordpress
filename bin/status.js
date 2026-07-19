@@ -107,9 +107,20 @@ class WordPressStatus {
     }
   }
 
+  isSensitiveVarName(varName) {
+    // Keyword-based classification so any credential-shaped variable name is
+    // caught, not just an exact-match allowlist that real env var names
+    // (e.g. WORDPRESS_APP_PASSWORD) don't happen to appear in.
+    const sensitiveKeywords = ["PASSWORD", "SECRET", "TOKEN", "KEY", "NONCE", "COOKIE", "AUTHORIZATION", "CREDENTIAL"];
+    const upper = varName.toUpperCase();
+    return sensitiveKeywords.some((keyword) => upper.includes(keyword));
+  }
+
   maskSensitive(varName, value) {
-    const sensitiveVars = ["PASSWORD", "APPLICATION_PASSWORD", "JWT_SECRET", "API_KEY", "API_SECRET"];
-    if (sensitiveVars.includes(varName)) {
+    if (!value) {
+      return value;
+    }
+    if (this.isSensitiveVarName(varName)) {
       return value.length > 4 ? value.substring(0, 4) + "..." : "***";
     }
     return value;
@@ -151,8 +162,6 @@ class WordPressStatus {
 
       // Test authentication
       console.log("🔄 Testing authentication...");
-      const authConfig = this.getAuthConfig();
-      console.log("Debug: Auth config:", authConfig);
       await client.authenticate();
       console.log("✅ Authentication successful");
 

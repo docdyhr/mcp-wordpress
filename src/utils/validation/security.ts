@@ -5,23 +5,81 @@
  * file size limits, MIME type validation, and HTML sanitization.
  */
 
+import * as fs from "fs";
 import * as path from "path";
 import { WordPressAPIError } from "@/types/client.js";
 
 /**
- * Validates and sanitizes file paths to prevent directory traversal
+ * Validates and sanitizes file paths to prevent directory traversal.
+ *
+ * Local uploads are disabled unless an explicit, existing base directory is
+ * configured. Containment is checked with realpath()+path.relative(), not a
+ * raw string prefix, so a sibling directory that merely shares a name prefix
+ * (e.g. "/safe-secret" against an allowed root of "/safe") cannot pass, and
+ * symlinks that resolve outside the allowed root are caught. The candidate
+ * itself must be a regular file — symlinks, directories, and other special
+ * files are rejected outright regardless of where they point.
  */
-export function validateFilePath(userPath: string, allowedBasePath: string): string {
-  // Normalize the path to remove ../ and other dangerous patterns
-  const normalizedPath = path.normalize(userPath);
-  const resolvedPath = path.resolve(allowedBasePath, normalizedPath);
+export function validateFilePath(userPath: string, allowedBasePath: string | undefined | null): string {
+  if (!allowedBasePath) {
+    throw new WordPressAPIError(
+      "Local file uploads are disabled. Set MCP_UPLOAD_BASE_DIR to an explicit, existing directory to enable them.",
+      403,
+      "UPLOADS_DISABLED",
+    );
+  }
 
-  // Ensure the resolved path is within the allowed directory
-  if (!resolvedPath.startsWith(path.resolve(allowedBasePath))) {
+  let resolvedBase: string;
+  try {
+    resolvedBase = fs.realpathSync(allowedBasePath);
+  } catch {
+    throw new WordPressAPIError(
+      `Configured upload directory does not exist: ${allowedBasePath}`,
+      500,
+      "UPLOAD_ROOT_MISSING",
+    );
+  }
+
+  if (!fs.statSync(resolvedBase).isDirectory()) {
+    throw new WordPressAPIError(
+      `Configured upload directory is not a directory: ${allowedBasePath}`,
+      500,
+      "UPLOAD_ROOT_INVALID",
+    );
+  }
+
+  const normalizedUserPath = path.normalize(userPath);
+  const candidatePath = path.isAbsolute(normalizedUserPath)
+    ? normalizedUserPath
+    : path.resolve(resolvedBase, normalizedUserPath);
+
+  let candidateLstat: fs.Stats;
+  try {
+    candidateLstat = fs.lstatSync(candidatePath);
+  } catch {
+    throw new WordPressAPIError(`File not found at path: ${userPath}`, 404, "FILE_NOT_FOUND");
+  }
+
+  if (candidateLstat.isSymbolicLink()) {
+    throw new WordPressAPIError("Invalid file path: symlinks are not allowed", 403, "SYMLINK_NOT_ALLOWED");
+  }
+
+  if (!candidateLstat.isFile()) {
+    throw new WordPressAPIError("Invalid file path: only regular files may be uploaded", 403, "NOT_A_REGULAR_FILE");
+  }
+
+  // Resolves any symlinked ancestor directories so a path that only escapes
+  // via an intermediate symlink is still caught by the containment check.
+  const resolvedCandidate = fs.realpathSync(candidatePath);
+  const relative = path.relative(resolvedBase, resolvedCandidate);
+  const isContained =
+    relative !== "" && relative !== ".." && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative);
+
+  if (!isContained) {
     throw new WordPressAPIError("Invalid file path: access denied", 403, "PATH_TRAVERSAL_ATTEMPT");
   }
 
-  return resolvedPath;
+  return resolvedCandidate;
 }
 
 /**
