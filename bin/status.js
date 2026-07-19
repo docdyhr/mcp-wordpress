@@ -82,7 +82,7 @@ class WordPressStatus {
     const optionalVars = ["DEBUG", "WORDPRESS_DEBUG", "CACHE_ENABLED", "WORDPRESS_TIMEOUT"];
     for (const varName of optionalVars) {
       if (process.env[varName]) {
-        console.log(`ℹ️  ${varName}: ${process.env[varName]}`);
+        console.log(`ℹ️  ${varName}: ${this.maskSensitive(varName, process.env[varName])}`);
       }
     }
 

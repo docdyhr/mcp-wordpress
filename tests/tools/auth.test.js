@@ -368,10 +368,10 @@ describe("AuthTools", () => {
       });
     });
 
-    it("switches to api-key and verifies it", async () => {
+    it("switches to api-key but does not claim the key was verified (regression: api-key has no live verification step)", async () => {
       mockClient.authenticate.mockResolvedValue(true);
 
-      await authTools.handleSwitchAuthMethod(mockClient, {
+      const result = await authTools.handleSwitchAuthMethod(mockClient, {
         method: "api-key",
         api_key: "key123",
       });
@@ -380,6 +380,8 @@ describe("AuthTools", () => {
         method: "api-key",
         apiKey: "key123",
       });
+      expect(result.content).not.toContain("verified it successfully");
+      expect(result.content).toContain("not verified with a live request");
     });
 
     it("rejects a method missing its required fields without touching the client", async () => {

@@ -214,7 +214,14 @@ export class AuthTools {
         client.setAuthConfig(previousAuth);
         throw authError;
       }
-      return { content: `✅ Switched to '${method}' authentication and verified it successfully.` };
+      // api-key has no server-side verification step (WordPressClient.authenticate()
+      // just sets a header and returns true), so it can't honestly claim "verified"
+      // the way app-password/basic/jwt do via a real request — say so instead.
+      const confirmation =
+        method === "api-key"
+          ? `✅ Switched to '${method}' authentication. Note: the key is not verified with a live request; an invalid key will only surface as a 401/403 on later calls.`
+          : `✅ Switched to '${method}' authentication and verified it successfully.`;
+      return { content: confirmation };
     } catch (_error) {
       throw new Error(`Failed to switch auth method: ${getErrorMessage(_error)}`);
     }
