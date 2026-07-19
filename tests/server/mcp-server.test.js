@@ -11,6 +11,7 @@ vi.mock("../../dist/config/ServerConfiguration.js", () => ({
 }));
 
 const { MCPWordPressServer, runHealthCheck } = await import("../../dist/index.js");
+const { MockWordPressClient } = await import("../../dist/client/MockWordPressClient.js");
 
 describe("MCPWordPressServer", () => {
   let originalConsoleError;
@@ -70,6 +71,33 @@ describe("MCPWordPressServer", () => {
 
       expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining("Health check passed"));
       expect(process.exit).toHaveBeenCalledWith(0);
+    });
+
+    it("regression: exits 1 when the only 'client' is CI mock mode's demo MockWordPressClient", async () => {
+      // ServerConfiguration substitutes a MockWordPressClient when CI=true
+      // (set automatically by most CI runners, including GitHub Actions, on
+      // every job) and no real WORDPRESS_SITE_URL is set, so mcp-eval and
+      // similar tooling can exercise the server without real credentials.
+      // A health check exists specifically to catch "no real WordPress
+      // configured" — counting that demo client as configured would make
+      // this check always pass in any CI-flagged environment regardless of
+      // real configuration, silently defeating its own purpose. Caught by
+      // this project's own CI: the Phase 4.13 install-and-run smoke test
+      // reported "Health check passed: 1 site(s) configured" against a
+      // freshly installed tarball with zero real WordPress config.
+      const mockClient = new MockWordPressClient({
+        baseUrl: "https://demo.wordpress.com",
+        auth: { method: "app-password", username: "ci-user", appPassword: "ci-mock-password" },
+      });
+      mockLoadClientConfigurations.mockResolvedValue({
+        clients: new Map([["default", mockClient]]),
+        configs: [],
+      });
+
+      await runHealthCheck();
+
+      expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining("no WordPress sites configured"));
+      expect(process.exit).toHaveBeenCalledWith(1);
     });
 
     it("exits 1 when no WordPress sites are configured", async () => {

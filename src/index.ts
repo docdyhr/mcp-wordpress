@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { fileURLToPath } from "url";
 import { WordPressClient } from "./client/api.js";
+import { MockWordPressClient } from "./client/MockWordPressClient.js";
 import { ServerConfiguration, SiteConfig } from "./config/ServerConfiguration.js";
 import { ToolRegistry } from "./server/ToolRegistry.js";
 import { ConnectionTester } from "./server/ConnectionTester.js";
@@ -160,11 +161,20 @@ async function runHealthCheck(): Promise<void> {
   try {
     const serverConfig = ServerConfiguration.getInstance();
     const { clients } = await serverConfig.loadClientConfigurations();
-    if (clients.size === 0) {
+    // ServerConfiguration substitutes a MockWordPressClient when CI=true (set
+    // automatically by most CI runners, including GitHub Actions, on every
+    // job) and no real WORDPRESS_SITE_URL is set — added so mcp-eval and
+    // similar tooling can exercise the server without real credentials. A
+    // health check exists specifically to catch "no real WordPress
+    // configured", so counting that mock client as configured would make
+    // this check always pass in any CI-flagged environment regardless of
+    // real configuration — silently defeating its own purpose.
+    const realClients = Array.from(clients.values()).filter((client) => !(client instanceof MockWordPressClient));
+    if (realClients.length === 0) {
       process.stderr.write("Health check failed: no WordPress sites configured\n");
       process.exit(1);
     }
-    process.stdout.write(`Health check passed: ${clients.size} site(s) configured\n`);
+    process.stdout.write(`Health check passed: ${realClients.length} site(s) configured\n`);
     process.exit(0);
   } catch (_error) {
     process.stderr.write(`Health check failed: ${getErrorMessage(_error)}\n`);
