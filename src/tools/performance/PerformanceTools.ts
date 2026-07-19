@@ -866,6 +866,9 @@ export default class PerformanceTools {
       environment: ConfigHelpers.get().get().app.nodeEnv,
     });
 
+    // unref() so this background timer alone can never keep a process (or a
+    // one-shot script that merely imports/instantiates this class, e.g.
+    // docs generation) alive.
     this.historicalDataInterval = setInterval(() => {
       try {
         const currentMetrics = this.collector.collectCurrentMetrics();
@@ -878,7 +881,7 @@ export default class PerformanceTools {
           _error: _error instanceof Error ? _error.message : String(_error),
         });
       }
-    }, interval);
+    }, interval).unref();
   }
 
   /**

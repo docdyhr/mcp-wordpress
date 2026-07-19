@@ -386,9 +386,11 @@ export class CacheManager {
    * Note: This uses setInterval and is not called in test environments to avoid Jest timer issues
    */
   private startCleanupInterval(): void {
+    // unref() so this background timer alone can never keep a process (or a
+    // one-shot script that merely imports/instantiates this class) alive.
     this.cleanupInterval = setInterval(() => {
       this.cleanupExpired();
-    }, 60000); // Cleanup every minute
+    }, 60000).unref(); // Cleanup every minute
   }
 
   /**

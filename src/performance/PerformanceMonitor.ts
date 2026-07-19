@@ -326,6 +326,8 @@ export class PerformanceMonitor {
    * Note: This uses setInterval and is not called in test environments to avoid Jest timer issues
    */
   private startCollection(): void {
+    // unref() so this background timer alone can never keep a process (or a
+    // one-shot script that merely imports/instantiates this class) alive.
     this.collectionTimer = setInterval(() => {
       const snapshot = this.getMetrics();
 
@@ -333,7 +335,7 @@ export class PerformanceMonitor {
         this.historicalData.push(snapshot);
         this.cleanupOldData();
       }
-    }, this.config.collectInterval);
+    }, this.config.collectInterval).unref();
   }
 
   /**
