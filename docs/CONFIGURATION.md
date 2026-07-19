@@ -47,17 +47,24 @@ RATE_LIMIT_WINDOW=60000
 
 #### Required Variables
 
-| Variable                 | Required | Description                    | Example                         |
-| ------------------------ | -------- | ------------------------------ | ------------------------------- |
-| `WORDPRESS_SITE_URL`     | Yes      | Full WordPress site URL        | `https://blog.example.com`      |
-| `WORDPRESS_USERNAME`     | Yes      | WordPress username             | `admin`                         |
-| `WORDPRESS_APP_PASSWORD` | Yes      | WordPress application password | `AbCd EfGh IjKl MnOp QrSt UvWx` |
+| Variable             | Required | Description             | Example                    |
+| --------------------- | -------- | ------------------------ | --------------------------- |
+| `WORDPRESS_SITE_URL` | Yes      | Full WordPress site URL | `https://blog.example.com` |
+| `WORDPRESS_USERNAME` | Yes\*    | WordPress username      | `admin`                    |
+
+\*Not required for `api-key` auth, which doesn't use a username.
 
 #### Authentication Variables
 
-| Variable                | Default        | Description           | Options                                   |
-| ----------------------- | -------------- | --------------------- | ----------------------------------------- |
-| `WORDPRESS_AUTH_METHOD` | `app-password` | Authentication method | `app-password`, `jwt`, `basic`, `api-key` |
+Which of these are required depends on `WORDPRESS_AUTH_METHOD` — each method needs only its own credentials, not all of them.
+
+| Variable                 | Required for                      | Description                       | Example                                   |
+| ------------------------- | ---------------------------------- | ----------------------------------- | -------------------------------------------- |
+| `WORDPRESS_AUTH_METHOD`  | always (default: `app-password`) | Authentication method              | `app-password`, `jwt`, `basic`, `api-key` |
+| `WORDPRESS_APP_PASSWORD` | `app-password`                    | WordPress application password     | `AbCd EfGh IjKl MnOp QrSt UvWx`            |
+| `WORDPRESS_PASSWORD`     | `basic`, `jwt`                    | WordPress account password         | `your-regular-password`                    |
+| `WORDPRESS_JWT_SECRET`   | `jwt`                             | JWT Authentication plugin secret   | `your-jwt-plugin-secret`                   |
+| `WORDPRESS_API_KEY`      | `api-key`                         | API key from an API-key plugin     | `your-api-key`                             |
 
 #### Runtime Variables
 
@@ -100,7 +107,8 @@ Create `mcp-wordpress.config.json` in your project root:
       "config": {
         "WORDPRESS_SITE_URL": "https://client-blog.com",
         "WORDPRESS_USERNAME": "editor",
-        "WORDPRESS_APP_PASSWORD": "yyyy yyyy yyyy yyyy yyyy yyyy",
+        "WORDPRESS_PASSWORD": "editor-account-password",
+        "WORDPRESS_JWT_SECRET": "client-blog-jwt-plugin-secret",
         "WORDPRESS_AUTH_METHOD": "jwt"
       }
     },
@@ -110,7 +118,7 @@ Create `mcp-wordpress.config.json` in your project root:
       "config": {
         "WORDPRESS_SITE_URL": "https://dev.example.com",
         "WORDPRESS_USERNAME": "developer",
-        "WORDPRESS_APP_PASSWORD": "zzzz zzzz zzzz zzzz zzzz zzzz",
+        "WORDPRESS_PASSWORD": "developer-account-password",
         "WORDPRESS_AUTH_METHOD": "basic"
       }
     }
@@ -213,7 +221,7 @@ wp_get_site_settings --site="dev-site"
       "config": {
         "WORDPRESS_SITE_URL": "http://localhost:8080",
         "WORDPRESS_USERNAME": "dev",
-        "WORDPRESS_APP_PASSWORD": "locl locl locl locl locl locl",
+        "WORDPRESS_PASSWORD": "dev-account-password",
         "WORDPRESS_AUTH_METHOD": "basic"
       }
     }
@@ -262,7 +270,8 @@ wp_get_site_settings --site="dev-site"
 {
   "WORDPRESS_AUTH_METHOD": "jwt",
   "WORDPRESS_USERNAME": "your-username",
-  "WORDPRESS_APP_PASSWORD": "your-jwt-token"
+  "WORDPRESS_PASSWORD": "your-regular-password",
+  "WORDPRESS_JWT_SECRET": "your-jwt-plugin-secret"
 }
 ```
 
@@ -284,7 +293,7 @@ define('JWT_AUTH_CORS_ENABLE', true);
 {
   "WORDPRESS_AUTH_METHOD": "basic",
   "WORDPRESS_USERNAME": "your-username",
-  "WORDPRESS_APP_PASSWORD": "your-regular-password"
+  "WORDPRESS_PASSWORD": "your-regular-password"
 }
 ```
 
@@ -301,8 +310,7 @@ define('JWT_AUTH_CORS_ENABLE', true);
 ```json
 {
   "WORDPRESS_AUTH_METHOD": "api-key",
-  "WORDPRESS_USERNAME": "your-username",
-  "WORDPRESS_APP_PASSWORD": "your-api-key"
+  "WORDPRESS_API_KEY": "your-api-key"
 }
 ```
 

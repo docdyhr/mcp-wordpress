@@ -143,7 +143,6 @@ class WordPressSetup {
   async setupAPIKey() {
     this.config.AUTH_METHOD = "api-key";
     this.config.API_KEY = await this.rl.question("API Key: ");
-    this.config.API_SECRET = await this.rl.question("API Secret (if required): ");
   }
 
   async ensureBuild() {
@@ -171,10 +170,13 @@ class WordPressSetup {
       });
 
       await client.authenticate();
-      const sites = await client.get("/wp/v2/");
+      // getSiteInfo() hits the REST root (wp-json/wp/v2/); the client's own
+      // apiUrl already includes that prefix, so passing "/wp/v2/" here would
+      // request .../wp-json/wp/v2/wp/v2/ and 404.
+      const siteInfo = await client.getSiteInfo();
 
       console.log("✅ Connection successful!");
-      console.log(`   Site: ${sites.name || "WordPress Site"}`);
+      console.log(`   Site: ${siteInfo.name || "WordPress Site"}`);
       console.log(`   URL: ${this.config.WORDPRESS_URL}`);
     } catch (error) {
       console.log("❌ Connection failed:", error.message);
@@ -212,7 +214,6 @@ class WordPressSetup {
         return {
           method: "api-key",
           apiKey: this.config.API_KEY,
-          secret: this.config.API_SECRET,
         };
       default:
         throw new Error("Invalid authentication method");
@@ -240,9 +241,6 @@ class WordPressSetup {
     }
     if (this.config.API_KEY) {
       envVars["WORDPRESS_API_KEY"] = this.config.API_KEY;
-    }
-    if (this.config.API_SECRET) {
-      envVars["WORDPRESS_API_SECRET"] = this.config.API_SECRET;
     }
 
     const envContent = Object.entries(envVars)
@@ -290,7 +288,6 @@ class WordPressSetup {
     if (this.config.PASSWORD) envVars.push(`"WORDPRESS_PASSWORD": "${this.config.PASSWORD}"`);
     if (this.config.JWT_SECRET) envVars.push(`"WORDPRESS_JWT_SECRET": "${this.config.JWT_SECRET}"`);
     if (this.config.API_KEY) envVars.push(`"WORDPRESS_API_KEY": "${this.config.API_KEY}"`);
-    if (this.config.API_SECRET) envVars.push(`"WORDPRESS_API_SECRET": "${this.config.API_SECRET}"`);
     return envVars.join(",\n        ");
   }
 }

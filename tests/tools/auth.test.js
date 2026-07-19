@@ -10,6 +10,7 @@ describe("AuthTools", () => {
     mockClient = {
       ping: vi.fn(),
       getCurrentUser: vi.fn(),
+      authenticate: vi.fn(),
       isAuthenticated: true,
       config: {
         baseUrl: "https://example.com",
@@ -18,6 +19,11 @@ describe("AuthTools", () => {
         },
       },
     };
+    // Mirrors the real client: setAuthConfig() replaces the auth object
+    // that client.config.auth subsequently reflects.
+    mockClient.setAuthConfig = vi.fn((auth) => {
+      mockClient.config.auth = auth;
+    });
 
     authTools = new AuthTools();
   });
@@ -67,12 +73,12 @@ describe("AuthTools", () => {
       const tools = authTools.getTools();
       const switchTool = tools.find((t) => t.name === "wp_switch_auth_method");
 
-      expect(Object.keys(switchTool.inputSchema.properties)).toHaveLength(4);
+      expect(Object.keys(switchTool.inputSchema.properties)).toHaveLength(5);
 
       const methodProp = switchTool.inputSchema.properties.method;
       expect(methodProp).toBeDefined();
       expect(switchTool.inputSchema.required).toContain("method");
-      expect(methodProp.enum).toEqual(["app-password", "jwt", "basic", "api-key", "cookie"]);
+      expect(methodProp.enum).toEqual(["app-password", "jwt", "basic", "api-key"]);
 
       const usernameProp = switchTool.inputSchema.properties.username;
       expect(usernameProp).toBeDefined();
@@ -82,9 +88,13 @@ describe("AuthTools", () => {
       expect(passwordProp).toBeDefined();
       expect(switchTool.inputSchema.required).not.toContain("password");
 
-      const jwtProp = switchTool.inputSchema.properties.jwt_token;
-      expect(jwtProp).toBeDefined();
-      expect(switchTool.inputSchema.required).not.toContain("jwt_token");
+      const jwtSecretProp = switchTool.inputSchema.properties.jwt_secret;
+      expect(jwtSecretProp).toBeDefined();
+      expect(switchTool.inputSchema.required).not.toContain("jwt_secret");
+
+      const apiKeyProp = switchTool.inputSchema.properties.api_key;
+      expect(apiKeyProp).toBeDefined();
+      expect(switchTool.inputSchema.required).not.toContain("api_key");
     });
   });
 
@@ -305,46 +315,99 @@ describe("AuthTools", () => {
   });
 
   describe("handleSwitchAuthMethod", () => {
-    it("should always throw error indicating feature is not supported", async () => {
-      const testCases = [
-        { method: "app-password", username: "user", password: "pass" },
-        { method: "jwt", jwt_token: "token123" },
-        { method: "basic", username: "user", password: "pass" },
-        { method: "api-key", username: "user", password: "pass" },
-        { method: "cookie", username: "user", password: "pass" },
-      ];
+    it("switches to app-password and verifies it", async () => {
+      mockClient.authenticate.mockResolvedValue(true);
 
-      for (const params of testCases) {
-        await expect(authTools.handleSwitchAuthMethod(mockClient, params)).rejects.toThrow(
-          "Failed to switch auth method: Dynamic authentication method switching is not currently supported. Please update your configuration file and restart the server.",
-        );
-      }
+      const result = await authTools.handleSwitchAuthMethod(mockClient, {
+        method: "app-password",
+        username: "user",
+        password: "app-password-value",
+      });
+
+      expect(mockClient.setAuthConfig).toHaveBeenCalledWith({
+        method: "app-password",
+        username: "user",
+        appPassword: "app-password-value",
+      });
+      expect(mockClient.authenticate).toHaveBeenCalledTimes(1);
+      expect(result.content).toContain("✅");
+      expect(result.content).toContain("app-password");
     });
 
-    it("should handle empty parameters", async () => {
-      await expect(authTools.handleSwitchAuthMethod(mockClient, {})).rejects.toThrow(
-        "Failed to switch auth method: Dynamic authentication method switching is not currently supported",
-      );
+    it("switches to basic auth and verifies it", async () => {
+      mockClient.authenticate.mockResolvedValue(true);
+
+      await authTools.handleSwitchAuthMethod(mockClient, {
+        method: "basic",
+        username: "user",
+        password: "pass",
+      });
+
+      expect(mockClient.setAuthConfig).toHaveBeenCalledWith({
+        method: "basic",
+        username: "user",
+        password: "pass",
+      });
     });
 
-    it("should handle null parameters", async () => {
-      await expect(authTools.handleSwitchAuthMethod(mockClient, { method: null })).rejects.toThrow(
-        "Failed to switch auth method: Dynamic authentication method switching is not currently supported",
-      );
-    });
+    it("switches to jwt and verifies it", async () => {
+      mockClient.authenticate.mockResolvedValue(true);
 
-    it("should properly destructure parameters even though feature is not implemented", async () => {
-      // This test ensures the parameter destructuring works correctly
-      const params = {
+      await authTools.handleSwitchAuthMethod(mockClient, {
         method: "jwt",
-        username: "testuser",
-        password: "testpass",
-        jwt_token: "testtoken",
-      };
+        username: "user",
+        password: "pass",
+        jwt_secret: "secret123",
+      });
 
-      await expect(authTools.handleSwitchAuthMethod(mockClient, params)).rejects.toThrow(
-        "Dynamic authentication method switching is not currently supported",
+      expect(mockClient.setAuthConfig).toHaveBeenCalledWith({
+        method: "jwt",
+        username: "user",
+        password: "pass",
+        secret: "secret123",
+      });
+    });
+
+    it("switches to api-key and verifies it", async () => {
+      mockClient.authenticate.mockResolvedValue(true);
+
+      await authTools.handleSwitchAuthMethod(mockClient, {
+        method: "api-key",
+        api_key: "key123",
+      });
+
+      expect(mockClient.setAuthConfig).toHaveBeenCalledWith({
+        method: "api-key",
+        apiKey: "key123",
+      });
+    });
+
+    it("rejects a method missing its required fields without touching the client", async () => {
+      await expect(authTools.handleSwitchAuthMethod(mockClient, { method: "jwt", username: "user" })).rejects.toThrow(
+        "'jwt' requires 'username', 'password', and 'jwt_secret'.",
       );
+
+      expect(mockClient.setAuthConfig).not.toHaveBeenCalled();
+      expect(mockClient.authenticate).not.toHaveBeenCalled();
+    });
+
+    it("restores the previous auth config when the new credentials fail verification", async () => {
+      const originalAuth = { method: "app-password", username: "orig", appPassword: "origpass" };
+      mockClient.config.auth = originalAuth;
+      mockClient.authenticate.mockRejectedValue(new Error("401 Unauthorized"));
+
+      await expect(
+        authTools.handleSwitchAuthMethod(mockClient, { method: "basic", username: "user", password: "wrong" }),
+      ).rejects.toThrow("Failed to switch auth method: 401 Unauthorized");
+
+      // First call switches to the new (bad) config, second call restores the original.
+      expect(mockClient.setAuthConfig).toHaveBeenCalledTimes(2);
+      expect(mockClient.setAuthConfig).toHaveBeenLastCalledWith(originalAuth);
+    });
+
+    it("rejects an empty method", async () => {
+      await expect(authTools.handleSwitchAuthMethod(mockClient, {})).rejects.toThrow("Failed to switch auth method:");
+      expect(mockClient.setAuthConfig).not.toHaveBeenCalled();
     });
   });
 
@@ -390,7 +453,7 @@ describe("AuthTools", () => {
       const switchTool = tools.find((t) => t.name === "wp_switch_auth_method");
       const methodProp = switchTool.inputSchema.properties.method;
 
-      const validMethods = ["app-password", "jwt", "basic", "api-key", "cookie"];
+      const validMethods = ["app-password", "jwt", "basic", "api-key"];
       expect(methodProp.enum).toEqual(validMethods);
 
       // Ensure all methods are strings

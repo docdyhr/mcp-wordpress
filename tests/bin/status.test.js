@@ -10,7 +10,7 @@ describe("bin/status.js credential redaction", () => {
   const SECRET_APP_PASSWORD = "abcd1234EFGHsecretApplicationPasswordValue";
   const SECRET_JWT_SECRET = "jwtSECRETvalueTHATmustNEVERleak0987";
   const SECRET_JWT_PASSWORD = "jwtUserPasswordSECRETvalue1122";
-  const SECRET_OAUTH_CLIENT_SECRET = "oauthCLIENTsecretVALUEshouldNotLeak";
+  const SECRET_BASIC_PASSWORD = "basicAuthSECRETpasswordVALUE4455";
   const SECRET_COOKIE_NONCE = "cookieNonceSECRETvalue998877";
 
   let logSpy;
@@ -20,11 +20,9 @@ describe("bin/status.js credential redaction", () => {
     "WORDPRESS_SITE_URL",
     "WORDPRESS_USERNAME",
     "WORDPRESS_APP_PASSWORD",
+    "WORDPRESS_PASSWORD",
     "WORDPRESS_JWT_SECRET",
-    "WORDPRESS_JWT_USERNAME",
-    "WORDPRESS_JWT_PASSWORD",
-    "WORDPRESS_OAUTH_CLIENT_ID",
-    "WORDPRESS_OAUTH_CLIENT_SECRET",
+    "WORDPRESS_API_KEY",
     "WORDPRESS_COOKIE_NONCE",
   ];
 
@@ -58,9 +56,9 @@ describe("bin/status.js credential redaction", () => {
 
   it("never prints the full JWT secret or password", async () => {
     process.env.WORDPRESS_SITE_URL = "https://example.test";
+    process.env.WORDPRESS_USERNAME = "jwtuser";
+    process.env.WORDPRESS_PASSWORD = SECRET_JWT_PASSWORD;
     process.env.WORDPRESS_JWT_SECRET = SECRET_JWT_SECRET;
-    process.env.WORDPRESS_JWT_USERNAME = "jwtuser";
-    process.env.WORDPRESS_JWT_PASSWORD = SECRET_JWT_PASSWORD;
 
     const status = new WordPressStatus();
     await status.checkConfiguration();
@@ -70,15 +68,15 @@ describe("bin/status.js credential redaction", () => {
     expect(output).not.toContain(SECRET_JWT_PASSWORD);
   });
 
-  it("never prints the full OAuth client secret", async () => {
+  it("never prints the full Basic auth password", async () => {
     process.env.WORDPRESS_SITE_URL = "https://example.test";
-    process.env.WORDPRESS_OAUTH_CLIENT_ID = "client-id-value";
-    process.env.WORDPRESS_OAUTH_CLIENT_SECRET = SECRET_OAUTH_CLIENT_SECRET;
+    process.env.WORDPRESS_USERNAME = "basicuser";
+    process.env.WORDPRESS_PASSWORD = SECRET_BASIC_PASSWORD;
 
     const status = new WordPressStatus();
     await status.checkConfiguration();
 
-    expect(loggedOutput()).not.toContain(SECRET_OAUTH_CLIENT_SECRET);
+    expect(loggedOutput()).not.toContain(SECRET_BASIC_PASSWORD);
   });
 
   it("never prints the full cookie nonce", async () => {

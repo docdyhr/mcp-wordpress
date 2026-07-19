@@ -232,6 +232,17 @@ export class WordPressClient implements IWordPressClient {
     return this.authenticated;
   }
 
+  /**
+   * Replace this client's authentication configuration for the current
+   * session. Does not itself verify the new credentials — call
+   * authenticate() afterward to confirm they work.
+   */
+  setAuthConfig(auth: AuthConfig): void {
+    this.auth = auth;
+    this.authenticated = false;
+    this.jwtToken = null;
+  }
+
   get stats(): ClientStats {
     return { ...this._stats };
   }

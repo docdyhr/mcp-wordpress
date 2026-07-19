@@ -48,11 +48,15 @@ class WordPressStatus {
       }
     }
 
-    // Check auth credentials (at least one method should be configured)
+    // Check auth credentials (at least one method should be configured).
+    // Ordered most- to least-specific: JWT's vars are a superset of Basic's,
+    // so JWT must be checked first or a fully-configured JWT setup would be
+    // misreported as Basic (whichever matches first wins and stops the loop).
     const authMethods = [
       { name: "Application Password", vars: ["WORDPRESS_USERNAME", "WORDPRESS_APP_PASSWORD"] },
-      { name: "JWT", vars: ["WORDPRESS_JWT_SECRET", "WORDPRESS_JWT_USERNAME", "WORDPRESS_JWT_PASSWORD"] },
-      { name: "OAuth", vars: ["WORDPRESS_OAUTH_CLIENT_ID", "WORDPRESS_OAUTH_CLIENT_SECRET"] },
+      { name: "JWT", vars: ["WORDPRESS_USERNAME", "WORDPRESS_PASSWORD", "WORDPRESS_JWT_SECRET"] },
+      { name: "Basic Authentication", vars: ["WORDPRESS_USERNAME", "WORDPRESS_PASSWORD"] },
+      { name: "API Key", vars: ["WORDPRESS_API_KEY"] },
       { name: "Cookie", vars: ["WORDPRESS_COOKIE_NONCE"] },
     ];
 
@@ -90,21 +94,6 @@ class WordPressStatus {
 
     console.log("\n✅ Configuration is complete");
     return true;
-  }
-
-  getAuthVars(authMethod) {
-    switch (authMethod) {
-      case "application_password":
-        return ["USERNAME", "APPLICATION_PASSWORD"];
-      case "basic":
-        return ["USERNAME", "PASSWORD"];
-      case "jwt":
-        return ["USERNAME", "PASSWORD", "JWT_SECRET"];
-      case "api_key":
-        return ["API_KEY"];
-      default:
-        return [];
-    }
   }
 
   isSensitiveVarName(varName) {

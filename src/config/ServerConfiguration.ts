@@ -11,6 +11,7 @@ import { LoggerFactory } from "@/utils/logger.js";
 import { ConfigHelpers } from "./Config.js";
 import {
   ConfigurationValidator,
+  buildAuthConfig,
   type SiteType as SiteConfig,
   type MultiSiteConfigType as MultiSiteConfig,
   type McpConfigType,
@@ -137,11 +138,7 @@ export class ServerConfiguration {
       for (const site of config.sites) {
         const clientConfig: WordPressClientConfig = {
           baseUrl: site.config.WORDPRESS_SITE_URL,
-          auth: {
-            method: site.config.WORDPRESS_AUTH_METHOD || "app-password",
-            username: site.config.WORDPRESS_USERNAME,
-            appPassword: site.config.WORDPRESS_APP_PASSWORD,
-          },
+          auth: buildAuthConfig(site.config),
         };
 
         // Use cached client for better performance
@@ -241,11 +238,17 @@ export class ServerConfiguration {
       // Validate MCP config if provided
       const validatedMcpConfig = mcpConfig ? ConfigurationValidator.validateMcpConfig(mcpConfig) : undefined;
 
-      // Prepare environment configuration for validation
+      // Prepare environment configuration for validation. Every credential
+      // field for every supported auth method is forwarded here (not just
+      // app-password's) so basic/jwt/api-key configurations set via .env or
+      // MCP config actually reach the schema and, from there, the client.
       const envConfig = {
         WORDPRESS_SITE_URL: validatedMcpConfig?.wordpressSiteUrl || process.env.WORDPRESS_SITE_URL,
         WORDPRESS_USERNAME: validatedMcpConfig?.wordpressUsername || process.env.WORDPRESS_USERNAME,
         WORDPRESS_APP_PASSWORD: validatedMcpConfig?.wordpressAppPassword || process.env.WORDPRESS_APP_PASSWORD,
+        WORDPRESS_PASSWORD: validatedMcpConfig?.wordpressPassword || process.env.WORDPRESS_PASSWORD,
+        WORDPRESS_JWT_SECRET: validatedMcpConfig?.wordpressJwtSecret || process.env.WORDPRESS_JWT_SECRET,
+        WORDPRESS_API_KEY: validatedMcpConfig?.wordpressApiKey || process.env.WORDPRESS_API_KEY,
         WORDPRESS_AUTH_METHOD:
           validatedMcpConfig?.wordpressAuthMethod || process.env.WORDPRESS_AUTH_METHOD || "app-password",
         NODE_ENV: process.env.NODE_ENV,
@@ -268,11 +271,7 @@ export class ServerConfiguration {
 
       const clientConfig: WordPressClientConfig = {
         baseUrl: validatedConfig.WORDPRESS_SITE_URL,
-        auth: {
-          method: validatedConfig.WORDPRESS_AUTH_METHOD,
-          username: validatedConfig.WORDPRESS_USERNAME,
-          appPassword: validatedConfig.WORDPRESS_APP_PASSWORD,
-        },
+        auth: buildAuthConfig(validatedConfig),
       };
 
       // Use cached client for better performance
@@ -286,12 +285,7 @@ export class ServerConfiguration {
       const siteConfig: SiteConfig = {
         id: "default",
         name: "Default Site",
-        config: {
-          WORDPRESS_SITE_URL: validatedConfig.WORDPRESS_SITE_URL,
-          WORDPRESS_USERNAME: validatedConfig.WORDPRESS_USERNAME,
-          WORDPRESS_APP_PASSWORD: validatedConfig.WORDPRESS_APP_PASSWORD,
-          WORDPRESS_AUTH_METHOD: validatedConfig.WORDPRESS_AUTH_METHOD,
-        },
+        config: validatedConfig,
       };
 
       if (!isDXTMode) {
