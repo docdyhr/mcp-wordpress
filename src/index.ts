@@ -91,25 +91,33 @@ class MCPWordPressServer {
 
     // Connect to stdio transport with timeout
     const transport = new StdioServerTransport();
+    await this.connectWithTimeout(transport, 30000);
 
-    // Add timeout protection for server connection
-    const connectionTimeout = setTimeout(() => {
-      throw new Error("Server connection timed out after 30000ms");
-    }, 30000);
+    this.logger.info("Server started and connected successfully", {
+      sites: this.wordpressClients.size,
+    });
+
+    // Keep the process alive
+    process.stdin.resume();
+  }
+
+  /**
+   * Races server.connect() against a timeout, expressed as a rejected
+   * promise rather than a setTimeout() callback that throws directly —
+   * that would be an uncaught exception outside this method's call stack,
+   * bypassing normal error handling/cleanup (main()'s catch, process exit
+   * code, and any future shutdown hooks).
+   */
+  private async connectWithTimeout(transport: StdioServerTransport, timeoutMs: number): Promise<void> {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => reject(new Error(`Server connection timed out after ${timeoutMs}ms`)), timeoutMs);
+    });
 
     try {
-      await this.server.connect(transport);
-      clearTimeout(connectionTimeout);
-
-      this.logger.info("Server started and connected successfully", {
-        sites: this.wordpressClients.size,
-      });
-
-      // Keep the process alive
-      process.stdin.resume();
-    } catch (_error) {
-      clearTimeout(connectionTimeout);
-      throw _error;
+      await Promise.race([this.server.connect(transport), timeout]);
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
@@ -141,6 +149,29 @@ async function main() {
   }
 }
 
+/**
+ * Finite health check for `docker healthcheck` / `docker-compose`: verifies
+ * configuration loads and at least one WordPress site is configured, then
+ * exits immediately. Deliberately does not connect a stdio transport or
+ * test live WordPress connectivity — either would make the check hang or
+ * turn transient network issues into container restarts.
+ */
+async function runHealthCheck(): Promise<void> {
+  try {
+    const serverConfig = ServerConfiguration.getInstance();
+    const { clients } = await serverConfig.loadClientConfigurations();
+    if (clients.size === 0) {
+      process.stderr.write("Health check failed: no WordPress sites configured\n");
+      process.exit(1);
+    }
+    process.stdout.write(`Health check passed: ${clients.size} site(s) configured\n`);
+    process.exit(0);
+  } catch (_error) {
+    process.stderr.write(`Health check failed: ${getErrorMessage(_error)}\n`);
+    process.exit(1);
+  }
+}
+
 // Check if running as main module - handle direct execution, DXT, and bin wrapper entry points
 const currentFile = fileURLToPath(import.meta.url);
 const callerFile = process.argv[1];
@@ -154,11 +185,15 @@ const isMainModule =
   !callerFile; // When run through DXT, process.argv[1] might be undefined
 
 if (isMainModule) {
-  main().catch((error) => {
-    process.stderr.write(`Fatal: ${error instanceof Error ? error.message : String(error)}\n`);
-    process.exit(1);
-  });
+  if (process.argv.includes("--health-check")) {
+    runHealthCheck();
+  } else {
+    main().catch((error) => {
+      process.stderr.write(`Fatal: ${error instanceof Error ? error.message : String(error)}\n`);
+      process.exit(1);
+    });
+  }
 }
 
 export default MCPWordPressServer;
-export { MCPWordPressServer };
+export { MCPWordPressServer, runHealthCheck };

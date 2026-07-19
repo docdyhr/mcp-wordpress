@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   mcp-wordpress:
     image: docdyhr/mcp-wordpress:latest
