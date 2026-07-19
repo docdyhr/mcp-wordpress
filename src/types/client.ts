@@ -115,6 +115,15 @@ export interface RequestOptions {
   idempotent?: boolean;
 }
 
+// Raw HTTP response metadata alongside the parsed body. Used by callers
+// (e.g. the cache layer) that need genuine server-provided validators
+// (ETag, Last-Modified, Cache-Control) rather than just the parsed data.
+export interface RawResponse<T = unknown> {
+  data: T;
+  status: number;
+  headers: Record<string, string>;
+}
+
 // API Response Wrapper
 export interface APIResponse<T = unknown> {
   data: T;

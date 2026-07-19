@@ -246,6 +246,39 @@ export class CacheManager {
   }
 
   /**
+   * Inspect an entry's freshness without evicting it if expired, recording
+   * the same hit/miss statistics get() would. Unlike get(), a stale entry
+   * is not deleted here — the caller (the HTTP cache layer) may still need
+   * its ETag/Last-Modified to issue a conditional revalidation request.
+   * get() itself deletes expired entries as a side effect of checking
+   * freshness, which would destroy those validators before they could be
+   * used, so callers that need to revalidate a stale entry must use this
+   * instead of get() + a separate expired-entry lookup.
+   */
+  peek(key: string): { entry: CacheEntry | null; fresh: boolean } {
+    const entry = this.cache.get(key);
+    if (!entry) {
+      this.stats.misses++;
+      this.updateHitRate();
+      return { entry: null, fresh: false };
+    }
+
+    const fresh = !this.isExpired(entry);
+    if (fresh) {
+      entry.accessCount++;
+      entry.lastAccessed = Date.now();
+      this.updateAccessOrder(key);
+      this.stats.hits++;
+    } else {
+      this.stats.misses++;
+      this.stats.expirations++;
+    }
+    this.updateHitRate();
+
+    return { entry: { ...entry }, fresh };
+  }
+
+  /**
    * Check if entry supports conditional requests
    */
   supportsConditionalRequest(key: string): boolean {

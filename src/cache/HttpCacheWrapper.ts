@@ -66,35 +66,56 @@ export class HttpCacheWrapper {
     }
 
     const cacheKey = this.generateCacheKey(options);
-    const cachedEntry = this.cacheManager.getEntry(cacheKey);
 
-    // Check for conditional request support
-    if (cachedEntry && this.cacheManager.supportsConditionalRequest(cacheKey)) {
-      const conditionalHeaders = this.cacheManager.getConditionalHeaders(cacheKey);
+    // Non-destructive freshness check: get() would evict an expired entry
+    // as a side effect, destroying the very ETag/Last-Modified this method
+    // needs below to revalidate a stale value.
+    const { entry, fresh } = this.cacheManager.peek(cacheKey);
 
-      // Add conditional headers to request
-      const _requestWithHeaders = {
-        ...options,
-        headers: {
-          ...options.headers,
-          ...conditionalHeaders,
-        },
+    // Fresh, non-expired entry: return it directly. No network call at all —
+    // this is the whole point of caching.
+    if (fresh && entry) {
+      const cachedValue = entry.value as CachedResponse;
+      return {
+        data: cachedValue.data as T,
+        status: cachedValue.status,
+        headers: cachedValue.headers,
+        cached: true,
       };
+    }
+
+    // No fresh entry. If a stale entry exists with real validators from a
+    // previous response, revalidate with a conditional request instead of
+    // fetching the full body again.
+    if (entry && (entry.etag || entry.lastModified)) {
+      const conditionalHeaders: Record<string, string> = {};
+      if (entry.etag) {
+        conditionalHeaders["If-None-Match"] = entry.etag;
+      }
+      if (entry.lastModified) {
+        conditionalHeaders["If-Modified-Since"] = entry.lastModified;
+      }
 
       try {
         const response = await requestFn(conditionalHeaders);
 
-        // 304 Not Modified - return cached data
+        // 304 Not Modified — the stale value is still current. Refresh its
+        // TTL and keep serving it without re-caching a new body.
         if (response.status === 304) {
+          const cachedValue = entry.value as CachedResponse;
+          const endpoint = this.extractEndpointFromKey(cacheKey);
+          const ttl = cacheOptions?.ttl || this.getDefaultTTL(endpoint);
+          this.cacheManager.set(cacheKey, cachedValue, ttl, entry.etag, entry.lastModified);
+
           return {
-            data: (cachedEntry.value as CachedResponse).data as T,
+            data: cachedValue.data as T,
             status: 200,
-            headers: (cachedEntry.value as CachedResponse).headers,
+            headers: cachedValue.headers,
             cached: true,
           };
         }
 
-        // Content changed - update cache
+        // Content changed - update cache with the fresh response
         return await this.cacheAndReturn(
           response as { data: T; status: number; headers: Record<string, string> },
           cacheKey,
@@ -109,18 +130,7 @@ export class HttpCacheWrapper {
       }
     }
 
-    // Check for valid cached response
-    const cached = this.cacheManager.get<CachedResponse>(cacheKey);
-    if (cached) {
-      return {
-        data: cached.data as T,
-        status: cached.status,
-        headers: cached.headers,
-        cached: true,
-      };
-    }
-
-    // Execute fresh request
+    // No usable cache entry: execute a fresh request.
     const response = await requestFn();
     return await this.cacheAndReturn(response, cacheKey, cacheOptions);
   }
@@ -237,10 +247,13 @@ export class HttpCacheWrapper {
     const endpoint = this.extractEndpointFromKey(cacheKey);
     const ttl = cacheOptions?.ttl || this.getDefaultTTL(endpoint);
 
-    // Generate ETags and cache headers
-    const etag = this.generateETag(response.data);
-    const lastModified = new Date().toUTCString();
-    const cacheControl = cacheOptions?.cacheControl || this.getDefaultCacheControl(endpoint);
+    // Prefer the real validators the origin server sent back; only
+    // synthesize our own when WordPress didn't provide any. A synthesized
+    // value must never be presented as if it came from the origin server.
+    const etag = response.headers?.["etag"] || this.generateETag(response.data);
+    const lastModified = response.headers?.["last-modified"] || new Date().toUTCString();
+    const cacheControl =
+      response.headers?.["cache-control"] || cacheOptions?.cacheControl || this.getDefaultCacheControl(endpoint);
 
     const cachedResponse: CachedResponse = {
       data: response.data,

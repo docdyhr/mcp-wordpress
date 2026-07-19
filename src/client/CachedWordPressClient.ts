@@ -95,12 +95,10 @@ export class CachedWordPressClient extends WordPressClient {
             ...(extraHeaders || {}),
           },
         };
-        const result = await super.request<T>(method, normalizedEndpoint, data, mergedOptions);
-        return {
-          data: result,
-          status: 200,
-          headers: mergedOptions.headers || {},
-        };
+        // requestWithMetadata() (not request()) so the cache layer sees the
+        // real HTTP status and response headers WordPress sent back, rather
+        // than the request headers we sent and a hardcoded 200.
+        return await super.requestWithMetadata<T>(method, normalizedEndpoint, data, mergedOptions);
       },
       cacheRequestOptions,
       cacheOptions,
