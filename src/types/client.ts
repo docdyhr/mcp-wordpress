@@ -108,6 +108,11 @@ export interface RequestOptions {
   retries?: number;
   signal?: AbortSignal;
   params?: Record<string, unknown>;
+  // Explicitly marks a mutating request (POST/PUT/PATCH/DELETE) as safe to
+  // retry after an ambiguous network failure. Only set this when the
+  // operation is genuinely idempotent server-side — GET/HEAD/OPTIONS are
+  // retried by default and never need this flag.
+  idempotent?: boolean;
 }
 
 // API Response Wrapper

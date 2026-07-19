@@ -540,7 +540,13 @@ export class WordPressClient implements IWordPressClient {
     // Validate absolute URLs through the same SSRF guard as the site URL
     const url = endpoint.startsWith("http") ? this.validateAndSanitizeUrl(endpoint) : `${this.apiUrl}/${cleanEndpoint}`;
 
-    const { headers: customHeaders, retries: retryOverride, params: _unusedParams, ...restOptions } = options;
+    const {
+      headers: customHeaders,
+      retries: retryOverride,
+      params: _unusedParams,
+      idempotent,
+      ...restOptions
+    } = options;
     const baseHeaders: Record<string, string> = {
       "Content-Type": "application/json",
       "User-Agent": getUserAgent(),
@@ -552,8 +558,14 @@ export class WordPressClient implements IWordPressClient {
     const requestTimeout = options.timeout || this.timeout;
     const configuredRetries =
       typeof retryOverride === "number" && retryOverride > 0 ? retryOverride : this.maxRetries || 1;
+    // GET is safe/idempotent by nature and always eligible for retry. Every
+    // mutating method (POST/PUT/PATCH/DELETE) is retried only when the caller
+    // explicitly marks the specific operation idempotent — retrying a POST
+    // after an ambiguous network failure (e.g. a connection reset after the
+    // server already processed it) can otherwise create a duplicate resource.
+    const canRetryMethod = method === "GET" || idempotent === true;
     const canRetryBody = this.isRetryableBody(data);
-    const maxAttempts = canRetryBody ? configuredRetries : 1;
+    const maxAttempts = canRetryMethod && canRetryBody ? configuredRetries : 1;
 
     let lastError: Error = new Error("Unknown error");
 

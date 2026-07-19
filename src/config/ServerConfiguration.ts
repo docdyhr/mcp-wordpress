@@ -77,20 +77,43 @@ export class ServerConfiguration {
   }> {
     const configPath = path.resolve(this.rootDir, "mcp-wordpress.config.json");
 
-    try {
-      await fsPromises.access(configPath);
-      if (ConfigHelpers.shouldLogInfo()) {
-        this.logger.info("Found multi-site configuration file", { configPath });
-      }
-      return await this.loadMultiSiteConfig(configPath);
-    } catch (_error) {
-      // Config file doesn't exist or is not accessible
+    const configFileExists = await this.multiSiteConfigFileExists(configPath);
+    if (!configFileExists) {
       if (ConfigHelpers.shouldLogInfo()) {
         this.logger.info("Multi-site config not found, using environment variables for single-site mode", {
           configPath,
         });
       }
       return this.loadSingleSiteFromEnv(mcpConfig);
+    }
+
+    if (ConfigHelpers.shouldLogInfo()) {
+      this.logger.info("Found multi-site configuration file", { configPath });
+    }
+    // Any failure from here (JSON parse, schema validation, duplicate site
+    // IDs, client construction) must stop startup rather than silently
+    // falling back to single-site env config — loadMultiSiteConfig() already
+    // logs a fatal diagnostic and rethrows.
+    return await this.loadMultiSiteConfig(configPath);
+  }
+
+  /**
+   * Returns false only when the multi-site config file is absent (ENOENT).
+   * Any other access error (permission denied, etc.) is fatal: it is logged
+   * and rethrown so startup fails loudly instead of silently degrading to
+   * single-site mode with the wrong site's credentials.
+   */
+  private async multiSiteConfigFileExists(configPath: string): Promise<boolean> {
+    try {
+      await fsPromises.access(configPath);
+      return true;
+    } catch (_error) {
+      if ((_error as NodeJS.ErrnoException).code === "ENOENT") {
+        return false;
+      }
+      const message = `Failed to access multi-site configuration file: ${getErrorMessage(_error)}`;
+      this.logger.fatal(message, { configPath });
+      throw new Error(message);
     }
   }
 
