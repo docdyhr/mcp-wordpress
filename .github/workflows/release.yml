@@ -60,9 +60,7 @@ jobs:
           HUSKY: 0
 
       - name: 🧪 Run Essential Tests
-        run: |
-          # Run core tests that must pass for release
-          npm run test:ci || npm run test:typescript
+        run: npm run test:ci
         env:
           WORDPRESS_SITE_URL: https://example.com
           WORDPRESS_USERNAME: test_user
@@ -237,12 +235,12 @@ jobs:
           echo "Verifying Docker Hub publishing for version: $VERSION"
 
           # Try to pull the image to verify it exists
-          if docker pull docdyhr/mcp-wordpress:$VERSION; then
+          if docker pull docdyhr/mcp-wordpress:"$VERSION"; then
             echo "✅ Successfully verified Docker image on Docker Hub"
-            echo "verification_status=success" >> $GITHUB_OUTPUT
+            echo "verification_status=success" >> "$GITHUB_OUTPUT"
           else
             echo "❌ Failed to verify Docker image on Docker Hub"
-            echo "verification_status=failure" >> $GITHUB_OUTPUT
+            echo "verification_status=failure" >> "$GITHUB_OUTPUT"
             exit 1
           fi
 

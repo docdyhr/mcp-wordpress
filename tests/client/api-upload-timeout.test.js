@@ -8,6 +8,36 @@ import { WordPressClient } from "@/client/api.js";
 import nock from "nock";
 import fs from "fs";
 
+/**
+ * Tests below intentionally mock a response `.delay()` longer than the
+ * client's own request timeout, so the client's AbortController wins the
+ * race and rejects first. But nock schedules that delay as its own
+ * independent timer, so it still fires afterward and tries to deliver the
+ * response to a request nock considers already aborted/handled — throwing
+ * an "already handled" InterceptorError asynchronously once the delay
+ * elapses. That's an artifact of simulating the race with nock, not a bug
+ * in the client, so it must be drained (and specifically that error
+ * swallowed) before the test ends, or it leaks out as a genuine unhandled
+ * exception during a later, unrelated test.
+ */
+async function waitForNockDelayToSettle(delayMs) {
+  const onUncaughtException = (error) => {
+    // Throwing again here would escalate into a hard worker crash (Node
+    // treats a second throw inside the handler as fatal), which is worse
+    // than an unattributed report — so log anything unexpected instead of
+    // rethrowing, and only silently absorb the specific, expected artifact.
+    if (!error?.message?.includes("the request has already been handled")) {
+      console.error("Unexpected error while draining a nock delay timer:", error);
+    }
+  };
+  process.on("uncaughtException", onUncaughtException);
+  try {
+    await new Promise((resolve) => setTimeout(resolve, delayMs + 100));
+  } finally {
+    process.off("uncaughtException", onUncaughtException);
+  }
+}
+
 describe("WordPress API Client Upload Timeout", () => {
   let client;
   const testBaseUrl = "https://test-wordpress.com";
@@ -49,16 +79,16 @@ describe("WordPress API Client Upload Timeout", () => {
   describe("uploadFile method timeout behavior", () => {
     it("should use custom timeout when provided in options", async () => {
       const customTimeout = 100; // Very short timeout for fast testing
+      const mockDelay = customTimeout + 50; // Short delay but still exceeds timeout
 
       // Mock slow response that exceeds custom timeout
-      nock(testBaseUrl)
-        .post("/wp-json/wp/v2/media")
-        .delay(customTimeout + 50) // Short delay but still exceeds timeout
-        .reply(200, { id: 123, title: "uploaded" });
+      nock(testBaseUrl).post("/wp-json/wp/v2/media").delay(mockDelay).reply(200, { id: 123, title: "uploaded" });
 
       await expect(
         client.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: customTimeout }),
       ).rejects.toThrow(/Request timeout after/);
+
+      await waitForNockDelayToSettle(mockDelay);
     });
 
     it("should use default 5-minute timeout for uploads when no custom timeout provided", async () => {
@@ -91,6 +121,8 @@ describe("WordPress API Client Upload Timeout", () => {
       await expect(fastClient.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: 50 })).rejects.toThrow(
         /Request timeout after/,
       );
+
+      await waitForNockDelayToSettle(100);
     });
   });
 
@@ -127,6 +159,8 @@ describe("WordPress API Client Upload Timeout", () => {
       await expect(fastClient.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: 100 })).rejects.toThrow(
         /Request timeout after/,
       );
+
+      await waitForNockDelayToSettle(200);
     });
   });
 
@@ -142,6 +176,8 @@ describe("WordPress API Client Upload Timeout", () => {
       await expect(
         client.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: shortTimeout }),
       ).rejects.toThrow(/Request timeout after \d+ms/);
+
+      await waitForNockDelayToSettle(200);
     });
 
     it("should not retry timeout errors", async () => {
@@ -163,6 +199,8 @@ describe("WordPress API Client Upload Timeout", () => {
 
       // Should only make 1 request, no retries for timeout
       expect(requestCount).toBe(1);
+
+      await waitForNockDelayToSettle(150);
     });
   });
 

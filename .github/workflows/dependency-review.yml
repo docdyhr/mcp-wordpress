@@ -74,14 +74,14 @@ jobs:
 
       - name: 🔍 NPM Security Audit
         run: |
-          echo "## 🔍 NPM Security Audit Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔍 NPM Security Audit Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
 
           # Run audit and capture results
           if npm audit --audit-level=moderate --json > audit-results.json 2>/dev/null; then
-            echo "✅ **No moderate or higher vulnerabilities found**" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **No moderate or higher vulnerabilities found**" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "⚠️ **Vulnerabilities detected**" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **Vulnerabilities detected**" >> "$GITHUB_STEP_SUMMARY"
 
             # Parse and display results
             if [ -f audit-results.json ]; then
@@ -90,12 +90,14 @@ jobs:
               MODERATE=$(cat audit-results.json | jq -r '.metadata.vulnerabilities.moderate // 0')
               LOW=$(cat audit-results.json | jq -r '.metadata.vulnerabilities.low // 0')
 
-              echo "- 🔴 Critical: $CRITICAL" >> $GITHUB_STEP_SUMMARY
-              echo "- 🟠 High: $HIGH" >> $GITHUB_STEP_SUMMARY
-              echo "- 🟡 Moderate: $MODERATE" >> $GITHUB_STEP_SUMMARY
-              echo "- 🟢 Low: $LOW" >> $GITHUB_STEP_SUMMARY
-              echo "" >> $GITHUB_STEP_SUMMARY
-              echo "**Action Required:** Please run \`npm audit fix\` to address vulnerabilities." >> $GITHUB_STEP_SUMMARY
+              {
+                echo "- 🔴 Critical: $CRITICAL"
+                echo "- 🟠 High: $HIGH"
+                echo "- 🟡 Moderate: $MODERATE"
+                echo "- 🟢 Low: $LOW"
+                echo ""
+                echo "**Action Required:** Please run \`npm audit fix\` to address vulnerabilities."
+              } >> "$GITHUB_STEP_SUMMARY"
             fi
           fi
 
@@ -130,8 +132,8 @@ jobs:
           # Install license checker
           npm install -g license-checker
 
-          echo "## 📜 License Compliance Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📜 License Compliance Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
 
           # Generate license report
           license-checker --json > licenses.json
@@ -140,16 +142,16 @@ jobs:
           PROBLEMATIC_LICENSES="GPL-2.0,AGPL-1.0,AGPL-3.0,LGPL-2.0"
 
           if license-checker --excludePackages 'dev-dependencies' --restrictLicenses "$PROBLEMATIC_LICENSES" --summary; then
-            echo "✅ **No problematic licenses found**" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **No problematic licenses found**" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "⚠️ **Problematic licenses detected**" >> $GITHUB_STEP_SUMMARY
-            echo "Please review the licenses and ensure compliance." >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **Problematic licenses detected**" >> "$GITHUB_STEP_SUMMARY"
+            echo "Please review the licenses and ensure compliance." >> "$GITHUB_STEP_SUMMARY"
           fi
 
           # Count license types
           TOTAL_LICENSES=$(cat licenses.json | jq 'keys | length')
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Total packages analyzed:** $TOTAL_LICENSES" >> $GITHUB_STEP_SUMMARY
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Total packages analyzed:** $TOTAL_LICENSES" >> "$GITHUB_STEP_SUMMARY"
 
       - name: 📊 Upload License Report
         if: always()
@@ -168,28 +170,28 @@ jobs:
 
       - name: 🔍 Package Lock Analysis
         run: |
-          echo "## 🔗 Supply Chain Security Analysis" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔗 Supply Chain Security Analysis" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
 
           # Check for package-lock.json integrity
           if [ -f package-lock.json ]; then
-            echo "✅ **package-lock.json found**" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **package-lock.json found**" >> "$GITHUB_STEP_SUMMARY"
 
             # Check lockfile version
             LOCKFILE_VERSION=$(cat package-lock.json | jq -r '.lockfileVersion')
-            echo "- Lockfile version: $LOCKFILE_VERSION" >> $GITHUB_STEP_SUMMARY
+            echo "- Lockfile version: $LOCKFILE_VERSION" >> "$GITHUB_STEP_SUMMARY"
 
             # Count dependencies
             DEPS_COUNT=$(cat package-lock.json | jq '.dependencies | length // 0')
-            echo "- Total dependencies: $DEPS_COUNT" >> $GITHUB_STEP_SUMMARY
+            echo "- Total dependencies: $DEPS_COUNT" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "⚠️ **package-lock.json missing**" >> $GITHUB_STEP_SUMMARY
-            echo "Consider using npm ci for reproducible builds." >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **package-lock.json missing**" >> "$GITHUB_STEP_SUMMARY"
+            echo "Consider using npm ci for reproducible builds." >> "$GITHUB_STEP_SUMMARY"
           fi
 
           # Check for .npmrc security settings
           if [ -f .npmrc ]; then
-            echo "📄 **.npmrc configuration found**" >> $GITHUB_STEP_SUMMARY
+            echo "📄 **.npmrc configuration found**" >> "$GITHUB_STEP_SUMMARY"
           fi
 
   dependency-summary:
@@ -200,26 +202,28 @@ jobs:
     steps:
       - name: 📊 Generate Summary Report
         run: |
-          echo "## 📊 Dependency Review Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🔍 Review Results" >> $GITHUB_STEP_SUMMARY
-          echo "- **Dependency Review:** ${{ needs.dependency-review.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Security Audit:** ${{ needs.security-audit.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **License Compliance:** ${{ needs.license-compliance.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Supply Chain Security:** ${{ needs.supply-chain-security.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📋 Configuration Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Fail on severity:** high and above (relaxed for dependency updates)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Fail on scopes:** runtime dependencies" >> $GITHUB_STEP_SUMMARY
-          echo "- **Allowed licenses:** MIT, Apache-2.0, BSD, ISC, CC0, Unlicense, LGPL" >> $GITHUB_STEP_SUMMARY
-          echo "- **OpenSSF Scorecard:** Enabled for supply chain visibility" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📝 Recommendations" >> $GITHUB_STEP_SUMMARY
-          echo "1. **Address any security vulnerabilities** found in the audit" >> $GITHUB_STEP_SUMMARY
-          echo "2. **Review license compliance** for any flagged packages" >> $GITHUB_STEP_SUMMARY
-          echo "3. **Ensure package-lock.json** is committed and up-to-date" >> $GITHUB_STEP_SUMMARY
-          echo "4. **Monitor dependency changes** in this PR carefully" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🔗 Resources" >> $GITHUB_STEP_SUMMARY
-          echo "- [Dependency Review Documentation](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-dependency-review)" >> $GITHUB_STEP_SUMMARY
-          echo "- [NPM Security Best Practices](https://docs.npmjs.com/security)" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## 📊 Dependency Review Summary"
+            echo ""
+            echo "### 🔍 Review Results"
+            echo "- **Dependency Review:** ${{ needs.dependency-review.result }}"
+            echo "- **Security Audit:** ${{ needs.security-audit.result }}"
+            echo "- **License Compliance:** ${{ needs.license-compliance.result }}"
+            echo "- **Supply Chain Security:** ${{ needs.supply-chain-security.result }}"
+            echo ""
+            echo "### 📋 Configuration Summary"
+            echo "- **Fail on severity:** high and above (relaxed for dependency updates)"
+            echo "- **Fail on scopes:** runtime dependencies"
+            echo "- **Allowed licenses:** MIT, Apache-2.0, BSD, ISC, CC0, Unlicense, LGPL"
+            echo "- **OpenSSF Scorecard:** Enabled for supply chain visibility"
+            echo ""
+            echo "### 📝 Recommendations"
+            echo "1. **Address any security vulnerabilities** found in the audit"
+            echo "2. **Review license compliance** for any flagged packages"
+            echo "3. **Ensure package-lock.json** is committed and up-to-date"
+            echo "4. **Monitor dependency changes** in this PR carefully"
+            echo ""
+            echo "### 🔗 Resources"
+            echo "- [Dependency Review Documentation](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-dependency-review)"
+            echo "- [NPM Security Best Practices](https://docs.npmjs.com/security)"
+          } >> "$GITHUB_STEP_SUMMARY"

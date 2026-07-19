@@ -32,16 +32,16 @@ afterAll(() => {
   }
 });
 
-// Handle uncaught exceptions in test environment
-process.on("uncaughtException", (error) => {
-  // eslint-disable-next-line no-console
-  console.error("Uncaught exception in test:", error);
-  // Don't exit the process, let vitest handle it
-});
-
-// Handle unhandled promise rejections in test environment
-process.on("unhandledRejection", (reason, _promise) => {
-  // eslint-disable-next-line no-console
-  console.error("Unhandled promise rejection in test:", reason);
-  // Don't exit the process, let vitest handle it
-});
+// Deliberately no process-level "uncaughtException"/"unhandledRejection"
+// listeners here. This file used to install listeners that only logged and
+// returned, which counts as Node.js "handling" the exception — it suppresses
+// Node's default fatal-exception behavior, so a genuine async bug (e.g. a
+// leaked Nock interceptor exception) was silently swallowed and the suite
+// still exited 0. With no listener installed, an uncaught exception or
+// unhandled rejection in any worker now falls through to Node's default
+// behavior (print and terminate that worker), which vitest's own pool-level
+// crash detection catches and reports as a failing, non-zero-exit run.
+// Calling process.exit() from a listener here does NOT work as an
+// alternative: vitest patches process.exit inside its worker/fork pool
+// specifically to prevent test code from exiting the process, so it just
+// throws a confusing secondary error instead of failing cleanly.
