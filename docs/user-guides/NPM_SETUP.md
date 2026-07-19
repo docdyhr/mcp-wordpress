@@ -101,7 +101,7 @@ npm run docs:generate   # Generate API documentation
 ## 🚨 Important Notes
 
 - **Build Required**: Must compile TypeScript before running
-- **Dependencies**: Requires Node.js 18+ and npm installed
+- **Dependencies**: Requires Node.js 20.8.1+ and npm installed
 - **Updates**: Manual process to get latest changes
 - **Space**: Uses local disk space for code and dependencies
 

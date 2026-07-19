@@ -69,7 +69,7 @@ export class ToolRegistry {
 
   /**
    * Build and install a cached tools/list handler, bypassing the SDK's per-request
-   * Zod→JSON-Schema conversion for all 59 tools.
+   * Zod→JSON-Schema conversion for all 71 tools.
    */
   private installCachedToolsListHandler(): void {
     if (!this._cachedToolsListResponse) return;

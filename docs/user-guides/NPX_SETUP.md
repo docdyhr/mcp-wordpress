@@ -16,7 +16,7 @@ NPX is a package runner that comes with npm 5.2+. It allows you to:
 
 ## 📋 Prerequisites
 
-- Node.js 18+ with npm 5.2+ (check with `npx --version`)
+- Node.js 20.8.1+ with npm 5.2+ (check with `npx --version`)
 - WordPress site with REST API enabled
 - WordPress Application Password (recommended)
 
@@ -190,7 +190,7 @@ customization** - Can't modify the code ❌ **No offline work** - Needs internet
 
 **"Command not found: npx"**
 
-- Install Node.js 18+ which includes npx
+- Install Node.js 20.8.1+ which includes npx
 - Or install npx globally: `npm install -g npx`
 
 **"No matching version found"**

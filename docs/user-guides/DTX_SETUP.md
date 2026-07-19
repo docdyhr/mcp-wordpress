@@ -218,16 +218,18 @@ After installation, you'll have access to these prompts:
 
 ### Tool Categories
 
-The DTX includes 59 tools across:
+The DTX includes 71 tools across:
 
 - **Posts & Pages** - Content management
 - **Media Library** - File uploads and management
+- **SEO** - Content analysis, metadata, schema markup, keyword research
 - **Users & Comments** - User administration and moderation
 - **Categories & Tags** - Taxonomy management
 - **Site Settings** - Configuration and statistics
 - **Authentication** - Security and access management
 - **Cache Management** - Performance optimization
 - **Performance Monitoring** - Real-time analytics
+- **System** - Version checking
 
 ## 🔍 DTX Troubleshooting
 

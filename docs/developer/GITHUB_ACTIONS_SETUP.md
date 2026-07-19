@@ -14,7 +14,7 @@ NPM publishing.
 **Features**:
 
 - ✅ Checkout code with latest actions
-- ✅ Setup Node.js 18 with NPM registry
+- ✅ Setup Node.js 22 with NPM registry
 - ✅ Install dependencies with `npm ci`
 - ✅ Run complete test suite
 - ✅ Verify ignore file configurations
@@ -40,7 +40,7 @@ gh release create v1.1.3 --title "Release v1.1.3" --notes "Release notes here"
 
 **Features**:
 
-- 🧪 **Test Matrix**: Multiple Node.js versions (18, 20, 22)
+- 🧪 **Test Matrix**: Multiple Node.js versions (20, 22, 24)
 - 🔍 **Quality Checks**: Linting, type checking, coverage
 - 📦 **Build Verification**: Package building and installation
 - 🌍 **WordPress Compatibility**: Tests against multiple WordPress versions
@@ -104,7 +104,7 @@ Check that your workflows reference the correct package name and repository:
 ### NPM Publish Process
 
 1. **Trigger**: GitHub release created
-2. **Environment**: Ubuntu latest, Node.js 18
+2. **Environment**: Ubuntu latest, Node.js 22
 3. **Steps**:
    - Checkout repository
    - Setup Node.js with NPM registry

@@ -43,7 +43,7 @@ npm run eval:report
 
 ### `wordpress-tools-eval.yaml`
 
-- Tests all 59 WordPress tools
+- Tests all 71 WordPress tools
 - Comprehensive coverage across all categories
 - Standard scoring thresholds (3.5/5.0 to pass)
 

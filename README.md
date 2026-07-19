@@ -30,7 +30,7 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 [![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker&logoColor=white)](https://hub.docker.com/r/docdyhr/mcp-wordpress)
 [![License](https://img.shields.io/badge/license-MIT-green?logo=opensource&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/blob/main/LICENSE)
 <!-- Badges updated: 2025-12-23 -->
-### 🎉 **v3.3.14** - Production Ready!
+### 🎉 **v3.3.14** - CI-Tested on Node 20/22/24
 
 </div>
 
@@ -45,9 +45,9 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 
 **Key Advantages:**
 
-- 🏆 **Most Complete**: 59 tools vs 20-30 in alternatives
+- 🏆 **Most Complete**: 71 tools vs 20-30 in alternatives
 - ⚡ **Fastest Setup**: 2-click Claude Desktop installation via DXT
-- 🔒 **Production Ready**: 2200+ tests, security audited, battle-tested
+- 🔒 **CI-Tested**: 2750+ tests across Node 20/22/24, CodeQL + Trivy security scanning
 - 🎯 **TypeScript Native**: 100% type safety, best-in-class developer experience
 - 🌐 **Multi-Site**: Manage unlimited WordPress sites from one place
 
@@ -169,21 +169,22 @@ Alternative methods: JWT, Basic Auth, API Key — see **[Authentication Configur
 
 | Feature                    | This Server                            | Competition     |
 | -------------------------- | -------------------------------------- | --------------- |
-| **Tools Available**        | 59 tools                               | 20-30 tools     |
+| **Tools Available**        | 71 tools                               | 20-30 tools     |
 | **Claude Desktop DXT**     | ✅ 2-click install                     | ❌ Manual setup |
 | **Multi-Site Support**     | ✅ Unlimited sites                     | ❌ Single site  |
-| **TypeScript**             | ✅ 100% coverage                       | ⚠️ Partial/None |
+| **TypeScript**             | ✅ 100% TypeScript, strict mode        | ⚠️ Partial/None |
 | **Performance Monitoring** | ✅ Real-time analytics                 | ❌ Basic only   |
-| **Test Coverage**          | ✅ 2200+ tests, comprehensive coverage | ⚠️ Limited      |
-| **Production Ready**       | ✅ Security audited                    | ⚠️ Unknown      |
+| **Test Coverage**          | ✅ 2750+ tests, ~76% line coverage     | ⚠️ Limited      |
+| **Security Scanning**      | ✅ CodeQL + Trivy in CI                | ⚠️ Unknown      |
 
-## 📋 Available Tools (59 Tools)
+## 📋 Available Tools (71 Tools)
 
 ### Content Management
 
 - **📝 Posts** (6 tools) - Create, edit, delete, list posts and revisions
 - **📄 Pages** (6 tools) - Manage static pages and revisions
-- **🖼️ Media** (6 tools) - Upload, manage media library and files
+- **🖼️ Media** (5 tools) - Upload, manage media library and files
+- **🔍 SEO** (11 tools) - Content analysis, metadata, schema markup, SERP tracking, keyword research
 
 ### User & Community
 
@@ -193,10 +194,11 @@ Alternative methods: JWT, Basic Auth, API Key — see **[Authentication Configur
 
 ### Site Management
 
-- **⚙️ Site Settings** (7 tools) - Site configuration and statistics
-- **🔐 Authentication** (6 tools) - Auth testing and management
+- **⚙️ Site Settings** (6 tools) - Site configuration and statistics
+- **🔐 Authentication** (3 tools) - Auth testing and management
 - **⚡ Cache Management** (4 tools) - Performance caching control
 - **📊 Performance Monitoring** (6 tools) - Real-time metrics and optimization
+- **🛠️ System** (1 tool) - Version checking
 
 📖 **[Complete Tool Documentation](docs/api/README.md)** | **[Live API Reference](docs/developer/API_REFERENCE.md)**
 
@@ -215,8 +217,8 @@ Alternative methods: JWT, Basic Auth, API Key — see **[Authentication Configur
 ## 🧪 Testing & Security
 
 ```bash
-npm test              # Full test suite (512/512 passing)
-npm run test:security # Security tests (40/40 passing)
+npm test              # Full test suite (2750/2750 passing, 94 files)
+npm run test:security # Security tests (371/371 passing)
 npm run health        # System health check
 ```
 

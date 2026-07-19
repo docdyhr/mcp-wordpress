@@ -9,7 +9,7 @@ The evaluation system provides automated testing and scoring of WordPress MCP to
 ensure:
 
 - **Tool Reliability**: Consistent performance across different scenarios
-- **Quality Assurance**: Comprehensive testing of all 59 WordPress tools
+- **Quality Assurance**: Comprehensive testing of all 71 WordPress tools
 - **Performance Monitoring**: Track tool performance over time
 - **Regression Detection**: Identify when changes affect tool quality
 
@@ -44,7 +44,7 @@ npm run eval:watch
 
 ### 1. Comprehensive Evaluation (`wordpress-tools-eval.yaml`)
 
-Tests all 59 WordPress tools across multiple categories:
+Tests all 71 WordPress tools across multiple categories:
 
 - **Post Management**: Create, read, update, delete posts
 - **Media Management**: Upload, manage media files

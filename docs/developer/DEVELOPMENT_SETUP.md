@@ -6,7 +6,7 @@ This guide walks you through setting up a complete development environment for t
 
 ### Required Software
 
-- **Node.js 18+** - [Download from nodejs.org](https://nodejs.org/)
+- **Node.js 20.8.1+** - [Download from nodejs.org](https://nodejs.org/)
 - **npm 9+** - Comes with Node.js
 - **Git** - [Download from git-scm.com](https://git-scm.com/)
 - **TypeScript 5+** - Installed via npm

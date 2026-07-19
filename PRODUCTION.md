@@ -17,7 +17,7 @@ Complete guide for deploying MCP WordPress Server to production environments.
 
 ### Prerequisites
 
-- Docker 20.10+ or Node.js 18+
+- Docker 20.10+ or Node.js 20.8.1+
 - WordPress site with REST API enabled
 - Application passwords or JWT authentication configured
 

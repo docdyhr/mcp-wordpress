@@ -215,7 +215,7 @@ docker buildx build --platform linux/amd64,linux/arm64 -t mcp-wordpress .
   "types": "dist/index.d.ts",
   "files": ["dist/", "src/", "README.md", "LICENSE"],
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.8.1"
   }
 }
 ```
