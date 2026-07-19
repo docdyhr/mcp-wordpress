@@ -83,30 +83,23 @@ export class ToolRegistry {
    * Register a single tool with parameter validation and execution handling
    */
   private registerTool(tool: ToolDefinition): void {
-    // Create base parameter schema with site parameter
-    const baseSchema = {
-      site: z
-        .string()
-        .optional()
-        .describe(
-          "The ID of the WordPress site to target (from mcp-wordpress.config.json). Required if multiple sites are configured.",
-        ),
-    };
+    // In multi-site mode, `site` must be a genuinely required Zod field so
+    // the SDK's own argument validation rejects an omitted `site` before
+    // the handler ever runs — a manual in-handler check alone would let an
+    // invalid call reach the handler and only fail (or worse, silently
+    // pick a site) from inside application code.
+    const isMultiSite = this.wordpressClients.size > 1;
+    const siteDescription = isMultiSite
+      ? "The ID of the WordPress site to target (from mcp-wordpress.config.json). Required when multiple sites are configured."
+      : "The ID of the WordPress site to target (from mcp-wordpress.config.json). Required if multiple sites are configured.";
+    const siteSchema = isMultiSite
+      ? z.string().describe(siteDescription)
+      : z.string().optional().describe(siteDescription);
+
+    const baseSchema = { site: siteSchema };
 
     // Merge with tool-specific parameters
     const parameterSchema = this.buildParameterSchema(tool, baseSchema);
-
-    // Make site parameter required if multiple sites are configured
-    if (
-      this.wordpressClients.size > 1 &&
-      parameterSchema.site &&
-      typeof parameterSchema.site === "object" &&
-      "describe" in parameterSchema.site
-    ) {
-      parameterSchema.site = (parameterSchema.site as z.ZodString).describe(
-        "The ID of the WordPress site to target (from mcp-wordpress.config.json). Required when multiple sites are configured.",
-      );
-    }
 
     this.server.tool(
       tool.name,
@@ -220,15 +213,18 @@ export class ToolRegistry {
    * is replaced by a single pre-computed snapshot.
    */
   private buildCachedInputSchema(tool: ToolDefinition): Record<string, unknown> {
-    const siteDescription =
-      this.wordpressClients.size > 1
-        ? "The ID of the WordPress site to target (from mcp-wordpress.config.json). Required when multiple sites are configured."
-        : "The ID of the WordPress site to target (from mcp-wordpress.config.json). Required if multiple sites are configured.";
+    const isMultiSite = this.wordpressClients.size > 1;
+    const siteDescription = isMultiSite
+      ? "The ID of the WordPress site to target (from mcp-wordpress.config.json). Required when multiple sites are configured."
+      : "The ID of the WordPress site to target (from mcp-wordpress.config.json). Required if multiple sites are configured.";
 
     const properties: Record<string, unknown> = {
       site: { type: "string", description: siteDescription },
     };
-    const required: string[] = [];
+    // Kept in sync with registerTool()'s Zod schema: `site` is only a
+    // genuinely required Zod field in multi-site mode, so the advertised
+    // JSON Schema must say the same thing here.
+    const required: string[] = isMultiSite ? ["site"] : [];
 
     if (tool.inputSchema) {
       Object.assign(properties, tool.inputSchema.properties || {});
@@ -311,31 +307,48 @@ export class ToolRegistry {
       return z.enum(enumValues as [string, ...string[]]);
     }
 
-    // Handle array types
+    // Handle array types — recurse so constraints/enums on the item schema
+    // itself (not just its bare type) are preserved too.
     if (propDef.type === "array") {
-      const itemType = propDef.items?.type || "string";
-      switch (itemType) {
-        case "number":
-          return z.array(z.number());
-        case "boolean":
-          return z.array(z.boolean());
-        case "object":
-          return z.array(z.record(z.string(), z.unknown()));
-        default:
-          return z.array(z.string());
-      }
+      const itemSchema = propDef.items ? this.getZodTypeForProperty(propDef.items) : z.string();
+      return z.array(itemSchema);
     }
 
-    // Handle primitive types
+    // Handle nested object types. JSONSchemaProperty has no per-nested-field
+    // "required" list, so nested properties are treated as optional — that's
+    // the most permissive interpretation the current schema shape supports.
+    if (propDef.type === "object") {
+      if (propDef.properties) {
+        const shape: Record<string, z.ZodType> = {};
+        for (const [key, nestedDef] of Object.entries(propDef.properties)) {
+          let nestedType = this.getZodTypeForProperty(nestedDef).optional();
+          if (nestedDef.description) {
+            nestedType = nestedType.describe(nestedDef.description);
+          }
+          shape[key] = nestedType;
+        }
+        return z.object(shape);
+      }
+      return z.record(z.string(), z.unknown());
+    }
+
+    // Handle primitive types, preserving numeric/string bounds and pattern.
     switch (propDef.type) {
-      case "string":
-        return z.string();
-      case "number":
-        return z.number();
+      case "string": {
+        let schema = z.string();
+        if (propDef.minLength !== undefined) schema = schema.min(propDef.minLength);
+        if (propDef.maxLength !== undefined) schema = schema.max(propDef.maxLength);
+        if (propDef.pattern !== undefined) schema = schema.regex(new RegExp(propDef.pattern));
+        return schema;
+      }
+      case "number": {
+        let schema = z.number();
+        if (propDef.minimum !== undefined) schema = schema.min(propDef.minimum);
+        if (propDef.maximum !== undefined) schema = schema.max(propDef.maximum);
+        return schema;
+      }
       case "boolean":
         return z.boolean();
-      case "object":
-        return z.record(z.string(), z.unknown());
       default:
         return z.string();
     }

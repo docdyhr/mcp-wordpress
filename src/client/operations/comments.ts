@@ -72,7 +72,7 @@ export class CommentsOperations {
    */
   async approveComment(id: number): Promise<WordPressComment> {
     return this.client.put<WordPressComment>(`comments/${id}`, {
-      status: "approved",
+      status: "approve",
     });
   }
 
@@ -81,7 +81,7 @@ export class CommentsOperations {
    */
   async rejectComment(id: number): Promise<WordPressComment> {
     return this.client.put<WordPressComment>(`comments/${id}`, {
-      status: "unapproved",
+      status: "hold",
     });
   }
 
