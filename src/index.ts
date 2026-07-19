@@ -172,17 +172,19 @@ async function runHealthCheck(): Promise<void> {
   }
 }
 
-// Check if running as main module - handle direct execution, DXT, and bin wrapper entry points
+// Check if running as main module - handles direct execution (`node dist/index.js`,
+// Docker, npm scripts) only. bin/mcp-wordpress.js is the entry point for npm/npx
+// invocation and dispatches explicitly instead of relying on this self-check:
+// process.argv[1] for an npm-generated bin shim (node_modules/.bin/mcp-wordpress,
+// or its .cmd/.ps1 equivalents on Windows) doesn't end in ".js", so a filename-based
+// guess can never reliably recognize that invocation path. DXT's entry point
+// (dxt-entry.ts) is likewise self-contained and calls startDXTServer() directly.
 const currentFile = fileURLToPath(import.meta.url);
 const callerFile = process.argv[1];
 
+// !callerFile: when run through DXT, process.argv[1] might be undefined.
 const isMainModule =
-  callerFile === currentFile ||
-  callerFile?.endsWith("/index.js") ||
-  callerFile?.endsWith("\\index.js") ||
-  callerFile?.endsWith("/mcp-wordpress.js") || // invoked via bin/mcp-wordpress.js wrapper
-  callerFile?.endsWith("\\mcp-wordpress.js") ||
-  !callerFile; // When run through DXT, process.argv[1] might be undefined
+  callerFile === currentFile || callerFile?.endsWith("/index.js") || callerFile?.endsWith("\\index.js") || !callerFile;
 
 if (isMainModule) {
   if (process.argv.includes("--health-check")) {
@@ -196,4 +198,4 @@ if (isMainModule) {
 }
 
 export default MCPWordPressServer;
-export { MCPWordPressServer, runHealthCheck };
+export { MCPWordPressServer, runHealthCheck, main };
