@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import { AuthTools } from "@/tools/auth.js";
+import { CachedWordPressClient } from "@/client/CachedWordPressClient.js";
 
 describe("AuthTools", () => {
   let authTools;
@@ -410,6 +411,90 @@ describe("AuthTools", () => {
     it("rejects an empty method", async () => {
       await expect(authTools.handleSwitchAuthMethod(mockClient, {})).rejects.toThrow("Failed to switch auth method:");
       expect(mockClient.setAuthConfig).not.toHaveBeenCalled();
+    });
+
+    it("clears the cache after a successful switch so stale auth-sensitive GETs aren't served under the new identity", async () => {
+      mockClient.authenticate.mockResolvedValue(true);
+      mockClient.clearCache = vi.fn().mockReturnValue(0);
+      Object.setPrototypeOf(mockClient, CachedWordPressClient.prototype);
+
+      await authTools.handleSwitchAuthMethod(mockClient, {
+        method: "basic",
+        username: "user",
+        password: "pass",
+      });
+
+      expect(mockClient.clearCache).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not touch the cache when the client isn't a CachedWordPressClient", async () => {
+      mockClient.authenticate.mockResolvedValue(true);
+      mockClient.clearCache = vi.fn();
+
+      await authTools.handleSwitchAuthMethod(mockClient, {
+        method: "basic",
+        username: "user",
+        password: "pass",
+      });
+
+      expect(mockClient.clearCache).not.toHaveBeenCalled();
+    });
+
+    it("does not clear the cache when the switch fails", async () => {
+      mockClient.clearCache = vi.fn();
+      Object.setPrototypeOf(mockClient, CachedWordPressClient.prototype);
+      mockClient.authenticate.mockRejectedValue(new Error("401 Unauthorized"));
+
+      await expect(
+        authTools.handleSwitchAuthMethod(mockClient, { method: "basic", username: "user", password: "wrong" }),
+      ).rejects.toThrow();
+
+      expect(mockClient.clearCache).not.toHaveBeenCalled();
+    });
+
+    it("re-authenticates to reacquire a JWT token when restoring after a failed switch (setAuthConfig always clears jwtToken)", async () => {
+      const originalAuth = { method: "jwt", username: "orig", password: "origpass", secret: "origsecret" };
+      mockClient.config.auth = originalAuth;
+      mockClient.authenticate = vi
+        .fn()
+        .mockRejectedValueOnce(new Error("401 Unauthorized"))
+        .mockResolvedValueOnce(true);
+
+      await expect(
+        authTools.handleSwitchAuthMethod(mockClient, { method: "basic", username: "user", password: "wrong" }),
+      ).rejects.toThrow("Failed to switch auth method: 401 Unauthorized");
+
+      // Second setAuthConfig call restores the JWT config; the extra authenticate()
+      // call re-derives a usable token instead of leaving the client silently logged out.
+      expect(mockClient.setAuthConfig).toHaveBeenLastCalledWith(originalAuth);
+      expect(mockClient.authenticate).toHaveBeenCalledTimes(2);
+    });
+
+    it("still surfaces the original switch error if reacquiring the JWT token on restore also fails", async () => {
+      const originalAuth = { method: "jwt", username: "orig", password: "origpass", secret: "origsecret" };
+      mockClient.config.auth = originalAuth;
+      mockClient.authenticate = vi
+        .fn()
+        .mockRejectedValueOnce(new Error("401 Unauthorized"))
+        .mockRejectedValueOnce(new Error("network down"));
+
+      await expect(
+        authTools.handleSwitchAuthMethod(mockClient, { method: "basic", username: "user", password: "wrong" }),
+      ).rejects.toThrow("Failed to switch auth method: 401 Unauthorized");
+
+      expect(mockClient.authenticate).toHaveBeenCalledTimes(2);
+    });
+
+    it("does not re-authenticate on restore when the previous method wasn't jwt", async () => {
+      const originalAuth = { method: "app-password", username: "orig", appPassword: "origpass" };
+      mockClient.config.auth = originalAuth;
+      mockClient.authenticate = vi.fn().mockRejectedValue(new Error("401 Unauthorized"));
+
+      await expect(
+        authTools.handleSwitchAuthMethod(mockClient, { method: "basic", username: "user", password: "wrong" }),
+      ).rejects.toThrow("Failed to switch auth method: 401 Unauthorized");
+
+      expect(mockClient.authenticate).toHaveBeenCalledTimes(1);
     });
   });
 

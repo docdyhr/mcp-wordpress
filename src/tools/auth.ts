@@ -1,4 +1,5 @@
 import { WordPressClient } from "@/client/api.js";
+import { CachedWordPressClient } from "@/client/CachedWordPressClient.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
 import type { AuthConfig } from "@/types/client.js";
 import { getErrorMessage } from "@/utils/error.js";
@@ -212,8 +213,23 @@ export class AuthTools {
         await client.authenticate();
       } catch (authError) {
         client.setAuthConfig(previousAuth);
+        // setAuthConfig() always clears the in-memory JWT token, so restoring
+        // a JWT config leaves the client silently unauthenticated until some
+        // later explicit authenticate() call. Reacquire the token now so the
+        // restored config is actually usable, not just nominally in place.
+        if (previousAuth.method === "jwt") {
+          await client.authenticate().catch(() => {});
+        }
         throw authError;
       }
+
+      // Cached GET responses (e.g. users/me) are keyed before auth headers
+      // are added, so entries fetched under the old credentials could still
+      // be served after switching identities unless cleared here.
+      if (client instanceof CachedWordPressClient) {
+        client.clearCache();
+      }
+
       // api-key has no server-side verification step (WordPressClient.authenticate()
       // just sets a header and returns true), so it can't honestly claim "verified"
       // the way app-password/basic/jwt do via a real request — say so instead.

@@ -109,7 +109,7 @@ export class HttpCacheWrapper {
 
           return {
             data: cachedValue.data as T,
-            status: 200,
+            status: cachedValue.status,
             headers: cachedValue.headers,
             cached: true,
           };

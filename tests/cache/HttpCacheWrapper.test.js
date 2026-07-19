@@ -73,6 +73,22 @@ describe("HttpCacheWrapper upstream request counting", () => {
     expect(revalidated.data).toEqual({ id: 1 });
   });
 
+  it("preserves the cached entry's original status on a 304, instead of hardcoding 200", async () => {
+    const requestFn = vi
+      .fn()
+      .mockResolvedValueOnce({ data: { id: 1 }, status: 201, headers: { etag: '"abc"' } })
+      .mockResolvedValueOnce({ data: null, status: 304, headers: {} });
+
+    const first = await httpCache.request(requestFn, baseOptions, { ttl: 1 });
+    expect(first.status).toBe(201);
+
+    await letStaleEntryAge();
+
+    const revalidated = await httpCache.request(requestFn, baseOptions, { ttl: 1 });
+    expect(requestFn).toHaveBeenCalledTimes(2);
+    expect(revalidated.status).toBe(201);
+  });
+
   it("fetches a fresh body when a stale entry's revalidation returns changed content", async () => {
     const requestFn = vi
       .fn()
