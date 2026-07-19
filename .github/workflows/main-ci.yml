@@ -157,8 +157,30 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Test package
-        run: npm pack --dry-run
+      - name: Pack and smoke-test the published tarball
+        run: |
+          npm pack
+          PACKAGE_TARBALL="$(ls mcp-wordpress-*.tgz)"
+          SMOKE_DIR="$(mktemp -d)"
+          cp "$PACKAGE_TARBALL" "$SMOKE_DIR/"
+          cd "$SMOKE_DIR"
+          npm init -y >/dev/null
+          npm install "./$PACKAGE_TARBALL"
+          # --health-check is finite (no stdio transport, no live WordPress
+          # calls) and exits 1 without WordPress configured. A crash here
+          # (missing module, broken import, etc. from an incomplete "files"
+          # list) would fail differently, not print this exact message.
+          set +e
+          node_modules/.bin/mcp-wordpress --health-check > health-check-output.txt 2>&1
+          HEALTH_CHECK_EXIT=$?
+          set -e
+          cat health-check-output.txt
+          if [ "$HEALTH_CHECK_EXIT" -ne 1 ]; then
+            echo "Expected exit code 1 (unconfigured), got $HEALTH_CHECK_EXIT" >&2
+            exit 1
+          fi
+          grep -q "Health check failed: no WordPress sites configured" health-check-output.txt
+          node node_modules/mcp-wordpress/bin/status.js
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
