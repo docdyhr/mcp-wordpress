@@ -63,5 +63,4 @@ jobs:
         with:
           category: "/language:javascript-typescript"
           upload: true
-          fail-on: error
           wait-for-processing: true

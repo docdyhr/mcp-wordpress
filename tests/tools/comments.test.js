@@ -605,9 +605,11 @@ describe("CommentTools", () => {
 
       const result = await commentTools.handleApproveComment(mockClient, { id: 1 });
 
+      // "approve" (not "approved") — matches wp_set_comment_status() and the
+      // tool's own published status enum ("hold"/"approve"/"spam"/"trash").
       expect(mockClient.updateComment).toHaveBeenCalledWith({
         id: 1,
-        status: "approved",
+        status: "approve",
       });
       expect(typeof result).toBe("string");
       expect(result).toContain("✅ Comment 1 has been approved");

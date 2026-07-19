@@ -1,3 +1,6 @@
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
 import {
   validateId,
   validateString,
@@ -74,19 +77,103 @@ describe("validation utilities", () => {
   });
 
   describe("validateFilePath", () => {
-    it("should validate safe file paths", () => {
-      expect(validateFilePath("file.txt", "/uploads")).toBe("/uploads/file.txt");
-      expect(validateFilePath("folder/file.txt", "/uploads")).toBe("/uploads/folder/file.txt");
+    let tmpRoot;
+
+    beforeEach(() => {
+      tmpRoot = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "mcp-wp-upload-test-")));
     });
 
-    it("should reject dangerous paths", () => {
-      expect(() => validateFilePath("../../../etc/passwd", "/uploads")).toThrow(WordPressAPIError);
-      // Note: some paths may be normalized and not throw
+    afterEach(() => {
+      fs.rmSync(tmpRoot, { recursive: true, force: true });
     });
 
-    it("should handle edge cases", () => {
-      // Empty paths and spaces are normalized by path.normalize
-      expect(() => validateFilePath("file with spaces.txt", "/uploads")).not.toThrow();
+    it("disables uploads when no base directory is configured", () => {
+      expect(() => validateFilePath("file.txt", undefined)).toThrow(WordPressAPIError);
+      expect(() => validateFilePath("file.txt", "")).toThrow(WordPressAPIError);
+    });
+
+    it("rejects a missing configured root", () => {
+      expect(() => validateFilePath("file.txt", path.join(tmpRoot, "does-not-exist"))).toThrow(WordPressAPIError);
+    });
+
+    it("validates a real file within the allowed directory", () => {
+      const filePath = path.join(tmpRoot, "file.txt");
+      fs.writeFileSync(filePath, "hello");
+      expect(validateFilePath("file.txt", tmpRoot)).toBe(fs.realpathSync(filePath));
+    });
+
+    it("validates a nested real file within the allowed directory", () => {
+      const nestedDir = path.join(tmpRoot, "folder");
+      fs.mkdirSync(nestedDir);
+      const filePath = path.join(nestedDir, "file.txt");
+      fs.writeFileSync(filePath, "hello");
+      expect(validateFilePath("folder/file.txt", tmpRoot)).toBe(fs.realpathSync(filePath));
+    });
+
+    it("rejects .. traversal outside the allowed directory", () => {
+      const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), "mcp-wp-outside-"));
+      fs.writeFileSync(path.join(outsideDir, "secret.txt"), "secret");
+      try {
+        expect(() => validateFilePath(`../${path.basename(outsideDir)}/secret.txt`, tmpRoot)).toThrow(
+          WordPressAPIError,
+        );
+      } finally {
+        fs.rmSync(outsideDir, { recursive: true, force: true });
+      }
+    });
+
+    it("rejects an absolute path outside the allowed directory", () => {
+      const outsideFile = path.join(os.tmpdir(), `mcp-wp-abs-outside-${process.pid}.txt`);
+      fs.writeFileSync(outsideFile, "secret");
+      try {
+        expect(() => validateFilePath(outsideFile, tmpRoot)).toThrow(WordPressAPIError);
+      } finally {
+        fs.rmSync(outsideFile, { force: true });
+      }
+    });
+
+    it("rejects a sibling directory that merely shares a name prefix", () => {
+      // Regression test: an allowed root of "/safe" must not match "/safe-secret"
+      // via a raw string startsWith() comparison.
+      const prefixCollisionDir = `${tmpRoot}-collision`;
+      fs.mkdirSync(prefixCollisionDir, { recursive: true });
+      const collisionFile = path.join(prefixCollisionDir, "file.txt");
+      fs.writeFileSync(collisionFile, "secret");
+      try {
+        expect(() => validateFilePath(collisionFile, tmpRoot)).toThrow(WordPressAPIError);
+      } finally {
+        fs.rmSync(prefixCollisionDir, { recursive: true, force: true });
+      }
+    });
+
+    it("rejects a symlink even when it points inside the allowed directory", () => {
+      const realFile = path.join(tmpRoot, "real.txt");
+      fs.writeFileSync(realFile, "hello");
+      const symlinkPath = path.join(tmpRoot, "link.txt");
+      fs.symlinkSync(realFile, symlinkPath);
+      expect(() => validateFilePath("link.txt", tmpRoot)).toThrow(WordPressAPIError);
+    });
+
+    it("rejects a symlink that escapes the allowed directory", () => {
+      const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), "mcp-wp-outside-"));
+      const outsideFile = path.join(outsideDir, "secret.txt");
+      fs.writeFileSync(outsideFile, "secret");
+      const symlinkPath = path.join(tmpRoot, "escape.txt");
+      fs.symlinkSync(outsideFile, symlinkPath);
+      try {
+        expect(() => validateFilePath("escape.txt", tmpRoot)).toThrow(WordPressAPIError);
+      } finally {
+        fs.rmSync(outsideDir, { recursive: true, force: true });
+      }
+    });
+
+    it("rejects a directory passed as the file path", () => {
+      fs.mkdirSync(path.join(tmpRoot, "folder"));
+      expect(() => validateFilePath("folder", tmpRoot)).toThrow(WordPressAPIError);
+    });
+
+    it("rejects a path that resolves to a non-existent file", () => {
+      expect(() => validateFilePath("does-not-exist.txt", tmpRoot)).toThrow(WordPressAPIError);
     });
   });
 

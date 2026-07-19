@@ -8,6 +8,17 @@ import { WordPressClient } from "@/client/api.js";
 import nock from "nock";
 import fs from "fs";
 
+/**
+ * Tests below intentionally mock a response `.delay()` longer than the
+ * client's own request timeout, so the client's AbortController wins the
+ * race and rejects first. But nock schedules that delay via its own
+ * independent timer, so — left alone — it fires afterward and tries to
+ * deliver a response to a request nock considers already handled, throwing
+ * an "already handled" InterceptorError asynchronously once the delay
+ * elapses. `nock.abortPendingRequests()` (called in afterEach) clears that
+ * still-pending timer before it ever fires, so the race never happens.
+ */
+
 describe("WordPress API Client Upload Timeout", () => {
   let client;
   const testBaseUrl = "https://test-wordpress.com";
@@ -42,6 +53,7 @@ describe("WordPress API Client Upload Timeout", () => {
   });
 
   afterEach(() => {
+    nock.abortPendingRequests();
     nock.cleanAll();
     vi.restoreAllMocks();
   });
@@ -49,12 +61,10 @@ describe("WordPress API Client Upload Timeout", () => {
   describe("uploadFile method timeout behavior", () => {
     it("should use custom timeout when provided in options", async () => {
       const customTimeout = 100; // Very short timeout for fast testing
+      const mockDelay = customTimeout + 50; // Short delay but still exceeds timeout
 
       // Mock slow response that exceeds custom timeout
-      nock(testBaseUrl)
-        .post("/wp-json/wp/v2/media")
-        .delay(customTimeout + 50) // Short delay but still exceeds timeout
-        .reply(200, { id: 123, title: "uploaded" });
+      nock(testBaseUrl).post("/wp-json/wp/v2/media").delay(mockDelay).reply(200, { id: 123, title: "uploaded" });
 
       await expect(
         client.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: customTimeout }),

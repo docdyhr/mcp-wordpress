@@ -335,7 +335,7 @@ export interface CreateCommentParams extends BaseToolParams {
   readonly author_url?: string;
   readonly date?: string;
   readonly date_gmt?: string;
-  readonly status?: "approved" | "unapproved";
+  readonly status?: "approve" | "hold";
   readonly meta?: DeepReadonly<Record<string, unknown>>;
 }
 
@@ -350,7 +350,7 @@ export interface UpdateCommentParams extends BaseToolParams {
   readonly author_url?: string;
   readonly date?: string;
   readonly date_gmt?: string;
-  readonly status?: "approved" | "unapproved" | "spam" | "trash";
+  readonly status?: "approve" | "hold" | "spam" | "trash";
   readonly meta?: DeepReadonly<Record<string, unknown>>;
 }
 
@@ -378,7 +378,7 @@ export interface ListCommentsParams extends BaseToolParams {
   readonly parent?: readonly CommentId[];
   readonly parent_exclude?: readonly CommentId[];
   readonly post?: readonly PostId[];
-  readonly status?: "approved" | "unapproved" | "spam" | "trash" | "hold" | "all";
+  readonly status?: "hold" | "approve" | "spam" | "trash";
   readonly type?: "comment" | "trackback" | "pingback";
   readonly password?: string;
 }
@@ -390,7 +390,7 @@ export interface DeleteCommentParams extends BaseToolParams {
 
 export interface ModerateCommentParams extends BaseToolParams {
   readonly id: CommentId;
-  readonly status: "approved" | "unapproved" | "spam" | "trash";
+  readonly status: "approve" | "hold" | "spam" | "trash";
 }
 
 // Taxonomy Tool Parameters
@@ -569,22 +569,20 @@ export interface ListToolResult<T> extends ToolResult<readonly T[]> {
   };
 }
 
-export interface DeleteToolResult
-  extends ToolResult<{
-    readonly deleted: boolean;
-    readonly previous?: unknown;
-  }> {}
+export interface DeleteToolResult extends ToolResult<{
+  readonly deleted: boolean;
+  readonly previous?: unknown;
+}> {}
 
-export interface SearchToolResult
-  extends ToolResult<
-    readonly {
-      readonly id: number;
-      readonly title: string;
-      readonly url: string;
-      readonly type: string;
-      readonly subtype: string;
-    }[]
-  > {}
+export interface SearchToolResult extends ToolResult<
+  readonly {
+    readonly id: number;
+    readonly title: string;
+    readonly url: string;
+    readonly type: string;
+    readonly subtype: string;
+  }[]
+> {}
 
 // Tool Handler Type Definitions
 export type PostToolHandler<TParams extends BaseToolParams, TResult = PostToolResult> = (

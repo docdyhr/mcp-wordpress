@@ -79,9 +79,11 @@ ENV NODE_ENV=production
 ENV NODE_OPTIONS="--experimental-vm-modules"
 ENV MCP_SERVER_VERSION=${VERSION}
 
-# Health check with better validation
+# Health check: verifies configuration loads and at least one WordPress
+# site is configured. Does not open a stdio MCP session or make live
+# WordPress requests (see runHealthCheck() in src/index.ts).
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "console.log('Health check passed')" || exit 1
+  CMD node dist/index.js --health-check || exit 1
 
 # Use tini as init system for proper signal handling
 ENTRYPOINT ["/sbin/tini", "--"]

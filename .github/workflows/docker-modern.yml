@@ -94,11 +94,13 @@ jobs:
         env:
           META_TAGS: ${{ steps.meta.outputs.tags }}
         run: |
-          echo "## 🧪 Docker Test Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Status:** ✅ Build successful" >> $GITHUB_STEP_SUMMARY
-          echo "**Platform:** linux/amd64 (test)" >> $GITHUB_STEP_SUMMARY
-          echo "**Tags:** ${META_TAGS}" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## 🧪 Docker Test Build Summary"
+            echo ""
+            echo "**Status:** ✅ Build successful"
+            echo "**Platform:** linux/amd64 (test)"
+            echo "**Tags:** ${META_TAGS}"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   # Full build and push with all v6 features
   build-and-push:
@@ -224,20 +226,24 @@ jobs:
       - name: 🔍 Security Scan (if pushed)
         if: inputs.push
         run: |
-          echo "### 🔍 Security Analysis" >> $GITHUB_STEP_SUMMARY
-          echo "**SBOM:** Generated and attached to image" >> $GITHUB_STEP_SUMMARY
-          echo "**Provenance:** Verified build integrity attestation" >> $GITHUB_STEP_SUMMARY
-          echo "**Scan:** Use \`docker scout\` or \`trivy\` to scan the published image" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "### 🔍 Security Analysis"
+            echo "**SBOM:** Generated and attached to image"
+            echo "**Provenance:** Verified build integrity attestation"
+            echo "**Scan:** Use \`docker scout\` or \`trivy\` to scan the published image"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: 📋 Usage Instructions
         run: |
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🚀 Usage" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "# Pull and run the image" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.tag || 'dev' }}" >> $GITHUB_STEP_SUMMARY
-          echo "docker run -d ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.tag || 'dev' }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "# Verify provenance and SBOM" >> $GITHUB_STEP_SUMMARY
-          echo "docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.tag || 'dev' }} --format '{{json .}}'" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          {
+            echo ""
+            echo "### 🚀 Usage"
+            echo "\`\`\`bash"
+            echo "# Pull and run the image"
+            echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.tag || 'dev' }}"
+            echo "docker run -d ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.tag || 'dev' }}"
+            echo ""
+            echo "# Verify provenance and SBOM"
+            echo "docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.tag || 'dev' }} --format '{{json .}}'"
+            echo "\`\`\`"
+          } >> "$GITHUB_STEP_SUMMARY"

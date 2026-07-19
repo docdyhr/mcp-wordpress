@@ -321,6 +321,40 @@ describe("WordPressClient", () => {
       expect(result).toEqual({ id: 1 });
     });
 
+    it("does not retry a POST after an ambiguous network failure (avoids duplicate mutation)", async () => {
+      // Simulates: the server actually processed the POST, but the connection
+      // reset before the client saw the response. Retrying here would risk
+      // creating a second resource server-side.
+      const successResponse = {
+        ok: true,
+        status: 201,
+        headers: new Map([["content-type", "application/json"]]),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf('{"id": 1}')),
+      };
+
+      mockFetch.mockRejectedValueOnce(new Error("ECONNRESET")).mockResolvedValueOnce(successResponse);
+
+      await expect(client.post("posts", { title: "New Post" })).rejects.toThrow();
+
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("retries a POST after an ambiguous network failure only when explicitly marked idempotent", async () => {
+      const successResponse = {
+        ok: true,
+        status: 201,
+        headers: new Map([["content-type", "application/json"]]),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf('{"id": 1}')),
+      };
+
+      mockFetch.mockRejectedValueOnce(new Error("ECONNRESET")).mockResolvedValueOnce(successResponse);
+
+      const result = await client.post("posts", { title: "New Post" }, { idempotent: true });
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({ id: 1 });
+    });
+
     it("should handle malformed JSON responses", async () => {
       mockFetch.mockResolvedValue({
         ok: true,

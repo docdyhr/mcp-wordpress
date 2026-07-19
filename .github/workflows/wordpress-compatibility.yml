@@ -77,7 +77,7 @@ jobs:
       - name: 🔧 Setup WordPress
         run: |
           # Install wp-cli in the container and set up WordPress
-          docker exec $(docker ps -q --filter "ancestor=wordpress:latest") bash -c "
+          docker exec "$(docker ps -q --filter "ancestor=wordpress:latest")" bash -c "
             cd /tmp &&
             curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar &&
             chmod +x wp-cli.phar &&

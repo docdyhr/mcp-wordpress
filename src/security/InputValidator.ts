@@ -351,5 +351,7 @@ export class SecurityLimiter {
   }
 }
 
-// Start cleanup interval
-setInterval(() => SecurityLimiter.cleanup(), 60000); // Clean up every minute
+// Start cleanup interval. unref() so this background timer never keeps the
+// process (or a test worker) alive on its own — importing this module must
+// not create a ref'ed global timer that blocks a clean process exit.
+setInterval(() => SecurityLimiter.cleanup(), 60000).unref(); // Clean up every minute

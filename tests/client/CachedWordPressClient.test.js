@@ -53,7 +53,9 @@ describe("CachedWordPressClient", () => {
     clientsToCleanup.push(cachedClient);
 
     // Mock the parent class methods
-    vi.spyOn(WordPressClient.prototype, "request").mockImplementation(async (method, endpoint, _data, _options) => {
+    // Shared fake response builder for both request() (used for non-GET
+    // methods) and requestWithMetadata() (used by the GET/caching path).
+    const mockRequestImpl = async (method, endpoint, _data, _options) => {
       // Simulate different responses based on endpoint
       if (endpoint === "posts") {
         return [
@@ -79,7 +81,18 @@ describe("CachedWordPressClient", () => {
         return { title: "Test Site", description: "A test site" };
       }
       return {};
-    });
+    };
+
+    vi.spyOn(WordPressClient.prototype, "request").mockImplementation(mockRequestImpl);
+
+    // CachedWordPressClient's GET/caching path calls requestWithMetadata()
+    // (not request()) so it can see real response status/headers.
+    vi.spyOn(WordPressClient.prototype, "requestWithMetadata").mockImplementation(
+      async (method, endpoint, data, options) => {
+        const result = await mockRequestImpl(method, endpoint, data, options);
+        return { data: result, status: 200, headers: {} };
+      },
+    );
 
     vi.spyOn(WordPressClient.prototype, "createPost").mockImplementation(async (data) => {
       return { id: 999, title: { rendered: data.title }, content: { rendered: data.content } };
@@ -138,7 +151,7 @@ describe("CachedWordPressClient", () => {
 
       // First request
       const result1 = await cachedClient.request("GET", "posts");
-      expect(WordPressClient.prototype.request).toHaveBeenCalledTimes(1);
+      expect(WordPressClient.prototype.requestWithMetadata).toHaveBeenCalledTimes(1);
 
       // Second request should use cache
       const result2 = await cachedClient.request("GET", "posts");
@@ -158,13 +171,13 @@ describe("CachedWordPressClient", () => {
     });
 
     it("should handle PUT requests and invalidate cache", async () => {
-      // First, populate cache with a GET request
+      // First, populate cache with a GET request (goes through requestWithMetadata)
       await cachedClient.request("GET", "posts/1");
-      expect(WordPressClient.prototype.request).toHaveBeenCalledTimes(1);
+      expect(WordPressClient.prototype.requestWithMetadata).toHaveBeenCalledTimes(1);
 
-      // Update the post
+      // Update the post (non-GET methods go through request() directly)
       await cachedClient.request("PUT", "posts/1", { title: "Updated Post" });
-      expect(WordPressClient.prototype.request).toHaveBeenCalledTimes(2);
+      expect(WordPressClient.prototype.request).toHaveBeenCalledTimes(1);
     });
 
     it("should handle PATCH requests", async () => {
@@ -173,12 +186,13 @@ describe("CachedWordPressClient", () => {
     });
 
     it("should handle DELETE requests and invalidate cache", async () => {
-      // First, populate cache
+      // First, populate cache (GET goes through requestWithMetadata)
       await cachedClient.request("GET", "posts/1");
+      expect(WordPressClient.prototype.requestWithMetadata).toHaveBeenCalledTimes(1);
 
-      // Delete the post
+      // Delete the post (non-GET methods go through request() directly)
       await cachedClient.request("DELETE", "posts/1");
-      expect(WordPressClient.prototype.request).toHaveBeenCalledTimes(2);
+      expect(WordPressClient.prototype.request).toHaveBeenCalledTimes(1);
     });
 
     it("should bypass cache when caching is disabled", async () => {
@@ -205,7 +219,7 @@ describe("CachedWordPressClient", () => {
       const _posts1 = await cachedClient.getPosts({ per_page: 5 });
       const _posts2 = await cachedClient.getPosts({ per_page: 10 });
 
-      expect(WordPressClient.prototype.request).toHaveBeenCalledTimes(2);
+      expect(WordPressClient.prototype.requestWithMetadata).toHaveBeenCalledTimes(2);
     });
 
     it("should cache individual post requests", async () => {
@@ -225,7 +239,7 @@ describe("CachedWordPressClient", () => {
       await cachedClient.getPost(1);
       await cachedClient.getPost(2);
 
-      expect(WordPressClient.prototype.request).toHaveBeenCalledTimes(2);
+      expect(WordPressClient.prototype.requestWithMetadata).toHaveBeenCalledTimes(2);
     });
 
     it("should cache getCurrentUser with session settings", async () => {
@@ -277,7 +291,7 @@ describe("CachedWordPressClient", () => {
     it("should invalidate cache after createPost", async () => {
       // First, populate cache
       await cachedClient.getPosts();
-      expect(WordPressClient.prototype.request).toHaveBeenCalledTimes(1);
+      expect(WordPressClient.prototype.requestWithMetadata).toHaveBeenCalledTimes(1);
 
       // Create a new post
       const newPost = await cachedClient.createPost({
@@ -293,7 +307,7 @@ describe("CachedWordPressClient", () => {
     it("should invalidate cache after updatePost", async () => {
       // First, get a specific post
       await cachedClient.getPost(1);
-      expect(WordPressClient.prototype.request).toHaveBeenCalledTimes(1);
+      expect(WordPressClient.prototype.requestWithMetadata).toHaveBeenCalledTimes(1);
 
       // Update the post
       const updatedPost = await cachedClient.updatePost({
@@ -309,7 +323,7 @@ describe("CachedWordPressClient", () => {
     it("should invalidate cache after deletePost", async () => {
       // First, get a specific post
       await cachedClient.getPost(1);
-      expect(WordPressClient.prototype.request).toHaveBeenCalledTimes(1);
+      expect(WordPressClient.prototype.requestWithMetadata).toHaveBeenCalledTimes(1);
 
       // Delete the post
       const result = await cachedClient.deletePost(1);

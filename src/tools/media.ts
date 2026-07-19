@@ -1,4 +1,3 @@
-import * as fs from "fs";
 import { WordPressClient } from "@/client/api.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
 import { MediaQueryParams, UpdateMediaRequest, UploadMediaRequest } from "@/types/wordpress.js";
@@ -224,17 +223,11 @@ export class MediaTools {
   public async handleUploadMedia(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     const uploadParams = toolParams<UploadMediaRequest & { file_path: string }>(params);
     try {
-      // Validate file path to prevent path traversal attacks
-      // Set MCP_UPLOAD_BASE_DIR to restrict uploads to a specific directory (recommended in Docker)
-      const allowedBasePath = process.env.MCP_UPLOAD_BASE_DIR || "/";
-      const safePath = validateFilePath(uploadParams.file_path, allowedBasePath);
+      // Local uploads are disabled unless MCP_UPLOAD_BASE_DIR is explicitly set to an
+      // existing directory. validateFilePath enforces containment via realpath, rejects
+      // symlinks/non-regular files, and confirms the file exists.
+      const safePath = validateFilePath(uploadParams.file_path, process.env.MCP_UPLOAD_BASE_DIR);
       uploadParams.file_path = safePath;
-
-      try {
-        await fs.promises.access(safePath);
-      } catch (_error) {
-        throw new Error(`File not found at path: ${safePath}`);
-      }
 
       const media = await client.uploadMedia(uploadParams);
       return `✅ Media uploaded successfully!\n- ID: ${media.id}\n- Title: ${media.title.rendered}\n- URL: ${media.source_url}`;

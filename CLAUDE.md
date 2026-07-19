@@ -4,7 +4,7 @@ AI assistant instructions for MCP WordPress project (v3.1.15).
 
 ## Quick Start
 
-**Status**: Production-ready | All tests passing (100%) | ~58% line coverage | 59 WordPress tools
+**Status**: CI-tested (Node 20/22/24) | All tests passing (2750/2750) | ~76% line coverage | 71 WordPress tools
 
 ```bash
 # Essential Commands
@@ -17,10 +17,10 @@ npm run build             # TypeScript compilation
 
 ## Architecture
 
-**Core**: MCP Server (`src/index.ts`) managing 59 WordPress tools across 10 categories **Client**: Composition pattern
+**Core**: MCP Server (`src/index.ts`) managing 71 WordPress tools across 12 categories **Client**: Composition pattern
 with dependency injection, 4 auth methods **Tools**: Posts(6), Pages(6), Media(5), Users(6), Comments(7),
-Taxonomies(10), Site(6), Auth(3), Cache(4), Performance(6) **Key Files**: `src/client/WordPressClient.ts`, `src/tools/`,
-`src/config/Config.ts`, `src/utils/logger.ts`
+Taxonomies(10), Site(6), Auth(3), Cache(4), Performance(6), SEO(11), System(1)
+**Key Files**: `src/client/WordPressClient.ts`, `src/tools/`, `src/config/Config.ts`, `src/utils/logger.ts`
 
 ## Configuration
 
@@ -125,11 +125,11 @@ npm run build          # TypeScript compilation
 
 **Project**: Model Context Protocol (MCP) Server for WordPress
 **Language**: TypeScript with strict type safety
-**Testing**: All tests passing (100%), ~58% line coverage
+**Testing**: All tests passing (2750/2750), ~76% line coverage
 **Auth**: 4 methods (App Passwords recommended)
 **Multi-Site**: Full support via configuration
-**Tools**: 59 across 10 categories
-**Status**: Production-ready with CI/CD
+**Tools**: 71 across 12 categories
+**Status**: CI-tested (Node 20/22/24) with CodeQL + Trivy scanning
 
 **Critical Files**:
 

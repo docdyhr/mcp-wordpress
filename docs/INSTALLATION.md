@@ -63,7 +63,7 @@ Best for users who want the latest version without installation.
 
 ### NPX Prerequisites
 
-- Node.js 16+ and npm
+- Node.js 20.8.1+ and npm
 - WordPress site with REST API enabled
 - WordPress Application Password
 
@@ -250,7 +250,7 @@ For contributors and custom development.
 
 ### Development Prerequisites
 
-- Node.js 18+
+- Node.js 20.8.1+
 - npm or yarn
 - Git
 

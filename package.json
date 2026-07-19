@@ -1,7 +1,7 @@
 {
   "name": "mcp-wordpress",
   "version": "3.3.17",
-  "description": "Comprehensive Model Context Protocol server for WordPress management with composition-based architecture, 59 tools, SEO toolkit, performance monitoring, intelligent caching, and production-ready authentication",
+  "description": "Comprehensive Model Context Protocol server for WordPress management with composition-based architecture, 71 tools, SEO toolkit, performance monitoring, intelligent caching, and production-ready authentication",
   "keywords": [
     "mcp",
     "model-context-protocol",
@@ -30,10 +30,7 @@
   },
   "files": [
     "dist/",
-    "src/",
     "bin/",
-    "docs/",
-    "examples/",
     "README.md",
     "LICENSE"
   ],
@@ -135,11 +132,13 @@
     "flatted": ">=3.4.2",
     "follow-redirects": ">=1.15.12",
     "hono": ">=4.12.21",
+    "js-yaml": ">=4.2.0 <5.0.0",
+    "markdown-it": ">=14.2.0 <15.0.0",
     "minimatch": "10.2.3",
     "path-to-regexp": ">=8.4.0",
     "postcss": ">=8.5.10",
     "qs": ">=6.15.2",
-    "tar": "7.5.11",
+    "tar": ">=7.5.16",
     "underscore": "1.13.8",
     "vite": ">=7.3.2"
   },

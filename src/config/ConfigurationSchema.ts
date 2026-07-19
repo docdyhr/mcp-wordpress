@@ -1,9 +1,15 @@
 import { z } from "zod";
 
 /**
- * Zod schema for WordPress authentication methods
+ * Zod schema for WordPress authentication methods.
+ *
+ * "cookie" is intentionally not offered here: the client can still be
+ * constructed with `{ method: "cookie", nonce }` programmatically, but it
+ * requires an already-established WordPress session nonce that neither the
+ * setup wizard, the DXT installer, nor this schema has any way to obtain,
+ * so it is not a genuinely configurable/supported mode end-to-end.
  */
-const AuthMethodSchema = z.enum(["app-password", "jwt", "basic", "api-key", "cookie"] as const);
+const AuthMethodSchema = z.enum(["app-password", "jwt", "basic", "api-key"] as const);
 
 /**
  * Zod schema for URL validation with security checks
@@ -37,26 +43,86 @@ const UrlSchema = z
     return true;
   }, "Private/localhost URLs not allowed in production");
 
+const UsernameSchema = z
+  .string()
+  .min(1, "Username is required")
+  .max(60, "Username must be 60 characters or less")
+  .regex(/^[a-zA-Z0-9._@-]+$/, "Username contains invalid characters");
+
+const AppPasswordSchema = z
+  .string()
+  .min(1, "Password is required")
+  .refine((password) => {
+    // WordPress app passwords are typically 24 characters with spaces
+    // But we'll be flexible to support different auth methods
+    return password.length >= 8;
+  }, "Password must be at least 8 characters");
+
+const PasswordSchema = z.string().min(1, "Password is required");
+const JwtSecretSchema = z.string().min(1, "JWT secret is required");
+const ApiKeySchema = z.string().min(1, "API key is required");
+
 /**
- * Zod schema for WordPress site configuration
+ * Per-auth-method site configuration variants. Each variant requires
+ * exactly the credentials that WordPressClient.getAuthFromEnv() /
+ * addAuthHeaders() actually use for that method — matching a method's
+ * literal without its required fields (e.g. selecting "jwt" without a
+ * WORDPRESS_JWT_SECRET) fails validation instead of silently falling back
+ * to whatever app-password fields happen to be present.
  */
-const SiteConfigSchema = z.object({
+const AppPasswordSiteConfigSchema = z.object({
   WORDPRESS_SITE_URL: UrlSchema,
-  WORDPRESS_USERNAME: z
-    .string()
-    .min(1, "Username is required")
-    .max(60, "Username must be 60 characters or less")
-    .regex(/^[a-zA-Z0-9._@-]+$/, "Username contains invalid characters"),
-  WORDPRESS_APP_PASSWORD: z
-    .string()
-    .min(1, "Password is required")
-    .refine((password) => {
-      // WordPress app passwords are typically 24 characters with spaces
-      // But we'll be flexible to support different auth methods
-      return password.length >= 8;
-    }, "Password must be at least 8 characters"),
-  WORDPRESS_AUTH_METHOD: AuthMethodSchema.optional().default("app-password"),
+  WORDPRESS_AUTH_METHOD: z.literal("app-password"),
+  WORDPRESS_USERNAME: UsernameSchema,
+  WORDPRESS_APP_PASSWORD: AppPasswordSchema,
 });
+
+const BasicSiteConfigSchema = z.object({
+  WORDPRESS_SITE_URL: UrlSchema,
+  WORDPRESS_AUTH_METHOD: z.literal("basic"),
+  WORDPRESS_USERNAME: UsernameSchema,
+  WORDPRESS_PASSWORD: PasswordSchema,
+});
+
+const JwtSiteConfigSchema = z.object({
+  WORDPRESS_SITE_URL: UrlSchema,
+  WORDPRESS_AUTH_METHOD: z.literal("jwt"),
+  WORDPRESS_USERNAME: UsernameSchema,
+  WORDPRESS_PASSWORD: PasswordSchema,
+  WORDPRESS_JWT_SECRET: JwtSecretSchema,
+});
+
+const ApiKeySiteConfigSchema = z.object({
+  WORDPRESS_SITE_URL: UrlSchema,
+  WORDPRESS_AUTH_METHOD: z.literal("api-key"),
+  WORDPRESS_API_KEY: ApiKeySchema,
+});
+
+/**
+ * Defaults WORDPRESS_AUTH_METHOD to "app-password" before discriminating,
+ * so callers that omit it entirely (the common case) still validate
+ * against the app-password variant instead of failing with "invalid
+ * discriminator value: undefined".
+ */
+function withDefaultAuthMethod(value: unknown): unknown {
+  if (value && typeof value === "object" && !("WORDPRESS_AUTH_METHOD" in value)) {
+    return { ...value, WORDPRESS_AUTH_METHOD: "app-password" };
+  }
+  return value;
+}
+
+/**
+ * Zod schema for WordPress site configuration (multi-site config file)
+ */
+const SiteConfigSchema = z.preprocess(
+  withDefaultAuthMethod,
+  z.discriminatedUnion("WORDPRESS_AUTH_METHOD", [
+    AppPasswordSiteConfigSchema,
+    BasicSiteConfigSchema,
+    JwtSiteConfigSchema,
+    ApiKeySiteConfigSchema,
+  ]),
+);
 
 /**
  * Zod schema for site configuration with metadata
@@ -97,28 +163,43 @@ const MultiSiteConfigSchema = z.object({
 });
 
 /**
- * Zod schema for environment variables (single-site mode)
+ * Zod schema for environment variables (single-site mode). Same
+ * per-method discrimination as SiteConfigSchema, with the additional
+ * optional process-level variables.
  */
-const EnvironmentConfigSchema = z.object({
-  WORDPRESS_SITE_URL: UrlSchema,
-  WORDPRESS_USERNAME: SiteConfigSchema.shape.WORDPRESS_USERNAME,
-  WORDPRESS_APP_PASSWORD: SiteConfigSchema.shape.WORDPRESS_APP_PASSWORD,
-  WORDPRESS_AUTH_METHOD: AuthMethodSchema.optional().default("app-password"),
-  // Optional environment variables
+const EnvironmentExtras = {
   NODE_ENV: z.enum(["development", "production", "test", "dxt", "ci"]).optional(),
   DEBUG: z.string().optional(),
   DISABLE_CACHE: z.string().optional(),
   LOG_LEVEL: z.enum(["error", "warn", "info", "debug"]).optional(),
-});
+};
+
+const EnvironmentConfigSchema = z.preprocess(
+  withDefaultAuthMethod,
+  z.discriminatedUnion("WORDPRESS_AUTH_METHOD", [
+    AppPasswordSiteConfigSchema.extend(EnvironmentExtras),
+    BasicSiteConfigSchema.extend(EnvironmentExtras),
+    JwtSiteConfigSchema.extend(EnvironmentExtras),
+    ApiKeySiteConfigSchema.extend(EnvironmentExtras),
+  ]),
+);
 
 /**
- * Zod schema for MCP configuration passed from client
+ * Zod schema for MCP configuration passed from client. Left as a loose,
+ * fully-optional bag of fields (not discriminated) because it represents a
+ * partial credential fragment that gets merged with process.env in
+ * ServerConfiguration before the merged result is validated by
+ * EnvironmentConfigSchema above — that merged validation is where an
+ * incomplete credential set for the chosen method is actually caught.
  */
 const McpConfigSchema = z
   .object({
     wordpressSiteUrl: UrlSchema.optional(),
-    wordpressUsername: SiteConfigSchema.shape.WORDPRESS_USERNAME.optional(),
-    wordpressAppPassword: SiteConfigSchema.shape.WORDPRESS_APP_PASSWORD.optional(),
+    wordpressUsername: UsernameSchema.optional(),
+    wordpressAppPassword: AppPasswordSchema.optional(),
+    wordpressPassword: PasswordSchema.optional(),
+    wordpressJwtSecret: JwtSecretSchema.optional(),
+    wordpressApiKey: ApiKeySchema.optional(),
     wordpressAuthMethod: AuthMethodSchema.optional(),
   })
   .optional();
@@ -131,6 +212,51 @@ export type SiteType = z.infer<typeof SiteSchema>;
 export type MultiSiteConfigType = z.infer<typeof MultiSiteConfigSchema>;
 export type EnvironmentConfigType = z.infer<typeof EnvironmentConfigSchema>;
 export type McpConfigType = z.infer<typeof McpConfigSchema>;
+
+/**
+ * The credential shape WordPressClient's constructor expects, built from
+ * whichever discriminated variant validation resolved to. Keeping this
+ * next to the schema means the two can't drift independently — every
+ * variant added above must be handled here too (the exhaustive switch
+ * fails to compile otherwise).
+ */
+export interface ResolvedAuthConfig {
+  method: "app-password" | "jwt" | "basic" | "api-key";
+  username?: string;
+  password?: string;
+  appPassword?: string;
+  secret?: string;
+  apiKey?: string;
+}
+
+export function buildAuthConfig(validated: SiteConfigType | EnvironmentConfigType): ResolvedAuthConfig {
+  switch (validated.WORDPRESS_AUTH_METHOD) {
+    case "app-password":
+      return {
+        method: "app-password",
+        username: validated.WORDPRESS_USERNAME,
+        appPassword: validated.WORDPRESS_APP_PASSWORD,
+      };
+    case "basic":
+      return {
+        method: "basic",
+        username: validated.WORDPRESS_USERNAME,
+        password: validated.WORDPRESS_PASSWORD,
+      };
+    case "jwt":
+      return {
+        method: "jwt",
+        username: validated.WORDPRESS_USERNAME,
+        password: validated.WORDPRESS_PASSWORD,
+        secret: validated.WORDPRESS_JWT_SECRET,
+      };
+    case "api-key":
+      return {
+        method: "api-key",
+        apiKey: validated.WORDPRESS_API_KEY,
+      };
+  }
+}
 
 /**
  * Configuration validation utilities

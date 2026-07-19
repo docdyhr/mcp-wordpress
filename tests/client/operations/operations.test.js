@@ -367,6 +367,36 @@ describe("Operations Modules", () => {
         expect(mockClient.delete).toHaveBeenCalledWith("comments/1?force=false");
       });
     });
+
+    describe("approveComment", () => {
+      it("sends status: 'approve' (wp_set_comment_status()'s value, not 'approved')", async () => {
+        mockClient.put.mockResolvedValue({ id: 1, status: "approved" });
+
+        await commentsOps.approveComment(1);
+
+        expect(mockClient.put).toHaveBeenCalledWith("comments/1", { status: "approve" });
+      });
+    });
+
+    describe("rejectComment", () => {
+      it("sends status: 'hold' (wp_set_comment_status()'s value, not 'unapproved')", async () => {
+        mockClient.put.mockResolvedValue({ id: 1, status: "hold" });
+
+        await commentsOps.rejectComment(1);
+
+        expect(mockClient.put).toHaveBeenCalledWith("comments/1", { status: "hold" });
+      });
+    });
+
+    describe("spamComment", () => {
+      it("sends status: 'spam'", async () => {
+        mockClient.put.mockResolvedValue({ id: 1, status: "spam" });
+
+        await commentsOps.spamComment(1);
+
+        expect(mockClient.put).toHaveBeenCalledWith("comments/1", { status: "spam" });
+      });
+    });
   });
 
   describe("TaxonomiesOperations", () => {

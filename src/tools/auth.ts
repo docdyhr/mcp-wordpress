@@ -1,7 +1,13 @@
 import { WordPressClient } from "@/client/api.js";
+import { CachedWordPressClient } from "@/client/CachedWordPressClient.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
-import { AuthMethod } from "@/types/client.js";
+import type { AuthConfig } from "@/types/client.js";
 import { getErrorMessage } from "@/utils/error.js";
+
+// Kept in sync with ConfigurationSchema's AuthMethodSchema: "cookie" is
+// deliberately excluded because it requires an already-established
+// WordPress session nonce this tool has no way to obtain.
+type SupportedAuthMethod = "app-password" | "jwt" | "basic" | "api-key";
 
 /**
  * Provides authentication-related tools for WordPress sites.
@@ -47,26 +53,33 @@ export class AuthTools {
       },
       {
         name: "wp_switch_auth_method",
-        description: "Switches the authentication method for a site for the current session.",
+        description:
+          "Switches the authentication method for a site for the current session and verifies the new " +
+          "credentials with a live request. The switch is in-memory only — it does not persist across " +
+          "server restarts; update your configuration file for that.",
         inputSchema: {
           type: "object",
           properties: {
             method: {
               type: "string",
               description: "The new authentication method to use.",
-              enum: ["app-password", "jwt", "basic", "api-key", "cookie"],
+              enum: ["app-password", "jwt", "basic", "api-key"],
             },
             username: {
               type: "string",
-              description: "The username for 'app-password' or 'basic' authentication.",
+              description: "Required for 'app-password', 'basic', and 'jwt'.",
             },
             password: {
               type: "string",
-              description: "The Application Password for 'app-password' or password for 'basic' auth.",
+              description: "The Application Password for 'app-password', or the account password for 'basic'/'jwt'.",
             },
-            jwt_token: {
+            jwt_secret: {
               type: "string",
-              description: "The token for 'jwt' authentication.",
+              description: "Required for 'jwt' — the WordPress JWT Authentication plugin's secret key.",
+            },
+            api_key: {
+              type: "string",
+              description: "Required for 'api-key'.",
             },
           },
           required: ["method"],
@@ -171,31 +184,103 @@ export class AuthTools {
 
   /**
    * Handles the 'wp_switch_auth_method' tool request.
-   * Updates the client's authentication configuration in memory for the session.
+   * Replaces the client's in-memory auth config with the requested method's
+   * credentials, then verifies them with a live authenticate() call. On
+   * failure, the client's previous auth config is restored so a bad switch
+   * attempt doesn't leave the connection broken.
    * @param client - The WordPressClient instance for the target site.
    * @param params - The parameters for the tool request, including the new auth details.
    * @returns A promise that resolves to an MCPToolResponse.
    */
   public async handleSwitchAuthMethod(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
-    const {
-      method: _method,
-      username: _username,
-      password: _password,
-      jwt_token: _jwt_token,
-    } = params as {
-      method: AuthMethod;
+    const { method, username, password, jwt_secret, api_key } = params as {
+      method: SupportedAuthMethod;
       username?: string;
       password?: string;
-      jwt_token?: string;
+      jwt_secret?: string;
+      api_key?: string;
     };
+
     try {
-      // This functionality is not currently supported as the client
-      // doesn't have an updateAuthConfig method
-      throw new Error(
-        "Dynamic authentication method switching is not currently supported. Please update your configuration file and restart the server.",
-      );
+      // Validating and building the new config first means a bad request
+      // (missing fields for the chosen method) never touches the client at
+      // all — nothing to restore because nothing changed yet.
+      const newAuth = this.buildAuthConfig(method, { username, password, jwt_secret, api_key });
+      const previousAuth = client.config.auth;
+
+      client.setAuthConfig(newAuth);
+      try {
+        await client.authenticate();
+      } catch (authError) {
+        client.setAuthConfig(previousAuth);
+        // setAuthConfig() always clears the in-memory JWT token, so restoring
+        // a JWT config leaves the client silently unauthenticated until some
+        // later explicit authenticate() call. Reacquire the token now so the
+        // restored config is actually usable, not just nominally in place.
+        if (previousAuth.method === "jwt") {
+          await client.authenticate().catch(() => {});
+        }
+        throw authError;
+      }
+
+      // Cached GET responses (e.g. users/me) are keyed before auth headers
+      // are added, so entries fetched under the old credentials could still
+      // be served after switching identities unless cleared here.
+      if (client instanceof CachedWordPressClient) {
+        client.clearCache();
+      }
+
+      // api-key has no server-side verification step (WordPressClient.authenticate()
+      // just sets a header and returns true), so it can't honestly claim "verified"
+      // the way app-password/basic/jwt do via a real request — say so instead.
+      const confirmation =
+        method === "api-key"
+          ? `✅ Switched to '${method}' authentication. Note: the key is not verified with a live request; an invalid key will only surface as a 401/403 on later calls.`
+          : `✅ Switched to '${method}' authentication and verified it successfully.`;
+      return { content: confirmation };
     } catch (_error) {
       throw new Error(`Failed to switch auth method: ${getErrorMessage(_error)}`);
+    }
+  }
+
+  /**
+   * Builds a client AuthConfig for the requested method, validating that
+   * its required fields were provided. Mirrors ConfigurationSchema's
+   * per-method requirements so this tool and startup configuration agree
+   * on what each method actually needs.
+   */
+  private buildAuthConfig(
+    method: SupportedAuthMethod,
+    fields: {
+      username?: string | undefined;
+      password?: string | undefined;
+      jwt_secret?: string | undefined;
+      api_key?: string | undefined;
+    },
+  ): AuthConfig {
+    switch (method) {
+      case "app-password":
+        if (!fields.username || !fields.password) {
+          throw new Error("'app-password' requires 'username' and 'password' (the WordPress Application Password).");
+        }
+        return { method: "app-password", username: fields.username, appPassword: fields.password };
+      case "basic":
+        if (!fields.username || !fields.password) {
+          throw new Error("'basic' requires 'username' and 'password'.");
+        }
+        return { method: "basic", username: fields.username, password: fields.password };
+      case "jwt":
+        if (!fields.username || !fields.password || !fields.jwt_secret) {
+          throw new Error("'jwt' requires 'username', 'password', and 'jwt_secret'.");
+        }
+        return { method: "jwt", username: fields.username, password: fields.password, secret: fields.jwt_secret };
+      case "api-key":
+        if (!fields.api_key) {
+          throw new Error("'api-key' requires 'api_key'.");
+        }
+        return { method: "api-key", apiKey: fields.api_key };
+      default:
+        throw new Error(`Unsupported authentication method: ${method}`);
     }
   }
 }

@@ -120,27 +120,83 @@ describe("Configuration Validation Tests", () => {
       expect(() => ConfigurationValidator.validateMultiSiteConfig(invalidConfig)).toThrow();
     });
 
-    it("should validate all supported authentication methods", () => {
-      const authMethods = ["app-password", "jwt", "basic", "api-key", "cookie"];
+    it("should validate each supported auth method when given its own required credentials", () => {
+      const siteConfigsByMethod = {
+        "app-password": {
+          WORDPRESS_SITE_URL: "https://example.com",
+          WORDPRESS_AUTH_METHOD: "app-password",
+          WORDPRESS_USERNAME: "testuser",
+          WORDPRESS_APP_PASSWORD: "password123",
+        },
+        basic: {
+          WORDPRESS_SITE_URL: "https://example.com",
+          WORDPRESS_AUTH_METHOD: "basic",
+          WORDPRESS_USERNAME: "testuser",
+          WORDPRESS_PASSWORD: "password123",
+        },
+        jwt: {
+          WORDPRESS_SITE_URL: "https://example.com",
+          WORDPRESS_AUTH_METHOD: "jwt",
+          WORDPRESS_USERNAME: "testuser",
+          WORDPRESS_PASSWORD: "password123",
+          WORDPRESS_JWT_SECRET: "jwt-secret-value",
+        },
+        "api-key": {
+          WORDPRESS_SITE_URL: "https://example.com",
+          WORDPRESS_AUTH_METHOD: "api-key",
+          WORDPRESS_API_KEY: "api-key-value",
+        },
+      };
 
-      authMethods.forEach((method) => {
-        const config = {
-          sites: [
-            {
-              id: "site1",
-              name: "Test Site",
-              config: {
-                WORDPRESS_SITE_URL: "https://example.com",
-                WORDPRESS_USERNAME: "testuser",
-                WORDPRESS_APP_PASSWORD: "password",
-                WORDPRESS_AUTH_METHOD: method,
-              },
-            },
-          ],
-        };
-
+      Object.values(siteConfigsByMethod).forEach((siteConfig) => {
+        const config = { sites: [{ id: "site1", name: "Test Site", config: siteConfig }] };
         expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).not.toThrow();
       });
+    });
+
+    it("should reject cookie as a configurable auth method", () => {
+      const config = {
+        sites: [
+          {
+            id: "site1",
+            name: "Test Site",
+            config: {
+              WORDPRESS_SITE_URL: "https://example.com",
+              WORDPRESS_USERNAME: "testuser",
+              WORDPRESS_APP_PASSWORD: "password123",
+              WORDPRESS_AUTH_METHOD: "cookie",
+            },
+          },
+        ],
+      };
+
+      // Not offered through config validation — a WordPress session nonce
+      // can't be obtained through this schema/setup flow.
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).toThrow();
+    });
+
+    it("should reject a method selection missing that method's required credentials", () => {
+      // Regression test: previously any method validated successfully as
+      // long as WORDPRESS_USERNAME + WORDPRESS_APP_PASSWORD were present,
+      // even when the selected method (jwt here) needs different fields —
+      // so a JWT config missing its secret was silently accepted.
+      const config = {
+        sites: [
+          {
+            id: "site1",
+            name: "Test Site",
+            config: {
+              WORDPRESS_SITE_URL: "https://example.com",
+              WORDPRESS_USERNAME: "testuser",
+              WORDPRESS_APP_PASSWORD: "password123",
+              WORDPRESS_AUTH_METHOD: "jwt",
+              // Missing WORDPRESS_JWT_SECRET and WORDPRESS_PASSWORD
+            },
+          },
+        ],
+      };
+
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).toThrow();
     });
 
     it("should use default auth method when not specified", () => {
@@ -271,6 +327,54 @@ describe("Configuration Validation Tests", () => {
         WORDPRESS_USERNAME: "testuser",
         WORDPRESS_APP_PASSWORD: "password",
         LOG_LEVEL: "invalid-level",
+      };
+
+      expect(() => ConfigurationValidator.validateEnvironmentConfig(env)).toThrow();
+    });
+
+    it("should validate basic, jwt, and api-key env configs given their own credentials", () => {
+      const basicEnv = {
+        WORDPRESS_SITE_URL: "https://example.com",
+        WORDPRESS_AUTH_METHOD: "basic",
+        WORDPRESS_USERNAME: "testuser",
+        WORDPRESS_PASSWORD: "password123",
+      };
+      const jwtEnv = {
+        WORDPRESS_SITE_URL: "https://example.com",
+        WORDPRESS_AUTH_METHOD: "jwt",
+        WORDPRESS_USERNAME: "testuser",
+        WORDPRESS_PASSWORD: "password123",
+        WORDPRESS_JWT_SECRET: "jwt-secret-value",
+      };
+      const apiKeyEnv = {
+        WORDPRESS_SITE_URL: "https://example.com",
+        WORDPRESS_AUTH_METHOD: "api-key",
+        WORDPRESS_API_KEY: "api-key-value",
+      };
+
+      expect(() => ConfigurationValidator.validateEnvironmentConfig(basicEnv)).not.toThrow();
+      expect(() => ConfigurationValidator.validateEnvironmentConfig(jwtEnv)).not.toThrow();
+      expect(() => ConfigurationValidator.validateEnvironmentConfig(apiKeyEnv)).not.toThrow();
+    });
+
+    it("should reject an env config selecting jwt without its required secret", () => {
+      const env = {
+        WORDPRESS_SITE_URL: "https://example.com",
+        WORDPRESS_AUTH_METHOD: "jwt",
+        WORDPRESS_USERNAME: "testuser",
+        WORDPRESS_PASSWORD: "password123",
+        // Missing WORDPRESS_JWT_SECRET
+      };
+
+      expect(() => ConfigurationValidator.validateEnvironmentConfig(env)).toThrow();
+    });
+
+    it("should reject cookie as a configurable auth method", () => {
+      const env = {
+        WORDPRESS_SITE_URL: "https://example.com",
+        WORDPRESS_AUTH_METHOD: "cookie",
+        WORDPRESS_USERNAME: "testuser",
+        WORDPRESS_APP_PASSWORD: "password123",
       };
 
       expect(() => ConfigurationValidator.validateEnvironmentConfig(env)).toThrow();

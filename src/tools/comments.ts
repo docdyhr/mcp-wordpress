@@ -233,7 +233,7 @@ export class CommentTools {
     try {
       const comment = await client.updateComment({
         id,
-        status: "approved",
+        status: "approve",
       });
       return `✅ Comment ${comment.id} has been approved.`;
     } catch (_error) {

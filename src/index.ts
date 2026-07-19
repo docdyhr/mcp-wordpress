@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { fileURLToPath } from "url";
 import { WordPressClient } from "./client/api.js";
+import { MockWordPressClient } from "./client/MockWordPressClient.js";
 import { ServerConfiguration, SiteConfig } from "./config/ServerConfiguration.js";
 import { ToolRegistry } from "./server/ToolRegistry.js";
 import { ConnectionTester } from "./server/ConnectionTester.js";
@@ -91,25 +92,33 @@ class MCPWordPressServer {
 
     // Connect to stdio transport with timeout
     const transport = new StdioServerTransport();
+    await this.connectWithTimeout(transport, 30000);
 
-    // Add timeout protection for server connection
-    const connectionTimeout = setTimeout(() => {
-      throw new Error("Server connection timed out after 30000ms");
-    }, 30000);
+    this.logger.info("Server started and connected successfully", {
+      sites: this.wordpressClients.size,
+    });
+
+    // Keep the process alive
+    process.stdin.resume();
+  }
+
+  /**
+   * Races server.connect() against a timeout, expressed as a rejected
+   * promise rather than a setTimeout() callback that throws directly —
+   * that would be an uncaught exception outside this method's call stack,
+   * bypassing normal error handling/cleanup (main()'s catch, process exit
+   * code, and any future shutdown hooks).
+   */
+  private async connectWithTimeout(transport: StdioServerTransport, timeoutMs: number): Promise<void> {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => reject(new Error(`Server connection timed out after ${timeoutMs}ms`)), timeoutMs);
+    });
 
     try {
-      await this.server.connect(transport);
-      clearTimeout(connectionTimeout);
-
-      this.logger.info("Server started and connected successfully", {
-        sites: this.wordpressClients.size,
-      });
-
-      // Keep the process alive
-      process.stdin.resume();
-    } catch (_error) {
-      clearTimeout(connectionTimeout);
-      throw _error;
+      await Promise.race([this.server.connect(transport), timeout]);
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
@@ -141,24 +150,62 @@ async function main() {
   }
 }
 
-// Check if running as main module - handle direct execution, DXT, and bin wrapper entry points
+/**
+ * Finite health check for `docker healthcheck` / `docker-compose`: verifies
+ * configuration loads and at least one WordPress site is configured, then
+ * exits immediately. Deliberately does not connect a stdio transport or
+ * test live WordPress connectivity — either would make the check hang or
+ * turn transient network issues into container restarts.
+ */
+async function runHealthCheck(): Promise<void> {
+  try {
+    const serverConfig = ServerConfiguration.getInstance();
+    const { clients } = await serverConfig.loadClientConfigurations();
+    // ServerConfiguration substitutes a MockWordPressClient when CI=true (set
+    // automatically by most CI runners, including GitHub Actions, on every
+    // job) and no real WORDPRESS_SITE_URL is set — added so mcp-eval and
+    // similar tooling can exercise the server without real credentials. A
+    // health check exists specifically to catch "no real WordPress
+    // configured", so counting that mock client as configured would make
+    // this check always pass in any CI-flagged environment regardless of
+    // real configuration — silently defeating its own purpose.
+    const realClients = Array.from(clients.values()).filter((client) => !(client instanceof MockWordPressClient));
+    if (realClients.length === 0) {
+      process.stderr.write("Health check failed: no WordPress sites configured\n");
+      process.exit(1);
+    }
+    process.stdout.write(`Health check passed: ${realClients.length} site(s) configured\n`);
+    process.exit(0);
+  } catch (_error) {
+    process.stderr.write(`Health check failed: ${getErrorMessage(_error)}\n`);
+    process.exit(1);
+  }
+}
+
+// Check if running as main module - handles direct execution (`node dist/index.js`,
+// Docker, npm scripts) only. bin/mcp-wordpress.js is the entry point for npm/npx
+// invocation and dispatches explicitly instead of relying on this self-check:
+// process.argv[1] for an npm-generated bin shim (node_modules/.bin/mcp-wordpress,
+// or its .cmd/.ps1 equivalents on Windows) doesn't end in ".js", so a filename-based
+// guess can never reliably recognize that invocation path. DXT's entry point
+// (dxt-entry.ts) is likewise self-contained and calls startDXTServer() directly.
 const currentFile = fileURLToPath(import.meta.url);
 const callerFile = process.argv[1];
 
+// !callerFile: when run through DXT, process.argv[1] might be undefined.
 const isMainModule =
-  callerFile === currentFile ||
-  callerFile?.endsWith("/index.js") ||
-  callerFile?.endsWith("\\index.js") ||
-  callerFile?.endsWith("/mcp-wordpress.js") || // invoked via bin/mcp-wordpress.js wrapper
-  callerFile?.endsWith("\\mcp-wordpress.js") ||
-  !callerFile; // When run through DXT, process.argv[1] might be undefined
+  callerFile === currentFile || callerFile?.endsWith("/index.js") || callerFile?.endsWith("\\index.js") || !callerFile;
 
 if (isMainModule) {
-  main().catch((error) => {
-    process.stderr.write(`Fatal: ${error instanceof Error ? error.message : String(error)}\n`);
-    process.exit(1);
-  });
+  if (process.argv.includes("--health-check")) {
+    runHealthCheck();
+  } else {
+    main().catch((error) => {
+      process.stderr.write(`Fatal: ${error instanceof Error ? error.message : String(error)}\n`);
+      process.exit(1);
+    });
+  }
 }
 
 export default MCPWordPressServer;
-export { MCPWordPressServer };
+export { MCPWordPressServer, runHealthCheck, main };

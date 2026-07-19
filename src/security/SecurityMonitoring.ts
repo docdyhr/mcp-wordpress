@@ -141,10 +141,12 @@ export class SecurityMonitor extends EventEmitter {
     this.isMonitoring = true;
     logger.info("Starting security monitoring");
 
-    // Start metrics collection
+    // Start metrics collection. unref() so this background timer alone can
+    // never keep a process (or a one-shot script that merely imports this
+    // class) alive.
     this.metricsInterval = setInterval(() => {
       this.collectMetrics();
-    }, 60000); // Every minute
+    }, 60000).unref(); // Every minute
 
     this.emit("monitoring-started");
   }

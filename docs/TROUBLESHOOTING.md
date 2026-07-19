@@ -222,7 +222,7 @@ DEBUG=true npm run dev
    ```bash
    # Check all tools are loaded
    npm run status | grep "tools available"
-   # Should show "59 tools available"
+   # Should show "71 tools available"
    ```
 
 2. **Test Individual Tool Categories**

@@ -16,6 +16,7 @@ import type {
   HTTPMethod,
   RequestOptions,
   ClientStats,
+  RawResponse,
 } from "@/types/client.js";
 import { WordPressAPIError, AuthenticationError, RateLimitError } from "@/types/client.js";
 import { config } from "@/config/Config.js";
@@ -229,6 +230,17 @@ export class WordPressClient implements IWordPressClient {
 
   get isAuthenticated(): boolean {
     return this.authenticated;
+  }
+
+  /**
+   * Replace this client's authentication configuration for the current
+   * session. Does not itself verify the new credentials — call
+   * authenticate() afterward to confirm they work.
+   */
+  setAuthConfig(auth: AuthConfig): void {
+    this.auth = auth;
+    this.authenticated = false;
+    this.jwtToken = null;
   }
 
   get stats(): ClientStats {
@@ -533,6 +545,39 @@ export class WordPressClient implements IWordPressClient {
     data: unknown = null,
     options: RequestOptions = {},
   ): Promise<T> {
+    const raw = await this.requestRaw<T>(method, endpoint, data, options);
+    return raw.data;
+  }
+
+  /**
+   * Same as request(), but also returns the real HTTP status and response
+   * headers WordPress sent back — used by the cache layer to preserve
+   * genuine server-provided validators (ETag, Last-Modified, Cache-Control)
+   * instead of synthesizing its own.
+   */
+  async requestWithMetadata<T = unknown>(
+    method: HTTPMethod,
+    endpoint: string,
+    data: unknown = null,
+    options: RequestOptions = {},
+  ): Promise<RawResponse<T>> {
+    return this.requestRaw<T>(method, endpoint, data, options);
+  }
+
+  private headersToRecord(headers: Headers): Record<string, string> {
+    const record: Record<string, string> = {};
+    headers.forEach((value, key) => {
+      record[key] = value;
+    });
+    return record;
+  }
+
+  private async requestRaw<T = unknown>(
+    method: HTTPMethod,
+    endpoint: string,
+    data: unknown = null,
+    options: RequestOptions = {},
+  ): Promise<RawResponse<T>> {
     const timer = startTimer();
     this._stats.totalRequests++;
 
@@ -540,7 +585,13 @@ export class WordPressClient implements IWordPressClient {
     // Validate absolute URLs through the same SSRF guard as the site URL
     const url = endpoint.startsWith("http") ? this.validateAndSanitizeUrl(endpoint) : `${this.apiUrl}/${cleanEndpoint}`;
 
-    const { headers: customHeaders, retries: retryOverride, params: _unusedParams, ...restOptions } = options;
+    const {
+      headers: customHeaders,
+      retries: retryOverride,
+      params: _unusedParams,
+      idempotent,
+      ...restOptions
+    } = options;
     const baseHeaders: Record<string, string> = {
       "Content-Type": "application/json",
       "User-Agent": getUserAgent(),
@@ -552,8 +603,14 @@ export class WordPressClient implements IWordPressClient {
     const requestTimeout = options.timeout || this.timeout;
     const configuredRetries =
       typeof retryOverride === "number" && retryOverride > 0 ? retryOverride : this.maxRetries || 1;
+    // GET is safe/idempotent by nature and always eligible for retry. Every
+    // mutating method (POST/PUT/PATCH/DELETE) is retried only when the caller
+    // explicitly marks the specific operation idempotent — retrying a POST
+    // after an ambiguous network failure (e.g. a connection reset after the
+    // server already processed it) can otherwise create a duplicate resource.
+    const canRetryMethod = method === "GET" || idempotent === true;
     const canRetryBody = this.isRetryableBody(data);
-    const maxAttempts = canRetryBody ? configuredRetries : 1;
+    const maxAttempts = canRetryMethod && canRetryBody ? configuredRetries : 1;
 
     let lastError: Error = new Error("Unknown error");
 
@@ -579,6 +636,17 @@ export class WordPressClient implements IWordPressClient {
         log.debug(`API Request: ${method} ${url}${attempt > 0 ? ` (attempt ${attempt + 1})` : ""}`);
 
         const response = await fetch(url, fetchOptions);
+
+        // 304 Not Modified is a valid outcome of a conditional GET (caller
+        // sent If-None-Match/If-Modified-Since), not an error — the cache
+        // layer needs to see it to know its stale entry is still current.
+        if (response.status === 304) {
+          clearTimeout(timeoutId);
+          this._stats.successfulRequests++;
+          const duration = timer.end();
+          this.updateAverageResponseTime(duration);
+          return { data: null as T, status: 304, headers: this.headersToRecord(response.headers) };
+        }
 
         if (!response.ok) {
           const fallbackResult = await this.handleErrorResponseWithFallback<T>(
@@ -716,7 +784,7 @@ export class WordPressClient implements IWordPressClient {
     requestTimeout: number,
     fetchOptions: RequestInit & { headers: Record<string, string> },
     timer: ReturnType<typeof startTimer>,
-  ): Promise<T | undefined> {
+  ): Promise<RawResponse<T> | undefined> {
     const errorText = new TextDecoder("utf-8").decode(await response.arrayBuffer());
     let errorMessage: string;
 
@@ -767,7 +835,7 @@ export class WordPressClient implements IWordPressClient {
     requestTimeout: number,
     fetchOptions: RequestInit & { headers: Record<string, string> },
     timer: ReturnType<typeof startTimer>,
-  ): Promise<T | undefined> {
+  ): Promise<RawResponse<T> | undefined> {
     log.debug(`404 on pretty permalinks, trying index.php approach`);
 
     try {
@@ -799,38 +867,41 @@ export class WordPressClient implements IWordPressClient {
         return undefined;
       }
 
+      const meta = { status: fallbackResponse.status, headers: this.headersToRecord(fallbackResponse.headers) };
       const responseText = new TextDecoder("utf-8").decode(await fallbackResponse.arrayBuffer());
       if (!responseText) {
         this._stats.successfulRequests++;
         const duration = timer.end();
         this.updateAverageResponseTime(duration);
-        return null as T;
+        return { data: null as T, ...meta };
       }
 
       const result = JSON.parse(responseText);
       this._stats.successfulRequests++;
       const duration = timer.end();
       this.updateAverageResponseTime(duration);
-      return result as T;
+      return { data: result as T, ...meta };
     } catch (fallbackError) {
       log.debug(`Fallback request failed: ${(fallbackError as Error).message}`);
       return undefined;
     }
   }
 
-  // Note: Returns null cast as T for empty responses. Callers should handle
-  // potential null values when the WordPress API returns empty bodies (e.g. DELETE).
+  // Note: Returns data: null cast as T for empty responses. Callers should
+  // handle potential null values when the WordPress API returns empty
+  // bodies (e.g. DELETE).
   private async parseResponse<T>(
     response: Response,
     endpoint: string,
     timer: ReturnType<typeof startTimer>,
-  ): Promise<T> {
+  ): Promise<RawResponse<T>> {
+    const meta = { status: response.status, headers: this.headersToRecord(response.headers) };
     const responseText = new TextDecoder("utf-8").decode(await response.arrayBuffer());
     if (!responseText) {
       this._stats.successfulRequests++;
       const duration = timer.end();
       this.updateAverageResponseTime(duration);
-      return null as T;
+      return { data: null as T, ...meta };
     }
 
     try {
@@ -838,7 +909,7 @@ export class WordPressClient implements IWordPressClient {
       this._stats.successfulRequests++;
       const duration = timer.end();
       this.updateAverageResponseTime(duration);
-      return result as T;
+      return { data: result as T, ...meta };
     } catch (parseError) {
       if (endpoint.includes("users/me") || endpoint.includes("jwt-auth")) {
         throw new WordPressAPIError(`Invalid JSON response: ${(parseError as Error).message}`);
@@ -846,7 +917,7 @@ export class WordPressClient implements IWordPressClient {
       this._stats.successfulRequests++;
       const duration = timer.end();
       this.updateAverageResponseTime(duration);
-      return responseText as T;
+      return { data: responseText as T, ...meta };
     }
   }
 

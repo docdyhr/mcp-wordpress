@@ -216,7 +216,11 @@ export interface WordPressComment {
   date_gmt: string;
   content: WordPressRendered;
   link: string;
-  status: "approved" | "unapproved" | "spam" | "trash";
+  // WordPress's REST response always normalizes to these 4 values (see
+  // WP_REST_Comments_Controller::prepare_status_response()) — it never
+  // returns "unapproved" or "approve", even though those are accepted as
+  // synonyms on write (see CreateCommentRequest/UpdateCommentRequest).
+  status: "hold" | "approved" | "spam" | "trash";
   type: CommentType;
   author_avatar_urls: Record<string, string>;
   meta: WordPressMeta;
@@ -462,13 +466,16 @@ export interface CreateCommentRequest {
   author_url?: string;
   date?: string;
   date_gmt?: string;
-  status?: "approved" | "unapproved";
+  // The values wp_set_comment_status() and the REST API's own "status"
+  // request schema use — matches the wp_list_comments/wp_update_comment
+  // tool schemas exactly (see src/tools/comments.ts).
+  status?: "approve" | "hold";
   meta?: WordPressMeta;
 }
 
 export interface UpdateCommentRequest extends Partial<Omit<CreateCommentRequest, "status">> {
   id: number;
-  status?: "approved" | "unapproved" | "spam" | "trash";
+  status?: "approve" | "hold" | "spam" | "trash";
 }
 
 export interface CreateCategoryRequest {
