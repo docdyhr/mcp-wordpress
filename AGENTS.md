@@ -19,8 +19,10 @@ npm run security:scan       # build + scripts/security-demo.js, falls back to np
 ## Architecture
 
 **Core**: MCP Server (`src/index.ts`) registers 71 WordPress tools via `src/server/ToolRegistry.ts`.
-**Client**: `src/client/WordPressClient.ts` (in `api.ts`) composes per-resource operation classes
-(`src/client/operations/`) via constructor injection; 5 auth methods (App Passwords, JWT, Basic, API Key, Cookie).
+**Client**: `src/client/api.ts` (`WordPressClient`) composes per-resource operation classes
+(`src/client/operations/`) via constructor injection; App Passwords, JWT, Basic, and API Key are configurable via
+`.env`/`mcp-wordpress.config.json` — Cookie auth is also implemented but is client/programmatic-only (see
+Authentication below).
 **Tools**: Posts(6) Pages(6) Media(5) Users(6) Comments(7) Taxonomies(10) Site(3) Auth(6) Cache(4) Performance(6)
 SEO(11) System(1) = 71.
 **Key files**: `src/client/api.ts`, `src/server/ToolRegistry.ts`, `src/tools/`, `src/config/ServerConfiguration.ts`,
@@ -37,6 +39,7 @@ Full per-directory contracts live in the Child DOX Index below — read the appl
   "sites": [
     {
       "id": "site1",
+      "name": "Site 1",
       "config": {
         "WORDPRESS_SITE_URL": "https://site.com",
         "WORDPRESS_USERNAME": "user",
@@ -60,7 +63,9 @@ multi-site mode and fails startup loudly on invalid config (no silent fallback).
 
 ## Authentication
 
-**Methods**: App Passwords (recommended), JWT, Basic, API Key, Cookie.
+**Configurable methods** (`.env`/`mcp-wordpress.config.json`): App Passwords (recommended), JWT, Basic, API Key.
+Cookie auth is implemented in the client but is client/programmatic-only — `ConfigurationSchema` rejects it as a
+configured method, so it isn't available via `.env` or the multi-site config file.
 
 **401 Fix**: `npm run fix:rest-auth` or add to `.htaccess`:
 
@@ -105,7 +110,7 @@ Quality gates before a PR: `npm test && npm run lint && npm run security:scan &&
 
 ## DOX Framework
 
-- DOX is highly performant AGENTS.md hierarchy installed here
+- DOX is a highly performant AGENTS.md hierarchy installed here
 - Agent must follow DOX instructions across any edits
 
 ### Core Contract

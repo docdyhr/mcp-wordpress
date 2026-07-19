@@ -25,9 +25,12 @@ client architecture with its own tests but **not imported by `api.ts`, `ServerCo
 path**. Do not extend it or route new work through it without checking with the user first; the production client is
 `src/client/api.ts`.
 
-**Auth methods** (5: App Passwords, JWT, Basic, API Key, Cookie) are implemented directly in `api.ts`:
-`authenticateWithBasic` (`api.ts:466`, covers both App Passwords and Basic), `authenticateWithJWT` (`api.ts:493`,
-POSTs to `${baseUrl}/wp-json/jwt-auth/v1/token`), API Key header (`api.ts:401-405`, `X-API-Key`, no handshake).
+**Auth methods** (5, implemented directly in `api.ts`): App Passwords, JWT, Basic, API Key — all four configurable
+via `.env`/`mcp-wordpress.config.json` (`ConfigurationSchema`'s `AuthMethodSchema`) — plus Cookie, which is
+implemented (`api.ts:407`, `447`, `532`) but intentionally excluded from `AuthMethodSchema` and only constructible
+programmatically (`{ method: "cookie", nonce }`), not via config. `authenticateWithBasic` (`api.ts:466`, covers both
+App Passwords and Basic), `authenticateWithJWT` (`api.ts:493`, POSTs to `${baseUrl}/wp-json/jwt-auth/v1/token`),
+API Key header (`api.ts:401-405`, `X-API-Key`, no handshake).
 `src/client/auth.ts` (`WordPressAuth`, provider classes, `createAuthProvider`) is a second, unwired implementation —
 same dead-code caveat as `managers/`.
 
