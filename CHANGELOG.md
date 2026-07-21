@@ -29,6 +29,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🐛 Bug Fixes
+
+* **security:** expand private URL denylist and unify SSRF policy across `ConfigurationSchema` and `WordPressClient` — adds `169.254.0.0/16`, `0.0.0.0`, IPv6 link-local (`fe80::/10`)/unique-local (`fc00::/7`), and known cloud metadata hostnames; both enforcement points now share one `isDisallowedHostname` helper instead of drifting independently
+* **security:** require HTTPS for WordPress site URLs by default; `ALLOW_INSECURE_HTTP=true` remains available for local/Docker development over plain HTTP
+* **security:** deep-redact sensitive log context — object values under a sensitive key (e.g. `password`, `secret`) are now redacted instead of passed through as-is
+* **deps:** raise `axios` and `brace-expansion` npm override floors to `>=1.18.0` / `>=5.0.7`; apply non-breaking `npm audit fix` for `fast-uri`, `hono`, and `body-parser` transitive advisories
+
 ### 📚 Documentation
 
 * Trim README from 1168 to 343 lines — remove duplicate sections and verbose examples, replace with links to existing docs
