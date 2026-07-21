@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.19](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.18...v3.3.19) (2026-07-21)
+
+### 🐛 Bug Fixes
+
+* **security:** SSRF denylist, HTTPS enforcement, logger redaction, dep floors ([#205](https://github.com/docdyhr/mcp-wordpress/issues/205)) ([b899959](https://github.com/docdyhr/mcp-wordpress/commit/b8999592d7ac12bd30aa1cf8352abd381c6c0f06))
+
+### 📚 Documentation
+
+* install DOX hierarchical AGENTS.md tree ([#204](https://github.com/docdyhr/mcp-wordpress/issues/204)) ([9a5b580](https://github.com/docdyhr/mcp-wordpress/commit/9a5b5809cd547b54365b4474a3b0b751cbc05cd1))
+
 ## [3.3.18](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.17...v3.3.18) (2026-07-19)
 
 ### 🐛 Bug Fixes
