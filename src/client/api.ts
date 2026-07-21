@@ -8,6 +8,7 @@
 
 // Use native fetch and FormData in Node.js 18+ (both are globals, no import needed)
 import { getUserAgent } from "@/utils/version.js";
+import { isDisallowedHostname, isInsecureHttpAllowed, isPrivateUrlAllowed } from "@/utils/validation/network.js";
 import type {
   IWordPressClient,
   WordPressClientConfig,
@@ -267,20 +268,18 @@ export class WordPressClient implements IWordPressClient {
         throw new Error("Only HTTP and HTTPS protocols are allowed");
       }
 
+      // Require HTTPS unless explicitly allowed (WordPress auth headers travel over this URL)
+      // Set ALLOW_INSECURE_HTTP=true for local development over plain HTTP
+      if (parsed.protocol === "http:" && !isInsecureHttpAllowed()) {
+        throw new Error(
+          "HTTP is not allowed, use HTTPS. Set ALLOW_INSECURE_HTTP=true to override for local development.",
+        );
+      }
+
       // Prevent localhost/private IP access unless explicitly allowed
       // Set ALLOW_PRIVATE_URLS=true for local development with a local WordPress
-      if (process.env.ALLOW_PRIVATE_URLS !== "true") {
-        const hostname = parsed.hostname.toLowerCase();
-        if (
-          hostname === "localhost" ||
-          hostname === "127.0.0.1" ||
-          hostname === "::1" ||
-          hostname.match(/^10\./) ||
-          hostname.match(/^172\.(1[6-9]|2[0-9]|3[01])\./) ||
-          hostname.match(/^192\.168\./)
-        ) {
-          throw new Error("Private/localhost URLs not allowed. Set ALLOW_PRIVATE_URLS=true for local development.");
-        }
+      if (isDisallowedHostname(parsed.hostname) && !isPrivateUrlAllowed()) {
+        throw new Error("Private/localhost URLs not allowed. Set ALLOW_PRIVATE_URLS=true for local development.");
       }
 
       // Return clean URL without query parameters or fragments

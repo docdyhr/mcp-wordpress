@@ -5,8 +5,85 @@
  * and username validation with security considerations.
  */
 
+import net from "node:net";
 import { WordPressAPIError } from "@/types/client.js";
-import { config } from "@/config/Config.js";
+
+/**
+ * Hostnames that are always disallowed regardless of format, in addition to the
+ * IP-range checks below — primarily cloud metadata endpoints reachable by name.
+ */
+const DISALLOWED_HOSTNAMES = new Set(["localhost", "metadata.google.internal", "metadata.goog"]);
+
+/** Private/reserved IPv4 ranges, including link-local (covers 169.254.169.254 cloud metadata). */
+const IPV4_PRIVATE_RANGES: RegExp[] = [
+  /^127\./, // loopback 127.0.0.0/8
+  /^10\./, // private 10.0.0.0/8
+  /^172\.(1[6-9]|2\d|3[01])\./, // private 172.16.0.0/12
+  /^192\.168\./, // private 192.168.0.0/16
+  /^169\.254\./, // link-local 169.254.0.0/16
+  /^0\.0\.0\.0$/, // unspecified
+];
+
+function isDisallowedIPv4(address: string): boolean {
+  return IPV4_PRIVATE_RANGES.some((range) => range.test(address));
+}
+
+function isDisallowedIPv6(address: string): boolean {
+  const normalized = address.toLowerCase();
+
+  if (normalized === "::1" || normalized === "::") {
+    return true; // loopback / unspecified
+  }
+  if (/^fe[89ab][0-9a-f]:/.test(normalized)) {
+    return true; // link-local fe80::/10
+  }
+  if (/^f[cd][0-9a-f]{2}:/.test(normalized)) {
+    return true; // unique local fc00::/7
+  }
+
+  // IPv4-mapped/-compatible addresses (e.g. ::ffff:169.254.169.254) must inherit the IPv4 check
+  const mapped = normalized.match(/^::(?:ffff:)?(\d+\.\d+\.\d+\.\d+)$/);
+  if (mapped) {
+    return isDisallowedIPv4(mapped[1]);
+  }
+
+  return false;
+}
+
+/**
+ * True if `hostname` is a loopback, private, link-local, unique-local, or known
+ * cloud-metadata address/name. This is the single source of truth for the SSRF
+ * denylist — shared by `ConfigurationSchema`'s `UrlSchema`,
+ * `WordPressClient.validateAndSanitizeUrl`, and `validateUrl` below, so the
+ * policy can't drift between call sites.
+ *
+ * Callers should skip this check entirely when `ALLOW_PRIVATE_URLS=true`.
+ */
+export function isDisallowedHostname(hostname: string): boolean {
+  const normalized = hostname.toLowerCase();
+  const unbracketed = normalized.startsWith("[") && normalized.endsWith("]") ? normalized.slice(1, -1) : normalized;
+
+  if (DISALLOWED_HOSTNAMES.has(unbracketed)) {
+    return true;
+  }
+  if (net.isIPv4(unbracketed)) {
+    return isDisallowedIPv4(unbracketed);
+  }
+  if (net.isIPv6(unbracketed)) {
+    return isDisallowedIPv6(unbracketed);
+  }
+  return false;
+}
+
+/** True when the operator has explicitly opted in to private/loopback URLs (local dev). */
+export function isPrivateUrlAllowed(): boolean {
+  return process.env.ALLOW_PRIVATE_URLS === "true";
+}
+
+/** True when the operator has explicitly opted in to plain-HTTP URLs (local dev). */
+export function isInsecureHttpAllowed(): boolean {
+  return process.env.ALLOW_INSECURE_HTTP === "true";
+}
 
 /**
  * Validates and sanitizes URLs with enhanced edge case handling
@@ -47,10 +124,17 @@ export function validateUrl(url: string, fieldName: string = "url"): string {
       throw new WordPressAPIError(`Invalid ${fieldName}: hostname is missing or too short`, 400, "INVALID_PARAMETER");
     }
 
-    // Check for localhost in production
-    if (config().app.isProduction && (urlObj.hostname === "localhost" || urlObj.hostname === "127.0.0.1")) {
+    if (urlObj.protocol === "http:" && !isInsecureHttpAllowed()) {
       throw new WordPressAPIError(
-        `Invalid ${fieldName}: localhost URLs are not allowed in production`,
+        `Invalid ${fieldName}: HTTP is not allowed, use HTTPS (set ALLOW_INSECURE_HTTP=true to override for local development)`,
+        400,
+        "INVALID_PARAMETER",
+      );
+    }
+
+    if (isDisallowedHostname(urlObj.hostname) && !isPrivateUrlAllowed()) {
+      throw new WordPressAPIError(
+        `Invalid ${fieldName}: private/localhost URLs are not allowed (set ALLOW_PRIVATE_URLS=true to override for local development)`,
         400,
         "INVALID_PARAMETER",
       );

@@ -464,14 +464,14 @@ describe("Configuration Validation Tests", () => {
       expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).not.toThrow();
     });
 
-    it("should accept http URLs", () => {
+    it("should reject http URLs by default", () => {
       const config = {
         sites: [
           {
             id: "site1",
             name: "Test Site",
             config: {
-              WORDPRESS_SITE_URL: "http://localhost:8080",
+              WORDPRESS_SITE_URL: "http://example.com",
               WORDPRESS_USERNAME: "testuser",
               WORDPRESS_APP_PASSWORD: "password",
             },
@@ -479,7 +479,126 @@ describe("Configuration Validation Tests", () => {
         ],
       };
 
-      expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).not.toThrow();
+      expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).toThrow(/HTTP is not allowed/);
+    });
+
+    it("should accept http URLs when ALLOW_INSECURE_HTTP=true", () => {
+      const original = process.env.ALLOW_INSECURE_HTTP;
+      process.env.ALLOW_INSECURE_HTTP = "true";
+      try {
+        const config = {
+          sites: [
+            {
+              id: "site1",
+              name: "Test Site",
+              config: {
+                WORDPRESS_SITE_URL: "http://example.com",
+                WORDPRESS_USERNAME: "testuser",
+                WORDPRESS_APP_PASSWORD: "password",
+              },
+            },
+          ],
+        };
+
+        expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).not.toThrow();
+      } finally {
+        if (original === undefined) {
+          delete process.env.ALLOW_INSECURE_HTTP;
+        } else {
+          process.env.ALLOW_INSECURE_HTTP = original;
+        }
+      }
+    });
+
+    it("should reject private/localhost URLs by default, even with ALLOW_INSECURE_HTTP=true", () => {
+      const original = process.env.ALLOW_INSECURE_HTTP;
+      process.env.ALLOW_INSECURE_HTTP = "true";
+      try {
+        const config = {
+          sites: [
+            {
+              id: "site1",
+              name: "Test Site",
+              config: {
+                WORDPRESS_SITE_URL: "http://localhost:8080",
+                WORDPRESS_USERNAME: "testuser",
+                WORDPRESS_APP_PASSWORD: "password",
+              },
+            },
+          ],
+        };
+
+        expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).toThrow(/Private\/localhost/);
+      } finally {
+        if (original === undefined) {
+          delete process.env.ALLOW_INSECURE_HTTP;
+        } else {
+          process.env.ALLOW_INSECURE_HTTP = original;
+        }
+      }
+    });
+
+    it("should accept private/localhost URLs when both escape hatches are set", () => {
+      const originalHttp = process.env.ALLOW_INSECURE_HTTP;
+      const originalPrivate = process.env.ALLOW_PRIVATE_URLS;
+      process.env.ALLOW_INSECURE_HTTP = "true";
+      process.env.ALLOW_PRIVATE_URLS = "true";
+      try {
+        const config = {
+          sites: [
+            {
+              id: "site1",
+              name: "Test Site",
+              config: {
+                WORDPRESS_SITE_URL: "http://localhost:8080",
+                WORDPRESS_USERNAME: "testuser",
+                WORDPRESS_APP_PASSWORD: "password",
+              },
+            },
+          ],
+        };
+
+        expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).not.toThrow();
+      } finally {
+        if (originalHttp === undefined) {
+          delete process.env.ALLOW_INSECURE_HTTP;
+        } else {
+          process.env.ALLOW_INSECURE_HTTP = originalHttp;
+        }
+        if (originalPrivate === undefined) {
+          delete process.env.ALLOW_PRIVATE_URLS;
+        } else {
+          process.env.ALLOW_PRIVATE_URLS = originalPrivate;
+        }
+      }
+    });
+
+    it("should reject known cloud metadata hostnames even with ALLOW_INSECURE_HTTP=true", () => {
+      const original = process.env.ALLOW_INSECURE_HTTP;
+      process.env.ALLOW_INSECURE_HTTP = "true";
+      try {
+        const config = {
+          sites: [
+            {
+              id: "site1",
+              name: "Test Site",
+              config: {
+                WORDPRESS_SITE_URL: "http://169.254.169.254",
+                WORDPRESS_USERNAME: "testuser",
+                WORDPRESS_APP_PASSWORD: "password",
+              },
+            },
+          ],
+        };
+
+        expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).toThrow(/Private\/localhost/);
+      } finally {
+        if (original === undefined) {
+          delete process.env.ALLOW_INSECURE_HTTP;
+        } else {
+          process.env.ALLOW_INSECURE_HTTP = original;
+        }
+      }
     });
 
     it("should reject other protocols", () => {

@@ -34,6 +34,12 @@ API Key header (`api.ts:401-405`, `X-API-Key`, no handshake).
 `src/client/auth.ts` (`WordPressAuth`, provider classes, `createAuthProvider`) is a second, unwired implementation —
 same dead-code caveat as `managers/`.
 
+**URL validation (SSRF/HTTPS)**: `validateAndSanitizeUrl` (constructor + any `request()` call whose endpoint starts
+with `http`) requires `https:` and rejects private/loopback/link-local/metadata hostnames via the shared
+`isDisallowedHostname` helper (`src/utils/validation/network.ts`) — same policy as `ConfigurationSchema`'s
+`UrlSchema` (`src/config/AGENTS.md`). Escape hatches: `ALLOW_INSECURE_HTTP=true`, `ALLOW_PRIVATE_URLS=true`. Don't
+add a second hostname/protocol check here — extend the shared helper instead.
+
 **Request pipeline**: tool → `WordPressClient` public method → `operations/*.ts` → `request()` (`api.ts:542`) →
 `requestRaw()` (`api.ts:575`) — builds URL/auth headers, applies `rateLimit()` (`api.ts:418`), retries GETs always
 and mutating requests only when `idempotent:true` (linear backoff, `api.ts:684`), retries only on 5xx/network errors

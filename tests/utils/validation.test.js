@@ -17,6 +17,7 @@ import {
   validatePaginationParams,
   validatePostParams,
 } from "@/utils/validation.js";
+import { isDisallowedHostname, isPrivateUrlAllowed, isInsecureHttpAllowed } from "@/utils/validation/network.js";
 import { WordPressAPIError } from "@/types/client.js";
 
 describe("validation utilities", () => {
@@ -194,10 +195,26 @@ describe("validation utilities", () => {
   });
 
   describe("validateUrl", () => {
+    const originalAllowInsecureHttp = process.env.ALLOW_INSECURE_HTTP;
+    const originalAllowPrivateUrls = process.env.ALLOW_PRIVATE_URLS;
+
+    afterEach(() => {
+      if (originalAllowInsecureHttp === undefined) {
+        delete process.env.ALLOW_INSECURE_HTTP;
+      } else {
+        process.env.ALLOW_INSECURE_HTTP = originalAllowInsecureHttp;
+      }
+      if (originalAllowPrivateUrls === undefined) {
+        delete process.env.ALLOW_PRIVATE_URLS;
+      } else {
+        process.env.ALLOW_PRIVATE_URLS = originalAllowPrivateUrls;
+      }
+    });
+
     it("should validate correct URLs", () => {
       expect(validateUrl("https://example.com")).toBe("https://example.com");
-      expect(validateUrl("http://test.example.com")).toBe("http://test.example.com");
       expect(validateUrl("https://example.com/path")).toBe("https://example.com/path");
+      expect(validateUrl("https://test.example.com")).toBe("https://test.example.com");
     });
 
     it("should reject invalid URLs", () => {
@@ -209,6 +226,105 @@ describe("validation utilities", () => {
 
     it("should include field name in error messages", () => {
       expect(() => validateUrl("invalid", "siteUrl")).toThrow(/Invalid siteUrl.*must start with http/);
+    });
+
+    it("should reject http URLs by default", () => {
+      delete process.env.ALLOW_INSECURE_HTTP;
+      expect(() => validateUrl("http://test.example.com")).toThrow(/HTTP is not allowed/);
+    });
+
+    it("should accept http URLs when ALLOW_INSECURE_HTTP=true", () => {
+      process.env.ALLOW_INSECURE_HTTP = "true";
+      expect(validateUrl("http://test.example.com")).toBe("http://test.example.com");
+    });
+
+    it("should reject private/localhost hostnames by default", () => {
+      delete process.env.ALLOW_PRIVATE_URLS;
+      process.env.ALLOW_INSECURE_HTTP = "true";
+      expect(() => validateUrl("http://localhost:8080")).toThrow(/private\/localhost/i);
+      expect(() => validateUrl("https://169.254.169.254")).toThrow(/private\/localhost/i);
+    });
+
+    it("should accept private/localhost hostnames when ALLOW_PRIVATE_URLS=true", () => {
+      process.env.ALLOW_PRIVATE_URLS = "true";
+      process.env.ALLOW_INSECURE_HTTP = "true";
+      expect(validateUrl("http://localhost:8080")).toBe("http://localhost:8080");
+    });
+  });
+
+  describe("isDisallowedHostname", () => {
+    it("blocks localhost and loopback addresses", () => {
+      expect(isDisallowedHostname("localhost")).toBe(true);
+      expect(isDisallowedHostname("127.0.0.1")).toBe(true);
+      expect(isDisallowedHostname("127.0.0.2")).toBe(true);
+      expect(isDisallowedHostname("::1")).toBe(true);
+    });
+
+    it("blocks private IPv4 ranges", () => {
+      expect(isDisallowedHostname("10.0.0.1")).toBe(true);
+      expect(isDisallowedHostname("172.16.0.1")).toBe(true);
+      expect(isDisallowedHostname("172.31.255.255")).toBe(true);
+      expect(isDisallowedHostname("192.168.1.1")).toBe(true);
+    });
+
+    it("blocks link-local and unspecified IPv4 addresses, including cloud metadata", () => {
+      expect(isDisallowedHostname("169.254.169.254")).toBe(true);
+      expect(isDisallowedHostname("0.0.0.0")).toBe(true);
+    });
+
+    it("blocks IPv6 link-local and unique-local ranges", () => {
+      expect(isDisallowedHostname("fe80::1")).toBe(true);
+      expect(isDisallowedHostname("fc00::1")).toBe(true);
+      expect(isDisallowedHostname("fd12:3456:789a::1")).toBe(true);
+    });
+
+    it("blocks IPv4-mapped IPv6 addresses that resolve to a private range", () => {
+      expect(isDisallowedHostname("::ffff:169.254.169.254")).toBe(true);
+      expect(isDisallowedHostname("::ffff:127.0.0.1")).toBe(true);
+    });
+
+    it("blocks known cloud metadata hostnames", () => {
+      expect(isDisallowedHostname("metadata.google.internal")).toBe(true);
+      expect(isDisallowedHostname("metadata.goog")).toBe(true);
+    });
+
+    it("allows normal public hostnames and addresses", () => {
+      expect(isDisallowedHostname("example.com")).toBe(false);
+      expect(isDisallowedHostname("wordpress.example.org")).toBe(false);
+      expect(isDisallowedHostname("8.8.8.8")).toBe(false);
+      expect(isDisallowedHostname("2001:4860:4860::8888")).toBe(false);
+    });
+  });
+
+  describe("isPrivateUrlAllowed / isInsecureHttpAllowed", () => {
+    const originalAllowPrivateUrls = process.env.ALLOW_PRIVATE_URLS;
+    const originalAllowInsecureHttp = process.env.ALLOW_INSECURE_HTTP;
+
+    afterEach(() => {
+      if (originalAllowPrivateUrls === undefined) {
+        delete process.env.ALLOW_PRIVATE_URLS;
+      } else {
+        process.env.ALLOW_PRIVATE_URLS = originalAllowPrivateUrls;
+      }
+      if (originalAllowInsecureHttp === undefined) {
+        delete process.env.ALLOW_INSECURE_HTTP;
+      } else {
+        process.env.ALLOW_INSECURE_HTTP = originalAllowInsecureHttp;
+      }
+    });
+
+    it("default to false", () => {
+      delete process.env.ALLOW_PRIVATE_URLS;
+      delete process.env.ALLOW_INSECURE_HTTP;
+      expect(isPrivateUrlAllowed()).toBe(false);
+      expect(isInsecureHttpAllowed()).toBe(false);
+    });
+
+    it("respect the escape hatch env vars", () => {
+      process.env.ALLOW_PRIVATE_URLS = "true";
+      process.env.ALLOW_INSECURE_HTTP = "true";
+      expect(isPrivateUrlAllowed()).toBe(true);
+      expect(isInsecureHttpAllowed()).toBe(true);
     });
   });
 
