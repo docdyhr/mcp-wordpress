@@ -278,9 +278,34 @@ describe("validation utilities", () => {
       expect(isDisallowedHostname("fd12:3456:789a::1")).toBe(true);
     });
 
-    it("blocks IPv4-mapped IPv6 addresses that resolve to a private range", () => {
+    it("blocks IPv4-mapped IPv6 addresses that resolve to a private range (dotted-decimal form)", () => {
       expect(isDisallowedHostname("::ffff:169.254.169.254")).toBe(true);
       expect(isDisallowedHostname("::ffff:127.0.0.1")).toBe(true);
+    });
+
+    it("blocks IPv4-mapped IPv6 addresses in the hex form new URL() actually produces", () => {
+      // new URL("https://[::ffff:169.254.169.254]/").hostname === "[::ffff:a9fe:a9fe]" —
+      // WHATWG URL canonicalizes IPv4-mapped literals to hex, so a dotted-decimal-only
+      // check here would silently never match real request traffic.
+      expect(isDisallowedHostname("[::ffff:a9fe:a9fe]")).toBe(true);
+      expect(isDisallowedHostname("::ffff:a9fe:a9fe")).toBe(true);
+      expect(isDisallowedHostname("[::ffff:7f00:1]")).toBe(true); // 127.0.0.1
+      // Full (uncompressed) hextet form, e.g. as an operator might type it directly
+      expect(isDisallowedHostname("0:0:0:0:0:ffff:169.254.169.254")).toBe(true);
+      expect(isDisallowedHostname("0:0:0:0:0:ffff:a9fe:a9fe")).toBe(true);
+    });
+
+    it("blocks additional reserved IPv4 ranges (CGN, IETF protocol, benchmarking)", () => {
+      expect(isDisallowedHostname("100.64.0.1")).toBe(true);
+      expect(isDisallowedHostname("100.127.255.255")).toBe(true);
+      expect(isDisallowedHostname("192.0.0.1")).toBe(true);
+      expect(isDisallowedHostname("198.18.0.1")).toBe(true);
+      expect(isDisallowedHostname("198.19.255.255")).toBe(true);
+      // Adjacent public ranges must not be swept in by mistake
+      expect(isDisallowedHostname("100.63.255.255")).toBe(false);
+      expect(isDisallowedHostname("100.128.0.0")).toBe(false);
+      expect(isDisallowedHostname("192.0.1.1")).toBe(false);
+      expect(isDisallowedHostname("198.20.0.1")).toBe(false);
     });
 
     it("blocks known cloud metadata hostnames", () => {
@@ -288,11 +313,13 @@ describe("validation utilities", () => {
       expect(isDisallowedHostname("metadata.goog")).toBe(true);
     });
 
-    it("allows normal public hostnames and addresses", () => {
+    it("allows normal public hostnames and addresses, including public IPv4-mapped IPv6", () => {
       expect(isDisallowedHostname("example.com")).toBe(false);
       expect(isDisallowedHostname("wordpress.example.org")).toBe(false);
       expect(isDisallowedHostname("8.8.8.8")).toBe(false);
       expect(isDisallowedHostname("2001:4860:4860::8888")).toBe(false);
+      expect(isDisallowedHostname("::ffff:8.8.8.8")).toBe(false);
+      expect(isDisallowedHostname("[::ffff:808:808]")).toBe(false); // hex form of 8.8.8.8
     });
   });
 

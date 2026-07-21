@@ -175,6 +175,14 @@ describe("WordPressClient", () => {
         process.env.ALLOW_PRIVATE_URLS = "true";
         expect(() => new WordPressClient({ baseUrl: "https://localhost", auth: authConfig })).not.toThrow();
       });
+
+      it("should reject IPv4-mapped IPv6 metadata addresses even in the hex form new URL() canonicalizes to", () => {
+        delete process.env.ALLOW_PRIVATE_URLS;
+        // new URL("https://[::ffff:169.254.169.254]/").hostname === "[::ffff:a9fe:a9fe]"
+        expect(() => new WordPressClient({ baseUrl: "https://[::ffff:169.254.169.254]", auth: authConfig })).toThrow(
+          /Private\/localhost/,
+        );
+      });
     });
   });
 

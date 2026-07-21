@@ -22,10 +22,51 @@ const IPV4_PRIVATE_RANGES: RegExp[] = [
   /^192\.168\./, // private 192.168.0.0/16
   /^169\.254\./, // link-local 169.254.0.0/16
   /^0\.0\.0\.0$/, // unspecified
+  /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./, // carrier-grade NAT shared space 100.64.0.0/10
+  /^192\.0\.0\./, // IETF protocol assignments 192.0.0.0/24
+  /^198\.(1[89])\./, // benchmarking 198.18.0.0/15
 ];
 
 function isDisallowedIPv4(address: string): boolean {
   return IPV4_PRIVATE_RANGES.some((range) => range.test(address));
+}
+
+/**
+ * Expands a valid IPv6 literal (already confirmed via `net.isIPv6`) into its 8
+ * 16-bit groups as numbers, resolving `::` compression and a trailing IPv4
+ * dotted-decimal quad (e.g. `::ffff:169.254.169.254`) if present. Returns null
+ * only for shapes that shouldn't occur given a `net.isIPv6`-validated input.
+ */
+function expandIPv6Groups(address: string): number[] | null {
+  const dotted = address.match(/^(.*:)?(\d+\.\d+\.\d+\.\d+)$/);
+  let textual = address;
+  if (dotted && net.isIPv4(dotted[2])) {
+    const [a, b, c, d] = dotted[2].split(".").map(Number);
+    textual = `${dotted[1] ?? ""}${((a << 8) | b).toString(16)}:${((c << 8) | d).toString(16)}`;
+  }
+
+  const halves = textual.split("::");
+  if (halves.length > 2) {
+    return null;
+  }
+
+  const head = halves[0] ? halves[0].split(":") : [];
+  const tail = halves.length === 2 && halves[1] ? halves[1].split(":") : [];
+  let groups: string[];
+  if (halves.length === 2) {
+    const fillCount = 8 - head.length - tail.length;
+    if (fillCount < 0) {
+      return null;
+    }
+    groups = [...head, ...Array(fillCount).fill("0"), ...tail];
+  } else {
+    groups = head;
+  }
+
+  if (groups.length !== 8 || groups.some((g) => g === "")) {
+    return null;
+  }
+  return groups.map((g) => parseInt(g, 16));
 }
 
 function isDisallowedIPv6(address: string): boolean {
@@ -41,10 +82,15 @@ function isDisallowedIPv6(address: string): boolean {
     return true; // unique local fc00::/7
   }
 
-  // IPv4-mapped/-compatible addresses (e.g. ::ffff:169.254.169.254) must inherit the IPv4 check
-  const mapped = normalized.match(/^::(?:ffff:)?(\d+\.\d+\.\d+\.\d+)$/);
-  if (mapped) {
-    return isDisallowedIPv4(mapped[1]);
+  // IPv4-mapped addresses (::ffff:a.b.c.d) must inherit the IPv4 check. Node's URL
+  // parser canonicalizes these to hex groups (e.g. ::ffff:169.254.169.254 becomes
+  // ::ffff:a9fe:a9fe), so both hex and dotted-decimal input must be handled — a
+  // dotted-decimal-only regex here would never match what `new URL().hostname`
+  // actually produces and would leave the check silently non-functional.
+  const groups = expandIPv6Groups(normalized);
+  if (groups && groups.slice(0, 5).every((g) => g === 0) && groups[5] === 0xffff) {
+    const ipv4 = `${(groups[6] >> 8) & 0xff}.${groups[6] & 0xff}.${(groups[7] >> 8) & 0xff}.${groups[7] & 0xff}`;
+    return isDisallowedIPv4(ipv4);
   }
 
   return false;
