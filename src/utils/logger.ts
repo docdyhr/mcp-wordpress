@@ -102,8 +102,12 @@ function sanitizeContext(context: LogContext): LogContext {
         sanitized[key] = value.length > 0 ? `[REDACTED:${value.length}chars]` : "[EMPTY]";
       } else if (Array.isArray(value)) {
         sanitized[key] = "[EMPTY]"; // Redact entire array for sensitive fields
+      } else if (value !== null && typeof value === "object") {
+        sanitized[key] = "[REDACTED]"; // Redact entire object for sensitive fields — never pass nested secrets through
+      } else if (value === null || value === undefined) {
+        sanitized[key] = value; // Nothing to leak
       } else {
-        sanitized[key] = value; // Keep non-string, non-array values as-is
+        sanitized[key] = "[REDACTED]"; // Numbers/booleans under a sensitive key can themselves be the secret (PIN/OTP)
       }
     } else {
       sanitized[key] = value;

@@ -464,22 +464,81 @@ describe("Configuration Validation Tests", () => {
       expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).not.toThrow();
     });
 
-    it("should accept http URLs", () => {
-      const config = {
+    describe("HTTPS / private-host escape hatches", () => {
+      let originalHttp;
+      let originalPrivate;
+
+      beforeEach(() => {
+        originalHttp = process.env.ALLOW_INSECURE_HTTP;
+        originalPrivate = process.env.ALLOW_PRIVATE_URLS;
+        // Every test in this block starts from a known baseline (both unset) so it
+        // can't pass or fail based on the developer's/CI's ambient environment.
+        delete process.env.ALLOW_INSECURE_HTTP;
+        delete process.env.ALLOW_PRIVATE_URLS;
+      });
+
+      afterEach(() => {
+        if (originalHttp === undefined) {
+          delete process.env.ALLOW_INSECURE_HTTP;
+        } else {
+          process.env.ALLOW_INSECURE_HTTP = originalHttp;
+        }
+        if (originalPrivate === undefined) {
+          delete process.env.ALLOW_PRIVATE_URLS;
+        } else {
+          process.env.ALLOW_PRIVATE_URLS = originalPrivate;
+        }
+      });
+
+      const configFor = (url) => ({
         sites: [
           {
             id: "site1",
             name: "Test Site",
             config: {
-              WORDPRESS_SITE_URL: "http://localhost:8080",
+              WORDPRESS_SITE_URL: url,
               WORDPRESS_USERNAME: "testuser",
               WORDPRESS_APP_PASSWORD: "password",
             },
           },
         ],
-      };
+      });
 
-      expect(() => ConfigurationValidator.validateMultiSiteConfig(config)).not.toThrow();
+      it("should reject http URLs by default", () => {
+        expect(() => ConfigurationValidator.validateMultiSiteConfig(configFor("http://example.com"))).toThrow(
+          /HTTP is not allowed/,
+        );
+      });
+
+      it("should accept http URLs when ALLOW_INSECURE_HTTP=true", () => {
+        process.env.ALLOW_INSECURE_HTTP = "true";
+        expect(() => ConfigurationValidator.validateMultiSiteConfig(configFor("http://example.com"))).not.toThrow();
+      });
+
+      it("should reject private/localhost URLs by default, even with ALLOW_INSECURE_HTTP=true", () => {
+        process.env.ALLOW_INSECURE_HTTP = "true";
+        expect(() => ConfigurationValidator.validateMultiSiteConfig(configFor("http://localhost:8080"))).toThrow(
+          /Private\/localhost/,
+        );
+      });
+
+      it("should accept private/localhost URLs when both escape hatches are set", () => {
+        process.env.ALLOW_INSECURE_HTTP = "true";
+        process.env.ALLOW_PRIVATE_URLS = "true";
+        expect(() => ConfigurationValidator.validateMultiSiteConfig(configFor("http://localhost:8080"))).not.toThrow();
+      });
+
+      it("should accept https private/localhost URLs when only ALLOW_PRIVATE_URLS is set", () => {
+        process.env.ALLOW_PRIVATE_URLS = "true";
+        expect(() => ConfigurationValidator.validateMultiSiteConfig(configFor("https://localhost:8443"))).not.toThrow();
+      });
+
+      it("should reject known cloud metadata hostnames even with ALLOW_INSECURE_HTTP=true", () => {
+        process.env.ALLOW_INSECURE_HTTP = "true";
+        expect(() => ConfigurationValidator.validateMultiSiteConfig(configFor("http://169.254.169.254"))).toThrow(
+          /Private\/localhost/,
+        );
+      });
     });
 
     it("should reject other protocols", () => {

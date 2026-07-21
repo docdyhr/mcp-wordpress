@@ -199,20 +199,50 @@ if (path.includes("..") || path.includes("~")) {
 
 ### HTTPS Requirements
 
-**Production Deployment:**
+`WORDPRESS_SITE_URL` must use `https://` — enforced by both `ConfigurationSchema` (`UrlSchema`) and
+`WordPressClient.validateAndSanitizeUrl` (`src/client/api.ts`), which apply the same rule so they can't drift apart.
 
 ```bash
-# Always use HTTPS in production
-WORDPRESS_SITE_URL=https://your-site.com  # ✅ Secure
-WORDPRESS_SITE_URL=http://your-site.com   # ❌ Insecure
+WORDPRESS_SITE_URL=https://your-site.com  # ✅ Secure — always allowed
+WORDPRESS_SITE_URL=http://your-site.com   # ❌ Rejected by default
 ```
 
-**Development Exceptions:**
+**Local development escape hatch:**
 
 ```bash
-# HTTP acceptable for localhost only
-WORDPRESS_SITE_URL=http://localhost:8080  # ✅ OK for development
+# Only for local Docker/dev WordPress instances served over plain HTTP
+ALLOW_INSECURE_HTTP=true
+WORDPRESS_SITE_URL=http://localhost:8080
 ```
+
+Never set `ALLOW_INSECURE_HTTP=true` in production — WordPress auth headers (App Password/Basic/JWT/API Key) travel
+over this URL and are exposed in plaintext without TLS.
+
+### SSRF / Private-Network Protection
+
+`WORDPRESS_SITE_URL` is checked against a shared denylist (`isDisallowedHostname` in
+`src/utils/validation/network.ts`) before any request is made, blocking:
+
+- Loopback: `localhost`, `127.0.0.0/8`, `::1`
+- Private IPv4 ranges: `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`
+- Link-local / cloud metadata: `169.254.0.0/16` (covers `169.254.169.254`), IPv6 `fe80::/10`
+- IPv6 unique-local: `fc00::/7`
+- Unspecified addresses: `0.0.0.0`, IPv6 `::`
+- Known metadata hostnames: `metadata.google.internal`, `metadata.goog`
+- IPv4-mapped IPv6 addresses that resolve to any of the above (e.g. `::ffff:169.254.169.254`)
+
+This is the same policy in `ConfigurationSchema`'s `UrlSchema` and `WordPressClient.validateAndSanitizeUrl` — one
+helper, no drift between the two enforcement points.
+
+**Local development escape hatch:**
+
+```bash
+# Only for local/private WordPress instances (e.g. Docker Compose on a private network)
+ALLOW_PRIVATE_URLS=true
+WORDPRESS_SITE_URL=http://localhost:8080  # also requires ALLOW_INSECURE_HTTP=true, see above
+```
+
+`ALLOW_PRIVATE_URLS` and `ALLOW_INSECURE_HTTP` are independent flags — set only the ones you need.
 
 ### Rate Limiting
 

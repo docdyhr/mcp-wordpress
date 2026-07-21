@@ -620,10 +620,10 @@ describe("Logger", () => {
       expect(logOutput).not.toContain('""');
     });
 
-    it("should preserve non-string sensitive values", () => {
+    it("should redact numeric/object sensitive values but preserve null", () => {
       const logger = new Logger();
       logger.info("Test", {
-        password: 123,
+        password: 123, // numeric secrets (PINs/OTPs) must not leak either
         token: null,
         apiKey: undefined,
         secret: { nested: "value" },
@@ -631,9 +631,12 @@ describe("Logger", () => {
 
       expect(consoleErrorSpy).toHaveBeenCalled();
       const logOutput = consoleErrorSpy.mock.calls[0][0];
-      expect(logOutput).toContain("123");
+      expect(logOutput).not.toContain("123");
       expect(logOutput).toContain("null");
-      expect(logOutput).toContain("nested");
+      // Object values under a sensitive key must never pass nested secrets through
+      expect(logOutput).not.toContain("nested");
+      expect(logOutput).not.toContain("value");
+      expect(logOutput).toContain("[REDACTED]");
     });
 
     it("should sanitize sensitive fields containing array values", () => {

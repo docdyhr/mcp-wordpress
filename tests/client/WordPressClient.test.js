@@ -130,6 +130,60 @@ describe("WordPressClient", () => {
     it("should validate required configuration", () => {
       expect(() => new WordPressClient({})).toThrow();
     });
+
+    describe("URL security (SSRF/HTTPS enforcement)", () => {
+      const authConfig = { username: "user", appPassword: "pass" };
+      const originalAllowPrivateUrls = process.env.ALLOW_PRIVATE_URLS;
+      const originalAllowInsecureHttp = process.env.ALLOW_INSECURE_HTTP;
+
+      afterEach(() => {
+        if (originalAllowPrivateUrls === undefined) {
+          delete process.env.ALLOW_PRIVATE_URLS;
+        } else {
+          process.env.ALLOW_PRIVATE_URLS = originalAllowPrivateUrls;
+        }
+        if (originalAllowInsecureHttp === undefined) {
+          delete process.env.ALLOW_INSECURE_HTTP;
+        } else {
+          process.env.ALLOW_INSECURE_HTTP = originalAllowInsecureHttp;
+        }
+      });
+
+      it("should reject http:// URLs by default", () => {
+        delete process.env.ALLOW_INSECURE_HTTP;
+        expect(() => new WordPressClient({ baseUrl: "http://example.com", auth: authConfig })).toThrow(
+          /HTTP is not allowed/,
+        );
+      });
+
+      it("should accept http:// URLs when ALLOW_INSECURE_HTTP=true", () => {
+        process.env.ALLOW_INSECURE_HTTP = "true";
+        expect(() => new WordPressClient({ baseUrl: "http://example.com", auth: authConfig })).not.toThrow();
+      });
+
+      it("should reject private/localhost/link-local hostnames by default", () => {
+        delete process.env.ALLOW_PRIVATE_URLS;
+        expect(() => new WordPressClient({ baseUrl: "https://localhost", auth: authConfig })).toThrow(
+          /Private\/localhost/,
+        );
+        expect(() => new WordPressClient({ baseUrl: "https://169.254.169.254", auth: authConfig })).toThrow(
+          /Private\/localhost/,
+        );
+      });
+
+      it("should accept private/localhost hostnames when ALLOW_PRIVATE_URLS=true", () => {
+        process.env.ALLOW_PRIVATE_URLS = "true";
+        expect(() => new WordPressClient({ baseUrl: "https://localhost", auth: authConfig })).not.toThrow();
+      });
+
+      it("should reject IPv4-mapped IPv6 metadata addresses even in the hex form new URL() canonicalizes to", () => {
+        delete process.env.ALLOW_PRIVATE_URLS;
+        // new URL("https://[::ffff:169.254.169.254]/").hostname === "[::ffff:a9fe:a9fe]"
+        expect(() => new WordPressClient({ baseUrl: "https://[::ffff:169.254.169.254]", auth: authConfig })).toThrow(
+          /Private\/localhost/,
+        );
+      });
+    });
   });
 
   describe("Authentication", () => {

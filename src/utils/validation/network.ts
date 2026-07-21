@@ -5,8 +5,131 @@
  * and username validation with security considerations.
  */
 
+import net from "node:net";
 import { WordPressAPIError } from "@/types/client.js";
-import { config } from "@/config/Config.js";
+
+/**
+ * Hostnames that are always disallowed regardless of format, in addition to the
+ * IP-range checks below — primarily cloud metadata endpoints reachable by name.
+ */
+const DISALLOWED_HOSTNAMES = new Set(["localhost", "metadata.google.internal", "metadata.goog"]);
+
+/** Private/reserved IPv4 ranges, including link-local (covers 169.254.169.254 cloud metadata). */
+const IPV4_PRIVATE_RANGES: RegExp[] = [
+  /^127\./, // loopback 127.0.0.0/8
+  /^10\./, // private 10.0.0.0/8
+  /^172\.(1[6-9]|2\d|3[01])\./, // private 172.16.0.0/12
+  /^192\.168\./, // private 192.168.0.0/16
+  /^169\.254\./, // link-local 169.254.0.0/16
+  /^0\.0\.0\.0$/, // unspecified
+  /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./, // carrier-grade NAT shared space 100.64.0.0/10
+  /^192\.0\.0\./, // IETF protocol assignments 192.0.0.0/24
+  /^198\.(1[89])\./, // benchmarking 198.18.0.0/15
+];
+
+function isDisallowedIPv4(address: string): boolean {
+  return IPV4_PRIVATE_RANGES.some((range) => range.test(address));
+}
+
+/**
+ * Expands a valid IPv6 literal (already confirmed via `net.isIPv6`) into its 8
+ * 16-bit groups as numbers, resolving `::` compression and a trailing IPv4
+ * dotted-decimal quad (e.g. `::ffff:169.254.169.254`) if present. Returns null
+ * only for shapes that shouldn't occur given a `net.isIPv6`-validated input.
+ */
+function expandIPv6Groups(address: string): number[] | null {
+  const dotted = address.match(/^(.*:)?(\d+\.\d+\.\d+\.\d+)$/);
+  let textual = address;
+  if (dotted && net.isIPv4(dotted[2])) {
+    const [a, b, c, d] = dotted[2].split(".").map(Number);
+    textual = `${dotted[1] ?? ""}${((a << 8) | b).toString(16)}:${((c << 8) | d).toString(16)}`;
+  }
+
+  const halves = textual.split("::");
+  if (halves.length > 2) {
+    return null;
+  }
+
+  const head = halves[0] ? halves[0].split(":") : [];
+  const tail = halves.length === 2 && halves[1] ? halves[1].split(":") : [];
+  let groups: string[];
+  if (halves.length === 2) {
+    const fillCount = 8 - head.length - tail.length;
+    if (fillCount < 0) {
+      return null;
+    }
+    groups = [...head, ...Array(fillCount).fill("0"), ...tail];
+  } else {
+    groups = head;
+  }
+
+  if (groups.length !== 8 || groups.some((g) => g === "")) {
+    return null;
+  }
+  return groups.map((g) => parseInt(g, 16));
+}
+
+function isDisallowedIPv6(address: string): boolean {
+  const normalized = address.toLowerCase();
+
+  if (normalized === "::1" || normalized === "::") {
+    return true; // loopback / unspecified
+  }
+  if (/^fe[89ab][0-9a-f]:/.test(normalized)) {
+    return true; // link-local fe80::/10
+  }
+  if (/^f[cd][0-9a-f]{2}:/.test(normalized)) {
+    return true; // unique local fc00::/7
+  }
+
+  // IPv4-mapped addresses (::ffff:a.b.c.d) must inherit the IPv4 check. Node's URL
+  // parser canonicalizes these to hex groups (e.g. ::ffff:169.254.169.254 becomes
+  // ::ffff:a9fe:a9fe), so both hex and dotted-decimal input must be handled — a
+  // dotted-decimal-only regex here would never match what `new URL().hostname`
+  // actually produces and would leave the check silently non-functional.
+  const groups = expandIPv6Groups(normalized);
+  if (groups && groups.slice(0, 5).every((g) => g === 0) && groups[5] === 0xffff) {
+    const ipv4 = `${(groups[6] >> 8) & 0xff}.${groups[6] & 0xff}.${(groups[7] >> 8) & 0xff}.${groups[7] & 0xff}`;
+    return isDisallowedIPv4(ipv4);
+  }
+
+  return false;
+}
+
+/**
+ * True if `hostname` is a loopback, private, link-local, unique-local, or known
+ * cloud-metadata address/name. This is the single source of truth for the SSRF
+ * denylist — shared by `ConfigurationSchema`'s `UrlSchema`,
+ * `WordPressClient.validateAndSanitizeUrl`, and `validateUrl` below, so the
+ * policy can't drift between call sites.
+ *
+ * Callers should skip this check entirely when `ALLOW_PRIVATE_URLS=true`.
+ */
+export function isDisallowedHostname(hostname: string): boolean {
+  const normalized = hostname.toLowerCase();
+  const unbracketed = normalized.startsWith("[") && normalized.endsWith("]") ? normalized.slice(1, -1) : normalized;
+
+  if (DISALLOWED_HOSTNAMES.has(unbracketed)) {
+    return true;
+  }
+  if (net.isIPv4(unbracketed)) {
+    return isDisallowedIPv4(unbracketed);
+  }
+  if (net.isIPv6(unbracketed)) {
+    return isDisallowedIPv6(unbracketed);
+  }
+  return false;
+}
+
+/** True when the operator has explicitly opted in to private/loopback URLs (local dev). */
+export function isPrivateUrlAllowed(): boolean {
+  return process.env.ALLOW_PRIVATE_URLS === "true";
+}
+
+/** True when the operator has explicitly opted in to plain-HTTP URLs (local dev). */
+export function isInsecureHttpAllowed(): boolean {
+  return process.env.ALLOW_INSECURE_HTTP === "true";
+}
 
 /**
  * Validates and sanitizes URLs with enhanced edge case handling
@@ -47,10 +170,17 @@ export function validateUrl(url: string, fieldName: string = "url"): string {
       throw new WordPressAPIError(`Invalid ${fieldName}: hostname is missing or too short`, 400, "INVALID_PARAMETER");
     }
 
-    // Check for localhost in production
-    if (config().app.isProduction && (urlObj.hostname === "localhost" || urlObj.hostname === "127.0.0.1")) {
+    if (urlObj.protocol === "http:" && !isInsecureHttpAllowed()) {
       throw new WordPressAPIError(
-        `Invalid ${fieldName}: localhost URLs are not allowed in production`,
+        `Invalid ${fieldName}: HTTP is not allowed, use HTTPS (set ALLOW_INSECURE_HTTP=true to override for local development)`,
+        400,
+        "INVALID_PARAMETER",
+      );
+    }
+
+    if (isDisallowedHostname(urlObj.hostname) && !isPrivateUrlAllowed()) {
+      throw new WordPressAPIError(
+        `Invalid ${fieldName}: private/localhost URLs are not allowed (set ALLOW_PRIVATE_URLS=true to override for local development)`,
         400,
         "INVALID_PARAMETER",
       );

@@ -14,6 +14,11 @@ Owns `src/config/`.
 - `ConfigurationSchema.ts` — owns all Zod schemas: per-auth-method discriminated unions (`app-password`/`basic`/
   `jwt`/`api-key`), `SiteSchema`/`MultiSiteConfigSchema` (JSON file), `EnvironmentConfigSchema` (single-site env),
   `McpConfigSchema` (client-passed partial config), `ConfigurationValidator`, `buildAuthConfig()`.
+- `UrlSchema` requires `https:` and rejects private/loopback/link-local hostnames (via
+  `isDisallowedHostname` in `src/utils/validation/network.ts`) by default, regardless of `NODE_ENV` — escape hatches
+  are `ALLOW_INSECURE_HTTP=true` and `ALLOW_PRIVATE_URLS=true`. This is the same policy `WordPressClient` enforces
+  in `validateAndSanitizeUrl` (`src/client/AGENTS.md`); both call the shared helper so the two can't drift apart —
+  don't reintroduce inline hostname/protocol checks in either place.
 - `ServerConfiguration.ts` — singleton consumer/orchestrator: decides single-site vs multi-site mode
   (`loadClientConfigurations()`, `ServerConfiguration.ts:75-99`), reads `.env` via dotenv, resolves
   `mcp-wordpress.config.json` if present, validates via `ConfigurationSchema`, and builds one

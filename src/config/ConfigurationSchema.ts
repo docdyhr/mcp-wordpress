@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isDisallowedHostname, isInsecureHttpAllowed, isPrivateUrlAllowed } from "@/utils/validation/network.js";
 
 /**
  * Zod schema for WordPress authentication methods.
@@ -12,7 +13,14 @@ import { z } from "zod";
 const AuthMethodSchema = z.enum(["app-password", "jwt", "basic", "api-key"] as const);
 
 /**
- * Zod schema for URL validation with security checks
+ * Zod schema for URL validation with security checks.
+ *
+ * Uses the same `isDisallowedHostname`/escape-hatch policy as
+ * `WordPressClient.validateAndSanitizeUrl` (`src/client/api.ts`) so the two
+ * enforcement points can't drift apart — this schema previously only blocked
+ * private/localhost hosts when `NODE_ENV=production`, while the client always
+ * blocked them; both now default to blocking, overridable via
+ * `ALLOW_PRIVATE_URLS=true` / `ALLOW_INSECURE_HTTP=true`.
  */
 const UrlSchema = z
   .string()
@@ -22,26 +30,13 @@ const UrlSchema = z
     return parsed.protocol === "http:" || parsed.protocol === "https:";
   }, "URL must use http or https protocol")
   .refine((url) => {
-    // Additional security checks
     const parsed = new URL(url);
-    const hostname = parsed.hostname.toLowerCase();
-
-    // In production, block localhost and private IPs
-    if (process.env.NODE_ENV === "production") {
-      if (
-        hostname === "localhost" ||
-        hostname === "127.0.0.1" ||
-        hostname === "::1" ||
-        hostname.match(/^10\./) ||
-        hostname.match(/^172\.(1[6-9]|2[0-9]|3[01])\./) ||
-        hostname.match(/^192\.168\./)
-      ) {
-        return false;
-      }
-    }
-
-    return true;
-  }, "Private/localhost URLs not allowed in production");
+    return parsed.protocol !== "http:" || isInsecureHttpAllowed();
+  }, "HTTP is not allowed, use HTTPS (set ALLOW_INSECURE_HTTP=true to override for local development)")
+  .refine((url) => {
+    const parsed = new URL(url);
+    return !isDisallowedHostname(parsed.hostname) || isPrivateUrlAllowed();
+  }, "Private/localhost URLs not allowed (set ALLOW_PRIVATE_URLS=true to override for local development)");
 
 const UsernameSchema = z
   .string()
