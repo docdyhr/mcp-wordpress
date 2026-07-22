@@ -203,6 +203,25 @@ describe("PageTools", () => {
       expect(result).toContain("<p>Full page content here</p>");
     });
 
+    it("should keep empty raw content instead of falling back to rendered HTML", async () => {
+      mockClient.getPage.mockResolvedValue({
+        id: 1,
+        title: { rendered: "Test Page" },
+        content: {
+          raw: "",
+          rendered: "<p>Filter-injected advertisement</p>",
+        },
+        date: "2024-01-01T00:00:00",
+        status: "publish",
+        link: "https://test.wordpress.com/test-page",
+      });
+
+      const result = await pageTools.handleGetPage(mockClient, { id: 1, include_content: true });
+
+      expect(result).not.toContain("Filter-injected advertisement");
+      expect(result).toContain("(empty)");
+    });
+
     it("should fall back to context=view when context=edit is denied", async () => {
       const forbidden = Object.assign(new Error("403 rest_forbidden_context"), { statusCode: 403 });
       mockClient.getPage.mockImplementation((id, context) =>
