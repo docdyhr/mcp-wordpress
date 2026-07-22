@@ -144,6 +144,43 @@ describe("CachedWordPressClient", () => {
     });
   });
 
+  describe("getPost context forwarding", () => {
+    it("should request context=edit when asked, so raw Gutenberg markup is fetchable through the cached client", async () => {
+      vi.clearAllMocks();
+
+      await cachedClient.getPost(5, "edit");
+
+      expect(WordPressClient.prototype.requestWithMetadata).toHaveBeenCalledWith(
+        "GET",
+        expect.stringContaining("context=edit"),
+        null,
+        expect.anything(),
+      );
+    });
+
+    it("should default to context=view", async () => {
+      vi.clearAllMocks();
+
+      await cachedClient.getPost(5);
+
+      expect(WordPressClient.prototype.requestWithMetadata).toHaveBeenCalledWith(
+        "GET",
+        expect.stringContaining("context=view"),
+        null,
+        expect.anything(),
+      );
+    });
+
+    it("should cache edit and view contexts separately", async () => {
+      vi.clearAllMocks();
+
+      await cachedClient.getPost(5, "view");
+      await cachedClient.getPost(5, "edit");
+
+      expect(WordPressClient.prototype.requestWithMetadata).toHaveBeenCalledTimes(2);
+    });
+  });
+
   describe("request method caching behavior", () => {
     it("should cache GET requests", async () => {
       // Reset call count

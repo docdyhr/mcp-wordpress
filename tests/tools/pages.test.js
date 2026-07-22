@@ -231,7 +231,7 @@ describe("PageTools", () => {
 
       const result = await pageTools.handleGetPage(mockClient, { id: 1 });
 
-      expect(mockClient.getPage).toHaveBeenCalledWith(1);
+      expect(mockClient.getPage).toHaveBeenCalledWith(1, "view");
       expect(typeof result).toBe("string");
       expect(result).toContain("Page Details (ID: 1)");
       expect(result).toContain("Test Page");

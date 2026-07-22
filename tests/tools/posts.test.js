@@ -231,7 +231,7 @@ describe("PostTools", () => {
 
       const result = await postTools.handleGetPost(mockClient, { id: 1 });
 
-      expect(mockClient.getPost).toHaveBeenCalledWith(1);
+      expect(mockClient.getPost).toHaveBeenCalledWith(1, "edit");
       expect(typeof result).toBe("string");
       expect(result).toContain("Test Post");
       expect(result).toContain("Test Content");

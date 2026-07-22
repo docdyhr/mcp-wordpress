@@ -22,6 +22,24 @@ function legacyConsoleError(...args: unknown[]) {
 // @__PURE__ This constant has no side effects and can be dropped in production builds
 export const __errorUtilsLogger = logger;
 
+/**
+ * True when an error represents a WordPress REST permission denial (401/403),
+ * e.g. requesting context=edit with credentials that lack edit capability.
+ */
+export function isPermissionError(error: unknown): boolean {
+  if (error && typeof error === "object") {
+    const statusCode = (error as { statusCode?: unknown }).statusCode;
+    if (statusCode === 401 || statusCode === 403) {
+      return true;
+    }
+    const code = (error as { code?: unknown }).code;
+    if (code === "rest_forbidden" || code === "rest_forbidden_context") {
+      return true;
+    }
+  }
+  return /\b(401|403|rest_forbidden)\b/.test(getErrorMessage(error));
+}
+
 export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;

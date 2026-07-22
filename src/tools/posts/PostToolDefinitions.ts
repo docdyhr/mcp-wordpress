@@ -71,7 +71,8 @@ export const getPostTool: MCPTool = {
       },
       include_content: {
         type: "boolean",
-        description: "If true, includes the full HTML content of the post for editing. Default: false",
+        description:
+          "If true, includes the full post content as raw source (context=edit), preserving Gutenberg block markup for editing. Default: true",
       },
     },
     required: ["id"],

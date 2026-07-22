@@ -1,7 +1,7 @@
 import { WordPressClient } from "@/client/api.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
 import { CreatePageRequest, PostQueryParams as PageQueryParams, UpdatePageRequest } from "@/types/wordpress.js";
-import { getErrorMessage } from "@/utils/error.js";
+import { getErrorMessage, isPermissionError } from "@/utils/error.js";
 import { parseId, parseIdAndForce, toolParams } from "./params.js";
 
 /**
@@ -56,7 +56,8 @@ export class PageTools {
             },
             include_content: {
               type: "boolean",
-              description: "If true, includes the full HTML content of the page. Default: false",
+              description:
+                "If true, includes the full page content as raw source (context=edit), preserving Gutenberg block markup for editing. Default: false",
             },
           },
           required: ["id"],
@@ -172,7 +173,20 @@ export class PageTools {
     const id = parseId(params);
     const { include_content = false } = params as { include_content?: boolean };
     try {
-      const page = await client.getPage(id);
+      let page;
+      if (include_content) {
+        try {
+          page = await client.getPage(id, "edit");
+        } catch (error) {
+          if (!isPermissionError(error)) {
+            throw error;
+          }
+          // Credentials lack edit capability for context=edit — fall back to rendered content
+          page = await client.getPage(id, "view");
+        }
+      } else {
+        page = await client.getPage(id, "view");
+      }
       let content =
         `**Page Details (ID: ${page.id})**\n\n` +
         `- **Title:** ${page.title.rendered}\n` +
@@ -181,7 +195,7 @@ export class PageTools {
         `- **Date:** ${new Date(page.date).toLocaleString()}`;
 
       if (include_content) {
-        content += `\n\n**Content:**\n\n` + `${page.content.rendered || "(empty)"}`;
+        content += `\n\n**Content:**\n\n` + `${(page.content.raw ?? page.content.rendered) || "(empty)"}`;
       }
 
       return content;
