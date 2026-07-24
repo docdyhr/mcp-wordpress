@@ -91,6 +91,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: semantic-release
     if: needs.semantic-release.outputs.new-release-published == 'true'
+    # Backstop against the default 6h job timeout: the v3.3.19 release run hung for 6h0m
+    # after the linux/arm64 QEMU emulation crashed mid-`npm ci` ("uncaught target signal 4
+    # (Illegal instruction) - core dumped") — docker/build-push-action never returned, so
+    # nothing here failed fast and the retry step below never got a chance to run.
+    timeout-minutes: 75
     permissions:
       contents: read
       packages: write
@@ -171,6 +176,11 @@ jobs:
 
       - name: 🏗️ Build and Push Docker Image
         id: docker-build
+        # Bounded well under the job's 75m timeout-minutes so a hung/crashed emulation
+        # layer (see job-level comment above) fails fast and leaves time for the retry
+        # step below, instead of consuming the run's entire time budget.
+        timeout-minutes: 30
+        continue-on-error: true
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -189,7 +199,18 @@ jobs:
           sbom: true
 
       - name: 🔄 Retry Docker Build on Failure
-        if: failure() && steps.docker-build.outcome == 'failure'
+        # steps.docker-build.outcome is 'cancelled' (not 'failure') when it hits its own
+        # timeout-minutes, so checking only 'failure' here never fires for a hang/timeout —
+        # exactly what happened on the v3.3.19 release. Deliberately narrower than
+        # `!= 'success'`: that would also match 'skipped' (e.g. if Docker login fails
+        # earlier, docker-build never runs), which would attempt a build without its
+        # prerequisites and mask the real failure. continue-on-error above means this
+        # custom `if:` is evaluated regardless of docker-build's own outcome (its
+        # continue-on-error keeps the job's default success() check passing), and a
+        # step-level timeout below keeps a second hang from burning the rest of the
+        # job's budget.
+        if: steps.docker-build.outcome == 'failure' || steps.docker-build.outcome == 'cancelled'
+        timeout-minutes: 30
         uses: docker/build-push-action@v6
         with:
           context: .
