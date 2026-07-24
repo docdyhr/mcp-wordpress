@@ -201,10 +201,16 @@ jobs:
       - name: 🔄 Retry Docker Build on Failure
         # steps.docker-build.outcome is 'cancelled' (not 'failure') when it hits its own
         # timeout-minutes, so checking only 'failure' here never fires for a hang/timeout —
-        # exactly what happened on the v3.3.19 release. continue-on-error above plus this
-        # broader outcome check means a hang now gets one bounded retry instead of silently
-        # burning the rest of the job's timeout.
-        if: always() && steps.docker-build.outcome != 'success'
+        # exactly what happened on the v3.3.19 release. Deliberately narrower than
+        # `!= 'success'`: that would also match 'skipped' (e.g. if Docker login fails
+        # earlier, docker-build never runs), which would attempt a build without its
+        # prerequisites and mask the real failure. continue-on-error above means this
+        # custom `if:` is evaluated regardless of docker-build's own outcome (its
+        # continue-on-error keeps the job's default success() check passing), and a
+        # step-level timeout below keeps a second hang from burning the rest of the
+        # job's budget.
+        if: steps.docker-build.outcome == 'failure' || steps.docker-build.outcome == 'cancelled'
+        timeout-minutes: 30
         uses: docker/build-push-action@v6
         with:
           context: .
