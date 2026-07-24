@@ -209,8 +209,19 @@ jobs:
         # continue-on-error keeps the job's default success() check passing), and a
         # step-level timeout below keeps a second hang from burning the rest of the
         # job's budget.
+        #
+        # continue-on-error here too: on the v3.3.20 release both this step and the
+        # primary attempt above hit their 30m timeout (docker/build-push-action@v6's
+        # wrapper reliably hangs after its actual work finishes in this environment —
+        # not QEMU-crash-specific, since v3.3.20 hit it with no crash at all). Without
+        # continue-on-error, this step's genuine 'failure' outcome skipped Verify Docker
+        # Push Success below and reported the whole job as failed, even though the
+        # primary attempt's image had already pushed correctly. That verification step
+        # does a real `docker pull` against the registry, so it — not either build
+        # attempt's own exit status — should be the actual arbiter of success.
         if: steps.docker-build.outcome == 'failure' || steps.docker-build.outcome == 'cancelled'
         timeout-minutes: 30
+        continue-on-error: true
         uses: docker/build-push-action@v6
         with:
           context: .
