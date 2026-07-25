@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.22](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.21...v3.3.22) (2026-07-25)
+
+### 🐛 Bug Fixes
+
+* return raw Gutenberg block markup when full content is requested ([#206](https://github.com/docdyhr/mcp-wordpress/issues/206)) ([3dcdd2f](https://github.com/docdyhr/mcp-wordpress/commit/3dcdd2f3fe2933a74736368d9367bf93f6775719))
+
 ## [3.3.21](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.20...v3.3.21) (2026-07-25)
 
 ### 🐛 Bug Fixes
