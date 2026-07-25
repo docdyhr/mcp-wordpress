@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.21](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.20...v3.3.21) (2026-07-25)
+
+### 🐛 Bug Fixes
+
+* **ci:** make Docker retry step continue-on-error so real verification decides success ([#208](https://github.com/docdyhr/mcp-wordpress/issues/208)) ([4b9aae6](https://github.com/docdyhr/mcp-wordpress/commit/4b9aae6bf0215980f2deeaf6704d0715195bc0dc))
+
 ## [3.3.20](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.19...v3.3.20) (2026-07-24)
 
 ### 🐛 Bug Fixes
