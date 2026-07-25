@@ -250,10 +250,76 @@ describe("PostTools", () => {
     it("should get a post by ID", async () => {
       const result = await postTools.handleGetPost(mockClient, { id: 1 });
 
-      expect(mockClient.getPost).toHaveBeenCalledWith(1);
+      expect(mockClient.getPost).toHaveBeenCalledWith(1, "edit");
       expect(typeof result).toBe("string");
       expect(result).toContain("Test Post");
       expect(result).toContain("Full post content here");
+    });
+
+    it("should prefer raw content when available", async () => {
+      mockClient.getPost.mockResolvedValue({
+        id: 1,
+        title: { rendered: "Test Post" },
+        content: {
+          raw: "<!-- wp:paragraph --><p>Raw block markup</p><!-- /wp:paragraph -->",
+          rendered: "<p>Raw block markup</p>",
+        },
+        date: "2024-01-01T00:00:00",
+        modified: "2024-01-02T00:00:00",
+        status: "publish",
+        link: "https://test.wordpress.com/test-post",
+        author: 1,
+      });
+
+      const result = await postTools.handleGetPost(mockClient, { id: 1 });
+
+      expect(result).toContain("<!-- wp:paragraph -->");
+    });
+
+    it("should keep empty raw content instead of falling back to rendered HTML", async () => {
+      // raw="" means the stored post_content is genuinely empty; rendered may still
+      // contain filter-injected HTML which must not be surfaced as editable content.
+      mockClient.getPost.mockResolvedValue({
+        id: 1,
+        title: { rendered: "Test Post" },
+        content: {
+          raw: "",
+          rendered: "<p>Filter-injected advertisement</p>",
+        },
+        date: "2024-01-01T00:00:00",
+        modified: "2024-01-02T00:00:00",
+        status: "publish",
+        link: "https://test.wordpress.com/test-post",
+        author: 1,
+      });
+
+      const result = await postTools.handleGetPost(mockClient, { id: 1 });
+
+      expect(result).not.toContain("Filter-injected advertisement");
+    });
+
+    it("should fall back to context=view when context=edit is denied", async () => {
+      const forbidden = Object.assign(new Error("403 rest_forbidden_context"), { statusCode: 403 });
+      mockClient.getPost.mockImplementation((id, context) =>
+        context === "edit"
+          ? Promise.reject(forbidden)
+          : Promise.resolve({
+              id: 1,
+              title: { rendered: "Test Post" },
+              content: { rendered: "<p>Rendered only</p>" },
+              date: "2024-01-01T00:00:00",
+              modified: "2024-01-02T00:00:00",
+              status: "publish",
+              link: "https://test.wordpress.com/test-post",
+              author: 1,
+            }),
+      );
+
+      const result = await postTools.handleGetPost(mockClient, { id: 1 });
+
+      expect(mockClient.getPost).toHaveBeenCalledWith(1, "edit");
+      expect(mockClient.getPost).toHaveBeenCalledWith(1, "view");
+      expect(result).toContain("<p>Rendered only</p>");
     });
 
     it("should handle missing ID parameter", async () => {

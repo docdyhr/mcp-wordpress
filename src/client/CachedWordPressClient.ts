@@ -123,8 +123,8 @@ export class CachedWordPressClient extends WordPressClient {
   /**
    * Get single post with caching
    */
-  async getPost(id: number): Promise<WordPressPost> {
-    return await this.request<WordPressPost>("GET", `posts/${id}`);
+  async getPost(id: number, context: "view" | "embed" | "edit" = "view"): Promise<WordPressPost> {
+    return await this.request<WordPressPost>("GET", `posts/${id}?context=${context}`);
   }
 
   /**

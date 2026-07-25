@@ -172,10 +172,85 @@ describe("PageTools", () => {
     it("should get a page by ID", async () => {
       const result = await pageTools.handleGetPage(mockClient, { id: 1 });
 
-      expect(mockClient.getPage).toHaveBeenCalledWith(1);
+      expect(mockClient.getPage).toHaveBeenCalledWith(1, "view");
       expect(typeof result).toBe("string");
       expect(result).toContain("Test Page");
       expect(result).toContain("Page Details (ID: 1)");
+    });
+
+    it("should fetch with context=edit and prefer raw content when include_content is true", async () => {
+      mockClient.getPage.mockResolvedValue({
+        id: 1,
+        title: { rendered: "Test Page" },
+        content: {
+          raw: "<!-- wp:paragraph --><p>Raw block markup</p><!-- /wp:paragraph -->",
+          rendered: "<p>Raw block markup</p>",
+        },
+        date: "2024-01-01T00:00:00",
+        status: "publish",
+        link: "https://test.wordpress.com/test-page",
+      });
+
+      const result = await pageTools.handleGetPage(mockClient, { id: 1, include_content: true });
+
+      expect(mockClient.getPage).toHaveBeenCalledWith(1, "edit");
+      expect(result).toContain("<!-- wp:paragraph -->");
+    });
+
+    it("should fall back to rendered content when raw is absent", async () => {
+      const result = await pageTools.handleGetPage(mockClient, { id: 1, include_content: true });
+
+      expect(result).toContain("<p>Full page content here</p>");
+    });
+
+    it("should keep empty raw content instead of falling back to rendered HTML", async () => {
+      mockClient.getPage.mockResolvedValue({
+        id: 1,
+        title: { rendered: "Test Page" },
+        content: {
+          raw: "",
+          rendered: "<p>Filter-injected advertisement</p>",
+        },
+        date: "2024-01-01T00:00:00",
+        status: "publish",
+        link: "https://test.wordpress.com/test-page",
+      });
+
+      const result = await pageTools.handleGetPage(mockClient, { id: 1, include_content: true });
+
+      expect(result).not.toContain("Filter-injected advertisement");
+      expect(result).toContain("(empty)");
+    });
+
+    it("should fall back to context=view when context=edit is denied", async () => {
+      const forbidden = Object.assign(new Error("403 rest_forbidden_context"), { statusCode: 403 });
+      mockClient.getPage.mockImplementation((id, context) =>
+        context === "edit"
+          ? Promise.reject(forbidden)
+          : Promise.resolve({
+              id: 1,
+              title: { rendered: "Test Page" },
+              content: { rendered: "<p>Rendered only</p>" },
+              date: "2024-01-01T00:00:00",
+              status: "publish",
+              link: "https://test.wordpress.com/test-page",
+            }),
+      );
+
+      const result = await pageTools.handleGetPage(mockClient, { id: 1, include_content: true });
+
+      expect(mockClient.getPage).toHaveBeenCalledWith(1, "edit");
+      expect(mockClient.getPage).toHaveBeenCalledWith(1, "view");
+      expect(result).toContain("<p>Rendered only</p>");
+    });
+
+    it("should not retry non-permission errors with context=view", async () => {
+      mockClient.getPage.mockRejectedValue(new Error("Page not found"));
+
+      await expect(pageTools.handleGetPage(mockClient, { id: 1, include_content: true })).rejects.toThrow(
+        "Failed to get page: Page not found",
+      );
+      expect(mockClient.getPage).toHaveBeenCalledTimes(1);
     });
 
     it("should handle missing ID parameter", async () => {

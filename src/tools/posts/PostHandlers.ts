@@ -8,7 +8,7 @@
 
 import { WordPressClient } from "@/client/api.js";
 import { CreatePostRequest, PostQueryParams, PostStatus, UpdatePostRequest, WordPressPost } from "@/types/wordpress.js";
-import { getErrorMessage } from "@/utils/error.js";
+import { getErrorMessage, isPermissionError } from "@/utils/error.js";
 import { ErrorHandlers } from "@/utils/enhancedError.js";
 import { validateId, validatePaginationParams, validatePostParams } from "@/utils/validation.js";
 import { sanitizeHtml } from "@/utils/validation/security.js";
@@ -205,7 +205,23 @@ export async function handleGetPost(
 ): Promise<WordPressPost | string> {
   try {
     const postId = validateId(params.id, "post ID");
-    const post = await client.getPost(postId);
+    // Only include full content if explicitly requested (for backward compatibility, default to true).
+    // When content is wanted, fetch with context=edit so content.raw (Gutenberg block markup) is available.
+    const includeContent = params.include_content !== false;
+    let post;
+    if (includeContent) {
+      try {
+        post = await client.getPost(postId, "edit");
+      } catch (error) {
+        if (!isPermissionError(error)) {
+          throw error;
+        }
+        // Credentials lack edit capability for context=edit — fall back to rendered content
+        post = await client.getPost(postId, "view");
+      }
+    } else {
+      post = await client.getPost(postId, "view");
+    }
 
     // Get additional metadata for comprehensive response
     const [author, categories, tags] = await Promise.all([
@@ -241,7 +257,7 @@ export async function handleGetPost(
       minute: "2-digit",
     });
 
-    const content = post.content?.rendered || "";
+    const content = post.content?.raw ?? post.content?.rendered ?? "";
     const excerpt = post.excerpt?.rendered ? sanitizeHtml(post.excerpt.rendered).trim() : "";
     const wordCount = sanitizeHtml(content).split(/\s+/).filter(Boolean).length;
 
@@ -268,8 +284,6 @@ export async function handleGetPost(
       response += `\n## Excerpt\n${excerpt}\n`;
     }
 
-    // Only include full content if explicitly requested (for backward compatibility, default to true)
-    const includeContent = params.include_content !== false;
     if (content && includeContent) {
       response += `\n## Content\n${content}\n`;
     }
