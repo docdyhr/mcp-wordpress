@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.20](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.19...v3.3.20) (2026-07-24)
+
+### 🐛 Bug Fixes
+
+* **ci:** bound docker-publish job timeout, fix dead retry-on-hang path ([#207](https://github.com/docdyhr/mcp-wordpress/issues/207)) ([5ac7cf6](https://github.com/docdyhr/mcp-wordpress/commit/5ac7cf6655ce44b22b5f2e6424113facd6da0911))
+
 ## [3.3.19](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.18...v3.3.19) (2026-07-21)
 
 ### 🐛 Bug Fixes
