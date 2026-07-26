@@ -421,6 +421,18 @@ describe("PostTools", () => {
         }),
       );
     });
+
+    it("sanitizes dangerous content before sending to the API (regression: validatePostParams's sanitized result used to be discarded)", async () => {
+      await postTools.handleCreatePost(mockClient, {
+        title: "New Post",
+        content: '<p>Welcome</p><script>alert(1)</script><img src=x onerror="alert(2)">',
+      });
+
+      const sentContent = mockClient.createPost.mock.calls[0][0].content;
+      expect(sentContent).not.toContain("<script");
+      expect(sentContent).not.toContain("onerror");
+      expect(sentContent).toContain("Welcome");
+    });
   });
 
   describe("handleUpdatePost", () => {
@@ -510,6 +522,19 @@ describe("PostTools", () => {
           featured_media: 0,
         }),
       );
+    });
+
+    it("sanitizes dangerous content before sending to the API (regression: validatePostParams's sanitized result used to be discarded)", async () => {
+      await postTools.handleUpdatePost(mockClient, {
+        id: 1,
+        title: "Updated Post",
+        content: '<p>Updated</p><script>alert(1)</script><img src=x onerror="alert(2)">',
+      });
+
+      const sentContent = mockClient.updatePost.mock.calls[0][0].content;
+      expect(sentContent).not.toContain("<script");
+      expect(sentContent).not.toContain("onerror");
+      expect(sentContent).toContain("Updated");
     });
   });
 

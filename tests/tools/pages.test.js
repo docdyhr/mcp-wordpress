@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import { PageTools } from "@/tools/pages.js";
+import { WordPressAPIError } from "@/types/client.js";
 
 describe("PageTools", () => {
   let pageTools;
@@ -185,6 +186,16 @@ describe("PageTools", () => {
       await expect(pageTools.handleListPages(mockClient, {})).rejects.toThrow("Failed to list pages");
     });
 
+    it("preserves statusCode/code from a typed client error instead of discarding them", async () => {
+      mockClient.getPages.mockRejectedValueOnce(new WordPressAPIError("Not logged in", 401, "authentication_failed"));
+
+      const error = await pageTools.handleListPages(mockClient, {}).catch((e) => e);
+
+      expect(error).toBeInstanceOf(WordPressAPIError);
+      expect(error.statusCode).toBe(401);
+      expect(error.code).toBe("authentication_failed");
+    });
+
     it("should handle per_page parameter", async () => {
       const mockPages = Array.from({ length: 20 }, (_, i) => ({
         id: i + 1,
@@ -363,6 +374,26 @@ describe("PageTools", () => {
       });
       expect(result).toContain("Minimal Page");
     });
+
+    it("sanitizes dangerous content before sending to the API (defense-in-depth: pages have no other sanitization layer)", async () => {
+      mockClient.createPage.mockResolvedValueOnce({
+        id: 126,
+        title: { rendered: "Page" },
+        content: { rendered: "" },
+        status: "publish",
+        link: "https://test-site.com/page",
+      });
+
+      await pageTools.handleCreatePage(mockClient, {
+        title: "Page",
+        content: '<p>Hello</p><svg><animate onbegin="alert(1)"></animate></svg>',
+      });
+
+      const sentContent = mockClient.createPage.mock.calls[0][0].content;
+      expect(sentContent).not.toContain("<svg");
+      expect(sentContent).not.toContain("onbegin");
+      expect(sentContent).toContain("Hello");
+    });
   });
 
   describe("handleUpdatePage", () => {
@@ -431,6 +462,20 @@ describe("PageTools", () => {
         status: "publish",
       });
       expect(result).toContain("✅ Page 2 updated successfully");
+    });
+
+    it("sanitizes dangerous content before sending to the API when content is included in an update", async () => {
+      mockClient.updatePage.mockResolvedValueOnce({ id: 3, title: { rendered: "Page" }, status: "publish" });
+
+      await pageTools.handleUpdatePage(mockClient, {
+        id: 3,
+        content: '<p>Edited</p><svg><animate onbegin="alert(1)"></animate></svg>',
+      });
+
+      const sentContent = mockClient.updatePage.mock.calls[0][0].content;
+      expect(sentContent).not.toContain("<svg");
+      expect(sentContent).not.toContain("onbegin");
+      expect(sentContent).toContain("Edited");
     });
   });
 

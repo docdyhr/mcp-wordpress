@@ -49,12 +49,56 @@ describe("SecuritySchemas", () => {
       expect(() => SecuritySchemas.safeString.parse("onfocus=alert(1)")).toThrow();
     });
 
+    it("does not false-positive on ordinary words starting with 'on' before an '=' (e.g. URL query params)", () => {
+      // A generic `\bon[a-z]+\s*=` wildcard would also match harmless strings like these —
+      // the event-handler check is an enumerated list of real DOM handler names specifically
+      // to avoid rejecting legitimate input such as URL query strings.
+      expect(SecuritySchemas.safeString.parse("?online=true")).toBe("?online=true");
+      expect(SecuritySchemas.safeString.parse("onboarding=complete")).toBe("onboarding=complete");
+      expect(SecuritySchemas.safeString.parse("ongoing=1")).toBe("ongoing=1");
+    });
+
     it("rejects strings over 10000 chars", () => {
       expect(() => SecuritySchemas.safeString.parse("a".repeat(10001))).toThrow();
     });
 
     it("accepts strings at max length", () => {
       expect(SecuritySchemas.safeString.parse("a".repeat(10000))).toHaveLength(10000);
+    });
+
+    it("rejects the same malicious payload deterministically across repeated calls (regression: shared global regex lastIndex)", () => {
+      // SCRIPT_TAG_PATTERN/SCRIPT_END_PATTERN used to be module-level singletons with the
+      // `g` flag, and `.test()` on a global regex mutates `lastIndex` as a side effect — so
+      // repeated validation of the identical string used to flip between pass/fail depending
+      // on how many prior calls had happened. Every one of these must reject.
+      for (let i = 0; i < 20; i++) {
+        expect(SecuritySchemas.safeString.safeParse("<script>alert(1)</script>").success).toBe(false);
+      }
+    });
+
+    it("rejects onclick and other event handlers beyond the original onerror/onload/onfocus list", () => {
+      expect(() => SecuritySchemas.safeString.parse('<div onclick="alert(1)">x</div>')).toThrow();
+      expect(() => SecuritySchemas.safeString.parse('<body onmouseover="alert(1)">x</body>')).toThrow();
+    });
+
+    it("rejects SVG SMIL animation event handlers (regression: security review found onbegin/onend/onrepeat were missing from the enumerated list)", () => {
+      // <svg><animate onbegin=...> is a well-documented blocklist-bypass technique: SMIL
+      // animation events fire automatically (no click needed) and are routinely missed by
+      // filters built around common DOM events like onclick/onerror/onload.
+      expect(() =>
+        SecuritySchemas.safeString.parse(
+          "<svg><animate onbegin=alert(1) attributeName=x dur=1s repeatCount=indefinite></animate></svg>",
+        ),
+      ).toThrow();
+      expect(() => SecuritySchemas.safeString.parse("<svg><animate onend=alert(1)></animate></svg>")).toThrow();
+      expect(() => SecuritySchemas.safeString.parse("<svg><animate onrepeat=alert(1)></animate></svg>")).toThrow();
+    });
+
+    it("rejects onfocusin/onfocusout/onbeforeinput/onauxclick (regression: also missing from the original enumerated list)", () => {
+      expect(() => SecuritySchemas.safeString.parse("<input onfocusin=alert(1)>")).toThrow();
+      expect(() => SecuritySchemas.safeString.parse("<input onfocusout=alert(1)>")).toThrow();
+      expect(() => SecuritySchemas.safeString.parse("<input onbeforeinput=alert(1)>")).toThrow();
+      expect(() => SecuritySchemas.safeString.parse("<div onauxclick=alert(1)>")).toThrow();
     });
   });
 
@@ -73,6 +117,17 @@ describe("SecuritySchemas", () => {
 
     it("rejects strings over 100000 chars", () => {
       expect(() => SecuritySchemas.htmlContent.parse("a".repeat(100001))).toThrow();
+    });
+
+    it("rejects onerror event handlers (regression: literal-substring check never matched real payloads)", () => {
+      // The previous check was `val.includes("on[a-z]+=")` — a literal 9-character substring
+      // that real payloads never contain — instead of an actual regex test, so it silently
+      // never rejected anything.
+      expect(() => SecuritySchemas.htmlContent.parse("<img src=x onerror=alert(1)>")).toThrow();
+    });
+
+    it("rejects onclick and other event handlers", () => {
+      expect(() => SecuritySchemas.htmlContent.parse('<div onclick="alert(1)">x</div>')).toThrow();
     });
   });
 
@@ -146,6 +201,35 @@ describe("SecuritySchemas", () => {
 
     it("rejects javascript: URLs", () => {
       expect(() => SecuritySchemas.wpContent.parse('<img src="javascript:void(0)">')).toThrow();
+    });
+
+    it("rejects event handlers embedded in content", () => {
+      expect(() => SecuritySchemas.wpContent.parse('<p onclick="alert(1)">Click me</p>')).toThrow();
+    });
+
+    it("rejects SVG SMIL animation event handlers in WordPress content (regression: security review finding, GHSA-class blocklist-bypass)", () => {
+      // This is the exact vector a security review flagged in the content/excerpt path
+      // (wp_create_post/wp_update_post/wp_create_comment/wp_update_comment): SVG SMIL events
+      // fire automatically with no user interaction, and were missing from the original
+      // enumerated event-handler list.
+      expect(() =>
+        SecuritySchemas.wpContent.parse(
+          "<p>Welcome</p><svg><animate onbegin=alert(document.cookie) attributeName=x dur=1s repeatCount=indefinite></animate></svg>",
+        ),
+      ).toThrow();
+    });
+
+    it("accepts legitimate Gutenberg block markup (must not be blindly stripped)", () => {
+      const gutenbergContent =
+        "<!-- wp:paragraph --><p>Hello world</p><!-- /wp:paragraph -->" +
+        '<!-- wp:image {"id":42} --><figure class="wp-block-image"><img src="https://example.com/photo.jpg" alt="A photo"/></figure><!-- /wp:image -->';
+
+      expect(SecuritySchemas.wpContent.parse(gutenbergContent)).toBe(gutenbergContent);
+    });
+
+    it("accepts data: URLs (unlike safeString/htmlContent — legitimate in embedded block content)", () => {
+      const content = '<img src="data:image/png;base64,iVBORw0KGgo=" alt="inline image">';
+      expect(SecuritySchemas.wpContent.parse(content)).toBe(content);
     });
   });
 

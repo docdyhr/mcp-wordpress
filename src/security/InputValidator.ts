@@ -12,10 +12,66 @@ const logger = LoggerFactory.security();
 const URL_PATTERN = /^https?:\/\/[^\s<>'"{}|\\^`\[\]]+$/;
 const EMAIL_PATTERN = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const SLUG_PATTERN = /^[a-z0-9-]+$/;
-// Patterns for detecting dangerous content (used for validation, not sanitization)
-const SCRIPT_TAG_PATTERN = /<script/gi;
-const SCRIPT_END_PATTERN = /<\/script/gi;
+// Patterns for detecting dangerous content (used for validation, not sanitization).
+// Deliberately NOT global (`g`/`y`) — these are only ever used with `.test()` for a boolean
+// check, and a global flag makes `.test()` mutate `lastIndex` on the shared instance below,
+// so repeated calls against the same (or even identical) input nondeterministically flip
+// between matching and not matching. Use a fresh regex literal (safe, no shared state) or one
+// of these non-global constants; never add `g`/`y` back without also switching every caller
+// off `.test()`.
+const SCRIPT_TAG_PATTERN = /<script/i;
+const SCRIPT_END_PATTERN = /<\/script/i;
+const JAVASCRIPT_URL_PATTERN = /javascript\s*:/i;
+const DATA_URL_PATTERN = /data\s*:/i;
+// Matches a real event-handler attribute (onerror=, onclick=, onload=, ...). The previous
+// version of this check used `val.includes("on[a-z]+=")`, which looks for that literal
+// 9-character substring — a string that real payloads never contain — instead of compiling
+// the pattern as a regex, so it silently never matched anything.
+//
+// Deliberately an enumerated list of actual DOM event-handler attribute names rather than a
+// generic `\bon[a-z]+\s*=` wildcard: the wildcard also matches ordinary words that happen to
+// start with "on" and appear before an "=" — e.g. a URL query string like `?online=true` or
+// `?onboarding=1` — which would reject legitimate, harmless input.
+//
+// Includes the SVG SMIL animation handlers (begin/end/repeat — e.g. `<svg><animate onbegin=...>`,
+// a well-known blocklist-bypass technique since generic filters built around common DOM events
+// routinely miss them) and the newer focusin/focusout/beforeinput/beforetoggle/auxclick handlers,
+// alongside the original DOM event list. A security review of this exact pattern flagged the
+// initial version for omitting these — keep this comprehensive rather than trimming it back to
+// "common" handlers only.
+const EVENT_HANDLER_PATTERN =
+  /\bon(?:error|load|click|dblclick|auxclick|contextmenu|mouse(?:over|out|enter|leave|down|up|move)|focus|focusin|focusout|blur|key(?:down|up|press)|submit|change|input|beforeinput|drag(?:start|end|over|enter|leave)?|drop|wheel|scroll|resize|animation(?:start|end|iteration)|transitionend|begin|end|repeat|pointer(?:down|up|move|over|out|enter|leave|cancel)|touch(?:start|end|move|cancel)|beforeunload|beforetoggle|unload|popstate|hashchange|message|copy|cut|paste|toggle|reset|select|abort|canplay|ended|pause|play|seeked|seeking|stalled|suspend|waiting|invalid|search)\s*=/i;
 const SQL_INJECTION_PATTERN = /('|(\\')|(;)|(\\x00)|(\\n)|(\\r)|(\\x1a)|(\\x22)|(\\x27)|(\\x5c)|(\\x60))/i;
+
+/**
+ * True when a string contains an unmistakable XSS vector (script tag, javascript:/data: URL
+ * scheme, or an inline event-handler attribute). Intended for general free-text MCP tool
+ * parameters (titles, search queries, usernames, etc.) — NOT WordPress content fields, which
+ * legitimately contain rich HTML/Gutenberg block markup; use isUnsafeWordPressContent instead.
+ */
+export function isUnsafePlainText(value: string): boolean {
+  return (
+    SCRIPT_TAG_PATTERN.test(value) ||
+    SCRIPT_END_PATTERN.test(value) ||
+    JAVASCRIPT_URL_PATTERN.test(value) ||
+    DATA_URL_PATTERN.test(value) ||
+    EVENT_HANDLER_PATTERN.test(value)
+  );
+}
+
+/**
+ * True when WordPress post/page/comment content contains an unmistakable XSS vector. Narrower
+ * than isUnsafePlainText: does not reject `data:` URLs (legitimate in embedded block content)
+ * and carries no length cap of its own — callers apply their own maxLength.
+ */
+export function isUnsafeWordPressContent(value: string): boolean {
+  return (
+    SCRIPT_TAG_PATTERN.test(value) ||
+    SCRIPT_END_PATTERN.test(value) ||
+    JAVASCRIPT_URL_PATTERN.test(value) ||
+    EVENT_HANDLER_PATTERN.test(value)
+  );
+}
 
 /**
  * Security validation schemas
@@ -25,20 +81,13 @@ export const SecuritySchemas = {
   safeString: z
     .string()
     .max(10000, "String too long")
-    .refine((val) => !SCRIPT_TAG_PATTERN.test(val) && !SCRIPT_END_PATTERN.test(val), "Script tags not allowed")
-    .refine((val) => !/javascript\s*:/i.test(val), "JavaScript URLs not allowed")
-    .refine((val) => !/data\s*:/i.test(val), "Data URLs not allowed")
-    .refine((val) => !val.includes("onerror="), "Event handlers not allowed")
-    .refine((val) => !val.includes("onload="), "Event handlers not allowed")
-    .refine((val) => !val.includes("onfocus="), "Event handlers not allowed"),
+    .refine((val) => !isUnsafePlainText(val), "Unsafe content (script tag, javascript:/data: URL, or event handler)"),
 
   // HTML content with basic sanitization
   htmlContent: z
     .string()
     .max(100000, "Content too long")
-    .refine((val) => !SCRIPT_TAG_PATTERN.test(val) && !SCRIPT_END_PATTERN.test(val), "Script tags not allowed")
-    .refine((val) => !/javascript\s*:/i.test(val), "JavaScript URLs not allowed")
-    .refine((val) => !val.includes("on[a-z]+="), "Event handlers not allowed"),
+    .refine((val) => !isUnsafePlainText(val), "Unsafe content (script tag, javascript:/data: URL, or event handler)"),
 
   // URL validation
   url: z
@@ -62,15 +111,14 @@ export const SecuritySchemas = {
     .max(100, "Slug too long")
     .regex(SLUG_PATTERN, "Slug can only contain lowercase letters, numbers, and hyphens"),
 
-  // WordPress post/page content
+  // WordPress post/page/comment content: deliberately more permissive than safeString/
+  // htmlContent (no data: URL restriction, no length cap of its own) since legitimate
+  // Gutenberg block markup and rich content must not be blindly stripped — see
+  // isUnsafeWordPressContent's docstring for the exact, narrower boundary this enforces.
   wpContent: z
     .string()
     .max(1000000, "Content too long")
-    .refine(
-      (val) => !SCRIPT_TAG_PATTERN.test(val) && !SCRIPT_END_PATTERN.test(val),
-      "Script tags not allowed in content",
-    )
-    .refine((val) => !/javascript\s*:/i.test(val), "JavaScript URLs not allowed"),
+    .refine((val) => !isUnsafeWordPressContent(val), "Unsafe content (script tag, javascript: URL, or event handler)"),
 
   // Site ID validation
   siteId: z

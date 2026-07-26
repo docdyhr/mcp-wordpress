@@ -1,7 +1,8 @@
 import { WordPressClient } from "@/client/api.js";
 import { MCPToolSchema } from "@/types/mcp.js";
 import { CommentQueryParams, CreateCommentRequest, UpdateCommentRequest } from "@/types/wordpress.js";
-import { getErrorMessage } from "@/utils/error.js";
+import { preserveToolError } from "@/utils/error.js";
+import { sanitizeHtml } from "@/utils/validation/security.js";
 import { parseId, parseIdAndForce, toolParams } from "./params.js";
 
 /**
@@ -176,7 +177,7 @@ export class CommentTools {
           .join("\n");
       return content;
     } catch (_error) {
-      throw new Error(`Failed to list comments: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to list comments", _error);
     }
   }
 
@@ -193,27 +194,35 @@ export class CommentTools {
         `- **Content:** ${comment.content.rendered}`;
       return content;
     } catch (_error) {
-      throw new Error(`Failed to get comment: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to get comment", _error);
     }
   }
 
   public async handleCreateComment(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     const createParams = toolParams<CreateCommentRequest>(params);
     try {
+      // Defense-in-depth: the Zod schema at the MCP tool boundary (ToolRegistry.ts) blocks
+      // known-dangerous content (script tags, event handlers), but this allowlist-based
+      // sanitizer is a second, independent layer — it strips any tag/attribute not on its
+      // allowlist outright, rather than trying to enumerate every dangerous one.
+      createParams.content = sanitizeHtml(createParams.content);
       const comment = await client.createComment(createParams);
       return `✅ Comment created successfully with ID: ${comment.id}`;
     } catch (_error) {
-      throw new Error(`Failed to create comment: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to create comment", _error);
     }
   }
 
   public async handleUpdateComment(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     try {
       const updateParams = toolParams<UpdateCommentRequest & { id: number }>(params);
+      if (updateParams.content !== undefined) {
+        updateParams.content = sanitizeHtml(updateParams.content);
+      }
       const comment = await client.updateComment(updateParams);
       return `✅ Comment ${comment.id} updated successfully. New status: ${comment.status}.`;
     } catch (_error) {
-      throw new Error(`Failed to update comment: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to update comment", _error);
     }
   }
 
@@ -224,7 +233,7 @@ export class CommentTools {
       const action = force ? "permanently deleted" : "moved to trash";
       return `✅ Comment ${id} has been ${action}`;
     } catch (_error) {
-      throw new Error(`Failed to delete comment: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to delete comment", _error);
     }
   }
 
@@ -237,7 +246,7 @@ export class CommentTools {
       });
       return `✅ Comment ${comment.id} has been approved.`;
     } catch (_error) {
-      throw new Error(`Failed to approve comment: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to approve comment", _error);
     }
   }
 
@@ -250,7 +259,7 @@ export class CommentTools {
       });
       return `✅ Comment ${comment.id} has been marked as spam.`;
     } catch (_error) {
-      throw new Error(`Failed to mark comment as spam: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to mark comment as spam", _error);
     }
   }
 }

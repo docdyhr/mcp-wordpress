@@ -1,11 +1,19 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { WordPressClient } from "@/client/api.js";
+import { WordPressAPIError } from "@/types/client.js";
 import { getErrorMessage } from "@/utils/error.js";
 import { EnhancedError, ErrorHandlers } from "@/utils/enhancedError.js";
 import * as Tools from "@/tools/index.js";
 import { z } from "zod";
 import type { MCPToolSchema, JSONSchemaProperty } from "@/types/mcp.js";
+import { isUnsafePlainText, isUnsafeWordPressContent } from "@/security/InputValidator.js";
+
+// Parameter names that carry WordPress post/page/comment body content — these legitimately
+// contain rich HTML and Gutenberg block markup, so they're validated against the narrower
+// isUnsafeWordPressContent check instead of the general isUnsafePlainText check applied to
+// every other free-text string parameter (titles, slugs, search queries, URLs, etc.).
+const WORDPRESS_CONTENT_PARAM_NAMES = new Set(["content", "excerpt"]);
 
 /**
  * Interface for tool definition
@@ -256,7 +264,7 @@ export class ToolRegistry {
       const required = tool.inputSchema.required || [];
 
       for (const [propName, propDef] of Object.entries(properties)) {
-        let zodType = this.getZodTypeForProperty(propDef);
+        let zodType = this.getZodTypeForProperty(propDef, propName);
 
         if (propDef.description) {
           zodType = zodType.describe(propDef.description);
@@ -298,9 +306,10 @@ export class ToolRegistry {
   }
 
   /**
-   * Get appropriate Zod type for inputSchema property definition
+   * Get appropriate Zod type for inputSchema property definition. `propName` (when known) picks
+   * the right security boundary for string properties — see WORDPRESS_CONTENT_PARAM_NAMES.
    */
-  private getZodTypeForProperty(propDef: JSONSchemaProperty): z.ZodType {
+  private getZodTypeForProperty(propDef: JSONSchemaProperty, propName?: string): z.ZodType {
     // Handle enum types
     if (propDef.enum && propDef.enum.length > 0) {
       const enumValues = propDef.enum as [string | number, ...(string | number)[]];
@@ -321,7 +330,7 @@ export class ToolRegistry {
       if (propDef.properties) {
         const shape: Record<string, z.ZodType> = {};
         for (const [key, nestedDef] of Object.entries(propDef.properties)) {
-          let nestedType = this.getZodTypeForProperty(nestedDef).optional();
+          let nestedType = this.getZodTypeForProperty(nestedDef, key).optional();
           if (nestedDef.description) {
             nestedType = nestedType.describe(nestedDef.description);
           }
@@ -339,7 +348,21 @@ export class ToolRegistry {
         if (propDef.minLength !== undefined) schema = schema.min(propDef.minLength);
         if (propDef.maxLength !== undefined) schema = schema.max(propDef.maxLength);
         if (propDef.pattern !== undefined) schema = schema.regex(new RegExp(propDef.pattern));
-        return schema;
+
+        // Route WordPress content fields (post/page/comment body text — legitimately rich
+        // HTML/Gutenberg markup) through the narrower content-specific check; every other
+        // free-text parameter (titles, slugs, search queries, URLs, ...) gets the stricter
+        // general-purpose check. Both reject script tags, javascript: URLs, and real event
+        // handler attributes; only the general check additionally rejects data: URLs.
+        return propName !== undefined && WORDPRESS_CONTENT_PARAM_NAMES.has(propName)
+          ? schema.refine(
+              (val) => !isUnsafeWordPressContent(val),
+              "Unsafe content: script tag, javascript: URL, or event handler attribute",
+            )
+          : schema.refine(
+              (val) => !isUnsafePlainText(val),
+              "Unsafe content: script tag, javascript:/data: URL, or event handler attribute",
+            );
       }
       case "number": {
         let schema = z.number();
@@ -357,10 +380,25 @@ export class ToolRegistry {
   /**
    * Get appropriate Zod type for parameter definition (old format)
    */
-  private getZodTypeForParameter(param: { type?: string; required?: boolean; [key: string]: unknown }): z.ZodType {
+  private getZodTypeForParameter(param: {
+    name?: string;
+    type?: string;
+    required?: boolean;
+    [key: string]: unknown;
+  }): z.ZodType {
     switch (param.type) {
-      case "string":
-        return z.string();
+      case "string": {
+        const schema = z.string();
+        return param.name !== undefined && WORDPRESS_CONTENT_PARAM_NAMES.has(param.name)
+          ? schema.refine(
+              (val) => !isUnsafeWordPressContent(val),
+              "Unsafe content: script tag, javascript: URL, or event handler attribute",
+            )
+          : schema.refine(
+              (val) => !isUnsafePlainText(val),
+              "Unsafe content: script tag, javascript:/data: URL, or event handler attribute",
+            );
+      }
       case "number":
         return z.number();
       case "boolean":
@@ -385,13 +423,17 @@ export class ToolRegistry {
   }
 
   /**
-   * Check if error is authentication-related
+   * Check if error is authentication-related.
+   *
+   * Checks `statusCode` on the real `WordPressAPIError` hierarchy (`src/types/client.ts`),
+   * not `error.response.status`/`error.code === "WORDPRESS_AUTH_ERROR"` — those never match
+   * anything the client pipeline actually throws (it sets `statusCode` directly on the error,
+   * with no `.response` wrapper, and uses `"authentication_failed"` as the code). Checking
+   * `statusCode` rather than `instanceof AuthenticationError` also catches a bare 401 on a
+   * non-media endpoint, which the client throws as a plain `WordPressAPIError`, not the
+   * `AuthenticationError` subclass (that subtype is only used for media-upload 401/403).
    */
   private isAuthenticationError(error: unknown): boolean {
-    const errorObj = error as { response?: { status?: number }; code?: string };
-    if (errorObj?.response?.status && [401, 403].includes(errorObj.response.status)) {
-      return true;
-    }
-    return errorObj?.code === "WORDPRESS_AUTH_ERROR";
+    return error instanceof WordPressAPIError && (error.statusCode === 401 || error.statusCode === 403);
   }
 }
