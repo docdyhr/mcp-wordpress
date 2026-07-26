@@ -102,8 +102,7 @@ jobs:
         run: npm run lint
 
       - name: Security audit
-        run: npm audit --production --audit-level moderate
-        continue-on-error: true
+        run: node scripts/security-audit-gate.js
 
   # Security scanning
   security:

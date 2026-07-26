@@ -58,13 +58,11 @@ export WORDPRESS_APP_PASSWORD="xxxx xxxx xxxx xxxx xxxx xxxx"
 ### Authentication Security
 
 1. **Use Application Passwords** (Recommended)
-
    - WordPress 5.6+ built-in feature
    - Separate passwords for each application
    - Easy to revoke without affecting main account
 
 2. **Rotate Credentials Regularly**
-
    - Set up automated rotation for production environments
    - Use different credentials for development/staging/production
    - Immediately revoke compromised credentials
@@ -95,13 +93,11 @@ if (!safePath.startsWith(allowedBasePath)) {
 ### API Security
 
 1. **Error Handling**
-
    - Never expose internal error details
    - Log errors server-side for debugging
    - Return generic error messages to clients
 
 2. **Request Limits**
-
    - Implement request size limits
    - Set appropriate timeouts
    - Validate Content-Type headers
@@ -267,19 +263,16 @@ If you discover a security vulnerability:
 The repository includes comprehensive automated security workflows:
 
 1. **CodeQL Analysis** (`.github/workflows/codeql-analysis.yml`)
-
    - Static code analysis for vulnerabilities
    - Daily scheduled scans
    - Custom security queries
 
 2. **Dependency Review** (`.github/workflows/dependency-review.yml`)
-
    - PR-based dependency security analysis
    - License compliance checking
    - Supply chain security validation
 
 3. **Secret Scanning** (`.github/workflows/secret-scanning.yml`)
-
    - TruffleHog and GitLeaks integration
    - Custom pattern detection
    - Environment file analysis
@@ -293,9 +286,27 @@ The repository includes comprehensive automated security workflows:
 
 ![Security Badge](https://img.shields.io/badge/security-monitored-green)
 ![Dependencies](https://img.shields.io/badge/dependencies-up%20to%20date-green)
-![Vulnerabilities](https://img.shields.io/badge/vulnerabilities-0-green)
+![Vulnerabilities](https://img.shields.io/badge/vulnerabilities-1%20reviewed%20exception-yellow)
 
 ## 🔍 Known Security Issues
+
+### Production Dependencies
+
+**@hono/node-server Path Traversal (GHSA-frvp-7c67-39w9)**
+
+- **Severity:** Moderate (CVSS 5.9)
+- **Location:** `@modelcontextprotocol/sdk` → `@hono/node-server@<2.0.5`
+- **Impact:** Path traversal in Hono's `serve-static` feature on Windows via an encoded backslash (`%5C`)
+- **Status:** Reviewed, accepted exception — tracked in [`security-exceptions.json`](./security-exceptions.json),
+  enforced by [`scripts/security-audit-gate.js`](./scripts/security-audit-gate.js) (`npm run security:scan`), which
+  fails the build once the exception's `reviewBy` date passes
+- **Mitigation:**
+  - This server only ever constructs a `StdioServerTransport` (see `src/index.ts`) — it never starts an HTTP listener,
+    so Hono's static-file-serving code path is never reached
+  - The fix (`@hono/node-server >=2.0.5`) is only resolvable by upgrading `@modelcontextprotocol/sdk`, which
+    `npm audit fix --force` reports as a breaking downgrade to `1.24.3` — not worth forcing for a code path this project
+    never executes (see `package.json`'s `overrides` and commit `b899959`)
+  - Re-reviewed on every CI run and pre-push; the exception itself expires and must be consciously renewed
 
 ### Development Dependencies (Non-Production)
 
@@ -320,13 +331,14 @@ The repository includes comprehensive automated security workflows:
 
 ## 📋 Security Audit Log
 
-| Date       | Auditor   | Findings                       | Actions Taken                             |
-| ---------- | --------- | ------------------------------ | ----------------------------------------- |
-| 2025-10-02 | Claude AI | 3 moderate dev vulnerabilities | Documented jsondiffpatch XSS as dev-only  |
-| 2025-07-19 | Claude AI | Enhanced security workflows    | Added CodeQL, Dependabot, Secret Scanning |
-| 2025-06-29 | Claude AI | Exposed credentials in config  | Documentation created                     |
-| -          | -         | Input validation gaps          | Recommendations provided                  |
-| -          | -         | 0 production vulnerabilities   | ✅ Maintained clean production deps       |
+| Date       | Auditor   | Findings                                                                                                                | Actions Taken                                                                                                                                 |
+| ---------- | --------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-26 | Claude AI | Security gates non-enforcing (npm audit swallowed in package.json, main-ci.yml, dependency-review.yml, .husky/pre-push) | Added security-audit-gate.js + security-exceptions.json as one real, blocking, time-boxed exception mechanism; wired into all four call sites |
+| 2025-10-02 | Claude AI | 3 moderate dev vulnerabilities                                                                                          | Documented jsondiffpatch XSS as dev-only                                                                                                      |
+| 2025-07-19 | Claude AI | Enhanced security workflows                                                                                             | Added CodeQL, Dependabot, Secret Scanning                                                                                                     |
+| 2025-06-29 | Claude AI | Exposed credentials in config                                                                                           | Documentation created                                                                                                                         |
+| -          | -         | Input validation gaps                                                                                                   | Recommendations provided                                                                                                                      |
+| -          | -         | 0 production vulnerabilities                                                                                            | ✅ Maintained clean production deps                                                                                                           |
 
 ---
 
