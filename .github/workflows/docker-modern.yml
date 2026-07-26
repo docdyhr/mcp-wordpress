@@ -4,8 +4,15 @@ name: 🐳 Docker Build & Publish (Primary)
 # Updated 2025-10-02: Consolidated from 3 workflows into 1 production-ready workflow
 
 on:
-  release:
-    types: [created, published]
+  # NOTE: no `release:` trigger here — release.yml's docker-publish job is the sole
+  # authoritative Docker Hub publish path (unconditional `push: true`, verified via a real
+  # `docker pull` after push). A `release:` trigger on THIS workflow used to run automatically
+  # on every semantic-release-created GitHub release, but its outputs param
+  # (`type=oci,dest=/tmp/image.tar`) is gated solely on `inputs.push`, which the `release`
+  # event never populates — so it silently built an image, exported it to a local tarball,
+  # and discarded it without ever pushing or retaining an artifact. Keeping that trigger only
+  # burned CI minutes on every release with zero effect; this workflow now runs only for
+  # manual ad hoc builds (workflow_dispatch) and pre-merge Dockerfile validation (pull_request).
   workflow_dispatch:
     inputs:
       tag:
@@ -151,7 +158,7 @@ jobs:
             type=raw,value=latest,enable=${{ github.event_name == 'release' }}
           labels: |
             org.opencontainers.image.title=MCP WordPress Server
-            org.opencontainers.image.description=Complete WordPress MCP Server with 59 management tools, intelligent caching, and real-time monitoring
+            org.opencontainers.image.description=Complete WordPress MCP Server with 71 management tools, intelligent caching, and real-time monitoring
             org.opencontainers.image.version=${{ github.ref_name }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.created={{date 'YYYY-MM-DDTHH:mm:ssZ'}}
@@ -189,7 +196,7 @@ jobs:
           # Annotations for OCI spec compliance
           annotations: |
             org.opencontainers.image.title=MCP WordPress Server
-            org.opencontainers.image.description=Complete WordPress MCP Server with 59 management tools
+            org.opencontainers.image.description=Complete WordPress MCP Server with 71 management tools
             org.opencontainers.image.authors=docdyhr
             org.opencontainers.image.vendor=docdyhr
           # Output configuration for multi-platform
