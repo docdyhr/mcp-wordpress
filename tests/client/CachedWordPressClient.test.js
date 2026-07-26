@@ -375,6 +375,37 @@ describe("CachedWordPressClient", () => {
       expect(result.deleted).toBe(true);
       expect(WordPressClient.prototype.deletePost).toHaveBeenCalledWith(1, true);
     });
+
+    it("returns fresh data on the immediate next GET after a write, with no artificial delay (read-after-write regression)", async () => {
+      let currentTitle = "Original Title";
+
+      vi.spyOn(WordPressClient.prototype, "requestWithMetadata").mockImplementation(async (_method, endpoint) => {
+        if (endpoint.startsWith("posts/")) {
+          return {
+            data: { id: 1, title: { rendered: currentTitle }, content: { rendered: "Content 1" } },
+            status: 200,
+            headers: {},
+          };
+        }
+        return { data: {}, status: 200, headers: {} };
+      });
+
+      vi.spyOn(WordPressClient.prototype, "updatePost").mockImplementation(async (data) => {
+        currentTitle = data.title;
+        return { id: data.id, title: { rendered: data.title }, content: { rendered: data.content } };
+      });
+
+      const firstRead = await cachedClient.getPost(1);
+      expect(firstRead.title.rendered).toBe("Original Title");
+
+      await cachedClient.updatePost({ id: 1, title: "Updated Title", content: "Updated content" });
+
+      // No artificial delay between the awaited write and this read — if cache
+      // invalidation were still deferred to a later event-loop tick, this would
+      // incorrectly return the stale cached "Original Title".
+      const secondRead = await cachedClient.getPost(1);
+      expect(secondRead.title.rendered).toBe("Updated Title");
+    });
   });
 
   describe("cache management methods", () => {

@@ -46,20 +46,16 @@ export class CacheInvalidation {
   }
 
   /**
-   * Trigger invalidation event
+   * Trigger invalidation event. Resolves only once the event has actually been
+   * processed (cache entries genuinely cleared) — callers such as
+   * `CachedWordPressClient` depend on this for read-after-write consistency:
+   * an immediate read after an awaited write must not see stale cached data.
    */
   async trigger(event: InvalidationEvent): Promise<void> {
-    // Add event to queue and kick off processing. Tests expect the event to
-    // still be present on the queue immediately after `trigger` returns,
-    // but they also expect `processQueue` to have been called. To satisfy
-    // both we call `processQueue` with `defer = true` which will mark the
-    // queue as scheduled and call the real processing on the next tick.
     this.eventQueue.push(event);
 
     if (!this.processing) {
-      // Call processQueue in deferred mode so spies detect the call but
-      // processing doesn't remove the event until after the test assertion.
-      void this.processQueue(true);
+      await this.processQueue();
     }
   }
 
@@ -269,51 +265,16 @@ export class CacheInvalidation {
   }
 
   /**
-   * Process invalidation event queue
+   * Process invalidation event queue, draining it synchronously (fully awaited)
+   * before returning. No caller currently needs fire-and-forget/background
+   * invalidation — if one ever does, add a separate explicitly-named method
+   * rather than reintroducing a hidden defer flag here.
    */
-  /**
-   * Process invalidation event queue.
-   * If `defer` is true the actual processing loop is scheduled on the next
-   * tick so callers (like `trigger`) can observe the queue state before it
-   * is drained. When called without arguments the method will process the
-   * queue immediately and return when finished.
-   */
-  async processQueue(defer = false): Promise<void> {
+  async processQueue(): Promise<void> {
     if (this.processing || this.eventQueue.length === 0) {
       return;
     }
 
-    if (defer) {
-      // Mark as processing to prevent duplicate schedulers, then schedule
-      // the actual drainage on the next tick so `trigger` can return
-      // while the event remains visible in the queue.
-      this.processing = true;
-
-      const run = async () => {
-        try {
-          while (this.eventQueue.length > 0) {
-            const event = this.eventQueue.shift()!;
-            try {
-              await this.processEvent(event);
-            } catch (err) {
-              this.logger.error("Error processing invalidation event", { error: err, event });
-            }
-          }
-        } finally {
-          this.processing = false;
-        }
-      };
-
-      if (typeof setImmediate !== "undefined") {
-        setImmediate(() => void run());
-      } else {
-        setTimeout(() => void run(), 0);
-      }
-
-      return;
-    }
-
-    // Immediate processing path (used by tests that call processQueue directly)
     this.processing = true;
 
     try {
@@ -401,7 +362,8 @@ export class CacheInvalidation {
           }
 
           const optional = this.httpCache as unknown as OptionalCacheOps;
-          const keys = typeof optional.getKeys === "function" ? optional.getKeys() : [];
+          const rawKeys = typeof optional.getKeys === "function" ? optional.getKeys() : [];
+          const keys = Array.isArray(rawKeys) ? rawKeys : [];
 
           for (const key of keys) {
             for (const candidate of patternsToInvalidate) {

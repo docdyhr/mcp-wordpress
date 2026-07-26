@@ -95,7 +95,7 @@ describe("CacheInvalidation", () => {
   });
 
   describe("trigger", () => {
-    it("should add event to queue", async () => {
+    it("processes the event to completion before resolving, leaving the queue empty", async () => {
       const event = {
         type: "create",
         resource: "posts",
@@ -106,7 +106,11 @@ describe("CacheInvalidation", () => {
 
       await invalidation.trigger(event);
 
-      expect(invalidation.eventQueue).toContainEqual(event);
+      // trigger() must not resolve until the event has actually been drained and
+      // processed — a caller reading right after an awaited write must see fresh
+      // data, not a queued-but-not-yet-applied invalidation.
+      expect(invalidation.eventQueue).toHaveLength(0);
+      expect(mockHttpCache.invalidatePattern).toHaveBeenCalled();
     });
 
     it("should process queue immediately if not processing", async () => {
@@ -595,7 +599,7 @@ describe("CacheInvalidation", () => {
       expect(duration).toBeLessThan(1000);
     });
 
-    it("should not block on queue processing", async () => {
+    it("waits for slow processing to complete before resolving (read-after-write guarantee)", async () => {
       const event = {
         type: "create",
         resource: "posts",
@@ -604,21 +608,17 @@ describe("CacheInvalidation", () => {
         timestamp: Date.now(),
       };
 
-      // Mock slow processing
+      let processingCompleted = false;
       vi.spyOn(invalidation, "processEvent").mockImplementation(async () => {
         await new Promise((resolve) => setTimeout(resolve, 100));
+        processingCompleted = true;
       });
 
-      const startTime = Date.now();
-
-      // Trigger should return immediately
       await invalidation.trigger(event);
 
-      const endTime = Date.now();
-      const duration = endTime - startTime;
-
-      // Should not wait for processing to complete
-      expect(duration).toBeLessThan(50);
+      // A caller awaiting trigger() must see processing already finished — this is
+      // exactly what CachedWordPressClient depends on to avoid stale reads after a write.
+      expect(processingCompleted).toBe(true);
     });
   });
 });
