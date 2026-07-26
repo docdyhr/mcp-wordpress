@@ -31,6 +31,16 @@ Full audit remediation (2026-07-26) — not yet committed/released.
   entire "OAuth" authentication method example that was never implemented; removed all of them and corrected the JWT
   example's field names
 
+## [3.3.22](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.21...v3.3.22) (2026-07-25)
+
+### 🐛 Bug Fixes
+
+- return raw Gutenberg block markup when full content is requested
+  ([#206](https://github.com/docdyhr/mcp-wordpress/issues/206))
+  ([3dcdd2f](https://github.com/docdyhr/mcp-wordpress/commit/3dcdd2f3fe2933a74736368d9367bf93f6775719))
+
+## [3.3.21](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.20...v3.3.21) (2026-07-25)
+
 ### 🐛 Bug Fixes
 
 - **client:** preserve `statusCode`/`code`/`data` on typed errors through `requestRaw()`'s retry-exhaustion path and
