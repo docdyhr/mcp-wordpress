@@ -6,9 +6,9 @@ Vitest test suite for the MCP WordPress server: unit, integration, contract, sec
 
 ## Ownership
 
-Owns `tests/`: `baseline/`, `bin/`, `cache/`, `client/`, `config/`, `contracts/`, `fixtures/`, `managers/`,
-`performance/`, `property/`, `security/`, `server/`, `tools/`, `unit/`, `utils/`. `logs/` and `pacts/` are gitignored
-runtime output, not source.
+Owns `tests/`: `baseline/`, `bin/`, `cache/`, `client/`, `config/`, `contracts/`, `fixtures/`, `performance/`,
+`property/`, `security/`, `server/`, `tools/`, `unit/`, `utils/`. `logs/` and `pacts/` are gitignored runtime output,
+not source.
 
 ## Local Contracts
 

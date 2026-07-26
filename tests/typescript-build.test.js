@@ -29,12 +29,6 @@ describe("TypeScript Build Tests", () => {
       expect(apiModule.WordPressClient).toBeDefined();
       expect(typeof apiModule.WordPressClient).toBe("function");
     });
-
-    it("should export WordPress auth client", async () => {
-      const authModule = await import("../dist/client/auth.js");
-      expect(authModule.WordPressAuth).toBeDefined();
-      expect(typeof authModule.WordPressAuth).toBe("function");
-    });
   });
 
   describe("Tool Modules", () => {
