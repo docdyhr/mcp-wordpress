@@ -58,22 +58,18 @@ After installation, Claude Desktop will prompt you to configure:
 The DTX GUI interface supports single-site configuration:
 
 1. **WordPress Site URL**
-
    - Enter your full WordPress site URL
    - Example: `https://yoursite.com`
 
 2. **WordPress Username**
-
    - Your WordPress admin username
    - Must have appropriate permissions
 
 3. **WordPress Application Password**
-
    - Generate in WordPress: Admin → Users → Profile → Application Passwords
    - Format: `xxxx xxxx xxxx xxxx xxxx xxxx`
 
 4. **Authentication Method** (Optional)
-
    - **Application Password** (Recommended)
    - JWT Authentication
    - Basic Authentication
@@ -117,7 +113,6 @@ The DTX package supports multi-site configuration, but requires manual setup:
 ```
 
 1. **Place the file in one of these locations:**
-
    - **macOS/Linux**: `~/mcp-wordpress.config.json`
    - **Windows**: `%USERPROFILE%\mcp-wordpress.config.json`
    - **DTX Install Directory**: Next to the DTX package files

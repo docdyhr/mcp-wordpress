@@ -1,7 +1,6 @@
 # DXT Multi-Site Configuration Guide
 
-**Updated**: 2026-04-30
-**Status**: ✅ Multi-Site Support CONFIRMED
+**Updated**: 2026-04-30 **Status**: ✅ Multi-Site Support CONFIRMED
 
 ---
 
@@ -89,18 +88,18 @@ cp mcp-wordpress.config.json.example mcp-wordpress.config.json
 
 > **💡 Pro tip — use a symlink instead of a copy**
 >
-> If you keep your `mcp-wordpress.config.json` in a fixed location (e.g. `~/mcp-wordpress.config.json`),
-> create a symlink rather than a copy. The symlink survives every DXT reinstall automatically —
-> no re-copying required after updates:
+> If you keep your `mcp-wordpress.config.json` in a fixed location (e.g. `~/mcp-wordpress.config.json`), create a
+> symlink rather than a copy. The symlink survives every DXT reinstall automatically — no re-copying required after
+> updates:
 >
 > ```bash
 > ln -sf ~/mcp-wordpress.config.json \
 >   ~/Library/Application\ Support/Claude/Claude\ Extensions/local.dxt.thomas-dyhr.mcp-wordpress/mcp-wordpress.config.json
 > ```
 >
-> The DXT installer only extracts files that are in the `.dxt` archive. Since
-> `mcp-wordpress.config.json` is never packaged (it is user data), the symlink is left untouched
-> on every update. Edit your source file once; the extension always sees the latest version.
+> The DXT installer only extracts files that are in the `.dxt` archive. Since `mcp-wordpress.config.json` is never
+> packaged (it is user data), the symlink is left untouched on every update. Edit your source file once; the extension
+> always sees the latest version.
 
 ### Step 3: Edit the Config File
 
@@ -184,9 +183,9 @@ wp_get_site_settings --site="site3"
 
 ## Configuration Comparison
 
-| Method | Configuration | Priority | Sites |
-| ------ | ------------- | -------- | ----- |
-| **UI Form** (default) | Claude Desktop UI | Low | 1 site |
+| Method                     | Configuration               | Priority                | Sites     |
+| -------------------------- | --------------------------- | ----------------------- | --------- |
+| **UI Form** (default)      | Claude Desktop UI           | Low                     | 1 site    |
 | **Config File** (advanced) | `mcp-wordpress.config.json` | **HIGH** (overrides UI) | Unlimited |
 
 ---
@@ -245,9 +244,8 @@ The new manifest now correctly states:
 
 And the long description explains:
 
-> **Multi-Site (Advanced)**: Create `mcp-wordpress.config.json` in the DXT installation directory.
-> Copy from included `mcp-wordpress.config.json.example` file, configure multiple sites, and
-> restart Claude Desktop.
+> **Multi-Site (Advanced)**: Create `mcp-wordpress.config.json` in the DXT installation directory. Copy from included
+> `mcp-wordpress.config.json.example` file, configure multiple sites, and restart Claude Desktop.
 
 ---
 
@@ -294,9 +292,8 @@ And the long description explains:
 
 You were absolutely correct:
 
-**Multi-site works in DXT** by creating `mcp-wordpress.config.json` in the DXT installation
-directory. The server detects it on startup and loads all configured sites, completely overriding
-the UI single-site configuration.
+**Multi-site works in DXT** by creating `mcp-wordpress.config.json` in the DXT installation directory. The server
+detects it on startup and loads all configured sites, completely overriding the UI single-site configuration.
 
 The DXT package **includes everything needed**:
 

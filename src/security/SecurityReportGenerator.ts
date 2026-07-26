@@ -176,10 +176,7 @@ export class SecurityReportGenerator {
   /**
    * Generate recommendations based on results
    */
-  generateRecommendations(
-    gateResults: GateResult[],
-    summary: ReportSummary,
-  ): string[] {
+  generateRecommendations(gateResults: GateResult[], summary: ReportSummary): string[] {
     const recommendations: string[] = [];
 
     if (summary.criticalIssues > 0) {

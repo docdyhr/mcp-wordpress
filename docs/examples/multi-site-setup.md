@@ -515,12 +515,10 @@ Each site in the configuration maintains complete isolation:
 ### Common Problems
 
 1. **Site ID not found**
-
    - Verify the `id` field matches exactly
    - Check for typos in site parameter
 
 2. **Authentication fails for specific site**
-
    - Test each site's credentials individually
    - Regenerate application passwords if needed
 

@@ -70,7 +70,6 @@ code --list-extensions | grep cline
 ### Basic Configuration
 
 1. **Open Cline Settings**
-
    - Open Command Palette (Ctrl+Shift+P)
    - Type "Cline: Open Settings"
    - Or navigate to File > Preferences > Settings > Extensions > Cline
