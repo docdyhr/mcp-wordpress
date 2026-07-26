@@ -7,7 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { WordPressClient } from "@/client/api.js";
-import { WordPressAPIError, AuthenticationError, RateLimitError } from "@/client/api.js";
+import { WordPressAPIError, RateLimitError } from "@/types/client.js";
 
 // Mock fetch
 const mockFetch = vi.fn();
@@ -311,7 +311,9 @@ describe("WordPressClient", () => {
         arrayBuffer: vi.fn().mockResolvedValue(utf8Buf('{"code":"rest_post_invalid_id","message":"Invalid post ID"}')),
       });
 
-      await expect(client.get("posts/999")).rejects.toThrow(WordPressAPIError);
+      const notFoundError = await client.get("posts/999").catch((e) => e);
+      expect(notFoundError).toBeInstanceOf(WordPressAPIError);
+      expect(notFoundError.statusCode).toBe(404);
     });
 
     it("should handle 401 authentication errors", async () => {
@@ -329,7 +331,12 @@ describe("WordPressClient", () => {
           .mockResolvedValue(utf8Buf('{"code":"rest_forbidden","message":"Sorry, you are not allowed to do that"}')),
       });
 
-      await expect(client.get("posts")).rejects.toThrow(AuthenticationError);
+      // A bare 401 on a non-media endpoint surfaces as WordPressAPIError with statusCode 401
+      // (not the AuthenticationError subclass, which is reserved for media-upload 401/403) —
+      // this must survive to the caller so ToolRegistry's isAuthenticationError() can act on it.
+      const authError = await client.get("posts").catch((e) => e);
+      expect(authError).toBeInstanceOf(WordPressAPIError);
+      expect(authError.statusCode).toBe(401);
     });
 
     it("should handle 429 rate limit errors", async () => {
@@ -350,7 +357,30 @@ describe("WordPressClient", () => {
           .mockResolvedValue(utf8Buf('{"code":"rest_too_many_requests","message":"Too many requests"}')),
       });
 
-      await expect(client.get("posts")).rejects.toThrow(RateLimitError);
+      const rateLimitError = await client.get("posts").catch((e) => e);
+      expect(rateLimitError).toBeInstanceOf(RateLimitError);
+      expect(rateLimitError.statusCode).toBe(429);
+      expect(rateLimitError.code).toBe("rate_limit_exceeded");
+    });
+
+    it("should handle 403 forbidden errors", async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 403,
+        statusText: "Forbidden",
+        headers: new Map([["content-type", "application/json"]]),
+        json: vi.fn().mockResolvedValue({
+          code: "rest_forbidden",
+          message: "Sorry, you are not allowed to do that",
+        }),
+        arrayBuffer: vi
+          .fn()
+          .mockResolvedValue(utf8Buf('{"code":"rest_forbidden","message":"Sorry, you are not allowed to do that"}')),
+      });
+
+      const forbiddenError = await client.get("posts").catch((e) => e);
+      expect(forbiddenError).toBeInstanceOf(WordPressAPIError);
+      expect(forbiddenError.statusCode).toBe(403);
     });
 
     it("should handle network errors", async () => {
@@ -373,6 +403,35 @@ describe("WordPressClient", () => {
 
       expect(mockFetch).toHaveBeenCalledTimes(2);
       expect(result).toEqual({ id: 1 });
+    });
+
+    it("preserves statusCode when retries are exhausted on a persistent 5xx error", async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 503,
+        statusText: "Service Unavailable",
+        headers: new Map([["content-type", "application/json"]]),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf('{"code":"internal_error","message":"Service Unavailable"}')),
+      });
+
+      const exhaustedError = await client.get("posts").catch((e) => e);
+
+      // Default maxRetries is 3 (WORDPRESS_MAX_RETRIES), and GET is always retry-eligible.
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+      expect(exhaustedError).toBeInstanceOf(WordPressAPIError);
+      expect(exhaustedError.statusCode).toBe(503);
+    });
+
+    it("wraps with the actual attempt count (not the configured max) when a non-retryable error breaks early", async () => {
+      mockFetch.mockRejectedValue(new Error("Unexpected client failure"));
+
+      const earlyBreakError = await client.get("posts").catch((e) => e);
+
+      // "Unexpected client failure" matches none of shouldRetryError's retryable patterns, so
+      // the loop must break after exactly 1 attempt — the wrapped message must reflect that
+      // reality, not the configured maxAttempts (3), which would misleadingly claim 3 attempts.
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(earlyBreakError.message).toContain("Request failed after 1 attempt:");
     });
 
     it("does not retry a POST after an ambiguous network failure (avoids duplicate mutation)", async () => {

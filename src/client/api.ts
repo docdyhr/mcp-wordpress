@@ -612,8 +612,10 @@ export class WordPressClient implements IWordPressClient {
     const maxAttempts = canRetryMethod && canRetryBody ? configuredRetries : 1;
 
     let lastError: Error = new Error("Unknown error");
+    let attemptsMade = 0;
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      attemptsMade = attempt + 1;
       await this.rateLimit();
 
       const controller = new AbortController();
@@ -689,8 +691,15 @@ export class WordPressClient implements IWordPressClient {
     this._stats.failedRequests++;
     this._stats.errors++;
     timer.end();
+
+    // Preserve the typed error (statusCode/code/data) all the way to the caller instead of
+    // discarding it into a brand-new statusless WordPressAPIError — ToolRegistry and callers
+    // rely on statusCode/code surviving to distinguish auth/rate-limit/validation failures.
+    if (lastError instanceof WordPressAPIError) {
+      throw lastError;
+    }
     throw new WordPressAPIError(
-      `Request failed after ${maxAttempts} attempt${maxAttempts === 1 ? "" : "s"}: ${lastError.message}`,
+      `Request failed after ${attemptsMade} attempt${attemptsMade === 1 ? "" : "s"}: ${lastError.message}`,
     );
   }
 

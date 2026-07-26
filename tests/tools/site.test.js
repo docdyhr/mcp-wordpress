@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import { SiteTools } from "@/tools/site.js";
+import { WordPressAPIError } from "@/types/client.js";
 
 describe("SiteTools", () => {
   let siteTools;
@@ -99,6 +100,21 @@ describe("SiteTools", () => {
       const settingsTool = tools.find((t) => t.name === "wp_get_site_settings");
 
       await expect(settingsTool.handler(mockClient, {})).rejects.toThrow("Failed to get site settings");
+    });
+
+    it("preserves statusCode/code from a typed client error instead of discarding them", async () => {
+      mockClient.getSiteSettings.mockRejectedValue(
+        new WordPressAPIError("Not logged in", 401, "authentication_failed"),
+      );
+
+      const tools = siteTools.getTools();
+      const settingsTool = tools.find((t) => t.name === "wp_get_site_settings");
+
+      const error = await settingsTool.handler(mockClient, {}).catch((e) => e);
+
+      expect(error).toBeInstanceOf(WordPressAPIError);
+      expect(error.statusCode).toBe(401);
+      expect(error.code).toBe("authentication_failed");
     });
   });
 

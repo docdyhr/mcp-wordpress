@@ -2,7 +2,7 @@ import { WordPressClient } from "@/client/api.js";
 import { CachedWordPressClient } from "@/client/CachedWordPressClient.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
 import type { AuthConfig } from "@/types/client.js";
-import { getErrorMessage } from "@/utils/error.js";
+import { preserveToolError } from "@/utils/error.js";
 
 // Kept in sync with ConfigurationSchema's AuthMethodSchema: "cookie" is
 // deliberately excluded because it requires an already-established
@@ -141,7 +141,7 @@ export class AuthTools {
         timeoutSignal,
       ]);
     } catch (_error) {
-      throw new Error(`Authentication test failed: ${getErrorMessage(_error)}`);
+      preserveToolError("Authentication test failed", _error);
     } finally {
       clearTimeout(timeoutHandle);
     }
@@ -178,7 +178,7 @@ export class AuthTools {
 
       return { content };
     } catch (_error) {
-      throw new Error(`Failed to get auth status: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to get auth status", _error);
     }
   }
 
@@ -239,7 +239,7 @@ export class AuthTools {
           : `✅ Switched to '${method}' authentication and verified it successfully.`;
       return { content: confirmation };
     } catch (_error) {
-      throw new Error(`Failed to switch auth method: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to switch auth method", _error);
     }
   }
 

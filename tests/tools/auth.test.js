@@ -1,6 +1,7 @@
 import { vi } from "vitest";
 import { AuthTools } from "@/tools/auth.js";
 import { CachedWordPressClient } from "@/client/CachedWordPressClient.js";
+import { WordPressAPIError } from "@/types/client.js";
 
 describe("AuthTools", () => {
   let authTools;
@@ -133,6 +134,16 @@ describe("AuthTools", () => {
 
       expect(mockClient.ping).toHaveBeenCalledTimes(1);
       expect(mockClient.getCurrentUser).not.toHaveBeenCalled();
+    });
+
+    it("preserves statusCode/code from a typed client error instead of discarding them", async () => {
+      mockClient.ping.mockRejectedValue(new WordPressAPIError("Not logged in", 401, "authentication_failed"));
+
+      const error = await authTools.handleTestAuth(mockClient, {}).catch((e) => e);
+
+      expect(error).toBeInstanceOf(WordPressAPIError);
+      expect(error.statusCode).toBe(401);
+      expect(error.code).toBe("authentication_failed");
     });
 
     it("should fail immediately when ping returns false without calling getCurrentUser", async () => {
