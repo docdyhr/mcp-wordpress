@@ -29,8 +29,10 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 [![CodeQL](https://github.com/docdyhr/mcp-wordpress/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/codeql-analysis.yml)
 [![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker&logoColor=white)](https://hub.docker.com/r/docdyhr/mcp-wordpress)
 [![License](https://img.shields.io/badge/license-MIT-green?logo=opensource&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/blob/main/LICENSE)
+
 <!-- Badges updated: 2025-12-23 -->
-### 🎉 **v3.3.14** - CI-Tested on Node 20/22/24
+
+### 🎉 **v3.3.21** - CI-Tested on Node 20/22/24
 
 </div>
 
@@ -49,7 +51,7 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 - ⚡ **Fastest Setup**: 2-click Claude Desktop installation via DXT
 - 🔒 **CI-Tested**: 2750+ tests across Node 20/22/24, CodeQL + Trivy security scanning
 - 🎯 **TypeScript Native**: 100% type safety, best-in-class developer experience
-- 🌐 **Multi-Site**: Manage unlimited WordPress sites from one place
+- 🌐 **Multi-Site**: Manage up to 50 WordPress sites from one place
 
 ## 🚀 Quick Start
 
@@ -163,19 +165,20 @@ WordPress Application Passwords are recommended:
 1. **WordPress Admin** → **Users** → **Profile** → **Application Passwords** → **Add New**
 2. Copy the generated password into your config
 
-Alternative methods: JWT, Basic Auth, API Key — see **[Authentication Configuration](docs/CONFIGURATION.md#authentication-configuration)**
+Alternative methods: JWT, Basic Auth, API Key — see
+**[Authentication Configuration](docs/CONFIGURATION.md#authentication-configuration)**
 
 ## 🌟 What Makes This Special
 
-| Feature                    | This Server                            | Competition     |
-| -------------------------- | -------------------------------------- | --------------- |
-| **Tools Available**        | 71 tools                               | 20-30 tools     |
-| **Claude Desktop DXT**     | ✅ 2-click install                     | ❌ Manual setup |
-| **Multi-Site Support**     | ✅ Unlimited sites                     | ❌ Single site  |
-| **TypeScript**             | ✅ 100% TypeScript, strict mode        | ⚠️ Partial/None |
-| **Performance Monitoring** | ✅ Real-time analytics                 | ❌ Basic only   |
-| **Test Coverage**          | ✅ 2750+ tests, ~76% line coverage     | ⚠️ Limited      |
-| **Security Scanning**      | ✅ CodeQL + Trivy in CI                | ⚠️ Unknown      |
+| Feature                    | This Server                        | Competition     |
+| -------------------------- | ---------------------------------- | --------------- |
+| **Tools Available**        | 71 tools                           | 20-30 tools     |
+| **Claude Desktop DXT**     | ✅ 2-click install                 | ❌ Manual setup |
+| **Multi-Site Support**     | ✅ Up to 50 sites                  | ❌ Single site  |
+| **TypeScript**             | ✅ 100% TypeScript, strict mode    | ⚠️ Partial/None |
+| **Performance Monitoring** | ✅ Real-time analytics             | ❌ Basic only   |
+| **Test Coverage**          | ✅ 2750+ tests, ~76% line coverage | ⚠️ Limited      |
+| **Security Scanning**      | ✅ CodeQL + Trivy in CI            | ⚠️ Unknown      |
 
 ## 📋 Available Tools (71 Tools)
 
@@ -232,12 +235,12 @@ DEBUG=true npm run dev # Debug logging
 npm run fix:rest-auth  # Fix WordPress 401 errors
 ```
 
-| Error | Solution |
-|-------|----------|
-| `401 Unauthorized` | Regenerate application password |
-| `403 Forbidden` | Check user role (Editor+ required) |
-| `404 Not Found` | Verify `WORDPRESS_SITE_URL` |
-| `Connection Timeout` | Check WordPress REST API access |
+| Error                | Solution                           |
+| -------------------- | ---------------------------------- |
+| `401 Unauthorized`   | Regenerate application password    |
+| `403 Forbidden`      | Check user role (Editor+ required) |
+| `404 Not Found`      | Verify `WORDPRESS_SITE_URL`        |
+| `Connection Timeout` | Check WordPress REST API access    |
 
 📖 **[Full Troubleshooting Guide](docs/TROUBLESHOOTING.md)**
 
@@ -296,7 +299,9 @@ npm run fix:rest-auth  # Fix WordPress 401 errors
 
 **Ready to transform your WordPress management?**
 
-1. **🏆 [Download DXT Extension](https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt)** - Easiest setup (2 minutes)
+1. **🏆
+   [Download DXT Extension](https://github.com/docdyhr/mcp-wordpress/releases/latest/download/mcp-wordpress.dxt)** -
+   Easiest setup (2 minutes)
 2. **⚡ [Try NPX Method](docs/user-guides/NPX_SETUP.md)** - Power user setup (5 minutes)
 3. **📚 [Explore All Tools](docs/api/README.md)** - See what's possible
 4. **💬 [Join Discussions](https://github.com/docdyhr/mcp-wordpress/discussions)** - Get help and share ideas
@@ -305,11 +310,20 @@ npm run fix:rest-auth  # Fix WordPress 401 errors
 
 ## 🔗 Similar Projects
 
-- **[Automattic WordPress MCP](https://github.com/Automattic/wordpress-mcp)** - Official WordPress MCP server by Automattic
+- **[Automattic WordPress MCP](https://github.com/Automattic/wordpress-mcp)** - Official WordPress MCP server by
+  Automattic
 
 ---
 
 ## 📋 Changelog
+
+### v3.3.21 (July 2026)
+
+- **🔒 Security Hardening** - SSRF denylist, HTTPS enforcement, logger redaction, dependency floor updates
+- **🐳 Docker Release Reliability** - Bounded publish-job timeouts and corrected retry-on-hang logic
+- **📚 DOX Documentation** - Hierarchical AGENTS.md contract tree for per-directory work guidance
+
+See [CHANGELOG.md](./CHANGELOG.md) for the complete, release-by-release history.
 
 ### v3.3.14 (June 2026)
 
@@ -320,9 +334,10 @@ npm run fix:rest-auth  # Fix WordPress 401 errors
 
 - **🏗️ Modular Architecture** - Domain-specific operation modules and composition pattern
 - **🔄 Fault Tolerance** - Circuit breaker pattern with automatic recovery
-- **📊 2200+ Tests** - Comprehensive test suite across security, cache, server, client, config, utils, tools, and performance
+- **📊 2200+ Tests** - Comprehensive test suite across security, cache, server, client, config, utils, tools, and
+  performance
 - **⚡ Caching Layer** - `CachedWordPressClient` with configurable TTL; 50–70% faster repeat requests
-- **🌐 Multi-Site** - Unlimited WordPress sites from one configuration file
+- **🌐 Multi-Site** - Up to 50 WordPress sites from one configuration file
 - **🔐 4 Auth Methods** - App Passwords (recommended), JWT, Basic, API Key
 - **🐳 Docker & DXT** - One-click Claude Desktop extension and Docker Hub image
 
