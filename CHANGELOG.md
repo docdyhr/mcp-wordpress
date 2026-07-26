@@ -20,16 +20,50 @@ Full audit remediation (2026-07-26) — not yet committed/released.
   the existing allowlist-based `sanitizeHtml()` — only for its side effect of throwing on invalid input, then discarding
   the sanitized result and sending the original, unsanitized `params` to the WordPress REST API. The sanitized fields
   are now actually used
-- **comments/pages:** `content` (and, for pages, none — `excerpt` isn't an exposed parameter there) had no HTML
-  sanitization at all beyond the Zod boundary check above; added the same `sanitizeHtml()` call as defense-in-depth,
-  since these tools had no fallback layer if that check were ever bypassed
+- **comments:** `content` had no HTML sanitization at all beyond the Zod boundary check above; added the same
+  `sanitizeHtml()` call as defense-in-depth, since this tool had no fallback layer if that check were ever bypassed
+- **posts/pages content corruption (PR #209 review):** the `sanitizeHtml()` wiring above ran post/page `content` through
+  an HTML _allowlist_ on every create/update — which strips HTML comments and any non-allowlisted element/attribute,
+  corrupting ordinary Gutenberg block markup (`<!-- wp:* -->` comments, `<figure>`/`class` wrapper markup, etc.) on
+  every write. Both Copilot and Codex independently flagged this in review. Replaced with the already-correct
+  `isUnsafeWordPressContent` reject-or-passthrough used at the MCP tool boundary (`ToolRegistry.ts`): unmistakable XSS
+  vectors (script tags, `javascript:` URLs, event handlers) are rejected outright, and otherwise-safe content —
+  including Gutenberg markup — passes through unchanged
+- **cache invalidation race (PR #209 review):** `CacheInvalidation.trigger()` only awaited `processQueue()` when no
+  drain was already in flight; a `trigger()` call arriving while another was mid-drain pushed its event onto the shared
+  queue but returned immediately, before that event was actually processed — breaking the read-after-write guarantee for
+  concurrent writes. `processQueue()` now has every concurrent caller join the in-flight drain instead of returning
+  early
+- **`InputValidator.ts` data: URL over-matching (PR #209 review):** `DATA_URL_PATTERN` was an unanchored `/data\s*:/i`,
+  matching inside ordinary words like "Metadata:" and rejecting legitimate titles/descriptions/search terms before their
+  handler ran. Anchored to an actual `data:` URI shape (word boundary before `data`, no whitespace before the mandatory
+  comma) so real data URIs are still rejected but prose mentioning "data:" is not
 - **ci:** fixed the remaining swallowed-failure npm scripts (`security:monitor`, `security:review`) to propagate real
   results instead of always reporting success; removed `dependency-review.yml`'s skip condition for Dependabot/labeled
   PRs, so the custom audit job runs on every PR consistently
-- **docs:** `.env.example` had six more unread/fictional variables beyond the ones already fixed in this remediation
-  (`PORT`, `CACHE_DIR`, `WORDPRESS_API_VERSION`, `WORDPRESS_DEBUG`, `WORDPRESS_REST_API_BASE`, `LOG_FILE`) plus an
-  entire "OAuth" authentication method example that was never implemented; removed all of them and corrected the JWT
-  example's field names
+- **`security-audit-gate.js` exception expiry (PR #209 review):** a missing or malformed `reviewBy` (e.g.
+  `"not-a-date"`, which sorts after any real date string) never satisfied the bare `reviewBy < today` comparison, so the
+  exception was silently accepted forever instead of being treated as expired. Now validated as a real, unexpired
+  `YYYY-MM-DD` date before being accepted
+
+### 🐛 Bug Fixes
+
+- **`scripts/health-check.js` (PR #209 review):** `requiredFiles`/`keyFiles` still listed `src/client/auth.ts` and
+  `dist/client/auth.js`, deleted in this same remediation's dead-code cleanup, so `npm run health` always reported a
+  correctly-built checkout as unhealthy. Removed the stale entries
+- **`package.json` build script (PR #209 review):** `"build": "rm -rf dist && ..."` fails on native Windows, where
+  `cmd.exe` has no `rm` — breaking `npm run build`, and everything that chains it (`setup`, `dev`, tests). Replaced with
+  a `node -e` `fs.rmSync` one-liner, avoiding a new dependency
+
+### 📚 Documentation
+
+- **`.env.example`** had six more unread/fictional variables beyond the ones already fixed in this remediation (`PORT`,
+  `CACHE_DIR`, `WORDPRESS_API_VERSION`, `WORDPRESS_DEBUG`, `WORDPRESS_REST_API_BASE`, `LOG_FILE`) plus an entire "OAuth"
+  authentication method example that was never implemented; removed all of them and corrected the JWT example's field
+  names
+- **multi-site site limit (PR #209 review):** `DXT-MULTISITE-GUIDE.md` and `docs/examples/multi-site-setup.md` claimed
+  config-file multi-site supports "unlimited" sites; `MultiSiteConfigSchema` actually caps it at 50. Corrected both to
+  state the real limit
 
 ## [3.3.22](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.21...v3.3.22) (2026-07-25)
 

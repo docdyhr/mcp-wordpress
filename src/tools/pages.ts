@@ -1,8 +1,9 @@
 import { WordPressClient } from "@/client/api.js";
+import { WordPressAPIError } from "@/types/client.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
 import { CreatePageRequest, PostQueryParams as PageQueryParams, UpdatePageRequest } from "@/types/wordpress.js";
 import { isPermissionError, preserveToolError } from "@/utils/error.js";
-import { sanitizeHtml } from "@/utils/validation/security.js";
+import { isUnsafeWordPressContent } from "@/security/InputValidator.js";
 import { parseId, parseIdAndForce, toolParams } from "./params.js";
 
 /**
@@ -208,11 +209,18 @@ export class PageTools {
   public async handleCreatePage(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     const createParams = toolParams<CreatePageRequest>(params);
     try {
-      // Defense-in-depth: the Zod schema at the MCP tool boundary (ToolRegistry.ts) blocks
-      // known-dangerous content (script tags, event handlers), but this allowlist-based
-      // sanitizer is a second, independent layer — it strips any tag/attribute not on its
-      // allowlist outright, rather than trying to enumerate every dangerous one.
-      if (createParams.content !== undefined) createParams.content = sanitizeHtml(createParams.content);
+      // Defense-in-depth: the Zod schema at the MCP tool boundary (ToolRegistry.ts) already
+      // rejects unmistakable XSS vectors in `content` via isUnsafeWordPressContent. Re-check
+      // here rather than running content through the allowlist-based sanitizeHtml(), which
+      // strips/escapes Gutenberg <!-- wp:* --> block markup and corrupts ordinary
+      // block-editor page content.
+      if (createParams.content !== undefined && isUnsafeWordPressContent(createParams.content)) {
+        throw new WordPressAPIError(
+          "Unsafe content (script tag, javascript: URL, or event handler)",
+          400,
+          "INVALID_PARAMETER",
+        );
+      }
       const page = await client.createPage(createParams);
       return `✅ Page created successfully!\n- ID: ${page.id}\n- Title: ${page.title.rendered}\n- Link: ${page.link}`;
     } catch (_error) {
@@ -223,7 +231,13 @@ export class PageTools {
   public async handleUpdatePage(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     const updateParams = toolParams<UpdatePageRequest & { id: number }>(params);
     try {
-      if (updateParams.content !== undefined) updateParams.content = sanitizeHtml(updateParams.content);
+      if (updateParams.content !== undefined && isUnsafeWordPressContent(updateParams.content)) {
+        throw new WordPressAPIError(
+          "Unsafe content (script tag, javascript: URL, or event handler)",
+          400,
+          "INVALID_PARAMETER",
+        );
+      }
       const page = await client.updatePage(updateParams);
       return `✅ Page ${page.id} updated successfully.`;
     } catch (_error) {

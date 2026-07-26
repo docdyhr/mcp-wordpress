@@ -19,9 +19,23 @@ const repoRoot = path.resolve(__dirname, "..");
 const EXCEPTIONS_PATH = path.join(repoRoot, "security-exceptions.json");
 const SEVERITY_ORDER = ["info", "low", "moderate", "high", "critical"];
 const MIN_SEVERITY = "moderate";
+const REVIEW_BY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 function severityAtOrAbove(severity) {
   return SEVERITY_ORDER.indexOf(severity) >= SEVERITY_ORDER.indexOf(MIN_SEVERITY);
+}
+
+/**
+ * True when `reviewBy` is missing, isn't a YYYY-MM-DD string, or is in the past. A bare
+ * `reviewBy < today` string comparison would let a missing value (`undefined < "2026-…"` is
+ * always false) or a malformed one (e.g. "not-a-date", which sorts after any real date
+ * lexicographically) silently pass as "not expired" forever — fail closed instead.
+ */
+function isExceptionExpiredOrInvalid(reviewBy, today) {
+  if (typeof reviewBy !== "string" || !REVIEW_BY_PATTERN.test(reviewBy)) {
+    return true;
+  }
+  return reviewBy < today;
 }
 
 function parseAuditOutput(stdout) {
@@ -90,55 +104,70 @@ function loadExceptions() {
   return raw.exceptions ?? [];
 }
 
-const report = runNpmAudit();
-const findings = extractAdvisories(report);
-const exceptions = loadExceptions();
-const today = new Date().toISOString().slice(0, 10);
+function main() {
+  const report = runNpmAudit();
+  const findings = extractAdvisories(report);
+  const exceptions = loadExceptions();
+  const today = new Date().toISOString().slice(0, 10);
 
-console.log(`🔍 Production dependency audit (npm audit --omit=dev, severity >= ${MIN_SEVERITY})`);
-console.log(`   Findings at or above threshold: ${findings.length}\n`);
+  console.log(`🔍 Production dependency audit (npm audit --omit=dev, severity >= ${MIN_SEVERITY})`);
+  console.log(`   Findings at or above threshold: ${findings.length}\n`);
 
-let failed = false;
+  let failed = false;
 
-for (const finding of findings) {
-  const exception = exceptions.find((e) => e.id === finding.id);
+  for (const finding of findings) {
+    const exception = exceptions.find((e) => e.id === finding.id);
 
-  if (!exception) {
-    console.error(`❌ ${finding.id} (${finding.package}, ${finding.severity}) has no documented exception.`);
-    console.error(`   ${finding.title}`);
-    console.error(`   ${finding.url}`);
-    console.error(`   Fix it, or add a reviewed, time-boxed entry to security-exceptions.json.\n`);
-    failed = true;
-    continue;
+    if (!exception) {
+      console.error(`❌ ${finding.id} (${finding.package}, ${finding.severity}) has no documented exception.`);
+      console.error(`   ${finding.title}`);
+      console.error(`   ${finding.url}`);
+      console.error(`   Fix it, or add a reviewed, time-boxed entry to security-exceptions.json.\n`);
+      failed = true;
+      continue;
+    }
+
+    if (isExceptionExpiredOrInvalid(exception.reviewBy, today)) {
+      console.error(
+        `❌ ${finding.id} (${finding.package}) exception has an invalid or expired reviewBy ` +
+          `(${JSON.stringify(exception.reviewBy)}); expected an unexpired YYYY-MM-DD date.`,
+      );
+      console.error(`   Re-review and update security-exceptions.json (or fix the underlying dependency).\n`);
+      failed = true;
+      continue;
+    }
+
+    console.log(
+      `✅ ${finding.id} (${finding.package}, ${finding.severity}) — reviewed, valid until ${exception.reviewBy}.`,
+    );
+    console.log(`   ${exception.reason}\n`);
   }
 
-  if (exception.reviewBy < today) {
-    console.error(`❌ ${finding.id} (${finding.package}) exception expired on ${exception.reviewBy}.`);
-    console.error(`   Re-review and update security-exceptions.json (or fix the underlying dependency).\n`);
-    failed = true;
-    continue;
+  const staleExceptions = exceptions.filter((e) => !findings.some((f) => f.id === e.id));
+  if (staleExceptions.length > 0) {
+    console.log(
+      `ℹ️  ${staleExceptions.length} exception(s) in security-exceptions.json no longer match any current finding — consider removing:`,
+    );
+    for (const stale of staleExceptions) {
+      console.log(`   - ${stale.id} (${stale.package})`);
+    }
+    console.log("");
+  }
+
+  if (failed) {
+    console.error("❌ Production dependency audit gate FAILED.");
+    process.exit(1);
   }
 
   console.log(
-    `✅ ${finding.id} (${finding.package}, ${finding.severity}) — reviewed, valid until ${exception.reviewBy}.`,
+    "✅ Production dependency audit gate passed — every finding is reviewed and within its exception window.",
   );
-  console.log(`   ${exception.reason}\n`);
 }
 
-const staleExceptions = exceptions.filter((e) => !findings.some((f) => f.id === e.id));
-if (staleExceptions.length > 0) {
-  console.log(
-    `ℹ️  ${staleExceptions.length} exception(s) in security-exceptions.json no longer match any current finding — consider removing:`,
-  );
-  for (const stale of staleExceptions) {
-    console.log(`   - ${stale.id} (${stale.package})`);
-  }
-  console.log("");
+// Guard so this module can be imported for unit tests (e.g. isExceptionExpiredOrInvalid)
+// without shelling out to a live `npm audit` or calling process.exit.
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main();
 }
 
-if (failed) {
-  console.error("❌ Production dependency audit gate FAILED.");
-  process.exit(1);
-}
-
-console.log("✅ Production dependency audit gate passed — every finding is reviewed and within its exception window.");
+export { severityAtOrAbove, extractAdvisories, isExceptionExpiredOrInvalid };

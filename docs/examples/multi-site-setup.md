@@ -572,5 +572,5 @@ done
 echo "✅ Multi-site configuration validated"
 ```
 
-This comprehensive multi-site setup allows you to manage unlimited WordPress sites efficiently through a single Claude
+This comprehensive multi-site setup allows you to manage up to 50 WordPress sites efficiently through a single Claude
 Desktop configuration.

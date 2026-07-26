@@ -6,7 +6,7 @@ the MCP SDK to any MCP-compatible client.
 ## Quick Start
 
 ```bash
-npm run build              # rm -rf dist && tsc && tsc-alias — required before most test/CLI scripts (tests run against dist/)
+npm run build               # cross-platform clean + tsc && tsc-alias — required before most test/CLI scripts (tests run against dist/)
 npm test                   # Run tests (npm run test:batch)
 npm run dev                # Build + run with DEBUG=true
 npm run health              # System check (scripts/health-check.js)

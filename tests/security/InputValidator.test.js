@@ -37,6 +37,20 @@ describe("SecuritySchemas", () => {
       expect(() => SecuritySchemas.safeString.parse("data:text/html,<h1>test</h1>")).toThrow();
     });
 
+    it("rejects a data: URL embedded mid-string", () => {
+      expect(() => SecuritySchemas.safeString.parse("<img src=data:image/png;base64,iVBORw0KGgo=>")).toThrow();
+    });
+
+    it("does not false-positive on ordinary words/prose containing 'data:' as a substring (regression: unanchored data\\s*: pattern)", () => {
+      // A bare `/data\s*:/i` pattern matches "data:" inside "Metadata:" too, rejecting an
+      // entirely ordinary title before its handler runs.
+      expect(SecuritySchemas.safeString.parse("Metadata: Migration Guide")).toBe("Metadata: Migration Guide");
+      expect(SecuritySchemas.safeString.parse("Postdata: see appendix")).toBe("Postdata: see appendix");
+      expect(SecuritySchemas.safeString.parse("data: is explained in the docs below")).toBe(
+        "data: is explained in the docs below",
+      );
+    });
+
     it("rejects onerror event handler", () => {
       expect(() => SecuritySchemas.safeString.parse("onerror=alert(1)")).toThrow();
     });

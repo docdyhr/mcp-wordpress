@@ -29,6 +29,7 @@ export class CacheInvalidation {
   invalidationRules: Map<string, InvalidationRule[]> = new Map();
   eventQueue: InvalidationEvent[] = [];
   processing = false;
+  private drainingPromise: Promise<void> | null = null;
   private logger = LoggerFactory.cache();
 
   constructor(private httpCache: HttpCacheWrapper) {
@@ -53,10 +54,7 @@ export class CacheInvalidation {
    */
   async trigger(event: InvalidationEvent): Promise<void> {
     this.eventQueue.push(event);
-
-    if (!this.processing) {
-      await this.processQueue();
-    }
+    await this.processQueue();
   }
 
   /**
@@ -269,26 +267,56 @@ export class CacheInvalidation {
    * before returning. No caller currently needs fire-and-forget/background
    * invalidation — if one ever does, add a separate explicitly-named method
    * rather than reintroducing a hidden defer flag here.
+   *
+   * If a drain is already in flight (`processing === true`), join it instead of
+   * returning immediately: an event pushed onto `eventQueue` by a concurrent
+   * `trigger()` call is picked up by that same drain loop (it re-checks the
+   * queue every iteration), but the caller must still await until its own
+   * event has actually been processed — otherwise a second `trigger()` call
+   * arriving mid-drain would resolve before its event is applied, breaking the
+   * read-after-write guarantee for concurrent writes (caught in PR #209 review
+   * by both Copilot and Codex).
    */
   async processQueue(): Promise<void> {
-    if (this.processing || this.eventQueue.length === 0) {
+    if (this.processing) {
+      await this.drainingPromise;
+      // New events may have been pushed after that drain finished draining
+      // but before this call observed it; make sure the queue is fully empty
+      // before resolving.
+      if (this.eventQueue.length > 0) {
+        await this.processQueue();
+      }
+      return;
+    }
+
+    if (this.eventQueue.length === 0) {
       return;
     }
 
     this.processing = true;
+    this.drainingPromise = this.drainQueue();
 
     try {
-      while (this.eventQueue.length > 0) {
-        const event = this.eventQueue.shift()!;
-        try {
-          await this.processEvent(event);
-        } catch (err) {
-          // Log and continue processing remaining events
-          this.logger.error("Error processing invalidation event", { error: err, event });
-        }
-      }
+      await this.drainingPromise;
     } finally {
       this.processing = false;
+      this.drainingPromise = null;
+    }
+  }
+
+  /**
+   * Drain the event queue until empty, tolerating per-event failures so one
+   * bad event can't block invalidation of the rest.
+   */
+  private async drainQueue(): Promise<void> {
+    while (this.eventQueue.length > 0) {
+      const event = this.eventQueue.shift()!;
+      try {
+        await this.processEvent(event);
+      } catch (err) {
+        // Log and continue processing remaining events
+        this.logger.error("Error processing invalidation event", { error: err, event });
+      }
     }
   }
 

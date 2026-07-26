@@ -22,7 +22,13 @@ const SLUG_PATTERN = /^[a-z0-9-]+$/;
 const SCRIPT_TAG_PATTERN = /<script/i;
 const SCRIPT_END_PATTERN = /<\/script/i;
 const JAVASCRIPT_URL_PATTERN = /javascript\s*:/i;
-const DATA_URL_PATTERN = /data\s*:/i;
+// Anchored to an actual `data:` URI scheme rather than a bare `data\s*:` substring match: the
+// latter also matches ordinary words/prose ending in "...data:" (e.g. a title like "Metadata:
+// Migration Guide") or plain sentences mentioning "data:" as a topic, rejecting legitimate
+// input before its handler runs. Requires a word boundary before "data" (so it can't match
+// inside "Metadata") and no whitespace between the colon and the following comma (real data
+// URIs never have one; prose like "data: is dangerous" always does).
+const DATA_URL_PATTERN = /\bdata:[^\s,]*,/i;
 // Matches a real event-handler attribute (onerror=, onclick=, onload=, ...). The previous
 // version of this check used `val.includes("on[a-z]+=")`, which looks for that literal
 // 9-character substring — a string that real payloads never contain — instead of compiling

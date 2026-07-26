@@ -580,28 +580,15 @@ describe("PostTools", () => {
       expect(typeof result === "object" || typeof result === "string").toBe(true);
     });
 
-    it("should sanitize HTML content in posts", async () => {
+    it("should reject a script tag in post content instead of stripping it", async () => {
       const postWithHtml = {
         title: "Test Post",
         content: "<script>alert('xss')</script><p>Safe content</p>",
         status: "publish",
       };
 
-      const mockCreatedPost = {
-        id: 125,
-        title: { rendered: "Test Post" },
-        content: { rendered: "<p>Safe content</p>" }, // Script should be removed
-        status: "publish",
-      };
-
-      mockClient.createPost.mockResolvedValueOnce(mockCreatedPost);
-
-      const result = await postTools.handleCreatePost(mockClient, postWithHtml);
-
-      expect(mockClient.createPost).toHaveBeenCalled();
-      // Content sanitization should occur in the handler
-      expect(typeof result).toBe("string");
-      expect(result).toContain("Post Created Successfully");
+      await expect(postTools.handleCreatePost(mockClient, postWithHtml)).rejects.toThrow("Unsafe content");
+      expect(mockClient.createPost).not.toHaveBeenCalled();
     });
   });
 

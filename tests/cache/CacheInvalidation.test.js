@@ -129,23 +129,37 @@ describe("CacheInvalidation", () => {
       expect(processQueueSpy).toHaveBeenCalled();
     });
 
-    it("should not process queue if already processing", async () => {
-      invalidation.processing = true;
+    it("joins an in-flight drain instead of resolving before its own event is processed", async () => {
+      const firstEvent = { type: "create", resource: "posts", id: 1, siteId: "test-site", timestamp: Date.now() };
+      const secondEvent = { type: "update", resource: "posts", id: 2, siteId: "test-site", timestamp: Date.now() };
 
-      const event = {
-        type: "create",
-        resource: "posts",
-        id: 123,
-        siteId: "test-site",
-        timestamp: Date.now(),
-      };
+      const realProcessEvent = invalidation.processEvent.bind(invalidation);
+      let secondEventProcessed = false;
+      vi.spyOn(invalidation, "processEvent").mockImplementation(async (event) => {
+        if (event === firstEvent) {
+          // Simulate slow processing so the second trigger() call below genuinely
+          // arrives while the first event's drain is still in flight.
+          await new Promise((resolve) => setTimeout(resolve, 20));
+        }
+        await realProcessEvent(event);
+        if (event === secondEvent) secondEventProcessed = true;
+      });
 
-      const processQueueSpy = vi.spyOn(invalidation, "processQueue");
+      const first = invalidation.trigger(firstEvent);
+      // No await between these two calls: processing is already true here because
+      // trigger() -> processQueue() sets it synchronously before its first await.
+      const second = invalidation.trigger(secondEvent);
 
-      await invalidation.trigger(event);
+      await second;
 
-      expect(processQueueSpy).not.toHaveBeenCalled();
-      expect(invalidation.eventQueue).toContainEqual(event);
+      // Regression: the old implementation returned from trigger(secondEvent)
+      // immediately upon seeing `processing === true`, without waiting for
+      // secondEvent to actually drain — a caller reading right after would see
+      // stale cache data.
+      expect(secondEventProcessed).toBe(true);
+      expect(invalidation.eventQueue).toHaveLength(0);
+
+      await first;
     });
   });
 

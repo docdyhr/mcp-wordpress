@@ -183,10 +183,10 @@ wp_get_site_settings --site="site3"
 
 ## Configuration Comparison
 
-| Method                     | Configuration               | Priority                | Sites     |
-| -------------------------- | --------------------------- | ----------------------- | --------- |
-| **UI Form** (default)      | Claude Desktop UI           | Low                     | 1 site    |
-| **Config File** (advanced) | `mcp-wordpress.config.json` | **HIGH** (overrides UI) | Unlimited |
+| Method                     | Configuration               | Priority                | Sites    |
+| -------------------------- | --------------------------- | ----------------------- | -------- |
+| **UI Form** (default)      | Claude Desktop UI           | Low                     | 1 site   |
+| **Config File** (advanced) | `mcp-wordpress.config.json` | **HIGH** (overrides UI) | Up to 50 |
 
 ---
 
