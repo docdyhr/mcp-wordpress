@@ -1,180 +1,100 @@
 # Production Deployment Guide
 
-Complete guide for deploying MCP WordPress Server to production environments.
+Guide for running MCP WordPress Server in production. This server is an **MCP (Model Context Protocol) server that
+communicates over stdio** — it has no HTTP listener, no port to expose, and no built-in reverse-proxy/load-balancer
+story. It is spawned as a child process by an MCP client (Claude Desktop, another MCP-compatible client, or Docker run
+interactively) and talks to that client over stdin/stdout. "Production" here means "reliably configured, correctly
+authenticated, and monitored" — not "a scaled, internet-facing HTTP service."
 
 ## Table of Contents
 
-- [Quick Start](#quick-start)
-- [Docker Deployment](#docker-deployment)
-- [Environment Management](#environment-management)
-- [Security Configuration](#security-configuration)
-- [Performance Optimization](#performance-optimization)
-- [Monitoring & Logging](#monitoring--logging)
-- [Backup & Recovery](#backup--recovery)
+- [Prerequisites](#prerequisites)
+- [Deployment Models](#deployment-models)
+- [Configuration](#configuration)
+- [Environment Variable Reference](#environment-variable-reference)
+- [Security](#security)
+- [Docker](#docker)
+- [Health Checks & Logging](#health-checks--logging)
+- [Backup](#backup)
 - [Troubleshooting](#troubleshooting)
 
-## Quick Start
+## Prerequisites
 
-### Prerequisites
+- Node.js **>=20.8.1** (see `package.json`'s `engines` field) or Docker
+- A WordPress site with the REST API enabled
+- An authentication method configured on that site: Application Passwords (recommended, WordPress 5.6+), Basic Auth, JWT
+  (requires a JWT Authentication plugin), or an API key
 
-- Docker 20.10+ or Node.js 20.8.1+
-- WordPress site with REST API enabled
-- Application passwords or JWT authentication configured
-
-### Production Checklist
-
-```bash
-# 1. Build verification
-npm run build
-npm test
-
-# 2. Security scan
-npm run security:scan
-
-# 3. Performance validation
-npm run test:performance
-
-# 4. Coverage check
-npm run coverage:full
-
-# 5. Docker deployment
-docker-compose up -d --build
-```
-
-## Docker Deployment
-
-### Official Docker Image
+### Pre-deployment checklist
 
 ```bash
-# Pull latest stable version
-docker pull docdyhr/mcp-wordpress:latest
-
-# Run with environment file
-docker run -d \
-  --name mcp-wordpress \
-  --env-file .env.production \
-  -p 3000:3000 \
-  docdyhr/mcp-wordpress:latest
+npm run build           # tsc && tsc-alias
+npm test                # full test suite
+npm run typecheck
+npm run lint
+npm run security:scan   # blocking production dependency audit (scripts/security-audit-gate.js)
 ```
 
-### Docker Compose (Recommended)
+## Deployment Models
 
-```yaml
-# docker-compose.prod.yml
-version: "3.8"
+### 1. Local/native (Node.js)
 
-services:
-  mcp-wordpress:
-    image: docdyhr/mcp-wordpress:latest
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: production
-      LOG_LEVEL: info
-    env_file:
-      - .env.production
-    volumes:
-      - ./config:/app/config:ro
-      - ./logs:/app/logs
-      - cache_data:/app/cache
-    healthcheck:
-      test: ["CMD", "npm", "run", "health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    networks:
-      - mcp_network
+The most common setup: the MCP client's own configuration spawns the server directly.
 
-  # Optional: Redis for enhanced caching
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    networks:
-      - mcp_network
-
-volumes:
-  cache_data:
-  redis_data:
-
-networks:
-  mcp_network:
-    driver: bridge
+```json
+{
+  "mcpServers": {
+    "wordpress": {
+      "command": "node",
+      "args": ["/absolute/path/to/mcp-wordpress/dist/index.js"],
+      "env": {
+        "WORDPRESS_SITE_URL": "https://your-site.com",
+        "WORDPRESS_USERNAME": "your-username",
+        "WORDPRESS_APP_PASSWORD": "xxxx xxxx xxxx xxxx xxxx xxxx",
+        "WORDPRESS_AUTH_METHOD": "app-password"
+      }
+    }
+  }
+}
 ```
 
-### Multi-Stage Dockerfile Optimization
+Generate this automatically with `npm run setup` (`bin/setup.js`), or run `npm run build && npm start` to launch it
+directly against a `.env` file for manual testing.
 
-```dockerfile
-# Dockerfile.prod
-FROM node:18-alpine AS builder
+### 2. Docker (interactive/stdio)
 
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
+The published image (`docdyhr/mcp-wordpress`) runs the same stdio server — there is no separate "Docker mode" with
+different capabilities. Point an MCP client at `docker run` instead of `node`:
 
-COPY . .
-RUN npm run build
-
-# Production stage
-FROM node:18-alpine AS production
-
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
-
-WORKDIR /app
-
-COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
-
-USER nodejs
-
-EXPOSE 3000
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD npm run health || exit 1
-
-CMD ["npm", "start"]
+```json
+{
+  "mcpServers": {
+    "wordpress": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "--env-file", "/absolute/path/to/.env", "docdyhr/mcp-wordpress:latest"]
+    }
+  }
+}
 ```
 
-## Environment Management
+`-i` (interactive, keeps stdin open) is required — without it the client's stdio connection to the container never
+works. See [Docker](#docker) below for `docker-compose.yml` usage and multi-site config mounting.
 
-### Production Environment Variables
+## Configuration
+
+### Single-site (`.env`)
 
 ```bash
-# .env.production
-NODE_ENV=production
-LOG_LEVEL=info
-DEBUG=false
-
-# WordPress Configuration
-WORDPRESS_SITE_URL=https://your-production-site.com
-WORDPRESS_USERNAME=production_user
+WORDPRESS_SITE_URL=https://your-site.com
+WORDPRESS_USERNAME=your-username
 WORDPRESS_APP_PASSWORD=xxxx xxxx xxxx xxxx xxxx xxxx
 WORDPRESS_AUTH_METHOD=app-password
-
-# Security
-ENABLE_CORS=false
-TRUSTED_ORIGINS=https://your-domain.com
-API_RATE_LIMIT=100
-API_RATE_WINDOW=900000
-
-# Performance
-CACHE_TTL=3600
-CACHE_MAX_SIZE=1000
-ENABLE_COMPRESSION=true
-MAX_REQUEST_SIZE=10mb
-
-# Monitoring
-ENABLE_METRICS=true
-METRICS_PORT=9090
-HEALTH_CHECK_TIMEOUT=5000
 ```
 
-### Multi-Site Production Config
+### Multi-site (`mcp-wordpress.config.json`)
+
+Supports up to **50 sites** (`ConfigurationSchema.ts`'s `MultiSiteConfigSchema`). Never commit this file — it's
+gitignored, same as `.env`.
 
 ```json
 {
@@ -183,9 +103,9 @@ HEALTH_CHECK_TIMEOUT=5000
       "id": "production",
       "name": "Production Site",
       "config": {
-        "WORDPRESS_SITE_URL": "https://main-site.com",
-        "WORDPRESS_USERNAME": "prod_user",
-        "WORDPRESS_APP_PASSWORD": "secure_app_password",
+        "WORDPRESS_SITE_URL": "https://your-site.com",
+        "WORDPRESS_USERNAME": "your-username",
+        "WORDPRESS_APP_PASSWORD": "xxxx xxxx xxxx xxxx xxxx xxxx",
         "WORDPRESS_AUTH_METHOD": "app-password"
       }
     },
@@ -193,411 +113,136 @@ HEALTH_CHECK_TIMEOUT=5000
       "id": "staging",
       "name": "Staging Site",
       "config": {
-        "WORDPRESS_SITE_URL": "https://staging.main-site.com",
-        "WORDPRESS_USERNAME": "staging_user",
-        "WORDPRESS_APP_PASSWORD": "staging_app_password",
+        "WORDPRESS_SITE_URL": "https://staging.your-site.com",
+        "WORDPRESS_USERNAME": "your-username",
+        "WORDPRESS_APP_PASSWORD": "yyyy yyyy yyyy yyyy yyyy yyyy",
         "WORDPRESS_AUTH_METHOD": "app-password"
       }
     }
-  ],
-  "security": {
-    "enableRateLimit": true,
-    "maxRequestsPerWindow": 100,
-    "windowSizeMs": 900000,
-    "enableCors": false,
-    "trustedOrigins": ["https://main-site.com"]
-  },
-  "performance": {
-    "cache": {
-      "enabled": true,
-      "defaultTTL": 3600,
-      "maxSize": 1000
-    },
-    "compression": true,
-    "maxRequestSize": "10mb"
-  },
-  "monitoring": {
-    "enableMetrics": true,
-    "metricsPort": 9090,
-    "healthCheckTimeout": 5000,
-    "logLevel": "info"
-  }
+  ]
 }
 ```
 
-## Security Configuration
+`ServerConfiguration.ts` fails startup loudly on invalid config (no silent fallback) — a typo or missing required field
+for the chosen auth method is caught immediately, not at first request.
 
-### Authentication Best Practices
+## Environment Variable Reference
 
-1. **Application Passwords (Recommended)**
+Every variable below is read somewhere in `src/` — this list is generated from the actual `process.env.*` call sites,
+not aspirational. Full per-auth-method requirements live in `src/config/ConfigurationSchema.ts`.
 
-   ```bash
-   # WordPress Admin → Users → Your Profile → Application Passwords
-   # Generate unique password for MCP server
-   WORDPRESS_APP_PASSWORD=xxxx xxxx xxxx xxxx xxxx xxxx
-   ```
+| Variable                 | Purpose                                                   | Default        |
+| ------------------------ | --------------------------------------------------------- | -------------- |
+| `WORDPRESS_SITE_URL`     | Site base URL (single-site mode)                          | — (required)   |
+| `WORDPRESS_USERNAME`     | Username for app-password/basic/jwt auth                  | —              |
+| `WORDPRESS_APP_PASSWORD` | Application Password (recommended auth method)            | —              |
+| `WORDPRESS_PASSWORD`     | Password for basic/jwt auth                               | —              |
+| `WORDPRESS_JWT_SECRET`   | JWT Authentication plugin secret                          | —              |
+| `WORDPRESS_API_KEY`      | API key auth                                              | —              |
+| `WORDPRESS_AUTH_METHOD`  | `app-password` \| `basic` \| `jwt` \| `api-key`           | `app-password` |
+| `WORDPRESS_TIMEOUT`      | Request timeout (ms)                                      | `30000`        |
+| `WORDPRESS_MAX_RETRIES`  | Max retry attempts for retryable requests                 | `3`            |
+| `DEBUG`                  | Verbose debug logging                                     | `false`        |
+| `LOG_LEVEL`              | Logger level                                              | —              |
+| `DISABLE_CACHE`          | Disable in-memory/HTTP caching entirely                   | `false`        |
+| `CACHE_TTL`              | Default cache TTL (seconds)                               | `300`          |
+| `CACHE_MAX_ITEMS`        | Max in-memory cache entries                               | —              |
+| `CACHE_MAX_MEMORY_MB`    | Approximate cache memory ceiling                          | —              |
+| `RATE_LIMIT`             | Client-side rate limit (requests/window)                  | `60`           |
+| `RATE_LIMIT_ENABLED`     | Enable client-side rate limiting                          | `true`         |
+| `RATE_LIMIT_REQUESTS`    | Requests per window                                       | `100`          |
+| `RATE_LIMIT_WINDOW`      | Window size (ms)                                          | `60000`        |
+| `ALLOW_INSECURE_HTTP`    | Escape hatch: allow `http://` site URLs                   | `false`        |
+| `ALLOW_PRIVATE_URLS`     | Escape hatch: allow private/loopback/link-local hostnames | `false`        |
 
-2. **JWT Authentication**
+`ALLOW_INSECURE_HTTP`/`ALLOW_PRIVATE_URLS` intentionally bypass the SSRF/HTTPS enforcement in
+`src/utils/validation/network.ts` — only set these for local development against a non-HTTPS or private WordPress
+instance, never in a real deployment reachable from untrusted input.
 
-   ```bash
-   # Install JWT Authentication plugin
-   # Configure JWT secret in wp-config.php
-   define('JWT_AUTH_SECRET_KEY', 'your-secret-key');
-   define('JWT_AUTH_CORS_ENABLE', true);
-   ```
+`npm run setup` (`bin/setup.js`) writes `WORDPRESS_*`, `DEBUG`, `DISABLE_CACHE`, and `RATE_LIMIT` for you interactively.
 
-### Network Security
+## Security
 
-```nginx
-# nginx.conf - Reverse proxy configuration
-upstream mcp_wordpress {
-    server 127.0.0.1:3000;
-    keepalive 32;
-}
+- **HTTPS/SSRF enforcement is on by default** for both single-site (`ConfigurationSchema`'s `UrlSchema`) and the live
+  client (`WordPressClient.validateAndSanitizeUrl`) — private, loopback, link-local, and cloud-metadata hostnames are
+  rejected unless `ALLOW_PRIVATE_URLS=true`, and non-HTTPS URLs are rejected unless `ALLOW_INSECURE_HTTP=true`.
+- **Never commit** `.env` or `mcp-wordpress.config.json` (both gitignored) — they hold plaintext credentials.
+- **Run `npm run security:scan` regularly** — it's a real, blocking gate (`scripts/security-audit-gate.js`) against a
+  reviewed, time-boxed exception list (`security-exceptions.json`), not a demo. See `SECURITY.md` for the current
+  known-issues list and how to add or renew an exception.
+- **Rotate Application Passwords** periodically from WordPress's own Users → Profile → Application Passwords screen —
+  revoking one there takes effect immediately, with no server restart needed here.
 
-server {
-    listen 443 ssl http2;
-    server_name api.yourdomain.com;
-
-    # SSL configuration
-    ssl_certificate /path/to/cert.pem;
-    ssl_certificate_key /path/to/key.pem;
-    ssl_protocols TLSv1.2 TLSv1.3;
-
-    # Security headers
-    add_header X-Frame-Options DENY;
-    add_header X-Content-Type-Options nosniff;
-    add_header X-XSS-Protection "1; mode=block";
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
-
-    # Rate limiting
-    limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
-    limit_req zone=api burst=20 nodelay;
-
-    location / {
-        proxy_pass http://mcp_wordpress;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-        proxy_read_timeout 86400;
-    }
-}
-```
-
-### Secrets Management
+## Docker
 
 ```bash
-# Using Docker secrets (Docker Swarm)
-echo "your_app_password" | docker secret create wp_app_password -
+# Pull the published image
+docker pull docdyhr/mcp-wordpress:latest
 
-# Using Kubernetes secrets
-kubectl create secret generic mcp-wordpress-secrets \
-  --from-literal=wp-app-password=your_app_password \
-  --from-literal=jwt-secret=your_jwt_secret
+# Run against a single-site .env file (interactive, for an MCP client to attach to)
+docker run -i --rm --env-file .env docdyhr/mcp-wordpress:latest
+
+# Or mount a multi-site config
+docker run -i --rm -v "$(pwd)/mcp-wordpress.config.json:/app/mcp-wordpress.config.json:ro" docdyhr/mcp-wordpress:latest
 ```
 
-## Performance Optimization
+The repository's own `docker-compose.yml` mounts `mcp-wordpress.config.json` and/or `.env` read-only, sets resource
+limits via the standard (non-Swarm) `mem_limit`/`cpus` keys, and wires up the real container `HEALTHCHECK`. It also
+includes an optional `wordpress` + `db` service pair (behind the `dev` profile) for spinning up a local WordPress
+instance to test against — not part of this server's own runtime.
 
-### Cache Configuration
+The image (`Dockerfile`) is a multi-stage `node:22-alpine` build, non-root (`mcp` user), `tini` as PID 1, with the same
+`--health-check` flag as the healthcheck below.
 
-```typescript
-// Production cache settings
-const cacheConfig = {
-  // Memory cache
-  maxItems: 5000,
-  maxMemoryMB: 512,
+## Health Checks & Logging
 
-  // TTL settings (seconds)
-  ttl: {
-    posts: 1800, // 30 minutes
-    pages: 3600, // 1 hour
-    users: 7200, // 2 hours
-    media: 86400, // 24 hours
-    settings: 43200, // 12 hours
-  },
-
-  // Compression
-  enableCompression: true,
-  compressionLevel: 6,
-};
-```
-
-### Database Optimization
-
-```sql
--- WordPress database indexes for REST API performance
-ALTER TABLE wp_posts ADD INDEX idx_post_status_type_date (post_status, post_type, post_date);
-ALTER TABLE wp_posts ADD INDEX idx_post_name (post_name);
-ALTER TABLE wp_postmeta ADD INDEX idx_meta_key_value (meta_key, meta_value(191));
-```
-
-### Load Balancing
-
-```yaml
-# docker-compose.scale.yml
-version: "3.8"
-
-services:
-  mcp-wordpress:
-    image: docdyhr/mcp-wordpress:latest
-    deploy:
-      replicas: 3
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 512M
-        reservations:
-          cpus: "0.25"
-          memory: 256M
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-    environment:
-      NODE_ENV: production
-    networks:
-      - app_network
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/ssl/certs:ro
-    depends_on:
-      - mcp-wordpress
-    networks:
-      - app_network
-```
-
-## Monitoring & Logging
-
-### Health Checks
+There is no HTTP `/health` endpoint — health is checked by actually running the server's own health-check path:
 
 ```bash
-# Built-in health check endpoint
-curl -f http://localhost:3000/health || exit 1
-
-# Detailed health check
-npm run health
-
-# Performance metrics
-curl http://localhost:9090/metrics
+node dist/index.js --health-check   # what the Docker HEALTHCHECK and docker-compose.yml both run
+npm run health                       # scripts/health-check.js — broader local diagnostic
+npm run status                       # bin/status.js — connection/auth status for configured site(s)
 ```
 
-### Structured Logging
+Logging goes through `src/utils/logger.ts` (structured, with credential redaction — confirmed by
+`tests/bin/status.test.js`'s redaction tests). Set `DEBUG=true` for verbose output; there is no separate
+`LOG_LEVEL=debug` HTTP-service-style log pipeline to configure.
 
-```json
-{
-  "timestamp": "2025-08-11T04:50:00.000Z",
-  "level": "info",
-  "message": "Request completed successfully",
-  "context": {
-    "method": "GET",
-    "endpoint": "/posts",
-    "duration": 145,
-    "statusCode": 200,
-    "cacheHit": true,
-    "siteId": "production"
-  }
-}
-```
+## Backup
 
-### Monitoring Stack
-
-```yaml
-# monitoring/docker-compose.yml
-version: "3.8"
-
-services:
-  prometheus:
-    image: prom/prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-
-  grafana:
-    image: grafana/grafana
-    ports:
-      - "3001:3000"
-    environment:
-      GF_SECURITY_ADMIN_PASSWORD: admin
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
-
-  loki:
-    image: grafana/loki
-    ports:
-      - "3100:3100"
-    volumes:
-      - ./loki-config.yml:/etc/loki/local-config.yaml
-      - loki_data:/tmp/loki
-
-volumes:
-  prometheus_data:
-  grafana_data:
-  loki_data:
-```
-
-## Backup & Recovery
-
-### Data Backup Strategy
+There is no local database and no persistent server-side state beyond the in-memory cache (which is intentionally
+ephemeral and rebuilds itself from WordPress on the next request). The only things worth backing up are your credentials
+and configuration:
 
 ```bash
-# Backup configuration
-tar -czf config-backup-$(date +%Y%m%d).tar.gz \
-  .env.production \
-  mcp-wordpress.config.json \
-  docker-compose.prod.yml
-
-# Cache backup (if needed)
-docker exec mcp-wordpress tar -czf - /app/cache > cache-backup-$(date +%Y%m%d).tar.gz
-
-# Database backup (if using local DB)
-docker exec postgres pg_dump -U postgres wordpress > db-backup-$(date +%Y%m%d).sql
+tar -czf mcp-wordpress-config-backup-$(date +%Y%m%d).tar.gz .env mcp-wordpress.config.json
 ```
 
-### Recovery Procedures
-
-```bash
-# 1. Stop services
-docker-compose -f docker-compose.prod.yml down
-
-# 2. Restore configuration
-tar -xzf config-backup-20250811.tar.gz
-
-# 3. Pull latest image
-docker-compose -f docker-compose.prod.yml pull
-
-# 4. Start services
-docker-compose -f docker-compose.prod.yml up -d
-
-# 5. Verify health
-npm run health
-```
+Store that archive somewhere access-controlled — it contains plaintext credentials.
 
 ## Troubleshooting
 
-### Common Production Issues
-
-#### 1. High Memory Usage
+### WordPress connection / authentication issues
 
 ```bash
-# Check memory usage
-docker stats mcp-wordpress
-
-# Adjust cache limits
-export CACHE_MAX_SIZE=500
-export CACHE_MAX_MEMORY_MB=256
-
-# Restart service
-docker-compose restart mcp-wordpress
+npm run status                                          # current auth status for configured site(s)
+npm run fix:rest-auth                                    # fixes the common Authorization-header-stripped-by-.htaccess case
+curl -I https://your-wordpress-site.com/wp-json/wp/v2/   # confirm the REST API itself is reachable
 ```
 
-#### 2. WordPress Connection Issues
+If Application Password authentication returns 401s specifically on shared hosting, the most common cause is the host
+stripping the `Authorization` header before it reaches WordPress — `npm run fix:rest-auth` adds the standard `.htaccess`
+rewrite rule for this (see the root `AGENTS.md` Troubleshooting section).
+
+### Debug mode
 
 ```bash
-# Test WordPress connectivity
-curl -I https://your-wordpress-site.com/wp-json/wp/v2/
-
-# Check authentication
-npm run test:auth
-
-# Verify application password
-wp user application-password list admin --allow-root
+DEBUG=true npm run dev   # build + run with verbose logging
 ```
 
-#### 3. Performance Degradation
+### Cache issues
 
 ```bash
-# Check cache hit rate
-curl http://localhost:9090/metrics | grep cache_hit_rate
-
-# Monitor request latency
-curl http://localhost:9090/metrics | grep request_duration
-
-# Check for memory leaks
-docker exec mcp-wordpress node --inspect=0.0.0.0:9229 dist/index.js
+rm -rf cache/            # clears the on-disk cache directory, if present
+# or set DISABLE_CACHE=true to bypass caching entirely for a session
 ```
-
-#### 4. SSL/TLS Issues
-
-```bash
-# Test SSL connection
-openssl s_client -connect your-domain.com:443 -servername your-domain.com
-
-# Check certificate expiration
-echo | openssl s_client -connect your-domain.com:443 2>/dev/null | openssl x509 -noout -dates
-```
-
-### Debug Mode
-
-```bash
-# Enable debug logging
-export DEBUG=true
-export LOG_LEVEL=debug
-
-# Restart with debug enabled
-docker-compose restart mcp-wordpress
-
-# View debug logs
-docker-compose logs -f mcp-wordpress
-```
-
-### Performance Profiling
-
-```bash
-# CPU profiling
-docker exec mcp-wordpress node --prof dist/index.js
-
-# Memory profiling
-docker exec mcp-wordpress node --inspect=0.0.0.0:9229 dist/index.js
-
-# Heap snapshots
-docker exec mcp-wordpress node -e "
-  const v8 = require('v8');
-  const fs = require('fs');
-  const heapSnapshot = v8.writeHeapSnapshot();
-  console.log('Heap snapshot written to', heapSnapshot);
-"
-```
-
----
-
-## Production Deployment Summary
-
-### Deployment Process
-
-1. **Pre-deployment**: Build → Test → Security Scan → Performance Check
-2. **Deployment**: Docker build → Environment setup → Service start → Health check
-3. **Post-deployment**: Monitoring setup → Backup configuration → Performance validation
-
-### Key Production Features
-
-- **56.37% test coverage** with c8 integration
-- **485 ESLint violations** (down from 506, ongoing optimization)
-- **Multi-site support** with centralized configuration
-- **Enhanced caching** with TTL and LRU eviction
-- **Structured logging** with context and sanitization
-- **Security hardening** with rate limiting and CORS
-- **Performance monitoring** with metrics and health checks
-
-### Maintenance Schedule
-
-- **Daily**: Health checks, log review, performance metrics
-- **Weekly**: Security updates, cache optimization, backup verification
-- **Monthly**: Full security audit, performance benchmarking, dependency updates
-- **Quarterly**: Architecture review, capacity planning, disaster recovery testing
-
-🚀 **Production Ready**: MCP WordPress Server is now fully prepared for enterprise production deployments with
-comprehensive monitoring, security, and performance optimization.

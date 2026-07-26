@@ -150,13 +150,11 @@ The following scripts help maintain file integrity:
 ### Monthly Tasks
 
 1. **Comprehensive Security Review**
-
    - Check `.gitignore` and `.npmignore` for new patterns
    - Review npm audit results
    - Verify no credentials in commit history
 
 2. **Documentation Updates**
-
    - Update README.md with new features
    - Review and update CLAUDE.md
    - Check all markdown files for accuracy
@@ -226,7 +224,6 @@ node_modules/
 ### Credential Management
 
 1. **Local Development:**
-
    - Store tokens in `~/.npmrc` or environment variables
    - Never commit `.npmrc` to version control
    - Use separate tokens for development vs. CI/CD
@@ -249,7 +246,6 @@ node_modules/
    ```
 
 2. **Credential Rotation:**
-
    - Revoke compromised NPM tokens
    - Rotate any exposed API keys
    - Update GitHub secrets

@@ -20,15 +20,10 @@ jobs:
   dependency-review:
     name: 🔍 Dependency Security Review
     runs-on: ubuntu-latest
-    # Skip for automated dependency update PRs
-    if: |
-      !(
-        contains(github.event.pull_request.labels.*.name, 'dependencies') ||
-        contains(github.event.pull_request.title, 'dependabot') ||
-        contains(github.event.pull_request.title, 'dependency update') ||
-        github.actor == 'dependabot[bot]' ||
-        github.actor == 'github-actions[bot]'
-      )
+    # Runs on every PR, including Dependabot's own — it previously skipped those (and any PR
+    # labeled "dependencies"), the exact gap a security review flagged. continue-on-error below
+    # already protects against this failing a Dependabot PR outright when GitHub Advanced
+    # Security isn't available; there's no reason to also skip it entirely.
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v6
@@ -74,32 +69,19 @@ jobs:
 
       - name: 🔍 NPM Security Audit
         run: |
-          echo "## 🔍 NPM Security Audit Results" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
+          npm audit --omit=dev --json > audit-results.json 2>/dev/null || true
 
-          # Run audit and capture results
-          if npm audit --audit-level=moderate --json > audit-results.json 2>/dev/null; then
-            echo "✅ **No moderate or higher vulnerabilities found**" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "⚠️ **Vulnerabilities detected**" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## 🔍 NPM Security Audit Results"
+            echo ""
+            echo "- 🔴 Critical: $(jq -r '.metadata.vulnerabilities.critical // 0' audit-results.json)"
+            echo "- 🟠 High: $(jq -r '.metadata.vulnerabilities.high // 0' audit-results.json)"
+            echo "- 🟡 Moderate: $(jq -r '.metadata.vulnerabilities.moderate // 0' audit-results.json)"
+            echo "- 🟢 Low: $(jq -r '.metadata.vulnerabilities.low // 0' audit-results.json)"
+          } >> "$GITHUB_STEP_SUMMARY"
 
-            # Parse and display results
-            if [ -f audit-results.json ]; then
-              CRITICAL=$(cat audit-results.json | jq -r '.metadata.vulnerabilities.critical // 0')
-              HIGH=$(cat audit-results.json | jq -r '.metadata.vulnerabilities.high // 0')
-              MODERATE=$(cat audit-results.json | jq -r '.metadata.vulnerabilities.moderate // 0')
-              LOW=$(cat audit-results.json | jq -r '.metadata.vulnerabilities.low // 0')
-
-              {
-                echo "- 🔴 Critical: $CRITICAL"
-                echo "- 🟠 High: $HIGH"
-                echo "- 🟡 Moderate: $MODERATE"
-                echo "- 🟢 Low: $LOW"
-                echo ""
-                echo "**Action Required:** Please run \`npm audit fix\` to address vulnerabilities."
-              } >> "$GITHUB_STEP_SUMMARY"
-            fi
-          fi
+      - name: 🎯 Production Dependency Audit Gate
+        run: node scripts/security-audit-gate.js
 
       - name: 📊 Upload Security Audit Results
         if: always()

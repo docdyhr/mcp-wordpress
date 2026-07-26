@@ -1,7 +1,7 @@
 import { WordPressClient } from "@/client/api.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
 import { MediaQueryParams, UpdateMediaRequest, UploadMediaRequest } from "@/types/wordpress.js";
-import { getErrorMessage } from "@/utils/error.js";
+import { preserveToolError } from "@/utils/error.js";
 import { validateFilePath } from "@/utils/validation/security.js";
 import { parseId, parseIdAndForce, toolParams } from "./params.js";
 
@@ -198,7 +198,7 @@ export class MediaTools {
         media.map((m) => `- ID ${m.id}: **${m.title.rendered}** (${m.mime_type})\n  Link: ${m.source_url}`).join("\n");
       return content;
     } catch (_error) {
-      throw new Error(`Failed to list media: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to list media", _error);
     }
   }
 
@@ -216,7 +216,7 @@ export class MediaTools {
         (media.caption.rendered ? `- **Caption:** ${media.caption.rendered}\n` : "");
       return content;
     } catch (_error) {
-      throw new Error(`Failed to get media item: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to get media item", _error);
     }
   }
 
@@ -232,7 +232,7 @@ export class MediaTools {
       const media = await client.uploadMedia(uploadParams);
       return `✅ Media uploaded successfully!\n- ID: ${media.id}\n- Title: ${media.title.rendered}\n- URL: ${media.source_url}`;
     } catch (_error) {
-      throw new Error(`Failed to upload media: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to upload media", _error);
     }
   }
 
@@ -242,7 +242,7 @@ export class MediaTools {
       const media = await client.updateMedia(updateParams);
       return `✅ Media ${media.id} updated successfully.`;
     } catch (_error) {
-      throw new Error(`Failed to update media: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to update media", _error);
     }
   }
 
@@ -253,7 +253,7 @@ export class MediaTools {
       const action = force ? "permanently deleted" : "moved to trash";
       return `✅ Media item ${id} has been ${action}`;
     } catch (_error) {
-      throw new Error(`Failed to delete media: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to delete media", _error);
     }
   }
 }

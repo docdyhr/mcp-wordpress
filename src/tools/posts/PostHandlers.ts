@@ -313,8 +313,13 @@ export async function handleCreatePost(
   params: CreatePostRequest,
 ): Promise<WordPressPost | string> {
   try {
-    validatePostParams(params);
-    const post = await client.createPost(params);
+    // validatePostParams sanitizes `content` (and validates title/status/categories/tags/
+    // featured_media/date) via the allowlist-based sanitizeHtml() — its returned, sanitized
+    // fields must actually be sent, not just the original `params`, or the sanitization has no
+    // effect at all (a real gap a security review caught: this used to be called only for its
+    // throwing side effect, then discarded).
+    const validated = validatePostParams(params);
+    const post = await client.createPost({ ...params, ...validated } as CreatePostRequest);
 
     // Build success response with management links
     let response = `✅ **Post Created Successfully**\n\n`;
@@ -352,9 +357,10 @@ export async function handleUpdatePost(
     const postId = validateId(params.id, "post ID");
 
     const { id: _id, ...updateData } = params;
-    validatePostParams(updateData, true);
+    // See handleCreatePost: validated (sanitized) fields must be sent, not just updateData.
+    const validated = validatePostParams(updateData, true);
 
-    const updatedPost = await client.updatePost({ id: postId, ...updateData });
+    const updatedPost = await client.updatePost({ id: postId, ...updateData, ...validated });
 
     // Build change summary
     let response = `✅ **Post Updated Successfully**\n\n`;

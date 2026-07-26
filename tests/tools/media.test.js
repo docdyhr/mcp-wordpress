@@ -4,6 +4,7 @@ import { vi } from "vitest";
 // Upload functionality is validated through integration tests
 
 import { MediaTools } from "@/tools/media.js";
+import { WordPressAPIError } from "@/types/client.js";
 
 describe("MediaTools", () => {
   let mediaTools;
@@ -195,6 +196,17 @@ describe("MediaTools", () => {
       mockClient.getMedia.mockRejectedValueOnce(new Error("API Error"));
 
       await expect(mediaTools.handleListMedia(mockClient, {})).rejects.toThrow("Failed to list media");
+    });
+
+    it("preserves statusCode/code from a typed client error instead of discarding them", async () => {
+      mockClient.getMedia.mockRejectedValueOnce(new WordPressAPIError("Not logged in", 401, "authentication_failed"));
+
+      const error = await mediaTools.handleListMedia(mockClient, {}).catch((e) => e);
+
+      expect(error).toBeInstanceOf(WordPressAPIError);
+      expect(error.statusCode).toBe(401);
+      expect(error.code).toBe("authentication_failed");
+      expect(error.message).toContain("Failed to list media");
     });
 
     it("should handle per_page parameter", async () => {

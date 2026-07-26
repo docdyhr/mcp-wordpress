@@ -93,7 +93,7 @@ CMD ["node", "dist/index.js"]
 
 # OCI metadata labels (enhanced for v6 compliance)
 LABEL org.opencontainers.image.title="MCP WordPress Server"
-LABEL org.opencontainers.image.description="Complete WordPress MCP Server with 59 management tools, intelligent caching, real-time monitoring, and multi-site support"
+LABEL org.opencontainers.image.description="Complete WordPress MCP Server with 71 management tools, intelligent caching, real-time monitoring, and multi-site support"
 LABEL org.opencontainers.image.version="${VERSION}"
 LABEL org.opencontainers.image.created="${BUILD_DATE}"
 LABEL org.opencontainers.image.revision="${VCS_REF}"

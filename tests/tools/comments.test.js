@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import { CommentTools } from "@/tools/comments.js";
+import { WordPressAPIError } from "@/types/client.js";
 
 describe("CommentTools", () => {
   let commentTools;
@@ -196,6 +197,18 @@ describe("CommentTools", () => {
       mockClient.getComments.mockRejectedValueOnce(new Error("API Error"));
 
       await expect(commentTools.handleListComments(mockClient, {})).rejects.toThrow("Failed to list comments");
+    });
+
+    it("preserves statusCode/code from a typed client error instead of discarding them", async () => {
+      mockClient.getComments.mockRejectedValueOnce(
+        new WordPressAPIError("Not logged in", 401, "authentication_failed"),
+      );
+
+      const error = await commentTools.handleListComments(mockClient, {}).catch((e) => e);
+
+      expect(error).toBeInstanceOf(WordPressAPIError);
+      expect(error.statusCode).toBe(401);
+      expect(error.code).toBe("authentication_failed");
     });
 
     it("should truncate long comment content", async () => {
@@ -429,6 +442,20 @@ describe("CommentTools", () => {
       });
       expect(result).toContain("ID: 125");
     });
+
+    it("sanitizes dangerous content before sending to the API (defense-in-depth: comments have no other sanitization layer)", async () => {
+      mockClient.createComment.mockResolvedValueOnce({ id: 126, post: 100, content: { rendered: "" }, status: "hold" });
+
+      await commentTools.handleCreateComment(mockClient, {
+        post: 100,
+        content: '<p>Nice post</p><svg><animate onbegin="alert(1)"></animate></svg>',
+      });
+
+      const sentContent = mockClient.createComment.mock.calls[0][0].content;
+      expect(sentContent).not.toContain("<svg");
+      expect(sentContent).not.toContain("onbegin");
+      expect(sentContent).toContain("Nice post");
+    });
   });
 
   describe("handleUpdateComment", () => {
@@ -533,6 +560,20 @@ describe("CommentTools", () => {
 
         expect(result).toContain(`New status: ${status}`);
       }
+    });
+
+    it("sanitizes dangerous content before sending to the API when content is included in an update", async () => {
+      mockClient.updateComment.mockResolvedValueOnce({ id: 5, status: "hold" });
+
+      await commentTools.handleUpdateComment(mockClient, {
+        id: 5,
+        content: '<p>Edited</p><svg><animate onbegin="alert(1)"></animate></svg>',
+      });
+
+      const sentContent = mockClient.updateComment.mock.calls[0][0].content;
+      expect(sentContent).not.toContain("<svg");
+      expect(sentContent).not.toContain("onbegin");
+      expect(sentContent).toContain("Edited");
     });
   });
 

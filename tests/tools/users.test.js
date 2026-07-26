@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import { UserTools } from "@/tools/users.js";
+import { WordPressAPIError } from "@/types/client.js";
 
 describe("UserTools", () => {
   let userTools;
@@ -192,6 +193,16 @@ describe("UserTools", () => {
       mockClient.getUsers.mockRejectedValueOnce(new Error("API Error"));
 
       await expect(userTools.handleListUsers(mockClient, {})).rejects.toThrow("Failed to list users");
+    });
+
+    it("preserves statusCode/code from a typed client error instead of discarding them", async () => {
+      mockClient.getUsers.mockRejectedValueOnce(new WordPressAPIError("Not logged in", 401, "authentication_failed"));
+
+      const error = await userTools.handleListUsers(mockClient, {}).catch((e) => e);
+
+      expect(error).toBeInstanceOf(WordPressAPIError);
+      expect(error.statusCode).toBe(401);
+      expect(error.code).toBe("authentication_failed");
     });
 
     it("should format users with missing optional fields", async () => {

@@ -1,7 +1,7 @@
 import { WordPressClient } from "@/client/api.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
 import { CreateCategoryRequest, CreateTagRequest, UpdateCategoryRequest, UpdateTagRequest } from "@/types/wordpress.js";
-import { getErrorMessage } from "@/utils/error.js";
+import { preserveToolError } from "@/utils/error.js";
 import { parseId, toolParams } from "./params.js";
 
 /**
@@ -201,7 +201,7 @@ export class TaxonomyTools {
         categories.map((c) => `- ID ${c.id}: **${c.name}** (Posts: ${c.count})`).join("\n");
       return content;
     } catch (_error) {
-      throw new Error(`Failed to list categories: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to list categories", _error);
     }
   }
 
@@ -217,7 +217,7 @@ export class TaxonomyTools {
         `- **Post Count:** ${category.count}`;
       return content;
     } catch (_error) {
-      throw new Error(`Failed to get category: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to get category", _error);
     }
   }
 
@@ -227,7 +227,7 @@ export class TaxonomyTools {
       const category = await client.createCategory(createParams);
       return `✅ Category "${category.name}" created successfully with ID: ${category.id}.`;
     } catch (_error) {
-      throw new Error(`Failed to create category: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to create category", _error);
     }
   }
 
@@ -237,7 +237,7 @@ export class TaxonomyTools {
       const category = await client.updateCategory(updateParams);
       return `✅ Category ${category.id} updated successfully.`;
     } catch (_error) {
-      throw new Error(`Failed to update category: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to update category", _error);
     }
   }
 
@@ -247,7 +247,7 @@ export class TaxonomyTools {
       await client.deleteCategory(id);
       return `✅ Category ${id} has been deleted.`;
     } catch (_error) {
-      throw new Error(`Failed to delete category: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to delete category", _error);
     }
   }
 
@@ -263,7 +263,7 @@ export class TaxonomyTools {
         tags.map((t) => `- ID ${t.id}: **${t.name}** (Posts: ${t.count})`).join("\n");
       return content;
     } catch (_error) {
-      throw new Error(`Failed to list tags: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to list tags", _error);
     }
   }
 
@@ -278,7 +278,7 @@ export class TaxonomyTools {
         `- **Post Count:** ${tag.count}`;
       return content;
     } catch (_error) {
-      throw new Error(`Failed to get tag: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to get tag", _error);
     }
   }
 
@@ -288,7 +288,7 @@ export class TaxonomyTools {
       const tag = await client.createTag(createParams);
       return `✅ Tag "${tag.name}" created successfully with ID: ${tag.id}.`;
     } catch (_error) {
-      throw new Error(`Failed to create tag: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to create tag", _error);
     }
   }
 
@@ -298,7 +298,7 @@ export class TaxonomyTools {
       const tag = await client.updateTag(updateParams);
       return `✅ Tag ${tag.id} updated successfully.`;
     } catch (_error) {
-      throw new Error(`Failed to update tag: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to update tag", _error);
     }
   }
 
@@ -308,7 +308,7 @@ export class TaxonomyTools {
       await client.deleteTag(id);
       return `✅ Tag ${id} has been deleted.`;
     } catch (_error) {
-      throw new Error(`Failed to delete tag: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to delete tag", _error);
     }
   }
 }

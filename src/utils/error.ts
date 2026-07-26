@@ -3,6 +3,7 @@
  */
 import { LoggerFactory } from "./logger.js";
 import { config } from "@/config/Config.js";
+import { WordPressAPIError } from "@/types/client.js";
 
 const logger = LoggerFactory.server().child({ component: "ErrorUtils" });
 
@@ -110,6 +111,22 @@ export function handleToolError(error: unknown, operation: string, context?: Rec
   }
 
   throw new Error(`Failed to ${operation}: ${message}`);
+}
+
+/**
+ * Rethrows a caught client error with an operation-specific message prefix (e.g. "Failed to
+ * list media"), preserving statusCode/code/data/subclass-identity for WordPressAPIError (and
+ * its subclasses AuthenticationError/RateLimitError/ValidationError) instead of flattening it
+ * into a plain Error — ToolRegistry's auth-error detection and other callers depend on that
+ * metadata surviving to the MCP tool boundary. Falls back to a plain Error only for inputs
+ * that carry no such metadata to begin with.
+ */
+export function preserveToolError(prefix: string, error: unknown): never {
+  if (error instanceof WordPressAPIError) {
+    error.message = `${prefix}: ${error.message}`;
+    throw error;
+  }
+  throw new Error(`${prefix}: ${getErrorMessage(error)}`);
 }
 
 /**

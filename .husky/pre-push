@@ -21,11 +21,13 @@ NODE_OPTIONS="--max-old-space-size=4096" npm run test:security || {
     exit 1
 }
 
-# Run dependency audit (lightweight check)
-echo "🔍 Running security audit..."
-npm audit --audit-level moderate || {
-    echo "⚠️ Security audit found issues. Consider running 'npm audit fix' if needed."
-    echo "Proceeding with push as audit issues may be acceptable..."
+# Run the blocking production dependency audit gate — fails unless every
+# finding is covered by a live, unexpired entry in security-exceptions.json.
+echo "🔍 Running production dependency audit gate..."
+node scripts/security-audit-gate.js || {
+    echo "❌ Security audit gate failed. Fix the dependency or add a reviewed, time-boxed"
+    echo "   exception to security-exceptions.json before pushing."
+    exit 1
 }
 
 echo "✅ All pre-push checks passed! Ready to push."

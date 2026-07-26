@@ -59,6 +59,18 @@ jobs:
         env:
           HUSKY: 0
 
+      - name: 🔍 TypeScript Check
+        run: npm run typecheck
+
+      - name: 🧹 Lint Code
+        run: npm run lint
+
+      - name: 🎨 Format Check
+        run: npm run format:check
+
+      - name: 🔒 Production Dependency Audit Gate
+        run: npm run security:scan
+
       - name: 🧪 Run Essential Tests
         run: npm run test:ci
         env:
@@ -150,7 +162,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
           labels: |
             org.opencontainers.image.title=MCP WordPress Server
-            org.opencontainers.image.description=Complete WordPress MCP Server with 59 management tools, intelligent caching, and real-time monitoring
+            org.opencontainers.image.description=Complete WordPress MCP Server with 71 management tools, intelligent caching, and real-time monitoring
             org.opencontainers.image.version=${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.created={{date 'YYYY-MM-DDTHH:mm:ssZ'}}
@@ -280,11 +292,34 @@ jobs:
             exit 1
           fi
 
+      - name: 🔍 Trivy Vulnerability Scan (published image)
+        id: trivy-scan
+        # Scans the tag this job just pushed and verified above. This is necessarily a
+        # post-push scan, not a pre-push gate: the build above is multi-platform
+        # (linux/amd64,linux/arm64) via a single buildx invocation, and buildx cannot
+        # `--load` a multi-platform manifest locally, so there is no local image to scan
+        # before push. A HIGH/CRITICAL finding here fails this job loudly (see the alert
+        # step below) so it gets human attention immediately, even though the image is
+        # already public by the time the scan runs.
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          scan-type: "image"
+          image-ref: docdyhr/mcp-wordpress:${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}
+          format: "table"
+          severity: "HIGH,CRITICAL"
+          exit-code: "1"
+
       - name: 🚨 Docker Verification Failed - Create Alert
         if: failure() && steps.verify-docker.outputs.verification_status == 'failure'
         run: |
           echo "::error title=Docker Publishing Verification Failed::Failed to verify Docker image publication"
           echo "Manual intervention may be required to publish the Docker image"
+
+      - name: 🚨 Trivy Scan Failed - Create Alert
+        if: failure() && steps.trivy-scan.outcome == 'failure'
+        run: |
+          echo "::error title=Docker Image Vulnerability Scan Failed::The published image has HIGH/CRITICAL vulnerabilities — see the Trivy step output above"
+          echo "The image is already live on Docker Hub; review and patch, then release a fixed version."
 
   # 📦 DXT Package Build and Upload
   dxt-package:

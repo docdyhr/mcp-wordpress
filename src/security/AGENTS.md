@@ -12,7 +12,15 @@ Owns `src/security/` (12 files, barrel-exported via `index.ts`).
 ## Local Contracts
 
 - `InputValidator.ts` — `InputSanitizer`, `SecuritySchemas`, `SecurityLimiter`, `ToolSchemas` — **the single
-  sanitization surface every MCP tool input should route through.**
+  sanitization surface every MCP tool input should route through.** Wired into
+  `src/server/ToolRegistry.ts`'s `getZodTypeForProperty()`/`getZodTypeForParameter()`: every string-typed tool
+  parameter is layered with `isUnsafePlainText` (script tags, `javascript:`/`data:` URLs, event-handler attributes),
+  except parameters named `content`/`excerpt` (WordPress post/page/comment body text), which get the narrower
+  `isUnsafeWordPressContent` so legitimate Gutenberg block markup isn't rejected. **Do not confuse
+  `InputSanitizer.sanitizeHtml()` here with the differently-purposed `sanitizeHtml()` in
+  `src/utils/validation/security.ts`** — the latter post-processes already-fetched WordPress content for read-side
+  output (used by `PostHandlers.ts`), not incoming tool-call arguments; the two are unrelated despite the identical
+  name.
 - `SecurityConfig.ts` — static security constants, `SecurityUtils`, `createSecureError`, `getEnvironmentSecurity`.
 - `AISecurityScanner.ts` — AI-powered vulnerability detection.
 - `AutomatedRemediation.ts` — automated fix generation for detected vulnerabilities.

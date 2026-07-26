@@ -2,637 +2,943 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+Full audit remediation (2026-07-26) — not yet committed/released.
+
+### 🔒 Security
+
+- **content sanitization:** a follow-up security review found the newly-added event-handler denylist
+  (`EVENT_HANDLER_PATTERN` in `InputValidator.ts`) omitted SVG SMIL animation handlers (`onbegin`/`onend`/`onrepeat` — a
+  well-known filter-bypass technique, since these fire with no user interaction and are routinely missed by lists built
+  around common DOM events) plus `onfocusin`/`onfocusout`/`onbeforeinput`/`onbeforetoggle`/`onauxclick`; broadened the
+  pattern to cover all of them
+- **posts:** `handleCreatePost`/`handleUpdatePost` were calling `validatePostParams()` — which sanitizes `content` via
+  the existing allowlist-based `sanitizeHtml()` — only for its side effect of throwing on invalid input, then discarding
+  the sanitized result and sending the original, unsanitized `params` to the WordPress REST API. The sanitized fields
+  are now actually used
+- **comments:** `content` had no HTML sanitization at all beyond the Zod boundary check above; added the same
+  `sanitizeHtml()` call as defense-in-depth, since this tool had no fallback layer if that check were ever bypassed
+- **posts/pages content corruption (PR #209 review):** the `sanitizeHtml()` wiring above ran post/page `content` through
+  an HTML _allowlist_ on every create/update — which strips HTML comments and any non-allowlisted element/attribute,
+  corrupting ordinary Gutenberg block markup (`<!-- wp:* -->` comments, `<figure>`/`class` wrapper markup, etc.) on
+  every write. Both Copilot and Codex independently flagged this in review. Replaced with the already-correct
+  `isUnsafeWordPressContent` reject-or-passthrough used at the MCP tool boundary (`ToolRegistry.ts`): unmistakable XSS
+  vectors (script tags, `javascript:` URLs, event handlers) are rejected outright, and otherwise-safe content —
+  including Gutenberg markup — passes through unchanged
+- **cache invalidation race (PR #209 review):** `CacheInvalidation.trigger()` only awaited `processQueue()` when no
+  drain was already in flight; a `trigger()` call arriving while another was mid-drain pushed its event onto the shared
+  queue but returned immediately, before that event was actually processed — breaking the read-after-write guarantee for
+  concurrent writes. `processQueue()` now has every concurrent caller join the in-flight drain instead of returning
+  early
+- **`InputValidator.ts` data: URL over-matching (PR #209 review):** `DATA_URL_PATTERN` was an unanchored `/data\s*:/i`,
+  matching inside ordinary words like "Metadata:" and rejecting legitimate titles/descriptions/search terms before their
+  handler ran. Anchored to an actual `data:` URI shape (word boundary before `data`, no whitespace before the mandatory
+  comma) so real data URIs are still rejected but prose mentioning "data:" is not
+- **ci:** fixed the remaining swallowed-failure npm scripts (`security:monitor`, `security:review`) to propagate real
+  results instead of always reporting success; removed `dependency-review.yml`'s skip condition for Dependabot/labeled
+  PRs, so the custom audit job runs on every PR consistently
+- **`security-audit-gate.js` exception expiry (PR #209 review):** a missing or malformed `reviewBy` (e.g.
+  `"not-a-date"`, which sorts after any real date string) never satisfied the bare `reviewBy < today` comparison, so the
+  exception was silently accepted forever instead of being treated as expired. Now validated as a real, unexpired
+  `YYYY-MM-DD` date before being accepted
+
+### 🐛 Bug Fixes
+
+- **`scripts/health-check.js` (PR #209 review):** `requiredFiles`/`keyFiles` still listed `src/client/auth.ts` and
+  `dist/client/auth.js`, deleted in this same remediation's dead-code cleanup, so `npm run health` always reported a
+  correctly-built checkout as unhealthy. Removed the stale entries
+- **`package.json` build script (PR #209 review):** `"build": "rm -rf dist && ..."` fails on native Windows, where
+  `cmd.exe` has no `rm` — breaking `npm run build`, and everything that chains it (`setup`, `dev`, tests). Replaced with
+  a `node -e` `fs.rmSync` one-liner, avoiding a new dependency
+
+### 📚 Documentation
+
+- **`.env.example`** had six more unread/fictional variables beyond the ones already fixed in this remediation (`PORT`,
+  `CACHE_DIR`, `WORDPRESS_API_VERSION`, `WORDPRESS_DEBUG`, `WORDPRESS_REST_API_BASE`, `LOG_FILE`) plus an entire "OAuth"
+  authentication method example that was never implemented; removed all of them and corrected the JWT example's field
+  names
+- **multi-site site limit (PR #209 review):** `DXT-MULTISITE-GUIDE.md` and `docs/examples/multi-site-setup.md` claimed
+  config-file multi-site supports "unlimited" sites; `MultiSiteConfigSchema` actually caps it at 50. Corrected both to
+  state the real limit
 
 ## [3.3.22](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.21...v3.3.22) (2026-07-25)
 
 ### 🐛 Bug Fixes
 
-* return raw Gutenberg block markup when full content is requested ([#206](https://github.com/docdyhr/mcp-wordpress/issues/206)) ([3dcdd2f](https://github.com/docdyhr/mcp-wordpress/commit/3dcdd2f3fe2933a74736368d9367bf93f6775719))
+- return raw Gutenberg block markup when full content is requested
+  ([#206](https://github.com/docdyhr/mcp-wordpress/issues/206))
+  ([3dcdd2f](https://github.com/docdyhr/mcp-wordpress/commit/3dcdd2f3fe2933a74736368d9367bf93f6775719))
 
 ## [3.3.21](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.20...v3.3.21) (2026-07-25)
 
 ### 🐛 Bug Fixes
 
-* **ci:** make Docker retry step continue-on-error so real verification decides success ([#208](https://github.com/docdyhr/mcp-wordpress/issues/208)) ([4b9aae6](https://github.com/docdyhr/mcp-wordpress/commit/4b9aae6bf0215980f2deeaf6704d0715195bc0dc))
+- **client:** preserve `statusCode`/`code`/`data` on typed errors through `requestRaw()`'s retry-exhaustion path and
+  through every `src/tools/*.ts` catch-and-rewrap site (new `preserveToolError()` helper), instead of discarding them
+  into a generic `Error`; fix `ToolRegistry.isAuthenticationError()` to check the fields the client actually sets
+  (`statusCode`, `code: "authentication_failed"`) instead of a shape (`response.status`, `"WORDPRESS_AUTH_ERROR"`)
+  nothing ever throws
+- **cache:** `CacheInvalidation.trigger()`/`processQueue()` now resolve only once the queued invalidation has actually
+  run (no more `setImmediate` deferral), closing a read-after-write race where an immediate GET after an awaited write
+  could return stale cached data
+- **security:** fix a stateful shared-regex bug in `InputValidator.ts` (`SCRIPT_TAG_PATTERN`/`SCRIPT_END_PATTERN`
+  carried the `g` flag with `.test()`, making repeated validation of the same malicious payload nondeterministic) and a
+  broken `htmlContent` event-handler check (`val.includes("on[a-z]+=")` matched a literal string, never a pattern); wire
+  `SecuritySchemas` into `ToolRegistry`'s Zod schema construction so MCP tool string parameters are actually validated
+  at the boundary, with a permissive `wpContent`-based check for `content`/`excerpt` fields so legitimate Gutenberg
+  block markup isn't rejected
+- **ci:** replace non-enforcing security gates (`security:scan`'s swallowed `||` fallback, `main-ci.yml`'s
+  `continue-on-error` audit step, `dependency-review.yml`'s always-passing audit job, `.husky/pre-push`'s swallowed
+  audit) with a real blocking gate (`scripts/security-audit-gate.js` + `security-exceptions.json`, replacing the unused
+  `.audit-ci.json`/stale `.auditignore`); document and time-box the one current accepted finding
+  (Hono/`@modelcontextprotocol/sdk`, GHSA-frvp-7c67-39w9)
+- **release:** add lint/typecheck/format/security gates to `release.yml`'s publish job; remove `docker-modern.yml`'s
+  `release:` trigger, which silently built-and-discarded an image on every release instead of publishing
+  (`release.yml`'s `docker-publish` job is the sole authoritative push path); add a real blocking Trivy scan of the
+  published image; fix stale "59 management tools" metadata (now 71) across `Dockerfile` and both Docker workflows
+- **setup:** `bin/setup.js` now persists `DEBUG`/`RATE_LIMIT`/`DISABLE_CACHE` (previously collected then silently
+  discarded), masks secret prompts instead of echoing them, escapes `.env` values, resets credential-file permissions to
+  `0600` on overwrite (previously only applied on first creation), and JSON-escapes the generated Claude Desktop config
+  snippet instead of hand-splicing a template string
+- **build:** `npm run build` now cleans `dist/` first — `tsc` never removes output for deleted source files, so a stale
+  `dist/client/managers/` (64 files) and `dist/client/auth.js` survived past this session's dead-code deletion until
+  this fix
+
+### 🗑️ Removed
+
+- Deleted `src/client/managers/` (16 files, a confirmed-dead parallel client architecture) and `src/client/auth.ts` (a
+  second, unwired auth implementation), plus their 9 associated dead test files — shrinks the published npm tarball from
+  490 to 422 files (2.64 MB → 2.4 MB unpacked)
+
+### 📚 Documentation
+
+- Rewrite `PRODUCTION.md` around the server's actual stdio-transport deployment model (was: port 3000, Redis, nginx
+  reverse proxy, Prometheus/Grafana/Loki — none implemented)
+- Fix README version badge (v3.3.14 → v3.3.21) and multi-site cap claim ("unlimited" → "up to 50 sites", matching
+  `ConfigurationSchema`'s enforced limit)
+- Sync DOX (`AGENTS.md` files) with all of the above: `src/client/`, `src/security/`, `src/cache/`, `tests/`,
+  `scripts/`, and root
+
+### 🧪 Tests
+
+- Added ~50 regression tests across the client retry path, `ToolRegistry` schema validation, cache invalidation,
+  `InputValidator`, and a new `tests/bin/setup.test.js` (previously zero coverage)
+
+### 🐛 Bug Fixes
+
+- **ci:** make Docker retry step continue-on-error so real verification decides success
+  ([#208](https://github.com/docdyhr/mcp-wordpress/issues/208))
+  ([4b9aae6](https://github.com/docdyhr/mcp-wordpress/commit/4b9aae6bf0215980f2deeaf6704d0715195bc0dc))
 
 ## [3.3.20](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.19...v3.3.20) (2026-07-24)
 
 ### 🐛 Bug Fixes
 
-* **ci:** bound docker-publish job timeout, fix dead retry-on-hang path ([#207](https://github.com/docdyhr/mcp-wordpress/issues/207)) ([5ac7cf6](https://github.com/docdyhr/mcp-wordpress/commit/5ac7cf6655ce44b22b5f2e6424113facd6da0911))
+- **ci:** bound docker-publish job timeout, fix dead retry-on-hang path
+  ([#207](https://github.com/docdyhr/mcp-wordpress/issues/207))
+  ([5ac7cf6](https://github.com/docdyhr/mcp-wordpress/commit/5ac7cf6655ce44b22b5f2e6424113facd6da0911))
 
 ## [3.3.19](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.18...v3.3.19) (2026-07-21)
 
 ### 🐛 Bug Fixes
 
-* **security:** SSRF denylist, HTTPS enforcement, logger redaction, dep floors ([#205](https://github.com/docdyhr/mcp-wordpress/issues/205)) ([b899959](https://github.com/docdyhr/mcp-wordpress/commit/b8999592d7ac12bd30aa1cf8352abd381c6c0f06))
+- **security:** SSRF denylist, HTTPS enforcement, logger redaction, dep floors
+  ([#205](https://github.com/docdyhr/mcp-wordpress/issues/205))
+  ([b899959](https://github.com/docdyhr/mcp-wordpress/commit/b8999592d7ac12bd30aa1cf8352abd381c6c0f06))
 
 ### 📚 Documentation
 
-* install DOX hierarchical AGENTS.md tree ([#204](https://github.com/docdyhr/mcp-wordpress/issues/204)) ([9a5b580](https://github.com/docdyhr/mcp-wordpress/commit/9a5b5809cd547b54365b4474a3b0b751cbc05cd1))
+- install DOX hierarchical AGENTS.md tree ([#204](https://github.com/docdyhr/mcp-wordpress/issues/204))
+  ([9a5b580](https://github.com/docdyhr/mcp-wordpress/commit/9a5b5809cd547b54365b4474a3b0b751cbc05cd1))
 
 ## [3.3.18](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.17...v3.3.18) (2026-07-19)
 
 ### 🐛 Bug Fixes
 
-* remediate 2026-07-19 security/correctness/release audit (14 items) ([#203](https://github.com/docdyhr/mcp-wordpress/issues/203)) ([f6c29e6](https://github.com/docdyhr/mcp-wordpress/commit/f6c29e624dd83a38694b1d9daf68aca01c1f1d1d))
+- remediate 2026-07-19 security/correctness/release audit (14 items)
+  ([#203](https://github.com/docdyhr/mcp-wordpress/issues/203))
+  ([f6c29e6](https://github.com/docdyhr/mcp-wordpress/commit/f6c29e624dd83a38694b1d9daf68aca01c1f1d1d))
 
 ## [3.3.17](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.16...v3.3.17) (2026-07-09)
 
 ### 🐛 Bug Fixes
 
-* **auth:** bound wp_test_auth with 10s timeout and check ping() return value ([#202](https://github.com/docdyhr/mcp-wordpress/issues/202)) ([7e2fdac](https://github.com/docdyhr/mcp-wordpress/commit/7e2fdac9d5a28a1d9cc96f497d52f22d5bccbbe9))
+- **auth:** bound wp_test_auth with 10s timeout and check ping() return value
+  ([#202](https://github.com/docdyhr/mcp-wordpress/issues/202))
+  ([7e2fdac](https://github.com/docdyhr/mcp-wordpress/commit/7e2fdac9d5a28a1d9cc96f497d52f22d5bccbbe9))
 
 ## [3.3.16](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.15...v3.3.16) (2026-07-09)
 
 ### 🐛 Bug Fixes
 
-* resolve media upload 400 error caused by duplicate Content-Type header ([#199](https://github.com/docdyhr/mcp-wordpress/issues/199)) ([0df639b](https://github.com/docdyhr/mcp-wordpress/commit/0df639bcec6eaf1060a2e43dc5c325e20177db19)), closes [#2](https://github.com/docdyhr/mcp-wordpress/issues/2)
+- resolve media upload 400 error caused by duplicate Content-Type header
+  ([#199](https://github.com/docdyhr/mcp-wordpress/issues/199))
+  ([0df639b](https://github.com/docdyhr/mcp-wordpress/commit/0df639bcec6eaf1060a2e43dc5c325e20177db19)), closes
+  [#2](https://github.com/docdyhr/mcp-wordpress/issues/2)
 
 ### 📚 Documentation
 
-* trim README from 1168 to 342 lines ([#197](https://github.com/docdyhr/mcp-wordpress/issues/197)) ([3bdef35](https://github.com/docdyhr/mcp-wordpress/commit/3bdef35b24a5902855a771577806238fcf268dd3))
+- trim README from 1168 to 342 lines ([#197](https://github.com/docdyhr/mcp-wordpress/issues/197))
+  ([3bdef35](https://github.com/docdyhr/mcp-wordpress/commit/3bdef35b24a5902855a771577806238fcf268dd3))
 
 ## [Unreleased]
 
 ### 🐛 Bug Fixes
 
-* **security:** expand private URL denylist and unify SSRF policy across `ConfigurationSchema` and `WordPressClient` — adds `169.254.0.0/16`, `0.0.0.0`, IPv6 link-local (`fe80::/10`)/unique-local (`fc00::/7`), and known cloud metadata hostnames; both enforcement points now share one `isDisallowedHostname` helper instead of drifting independently
-* **security:** require HTTPS for WordPress site URLs by default; `ALLOW_INSECURE_HTTP=true` remains available for local/Docker development over plain HTTP
-* **security:** deep-redact sensitive log context — object values under a sensitive key (e.g. `password`, `secret`) are now redacted instead of passed through as-is
-* **deps:** raise `axios` and `brace-expansion` npm override floors to `>=1.18.0` / `>=5.0.7`; apply non-breaking `npm audit fix` for `fast-uri`, `hono`, and `body-parser` transitive advisories
+- **security:** expand private URL denylist and unify SSRF policy across `ConfigurationSchema` and `WordPressClient` —
+  adds `169.254.0.0/16`, `0.0.0.0`, IPv6 link-local (`fe80::/10`)/unique-local (`fc00::/7`), and known cloud metadata
+  hostnames; both enforcement points now share one `isDisallowedHostname` helper instead of drifting independently
+- **security:** require HTTPS for WordPress site URLs by default; `ALLOW_INSECURE_HTTP=true` remains available for
+  local/Docker development over plain HTTP
+- **security:** deep-redact sensitive log context — object values under a sensitive key (e.g. `password`, `secret`) are
+  now redacted instead of passed through as-is
+- **deps:** raise `axios` and `brace-expansion` npm override floors to `>=1.18.0` / `>=5.0.7`; apply non-breaking
+  `npm audit fix` for `fast-uri`, `hono`, and `body-parser` transitive advisories
 
 ### 📚 Documentation
 
-* Trim README from 1168 to 343 lines — remove duplicate sections and verbose examples, replace with links to existing docs
+- Trim README from 1168 to 343 lines — remove duplicate sections and verbose examples, replace with links to existing
+  docs
 
 ## [3.3.15](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.14...v3.3.15) (2026-06-22)
 
 ### 🐛 Bug Fixes
 
-* resolve project review issues (README version drift, dead code, console patch) ([#196](https://github.com/docdyhr/mcp-wordpress/issues/196)) ([cd3827a](https://github.com/docdyhr/mcp-wordpress/commit/cd3827ab8ce5d7318d99067d605ff824c49054f6))
+- resolve project review issues (README version drift, dead code, console patch)
+  ([#196](https://github.com/docdyhr/mcp-wordpress/issues/196))
+  ([cd3827a](https://github.com/docdyhr/mcp-wordpress/commit/cd3827ab8ce5d7318d99067d605ff824c49054f6))
 
 ## [3.3.14](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.13...v3.3.14) (2026-06-10)
 
 ### 🐛 Bug Fixes
 
-* **deps:** patch hono moderate vulns and allowlist npm-bundled advisories ([#195](https://github.com/docdyhr/mcp-wordpress/issues/195)) ([cabc95e](https://github.com/docdyhr/mcp-wordpress/commit/cabc95ebe52fa66edecc4987eaf5801055a109dd))
+- **deps:** patch hono moderate vulns and allowlist npm-bundled advisories
+  ([#195](https://github.com/docdyhr/mcp-wordpress/issues/195))
+  ([cabc95e](https://github.com/docdyhr/mcp-wordpress/commit/cabc95ebe52fa66edecc4987eaf5801055a109dd))
 
 ### 📚 Documentation
 
-* note Node 24 in CLAUDE.md CI section ([d94a412](https://github.com/docdyhr/mcp-wordpress/commit/d94a412a63bebaa1003685ca4db10cf37f435174))
+- note Node 24 in CLAUDE.md CI section
+  ([d94a412](https://github.com/docdyhr/mcp-wordpress/commit/d94a412a63bebaa1003685ca4db10cf37f435174))
 
 ## [3.3.13](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.12...v3.3.13) (2026-06-10)
 
 ### 🐛 Bug Fixes
 
-* **ci:** grant pull-requests write permission to claude-code-review ([3279b6c](https://github.com/docdyhr/mcp-wordpress/commit/3279b6c608c4668a676f96d8b202a263c5d42fb1))
+- **ci:** grant pull-requests write permission to claude-code-review
+  ([3279b6c](https://github.com/docdyhr/mcp-wordpress/commit/3279b6c608c4668a676f96d8b202a263c5d42fb1))
 
 ## [3.3.12](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.11...v3.3.12) (2026-05-29)
 
 ### 🐛 Bug Fixes
 
-* tighten security overrides for axios and brace-expansion ([#190](https://github.com/docdyhr/mcp-wordpress/issues/190)) ([149293d](https://github.com/docdyhr/mcp-wordpress/commit/149293dfb1f29dafcb744e94432b2552115d0a45))
+- tighten security overrides for axios and brace-expansion ([#190](https://github.com/docdyhr/mcp-wordpress/issues/190))
+  ([149293d](https://github.com/docdyhr/mcp-wordpress/commit/149293dfb1f29dafcb744e94432b2552115d0a45))
 
 ## [3.3.11](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.10...v3.3.11) (2026-05-29)
 
 ### 🐛 Bug Fixes
 
-* network retry patterns and DXT argv detection ([#188](https://github.com/docdyhr/mcp-wordpress/issues/188)) ([d14e854](https://github.com/docdyhr/mcp-wordpress/commit/d14e854ee338976e78b1c90980e1409c6b572f2d))
+- network retry patterns and DXT argv detection ([#188](https://github.com/docdyhr/mcp-wordpress/issues/188))
+  ([d14e854](https://github.com/docdyhr/mcp-wordpress/commit/d14e854ee338976e78b1c90980e1409c6b572f2d))
 
 ## [3.3.10](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.9...v3.3.10) (2026-05-29)
 
 ### 🐛 Bug Fixes
 
-* update Railway banner image to v2 asset ([#189](https://github.com/docdyhr/mcp-wordpress/issues/189)) ([5cee550](https://github.com/docdyhr/mcp-wordpress/commit/5cee550dbb4c588aaaa36b720206b43f731eaf3b))
+- update Railway banner image to v2 asset ([#189](https://github.com/docdyhr/mcp-wordpress/issues/189))
+  ([5cee550](https://github.com/docdyhr/mcp-wordpress/commit/5cee550dbb4c588aaaa36b720206b43f731eaf3b))
 
 ### 📚 Documentation
 
-* add Railway deployment banner and remove broken badges ([76f3a59](https://github.com/docdyhr/mcp-wordpress/commit/76f3a594f8e1c09c062ce61055b2fe5c330e6733))
-* replace table with div for Railway banner — no borders, title below ([c18b9b6](https://github.com/docdyhr/mcp-wordpress/commit/c18b9b6813d076f12cb4ad3b83b585c0eb5d4f97))
-* use table layout for Railway banner — fixes logo centering ([54029b5](https://github.com/docdyhr/mcp-wordpress/commit/54029b5c8ebf5f9233ba30b4522df6c31d4ec634))
+- add Railway deployment banner and remove broken badges
+  ([76f3a59](https://github.com/docdyhr/mcp-wordpress/commit/76f3a594f8e1c09c062ce61055b2fe5c330e6733))
+- replace table with div for Railway banner — no borders, title below
+  ([c18b9b6](https://github.com/docdyhr/mcp-wordpress/commit/c18b9b6813d076f12cb4ad3b83b585c0eb5d4f97))
+- use table layout for Railway banner — fixes logo centering
+  ([54029b5](https://github.com/docdyhr/mcp-wordpress/commit/54029b5c8ebf5f9233ba30b4522df6c31d4ec634))
 
 ## [3.3.9](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.8...v3.3.9) (2026-05-28)
 
 ### 🐛 Bug Fixes
 
-* remove unnecessary pre-fetch GET in handleUpdatePost ([#185](https://github.com/docdyhr/mcp-wordpress/issues/185)) ([a735188](https://github.com/docdyhr/mcp-wordpress/commit/a7351884853b785f1c010e3f29b39621c11918ac))
+- remove unnecessary pre-fetch GET in handleUpdatePost ([#185](https://github.com/docdyhr/mcp-wordpress/issues/185))
+  ([a735188](https://github.com/docdyhr/mcp-wordpress/commit/a7351884853b785f1c010e3f29b39621c11918ac))
 
 ## [3.3.8](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.7...v3.3.8) (2026-05-26)
 
 ### 🐛 Bug Fixes
 
-* **deps:** patch qs CVE-2026-8723 via override to >=6.15.2 ([#184](https://github.com/docdyhr/mcp-wordpress/issues/184)) ([6a4d53a](https://github.com/docdyhr/mcp-wordpress/commit/6a4d53a507382e0d95a0bdcb37faa69718886868))
+- **deps:** patch qs CVE-2026-8723 via override to >=6.15.2
+  ([#184](https://github.com/docdyhr/mcp-wordpress/issues/184))
+  ([6a4d53a](https://github.com/docdyhr/mcp-wordpress/commit/6a4d53a507382e0d95a0bdcb37faa69718886868))
 
 ## [3.3.7](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.6...v3.3.7) (2026-05-20)
 
 ### 🐛 Bug Fixes
 
-* **ci:** restore root-level *.js/*.ts paths in CodeQL config ([f0ed68a](https://github.com/docdyhr/mcp-wordpress/commit/f0ed68a98d13bece017a40efe0cad5a203dd1023))
+- **ci:** restore root-level _.js/_.ts paths in CodeQL config
+  ([f0ed68a](https://github.com/docdyhr/mcp-wordpress/commit/f0ed68a98d13bece017a40efe0cad5a203dd1023))
 
 ## [3.3.6](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.5...v3.3.6) (2026-05-09)
 
 ### 🐛 Bug Fixes
 
-* **deps:** patch fast-uri CVE-2026-6321 and CVE-2026-6322 via override ([0107f33](https://github.com/docdyhr/mcp-wordpress/commit/0107f337468d992a2367fc3e6cbbfed9c2237fed))
+- **deps:** patch fast-uri CVE-2026-6321 and CVE-2026-6322 via override
+  ([0107f33](https://github.com/docdyhr/mcp-wordpress/commit/0107f337468d992a2367fc3e6cbbfed9c2237fed))
 
 ## [3.3.5](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.4...v3.3.5) (2026-05-08)
 
 ### 🐛 Bug Fixes
 
-* **deps:** patch moderate vulns in hono and express-rate-limit ([d995987](https://github.com/docdyhr/mcp-wordpress/commit/d9959877859c419fe9b7136b54456837437fb684))
-* **schema:** add missing items type to metrics array in wp_performance_history ([face5c7](https://github.com/docdyhr/mcp-wordpress/commit/face5c76609f5a83a6caaf7ea8a984fef9ae573b))
+- **deps:** patch moderate vulns in hono and express-rate-limit
+  ([d995987](https://github.com/docdyhr/mcp-wordpress/commit/d9959877859c419fe9b7136b54456837437fb684))
+- **schema:** add missing items type to metrics array in wp_performance_history
+  ([face5c7](https://github.com/docdyhr/mcp-wordpress/commit/face5c76609f5a83a6caaf7ea8a984fef9ae573b))
 
 ## [3.3.4](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.3...v3.3.4) (2026-05-07)
 
 ### 🐛 Bug Fixes
 
-* **ci:** fix docker test job to use load instead of OCI export ([7df8603](https://github.com/docdyhr/mcp-wordpress/commit/7df8603977a89f3dd4faa004c8ebd88810059f61))
-* **ci:** node 22, docker load, and BUILD_DATE shell expansion ([bb4cef6](https://github.com/docdyhr/mcp-wordpress/commit/bb4cef6d23603063698556291b2356797b39486a))
+- **ci:** fix docker test job to use load instead of OCI export
+  ([7df8603](https://github.com/docdyhr/mcp-wordpress/commit/7df8603977a89f3dd4faa004c8ebd88810059f61))
+- **ci:** node 22, docker load, and BUILD_DATE shell expansion
+  ([bb4cef6](https://github.com/docdyhr/mcp-wordpress/commit/bb4cef6d23603063698556291b2356797b39486a))
 
 ## [3.3.3](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.2...v3.3.3) (2026-05-04)
 
 ### 🐛 Bug Fixes
 
-* **ci:** repair memory-safe test runner — all 4 batches now run ([53c9d6a](https://github.com/docdyhr/mcp-wordpress/commit/53c9d6ad2262b95e20a164e5cc898c1f8467ca4c))
+- **ci:** repair memory-safe test runner — all 4 batches now run
+  ([53c9d6a](https://github.com/docdyhr/mcp-wordpress/commit/53c9d6ad2262b95e20a164e5cc898c1f8467ca4c))
 
 ## [3.3.2](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.1...v3.3.2) (2026-05-04)
 
 ### 🐛 Bug Fixes
 
-* **deps:** patch critical/high vulns in handlebars, lodash, lodash-es ([b28316f](https://github.com/docdyhr/mcp-wordpress/commit/b28316f109312b875679aa82f33ac442fd5a89b3))
+- **deps:** patch critical/high vulns in handlebars, lodash, lodash-es
+  ([b28316f](https://github.com/docdyhr/mcp-wordpress/commit/b28316f109312b875679aa82f33ac442fd5a89b3))
 
 ## [3.3.1](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.0...v3.3.1) (2026-05-04)
 
 ### 🐛 Bug Fixes
 
-* **encoding:** replace response.json() with explicit TextDecoder UTF-8 on read path ([a692c10](https://github.com/docdyhr/mcp-wordpress/commit/a692c100b28b7d8a57d7700386065afd190b08d3))
-* **validation:** accept content-only wp_update_post without title ([3de1d3e](https://github.com/docdyhr/mcp-wordpress/commit/3de1d3ec9decfcccb1bb753013dc48403651d5fc))
+- **encoding:** replace response.json() with explicit TextDecoder UTF-8 on read path
+  ([a692c10](https://github.com/docdyhr/mcp-wordpress/commit/a692c100b28b7d8a57d7700386065afd190b08d3))
+- **validation:** accept content-only wp_update_post without title
+  ([3de1d3e](https://github.com/docdyhr/mcp-wordpress/commit/3de1d3ec9decfcccb1bb753013dc48403651d5fc))
 
 ### 📚 Documentation
 
-* **changelog:** add Unreleased entries for read-path encoding fix and mojibake tests ([30c7d5f](https://github.com/docdyhr/mcp-wordpress/commit/30c7d5f9548e8ed193ad27e66753fcbca7a3205e))
+- **changelog:** add Unreleased entries for read-path encoding fix and mojibake tests
+  ([30c7d5f](https://github.com/docdyhr/mcp-wordpress/commit/30c7d5f9548e8ed193ad27e66753fcbca7a3205e))
 
 ## [3.3.0](https://github.com/docdyhr/mcp-wordpress/compare/v3.2.1...v3.3.0) (2026-05-02)
 
 ### 🚀 Features
 
-* **seo:** add Google Search Console OAuth2 provider for real SERP data ([09f7dd7](https://github.com/docdyhr/mcp-wordpress/commit/09f7dd789d0795255e8c37c64e0482c8777310f9))
+- **seo:** add Google Search Console OAuth2 provider for real SERP data
+  ([09f7dd7](https://github.com/docdyhr/mcp-wordpress/commit/09f7dd789d0795255e8c37c64e0482c8777310f9))
 
 ### 🐛 Bug Fixes
 
-* **security:** add write-path mojibake guard and repair tooling ([2f6320c](https://github.com/docdyhr/mcp-wordpress/commit/2f6320cc57cc093bb0705494cb17fddce6e63cbf))
+- **security:** add write-path mojibake guard and repair tooling
+  ([2f6320c](https://github.com/docdyhr/mcp-wordpress/commit/2f6320cc57cc093bb0705494cb17fddce6e63cbf))
 
 ## [Unreleased]
 
 ### 🚀 Features
 
-* **seo:** add optional Google Search Console OAuth2 integration for `wp_seo_track_serp_positions` and `wp_seo_keyword_research` — returns real SERP positions, clicks, impressions, and top queries when `SEO_PROVIDER_SEARCH_CONSOLE=true` and Google OAuth2 credentials are configured; WordPress content-analysis remains the default fallback
+- **seo:** add optional Google Search Console OAuth2 integration for `wp_seo_track_serp_positions` and
+  `wp_seo_keyword_research` — returns real SERP positions, clicks, impressions, and top queries when
+  `SEO_PROVIDER_SEARCH_CONSOLE=true` and Google OAuth2 credentials are configured; WordPress content-analysis remains
+  the default fallback
 
 ### 🐛 Bug Fixes
 
-* **encoding:** replace `response.json()` with explicit `TextDecoder('utf-8')` on the read path in both `RequestManager` and `ComposedRequestManager`; prevents silent CJK and em-dash mojibake in environments where the runtime honours an incorrect `Content-Type` charset header
-* **security:** add write-path mojibake guard (`assertNoMojibake`) to both request managers; any POST/PUT/PATCH payload containing cp1252-double-encoded sequences is now refused with a `MOJIBAKE_REFUSED` error before reaching WordPress, preventing database corruption from read→write loops with non-ASCII content
+- **encoding:** replace `response.json()` with explicit `TextDecoder('utf-8')` on the read path in both `RequestManager`
+  and `ComposedRequestManager`; prevents silent CJK and em-dash mojibake in environments where the runtime honours an
+  incorrect `Content-Type` charset header
+- **security:** add write-path mojibake guard (`assertNoMojibake`) to both request managers; any POST/PUT/PATCH payload
+  containing cp1252-double-encoded sequences is now refused with a `MOJIBAKE_REFUSED` error before reaching WordPress,
+  preventing database corruption from read→write loops with non-ASCII content
 
 ### 🐛 Bug Fixes
 
-* **validation:** `wp_update_post` now accepts content-only updates without a `title`; `validatePostParams` gained an `isUpdate` flag (defaults `false`) so the title-required check is skipped on the update path — callers no longer need to re-send the title when only changing content or status
+- **validation:** `wp_update_post` now accepts content-only updates without a `title`; `validatePostParams` gained an
+  `isUpdate` flag (defaults `false`) so the title-required check is skipped on the update path — callers no longer need
+  to re-send the title when only changing content or status
 
 ### 🧪 Tests
 
-* add `tests/utils/mojibake.test.js` (23 tests) — positive cases (clean CJK/em-dash preserved through `isMojibake`) and negative cases (`assertNoMojibake` throws `[MOJIBAKE_REFUSED]` for all known cp1252 double-encoding patterns)
-* add regression tests for content-only `wp_update_post` in `validation.test.js` and `posts.test.js`
+- add `tests/utils/mojibake.test.js` (23 tests) — positive cases (clean CJK/em-dash preserved through `isMojibake`) and
+  negative cases (`assertNoMojibake` throws `[MOJIBAKE_REFUSED]` for all known cp1252 double-encoding patterns)
+- add regression tests for content-only `wp_update_post` in `validation.test.js` and `posts.test.js`
 
 ### 🛠 Maintenance
 
-* **scripts:** add `scripts/neigong-mojibake-scan.py` — standalone Python scanner and surgical repair tool for WordPress sites with mojibake-corrupted content (UTF-8 bytes decoded as cp1252). Repaired 214 posts on neigong.net (CJK characters, em-dashes, smart quotes). Supports `--repair --apply` for safe programmatic recovery.
+- **scripts:** add `scripts/neigong-mojibake-scan.py` — standalone Python scanner and surgical repair tool for WordPress
+  sites with mojibake-corrupted content (UTF-8 bytes decoded as cp1252). Repaired 214 posts on neigong.net (CJK
+  characters, em-dashes, smart quotes). Supports `--repair --apply` for safe programmatic recovery.
 
 ## [3.2.1](https://github.com/docdyhr/mcp-wordpress/compare/v3.2.0...v3.2.1) (2026-04-30)
 
 ### 🐛 Bug Fixes
 
-* **seo:** replace inline HTML-strip regex with loop-until-stable helper ([7557a14](https://github.com/docdyhr/mcp-wordpress/commit/7557a14e0b067086c50c97655c0c1f7cde0db81c))
+- **seo:** replace inline HTML-strip regex with loop-until-stable helper
+  ([7557a14](https://github.com/docdyhr/mcp-wordpress/commit/7557a14e0b067086c50c97655c0c1f7cde0db81c))
 
 ## [3.2.0](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.28...v3.2.0) (2026-04-30)
 
 ### 🚀 Features
 
-* **seo:** implement wp_seo_track_serp_positions and wp_seo_keyword_research tools ([35f66d2](https://github.com/docdyhr/mcp-wordpress/commit/35f66d2c7e6ea005f5a0c796808551f2f25789c6)), closes [#180](https://github.com/docdyhr/mcp-wordpress/issues/180) [#181](https://github.com/docdyhr/mcp-wordpress/issues/181)
+- **seo:** implement wp_seo_track_serp_positions and wp_seo_keyword_research tools
+  ([35f66d2](https://github.com/docdyhr/mcp-wordpress/commit/35f66d2c7e6ea005f5a0c796808551f2f25789c6)), closes
+  [#180](https://github.com/docdyhr/mcp-wordpress/issues/180)
+  [#181](https://github.com/docdyhr/mcp-wordpress/issues/181)
 
 ### 🐛 Bug Fixes
 
-* **ci:** remove DXT git-commit step that fails on gitignored artifact ([4b8c72c](https://github.com/docdyhr/mcp-wordpress/commit/4b8c72c709789db42f4c3cded207745ca13fd89a))
+- **ci:** remove DXT git-commit step that fails on gitignored artifact
+  ([4b8c72c](https://github.com/docdyhr/mcp-wordpress/commit/4b8c72c709789db42f4c3cded207745ca13fd89a))
 
 ## [3.1.28](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.27...v3.1.28) (2026-04-30)
 
 ### 🐛 Bug Fixes
 
-* **security:** remove duplicate single-quote in regex character class ([2a2e48d](https://github.com/docdyhr/mcp-wordpress/commit/2a2e48d950e7769c13d2cfa55af6492a95a80e15))
+- **security:** remove duplicate single-quote in regex character class
+  ([2a2e48d](https://github.com/docdyhr/mcp-wordpress/commit/2a2e48d950e7769c13d2cfa55af6492a95a80e15))
 
 ## [3.1.27](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.26...v3.1.27) (2026-04-30)
 
 ### 🐛 Bug Fixes
 
-* guard main() against unhandled rejection and surface silent audit errors ([f9d9fea](https://github.com/docdyhr/mcp-wordpress/commit/f9d9fead2392cd55d64ddd6614b57f35e839e3ac))
-* **seo:** route wp_seo_* tools to correct site in multi-site configs ([487c036](https://github.com/docdyhr/mcp-wordpress/commit/487c036ab82ef227cba4823b677cc2a1f670cb6e))
+- guard main() against unhandled rejection and surface silent audit errors
+  ([f9d9fea](https://github.com/docdyhr/mcp-wordpress/commit/f9d9fead2392cd55d64ddd6614b57f35e839e3ac))
+- **seo:** route wp*seo*\* tools to correct site in multi-site configs
+  ([487c036](https://github.com/docdyhr/mcp-wordpress/commit/487c036ab82ef227cba4823b677cc2a1f670cb6e))
 
 ### ♻️ Refactoring
 
-* address remaining audit suggestions ([11c8195](https://github.com/docdyhr/mcp-wordpress/commit/11c8195d049b54943d1115bf895fb97d0ffc661c))
+- address remaining audit suggestions
+  ([11c8195](https://github.com/docdyhr/mcp-wordpress/commit/11c8195d049b54943d1115bf895fb97d0ffc661c))
 
 ### 📚 Documentation
 
-* **dxt:** add symlink pro tip for persisting multi-site config across updates ([768ea90](https://github.com/docdyhr/mcp-wordpress/commit/768ea903004783179781bbe7797f8919f72f8e03))
+- **dxt:** add symlink pro tip for persisting multi-site config across updates
+  ([768ea90](https://github.com/docdyhr/mcp-wordpress/commit/768ea903004783179781bbe7797f8919f72f8e03))
 
 ## [3.1.26](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.25...v3.1.26) (2026-04-30)
 
 ### 🐛 Bug Fixes
 
-* **deps:** resolve transitive audit vulnerabilities via overrides ([03540c0](https://github.com/docdyhr/mcp-wordpress/commit/03540c0fcb7e9c5728992a642d6be3415e894048))
+- **deps:** resolve transitive audit vulnerabilities via overrides
+  ([03540c0](https://github.com/docdyhr/mcp-wordpress/commit/03540c0fcb7e9c5728992a642d6be3415e894048))
 
 ## [3.1.25](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.24...v3.1.25) (2026-04-30)
 
 ### 🐛 Bug Fixes
 
-* **cache:** `wp_cache_info` handler now races a 5 s `setTimeout` so a stalled `getCacheStats()` call can never block the MCP response indefinitely; throws/timeouts are caught and return `{ caching_enabled: false, status: "unavailable", error: "…" }` instead of hanging.
-* **performance:** `wp_performance_benchmark` handler now races a 5 s `setTimeout`; any exception from `benchmarkPerformance()` is caught and returns a graceful `{ success: false, status: "unavailable", … }` payload instead of hanging.
-* **encoding:** `ComposedRequestManager.makeRequest` now uses `new TextDecoder('utf-8').decode(await response.arrayBuffer())` for non-JSON response bodies, completing the D8 UTF-8 fix across all HTTP client paths (previously only `WordPressClient` error and fallback paths were covered).
+- **cache:** `wp_cache_info` handler now races a 5 s `setTimeout` so a stalled `getCacheStats()` call can never block
+  the MCP response indefinitely; throws/timeouts are caught and return
+  `{ caching_enabled: false, status: "unavailable", error: "…" }` instead of hanging.
+- **performance:** `wp_performance_benchmark` handler now races a 5 s `setTimeout`; any exception from
+  `benchmarkPerformance()` is caught and returns a graceful `{ success: false, status: "unavailable", … }` payload
+  instead of hanging.
+- **encoding:** `ComposedRequestManager.makeRequest` now uses
+  `new TextDecoder('utf-8').decode(await response.arrayBuffer())` for non-JSON response bodies, completing the D8 UTF-8
+  fix across all HTTP client paths (previously only `WordPressClient` error and fallback paths were covered).
 
 ### 🧪 Tests
 
-* **cache:** added 3 regression tests for `wp_cache_info` — graceful error response on `getCacheStats` throw, timing guard with no backend, timing guard with successful stats.
-* **performance:** fixed `toolWrapper` mock to use a plain function (immune to `mockReset: true`) and added 2 regression tests for `wp_performance_benchmark` — never-hang timing guard and graceful error on `benchmarkPerformance` throw.
+- **cache:** added 3 regression tests for `wp_cache_info` — graceful error response on `getCacheStats` throw, timing
+  guard with no backend, timing guard with successful stats.
+- **performance:** fixed `toolWrapper` mock to use a plain function (immune to `mockReset: true`) and added 2 regression
+  tests for `wp_performance_benchmark` — never-hang timing guard and graceful error on `benchmarkPerformance` throw.
 
 ## [3.1.24](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.23...v3.1.24) (2026-04-29)
 
 ### 🐛 Bug Fixes
 
-* **dx:** resolve D5/D8/D10 from live DXT diagnostic report ([db338b2](https://github.com/docdyhr/mcp-wordpress/commit/db338b2494ed8c64f8444beeb80ac494a87fbadf))
+- **dx:** resolve D5/D8/D10 from live DXT diagnostic report
+  ([db338b2](https://github.com/docdyhr/mcp-wordpress/commit/db338b2494ed8c64f8444beeb80ac494a87fbadf))
 
 ## [3.1.23](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.22...v3.1.23) (2026-04-29)
 
 ### 🐛 Bug Fixes
 
-* resolve 5 live-test defects (D1/D2/D3/D7/D9) ([e504aef](https://github.com/docdyhr/mcp-wordpress/commit/e504aef84de2c9f7af3cd57e81458acc8c9c6d80))
+- resolve 5 live-test defects (D1/D2/D3/D7/D9)
+  ([e504aef](https://github.com/docdyhr/mcp-wordpress/commit/e504aef84de2c9f7af3cd57e81458acc8c9c6d80))
 
 ### 📚 Documentation
 
-* **changelog:** add Unreleased entries for D1–D9 live-test defect fixes ([f622cf6](https://github.com/docdyhr/mcp-wordpress/commit/f622cf6e97a1f7b2cd37f06f54eb44422a0b79da))
+- **changelog:** add Unreleased entries for D1–D9 live-test defect fixes
+  ([f622cf6](https://github.com/docdyhr/mcp-wordpress/commit/f622cf6e97a1f7b2cd37f06f54eb44422a0b79da))
 
 ## [3.1.22](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.21...v3.1.22) (2026-04-26)
 
 ### 🐛 Bug Fixes
 
-* **deps:** upgrade hono and MCP SDK to resolve 7 medium CVEs ([58aa4f0](https://github.com/docdyhr/mcp-wordpress/commit/58aa4f0182792f369f090c2549a8d0957acbce74))
+- **deps:** upgrade hono and MCP SDK to resolve 7 medium CVEs
+  ([58aa4f0](https://github.com/docdyhr/mcp-wordpress/commit/58aa4f0182792f369f090c2549a8d0957acbce74))
 
 ## [Unreleased]
 
 ### 🐛 Bug Fixes
 
-* **D1 version:** `loadVersionSync` now reads `package.json` via `readFileSync` before falling back to the hardcoded constant; fallback bumped from `2.11.3` → `3.1.22`. Fixes MCP `serverInfo` reporting a stale version in DXT bundles.
-* **D2 auth:** `wp_get_auth_status` now performs a live `getCurrentUser` probe on every call instead of reading a stale in-memory flag; a failed probe returns a clear "not connected" message rather than throwing.
-* **D3 cache:** `warmCache` now caps each HTTP call at 10 s and the whole operation at 25 s via `Promise.race`; a single unresponsive WordPress endpoint can no longer hang the MCP request. Entry-log lines added to `wp_cache_warm` and `wp_cache_info` handlers for future diagnostics.
-* **D5 perf:** `ToolRegistry.registerAllTools` now installs a pre-built JSON Schema cache as the `tools/list` handler, replacing the MCP SDK's per-request Zod→JSON-Schema conversion for all 59 tools. Reduces repeated `tools/list` serialization overhead.
-* **D7 alerts:** `PerformanceMonitor.addAlert` now tracks a per-`(metric, severity)` cooldown (15 min); duplicate conditions update the existing alert in-place instead of appending, eliminating "Low cache hit rate" spam.
-* **D8 encoding:** All HTTP response bodies in `WordPressClient` are now decoded with an explicit `new TextDecoder('utf-8')` on an `arrayBuffer()` read instead of relying on `response.text()` charset inference, guaranteeing correct UTF-8 decoding for multi-byte characters (Chinese, Arabic, emoji, etc.).
-* **D9 SEO:** `MetaGenerator.generateDescription` now strips HTML from the WordPress excerpt via `stripHtml()` before using it as the `openGraph`/`twitter` description base, preventing raw `<p>` tags from appearing in social-share previews.
-* **D10 cache:** `CacheStats` gains an `expirations` counter, incremented when a TTL-expired entry is lazily removed on `get()` and during the periodic cleanup sweep. Exposed in `wp_cache_stats` and `wp_cache_info` outputs to explain non-monotonic `total_entries`.
+- **D1 version:** `loadVersionSync` now reads `package.json` via `readFileSync` before falling back to the hardcoded
+  constant; fallback bumped from `2.11.3` → `3.1.22`. Fixes MCP `serverInfo` reporting a stale version in DXT bundles.
+- **D2 auth:** `wp_get_auth_status` now performs a live `getCurrentUser` probe on every call instead of reading a stale
+  in-memory flag; a failed probe returns a clear "not connected" message rather than throwing.
+- **D3 cache:** `warmCache` now caps each HTTP call at 10 s and the whole operation at 25 s via `Promise.race`; a single
+  unresponsive WordPress endpoint can no longer hang the MCP request. Entry-log lines added to `wp_cache_warm` and
+  `wp_cache_info` handlers for future diagnostics.
+- **D5 perf:** `ToolRegistry.registerAllTools` now installs a pre-built JSON Schema cache as the `tools/list` handler,
+  replacing the MCP SDK's per-request Zod→JSON-Schema conversion for all 59 tools. Reduces repeated `tools/list`
+  serialization overhead.
+- **D7 alerts:** `PerformanceMonitor.addAlert` now tracks a per-`(metric, severity)` cooldown (15 min); duplicate
+  conditions update the existing alert in-place instead of appending, eliminating "Low cache hit rate" spam.
+- **D8 encoding:** All HTTP response bodies in `WordPressClient` are now decoded with an explicit
+  `new TextDecoder('utf-8')` on an `arrayBuffer()` read instead of relying on `response.text()` charset inference,
+  guaranteeing correct UTF-8 decoding for multi-byte characters (Chinese, Arabic, emoji, etc.).
+- **D9 SEO:** `MetaGenerator.generateDescription` now strips HTML from the WordPress excerpt via `stripHtml()` before
+  using it as the `openGraph`/`twitter` description base, preventing raw `<p>` tags from appearing in social-share
+  previews.
+- **D10 cache:** `CacheStats` gains an `expirations` counter, incremented when a TTL-expired entry is lazily removed on
+  `get()` and during the periodic cleanup sweep. Exposed in `wp_cache_stats` and `wp_cache_info` outputs to explain
+  non-monotonic `total_entries`.
 
 ### 🔒 Security
 
-* **deps:** upgrade `@modelcontextprotocol/sdk` to 1.29.0, pin `hono` to ≥4.12.15 and `@hono/node-server` to ^1.19.13 to resolve 7 medium-severity CVEs (JSX injection, cookie name bypass, IP matching bypass, path traversal, serveStatic middleware bypass)
+- **deps:** upgrade `@modelcontextprotocol/sdk` to 1.29.0, pin `hono` to ≥4.12.15 and `@hono/node-server` to ^1.19.13 to
+  resolve 7 medium-severity CVEs (JSX injection, cookie name bypass, IP matching bypass, path traversal, serveStatic
+  middleware bypass)
 
 ## [3.1.21](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.20...v3.1.21) (2026-03-31)
 
 ### 🐛 Bug Fixes
 
-* **config:** update .npmrc.example to reflect OIDC Trusted Publishing ([090afda](https://github.com/docdyhr/mcp-wordpress/commit/090afda67607eebe586cdfbf2161562d63ad02c5))
+- **config:** update .npmrc.example to reflect OIDC Trusted Publishing
+  ([090afda](https://github.com/docdyhr/mcp-wordpress/commit/090afda67607eebe586cdfbf2161562d63ad02c5))
 
 ## [3.1.20](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.19...v3.1.20) (2026-03-31)
 
 ### 🐛 Bug Fixes
 
-* **ci:** add id-token: write to release job for NPM Trusted Publishing ([cbfefcd](https://github.com/docdyhr/mcp-wordpress/commit/cbfefcd6ca1a364e9f16384e4472a92a19e57640))
+- **ci:** add id-token: write to release job for NPM Trusted Publishing
+  ([cbfefcd](https://github.com/docdyhr/mcp-wordpress/commit/cbfefcd6ca1a364e9f16384e4472a92a19e57640))
 
 ## [3.1.19](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.18...v3.1.19) (2026-03-31)
 
 ### 🐛 Bug Fixes
 
-* detect bin wrapper entry point in isMainModule check ([#179](https://github.com/docdyhr/mcp-wordpress/issues/179)) ([dcf65a6](https://github.com/docdyhr/mcp-wordpress/commit/dcf65a6bce27666a38df08294d69da19c464c9fc))
+- detect bin wrapper entry point in isMainModule check ([#179](https://github.com/docdyhr/mcp-wordpress/issues/179))
+  ([dcf65a6](https://github.com/docdyhr/mcp-wordpress/commit/dcf65a6bce27666a38df08294d69da19c464c9fc))
 
 ## [3.1.18](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.17...v3.1.18) (2026-03-31)
 
 ### 🐛 Bug Fixes
 
-* **ci:** skip claude-review for fork PRs (OIDC unavailable on forks) ([693c22e](https://github.com/docdyhr/mcp-wordpress/commit/693c22eccc21ce24e379e3de426c96d2e55b2ee9))
+- **ci:** skip claude-review for fork PRs (OIDC unavailable on forks)
+  ([693c22e](https://github.com/docdyhr/mcp-wordpress/commit/693c22eccc21ce24e379e3de426c96d2e55b2ee9))
 
 ## [3.1.17](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.16...v3.1.17) (2026-03-31)
 
 ### 🐛 Bug Fixes
 
-* **deps:** allowlist remaining handlebars dev-dep advisories in audit-ci ([7593b24](https://github.com/docdyhr/mcp-wordpress/commit/7593b2499cf698155aef7c11448e913973acfcb1))
+- **deps:** allowlist remaining handlebars dev-dep advisories in audit-ci
+  ([7593b24](https://github.com/docdyhr/mcp-wordpress/commit/7593b2499cf698155aef7c11448e913973acfcb1))
 
 ## [3.1.16](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.15...v3.1.16) (2026-03-31)
 
 ### 🐛 Bug Fixes
 
-* security hardening, dependency updates, and flaky test fix ([45df431](https://github.com/docdyhr/mcp-wordpress/commit/45df431d243c0420d5225792f4b68abc0e8ae7b1))
-* **tests:** stabilise flaky ETA timing assertion in BulkOperations ([4a9975d](https://github.com/docdyhr/mcp-wordpress/commit/4a9975d5cca7754efda8e4a4e5668f57ab7ccb69))
+- security hardening, dependency updates, and flaky test fix
+  ([45df431](https://github.com/docdyhr/mcp-wordpress/commit/45df431d243c0420d5225792f4b68abc0e8ae7b1))
+- **tests:** stabilise flaky ETA timing assertion in BulkOperations
+  ([4a9975d](https://github.com/docdyhr/mcp-wordpress/commit/4a9975d5cca7754efda8e4a4e5668f57ab7ccb69))
 
 ## [3.1.15](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.14...v3.1.15) (2026-03-26)
 
 ### 🐛 Bug Fixes
 
-* security hardening - SSRF bypass, input validation, magic bytes, crypto state ([bcfc451](https://github.com/docdyhr/mcp-wordpress/commit/bcfc451a1815e3883500301ba5944bec647425a4))
+- security hardening - SSRF bypass, input validation, magic bytes, crypto state
+  ([bcfc451](https://github.com/docdyhr/mcp-wordpress/commit/bcfc451a1815e3883500301ba5944bec647425a4))
 
 ## [3.1.14](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.13...v3.1.14) (2026-03-26)
 
 ### 🐛 Bug Fixes
 
-* **security:** enable SSRF protection by default, add path traversal guard on uploads ([#177](https://github.com/docdyhr/mcp-wordpress/issues/177)) ([fcf7157](https://github.com/docdyhr/mcp-wordpress/commit/fcf71579cbdae4deeb68fea60fe8cac0096689a6)), closes [#176](https://github.com/docdyhr/mcp-wordpress/issues/176)
+- **security:** enable SSRF protection by default, add path traversal guard on uploads
+  ([#177](https://github.com/docdyhr/mcp-wordpress/issues/177))
+  ([fcf7157](https://github.com/docdyhr/mcp-wordpress/commit/fcf71579cbdae4deeb68fea60fe8cac0096689a6)), closes
+  [#176](https://github.com/docdyhr/mcp-wordpress/issues/176)
 
 ## [3.1.13](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.12...v3.1.13) (2026-03-16)
 
 ### 🐛 Bug Fixes
 
-* resolve multi-site bugs from DXT v3.1.12 testing ([#172](https://github.com/docdyhr/mcp-wordpress/issues/172)) ([805a5e4](https://github.com/docdyhr/mcp-wordpress/commit/805a5e4db68e123b8352cefa6fd921b68c683f04))
+- resolve multi-site bugs from DXT v3.1.12 testing ([#172](https://github.com/docdyhr/mcp-wordpress/issues/172))
+  ([805a5e4](https://github.com/docdyhr/mcp-wordpress/commit/805a5e4db68e123b8352cefa6fd921b68c683f04))
 
 ## [3.1.12](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.11...v3.1.12) (2026-03-15)
 
 ### ♻️ Refactoring
 
-* migrate legacy tools to inputSchema JSON Schema format ([#170](https://github.com/docdyhr/mcp-wordpress/issues/170)) ([067aa3e](https://github.com/docdyhr/mcp-wordpress/commit/067aa3e3a8bc6428449f0b79c3285aafe79da91c))
+- migrate legacy tools to inputSchema JSON Schema format ([#170](https://github.com/docdyhr/mcp-wordpress/issues/170))
+  ([067aa3e](https://github.com/docdyhr/mcp-wordpress/commit/067aa3e3a8bc6428449f0b79c3285aafe79da91c))
 
 ## [3.1.11](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.10...v3.1.11) (2026-03-15)
 
 ### ♻️ Refactoring
 
-* unify dual logging systems (debug.ts → logger.ts) ([#169](https://github.com/docdyhr/mcp-wordpress/issues/169)) ([9303e2f](https://github.com/docdyhr/mcp-wordpress/commit/9303e2f12b438e30c5e4b866bcd2d8cdf2fc4c1b))
+- unify dual logging systems (debug.ts → logger.ts) ([#169](https://github.com/docdyhr/mcp-wordpress/issues/169))
+  ([9303e2f](https://github.com/docdyhr/mcp-wordpress/commit/9303e2f12b438e30c5e4b866bcd2d8cdf2fc4c1b))
 
 ## [3.1.10](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.9...v3.1.10) (2026-03-15)
 
 ### ♻️ Refactoring
 
-* replace as-unknown-as casts with toolParams helper in tool handlers ([#168](https://github.com/docdyhr/mcp-wordpress/issues/168)) ([b150b35](https://github.com/docdyhr/mcp-wordpress/commit/b150b3554c1dd43bb8ab8ba4fe4b51a5506dfc72))
+- replace as-unknown-as casts with toolParams helper in tool handlers
+  ([#168](https://github.com/docdyhr/mcp-wordpress/issues/168))
+  ([b150b35](https://github.com/docdyhr/mcp-wordpress/commit/b150b3554c1dd43bb8ab8ba4fe4b51a5506dfc72))
 
 ## [3.1.9](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.8...v3.1.9) (2026-03-15)
 
 ### 🐛 Bug Fixes
 
-* comprehensive project audit improvements ([#167](https://github.com/docdyhr/mcp-wordpress/issues/167)) ([e2100ca](https://github.com/docdyhr/mcp-wordpress/commit/e2100ca313f93d5cb433d8b70958bec1fda53b62))
+- comprehensive project audit improvements ([#167](https://github.com/docdyhr/mcp-wordpress/issues/167))
+  ([e2100ca](https://github.com/docdyhr/mcp-wordpress/commit/e2100ca313f93d5cb433d8b70958bec1fda53b62))
 
 ## [3.1.8](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.7...v3.1.8) (2026-02-27)
 
 ### 🐛 Bug Fixes
 
-* use ESM-compatible path resolution in wp_check_version tool ([f1d3e65](https://github.com/docdyhr/mcp-wordpress/commit/f1d3e65b2da56358c48a8c81c114dd372802ec66))
+- use ESM-compatible path resolution in wp_check_version tool
+  ([f1d3e65](https://github.com/docdyhr/mcp-wordpress/commit/f1d3e65b2da56358c48a8c81c114dd372802ec66))
 
 ## [3.1.7](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.6...v3.1.7) (2026-02-26)
 
 ### 🐛 Bug Fixes
 
-* add workflow_dispatch trigger to release workflow for manual runs ([608f33f](https://github.com/docdyhr/mcp-wordpress/commit/608f33fee72ca88ca68c2c024b45bb721a308735))
-* correct semantic-release output variable names to restore DXT and Docker publishing ([bf771cb](https://github.com/docdyhr/mcp-wordpress/commit/bf771cbcbbe5a04eccc87065c17d9d6267b8e836))
+- add workflow_dispatch trigger to release workflow for manual runs
+  ([608f33f](https://github.com/docdyhr/mcp-wordpress/commit/608f33fee72ca88ca68c2c024b45bb721a308735))
+- correct semantic-release output variable names to restore DXT and Docker publishing
+  ([bf771cb](https://github.com/docdyhr/mcp-wordpress/commit/bf771cbcbbe5a04eccc87065c17d9d6267b8e836))
 
 ## [3.1.6](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.5...v3.1.6) (2026-02-25)
 
 ### 🐛 Bug Fixes
 
-* remove release event trigger to prevent duplicate publish runs ([#166](https://github.com/docdyhr/mcp-wordpress/issues/166)) ([95abda0](https://github.com/docdyhr/mcp-wordpress/commit/95abda001cc7a242fa8efc43471b15842de4beac))
+- remove release event trigger to prevent duplicate publish runs
+  ([#166](https://github.com/docdyhr/mcp-wordpress/issues/166))
+  ([95abda0](https://github.com/docdyhr/mcp-wordpress/commit/95abda001cc7a242fa8efc43471b15842de4beac))
 
 ## [3.1.5](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.4...v3.1.5) (2026-02-25)
 
 ### 🐛 Bug Fixes
 
-* resolve CI workflow shell injection and duplicate NPM publish ([#165](https://github.com/docdyhr/mcp-wordpress/issues/165)) ([1541c16](https://github.com/docdyhr/mcp-wordpress/commit/1541c16b774d8a9ac40754868353c6688a5c3716))
+- resolve CI workflow shell injection and duplicate NPM publish
+  ([#165](https://github.com/docdyhr/mcp-wordpress/issues/165))
+  ([1541c16](https://github.com/docdyhr/mcp-wordpress/commit/1541c16b774d8a9ac40754868353c6688a5c3716))
 
 ## [3.1.4](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.3...v3.1.4) (2026-02-25)
 
 ### 🐛 Bug Fixes
 
-* resolve CI/CD pipeline failures and security vulnerabilities ([#164](https://github.com/docdyhr/mcp-wordpress/issues/164)) ([6231ea5](https://github.com/docdyhr/mcp-wordpress/commit/6231ea52c5a43666c0db49058f880436dd989814))
+- resolve CI/CD pipeline failures and security vulnerabilities
+  ([#164](https://github.com/docdyhr/mcp-wordpress/issues/164))
+  ([6231ea5](https://github.com/docdyhr/mcp-wordpress/commit/6231ea52c5a43666c0db49058f880436dd989814))
 
 ## [3.1.3](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.2...v3.1.3) (2026-02-07)
 
 ### 🐛 Bug Fixes
 
-* resolve security vulnerabilities, update CI/CD actions, and fix flaky test ([#163](https://github.com/docdyhr/mcp-wordpress/issues/163)) ([bfa894b](https://github.com/docdyhr/mcp-wordpress/commit/bfa894b97432114db07bcfb4dd7ef999a7aa7a24))
+- resolve security vulnerabilities, update CI/CD actions, and fix flaky test
+  ([#163](https://github.com/docdyhr/mcp-wordpress/issues/163))
+  ([bfa894b](https://github.com/docdyhr/mcp-wordpress/commit/bfa894b97432114db07bcfb4dd7ef999a7aa7a24))
 
 ## [3.1.2](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.1...v3.1.2) (2026-01-30)
 
 ### 🐛 Bug Fixes
 
-* **security:** update tar override to 7.5.7 and pact-node to 10.18.0 ([2c9794e](https://github.com/docdyhr/mcp-wordpress/commit/2c9794eb68840d0badc5b12bfe6ac62863c34d82))
+- **security:** update tar override to 7.5.7 and pact-node to 10.18.0
+  ([2c9794e](https://github.com/docdyhr/mcp-wordpress/commit/2c9794eb68840d0badc5b12bfe6ac62863c34d82))
 
 ## [3.1.1](https://github.com/docdyhr/mcp-wordpress/compare/v3.1.0...v3.1.1) (2026-01-16)
 
 ### 🐛 Bug Fixes
 
-* **dxt:** update manifest to v3.0.1 and fix version.ts ESLint errors ([9811026](https://github.com/docdyhr/mcp-wordpress/commit/9811026d98dba708a3b20bfa62e776714a45c7d5))
-* resolve security vulnerabilities and re-enable CI tests ([7900e6a](https://github.com/docdyhr/mcp-wordpress/commit/7900e6ad4aaca11037484221526640680c95d3cd))
+- **dxt:** update manifest to v3.0.1 and fix version.ts ESLint errors
+  ([9811026](https://github.com/docdyhr/mcp-wordpress/commit/9811026d98dba708a3b20bfa62e776714a45c7d5))
+- resolve security vulnerabilities and re-enable CI tests
+  ([7900e6a](https://github.com/docdyhr/mcp-wordpress/commit/7900e6ad4aaca11037484221526640680c95d3cd))
 
 ## [3.1.0](https://github.com/docdyhr/mcp-wordpress/compare/v3.0.1...v3.1.0) (2026-01-08)
 
 ### 🚀 Features
 
-* **dxt:** add version checking tool and update documentation ([24d679e](https://github.com/docdyhr/mcp-wordpress/commit/24d679e981c8bcc9c9ea76cff02c6761d5b2dc0d))
+- **dxt:** add version checking tool and update documentation
+  ([24d679e](https://github.com/docdyhr/mcp-wordpress/commit/24d679e981c8bcc9c9ea76cff02c6761d5b2dc0d))
 
 ## [3.0.1](https://github.com/docdyhr/mcp-wordpress/compare/v3.0.0...v3.0.1) (2026-01-08)
 
 ### 🐛 Bug Fixes
 
-* **dxt:** update ajv schema paths from lib to dist directory ([82c81c1](https://github.com/docdyhr/mcp-wordpress/commit/82c81c1cea86a0987b229886d199f0f5316561b5))
+- **dxt:** update ajv schema paths from lib to dist directory
+  ([82c81c1](https://github.com/docdyhr/mcp-wordpress/commit/82c81c1cea86a0987b229886d199f0f5316561b5))
 
 ## [3.0.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.12.0...v3.0.0) (2026-01-05)
 
 ### ⚠ BREAKING CHANGES
 
-* None - all exports remain compatible
+- None - all exports remain compatible
 
 ### 🚀 Features
 
-* add circuit breaker pattern and deprecation documentation ([aedac5b](https://github.com/docdyhr/mcp-wordpress/commit/aedac5b159abe4ddd133898224ca7c12e5cc20cc))
+- add circuit breaker pattern and deprecation documentation
+  ([aedac5b](https://github.com/docdyhr/mcp-wordpress/commit/aedac5b159abe4ddd133898224ca7c12e5cc20cc))
 
 ### 🐛 Bug Fixes
 
-* resolve CodeQL security warnings ([bcbbb03](https://github.com/docdyhr/mcp-wordpress/commit/bcbbb03e5c406489411db345063a276a5126f839)), closes [#19](https://github.com/docdyhr/mcp-wordpress/issues/19) [#22](https://github.com/docdyhr/mcp-wordpress/issues/22) [#25-27](https://github.com/docdyhr/mcp-wordpress/issues/25-27) [#94](https://github.com/docdyhr/mcp-wordpress/issues/94) [#96](https://github.com/docdyhr/mcp-wordpress/issues/96) [#98](https://github.com/docdyhr/mcp-wordpress/issues/98) [#125-140](https://github.com/docdyhr/mcp-wordpress/issues/125-140) [#144](https://github.com/docdyhr/mcp-wordpress/issues/144)
-* **security:** run npm audit fix for js-yaml vulnerability ([bd4344c](https://github.com/docdyhr/mcp-wordpress/commit/bd4344cf78ef8cdc8180c149173d805301a30da4))
-* **security:** update MCP SDK and body-parser to fix vulnerabilities ([9bb73f7](https://github.com/docdyhr/mcp-wordpress/commit/9bb73f79614df97994c9a6e83563c1b3b9d9d047))
-* **tests:** align getAuthStatus tests with actual AuthStatus type ([3629bf1](https://github.com/docdyhr/mcp-wordpress/commit/3629bf1827d172e9bca0604d1a35f59b1a868e19))
-* **tests:** resolve flaky tests in env-loading, logger, and timing tests ([85229b6](https://github.com/docdyhr/mcp-wordpress/commit/85229b6186721e34b0570116e62e590b3d8581b5))
-* **tests:** update cache key regex to match base36 hash format ([07f9da0](https://github.com/docdyhr/mcp-wordpress/commit/07f9da04faf7c9853599a476c745d0a73fcf71ff))
+- resolve CodeQL security warnings
+  ([bcbbb03](https://github.com/docdyhr/mcp-wordpress/commit/bcbbb03e5c406489411db345063a276a5126f839)), closes
+  [#19](https://github.com/docdyhr/mcp-wordpress/issues/19) [#22](https://github.com/docdyhr/mcp-wordpress/issues/22)
+  [#25-27](https://github.com/docdyhr/mcp-wordpress/issues/25-27)
+  [#94](https://github.com/docdyhr/mcp-wordpress/issues/94) [#96](https://github.com/docdyhr/mcp-wordpress/issues/96)
+  [#98](https://github.com/docdyhr/mcp-wordpress/issues/98)
+  [#125-140](https://github.com/docdyhr/mcp-wordpress/issues/125-140)
+  [#144](https://github.com/docdyhr/mcp-wordpress/issues/144)
+- **security:** run npm audit fix for js-yaml vulnerability
+  ([bd4344c](https://github.com/docdyhr/mcp-wordpress/commit/bd4344cf78ef8cdc8180c149173d805301a30da4))
+- **security:** update MCP SDK and body-parser to fix vulnerabilities
+  ([9bb73f7](https://github.com/docdyhr/mcp-wordpress/commit/9bb73f79614df97994c9a6e83563c1b3b9d9d047))
+- **tests:** align getAuthStatus tests with actual AuthStatus type
+  ([3629bf1](https://github.com/docdyhr/mcp-wordpress/commit/3629bf1827d172e9bca0604d1a35f59b1a868e19))
+- **tests:** resolve flaky tests in env-loading, logger, and timing tests
+  ([85229b6](https://github.com/docdyhr/mcp-wordpress/commit/85229b6186721e34b0570116e62e590b3d8581b5))
+- **tests:** update cache key regex to match base36 hash format
+  ([07f9da0](https://github.com/docdyhr/mcp-wordpress/commit/07f9da04faf7c9853599a476c745d0a73fcf71ff))
 
 ### ♻️ Refactoring
 
-* migrate relative imports to path aliases ([87eec2a](https://github.com/docdyhr/mcp-wordpress/commit/87eec2a2fb80956160f9612ddc407cf70be85540)), closes [#160](https://github.com/docdyhr/mcp-wordpress/issues/160)
-* modularize api.ts and performance.ts for improved maintainability ([3828459](https://github.com/docdyhr/mcp-wordpress/commit/382845975cd522093fa32792947b737f53b0ca26))
-* **security:** extract SecurityCIPipeline into modular components ([c041b18](https://github.com/docdyhr/mcp-wordpress/commit/c041b1873c35d8f84ac1b296e5f2d2f8759fcb63)), closes [#159](https://github.com/docdyhr/mcp-wordpress/issues/159)
+- migrate relative imports to path aliases
+  ([87eec2a](https://github.com/docdyhr/mcp-wordpress/commit/87eec2a2fb80956160f9612ddc407cf70be85540)), closes
+  [#160](https://github.com/docdyhr/mcp-wordpress/issues/160)
+- modularize api.ts and performance.ts for improved maintainability
+  ([3828459](https://github.com/docdyhr/mcp-wordpress/commit/382845975cd522093fa32792947b737f53b0ca26))
+- **security:** extract SecurityCIPipeline into modular components
+  ([c041b18](https://github.com/docdyhr/mcp-wordpress/commit/c041b1873c35d8f84ac1b296e5f2d2f8759fcb63)), closes
+  [#159](https://github.com/docdyhr/mcp-wordpress/issues/159)
 
 ### 📚 Documentation
 
-* add sprint implementation documentation ([c3fb7b0](https://github.com/docdyhr/mcp-wordpress/commit/c3fb7b020312f53e5fafa66001aa0027c9cd3c14))
-* remove Smithery references (service no longer available) ([bfe0fd2](https://github.com/docdyhr/mcp-wordpress/commit/bfe0fd2a9d2912e3487593c04a7a8d8984a0b57a)), closes [#155](https://github.com/docdyhr/mcp-wordpress/issues/155)
-* update README with v2.12.0 features and test counts ([c4601ec](https://github.com/docdyhr/mcp-wordpress/commit/c4601ec2d7528aab20d327df050366335f6a8553))
+- add sprint implementation documentation
+  ([c3fb7b0](https://github.com/docdyhr/mcp-wordpress/commit/c3fb7b020312f53e5fafa66001aa0027c9cd3c14))
+- remove Smithery references (service no longer available)
+  ([bfe0fd2](https://github.com/docdyhr/mcp-wordpress/commit/bfe0fd2a9d2912e3487593c04a7a8d8984a0b57a)), closes
+  [#155](https://github.com/docdyhr/mcp-wordpress/issues/155)
+- update README with v2.12.0 features and test counts
+  ([c4601ec](https://github.com/docdyhr/mcp-wordpress/commit/c4601ec2d7528aab20d327df050366335f6a8553))
 
 ## [2.12.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.13...v2.12.0) (2025-11-20)
 
 ### 🚀 Features
 
-* optimize cache and add Config tests ([8bef07c](https://github.com/docdyhr/mcp-wordpress/commit/8bef07c15e1433af4d9c1f107639a1a4fb401eef))
+- optimize cache and add Config tests
+  ([8bef07c](https://github.com/docdyhr/mcp-wordpress/commit/8bef07c15e1433af4d9c1f107639a1a4fb401eef))
 
 ## [2.11.13](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.12...v2.11.13) (2025-11-20)
 
 ### 🐛 Bug Fixes
 
-* **tests:** complete debug.test.js fixes for 100% pass rate ([daea8bb](https://github.com/docdyhr/mcp-wordpress/commit/daea8bb4b537f6fbbf918217461504ca78637fe6))
-* **tests:** resolve test failures for 100% pass rate ([429bbe2](https://github.com/docdyhr/mcp-wordpress/commit/429bbe2b1ab0cd88206c9b9ae63b2d2151c97911))
+- **tests:** complete debug.test.js fixes for 100% pass rate
+  ([daea8bb](https://github.com/docdyhr/mcp-wordpress/commit/daea8bb4b537f6fbbf918217461504ca78637fe6))
+- **tests:** resolve test failures for 100% pass rate
+  ([429bbe2](https://github.com/docdyhr/mcp-wordpress/commit/429bbe2b1ab0cd88206c9b9ae63b2d2151c97911))
 
 ### ♻️ Refactoring
 
-* **tests:** remove DocumentationGenerator test file with API mismatch ([fe4edc8](https://github.com/docdyhr/mcp-wordpress/commit/fe4edc818c490fa632fe5cee0009b24ef67c49fe))
+- **tests:** remove DocumentationGenerator test file with API mismatch
+  ([fe4edc8](https://github.com/docdyhr/mcp-wordpress/commit/fe4edc818c490fa632fe5cee0009b24ef67c49fe))
 
 ## [2.11.12](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.11...v2.11.12) (2025-11-20)
 
 ### 🐛 Bug Fixes
 
-* **ci:** add missing rollback-deployment.sh script for Performance Gates ([06f2533](https://github.com/docdyhr/mcp-wordpress/commit/06f25336ae48d92a8db2d7f8ce3c2f9b2c2c515b))
+- **ci:** add missing rollback-deployment.sh script for Performance Gates
+  ([06f2533](https://github.com/docdyhr/mcp-wordpress/commit/06f25336ae48d92a8db2d7f8ce3c2f9b2c2c515b))
 
 ## [2.11.11](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.10...v2.11.11) (2025-11-19)
 
 ### 🐛 Bug Fixes
 
-* **tests:** skip DocumentationGenerator tests - API mismatch ([40aea2f](https://github.com/docdyhr/mcp-wordpress/commit/40aea2f16c9b9b6e0f715abeb53c67e26d324557))
+- **tests:** skip DocumentationGenerator tests - API mismatch
+  ([40aea2f](https://github.com/docdyhr/mcp-wordpress/commit/40aea2f16c9b9b6e0f715abeb53c67e26d324557))
 
 ## [2.11.10](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.9...v2.11.10) (2025-11-19)
 
 ### 🐛 Bug Fixes
 
-* **tests:** resolve all mock constructor errors in test suite ([cec049b](https://github.com/docdyhr/mcp-wordpress/commit/cec049b4307a341882566fad87b64c3b8607c885))
+- **tests:** resolve all mock constructor errors in test suite
+  ([cec049b](https://github.com/docdyhr/mcp-wordpress/commit/cec049b4307a341882566fad87b64c3b8607c885))
 
 ## [2.11.9](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.8...v2.11.9) (2025-11-19)
 
 ### 🐛 Bug Fixes
 
-* **tests:** resolve mock constructor errors in performance.test.js ([6c8a66a](https://github.com/docdyhr/mcp-wordpress/commit/6c8a66a174b40ab1beb98bf64b5d4807f0c49c5d))
+- **tests:** resolve mock constructor errors in performance.test.js
+  ([6c8a66a](https://github.com/docdyhr/mcp-wordpress/commit/6c8a66a174b40ab1beb98bf64b5d4807f0c49c5d))
 
 ## [2.11.8](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.7...v2.11.8) (2025-11-19)
 
 ### 🐛 Bug Fixes
 
-* **ci:** resolve memory crashes with vitest pool and concurrency settings ([df4e761](https://github.com/docdyhr/mcp-wordpress/commit/df4e761c0089d4b45a90d89e528d2d120beeef73))
+- **ci:** resolve memory crashes with vitest pool and concurrency settings
+  ([df4e761](https://github.com/docdyhr/mcp-wordpress/commit/df4e761c0089d4b45a90d89e528d2d120beeef73))
 
 ## [2.11.7](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.6...v2.11.7) (2025-11-19)
 
 ### 🐛 Bug Fixes
 
-* **ci:** disable coverage in CI pipelines to prevent memory crashes ([ee7cf1c](https://github.com/docdyhr/mcp-wordpress/commit/ee7cf1c3baeaf6b9d067dd928a69a6ea90a819f2))
+- **ci:** disable coverage in CI pipelines to prevent memory crashes
+  ([ee7cf1c](https://github.com/docdyhr/mcp-wordpress/commit/ee7cf1c3baeaf6b9d067dd928a69a6ea90a819f2))
 
 ## [2.11.6](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.5...v2.11.6) (2025-11-19)
 
 ### 🐛 Bug Fixes
 
-* **ci:** resolve memory crashes in test runner ([80c2429](https://github.com/docdyhr/mcp-wordpress/commit/80c24295d2b01286764a9a3998f9c34e0f23001a))
+- **ci:** resolve memory crashes in test runner
+  ([80c2429](https://github.com/docdyhr/mcp-wordpress/commit/80c24295d2b01286764a9a3998f9c34e0f23001a))
 
 ## [2.11.5](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.4...v2.11.5) (2025-11-19)
 
 ### 🐛 Bug Fixes
 
-* **ci:** resolve CI/CD and quality assurance pipeline failures ([91b12df](https://github.com/docdyhr/mcp-wordpress/commit/91b12dfde7e7517c083db8a9067a361ce8ee4a05))
+- **ci:** resolve CI/CD and quality assurance pipeline failures
+  ([91b12df](https://github.com/docdyhr/mcp-wordpress/commit/91b12dfde7e7517c083db8a9067a361ce8ee4a05))
 
 ## [2.11.4](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.3...v2.11.4) (2025-11-03)
 
 ### 🐛 Bug Fixes
 
-* resolve failing CI/CD tests in posts and quality checks ([e549649](https://github.com/docdyhr/mcp-wordpress/commit/e5496499da17d8f5422eea9c7a66c623e837764f))
+- resolve failing CI/CD tests in posts and quality checks
+  ([e549649](https://github.com/docdyhr/mcp-wordpress/commit/e5496499da17d8f5422eea9c7a66c623e837764f))
 
 ### 📚 Documentation
 
-* fix duplicate CI/CD pipeline badges in README ([e6baae8](https://github.com/docdyhr/mcp-wordpress/commit/e6baae8beda31525c355c431860bee98e2b6a31e))
+- fix duplicate CI/CD pipeline badges in README
+  ([e6baae8](https://github.com/docdyhr/mcp-wordpress/commit/e6baae8beda31525c355c431860bee98e2b6a31e))
 
 ## [2.11.3](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.2...v2.11.3) (2025-10-29)
 
 ### 🐛 Bug Fixes
 
-* **docker:** enable Docker publishing on release events ([7a7d304](https://github.com/docdyhr/mcp-wordpress/commit/7a7d304a25982a3ee98a9593dd9d5070ac0809f6)), closes [#141](https://github.com/docdyhr/mcp-wordpress/issues/141)
+- **docker:** enable Docker publishing on release events
+  ([7a7d304](https://github.com/docdyhr/mcp-wordpress/commit/7a7d304a25982a3ee98a9593dd9d5070ac0809f6)), closes
+  [#141](https://github.com/docdyhr/mcp-wordpress/issues/141)
 
 ## [2.11.2](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.1...v2.11.2) (2025-10-29)
 
 ### 🐛 Bug Fixes
 
-* **security:** resolve vite vulnerability and update dependencies ([7a1c918](https://github.com/docdyhr/mcp-wordpress/commit/7a1c9180425852487efc1682698bd7d4fe49bc17)), closes [#141](https://github.com/docdyhr/mcp-wordpress/issues/141)
+- **security:** resolve vite vulnerability and update dependencies
+  ([7a1c918](https://github.com/docdyhr/mcp-wordpress/commit/7a1c9180425852487efc1682698bd7d4fe49bc17)), closes
+  [#141](https://github.com/docdyhr/mcp-wordpress/issues/141)
 
 ### 📚 Documentation
 
-* **todo:** update TODO list with completed security fixes ([863d330](https://github.com/docdyhr/mcp-wordpress/commit/863d330fbd023f854e93822d1cc389b471bdfaa2)), closes [#141](https://github.com/docdyhr/mcp-wordpress/issues/141)
+- **todo:** update TODO list with completed security fixes
+  ([863d330](https://github.com/docdyhr/mcp-wordpress/commit/863d330fbd023f854e93822d1cc389b471bdfaa2)), closes
+  [#141](https://github.com/docdyhr/mcp-wordpress/issues/141)
 
 ## [2.11.1](https://github.com/docdyhr/mcp-wordpress/compare/v2.11.0...v2.11.1) (2025-10-20)
 
 ### 🐛 Bug Fixes
 
-* **ci:** modernize CI/CD pipeline and resolve GitHub badges ([a2ac6c2](https://github.com/docdyhr/mcp-wordpress/commit/a2ac6c28aa36a06f6216a809e377bb80d931f183))
+- **ci:** modernize CI/CD pipeline and resolve GitHub badges
+  ([a2ac6c2](https://github.com/docdyhr/mcp-wordpress/commit/a2ac6c28aa36a06f6216a809e377bb80d931f183))
 
 ### 📚 Documentation
 
-* **security:** comprehensive security audit and risk assessment ([aa7ed5b](https://github.com/docdyhr/mcp-wordpress/commit/aa7ed5bcae7156e7905a13e03039909dac705997))
+- **security:** comprehensive security audit and risk assessment
+  ([aa7ed5b](https://github.com/docdyhr/mcp-wordpress/commit/aa7ed5bcae7156e7905a13e03039909dac705997))
 
 ## [2.11.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.10.7...v2.11.0) (2025-10-19)
 
 ### 🚀 Features
 
-* **tools:** Add include_content parameter to wp_get_page and wp_get_post ([facd43a](https://github.com/docdyhr/mcp-wordpress/commit/facd43ae40c7ee4863bf362675efdc93350624e4)), closes [#119](https://github.com/docdyhr/mcp-wordpress/issues/119) [#119](https://github.com/docdyhr/mcp-wordpress/issues/119)
+- **tools:** Add include_content parameter to wp_get_page and wp_get_post
+  ([facd43a](https://github.com/docdyhr/mcp-wordpress/commit/facd43ae40c7ee4863bf362675efdc93350624e4)), closes
+  [#119](https://github.com/docdyhr/mcp-wordpress/issues/119)
+  [#119](https://github.com/docdyhr/mcp-wordpress/issues/119)
 
 ### 🐛 Bug Fixes
 
-* **ci:** Add missing security:review and security:monitor scripts ([e3a109e](https://github.com/docdyhr/mcp-wordpress/commit/e3a109eaa48e1d3e7f92fc4a696e55c7117e172a))
-* **ci:** Resolve CI/CD pipeline failures in all workflows ([9724153](https://github.com/docdyhr/mcp-wordpress/commit/972415333259801ed9433edc4480321bf9bfa5d2))
-* **ci:** resolve pre-push memory crashes with memory-safe test runner ([fb4cc7e](https://github.com/docdyhr/mcp-wordpress/commit/fb4cc7e3a2736136ce8cac8b04147713b672d72d))
+- **ci:** Add missing security:review and security:monitor scripts
+  ([e3a109e](https://github.com/docdyhr/mcp-wordpress/commit/e3a109eaa48e1d3e7f92fc4a696e55c7117e172a))
+- **ci:** Resolve CI/CD pipeline failures in all workflows
+  ([9724153](https://github.com/docdyhr/mcp-wordpress/commit/972415333259801ed9433edc4480321bf9bfa5d2))
+- **ci:** resolve pre-push memory crashes with memory-safe test runner
+  ([fb4cc7e](https://github.com/docdyhr/mcp-wordpress/commit/fb4cc7e3a2736136ce8cac8b04147713b672d72d))
 
 ### ♻️ Refactoring
 
-* **tests:** Remove all skipped tests and update documentation ([42fd6a8](https://github.com/docdyhr/mcp-wordpress/commit/42fd6a88301b7ab7e0cae8310d743cc0c7b5ae16))
+- **tests:** Remove all skipped tests and update documentation
+  ([42fd6a8](https://github.com/docdyhr/mcp-wordpress/commit/42fd6a88301b7ab7e0cae8310d743cc0c7b5ae16))
 
 ## [2.10.7](https://github.com/docdyhr/mcp-wordpress/compare/v2.10.6...v2.10.7) (2025-10-14)
 
 ### 🐛 Bug Fixes
 
-* **ci:** Resolve remaining 8 CI/CD pipeline failures ([5099e62](https://github.com/docdyhr/mcp-wordpress/commit/5099e62d969e863195462189d95a44cd50b46f53))
+- **ci:** Resolve remaining 8 CI/CD pipeline failures
+  ([5099e62](https://github.com/docdyhr/mcp-wordpress/commit/5099e62d969e863195462189d95a44cd50b46f53))
 
 ## [2.10.6](https://github.com/docdyhr/mcp-wordpress/compare/v2.10.5...v2.10.6) (2025-10-14)
 
 ### 🐛 Bug Fixes
 
-* **ci:** Replace batch test execution with proper vitest sharding to prevent V8 memory crashes ([b1c7300](https://github.com/docdyhr/mcp-wordpress/commit/b1c73009247c9ae4f7957c17c70476aeb77a4742))
+- **ci:** Replace batch test execution with proper vitest sharding to prevent V8 memory crashes
+  ([b1c7300](https://github.com/docdyhr/mcp-wordpress/commit/b1c73009247c9ae4f7957c17c70476aeb77a4742))
 
 ## [2.10.5](https://github.com/docdyhr/mcp-wordpress/compare/v2.10.4...v2.10.5) (2025-10-14)
 
 ### 🐛 Bug Fixes
 
-* **critical:** Fix user role and capabilities retrieval by using context=edit ([632e188](https://github.com/docdyhr/mcp-wordpress/commit/632e188c905f901661aaaaebf9dc7b05ae19ab5b))
-* **tools:** Add inputSchema support to ToolRegistry for wp_create_post ([b6b134e](https://github.com/docdyhr/mcp-wordpress/commit/b6b134e9f5b0fa244cad6892c96a77af45c23c92))
+- **critical:** Fix user role and capabilities retrieval by using context=edit
+  ([632e188](https://github.com/docdyhr/mcp-wordpress/commit/632e188c905f901661aaaaebf9dc7b05ae19ab5b))
+- **tools:** Add inputSchema support to ToolRegistry for wp_create_post
+  ([b6b134e](https://github.com/docdyhr/mcp-wordpress/commit/b6b134e9f5b0fa244cad6892c96a77af45c23c92))
 
 ## [2.10.4](https://github.com/docdyhr/mcp-wordpress/compare/v2.10.3...v2.10.4) (2025-10-08)
 
 ### 🐛 Bug Fixes
 
-* **critical:** Fix Zod version mismatch and restore multi-site functionality ([f7acd3b](https://github.com/docdyhr/mcp-wordpress/commit/f7acd3b06f32cadb6017b18dd810cbad7053a9dc))
+- **critical:** Fix Zod version mismatch and restore multi-site functionality
+  ([f7acd3b](https://github.com/docdyhr/mcp-wordpress/commit/f7acd3b06f32cadb6017b18dd810cbad7053a9dc))
 
 ## [2.10.3](https://github.com/docdyhr/mcp-wordpress/compare/v2.10.2...v2.10.3) (2025-10-02)
 
 ### 🐛 Bug Fixes
 
-* **ci:** Fix CI pipeline failures and optimize test execution ([34bd8ca](https://github.com/docdyhr/mcp-wordpress/commit/34bd8cad738884dc2d0a8ee64aae20043bec9ef8))
+- **ci:** Fix CI pipeline failures and optimize test execution
+  ([34bd8ca](https://github.com/docdyhr/mcp-wordpress/commit/34bd8cad738884dc2d0a8ee64aae20043bec9ef8))
 
 ### 📚 Documentation
 
-* Add comprehensive fixes documentation ([04e950e](https://github.com/docdyhr/mcp-wordpress/commit/04e950eb0eeca6eb74ab70d706e550ba50d85117))
+- Add comprehensive fixes documentation
+  ([04e950e](https://github.com/docdyhr/mcp-wordpress/commit/04e950eb0eeca6eb74ab70d706e550ba50d85117))
 
 ## [2.10.2](https://github.com/docdyhr/mcp-wordpress/compare/v2.10.1...v2.10.2) (2025-09-23)
 
 ### 🐛 Bug Fixes
 
-* **ci:** Add missing test:security:validation script and fix formatting ([24197a3](https://github.com/docdyhr/mcp-wordpress/commit/24197a33c4eaf373460f9a2457bd6c0eb77dd946))
+- **ci:** Add missing test:security:validation script and fix formatting
+  ([24197a3](https://github.com/docdyhr/mcp-wordpress/commit/24197a33c4eaf373460f9a2457bd6c0eb77dd946))
 
 # Changelog
 
@@ -645,7 +951,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### 🐛 Bug Fixes
 
-* **ci:** Resolve CI/CD pipeline failures ([c96ea67](https://github.com/docdyhr/mcp-wordpress/commit/c96ea6741326b1a1000b237ec5639bb408416bc8))
+- **ci:** Resolve CI/CD pipeline failures
+  ([c96ea67](https://github.com/docdyhr/mcp-wordpress/commit/c96ea6741326b1a1000b237ec5639bb408416bc8))
 
 ## [2.10.0](https://github.com/docdyhr/mcp-wordpress/compare/v2.9.3...v2.10.0) (2025-09-21)
 
@@ -735,7 +1042,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - **architecture**: Complete migration to composition-based architecture
   ([TECH-001](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.4...v2.7.0))
-
   - Replaced monolithic WordPressClient with modular manager pattern
   - Added AuthManager, RequestManager, and operation-specific managers
   - Enabled full testability with dependency injection
@@ -743,7 +1049,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - **seo**: Complete SEO toolkit implementation
   ([FEAT-002](https://github.com/docdyhr/mcp-wordpress/compare/v2.6.4...v2.7.0))
-
   - Content analyzer with readability metrics and keyword density
   - SEO metadata generator with OpenGraph and Twitter Cards
   - Schema.org markup generator for multiple content types
@@ -864,20 +1169,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### 🔧 Technical Debt Resolution
 
 - **Code Quality Improvements**
-
   - Remove 104 ESLint violations (89 explicit `any` types, 25 console statements)
   - Fix unused variable violations in catch blocks
   - Replace console statements with structured logging via LoggerFactory
   - Add proper TypeScript interfaces and type guards
 
 - **Dependency Management**
-
   - Update 12 outdated dependencies to latest versions
   - Migrate to Node.js v22 type definitions
   - Evaluate Zod v4 migration for improved validation
 
 - **Testing & Coverage**
-
   - Fix test coverage reporting configuration
   - Add missing unit tests for improved coverage
   - Set coverage thresholds for CI pipeline

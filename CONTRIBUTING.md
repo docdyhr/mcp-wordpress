@@ -102,7 +102,7 @@ test(posts): add comprehensive post tool unit tests
 - `perf`: Performance improvements
 - `security`: Security improvements
 
-## 🏗️ Code Quality Standards
+## 🏗 Code Quality Standards
 
 ### ESLint Configuration
 

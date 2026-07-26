@@ -9,12 +9,13 @@
 import { vi } from "vitest";
 import { z } from "zod";
 import { ToolRegistry } from "@/server/ToolRegistry.js";
+import { WordPressAPIError } from "@/types/client.js";
 
 function createMockServer() {
   const registeredTools = new Map();
   return {
-    tool: vi.fn((name, description, schema) => {
-      registeredTools.set(name, { name, description, schema });
+    tool: vi.fn((name, description, schema, handler) => {
+      registeredTools.set(name, { name, description, schema, handler });
     }),
     server: {
       setRequestHandler: vi.fn(),
@@ -188,6 +189,181 @@ describe("ToolRegistry", () => {
 
       expect(zodSchema.safeParse({ meta: { count: 5 } }).success).toBe(true);
       expect(zodSchema.safeParse({ meta: { count: -1 } }).success).toBe(false);
+    });
+  });
+
+  describe("security validation wiring", () => {
+    let registry;
+    let server;
+
+    beforeEach(() => {
+      server = createMockServer();
+      registry = new ToolRegistry(server, new Map([["default", {}]]));
+    });
+
+    it("rejects a script-tag payload in an ordinary string parameter (e.g. title)", () => {
+      registry.registerTool(
+        simpleTool({
+          inputSchema: {
+            type: "object",
+            properties: { title: { type: "string" } },
+            required: ["title"],
+          },
+        }),
+      );
+
+      const { schema } = server._registeredTools.get("wp_test_tool");
+      const zodSchema = z.object(schema);
+
+      expect(zodSchema.safeParse({ title: "<script>alert(1)</script>" }).success).toBe(false);
+      expect(zodSchema.safeParse({ title: "My Perfectly Normal Post Title" }).success).toBe(true);
+    });
+
+    it("rejects an event-handler payload in an ordinary string parameter", () => {
+      registry.registerTool(
+        simpleTool({
+          inputSchema: {
+            type: "object",
+            properties: { title: { type: "string" } },
+            required: ["title"],
+          },
+        }),
+      );
+
+      const { schema } = server._registeredTools.get("wp_test_tool");
+      const zodSchema = z.object(schema);
+
+      expect(zodSchema.safeParse({ title: '<img src=x onerror="alert(1)">' }).success).toBe(false);
+    });
+
+    it("rejects a script tag in a 'content' parameter but still accepts legitimate Gutenberg block markup", () => {
+      registry.registerTool(
+        simpleTool({
+          inputSchema: {
+            type: "object",
+            properties: { content: { type: "string" } },
+            required: ["content"],
+          },
+        }),
+      );
+
+      const { schema } = server._registeredTools.get("wp_test_tool");
+      const zodSchema = z.object(schema);
+
+      expect(zodSchema.safeParse({ content: "<script>alert(1)</script>" }).success).toBe(false);
+
+      const gutenbergContent =
+        "<!-- wp:paragraph --><p>Hello world</p><!-- /wp:paragraph -->" +
+        '<!-- wp:image {"id":42} --><figure class="wp-block-image"><img src="https://example.com/photo.jpg" alt="A photo"/></figure><!-- /wp:image -->';
+      expect(zodSchema.safeParse({ content: gutenbergContent }).success).toBe(true);
+    });
+
+    it("rejects an event handler embedded in a 'content' or 'excerpt' parameter", () => {
+      registry.registerTool(
+        simpleTool({
+          inputSchema: {
+            type: "object",
+            properties: {
+              content: { type: "string" },
+              excerpt: { type: "string" },
+            },
+            required: [],
+          },
+        }),
+      );
+
+      const { schema } = server._registeredTools.get("wp_test_tool");
+      const zodSchema = z.object(schema);
+
+      expect(zodSchema.safeParse({ content: '<p onclick="alert(1)">hi</p>' }).success).toBe(false);
+      expect(zodSchema.safeParse({ excerpt: '<p onclick="alert(1)">hi</p>' }).success).toBe(false);
+    });
+
+    it("still enforces JSON-Schema minLength/maxLength/pattern alongside the new security check", () => {
+      registry.registerTool(
+        simpleTool({
+          inputSchema: {
+            type: "object",
+            properties: {
+              slug: { type: "string", minLength: 3, maxLength: 10, pattern: "^[a-z-]+$" },
+            },
+            required: ["slug"],
+          },
+        }),
+      );
+
+      const { schema } = server._registeredTools.get("wp_test_tool");
+      const zodSchema = z.object(schema);
+
+      expect(zodSchema.safeParse({ slug: "ab" }).success).toBe(false); // too short
+      expect(zodSchema.safeParse({ slug: "a-valid-slug-too-long" }).success).toBe(false); // too long
+      expect(zodSchema.safeParse({ slug: "valid-slug" }).success).toBe(true);
+      expect(zodSchema.safeParse({ slug: "<script>" }).success).toBe(false); // pattern AND security both reject this
+    });
+
+    it("does not restrict non-string parameters (number/boolean/array/object types unaffected)", () => {
+      registry.registerTool(
+        simpleTool({
+          inputSchema: {
+            type: "object",
+            properties: {
+              count: { type: "number" },
+              enabled: { type: "boolean" },
+              ids: { type: "array", items: { type: "number" } },
+            },
+            required: ["count", "enabled", "ids"],
+          },
+        }),
+      );
+
+      const { schema } = server._registeredTools.get("wp_test_tool");
+      const zodSchema = z.object(schema);
+
+      expect(zodSchema.safeParse({ count: 5, enabled: true, ids: [1, 2, 3] }).success).toBe(true);
+    });
+  });
+
+  describe("authentication error detection", () => {
+    let registry;
+
+    beforeEach(() => {
+      const server = createMockServer();
+      registry = new ToolRegistry(server, new Map([["default", {}]]));
+    });
+
+    it("recognizes a bare 401 WordPressAPIError as an authentication error", () => {
+      expect(registry.isAuthenticationError(new WordPressAPIError("Not logged in", 401))).toBe(true);
+    });
+
+    it("recognizes a bare 403 WordPressAPIError as an authentication error", () => {
+      expect(registry.isAuthenticationError(new WordPressAPIError("Forbidden", 403))).toBe(true);
+    });
+
+    it("does not treat a non-auth WordPressAPIError (e.g. 404) as an authentication error", () => {
+      expect(registry.isAuthenticationError(new WordPressAPIError("Not found", 404))).toBe(false);
+    });
+
+    it("does not treat a plain Error as an authentication error", () => {
+      expect(registry.isAuthenticationError(new Error("boom"))).toBe(false);
+    });
+
+    it("surfaces the auth-specific guidance end-to-end when a tool handler throws a real 401", async () => {
+      const server = createMockServer();
+      const endToEndRegistry = new ToolRegistry(server, new Map([["default", {}]]));
+
+      endToEndRegistry.registerTool(
+        simpleTool({
+          handler: async () => {
+            throw new WordPressAPIError("Not logged in", 401);
+          },
+        }),
+      );
+
+      const { handler } = server._registeredTools.get("wp_test_tool");
+      const result = await handler({});
+
+      expect(result.isError).toBe(true);
+      expect(result.content[0].text).toContain("Authentication failed for site");
     });
   });
 });

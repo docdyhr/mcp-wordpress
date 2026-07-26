@@ -421,6 +421,29 @@ describe("PostTools", () => {
         }),
       );
     });
+
+    it("rejects dangerous content outright instead of silently stripping it (regression: validatePostParams's sanitized result used to be discarded)", async () => {
+      await expect(
+        postTools.handleCreatePost(mockClient, {
+          title: "New Post",
+          content: '<p>Welcome</p><script>alert(1)</script><img src=x onerror="alert(2)">',
+        }),
+      ).rejects.toThrow("Unsafe content");
+
+      expect(mockClient.createPost).not.toHaveBeenCalled();
+    });
+
+    it("preserves Gutenberg block markup unchanged instead of stripping it via an HTML allowlist (regression: PR #209 review)", async () => {
+      const blockContent =
+        '<!-- wp:image {"id":42} --><figure class="wp-block-image"><img src="https://example.com/x.png" class="wp-image-42"/></figure><!-- /wp:image -->';
+
+      await postTools.handleCreatePost(mockClient, {
+        title: "New Post",
+        content: blockContent,
+      });
+
+      expect(mockClient.createPost).toHaveBeenCalledWith(expect.objectContaining({ content: blockContent }));
+    });
   });
 
   describe("handleUpdatePost", () => {
@@ -510,6 +533,30 @@ describe("PostTools", () => {
           featured_media: 0,
         }),
       );
+    });
+
+    it("rejects dangerous content outright instead of silently stripping it (regression: validatePostParams's sanitized result used to be discarded)", async () => {
+      await expect(
+        postTools.handleUpdatePost(mockClient, {
+          id: 1,
+          title: "Updated Post",
+          content: '<p>Updated</p><script>alert(1)</script><img src=x onerror="alert(2)">',
+        }),
+      ).rejects.toThrow("Unsafe content");
+
+      expect(mockClient.updatePost).not.toHaveBeenCalled();
+    });
+
+    it("preserves Gutenberg block markup unchanged on update instead of stripping it via an HTML allowlist (regression: PR #209 review)", async () => {
+      const blockContent = '<!-- wp:paragraph --><p class="has-text-align-center">Updated</p><!-- /wp:paragraph -->';
+
+      await postTools.handleUpdatePost(mockClient, {
+        id: 1,
+        title: "Updated Post",
+        content: blockContent,
+      });
+
+      expect(mockClient.updatePost).toHaveBeenCalledWith(expect.objectContaining({ content: blockContent }));
     });
   });
 

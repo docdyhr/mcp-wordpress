@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import { PageTools } from "@/tools/pages.js";
+import { WordPressAPIError } from "@/types/client.js";
 
 describe("PageTools", () => {
   let pageTools;
@@ -185,6 +186,16 @@ describe("PageTools", () => {
       await expect(pageTools.handleListPages(mockClient, {})).rejects.toThrow("Failed to list pages");
     });
 
+    it("preserves statusCode/code from a typed client error instead of discarding them", async () => {
+      mockClient.getPages.mockRejectedValueOnce(new WordPressAPIError("Not logged in", 401, "authentication_failed"));
+
+      const error = await pageTools.handleListPages(mockClient, {}).catch((e) => e);
+
+      expect(error).toBeInstanceOf(WordPressAPIError);
+      expect(error.statusCode).toBe(401);
+      expect(error.code).toBe("authentication_failed");
+    });
+
     it("should handle per_page parameter", async () => {
       const mockPages = Array.from({ length: 20 }, (_, i) => ({
         id: i + 1,
@@ -363,6 +374,37 @@ describe("PageTools", () => {
       });
       expect(result).toContain("Minimal Page");
     });
+
+    it("rejects dangerous content outright instead of silently stripping it (defense-in-depth: pages have no other sanitization layer)", async () => {
+      await expect(
+        pageTools.handleCreatePage(mockClient, {
+          title: "Page",
+          content: '<p>Hello</p><svg><animate onbegin="alert(1)"></animate></svg>',
+        }),
+      ).rejects.toThrow("Unsafe content");
+
+      expect(mockClient.createPage).not.toHaveBeenCalled();
+    });
+
+    it("preserves Gutenberg block markup unchanged instead of stripping it via an HTML allowlist", async () => {
+      const blockContent =
+        '<!-- wp:image {"id":42} --><figure class="wp-block-image"><img src="https://example.com/x.png" class="wp-image-42"/></figure><!-- /wp:image -->';
+
+      mockClient.createPage.mockResolvedValueOnce({
+        id: 126,
+        title: { rendered: "Page" },
+        content: { rendered: blockContent },
+        status: "publish",
+        link: "https://test-site.com/page",
+      });
+
+      await pageTools.handleCreatePage(mockClient, {
+        title: "Page",
+        content: blockContent,
+      });
+
+      expect(mockClient.createPage).toHaveBeenCalledWith(expect.objectContaining({ content: blockContent }));
+    });
   });
 
   describe("handleUpdatePage", () => {
@@ -431,6 +473,30 @@ describe("PageTools", () => {
         status: "publish",
       });
       expect(result).toContain("✅ Page 2 updated successfully");
+    });
+
+    it("rejects dangerous content outright instead of silently stripping it when included in an update", async () => {
+      await expect(
+        pageTools.handleUpdatePage(mockClient, {
+          id: 3,
+          content: '<p>Edited</p><svg><animate onbegin="alert(1)"></animate></svg>',
+        }),
+      ).rejects.toThrow("Unsafe content");
+
+      expect(mockClient.updatePage).not.toHaveBeenCalled();
+    });
+
+    it("preserves Gutenberg block markup unchanged on update instead of stripping it via an HTML allowlist", async () => {
+      const blockContent = '<!-- wp:paragraph --><p class="has-text-align-center">Edited</p><!-- /wp:paragraph -->';
+
+      mockClient.updatePage.mockResolvedValueOnce({ id: 3, title: { rendered: "Page" }, status: "publish" });
+
+      await pageTools.handleUpdatePage(mockClient, {
+        id: 3,
+        content: blockContent,
+      });
+
+      expect(mockClient.updatePage).toHaveBeenCalledWith(expect.objectContaining({ content: blockContent }));
     });
   });
 
@@ -639,28 +705,15 @@ describe("PageTools", () => {
       expect(result).toContain("Found 100 pages:");
     });
 
-    it("should sanitize HTML content in pages", async () => {
+    it("should reject a script tag in page content instead of stripping it", async () => {
       const pageWithHtml = {
         title: "Test Page",
         content: "<script>alert('xss')</script><p>Safe content</p>",
         status: "publish",
       };
 
-      const mockCreatedPage = {
-        id: 125,
-        title: { rendered: "Test Page" },
-        content: { rendered: "<p>Safe content</p>" }, // Script should be removed
-        status: "publish",
-        link: "https://test-site.com/test-page",
-      };
-
-      mockClient.createPage.mockResolvedValueOnce(mockCreatedPage);
-
-      const result = await pageTools.handleCreatePage(mockClient, pageWithHtml);
-
-      expect(mockClient.createPage).toHaveBeenCalled();
-      expect(typeof result).toBe("string");
-      expect(result).toContain("✅ Page created successfully!");
+      await expect(pageTools.handleCreatePage(mockClient, pageWithHtml)).rejects.toThrow("Unsafe content");
+      expect(mockClient.createPage).not.toHaveBeenCalled();
     });
 
     it("should handle network timeouts gracefully", async () => {

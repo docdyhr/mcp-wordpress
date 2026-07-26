@@ -1,7 +1,7 @@
 import { WordPressClient } from "@/client/api.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
 import { CreateUserRequest, UpdateUserRequest, UserQueryParams } from "@/types/wordpress.js";
-import { getErrorMessage } from "@/utils/error.js";
+import { preserveToolError } from "@/utils/error.js";
 import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "@/utils/streaming.js";
 import { parseId, toolParams } from "./params.js";
 
@@ -227,7 +227,7 @@ export class UserTools {
           .join("\n\n");
       return content;
     } catch (_error) {
-      throw new Error(`Failed to list users: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to list users", _error);
     }
   }
 
@@ -243,7 +243,7 @@ export class UserTools {
         `- **Roles:** ${user.roles?.join(", ") || "N/A"}`;
       return content;
     } catch (_error) {
-      throw new Error(`Failed to get user: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to get user", _error);
     }
   }
 
@@ -309,7 +309,7 @@ export class UserTools {
 
       return { content };
     } catch (_error) {
-      throw new Error(`Failed to get current user: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to get current user", _error);
     }
   }
 
@@ -319,7 +319,7 @@ export class UserTools {
       const user = await client.createUser(createParams);
       return `✅ User "${user.name}" created successfully with ID: ${user.id}.`;
     } catch (_error) {
-      throw new Error(`Failed to create user: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to create user", _error);
     }
   }
 
@@ -329,7 +329,7 @@ export class UserTools {
       const user = await client.updateUser(updateParams);
       return `✅ User ${user.id} updated successfully.`;
     } catch (_error) {
-      throw new Error(`Failed to update user: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to update user", _error);
     }
   }
 
@@ -344,7 +344,7 @@ export class UserTools {
       }
       return content;
     } catch (_error) {
-      throw new Error(`Failed to delete user: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to delete user", _error);
     }
   }
 }

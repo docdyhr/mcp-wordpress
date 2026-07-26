@@ -1,7 +1,7 @@
 import { WordPressClient } from "@/client/api.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
 import { WordPressApplicationPassword } from "@/types/wordpress.js";
-import { getErrorMessage } from "@/utils/error.js";
+import { preserveToolError } from "@/utils/error.js";
 
 /**
  * Provides tools for managing general site settings and operations on a WordPress site.
@@ -189,7 +189,7 @@ export class SiteTools {
 
       return content;
     } catch (_error) {
-      throw new Error(`Failed to get site settings: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to get site settings", _error);
     }
   }
 
@@ -198,7 +198,7 @@ export class SiteTools {
       const updatedSettings = await client.updateSiteSettings(params);
       return `✅ Site settings updated successfully. New title: ${updatedSettings.title}`;
     } catch (_error) {
-      throw new Error(`Failed to update site settings: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to update site settings", _error);
     }
   }
 
@@ -214,7 +214,7 @@ export class SiteTools {
         results.map((r) => `- [${r.type}] **${r.title}**\n  Link: ${r.url}`).join("\n");
       return content;
     } catch (_error) {
-      throw new Error(`Failed to perform search: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to perform search", _error);
     }
   }
 
@@ -238,7 +238,7 @@ export class SiteTools {
           .join("\n");
       return content;
     } catch (_error) {
-      throw new Error(`Failed to get application passwords: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to get application passwords", _error);
     }
   }
 
@@ -256,7 +256,7 @@ export class SiteTools {
         "**IMPORTANT:** This password is shown only once. Please save it securely.";
       return content;
     } catch (_error) {
-      throw new Error(`Failed to create application password: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to create application password", _error);
     }
   }
 
@@ -269,7 +269,7 @@ export class SiteTools {
       await client.deleteApplicationPassword(user_id, uuid);
       return `✅ Application password with UUID ${uuid} has been revoked.`;
     } catch (_error) {
-      throw new Error(`Failed to delete application password: ${getErrorMessage(_error)}`);
+      preserveToolError("Failed to delete application password", _error);
     }
   }
 }

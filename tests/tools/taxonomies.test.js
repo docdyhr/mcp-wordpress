@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import { TaxonomyTools } from "@/tools/taxonomies.js";
+import { WordPressAPIError } from "@/types/client.js";
 
 describe("TaxonomyTools", () => {
   let taxonomyTools;
@@ -192,6 +193,18 @@ describe("TaxonomyTools", () => {
         mockClient.getCategories.mockRejectedValueOnce(new Error("API Error"));
 
         await expect(taxonomyTools.handleListCategories(mockClient, {})).rejects.toThrow("Failed to list categories");
+      });
+
+      it("preserves statusCode/code from a typed client error instead of discarding them", async () => {
+        mockClient.getCategories.mockRejectedValueOnce(
+          new WordPressAPIError("Not logged in", 401, "authentication_failed"),
+        );
+
+        const error = await taxonomyTools.handleListCategories(mockClient, {}).catch((e) => e);
+
+        expect(error).toBeInstanceOf(WordPressAPIError);
+        expect(error.statusCode).toBe(401);
+        expect(error.code).toBe("authentication_failed");
       });
 
       it("should handle categories with zero post count", async () => {

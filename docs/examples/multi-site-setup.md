@@ -515,12 +515,10 @@ Each site in the configuration maintains complete isolation:
 ### Common Problems
 
 1. **Site ID not found**
-
    - Verify the `id` field matches exactly
    - Check for typos in site parameter
 
 2. **Authentication fails for specific site**
-
    - Test each site's credentials individually
    - Regenerate application passwords if needed
 
@@ -574,5 +572,5 @@ done
 echo "✅ Multi-site configuration validated"
 ```
 
-This comprehensive multi-site setup allows you to manage unlimited WordPress sites efficiently through a single Claude
+This comprehensive multi-site setup allows you to manage up to 50 WordPress sites efficiently through a single Claude
 Desktop configuration.

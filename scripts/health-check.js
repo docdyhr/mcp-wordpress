@@ -48,14 +48,7 @@ const header = (title) => {
 function checkProjectStructure() {
   header("📁 Project Structure Check");
 
-  const requiredFiles = [
-    "package.json",
-    "src/index.ts",
-    "src/client/api.ts",
-    "src/client/auth.ts",
-    "tsconfig.json",
-    "dist/index.js",
-  ];
+  const requiredFiles = ["package.json", "src/index.ts", "src/client/api.ts", "tsconfig.json", "dist/index.js"];
 
   let allFilesExist = true;
 
@@ -213,6 +206,12 @@ function checkTypeScriptBuild() {
         resolve(true);
       } else {
         log("TypeScript compilation errors found", "error");
+        // tsc writes its diagnostics to stdout, not stderr — only truly fatal internal
+        // failures (crashes, OOM) go to stderr, so print both rather than assuming stderr
+        // is where the actual error text will be.
+        if (stdout) {
+          console.log(stdout);
+        }
         if (stderr) {
           console.log(stderr);
         }
@@ -299,7 +298,7 @@ function checkCompiledOutput() {
       return false;
     }
 
-    const keyFiles = ["index.js", "client/api.js", "client/auth.js", "tools/posts.js"];
+    const keyFiles = ["index.js", "client/api.js", "tools/posts.js"];
 
     let allCompiledFilesExist = true;
     for (const file of keyFiles) {

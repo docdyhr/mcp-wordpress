@@ -17,7 +17,8 @@ Owns `scripts/`. Not all files here are load-bearing — see Local Contracts.
 | --- | --- |
 | `fix:rest-auth` | `fix-rest-api-auth.sh` |
 | `health` | `health-check.js` |
-| `security:scan` | `security-demo.js` |
+| `security:scan` | `security-audit-gate.js` (blocking production `npm audit` gate against `security-exceptions.json`) |
+| `security:demo` | `security-demo.js` (AI security-scanner demo — informational only, not a gate) |
 | `test:auth` | `test-auth.js` |
 | `test:coverage:report` | `coverage-guardrail.js` |
 | `test:pre-push` | `test-pre-push.sh` |

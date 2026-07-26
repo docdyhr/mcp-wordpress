@@ -6,9 +6,9 @@
  */
 
 import { WordPressAPIError } from "@/types/client.js";
+import { isUnsafeWordPressContent } from "@/security/InputValidator.js";
 import { validateId } from "./core.js";
 import { validateString, validateArray } from "./core.js";
-import { sanitizeHtml } from "./security.js";
 
 /**
  * Validates WordPress post status values
@@ -128,9 +128,22 @@ export function validatePostParams(params: unknown, isUpdate = false): Record<st
     validated.title = validateString(typedParams.title as string, "title", 1, 200);
   }
 
-  // Content validation
+  // Content validation — reject unmistakable XSS vectors but otherwise leave the markup
+  // untouched. Post/page content is Gutenberg block markup (`<!-- wp:* -->` comments plus
+  // block-specific elements/attributes); running it through the allowlist-based
+  // sanitizeHtml() strips/escapes that markup and corrupts ordinary block-editor content
+  // (a regression caught in PR #209 review — see src/security/AGENTS.md for the
+  // isUnsafeWordPressContent vs. sanitizeHtml distinction).
   if (typedParams.content !== undefined) {
-    validated.content = sanitizeHtml(String(typedParams.content));
+    const content = String(typedParams.content);
+    if (isUnsafeWordPressContent(content)) {
+      throw new WordPressAPIError(
+        "Unsafe content (script tag, javascript: URL, or event handler)",
+        400,
+        "INVALID_PARAMETER",
+      );
+    }
+    validated.content = content;
   }
 
   // Status validation with context
