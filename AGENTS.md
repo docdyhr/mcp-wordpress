@@ -93,6 +93,16 @@ this stack. `main-ci.yml` (4-suite × Node-version matrix), `wordpress-compatibi
 `release.yml` (DXT + Docker Hub + npm in one pipeline), `docker-modern.yml`, `dependency-review.yml` are all
 project-specific by design. `/repo-audit` flags these as P1 — expected and accepted.
 
+**Production Docker image has no npm**: `Dockerfile`'s production stage removes the `node:22-alpine` base image's
+bundled npm CLI (`node_modules`, `npm`, `npx` binaries) entirely — the container's entrypoint only ever runs
+`node dist/index.js` (`CMD`/`HEALTHCHECK`), and `docs/DOCKER.md`'s documented `docker exec` usage only ever invokes
+`node` directly, so npm is never needed at runtime. Do not add a runtime code path (health check, `docker exec`
+instructions, `bin/*.js` scripts run inside the container) that shells out to `npm`/`npx` without restoring it first.
+This also means npm's own vendored dependencies (`tar`, `brace-expansion`, `picomatch`, `sigstore` — CVEs in npm's
+internals that `npm audit --omit=dev` never surfaces since they're not in this project's own dependency tree, but that
+periodically tripped the post-push Trivy HIGH/CRITICAL image-scan gate) are gone from the shipped image; `corepack` is a
+separate package and is unaffected.
+
 ## Development Workflow
 
 Branch naming: `feature/...`, `fix/...`, `chore/...`. Commits: Conventional Commits (`feat:`, `fix:`, `chore:`, etc.).
