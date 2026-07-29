@@ -1,3 +1,5 @@
+[![MCP Toplist](https://mcptoplist.com/badge/glama%2Fdocdyhr%2Fmcp-wordpress.svg)](https://mcptoplist.com/server/glama%2Fdocdyhr%2Fmcp-wordpress)
+
 <div align="right">
 <a href="https://railway.com?referralCode=QhjuBc">
   <img width="160" src="https://raw.githubusercontent.com/docdyhr/.github/main/assets/railway-corner-v2@2x.png" alt="Deploy on Railway — $20 free credits">
