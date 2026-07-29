@@ -25,22 +25,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### 🐛 Bug Fixes
 
-- **docker:** strip bundled npm CLI from production image to clear Trivy gate
-  ([#210](https://github.com/docdyhr/mcp-wordpress/issues/210))
-  ([191cc5e](https://github.com/docdyhr/mcp-wordpress/commit/191cc5e372646fca8dbc8a892b910bc580ab6b71)), closes
-  [#209](https://github.com/docdyhr/mcp-wordpress/issues/209)
-
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
-[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
-
-### 🐛 Bug Fixes
-
 - **docker:** the production image's Trivy vulnerability scan started failing on the v3.3.23 release
   (`Total: 6, HIGH: 5, CRITICAL: 1`) — every finding (`tar`, `brace-expansion`, `picomatch`, `sigstore`) was inside
   `/usr/local/lib/node_modules/npm`, the npm CLI bundled with the `node:22-alpine` base image, not the application's own
@@ -48,6 +32,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   `node dist/index.js` — never `npm` — so the production stage now removes npm's bundled `node_modules` and the
   `npm`/`npx` binaries entirely. Verified locally with Trivy 0.69.3 (matching CI): 6 findings before, 0 after; the built
   image still passes its health check unchanged. `corepack` is a separate package and is left in place.
+  ([#210](https://github.com/docdyhr/mcp-wordpress/issues/210))
+  ([191cc5e](https://github.com/docdyhr/mcp-wordpress/commit/191cc5e372646fca8dbc8a892b910bc580ab6b71)), closes
+  [#209](https://github.com/docdyhr/mcp-wordpress/issues/209)
 
 ## [3.3.23](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.22...v3.3.23) (2026-07-26)
 
