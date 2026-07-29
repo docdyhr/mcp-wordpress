@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 🔒 Security
+
+- **deps:** bumped the `@hono/node-server` override from `^1.19.13` to `^2.0.12`, fixing
+  [GHSA-frvp-7c67-39w9](https://github.com/advisories/GHSA-frvp-7c67-39w9) (medium, CVSS 5.9) — a path traversal in
+  `serve-static` on Windows via an encoded backslash (`%5C`). The package is pulled in transitively via
+  `@modelcontextprotocol/sdk`, which still requires `^1.19.9`, so raising this repo's own `overrides` entry was the fix
+  rather than a direct dependency bump. The vulnerable `serveStatic` API is never called by this project or by the SDK's
+  runtime code (confirmed via grep), so this was unreachable even before the fix. Verified the public API the SDK does
+  use at runtime (`getRequestListener`, in `streamableHttp.js`) is unchanged between v1 and v2 per the
+  [v2.0.0 release notes](https://github.com/honojs/node-server/releases/tag/v2.0.0) — the only breaking changes (Node
+  ≥20 requirement, removed Vercel adapter) don't apply here. Full test suite (2540 tests) and build pass unchanged.
+
 ## [3.3.24](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.23...v3.3.24) (2026-07-29)
 
 ### 🐛 Bug Fixes
