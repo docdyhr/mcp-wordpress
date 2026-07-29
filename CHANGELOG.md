@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [3.3.25](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.24...v3.3.25) (2026-07-29)
+
+### 🐛 Bug Fixes
+
+* **deps:** bump @hono/node-server override to 2.0.12 to clear path traversal CVE ([#214](https://github.com/docdyhr/mcp-wordpress/issues/214)) ([b934fe3](https://github.com/docdyhr/mcp-wordpress/commit/b934fe358774f5c3424948d1b2fbe06d99919043))
+
+### 📚 Documentation
+
+* add MCP Toplist rank badge to README ([#212](https://github.com/docdyhr/mcp-wordpress/issues/212)) ([caee868](https://github.com/docdyhr/mcp-wordpress/commit/caee8685f4bcddf70ac8d6ad3695f5ab0d2f1d86)), closes [#211](https://github.com/docdyhr/mcp-wordpress/issues/211)
+
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
