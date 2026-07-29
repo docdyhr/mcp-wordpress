@@ -120,7 +120,7 @@
     ]
   },
   "overrides": {
-    "@hono/node-server": "^1.19.13",
+    "@hono/node-server": "^2.0.12",
     "@pact-foundation/pact-node": {
       "@types/request": {
         "form-data": "^4.0.3"

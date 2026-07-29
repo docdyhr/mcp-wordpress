@@ -5,23 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.3.24](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.23...v3.3.24) (2026-07-29)
-
-### 🐛 Bug Fixes
-
-- **docker:** strip bundled npm CLI from production image to clear Trivy gate
-  ([#210](https://github.com/docdyhr/mcp-wordpress/issues/210))
-  ([191cc5e](https://github.com/docdyhr/mcp-wordpress/commit/191cc5e372646fca8dbc8a892b910bc580ab6b71)), closes
-  [#209](https://github.com/docdyhr/mcp-wordpress/issues/209)
-
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
-[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
 ## [Unreleased]
+
+### 🔒 Security
+
+- **deps:** bumped the `@hono/node-server` override from `^1.19.13` to `^2.0.12`, fixing
+  [GHSA-frvp-7c67-39w9](https://github.com/advisories/GHSA-frvp-7c67-39w9) (medium, CVSS 5.9) — a path traversal in
+  `serve-static` on Windows via an encoded backslash (`%5C`). The package is pulled in transitively via
+  `@modelcontextprotocol/sdk`, which still requires `^1.19.9`, so raising this repo's own `overrides` entry was the fix
+  rather than a direct dependency bump. The vulnerable `serveStatic` API is never called by this project or by the SDK's
+  runtime code (confirmed via grep), so this was unreachable even before the fix. Verified the public API the SDK does
+  use at runtime (`getRequestListener`, in `streamableHttp.js`) is unchanged between v1 and v2 per the
+  [v2.0.0 release notes](https://github.com/honojs/node-server/releases/tag/v2.0.0) — the only breaking changes (Node
+  ≥20 requirement, removed Vercel adapter) don't apply here. Full test suite (2540 tests) and build pass unchanged. Also
+  removed the now-stale `GHSA-frvp-7c67-39w9` entry from `security-exceptions.json`, since
+  `scripts/security-audit-gate.js` confirmed it no longer matches any current finding.
+
+## [3.3.24](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.23...v3.3.24) (2026-07-29)
 
 ### 🐛 Bug Fixes
 
@@ -32,6 +32,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   `node dist/index.js` — never `npm` — so the production stage now removes npm's bundled `node_modules` and the
   `npm`/`npx` binaries entirely. Verified locally with Trivy 0.69.3 (matching CI): 6 findings before, 0 after; the built
   image still passes its health check unchanged. `corepack` is a separate package and is left in place.
+  ([#210](https://github.com/docdyhr/mcp-wordpress/issues/210))
+  ([191cc5e](https://github.com/docdyhr/mcp-wordpress/commit/191cc5e372646fca8dbc8a892b910bc580ab6b71)), closes
+  [#209](https://github.com/docdyhr/mcp-wordpress/issues/209)
 
 ## [3.3.23](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.22...v3.3.23) (2026-07-26)
 
