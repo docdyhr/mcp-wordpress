@@ -17,7 +17,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   runtime code (confirmed via grep), so this was unreachable even before the fix. Verified the public API the SDK does
   use at runtime (`getRequestListener`, in `streamableHttp.js`) is unchanged between v1 and v2 per the
   [v2.0.0 release notes](https://github.com/honojs/node-server/releases/tag/v2.0.0) — the only breaking changes (Node
-  ≥20 requirement, removed Vercel adapter) don't apply here. Full test suite (2540 tests) and build pass unchanged.
+  ≥20 requirement, removed Vercel adapter) don't apply here. Full test suite (2540 tests) and build pass unchanged. Also
+  removed the now-stale `GHSA-frvp-7c67-39w9` entry from `security-exceptions.json`, since
+  `scripts/security-audit-gate.js` confirmed it no longer matches any current finding.
 
 ## [3.3.24](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.23...v3.3.24) (2026-07-29)
 

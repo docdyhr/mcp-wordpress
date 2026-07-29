@@ -1,13 +1,5 @@
 {
   "$schema": "Consumed by scripts/security-audit-gate.js — not a third-party tool config.",
   "description": "Production npm audit findings (npm audit --omit=dev) that are reviewed, accepted, and time-boxed. Every entry must have a reviewBy date; scripts/security-audit-gate.js fails the audit gate once that date passes, forcing a conscious renewal or fix rather than a silent standing exception.",
-  "exceptions": [
-    {
-      "id": "GHSA-frvp-7c67-39w9",
-      "package": "@hono/node-server",
-      "severity": "moderate",
-      "reason": "Path traversal in Hono's serve-static feature on Windows via an encoded backslash. This server only ever constructs a StdioServerTransport (see src/index.ts) — it never starts an HTTP listener, so Hono's static-file-serving code path is never reached. The fix (@hono/node-server >=2.0.5) is only resolvable by upgrading @modelcontextprotocol/sdk, which npm reports as a breaking downgrade to 1.24.3 (see package.json overrides and PR #205 commit b899959) — not worth forcing for a code path this project never executes.",
-      "reviewBy": "2026-10-26"
-    }
-  ]
+  "exceptions": []
 }
