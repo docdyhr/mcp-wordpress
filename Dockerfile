@@ -46,6 +46,17 @@ RUN apk update && apk upgrade && \
     apk add --no-cache tini && \
     rm -rf /var/cache/apk/*
 
+# Remove the npm CLI bundled with the base image: the container's entrypoint only ever
+# runs `node dist/index.js` (see CMD/HEALTHCHECK below and docs/DOCKER.md's documented
+# `docker exec` usage — both invoke `node` directly, never `npm`), so npm's own vendored
+# dependencies (tar, brace-expansion, picomatch, sigstore — used internally for `npm
+# audit`/`npm pack`/provenance signing) are dead weight that periodically trips the
+# post-push Trivy gate with HIGH/CRITICAL findings we can't fix ourselves. See the
+# "Production Docker image has no npm" note in the root AGENTS.md's CI/CD Pipeline
+# section before reintroducing any runtime path that shells out to npm/npx. corepack is
+# a separate package and is left in place.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
+
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S mcp -u 1001 -G nodejs

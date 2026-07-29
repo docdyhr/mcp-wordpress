@@ -2,25 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [3.3.23](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.22...v3.3.23) (2026-07-26)
-
-### 🐛 Bug Fixes
-
-* full audit remediation (security, cache, CI, dead code) ([#209](https://github.com/docdyhr/mcp-wordpress/issues/209)) ([401e0c9](https://github.com/docdyhr/mcp-wordpress/commit/401e0c9fbd385878bfade376ca8b850022ad2684))
-
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-Full audit remediation (2026-07-26) — not yet committed/released.
+### 🐛 Bug Fixes
+
+- **docker:** the production image's Trivy vulnerability scan started failing on the v3.3.23 release
+  (`Total: 6, HIGH: 5, CRITICAL: 1`) — every finding (`tar`, `brace-expansion`, `picomatch`, `sigstore`) was inside
+  `/usr/local/lib/node_modules/npm`, the npm CLI bundled with the `node:22-alpine` base image, not the application's own
+  dependencies (`/app/node_modules` scanned clean at 0 findings). The container's entrypoint only ever runs
+  `node dist/index.js` — never `npm` — so the production stage now removes npm's bundled `node_modules` and the
+  `npm`/`npx` binaries entirely. Verified locally with Trivy 0.69.3 (matching CI): 6 findings before, 0 after; the built
+  image still passes its health check unchanged. `corepack` is a separate package and is left in place.
+
+## [3.3.23](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.22...v3.3.23) (2026-07-26)
 
 ### 🔒 Security
 
@@ -61,6 +58,8 @@ Full audit remediation (2026-07-26) — not yet committed/released.
 
 ### 🐛 Bug Fixes
 
+- full audit remediation (security, cache, CI, dead code) ([#209](https://github.com/docdyhr/mcp-wordpress/issues/209))
+  ([401e0c9](https://github.com/docdyhr/mcp-wordpress/commit/401e0c9fbd385878bfade376ca8b850022ad2684))
 - **`scripts/health-check.js` (PR #209 review):** `requiredFiles`/`keyFiles` still listed `src/client/auth.ts` and
   `dist/client/auth.js`, deleted in this same remediation's dead-code cleanup, so `npm run health` always reported a
   correctly-built checkout as unhealthy. Removed the stale entries
