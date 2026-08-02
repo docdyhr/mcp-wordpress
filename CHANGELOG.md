@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [3.3.26](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.25...v3.3.26) (2026-08-02)
+
+### 🐛 Bug Fixes
+
+* **ci:** pin QEMU setup in release.yml Docker job to stop arm64 npm ci crash ([#215](https://github.com/docdyhr/mcp-wordpress/issues/215)) ([d8cd4b1](https://github.com/docdyhr/mcp-wordpress/commit/d8cd4b19b3921879bb09a85739ad3e3d7fdfc933))
+
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
