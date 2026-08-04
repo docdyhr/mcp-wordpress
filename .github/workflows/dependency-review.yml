@@ -30,7 +30,14 @@ jobs:
 
       - name: 🔍 Dependency Review
         uses: actions/dependency-review-action@v4
-        continue-on-error: true # Don't fail if GitHub Advanced Security not enabled
+        # Runtime HIGH+ findings now block merge (item 6 of the security audit
+        # remediation plan). Previously continue-on-error: true meant this step
+        # could never fail a PR even when GitHub Advanced Security was enabled
+        # and found a real vulnerability — fail-on-severity/fail-on-scopes
+        # below were configured but toothless. If GitHub Advanced Security is
+        # genuinely unavailable, the action itself exits successfully (it only
+        # fails on an actual finding), so this isn't expected to false-positive
+        # on repos without it enabled.
         with:
           # Make less strict for dependency updates
           fail-on-severity: high # Changed from 'moderate' to 'high'
