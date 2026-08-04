@@ -1,5 +1,5 @@
 {
-  "$schema": "Consumed by scripts/security-audit-gate.js — not a third-party tool config.",
+  "_comment": "Consumed by scripts/security-audit-gate.js — not a third-party tool config.",
   "description": "Production npm audit findings (npm audit --omit=dev) that are reviewed, accepted, and time-boxed. Every entry must have a reviewBy date; scripts/security-audit-gate.js fails the audit gate once that date passes, forcing a conscious renewal or fix rather than a silent standing exception.",
   "exceptions": []
 }
