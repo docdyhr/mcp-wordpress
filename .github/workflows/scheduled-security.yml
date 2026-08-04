@@ -56,6 +56,23 @@ jobs:
             const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             const label = "scheduled-security-scan";
 
+            // issues.create() 422s if a label doesn't exist yet, and this label
+            // is newly introduced by this workflow — create it before first use.
+            // 422 on the create call itself means it already exists (a prior
+            // run created it, or someone added it manually); anything else is
+            // a real error worth surfacing.
+            try {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: label,
+                color: "d73a4a",
+                description: "Opened by the weekly scheduled security scan on failure",
+              });
+            } catch (error) {
+              if (error.status !== 422) throw error;
+            }
+
             const { data: existing } = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,

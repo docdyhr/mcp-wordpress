@@ -150,8 +150,14 @@ describe("ServerConfiguration multi-site production guard", () => {
   // below explicitly flip NODE_ENV to simulate a non-CI/non-test boot and
   // must call Config.reset() afterward so the singleton re-reads the real
   // environment on the next access, in this file and any that follow it.
+  //
+  // Config.detectCIEnvironment() checks CI, NODE_ENV==="ci", GITHUB_ACTIONS,
+  // TRAVIS, and CIRCLECI — all of them must be cleared, not just CI, or the
+  // "fails closed" test below passes locally (no GITHUB_ACTIONS set) but
+  // silently no-ops in real CI, where GitHub Actions always sets
+  // GITHUB_ACTIONS=true and isCI() stays true regardless of CI itself.
   let serverConfig;
-  const GUARD_ENV_VARS = ["NODE_ENV", "CI", "MCP_WORDPRESS_ALLOW_MULTI_SITE"];
+  const GUARD_ENV_VARS = ["NODE_ENV", "CI", "GITHUB_ACTIONS", "TRAVIS", "CIRCLECI", "MCP_WORDPRESS_ALLOW_MULTI_SITE"];
   let previousEnv;
 
   beforeEach(() => {
@@ -175,6 +181,9 @@ describe("ServerConfiguration multi-site production guard", () => {
   it("fails closed when MCP_WORDPRESS_ALLOW_MULTI_SITE is not set outside CI/test", async () => {
     process.env.NODE_ENV = "production";
     delete process.env.CI;
+    delete process.env.GITHUB_ACTIONS;
+    delete process.env.TRAVIS;
+    delete process.env.CIRCLECI;
     delete process.env.MCP_WORDPRESS_ALLOW_MULTI_SITE;
     Config.reset();
 
@@ -188,6 +197,9 @@ describe("ServerConfiguration multi-site production guard", () => {
   it("proceeds when MCP_WORDPRESS_ALLOW_MULTI_SITE=true is set outside CI/test", async () => {
     process.env.NODE_ENV = "production";
     delete process.env.CI;
+    delete process.env.GITHUB_ACTIONS;
+    delete process.env.TRAVIS;
+    delete process.env.CIRCLECI;
     process.env.MCP_WORDPRESS_ALLOW_MULTI_SITE = "true";
     Config.reset();
 

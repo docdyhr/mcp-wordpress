@@ -279,14 +279,37 @@ jobs:
           provenance: true
           sbom: true
 
-      - name: 🔍 Trivy Vulnerability Scan (pre-publish gate)
-        id: trivy-scan
+      - name: 🔍 Trivy Vulnerability Scan (pre-publish gate, linux/amd64)
+        id: trivy-scan-amd64
         # This is the actual multi-platform manifest that would ship, scanned while
         # it only exists in the local, non-public registry service above — a
         # genuine pre-publish gate rather than the informational post-push scan
         # this replaced. No continue-on-error: a HIGH/CRITICAL finding here stops
         # the job before the promote step below, so a vulnerable image never
-        # reaches Docker Hub.
+        # reaches Docker Hub. TRIVY_INSECURE is required because Trivy's own
+        # registry client (unlike the Docker daemon) does not automatically trust
+        # localhost as plain HTTP — without it every scan against the local
+        # registry service fails before it ever evaluates a vulnerability.
+        # TRIVY_PLATFORM selects one architecture from the multi-platform
+        # manifest; without it Trivy silently scans only the runner's native
+        # linux/amd64 image and the separately-built linux/arm64 layers would
+        # ship unexamined, so amd64 and arm64 are scanned as two explicit steps.
+        env:
+          TRIVY_INSECURE: "true"
+          TRIVY_PLATFORM: linux/amd64
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          scan-type: "image"
+          image-ref: localhost:5000/mcp-wordpress:scan
+          format: "table"
+          severity: "HIGH,CRITICAL"
+          exit-code: "1"
+
+      - name: 🔍 Trivy Vulnerability Scan (pre-publish gate, linux/arm64)
+        id: trivy-scan-arm64
+        env:
+          TRIVY_INSECURE: "true"
+          TRIVY_PLATFORM: linux/arm64
         uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-type: "image"
@@ -299,7 +322,7 @@ jobs:
         # Copies the exact manifest that was just scanned to the real Docker Hub
         # tags via `docker buildx imagetools create` — a registry-to-registry copy,
         # not a rebuild, so the published image is byte-identical to what Trivy
-        # just cleared. Only reached if the scan above succeeded.
+        # just cleared. Only reached if both scans above succeeded.
         env:
           META_TAGS: ${{ steps.meta.outputs.tags }}
         run: |
@@ -308,6 +331,10 @@ jobs:
           while IFS= read -r tag; do
             [ -n "$tag" ] && tag_args+=(-t "$tag")
           done <<< "$META_TAGS"
+          if [ ${#tag_args[@]} -eq 0 ]; then
+            echo "::error::No tags extracted from metadata output (steps.meta.outputs.tags was empty) — refusing to promote with no destination tags."
+            exit 1
+          fi
           echo "Promoting localhost:5000/mcp-wordpress:scan to:"
           printf '  %s\n' "${tag_args[@]}"
           docker buildx imagetools create "${tag_args[@]}" localhost:5000/mcp-wordpress:scan
@@ -357,7 +384,7 @@ jobs:
           echo "Manual intervention may be required to publish the Docker image"
 
       - name: 🚨 Trivy Scan Failed - Create Alert
-        if: failure() && steps.trivy-scan.outcome == 'failure'
+        if: failure() && (steps.trivy-scan-amd64.outcome == 'failure' || steps.trivy-scan-arm64.outcome == 'failure')
         run: |
           echo "::error title=Docker Image Vulnerability Scan Failed::Pre-publish scan found HIGH/CRITICAL vulnerabilities in localhost:5000/mcp-wordpress:scan — the image was NOT promoted to Docker Hub."
           echo "Nothing public was affected. Fix the vulnerable dependency and release a new version."
