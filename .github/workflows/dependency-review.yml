@@ -30,22 +30,39 @@ jobs:
 
       - name: 🔍 Dependency Review
         uses: actions/dependency-review-action@v4
-        continue-on-error: true # Don't fail if GitHub Advanced Security not enabled
+        # Runtime HIGH+ findings now block merge (item 6 of the security audit
+        # remediation plan). Previously continue-on-error: true meant this step
+        # could never fail a PR even when GitHub Advanced Security was enabled
+        # and found a real vulnerability — fail-on-severity/fail-on-scopes
+        # below were configured but toothless.
+        #
+        # Correction: the assumption that this action exits successfully when
+        # GitHub Advanced Security/Dependency graph is unavailable was wrong —
+        # confirmed via this repo's own PR #217 CI run, it hard-fails with
+        # "Dependency review is not supported on this repository", and that
+        # error had been happening silently on every PR before continue-on-error
+        # was removed here (verified against prior runs' raw logs). That's a
+        # repo-configuration gap (see the linked settings URL), not something
+        # this workflow file can fix — flagged separately to the repo owner.
         with:
           # Make less strict for dependency updates
           fail-on-severity: high # Changed from 'moderate' to 'high'
           # Fail if vulnerabilities are found in runtime dependencies
           fail-on-scopes: runtime
-          # License check (allow common open source licenses)
-          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, CC0-1.0, Unlicense, LGPL-2.1, LGPL-3.0
           # Security advisories configuration
           allow-ghsas: false
           # Comment on PR with results (only on failure for dependency PRs)
           comment-summary-in-pr: on-failure # Changed from 'always'
           # Vulnerability severity threshold
           vulnerability-check: true
-          # License compliance check (relaxed for dependency updates)
-          license-check: true # Keep enabled but make non-blocking
+          # License compliance is handled by the separate, intentionally
+          # non-blocking license-compliance job below — keeping it off here too
+          # avoids a second, blocking license gate that PR review caught: with
+          # continue-on-error removed, an unlisted-but-legitimate open-source
+          # license (e.g. MPL-2.0) would fail this step just like a real
+          # vulnerability finding would, contrary to item 6's intent (runtime
+          # HIGH+ vulnerabilities blocking, not license policy).
+          license-check: false
           # Show OpenSSF Scorecard information
           show-openssf-scorecard: true # Keep enabled for supply chain visibility
 

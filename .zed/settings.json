@@ -1,0 +1,13 @@
+{
+  // Environment files are configuration data, not executable shell scripts.
+  "file_types": {
+    "Plain Text": [".env", ".env.*", "**/dist/**/*.js"]
+  },
+  "lsp": {
+    "eslint": {
+      "settings": {
+        "onIgnoredFiles": "off"
+      }
+    }
+  }
+}

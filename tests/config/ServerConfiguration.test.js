@@ -34,6 +34,7 @@ vi.mock("fs", async (importOriginal) => {
 });
 
 const { ServerConfiguration } = await import("../../dist/config/ServerConfiguration.js");
+const { Config } = await import("../../dist/config/Config.js");
 
 function enoent() {
   const error = new Error("ENOENT: no such file or directory");
@@ -140,5 +141,74 @@ describe("ServerConfiguration multi-site fail-closed behavior", () => {
     expect(result.configs).toHaveLength(1);
     expect(result.configs[0].id).toBe("site1");
     expect(result.clients.has("site1")).toBe(true);
+  });
+});
+
+describe("ServerConfiguration multi-site production guard", () => {
+  // Vitest sets NODE_ENV=test, which makes ConfigHelpers.isTest() true and
+  // exempts these tests themselves from the guard by default — the tests
+  // below explicitly flip NODE_ENV to simulate a non-CI/non-test boot and
+  // must call Config.reset() afterward so the singleton re-reads the real
+  // environment on the next access, in this file and any that follow it.
+  //
+  // Config.detectCIEnvironment() checks CI, NODE_ENV==="ci", GITHUB_ACTIONS,
+  // TRAVIS, and CIRCLECI — all of them must be cleared, not just CI, or the
+  // "fails closed" test below passes locally (no GITHUB_ACTIONS set) but
+  // silently no-ops in real CI, where GitHub Actions always sets
+  // GITHUB_ACTIONS=true and isCI() stays true regardless of CI itself.
+  let serverConfig;
+  const GUARD_ENV_VARS = ["NODE_ENV", "CI", "GITHUB_ACTIONS", "TRAVIS", "CIRCLECI", "MCP_WORDPRESS_ALLOW_MULTI_SITE"];
+  let previousEnv;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockDotenvConfig.mockReturnValue({});
+    serverConfig = ServerConfiguration.getInstance();
+    previousEnv = Object.fromEntries(GUARD_ENV_VARS.map((key) => [key, process.env[key]]));
+  });
+
+  afterEach(() => {
+    for (const key of GUARD_ENV_VARS) {
+      if (previousEnv[key] === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = previousEnv[key];
+      }
+    }
+    Config.reset();
+  });
+
+  it("fails closed when MCP_WORDPRESS_ALLOW_MULTI_SITE is not set outside CI/test", async () => {
+    process.env.NODE_ENV = "production";
+    delete process.env.CI;
+    delete process.env.GITHUB_ACTIONS;
+    delete process.env.TRAVIS;
+    delete process.env.CIRCLECI;
+    delete process.env.MCP_WORDPRESS_ALLOW_MULTI_SITE;
+    Config.reset();
+
+    mockAccess.mockResolvedValue(undefined);
+    mockReadFile.mockResolvedValue(JSON.stringify(VALID_MULTI_SITE_CONFIG));
+
+    await expect(serverConfig.loadClientConfigurations()).rejects.toThrow(/MCP_WORDPRESS_ALLOW_MULTI_SITE/);
+    expect(mockReadFile).not.toHaveBeenCalled();
+  });
+
+  it("proceeds when MCP_WORDPRESS_ALLOW_MULTI_SITE=true is set outside CI/test", async () => {
+    process.env.NODE_ENV = "production";
+    delete process.env.CI;
+    delete process.env.GITHUB_ACTIONS;
+    delete process.env.TRAVIS;
+    delete process.env.CIRCLECI;
+    process.env.MCP_WORDPRESS_ALLOW_MULTI_SITE = "true";
+    Config.reset();
+
+    mockAccess.mockResolvedValue(undefined);
+    mockReadFile.mockResolvedValue(JSON.stringify(VALID_MULTI_SITE_CONFIG));
+
+    const result = await serverConfig.loadClientConfigurations();
+
+    expect(result.configs).toHaveLength(1);
+    expect(result.configs[0].id).toBe("site1");
   });
 });

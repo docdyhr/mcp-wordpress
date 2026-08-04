@@ -1,5 +1,5 @@
 {
-  "$comment": "Multi-site WordPress MCP Server Configuration - IMPORTANT: Do NOT use quotes around password values with spaces. The JSON format handles them correctly.",
+  "$comment": "Multi-site WordPress MCP Server Configuration - IMPORTANT: Do NOT use quotes around password values with spaces. The JSON format handles them correctly. Set MCP_WORDPRESS_ALLOW_MULTI_SITE=true in your environment before the server will load this file outside CI/test.",
   "sites": [
     {
       "id": "site1",

@@ -91,6 +91,20 @@ export class ServerConfiguration {
     if (ConfigHelpers.shouldLogInfo()) {
       this.logger.info("Found multi-site configuration file", { configPath });
     }
+
+    // Fail closed against accidentally booting a multi-site config (real
+    // production credentials for every listed site) just because the file
+    // happens to be present — e.g. left over from another checkout, a stray
+    // copy, or a misplaced dev config. Requires an explicit opt-in outside
+    // CI/test, where the guard would only get in the way of existing suites.
+    if (!ConfigHelpers.isCI() && !ConfigHelpers.isTest() && process.env.MCP_WORDPRESS_ALLOW_MULTI_SITE !== "true") {
+      const message =
+        "Multi-site config file found but MCP_WORDPRESS_ALLOW_MULTI_SITE is not set to true. " +
+        "Set it to load production sites, or remove/rename the config file to use single-site env config.";
+      this.logger.fatal(message, { configPath });
+      throw new Error(message);
+    }
+
     // Any failure from here (JSON parse, schema validation, duplicate site
     // IDs, client construction) must stop startup rather than silently
     // falling back to single-site env config — loadMultiSiteConfig() already
@@ -152,9 +166,12 @@ export class ServerConfiguration {
           this.logger.info("Initialized site client", {
             siteName: site.name,
             siteId: site.id,
-            authMethod: site.config.WORDPRESS_AUTH_METHOD,
           });
         }
+      }
+
+      if (ConfigHelpers.shouldLogInfo()) {
+        this.logger.info("Multi-site configuration loaded", { sitesConfigured: validConfigs.length });
       }
 
       return { clients, configs: validConfigs };
@@ -222,11 +239,8 @@ export class ServerConfiguration {
       const isDXTMode = process.env.NODE_ENV === "dxt";
       if (!isDXTMode && ConfigHelpers.shouldDebug()) {
         this.logger.debug("Loading single-site configuration from environment", {
-          mcpConfigProvided: Boolean(mcpConfig),
-          siteUrl: process.env.WORDPRESS_SITE_URL || "NOT SET",
-          username: process.env.WORDPRESS_USERNAME || "NOT SET",
-          appPasswordSet: Boolean(process.env.WORDPRESS_APP_PASSWORD),
-          authMethod: process.env.WORDPRESS_AUTH_METHOD || "NOT SET",
+          configSource: mcpConfig ? "mcp" : "env",
+          hasSiteUrl: Boolean(process.env.WORDPRESS_SITE_URL),
         });
       }
 
@@ -259,10 +273,8 @@ export class ServerConfiguration {
 
       if (!isDXTMode && ConfigHelpers.shouldDebug()) {
         this.logger.debug("Final environment configuration for validation", {
-          siteUrl: envConfig.WORDPRESS_SITE_URL || "NOT SET",
-          username: envConfig.WORDPRESS_USERNAME || "NOT SET",
-          appPasswordSet: Boolean(envConfig.WORDPRESS_APP_PASSWORD),
-          authMethod: envConfig.WORDPRESS_AUTH_METHOD || "NOT SET",
+          configSource: mcpConfig ? "mcp" : "env",
+          hasSiteUrl: Boolean(envConfig.WORDPRESS_SITE_URL),
         });
       }
 
