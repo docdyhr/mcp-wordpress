@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [3.3.27](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.26...v3.3.27) (2026-08-04)
+
+### 🐛 Bug Fixes
+
+* **security:** remediate audit items 2-8 (deps, logging, multi-site guard, CI gates) ([#217](https://github.com/docdyhr/mcp-wordpress/issues/217)) ([012a633](https://github.com/docdyhr/mcp-wordpress/commit/012a6335e933370b22065e59788ae06d51803dd2))
+
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
