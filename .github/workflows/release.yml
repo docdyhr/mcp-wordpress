@@ -111,6 +111,17 @@ jobs:
     permissions:
       contents: read
       packages: write
+    services:
+      # Local scan registry (item 4 of the security audit remediation plan): the
+      # multi-platform image is built and pushed here first, scanned in place, and
+      # only promoted to Docker Hub once that scan is clean. `driver-opts:
+      # network=host` on the buildx builder below lets it reach `localhost:5000`
+      # directly — Docker's registry client treats localhost as plain HTTP by
+      # default, so no insecure-registry configuration is needed.
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v6
@@ -127,6 +138,10 @@ jobs:
 
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
+        with:
+          # network=host gives the builder direct access to the registry service
+          # container on localhost:5000 (see the services block above).
+          driver-opts: network=host
 
       - name: 🔐 Log in to Docker Hub
         uses: docker/login-action@v4
@@ -196,11 +211,14 @@ jobs:
           echo "Metadata JSON:"
           echo "${META_JSON}" | jq . 2>/dev/null || echo "${META_JSON}"
 
-      - name: 🏗️ Build and Push Docker Image
+      - name: 🏗️ Build and Push to Local Scan Registry
         id: docker-build
-        # Bounded well under the job's 75m timeout-minutes so a hung/crashed emulation
-        # layer (see job-level comment above) fails fast and leaves time for the retry
-        # step below, instead of consuming the run's entire time budget.
+        # Pushes to localhost:5000 (not Docker Hub yet — see the promote step
+        # below) so the actual multi-platform manifest that will ship can be
+        # scanned before anything public happens. Bounded well under the job's
+        # 75m timeout-minutes so a hung/crashed emulation layer (see job-level
+        # comment above) fails fast and leaves time for the retry step below,
+        # instead of consuming the run's entire time budget.
         timeout-minutes: 30
         continue-on-error: true
         uses: docker/build-push-action@v6
@@ -208,7 +226,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: localhost:5000/mcp-wordpress:scan
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -220,7 +238,7 @@ jobs:
           provenance: true
           sbom: true
 
-      - name: 🔄 Retry Docker Build on Failure
+      - name: 🔄 Retry Build on Failure
         # A timed-out docker-build doesn't reliably report one specific outcome: the
         # v3.3.19 incident hit the job-level 6h ceiling, which marks in-progress steps
         # 'cancelled'; the v3.3.20 incident hit THIS step's own timeout-minutes (added
@@ -239,12 +257,9 @@ jobs:
         # primary attempt above hit their 30m timeout (docker/build-push-action@v6's
         # wrapper reliably hangs after its actual work finishes in this environment —
         # not QEMU-crash-specific, since v3.3.20 hit it with no crash at all). Without
-        # continue-on-error, this step's own timeout (reported as conclusion 'failure',
-        # same caveat as above) skipped Verify Docker Push Success below and reported the
-        # whole job as failed, even though the primary attempt's image had already pushed
-        # correctly. That verification step does a real `docker pull` against the
-        # registry, so it — not either build attempt's own exit status — should be the
-        # actual arbiter of success.
+        # continue-on-error, a genuine failure/timeout here would skip every step below
+        # (Trivy scan, promote, verify) and report the whole job failed even when nothing
+        # public was ever affected — this only ever writes to the local scan registry.
         if: steps.docker-build.outcome == 'failure' || steps.docker-build.outcome == 'cancelled'
         timeout-minutes: 30
         continue-on-error: true
@@ -253,7 +268,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: localhost:5000/mcp-wordpress:scan
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -263,6 +278,39 @@ jobs:
             VCS_REF=${{ github.sha }}
           provenance: true
           sbom: true
+
+      - name: 🔍 Trivy Vulnerability Scan (pre-publish gate)
+        id: trivy-scan
+        # This is the actual multi-platform manifest that would ship, scanned while
+        # it only exists in the local, non-public registry service above — a
+        # genuine pre-publish gate rather than the informational post-push scan
+        # this replaced. No continue-on-error: a HIGH/CRITICAL finding here stops
+        # the job before the promote step below, so a vulnerable image never
+        # reaches Docker Hub.
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          scan-type: "image"
+          image-ref: localhost:5000/mcp-wordpress:scan
+          format: "table"
+          severity: "HIGH,CRITICAL"
+          exit-code: "1"
+
+      - name: 🚀 Promote Scanned Image to Docker Hub
+        # Copies the exact manifest that was just scanned to the real Docker Hub
+        # tags via `docker buildx imagetools create` — a registry-to-registry copy,
+        # not a rebuild, so the published image is byte-identical to what Trivy
+        # just cleared. Only reached if the scan above succeeded.
+        env:
+          META_TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          tag_args=()
+          while IFS= read -r tag; do
+            [ -n "$tag" ] && tag_args+=(-t "$tag")
+          done <<< "$META_TAGS"
+          echo "Promoting localhost:5000/mcp-wordpress:scan to:"
+          printf '  %s\n' "${tag_args[@]}"
+          docker buildx imagetools create "${tag_args[@]}" localhost:5000/mcp-wordpress:scan
 
       - name: 📝 Update Docker Hub Description
         uses: peter-evans/dockerhub-description@v5
@@ -302,23 +350,6 @@ jobs:
             exit 1
           fi
 
-      - name: 🔍 Trivy Vulnerability Scan (published image)
-        id: trivy-scan
-        # Scans the tag this job just pushed and verified above. This is necessarily a
-        # post-push scan, not a pre-push gate: the build above is multi-platform
-        # (linux/amd64,linux/arm64) via a single buildx invocation, and buildx cannot
-        # `--load` a multi-platform manifest locally, so there is no local image to scan
-        # before push. A HIGH/CRITICAL finding here fails this job loudly (see the alert
-        # step below) so it gets human attention immediately, even though the image is
-        # already public by the time the scan runs.
-        uses: aquasecurity/trivy-action@0.35.0
-        with:
-          scan-type: "image"
-          image-ref: docdyhr/mcp-wordpress:${{ needs.semantic-release.outputs.new-release-version || github.ref_name }}
-          format: "table"
-          severity: "HIGH,CRITICAL"
-          exit-code: "1"
-
       - name: 🚨 Docker Verification Failed - Create Alert
         if: failure() && steps.verify-docker.outputs.verification_status == 'failure'
         run: |
@@ -328,8 +359,8 @@ jobs:
       - name: 🚨 Trivy Scan Failed - Create Alert
         if: failure() && steps.trivy-scan.outcome == 'failure'
         run: |
-          echo "::error title=Docker Image Vulnerability Scan Failed::The published image has HIGH/CRITICAL vulnerabilities — see the Trivy step output above"
-          echo "The image is already live on Docker Hub; review and patch, then release a fixed version."
+          echo "::error title=Docker Image Vulnerability Scan Failed::Pre-publish scan found HIGH/CRITICAL vulnerabilities in localhost:5000/mcp-wordpress:scan — the image was NOT promoted to Docker Hub."
+          echo "Nothing public was affected. Fix the vulnerable dependency and release a new version."
 
   # 📦 DXT Package Build and Upload
   dxt-package:
