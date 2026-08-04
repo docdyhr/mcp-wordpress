@@ -80,6 +80,8 @@ RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 - Cache issues: `rm -rf cache/`
 - TypeScript: use `| undefined` for optional properties
 - ESLint: use `_` prefix for unused variables
+- Zed dotenv diagnostics: environment templates suppress ShellCheck `SC2034`, which is inapplicable to externally
+  consumed variables
 
 ## CI/CD Pipeline
 
@@ -209,6 +211,7 @@ When the user requests a durable behavior change, record it here or in the relev
 
 ### Child DOX Index
 
+- `.zed/AGENTS.md` — project-scoped Zed language associations for configuration templates and generated output
 - `src/AGENTS.md` — source-wide TypeScript/ESLint conventions, composition-pattern DI, logger usage; indexes its own
   children
 - `tests/AGENTS.md` — Vitest configs, coverage thresholds, test-against-dist convention
