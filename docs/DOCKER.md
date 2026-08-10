@@ -354,12 +354,12 @@ docker logs mcp-wordpress > mcp-wordpress.log
 
 ### Read-Only Root Filesystem
 
-The server does not write to disk during normal operation (config and logs go to stdout/stderr), so it runs cleanly with
-a read-only root filesystem. This blocks an attacker who gains code execution from persisting files or tampering with
-the image contents:
+The server does not write to disk during normal operation — configuration is read from environment variables and/or a
+mounted config file, and logs go to stdout/stderr — so it runs cleanly with a read-only root filesystem. This blocks an
+attacker who gains code execution from persisting files or tampering with the image contents:
 
 ```bash
-docker run -d \
+docker run -d -i \
   --name mcp-wordpress \
   --read-only \
   --tmpfs /tmp \
@@ -371,11 +371,17 @@ docker run -d \
   docdyhr/mcp-wordpress:latest
 ```
 
+`-i` keeps stdin open: the server uses `StdioServerTransport` and calls `process.stdin.resume()` to stay alive, so
+without it Docker attaches a closed `/dev/null` stdin and the process sees immediate EOF.
+
 The equivalent Docker Compose options (`read_only`, `tmpfs`, `cap_drop`) are included, commented out, in
 `docker-compose.yml` — uncomment them to opt in.
 
-> Only the optional security-remediation/config-export tools write to disk (under `/app/config` by default). If you use
-> those, mount a writable volume for that path instead of disabling `--read-only`.
+> The optional security-remediation/config-export tools are the exception to "no disk writes": `SecurityConfigManager`
+> defaults to a `security-config/` directory and `AutomatedRemediation` defaults its backups to `security-backups/`
+> (both relative to `/app`), and `AutomatedRemediation` also rewrites whatever source file it's remediating in place —
+> not a single fixed path. If you use these tools, either mount the specific directories they need as writable or skip
+> `--read-only` for that deployment.
 
 ### Runtime Security Monitoring
 
