@@ -350,6 +350,38 @@ docker logs mcp-wordpress > mcp-wordpress.log
 3. **Secrets Management**: Use Docker secrets or environment variables securely
 4. **Network Security**: Use custom networks for container isolation
 5. **Resource Limits**: Set memory and CPU limits
+6. **Read-Only Root Filesystem**: Recommended for production (see below)
+
+### Read-Only Root Filesystem
+
+The server does not write to disk during normal operation (config and logs go to stdout/stderr), so it runs cleanly with
+a read-only root filesystem. This blocks an attacker who gains code execution from persisting files or tampering with
+the image contents:
+
+```bash
+docker run -d \
+  --name mcp-wordpress \
+  --read-only \
+  --tmpfs /tmp \
+  --tmpfs /app/logs \
+  --cap-drop ALL \
+  -e WORDPRESS_SITE_URL=https://your-site.com \
+  -e WORDPRESS_USERNAME=your-username \
+  -e WORDPRESS_APP_PASSWORD=your-app-password \
+  docdyhr/mcp-wordpress:latest
+```
+
+The equivalent Docker Compose options (`read_only`, `tmpfs`, `cap_drop`) are included, commented out, in
+`docker-compose.yml` — uncomment them to opt in.
+
+> Only the optional security-remediation/config-export tools write to disk (under `/app/config` by default). If you use
+> those, mount a writable volume for that path instead of disabling `--read-only`.
+
+### Runtime Security Monitoring
+
+For production deployments, consider container runtime security monitoring (e.g. [Falco](https://falco.org/),
+[Sysdig](https://sysdig.com/), or an AppArmor/SELinux profile) to detect anomalous process execution or file access
+inside the container. This is a deployment-environment concern, not something the image itself configures.
 
 ### Secrets Management
 
