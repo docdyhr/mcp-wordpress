@@ -350,6 +350,44 @@ docker logs mcp-wordpress > mcp-wordpress.log
 3. **Secrets Management**: Use Docker secrets or environment variables securely
 4. **Network Security**: Use custom networks for container isolation
 5. **Resource Limits**: Set memory and CPU limits
+6. **Read-Only Root Filesystem**: Recommended for production (see below)
+
+### Read-Only Root Filesystem
+
+The server does not write to disk during normal operation — configuration is read from environment variables and/or a
+mounted config file, and logs go to stdout/stderr — so it runs cleanly with a read-only root filesystem. This blocks an
+attacker who gains code execution from persisting files or tampering with the image contents:
+
+```bash
+docker run -d -i \
+  --name mcp-wordpress \
+  --read-only \
+  --tmpfs /tmp \
+  --tmpfs /app/logs \
+  --cap-drop ALL \
+  -e WORDPRESS_SITE_URL=https://your-site.com \
+  -e WORDPRESS_USERNAME=your-username \
+  -e WORDPRESS_APP_PASSWORD=your-app-password \
+  docdyhr/mcp-wordpress:latest
+```
+
+`-i` keeps stdin open: the server uses `StdioServerTransport` and calls `process.stdin.resume()` to stay alive, so
+without it Docker attaches a closed `/dev/null` stdin and the process sees immediate EOF.
+
+The equivalent Docker Compose options (`read_only`, `tmpfs`, `cap_drop`) are included, commented out, in
+`docker-compose.yml` — uncomment them to opt in.
+
+> The optional security-remediation/config-export tools are the exception to "no disk writes": `SecurityConfigManager`
+> defaults to a `security-config/` directory and `AutomatedRemediation` defaults its backups to `security-backups/`
+> (both relative to `/app`), and `AutomatedRemediation` also rewrites whatever source file it's remediating in place —
+> not a single fixed path. If you use these tools, either mount the specific directories they need as writable or skip
+> `--read-only` for that deployment.
+
+### Runtime Security Monitoring
+
+For production deployments, consider container runtime security monitoring (e.g. [Falco](https://falco.org/),
+[Sysdig](https://sysdig.com/), or an AppArmor/SELinux profile) to detect anomalous process execution or file access
+inside the container. This is a deployment-environment concern, not something the image itself configures.
 
 ### Secrets Management
 
