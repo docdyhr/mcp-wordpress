@@ -107,7 +107,13 @@ describe("bin/mcp-wordpress.js entry-point dispatch", () => {
   // paths) is actually in place, so a future refactor can't silently drop it.
   it("regression: converts the dist/index.js path to a file:// URL before import (Windows ERR_UNSUPPORTED_ESM_URL_SCHEME)", () => {
     const source = readFileSync(join(repoRoot, "bin/mcp-wordpress.js"), "utf8");
-    expect(source).toMatch(/pathToFileURL\(mainModule\)\.href/);
-    expect(source).not.toMatch(/await import\(mainModule\)/);
+    // Asserts pathToFileURL's result specifically is what's passed to import(),
+    // not just that both substrings appear somewhere in the file — and the
+    // negative check blocks any `await import(mainModule)` call, not only the
+    // exact prior spelling, so reformatting can't dodge either assertion.
+    // Anchored on "await" so it doesn't false-match the explanatory comment
+    // above (which quotes the old `import(mainModule)` form by name).
+    expect(source).toMatch(/await\s+import\(\s*pathToFileURL\(mainModule\)\.href\s*\)/);
+    expect(source).not.toMatch(/await\s+import\(\s*mainModule\s*\)/);
   });
 });

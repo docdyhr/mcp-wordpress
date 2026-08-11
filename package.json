@@ -82,7 +82,7 @@
     "test:batch:1": "npm run build && NODE_OPTIONS=\"--max-old-space-size=8192\" vitest run tests/security/ tests/cache/ tests/server/ --no-coverage --reporter=default",
     "test:batch:2": "npm run build && NODE_OPTIONS=\"--max-old-space-size=8192\" vitest run tests/client/ tests/config/ tests/utils/ --no-coverage --reporter=default",
     "test:batch:3": "npm run build && NODE_OPTIONS=\"--max-old-space-size=8192\" vitest run tests/tools/ tests/performance/ --no-coverage --reporter=default",
-    "test:batch:4": "npm run build && NODE_OPTIONS=\"--max-old-space-size=8192\" vitest run tests/*.test.js tests/docs/ --no-coverage --reporter=default",
+    "test:batch:4": "npm run build && NODE_OPTIONS=\"--max-old-space-size=8192\" vitest run tests/*.test.js tests/docs/ tests/bin/ --no-coverage --reporter=default",
     "test:cache": "npm run build && vitest run tests/cache/",
     "test:ci": "npm run build && CI=true NODE_OPTIONS=\"--max-old-space-size=8192\" vitest run --reporter=default",
     "test:ci:safe": "NODE_OPTIONS=\"--max-old-space-size=8192\" npx vitest run --config vitest.ci.config.ts",
