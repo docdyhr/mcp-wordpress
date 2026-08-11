@@ -257,22 +257,22 @@ class WordPressStatus {
 
       // Check tool files
       const toolFiles = [
-        "dist/tools/posts.js",
-        "dist/tools/pages.js",
-        "dist/tools/media.js",
-        "dist/tools/users.js",
-        "dist/tools/comments.js",
-        "dist/tools/taxonomies.js",
-        "dist/tools/site.js",
-        "dist/tools/auth.js",
+        "dist/tools/posts",
+        "dist/tools/pages",
+        "dist/tools/media",
+        "dist/tools/users",
+        "dist/tools/comments",
+        "dist/tools/taxonomies",
+        "dist/tools/site",
+        "dist/tools/auth",
       ];
 
       let missingTools = 0;
       for (const toolFile of toolFiles) {
-        if (existsSync(join(rootDir, toolFile))) {
-          console.log(`✅ ${toolFile}`);
+        if (existsSync(join(rootDir, `${toolFile}.js`))) {
+          console.log(`✅ ${toolFile}.js`);
         } else {
-          console.log(`❌ ${toolFile} missing`);
+          console.log(`❌ ${toolFile}.js missing`);
           missingTools++;
         }
       }
@@ -289,14 +289,19 @@ class WordPressStatus {
 
       for (const toolFile of toolFiles) {
         try {
-          const module = await import(`../${toolFile}`);
+          // Built as a plain string (not a template literal directly in import()) so Vite's
+          // dynamic-import-vars plugin treats this as a genuinely dynamic import instead of
+          // trying to statically enumerate it — that transform injects a helper import above
+          // this file's shebang line, which breaks parsing.
+          const modulePath = "../" + toolFile + ".js";
+          const module = await import(modulePath);
           const toolNames = Object.keys(module).filter(
             (name) => !name.startsWith("handle") && typeof module[name] === "object",
           );
-          toolCounts[toolFile] = toolNames.length;
+          toolCounts[`${toolFile}.js`] = toolNames.length;
           totalTools += toolNames.length;
         } catch (error) {
-          console.log(`❌ Error loading ${toolFile}: ${error.message}`);
+          console.log(`❌ Error loading ${toolFile}.js: ${error.message}`);
           return false;
         }
       }
