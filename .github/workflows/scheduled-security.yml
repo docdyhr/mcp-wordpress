@@ -40,10 +40,27 @@ jobs:
         run: npm run security:scan
 
       - name: 🔍 Trivy Filesystem Scan
+        # Only @pact-foundation/pact-node is excluded, not all of node_modules:
+        # Trivy's bundler scanner was finding a Gemfile.lock vendored inside
+        # that package's standalone binary
+        # (node_modules/@pact-foundation/pact-node/standalone/*/pact/lib/vendor)
+        # — a bundled Ruby runtime for Pact's legacy mock-service/verifier that
+        # ships with the npm package itself. It's dev-only tooling never invoked
+        # in the shipped server, not something a package.json override can patch
+        # (it's a vendored binary, not an npm-resolved dependency), and unrelated
+        # to any code change in this repo, so it was reopening this workflow's
+        # tracking issue every week for a finding nobody can act on. Scoped to
+        # this one package (rather than all of node_modules) so Trivy still
+        # catches any other non-npm artifact vendored elsewhere under
+        # node_modules — npm-ecosystem CVEs are separately covered by the audit
+        # step above using npm's own advisory data, more precise for that
+        # ecosystem than Trivy's lockfile heuristics, but that step can't see
+        # non-npm vendored content the way Trivy's fs scan can.
         uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-type: "fs"
           scan-ref: "."
+          skip-dirs: "node_modules/@pact-foundation/pact-node"
           format: "table"
           severity: "HIGH,CRITICAL"
           exit-code: "1"
