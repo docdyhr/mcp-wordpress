@@ -10,13 +10,17 @@
 // imported module could never recognize this as its entry point, and the
 // server would silently do nothing (exit 0, no output).
 import path from "path";
-import { fileURLToPath } from "url";
+import { fileURLToPath, pathToFileURL } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// pathToFileURL is required, not cosmetic: on Windows a bare OS path like
+// "C:\...\dist\index.js" handed to import() is parsed as a "c:" URL scheme,
+// which Node's ESM loader rejects with ERR_UNSUPPORTED_ESM_URL_SCHEME. It's a
+// no-op on POSIX paths, so this is safe cross-platform.
 const mainModule = path.join(__dirname, "..", "dist", "index.js");
-const { main, runHealthCheck } = await import(mainModule);
+const { main, runHealthCheck } = await import(pathToFileURL(mainModule).href);
 
 if (process.argv.includes("--health-check")) {
   await runHealthCheck();

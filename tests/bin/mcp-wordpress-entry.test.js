@@ -1,6 +1,16 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { spawnSync } from "child_process";
-import { mkdtempSync, mkdirSync, rmSync, cpSync, copyFileSync, symlinkSync, writeFileSync, existsSync } from "fs";
+import {
+  mkdtempSync,
+  mkdirSync,
+  rmSync,
+  cpSync,
+  copyFileSync,
+  symlinkSync,
+  writeFileSync,
+  existsSync,
+  readFileSync,
+} from "fs";
 import { tmpdir } from "os";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
@@ -83,5 +93,21 @@ describe("bin/mcp-wordpress.js entry-point dispatch", () => {
     expect(result.stdout + result.stderr).toContain("Health check failed: no WordPress sites configured");
     // The old bug's signature: silently did nothing at all.
     expect(result.stdout + result.stderr).not.toBe("");
+  });
+
+  // Regression coverage for a second real bug (#221): the dispatch line handed
+  // a bare OS path straight to import(). On POSIX that path starts with "/",
+  // which the ESM loader accepts, so this was invisible on the Linux/macOS
+  // runners CI actually runs on — this repo has no Windows CI job to catch it
+  // at runtime. On Windows the path starts with a drive letter (e.g.
+  // "C:\...\dist\index.js"), which the loader parses as an unsupported "c:"
+  // URL scheme and throws ERR_UNSUPPORTED_ESM_URL_SCHEME before the server
+  // ever starts. Since the failure mode can't be reproduced on this suite's
+  // runners, this asserts the fix (pathToFileURL, a documented no-op on POSIX
+  // paths) is actually in place, so a future refactor can't silently drop it.
+  it("regression: converts the dist/index.js path to a file:// URL before import (Windows ERR_UNSUPPORTED_ESM_URL_SCHEME)", () => {
+    const source = readFileSync(join(repoRoot, "bin/mcp-wordpress.js"), "utf8");
+    expect(source).toMatch(/pathToFileURL\(mainModule\)\.href/);
+    expect(source).not.toMatch(/await import\(mainModule\)/);
   });
 });
