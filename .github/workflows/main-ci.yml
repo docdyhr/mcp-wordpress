@@ -34,7 +34,7 @@ jobs:
             path: "tests/tools/ tests/performance/"
             memory: "4096"
           - name: "root-docs"
-            path: "tests/*.test.js tests/docs/"
+            path: "tests/*.test.js tests/docs/ tests/bin/"
             memory: "2048"
 
     steps:
