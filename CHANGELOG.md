@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [3.3.28](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.27...v3.3.28) (2026-08-11)
+
+### 🐛 Bug Fixes
+
+* **bin:** convert dist/index.js path to file:// URL before import ([#226](https://github.com/docdyhr/mcp-wordpress/issues/226)) ([a94c25c](https://github.com/docdyhr/mcp-wordpress/commit/a94c25cdfdaafbc910077cffc70253e9bee2924e)), closes [#221](https://github.com/docdyhr/mcp-wordpress/issues/221)
+
+### 📚 Documentation
+
+* **security:** document read-only root filesystem hardening ([#220](https://github.com/docdyhr/mcp-wordpress/issues/220)) ([80ae710](https://github.com/docdyhr/mcp-wordpress/commit/80ae710a0f0d0c1d6ab7113f3740391464fb29f8))
+
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
