@@ -25,7 +25,6 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 [![NPM Total Downloads](https://img.shields.io/npm/dt/mcp-wordpress?logo=npm&logoColor=white&label=total%20downloads)](https://www.npmjs.com/package/mcp-wordpress)
 [![Docker Pulls](https://img.shields.io/docker/pulls/docdyhr/mcp-wordpress?logo=docker&logoColor=white)](https://hub.docker.com/r/docdyhr/mcp-wordpress)
 [![Coverage Status](https://img.shields.io/codecov/c/github/docdyhr/mcp-wordpress?logo=codecov&logoColor=white)](https://codecov.io/gh/docdyhr/mcp-wordpress)
-[![MCP Evaluation](https://img.shields.io/badge/mcp%20evaluation-4.5%2F5.0-brightgreen?logo=openai&logoColor=white)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/mcp-evaluations.yml)
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue?logo=typescript&logoColor=white)](https://github.com/docdyhr/mcp-wordpress)
 [![CodeQL](https://github.com/docdyhr/mcp-wordpress/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/docdyhr/mcp-wordpress/actions/workflows/codeql-analysis.yml)

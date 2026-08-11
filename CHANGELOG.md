@@ -15,13 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * **security:** document read-only root filesystem hardening ([#220](https://github.com/docdyhr/mcp-wordpress/issues/220)) ([80ae710](https://github.com/docdyhr/mcp-wordpress/commit/80ae710a0f0d0c1d6ab7113f3740391464fb29f8))
 
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
-[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
 ## [3.3.27](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.26...v3.3.27) (2026-08-04)
 
 ### 🐛 Bug Fixes
@@ -30,13 +23,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ([#217](https://github.com/docdyhr/mcp-wordpress/issues/217))
   ([012a633](https://github.com/docdyhr/mcp-wordpress/commit/012a6335e933370b22065e59788ae06d51803dd2))
 
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
-[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
 ## [3.3.26](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.25...v3.3.26) (2026-08-02)
 
 ### 🐛 Bug Fixes
@@ -44,13 +30,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **ci:** pin QEMU setup in release.yml Docker job to stop arm64 npm ci crash
   ([#215](https://github.com/docdyhr/mcp-wordpress/issues/215))
   ([d8cd4b1](https://github.com/docdyhr/mcp-wordpress/commit/d8cd4b19b3921879bb09a85739ad3e3d7fdfc933))
-
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
-[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [3.3.25](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.24...v3.3.25) (2026-07-29)
 
@@ -65,13 +44,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - add MCP Toplist rank badge to README ([#212](https://github.com/docdyhr/mcp-wordpress/issues/212))
   ([caee868](https://github.com/docdyhr/mcp-wordpress/commit/caee8685f4bcddf70ac8d6ad3695f5ab0d2f1d86)), closes
   [#211](https://github.com/docdyhr/mcp-wordpress/issues/211)
-
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
-[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
@@ -1039,13 +1011,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **ci:** Add missing test:security:validation script and fix formatting
   ([24197a3](https://github.com/docdyhr/mcp-wordpress/commit/24197a33c4eaf373460f9a2457bd6c0eb77dd946))
 
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
-[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
 ## [2.10.1](https://github.com/docdyhr/mcp-wordpress/compare/v2.10.0...v2.10.1) (2025-09-22)
 
 ### 🐛 Bug Fixes
@@ -1255,13 +1220,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - CI/CD workflow improvements and security monitoring syntax
   ([ff1b1d6](https://github.com/docdyhr/mcp-wordpress/commit/ff1b1d6c86ab69000b50c9148f80dac7aeb82cc7))
-
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
-[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
@@ -1495,13 +1453,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ([53dc3b1](https://github.com/docdyhr/mcp-wordpress/commit/53dc3b1c342bb45293221ef7c77aec13ad5fffed))
 - move Acknowledgments section to bottom of README
   ([1dfebfe](https://github.com/docdyhr/mcp-wordpress/commit/1dfebfe31550f6f37fc4d8cd3e9d83ec34ee43ac))
-
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
-[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
