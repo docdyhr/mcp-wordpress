@@ -2,22 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [3.3.29](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.28...v3.3.29) (2026-08-12)
 
 ### 🐛 Bug Fixes
 
-* audit follow-ups (deps override, README badge, changelog cleanup, dynamic import) ([#228](https://github.com/docdyhr/mcp-wordpress/issues/228)) ([eb8ec1a](https://github.com/docdyhr/mcp-wordpress/commit/eb8ec1a8b45cc837d4865d0b278248eccb9dcb2f))
-* **release:** reformat CHANGELOG.md to match prettier config ([#229](https://github.com/docdyhr/mcp-wordpress/issues/229)) ([b5b16ed](https://github.com/docdyhr/mcp-wordpress/commit/b5b16ed2f689f4112c008228b2aa53bf5b83146f))
-
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
-[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+- audit follow-ups (deps override, README badge, changelog cleanup, dynamic import)
+  ([#228](https://github.com/docdyhr/mcp-wordpress/issues/228))
+  ([eb8ec1a](https://github.com/docdyhr/mcp-wordpress/commit/eb8ec1a8b45cc837d4865d0b278248eccb9dcb2f))
+- **release:** reformat CHANGELOG.md to match prettier config
+  ([#229](https://github.com/docdyhr/mcp-wordpress/issues/229))
+  ([b5b16ed](https://github.com/docdyhr/mcp-wordpress/commit/b5b16ed2f689f4112c008228b2aa53bf5b83146f))
 
 ## [3.3.28](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.27...v3.3.28) (2026-08-11)
 
