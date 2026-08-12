@@ -105,6 +105,14 @@ internals that `npm audit --omit=dev` never surfaces since they're not in this p
 periodically tripped the post-push Trivy HIGH/CRITICAL image-scan gate) are gone from the shipped image; `corepack` is a
 separate package and is unaffected.
 
+**`.releaserc.json`'s `changelogTitle` must byte-match Prettier's output**: `@semantic-release/changelog` only skips
+prepending a fresh `# Changelog` header when the live `CHANGELOG.md` already `startsWith()` the configured
+`changelogTitle` — a byte-exact check (`node_modules/@semantic-release/changelog/lib/prepare.js`). Prettier's
+`proseWrap: "always"` wraps the intro paragraph at a specific point; if `changelogTitle` wraps it differently, the check
+silently fails on every release and prepends a duplicate header, compounding on each subsequent release (hit in the
+3.3.29 release commit). If `.prettierrc.json`'s `printWidth`/`proseWrap` or the intro text ever change, run
+`npx prettier --write CHANGELOG.md` and copy the new byte-exact header into `changelogTitle`.
+
 ## Development Workflow
 
 Branch naming: `feature/...`, `fix/...`, `chore/...`. Commits: Conventional Commits (`feat:`, `fix:`, `chore:`, etc.).
