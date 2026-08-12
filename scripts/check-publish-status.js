@@ -5,7 +5,7 @@
  * Usage: node scripts/check-publish-status.js [version]
  */
 
-import { execSync } from "child_process";
+import { execSync, execFileSync } from "child_process";
 // Use native fetch in Node.js 18+
 
 const PACKAGE_NAME = "mcp-wordpress";
@@ -24,21 +24,21 @@ async function checkNPM(version) {
     // Check specific version if provided
     if (version) {
       try {
-        execSync(`npm view ${PACKAGE_NAME}@${version} version`, {
+        execFileSync("npm", ["view", PACKAGE_NAME + "@" + version, "version"], {
           encoding: "utf-8",
         });
-        console.log(`✅ Version ${version} exists on NPM`);
+        console.log("✅ Version " + version + " exists on NPM");
       } catch {
-        console.log(`❌ Version ${version} NOT found on NPM`);
+        console.log("❌ Version " + version + " NOT found on NPM");
         return false;
       }
     }
 
     // Get publish time
-    const publishTime = execSync(`npm view ${PACKAGE_NAME} time.${version || npmVersion}`, {
+    const publishTime = execFileSync("npm", ["view", PACKAGE_NAME, "time." + (version || npmVersion)], {
       encoding: "utf-8",
     }).trim();
-    console.log(`📅 Published at: ${new Date(publishTime).toLocaleString()}`);
+    console.log("📅 Published at: " + new Date(publishTime).toLocaleString());
 
     console.log(`🔗 NPM URL: https://www.npmjs.com/package/${PACKAGE_NAME}`);
     return true;
@@ -63,17 +63,17 @@ async function checkDockerHub(version) {
     // Get latest tag info
     const latestTag = data.results.find((tag) => tag.name === "latest");
     if (latestTag) {
-      console.log(`✅ Latest tag updated: ${new Date(latestTag.last_updated).toLocaleString()}`);
+      console.log("✅ Latest tag updated: " + new Date(latestTag.last_updated).toLocaleString());
     }
 
     // Check specific version if provided
     if (version) {
-      const versionTag = data.results.find((tag) => tag.name === version || tag.name === `v${version}`);
+      const versionTag = data.results.find((tag) => tag.name === version || tag.name === "v" + version);
       if (versionTag) {
-        console.log(`✅ Version ${versionTag.name} exists on Docker Hub`);
-        console.log(`📅 Published at: ${new Date(versionTag.last_updated).toLocaleString()}`);
+        console.log("✅ Version " + versionTag.name + " exists on Docker Hub");
+        console.log("📅 Published at: " + new Date(versionTag.last_updated).toLocaleString());
       } else {
-        console.log(`❌ Version ${version} NOT found on Docker Hub`);
+        console.log("❌ Version " + version + " NOT found on Docker Hub");
         return false;
       }
     }
@@ -81,7 +81,7 @@ async function checkDockerHub(version) {
     // List all available tags
     console.log("\n📋 Available Docker tags:");
     data.results.slice(0, 10).forEach((tag) => {
-      console.log(`  - ${tag.name} (${new Date(tag.last_updated).toLocaleDateString()})`);
+      console.log("  - " + tag.name + " (" + new Date(tag.last_updated).toLocaleDateString() + ")");
     });
 
     console.log(`\n🔗 Docker Hub URL: https://hub.docker.com/r/${DOCKER_IMAGE}/tags`);
@@ -104,15 +104,15 @@ async function checkGitHubRelease(version) {
 
     if (version) {
       try {
-        const releaseInfo = execSync(`gh release view v${version} --json tagName,publishedAt,url`, {
+        const releaseInfo = execFileSync("gh", ["release", "view", "v" + version, "--json", "tagName,publishedAt,url"], {
           encoding: "utf-8",
         });
         const release = JSON.parse(releaseInfo);
-        console.log(`✅ GitHub release v${version} exists`);
-        console.log(`📅 Published at: ${new Date(release.publishedAt).toLocaleString()}`);
-        console.log(`🔗 Release URL: ${release.url}`);
+        console.log("✅ GitHub release v" + version + " exists");
+        console.log("📅 Published at: " + new Date(release.publishedAt).toLocaleString());
+        console.log("🔗 Release URL: " + release.url);
       } catch {
-        console.log(`❌ GitHub release v${version} NOT found`);
+        console.log("❌ GitHub release v" + version + " NOT found");
         return false;
       }
     }
@@ -125,6 +125,11 @@ async function checkGitHubRelease(version) {
 
 async function main() {
   const version = process.argv[2];
+
+  if (version && !/^[a-zA-Z0-9._+-]+$/.test(version)) {
+    console.error("❌ Invalid version format");
+    process.exit(1);
+  }
 
   console.log("🔍 MCP WordPress Publishing Status Check");
   console.log("========================================");
