@@ -9,7 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### 🐛 Bug Fixes
 
-* **release:** stop semantic-release from duplicating the changelog header ([#230](https://github.com/docdyhr/mcp-wordpress/issues/230)) ([97dd355](https://github.com/docdyhr/mcp-wordpress/commit/97dd355f57d82fea3c6b5cb74810c1c6bb516b35))
+- **release:** stop semantic-release from duplicating the changelog header
+  ([#230](https://github.com/docdyhr/mcp-wordpress/issues/230))
+  ([97dd355](https://github.com/docdyhr/mcp-wordpress/commit/97dd355f57d82fea3c6b5cb74810c1c6bb516b35))
 
 ## [3.3.29](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.28...v3.3.29) (2026-08-12)
 
