@@ -1,4 +1,5 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { format, resolveConfig } from "prettier";
 
 /**
@@ -16,7 +17,11 @@ import { format, resolveConfig } from "prettier";
  */
 const formatChangelog = {
   async prepare(pluginConfig, { cwd, logger }) {
-    const changelogPath = `${cwd}/CHANGELOG.md`;
+    const changelogPath = join(cwd, "CHANGELOG.md");
+    if (!existsSync(changelogPath)) {
+      return;
+    }
+
     const raw = readFileSync(changelogPath, "utf8");
     const options = (await resolveConfig(changelogPath)) || {};
     const formatted = await format(raw, { ...options, filepath: changelogPath });

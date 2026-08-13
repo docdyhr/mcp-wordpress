@@ -10,12 +10,12 @@ echo "======================================"
 
 # Test 1: Check semantic release configuration
 echo "1. Testing semantic release configuration..."
-if [ -f ".releaserc.json" ]; then
-    echo "✅ .releaserc.json found"
+if [ -f "release.config.js" ]; then
+    echo "✅ release.config.js found"
     npm run release:dry
     echo "✅ Semantic release dry run completed"
 else
-    echo "❌ .releaserc.json not found"
+    echo "❌ release.config.js not found"
     exit 1
 fi
 
