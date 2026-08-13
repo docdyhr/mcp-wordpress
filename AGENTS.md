@@ -86,7 +86,7 @@ RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 ## CI/CD Pipeline
 
 Conventional commits trigger semantic-release versioning (`docs`, `style`, `test`, `build`, `ci`, `chore` do **not** cut
-a release — see `.releaserc.json`). Publishing: NPM + Docker Hub + DXT packaging. Node versions tested: 20, 22, 24
+a release — see `release.config.js`). Publishing: NPM + Docker Hub + DXT packaging. Node versions tested: 20, 22, 24
 (LTS). Quality gates: all tests pass, security scans clean.
 
 **Workflow architecture (known audit deviation)**: all `.github/workflows/` files are intentionally self-contained
@@ -105,13 +105,19 @@ internals that `npm audit --omit=dev` never surfaces since they're not in this p
 periodically tripped the post-push Trivy HIGH/CRITICAL image-scan gate) are gone from the shipped image; `corepack` is a
 separate package and is unaffected.
 
-**`.releaserc.json`'s `changelogTitle` must byte-match Prettier's output**: `@semantic-release/changelog` only skips
+**`release.config.js`'s `changelogTitle` must byte-match Prettier's output**: `@semantic-release/changelog` only skips
 prepending a fresh `# Changelog` header when the live `CHANGELOG.md` already `startsWith()` the configured
 `changelogTitle` — a byte-exact check (`node_modules/@semantic-release/changelog/lib/prepare.js`). Prettier's
 `proseWrap: "always"` wraps the intro paragraph at a specific point; if `changelogTitle` wraps it differently, the check
 silently fails on every release and prepends a duplicate header, compounding on each subsequent release (hit in the
-3.3.29 release commit). If `.prettierrc.json`'s `printWidth`/`proseWrap` or the intro text ever change, run
-`npx prettier --write CHANGELOG.md` and copy the new byte-exact header into `changelogTitle`.
+3.3.29 release commit, fixed in #230). If `.prettierrc.json`'s `printWidth`/`proseWrap` or the intro text ever change,
+run `npx prettier --write CHANGELOG.md` and copy the new byte-exact header into `changelogTitle`.
+
+**`release.config.js` runs an inline `formatChangelog` prepare plugin** between `@semantic-release/changelog` and
+`@semantic-release/git` that reformats `CHANGELOG.md` with Prettier's JS API before the release commit — otherwise
+semantic-release writes raw conventional-changelog output (unwrapped lines, `*` bullets) straight to disk, which fails
+`format:check` on the very next release. This happened after 3.3.30 (patched by hand in #232); this plugin exists so it
+self-heals instead of needing another manual patch each time. If this plugin is ever removed, the failure mode returns.
 
 ## Development Workflow
 

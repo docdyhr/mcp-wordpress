@@ -9,8 +9,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### 🐛 Bug Fixes
 
-* javascript.lang.security.detect-child-process.detect-child-process security vulnerability ([#231](https://github.com/docdyhr/mcp-wordpress/issues/231)) ([6cefbd6](https://github.com/docdyhr/mcp-wordpress/commit/6cefbd66313847d8c29bb1981a8a9f558ad9f5a9))
-* **release:** reformat CHANGELOG.md's 3.3.30 entry to match prettier config ([#232](https://github.com/docdyhr/mcp-wordpress/issues/232)) ([827ab17](https://github.com/docdyhr/mcp-wordpress/commit/827ab17ec3b62f7d772d2668422cb1e323801b56))
+- javascript.lang.security.detect-child-process.detect-child-process security vulnerability
+  ([#231](https://github.com/docdyhr/mcp-wordpress/issues/231))
+  ([6cefbd6](https://github.com/docdyhr/mcp-wordpress/commit/6cefbd66313847d8c29bb1981a8a9f558ad9f5a9))
+- **release:** reformat CHANGELOG.md's 3.3.30 entry to match prettier config
+  ([#232](https://github.com/docdyhr/mcp-wordpress/issues/232))
+  ([827ab17](https://github.com/docdyhr/mcp-wordpress/commit/827ab17ec3b62f7d772d2668422cb1e323801b56))
 
 ## [3.3.30](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.29...v3.3.30) (2026-08-12)
 
