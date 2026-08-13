@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.32](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.31...v3.3.32) (2026-08-13)
+
+### 🐛 Bug Fixes
+
+- **release:** auto-format CHANGELOG.md with Prettier before every release commit
+  ([#233](https://github.com/docdyhr/mcp-wordpress/issues/233))
+  ([53b615b](https://github.com/docdyhr/mcp-wordpress/commit/53b615b48ee526bd540a5b6c5fbb5bdde446ec40)), closes
+  [#218](https://github.com/docdyhr/mcp-wordpress/issues/218)
+  [#225](https://github.com/docdyhr/mcp-wordpress/issues/225)
+  [#229](https://github.com/docdyhr/mcp-wordpress/issues/229)
+  [#232](https://github.com/docdyhr/mcp-wordpress/issues/232)
+  [#232](https://github.com/docdyhr/mcp-wordpress/issues/232)
+
 ## [3.3.31](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.30...v3.3.31) (2026-08-13)
 
 ### 🐛 Bug Fixes
