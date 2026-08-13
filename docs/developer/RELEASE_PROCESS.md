@@ -208,35 +208,23 @@ jobs:
 
 ## 🔧 Release Configuration
 
-### Semantic Release Configuration (`.releaserc.json`)
+### Semantic Release Configuration (`release.config.js`)
 
-```json
-{
-  "branches": ["main"],
-  "plugins": [
-    "@semantic-release/commit-analyzer",
-    "@semantic-release/release-notes-generator",
-    "@semantic-release/changelog",
-    "@semantic-release/npm",
-    [
-      "@semantic-release/exec",
-      {
-        "publishCmd": "docker buildx build --platform linux/amd64,linux/arm64 --tag docdyhr/mcp-wordpress:${nextRelease.version} --tag docdyhr/mcp-wordpress:latest --push ."
-      }
-    ],
-    [
-      "@semantic-release/github",
-      {
-        "assets": [
-          {
-            "path": "dist/**",
-            "label": "Distribution files"
-          }
-        ]
-      }
-    ]
-  ]
-}
+Docker Hub publishing is a separate job in `release.yml`, not a semantic-release plugin.
+
+```js
+export default {
+  branches: ["main"],
+  plugins: [
+    ["@semantic-release/commit-analyzer", { preset: "conventionalcommits", releaseRules: [...] }],
+    ["@semantic-release/release-notes-generator", { preset: "conventionalcommits", presetConfig: {...} }],
+    ["@semantic-release/changelog", { changelogFile: "CHANGELOG.md", changelogTitle: "..." }],
+    formatChangelog, // inline plugin: reformats CHANGELOG.md with Prettier before commit
+    ["@semantic-release/npm", { npmPublish: true, tarballDir: "." }],
+    ["@semantic-release/github", { assets: [{ path: "*.tgz", label: "NPM Package" }], ... }],
+    ["@semantic-release/git", { assets: ["CHANGELOG.md", "package.json", "package-lock.json"], ... }],
+  ],
+};
 ```
 
 ### Commit Analysis Configuration
@@ -252,9 +240,10 @@ jobs:
     { "type": "style", "release": false },
     { "type": "refactor", "release": "patch" },
     { "type": "test", "release": false },
-    { "type": "build", "release": "patch" },
+    { "type": "build", "release": false },
     { "type": "ci", "release": false },
     { "type": "chore", "release": false },
+    { "type": "revert", "release": "patch" },
     { "breaking": true, "release": "major" }
   ]
 }
