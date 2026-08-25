@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { WordPressClient } from "@/client/api.js";
-import { WordPressAPIError } from "@/types/client.js";
+import { AuthenticationError, WordPressAPIError } from "@/types/client.js";
 import { getErrorMessage } from "@/utils/error.js";
 import { EnhancedError, ErrorHandlers } from "@/utils/enhancedError.js";
 import * as Tools from "@/tools/index.js";
@@ -432,8 +432,19 @@ export class ToolRegistry {
    * `statusCode` rather than `instanceof AuthenticationError` also catches a bare 401 on a
    * non-media endpoint, which the client throws as a plain `WordPressAPIError`, not the
    * `AuthenticationError` subclass (that subtype is only used for media-upload 401/403).
+   *
+   * A bare 403 from WordPress is treated as a permission denial (auth-related). But a 403
+   * carrying an explicit error code is NOT: `validateFilePath`
+   * (src/utils/validation/security.ts) throws 403s like `UPLOADS_DISABLED`,
+   * `PATH_TRAVERSAL_ATTEMPT`, `SYMLINK_NOT_ALLOWED`, `NOT_A_REGULAR_FILE` that are local
+   * configuration/validation failures, not authentication problems. Classifying them as
+   * authentication errors here made `wp_upload_media` report "Authentication failed for site
+   * 'default'" when the real cause was that MCP_UPLOAD_BASE_DIR was not set — hiding the
+   * actual fix behind a misleading credentials error.
    */
   private isAuthenticationError(error: unknown): boolean {
-    return error instanceof WordPressAPIError && (error.statusCode === 401 || error.statusCode === 403);
+    if (error instanceof AuthenticationError) return true;
+    if (!(error instanceof WordPressAPIError)) return false;
+    return error.statusCode === 401 || (error.statusCode === 403 && error.code === undefined);
   }
 }
