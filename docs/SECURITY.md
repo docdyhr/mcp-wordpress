@@ -215,13 +215,13 @@ ALLOW_INSECURE_HTTP=true
 WORDPRESS_SITE_URL=http://localhost:8080
 ```
 
-Never set `ALLOW_INSECURE_HTTP=true` in production — WordPress auth headers (App Password/Basic/JWT/API Key) travel
-over this URL and are exposed in plaintext without TLS.
+Never set `ALLOW_INSECURE_HTTP=true` in production — WordPress auth headers (App Password/Basic/JWT/API Key) travel over
+this URL and are exposed in plaintext without TLS.
 
 ### SSRF / Private-Network Protection
 
-`WORDPRESS_SITE_URL` is checked against a shared denylist (`isDisallowedHostname` in
-`src/utils/validation/network.ts`) before any request is made, blocking:
+`WORDPRESS_SITE_URL` is checked against a shared denylist (`isDisallowedHostname` in `src/utils/validation/network.ts`)
+before any request is made, blocking:
 
 - Loopback: `localhost`, `127.0.0.0/8`, `::1`
 - Private IPv4 ranges: `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`
@@ -448,21 +448,18 @@ grep "Security validation failed" /var/log/mcp-wordpress.log
 ### Security Incident Checklist
 
 1. **Immediate Response**
-
    - Disable affected accounts
    - Rotate compromised credentials
    - Enable additional logging
    - Document incident timeline
 
 2. **Investigation**
-
    - Analyze access logs
    - Check WordPress audit logs
    - Review security monitoring
    - Identify attack vectors
 
 3. **Remediation**
-
    - Patch vulnerabilities
    - Update credentials
    - Strengthen security controls
@@ -598,13 +595,11 @@ npm run test:security:penetration
 **Security Validation:**
 
 1. **Authentication Testing**
-
    - Invalid credential handling
    - Brute force protection
    - Session management
 
 2. **Input Validation Testing**
-
    - XSS prevention
    - SQL injection protection
    - Path traversal prevention

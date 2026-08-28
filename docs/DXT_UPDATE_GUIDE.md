@@ -1,6 +1,7 @@
 # DXT Package Update Guide
 
-**Important**: Claude Desktop does **NOT** automatically update DXT packages. You must manually update to get the latest features and fixes.
+**Important**: Claude Desktop does **NOT** automatically update DXT packages. You must manually update to get the latest
+features and fixes.
 
 ---
 
@@ -29,6 +30,7 @@ DXT packages in Claude Desktop require manual updates because:
 ### Method 1: Check in Claude Desktop
 
 Ask Claude:
+
 ```
 What version of mcp-wordpress are you running?
 ```
@@ -38,6 +40,7 @@ Claude will respond with the current version number.
 ### Method 2: Check Manifest File
 
 The DXT package is installed at:
+
 ```
 ~/Library/Application Support/Claude/Claude Extensions/local.dxt.thomas-dyhr.mcp-wordpress/manifest.json
 ```
@@ -47,6 +50,7 @@ Open this file and look for the `version` field.
 ### Method 3: Check Logs
 
 View the server logs:
+
 ```bash
 tail -50 ~/Library/Logs/Claude/mcp-server-WordPress\ MCP\ Server.log
 ```
@@ -71,8 +75,7 @@ cp mcp-wordpress.config.json ~/mcp-wordpress.config.json.backup
 
 ### Step 2: Download Latest Version
 
-Visit the releases page:
-https://github.com/docdyhr/mcp-wordpress/releases/latest
+Visit the releases page: https://github.com/docdyhr/mcp-wordpress/releases/latest
 
 Download: `mcp-wordpress.dxt`
 
@@ -93,6 +96,7 @@ Download: `mcp-wordpress.dxt`
 **Single-Site**: Enter your WordPress credentials in the UI
 
 **Multi-Site**: Skip the wizard, then copy your backed-up config:
+
 ```bash
 cp ~/mcp-wordpress.config.json.backup ~/Library/Application\ Support/Claude/Claude\ Extensions/local.dxt.thomas-dyhr.mcp-wordpress/mcp-wordpress.config.json
 ```
@@ -104,6 +108,7 @@ Completely quit and relaunch Claude Desktop to load the new version.
 ### Step 6: Verify Update
 
 Ask Claude:
+
 ```
 What version of mcp-wordpress are you running?
 ```
@@ -114,21 +119,25 @@ It should report the new version number.
 
 ## Update Notification Tool
 
-The MCP WordPress server includes a version check tool that compares your installed version with the latest GitHub release.
+The MCP WordPress server includes a version check tool that compares your installed version with the latest GitHub
+release.
 
 ### Using the Version Check Tool
 
 Ask Claude:
+
 ```
 Check if there's a new version of mcp-wordpress available
 ```
 
 Or use the tool directly:
+
 ```
 wp_check_version
 ```
 
 **Response Example**:
+
 ```
 ✅ You're up to date! (v3.0.0)
 
@@ -145,21 +154,25 @@ Download: https://github.com/docdyhr/mcp-wordpress/releases/tag/v3.0.0
 ## What's New in v3.0.0
 
 ### 🚀 Features
+
 - Circuit breaker pattern for improved resilience
 - Deprecation documentation for API lifecycle management
 
 ### 🐛 Security & Bug Fixes
+
 - Resolved CodeQL security warnings
 - Fixed js-yaml vulnerability
 - Updated MCP SDK and body-parser dependencies
 - Fixed flaky tests in env-loading, logger, and timing
 
 ### ♻️ Refactoring
+
 - Migrated to path aliases (improved maintainability)
 - Modularized api.ts and performance.ts
 - Extracted SecurityCIPipeline into modular components
 
 ### 📚 Documentation
+
 - Added sprint implementation documentation
 - Removed Smithery references
 - Updated README with v2.12.0+ features
@@ -216,5 +229,4 @@ If you forgot to backup your config:
 
 ---
 
-**Last Updated**: 2026-01-08
-**Current Version**: 3.0.0
+**Last Updated**: 2026-01-08 **Current Version**: 3.0.0

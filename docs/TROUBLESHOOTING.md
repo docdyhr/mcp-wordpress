@@ -27,12 +27,12 @@ npm run test:performance
 
 ### Common Issue Categories
 
-| Issue Type                                     | Symptoms                | Quick Fix               |
-| ---------------------------------------------- | ----------------------- | ----------------------- |
-| **[Connection](#-connection-issues)**          | Can't reach WordPress   | Check URL and network   |
-| **[Authentication](#-authentication-issues)**  | Login failures          | Verify credentials      |
+| Issue Type                                    | Symptoms                | Quick Fix               |
+| --------------------------------------------- | ----------------------- | ----------------------- |
+| **[Connection](#-connection-issues)**         | Can't reach WordPress   | Check URL and network   |
+| **[Authentication](#-authentication-issues)** | Login failures          | Verify credentials      |
 | **[Tools](#️-tool-issues)**                    | Commands not working    | Check permissions       |
-| **[Performance](#-performance-issues)**        | Slow responses          | Enable caching          |
+| **[Performance](#-performance-issues)**       | Slow responses          | Enable caching          |
 | **[Claude Desktop](#️-claude-desktop-issues)** | Not appearing in Claude | Restart and reconfigure |
 
 ## 🌐 Connection Issues
@@ -71,7 +71,6 @@ curl -i https://your-site.com/wp-json/wp/v2/
    ```
 
 2. **Check WordPress REST API**
-
    - Go to **Settings** → **Permalinks** in WordPress admin
    - Click "Save Changes" to refresh rewrite rules
    - Verify REST API is not disabled by plugins
@@ -148,7 +147,6 @@ curl -u "username:app-password" https://your-site.com/wp-json/wp/v2/users/me
    ```
 
 2. **Regenerate Application Password**
-
    - WordPress Admin → Users → Profile
    - Delete old application password
    - Create new one: "MCP WordPress Server"
@@ -309,7 +307,6 @@ npm run cache:stats
    ```
 
 2. **WordPress Optimization**
-
    - Install caching plugin (W3 Total Cache, WP Rocket)
    - Optimize database and images
    - Use CDN for media files
@@ -378,7 +375,6 @@ npm run cache:stats
 2. **Check Configuration File**
 
    **For DXT Extension:**
-
    - Verify extension is enabled in Claude Desktop
    - Check configuration in Extensions settings
    - Reinstall DXT if necessary
@@ -516,7 +512,6 @@ npm run cache:stats
    ```
 
 2. **For Claude Desktop DXT**
-
    - Enable "Debug Mode" in extension settings
    - Check Claude Desktop console for detailed logs
 

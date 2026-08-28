@@ -126,10 +126,10 @@ Located in `src/utils/validation.ts`:
 
 ### v2.0.0 (Breaking Release)
 
-| Removed                      | Replacement                    |
-| ---------------------------- | ------------------------------ |
-| `WordPressClient.connect()`  | `WordPressClient.initialize()` |
-| `config.getEnv()`            | `config().app`                 |
+| Removed                     | Replacement                    |
+| --------------------------- | ------------------------------ |
+| `WordPressClient.connect()` | `WordPressClient.initialize()` |
+| `config.getEnv()`           | `config().app`                 |
 
 ---
 
@@ -144,14 +144,14 @@ If you need help migrating from deprecated APIs:
 
 ## Version Support Matrix
 
-| Version  | Status        | Deprecations Active | End of Support   |
-| -------- | ------------- | ------------------- | ---------------- |
-| v2.12.x  | Current       | Yes                 | -                |
-| v2.11.x  | Maintained    | Yes                 | v2.14.0 release  |
-| v2.10.x  | Security Only | Yes                 | v2.13.0 release  |
-| v2.9.x   | End of Life   | N/A                 | Ended            |
-| v3.0.0   | Planned       | Removed             | -                |
+| Version | Status        | Deprecations Active | End of Support  |
+| ------- | ------------- | ------------------- | --------------- |
+| v2.12.x | Current       | Yes                 | -               |
+| v2.11.x | Maintained    | Yes                 | v2.14.0 release |
+| v2.10.x | Security Only | Yes                 | v2.13.0 release |
+| v2.9.x  | End of Life   | N/A                 | Ended           |
+| v3.0.0  | Planned       | Removed             | -               |
 
 ---
 
-*Last updated: December 2024*
+_Last updated: December 2024_

@@ -48,7 +48,7 @@ RATE_LIMIT_WINDOW=60000
 #### Required Variables
 
 | Variable             | Required | Description             | Example                    |
-| --------------------- | -------- | ------------------------ | --------------------------- |
+| -------------------- | -------- | ----------------------- | -------------------------- |
 | `WORDPRESS_SITE_URL` | Yes      | Full WordPress site URL | `https://blog.example.com` |
 | `WORDPRESS_USERNAME` | Yes\*    | WordPress username      | `admin`                    |
 
@@ -56,15 +56,16 @@ RATE_LIMIT_WINDOW=60000
 
 #### Authentication Variables
 
-Which of these are required depends on `WORDPRESS_AUTH_METHOD` — each method needs only its own credentials, not all of them.
+Which of these are required depends on `WORDPRESS_AUTH_METHOD` — each method needs only its own credentials, not all of
+them.
 
-| Variable                 | Required for                      | Description                       | Example                                   |
-| ------------------------- | ---------------------------------- | ----------------------------------- | -------------------------------------------- |
-| `WORDPRESS_AUTH_METHOD`  | always (default: `app-password`) | Authentication method              | `app-password`, `jwt`, `basic`, `api-key` |
-| `WORDPRESS_APP_PASSWORD` | `app-password`                    | WordPress application password     | `AbCd EfGh IjKl MnOp QrSt UvWx`            |
-| `WORDPRESS_PASSWORD`     | `basic`, `jwt`                    | WordPress account password         | `your-regular-password`                    |
-| `WORDPRESS_JWT_SECRET`   | `jwt`                             | JWT Authentication plugin secret   | `your-jwt-plugin-secret`                   |
-| `WORDPRESS_API_KEY`      | `api-key`                         | API key from an API-key plugin     | `your-api-key`                             |
+| Variable                 | Required for                     | Description                      | Example                                   |
+| ------------------------ | -------------------------------- | -------------------------------- | ----------------------------------------- |
+| `WORDPRESS_AUTH_METHOD`  | always (default: `app-password`) | Authentication method            | `app-password`, `jwt`, `basic`, `api-key` |
+| `WORDPRESS_APP_PASSWORD` | `app-password`                   | WordPress application password   | `AbCd EfGh IjKl MnOp QrSt UvWx`           |
+| `WORDPRESS_PASSWORD`     | `basic`, `jwt`                   | WordPress account password       | `your-regular-password`                   |
+| `WORDPRESS_JWT_SECRET`   | `jwt`                            | JWT Authentication plugin secret | `your-jwt-plugin-secret`                  |
+| `WORDPRESS_API_KEY`      | `api-key`                        | API key from an API-key plugin   | `your-api-key`                            |
 
 #### Runtime Variables
 

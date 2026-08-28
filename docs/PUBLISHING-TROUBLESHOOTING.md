@@ -200,7 +200,6 @@ If all automated processes fail:
 ### Regular Maintenance
 
 1. **Rotate secrets annually:**
-
    - NPM_TOKEN
    - DOCKER_USERNAME/DOCKER_PASSWORD
 
