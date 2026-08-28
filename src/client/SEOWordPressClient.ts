@@ -29,11 +29,15 @@ import type { SEOMetadata, SchemaMarkup } from "@/types/seo.js";
  *
  * GET /wp/v2/plugins identifies a plugin by `plugin` — its file path relative to the
  * plugins directory with the .php extension stripped, e.g. "wordpress-seo/wp-seo". The
- * response carries no `slug` field; it stays optional here only so callers holding a
- * hand-built object still type-check.
+ * response carries no `slug` field at all.
+ *
+ * Both identifying fields are optional because this describes an external payload we do
+ * not control: `slug` so that a hand-built `{ slug, status }` object still type-checks,
+ * and `plugin` so a response missing it degrades to no match rather than a crash.
+ * pluginSlug() resolves whichever is present.
  */
 interface WordPressPlugin {
-  plugin: string;
+  plugin?: string;
   status: "active" | "inactive";
   slug?: string;
   name?: string;
@@ -187,9 +191,6 @@ export class SEOWordPressClient extends WordPressClient {
   }
 
   /**
-   * Detect active SEO plugins on the WordPress site
-   */
-  /**
    * Derives a plugin slug from a /wp/v2/plugins entry. The REST response has no `slug`
    * field, so the slug is the directory segment of `plugin`: "seo-by-rank-math/rank-math"
    * yields "seo-by-rank-math". Matching the whole segment rather than a prefix keeps
@@ -200,6 +201,9 @@ export class SEOWordPressClient extends WordPressClient {
     return plugin.slug ?? plugin.plugin?.split("/")[0] ?? "";
   }
 
+  /**
+   * Detect active SEO plugins on the WordPress site
+   */
   private async detectSEOPlugins(): Promise<void> {
     try {
       // Get list of installed plugins
