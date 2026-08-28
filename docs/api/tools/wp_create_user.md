@@ -6,12 +6,7 @@ Creates a new user.
 
 ## Parameters
 
-| Parameter  | Type     | Required | Description                              | Default | Examples                             |
-| ---------- | -------- | -------- | ---------------------------------------- | ------- | ------------------------------------ |
-| `username` | `string` | ✅       | The username for the new user.           | -       | `john_doe`, `admin`                  |
-| `email`    | `string` | ✅       | The email address for the new user.      | -       | `user@example.com`, `admin@site.com` |
-| `password` | `string` | ✅       | The password for the new user.           | -       | `example`                            |
-| `roles`    | `array`  | ❌       | An array of roles to assign to the user. | -       | `example`                            |
+_No parameters required._
 
 ## Examples
 
@@ -22,7 +17,7 @@ Simple example of using wp_create_user
 **Command:**
 
 ```bash
-wp_create_user --username="john_doe" --email="user@example.com"
+wp_create_user
 ```
 
 **Response:**
@@ -47,14 +42,14 @@ wp_create_user --username="john_doe" --email="user@example.com"
 }
 ```
 
-### Advanced user Configuration
+### Multi-Site user Usage
 
-Comprehensive example using all available parameters
+Using wp_create_user with specific site targeting
 
 **Command:**
 
 ```bash
-wp_create_user --username="john_doe" --email="user@example.com" --password="example_value" --roles="example_value"
+wp_create_user --site="site1"
 ```
 
 **Response:**

@@ -6,9 +6,7 @@ Pre-warm cache with essential WordPress data.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                | Default | Examples              |
-| --------- | -------- | -------- | -------------------------- | ------- | --------------------- |
-| `site`    | `string` | ❌       | Site ID to warm cache for. | -       | `site1`, `production` |
+_No parameters required._
 
 ## Examples
 

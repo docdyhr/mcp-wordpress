@@ -2,13 +2,11 @@
 
 ![page](https://img.shields.io/badge/category-page-lightgrey)
 
-Retrieves a single page by its ID.
+Retrieves a single page by its ID, optionally including full content for editing.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                         | Default | Examples     |
-| --------- | -------- | -------- | ----------------------------------- | ------- | ------------ |
-| `id`      | `number` | ✅       | The unique identifier for the page. | -       | `123`, `456` |
+_No parameters required._
 
 ## Examples
 
@@ -19,7 +17,7 @@ Simple example of using wp_get_page
 **Command:**
 
 ```bash
-wp_get_page --id="123"
+wp_get_page
 ```
 
 **Response:**
@@ -43,6 +41,31 @@ wp_get_page --id="123"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site page Usage
+
+Using wp_get_page with specific site targeting
+
+**Command:**
+
+```bash
+wp_get_page --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Example page",
+    "content": "Example content",
+    "status": "publish",
+    "date": "2024-01-01T00:00:00Z"
+  }
 }
 ```
 

@@ -1,11 +1,11 @@
 {
-  "totalTools": 59,
-  "totalCategories": 10,
+  "totalTools": 71,
+  "totalCategories": 12,
   "totalTypes": 1,
-  "lastUpdated": "2025-08-09T15:13:46.265Z",
+  "lastUpdated": "2026-08-28T10:21:07.053Z",
   "version": "1.2.0",
   "coverage": {
-    "toolsWithExamples": 59,
+    "toolsWithExamples": 71,
     "toolsWithWordPressMapping": 5,
     "typesDocumented": 1
   }

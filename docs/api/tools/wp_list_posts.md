@@ -12,13 +12,7 @@ status: `wp_list_posts --status="draft"` • Category filtering: `wp_list_posts 
 
 ## Parameters
 
-| Parameter    | Type     | Required | Description                                      | Default   | Examples                |
-| ------------ | -------- | -------- | ------------------------------------------------ | --------- | ----------------------- |
-| `per_page`   | `number` | ❌       | Number of items to return per page (max 100).    | `10`      | `10`, `20`              |
-| `search`     | `string` | ❌       | Limit results to those matching a search term.   | -         | `wordpress`, `tutorial` |
-| `status`     | `string` | ❌       | Filter by post status.                           | `publish` | `example`               |
-| `categories` | `array`  | ❌       | Limit results to posts in specific category IDs. | -         | `example`               |
-| `tags`       | `array`  | ❌       | Limit results to posts with specific tag IDs.    | -         | `example`               |
+_No parameters required._
 
 ## Examples
 
@@ -63,14 +57,14 @@ wp_list_posts
 }
 ```
 
-### Advanced post Configuration
+### Multi-Site post Usage
 
-Comprehensive example using all available parameters
+Using wp_list_posts with specific site targeting
 
 **Command:**
 
 ```bash
-wp_list_posts --per_page="10" --search="wordpress" --status="publish" --categories="example_value" --tags="example_value"
+wp_list_posts --site="site1"
 ```
 
 **Response:**

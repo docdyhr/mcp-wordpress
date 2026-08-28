@@ -6,9 +6,7 @@ Lists tags from a WordPress site.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                                    | Default | Examples                |
-| --------- | -------- | -------- | ---------------------------------------------- | ------- | ----------------------- |
-| `search`  | `string` | ❌       | Limit results to those matching a search term. | -       | `wordpress`, `tutorial` |
+_No parameters required._
 
 ## Examples
 
@@ -50,6 +48,38 @@ wp_list_tags
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site taxonomy Usage
+
+Using wp_list_tags with specific site targeting
+
+**Command:**
+
+```bash
+wp_list_tags --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "Example taxonomy 1",
+      "status": "publish"
+    },
+    {
+      "id": 2,
+      "title": "Example taxonomy 2",
+      "status": "draft"
+    }
+  ],
+  "total": 2,
+  "pages": 1
 }
 ```
 

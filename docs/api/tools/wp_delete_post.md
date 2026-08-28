@@ -2,14 +2,15 @@
 
 ![post](https://img.shields.io/badge/category-post-lightgrey)
 
-Deletes a WordPress post with option for permanent deletion or moving to trash.
+Deletes a WordPress post with options for trash or permanent deletion. Includes safety confirmations and detailed
+feedback on the deletion action.
+
+**Usage Examples:** • Trash a post: `wp_delete_post --id=123` (moves to trash) • Permanent deletion:
+`wp_delete_post --id=123 --force=true` • Bulk operations: Use multiple calls with different IDs
 
 ## Parameters
 
-| Parameter | Type      | Required | Description                                                              | Default | Examples     |
-| --------- | --------- | -------- | ------------------------------------------------------------------------ | ------- | ------------ |
-| `id`      | `number`  | ✅       | The ID of the post to delete.                                            | -       | `123`, `456` |
-| `force`   | `boolean` | ❌       | If true, permanently delete. If false, move to trash. Defaults to false. | -       | `example`    |
+_No parameters required._
 
 ## Examples
 
@@ -20,7 +21,7 @@ Simple example of using wp_delete_post
 **Command:**
 
 ```bash
-wp_delete_post --id="123"
+wp_delete_post
 ```
 
 **Response:**
@@ -41,6 +42,28 @@ wp_delete_post --id="123"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site post Usage
+
+Using wp_delete_post with specific site targeting
+
+**Command:**
+
+```bash
+wp_delete_post --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "deleted": true,
+    "id": 123
+  }
 }
 ```
 

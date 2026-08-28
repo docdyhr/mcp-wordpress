@@ -6,10 +6,7 @@ Deletes a user.
 
 ## Parameters
 
-| Parameter  | Type     | Required | Description                                                 | Default | Examples     |
-| ---------- | -------- | -------- | ----------------------------------------------------------- | ------- | ------------ |
-| `id`       | `number` | ✅       | The ID of the user to delete.                               | -       | `123`, `456` |
-| `reassign` | `number` | ❌       | The ID of a user to reassign the deleted user's content to. | -       | `example`    |
+_No parameters required._
 
 ## Examples
 
@@ -20,7 +17,7 @@ Simple example of using wp_delete_user
 **Command:**
 
 ```bash
-wp_delete_user --id="123"
+wp_delete_user
 ```
 
 **Response:**
@@ -41,6 +38,28 @@ wp_delete_user --id="123"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site user Usage
+
+Using wp_delete_user with specific site targeting
+
+**Command:**
+
+```bash
+wp_delete_user --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "deleted": true,
+    "id": 123
+  }
 }
 ```
 

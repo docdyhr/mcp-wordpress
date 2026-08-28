@@ -6,10 +6,7 @@ Clear cache for a WordPress site.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                                                                     | Default | Examples              |
-| --------- | -------- | -------- | ------------------------------------------------------------------------------- | ------- | --------------------- |
-| `site`    | `string` | ❌       | Site ID to clear cache for.                                                     | -       | `site1`, `production` |
-| `pattern` | `string` | ❌       | Optional pattern to clear specific cache entries (e.g., "posts", "categories"). | -       | `example`             |
+_No parameters required._
 
 ## Examples
 

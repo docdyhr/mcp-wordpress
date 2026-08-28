@@ -6,10 +6,7 @@ Updates an existing tag.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                  | Default | Examples     |
-| --------- | -------- | -------- | ---------------------------- | ------- | ------------ |
-| `id`      | `number` | ✅       | The ID of the tag to update. | -       | `123`, `456` |
-| `name`    | `string` | ❌       | The new name for the tag.    | -       | `example`    |
+_No parameters required._
 
 ## Examples
 
@@ -20,7 +17,7 @@ Simple example of using wp_update_tag
 **Command:**
 
 ```bash
-wp_update_tag --id="123"
+wp_update_tag
 ```
 
 **Response:**
@@ -42,6 +39,29 @@ wp_update_tag --id="123"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site taxonomy Usage
+
+Using wp_update_tag with specific site targeting
+
+**Command:**
+
+```bash
+wp_update_tag --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
 }
 ```
 

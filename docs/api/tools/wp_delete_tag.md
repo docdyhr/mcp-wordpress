@@ -6,9 +6,7 @@ Deletes a tag.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                  | Default | Examples     |
-| --------- | -------- | -------- | ---------------------------- | ------- | ------------ |
-| `id`      | `number` | ✅       | The ID of the tag to delete. | -       | `123`, `456` |
+_No parameters required._
 
 ## Examples
 
@@ -19,7 +17,7 @@ Simple example of using wp_delete_tag
 **Command:**
 
 ```bash
-wp_delete_tag --id="123"
+wp_delete_tag
 ```
 
 **Response:**
@@ -40,6 +38,28 @@ wp_delete_tag --id="123"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site taxonomy Usage
+
+Using wp_delete_tag with specific site targeting
+
+**Command:**
+
+```bash
+wp_delete_tag --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "deleted": true,
+    "id": 123
+  }
 }
 ```
 

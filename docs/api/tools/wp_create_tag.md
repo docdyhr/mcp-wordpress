@@ -6,9 +6,7 @@ Creates a new tag.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description          | Default | Examples  |
-| --------- | -------- | -------- | -------------------- | ------- | --------- |
-| `name`    | `string` | ✅       | The name of the tag. | -       | `example` |
+_No parameters required._
 
 ## Examples
 
@@ -19,7 +17,7 @@ Simple example of using wp_create_tag
 **Command:**
 
 ```bash
-wp_create_tag --name="example_value"
+wp_create_tag
 ```
 
 **Response:**
@@ -41,6 +39,29 @@ wp_create_tag --name="example_value"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site taxonomy Usage
+
+Using wp_create_tag with specific site targeting
+
+**Command:**
+
+```bash
+wp_create_tag --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
 }
 ```
 

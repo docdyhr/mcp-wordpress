@@ -6,11 +6,7 @@ Creates a new page.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                               | Default   | Examples                                              |
-| --------- | -------- | -------- | ----------------------------------------- | --------- | ----------------------------------------------------- |
-| `title`   | `string` | ✅       | The title for the page.                   | -         | `My Blog Post`, `Hello World`                         |
-| `content` | `string` | ❌       | The content for the page, in HTML format. | -         | `<p>Post content here</p>`, `This is my post content` |
-| `status`  | `string` | ❌       | The publishing status for the page.       | `publish` | `example`                                             |
+_No parameters required._
 
 ## Examples
 
@@ -21,7 +17,7 @@ Simple example of using wp_create_page
 **Command:**
 
 ```bash
-wp_create_page --title="Example Post Title"
+wp_create_page
 ```
 
 **Response:**
@@ -46,14 +42,14 @@ wp_create_page --title="Example Post Title"
 }
 ```
 
-### Advanced page Configuration
+### Multi-Site page Usage
 
-Comprehensive example using all available parameters
+Using wp_create_page with specific site targeting
 
 **Command:**
 
 ```bash
-wp_create_page --title="Example Post Title" --content="This is example content for the post." --status="publish"
+wp_create_page --site="site1"
 ```
 
 **Response:**

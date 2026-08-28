@@ -6,10 +6,7 @@ Revokes an existing application password.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                                     | Default | Examples  |
-| --------- | -------- | -------- | ----------------------------------------------- | ------- | --------- |
-| `user_id` | `number` | ✅       | The ID of the user who owns the password.       | -       | `example` |
-| `uuid`    | `string` | ✅       | The UUID of the application password to revoke. | -       | `example` |
+_No parameters required._
 
 ## Examples
 
@@ -20,7 +17,7 @@ Simple example of using wp_delete_application_password
 **Command:**
 
 ```bash
-wp_delete_application_password --user_id="example_value" --uuid="example_value"
+wp_delete_application_password
 ```
 
 **Response:**
@@ -41,6 +38,28 @@ wp_delete_application_password --user_id="example_value" --uuid="example_value"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site site Usage
+
+Using wp_delete_application_password with specific site targeting
+
+**Command:**
+
+```bash
+wp_delete_application_password --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "deleted": true,
+    "id": 123
+  }
 }
 ```
 

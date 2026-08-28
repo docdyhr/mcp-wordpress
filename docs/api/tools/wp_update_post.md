@@ -2,16 +2,19 @@
 
 ![post](https://img.shields.io/badge/category-post-lightgrey)
 
-Updates an existing WordPress post with validation and detailed confirmation.
+Updates an existing WordPress post with comprehensive validation and change tracking. All parameters except ID are
+optional - only provided fields will be updated.
+
+**Usage Examples:** • Update title: `wp_update_post --id=123 --title="New Title"` • Update content:
+`wp_update_post --id=123 --content="<p>Updated content</p>"` • Change status:
+`wp_update_post --id=123 --status="publish"` • Update categories: `wp_update_post --id=123 --categories=[1,5,10]` • Set
+featured image: `wp_update_post --id=123 --featured_media=42` • Remove featured image:
+`wp_update_post --id=123 --featured_media=0` • Multiple updates:
+`wp_update_post --id=123 --title="New Title" --status="publish" --categories=[1,2]`
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                                   | Default   | Examples                                              |
-| --------- | -------- | -------- | --------------------------------------------- | --------- | ----------------------------------------------------- |
-| `id`      | `number` | ✅       | The ID of the post to update.                 | -         | `123`, `456`                                          |
-| `title`   | `string` | ❌       | The new title for the post.                   | -         | `My Blog Post`, `Hello World`                         |
-| `content` | `string` | ❌       | The new content for the post, in HTML format. | -         | `<p>Post content here</p>`, `This is my post content` |
-| `status`  | `string` | ❌       | The new status for the post.                  | `publish` | `example`                                             |
+_No parameters required._
 
 ## Examples
 
@@ -22,7 +25,7 @@ Simple example of using wp_update_post
 **Command:**
 
 ```bash
-wp_update_post --id="123"
+wp_update_post
 ```
 
 **Response:**
@@ -47,14 +50,14 @@ wp_update_post --id="123"
 }
 ```
 
-### Advanced post Configuration
+### Multi-Site post Usage
 
-Comprehensive example using all available parameters
+Using wp_update_post with specific site targeting
 
 **Command:**
 
 ```bash
-wp_update_post --id="123" --title="Example Post Title" --content="This is example content for the post." --status="publish"
+wp_update_post --site="site1"
 ```
 
 **Response:**

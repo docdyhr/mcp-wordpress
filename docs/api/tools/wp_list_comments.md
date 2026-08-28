@@ -6,10 +6,7 @@ Lists comments from a WordPress site, with filters.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                                               | Default   | Examples  |
-| --------- | -------- | -------- | --------------------------------------------------------- | --------- | --------- |
-| `post`    | `number` | ❌       | Limit results to comments assigned to a specific post ID. | -         | `example` |
-| `status`  | `string` | ❌       | Filter by comment status.                                 | `publish` | `example` |
+_No parameters required._
 
 ## Examples
 
@@ -51,6 +48,38 @@ wp_list_comments
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site comment Usage
+
+Using wp_list_comments with specific site targeting
+
+**Command:**
+
+```bash
+wp_list_comments --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "Example comment 1",
+      "status": "publish"
+    },
+    {
+      "id": 2,
+      "title": "Example comment 2",
+      "status": "draft"
+    }
+  ],
+  "total": 2,
+  "pages": 1
 }
 ```
 

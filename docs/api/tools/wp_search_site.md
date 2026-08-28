@@ -11,10 +11,7 @@ Search media: `wp_search_site --term="logo" --type="media"` • Find specific co
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                    | Default | Examples  |
-| --------- | -------- | -------- | ------------------------------ | ------- | --------- |
-| `term`    | `string` | ✅       | The search term to look for.   | -       | `example` |
-| `type`    | `string` | ❌       | The type of content to search. | -       | `example` |
+_No parameters required._
 
 ## Examples
 
@@ -25,7 +22,7 @@ Simple example of using wp_search_site
 **Command:**
 
 ```bash
-wp_search_site --term="example_value"
+wp_search_site
 ```
 
 **Response:**
@@ -44,6 +41,26 @@ wp_search_site --term="example_value"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site site Usage
+
+Using wp_search_site with specific site targeting
+
+**Command:**
+
+```bash
+wp_search_site --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "wp_search_site executed successfully"
 }
 ```
 

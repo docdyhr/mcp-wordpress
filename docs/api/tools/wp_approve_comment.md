@@ -6,9 +6,7 @@ Approves a pending comment.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                       | Default | Examples     |
-| --------- | -------- | -------- | --------------------------------- | ------- | ------------ |
-| `id`      | `number` | ✅       | The ID of the comment to approve. | -       | `123`, `456` |
+_No parameters required._
 
 ## Examples
 
@@ -19,7 +17,7 @@ Simple example of using wp_approve_comment
 **Command:**
 
 ```bash
-wp_approve_comment --id="123"
+wp_approve_comment
 ```
 
 **Response:**
@@ -38,6 +36,26 @@ wp_approve_comment --id="123"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site comment Usage
+
+Using wp_approve_comment with specific site targeting
+
+**Command:**
+
+```bash
+wp_approve_comment --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "wp_approve_comment executed successfully"
 }
 ```
 

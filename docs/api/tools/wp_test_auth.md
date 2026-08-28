@@ -43,6 +43,26 @@ wp_test_auth
 }
 ```
 
+### Multi-Site auth Usage
+
+Using wp_test_auth with specific site targeting
+
+**Command:**
+
+```bash
+wp_test_auth --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "wp_test_auth executed successfully"
+}
+```
+
 ## Response Format
 
 **Return Type:** `object`

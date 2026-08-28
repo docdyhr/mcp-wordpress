@@ -1,8 +1,8 @@
-# wp_update_media
+# wp_seo_get_live_data
 
-![media](https://img.shields.io/badge/category-media-purple)
+![seo](https://img.shields.io/badge/category-seo-lightgrey)
 
-Updates the metadata of an existing media item.
+Retrieve live SEO data from WordPress including plugin-specific metadata and configurations
 
 ## Parameters
 
@@ -10,14 +10,14 @@ _No parameters required._
 
 ## Examples
 
-### Basic media Usage
+### Basic seo Usage
 
-Simple example of using wp_update_media
+Simple example of using wp_seo_get_live_data
 
 **Command:**
 
 ```bash
-wp_update_media
+wp_seo_get_live_data
 ```
 
 **Response:**
@@ -27,8 +27,10 @@ wp_update_media
   "success": true,
   "data": {
     "id": 123,
-    "title": "Created/Updated successfully",
-    "status": "publish"
+    "title": "Example seo",
+    "content": "Example content",
+    "status": "publish",
+    "date": "2024-01-01T00:00:00Z"
   }
 }
 ```
@@ -42,14 +44,14 @@ wp_update_media
 }
 ```
 
-### Multi-Site media Usage
+### Multi-Site seo Usage
 
-Using wp_update_media with specific site targeting
+Using wp_seo_get_live_data with specific site targeting
 
 **Command:**
 
 ```bash
-wp_update_media --site="site1"
+wp_seo_get_live_data --site="site1"
 ```
 
 **Response:**
@@ -59,25 +61,27 @@ wp_update_media --site="site1"
   "success": true,
   "data": {
     "id": 123,
-    "title": "Created/Updated successfully",
-    "status": "publish"
+    "title": "Example seo",
+    "content": "Example content",
+    "status": "publish",
+    "date": "2024-01-01T00:00:00Z"
   }
 }
 ```
 
 ## Response Format
 
-**Return Type:** `media`
+**Return Type:** `seo`
 
 ```json
 {
   "success": true,
   "data": {
-    // media response data
+    // seo response data
   },
   "metadata": {
     "timestamp": "2024-01-01T00:00:00.000Z",
-    "tool": "wp_update_media",
+    "tool": "wp_seo_get_live_data",
     "site": "site1"
   }
 }

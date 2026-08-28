@@ -6,9 +6,7 @@ Retrieves a single user by their ID.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                         | Default | Examples     |
-| --------- | -------- | -------- | ----------------------------------- | ------- | ------------ |
-| `id`      | `number` | ✅       | The unique identifier for the user. | -       | `123`, `456` |
+_No parameters required._
 
 ## Examples
 
@@ -19,7 +17,7 @@ Simple example of using wp_get_user
 **Command:**
 
 ```bash
-wp_get_user --id="123"
+wp_get_user
 ```
 
 **Response:**
@@ -43,6 +41,31 @@ wp_get_user --id="123"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site user Usage
+
+Using wp_get_user with specific site targeting
+
+**Command:**
+
+```bash
+wp_get_user --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Example user",
+    "content": "Example content",
+    "status": "publish",
+    "date": "2024-01-01T00:00:00Z"
+  }
 }
 ```
 

@@ -1,8 +1,9 @@
-# wp_update_media
+# wp_check_version
 
-![media](https://img.shields.io/badge/category-media-purple)
+![system](https://img.shields.io/badge/category-system-lightgrey)
 
-Updates the metadata of an existing media item.
+Check if a newer version of mcp-wordpress is available. Returns current version, latest version, and download URL if
+update is available.
 
 ## Parameters
 
@@ -10,14 +11,14 @@ _No parameters required._
 
 ## Examples
 
-### Basic media Usage
+### Basic system Usage
 
-Simple example of using wp_update_media
+Simple example of using wp_check_version
 
 **Command:**
 
 ```bash
-wp_update_media
+wp_check_version
 ```
 
 **Response:**
@@ -25,11 +26,8 @@ wp_update_media
 ```json
 {
   "success": true,
-  "data": {
-    "id": 123,
-    "title": "Created/Updated successfully",
-    "status": "publish"
-  }
+  "data": {},
+  "message": "wp_check_version executed successfully"
 }
 ```
 
@@ -42,14 +40,14 @@ wp_update_media
 }
 ```
 
-### Multi-Site media Usage
+### Multi-Site system Usage
 
-Using wp_update_media with specific site targeting
+Using wp_check_version with specific site targeting
 
 **Command:**
 
 ```bash
-wp_update_media --site="site1"
+wp_check_version --site="site1"
 ```
 
 **Response:**
@@ -57,27 +55,24 @@ wp_update_media --site="site1"
 ```json
 {
   "success": true,
-  "data": {
-    "id": 123,
-    "title": "Created/Updated successfully",
-    "status": "publish"
-  }
+  "data": {},
+  "message": "wp_check_version executed successfully"
 }
 ```
 
 ## Response Format
 
-**Return Type:** `media`
+**Return Type:** `object`
 
 ```json
 {
   "success": true,
   "data": {
-    // media response data
+    // object response data
   },
   "metadata": {
     "timestamp": "2024-01-01T00:00:00.000Z",
-    "tool": "wp_update_media",
+    "tool": "wp_check_version",
     "site": "site1"
   }
 }

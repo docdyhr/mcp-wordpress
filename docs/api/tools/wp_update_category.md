@@ -6,10 +6,7 @@ Updates an existing category.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                       | Default | Examples     |
-| --------- | -------- | -------- | --------------------------------- | ------- | ------------ |
-| `id`      | `number` | ✅       | The ID of the category to update. | -       | `123`, `456` |
-| `name`    | `string` | ❌       | The new name for the category.    | -       | `example`    |
+_No parameters required._
 
 ## Examples
 
@@ -20,7 +17,7 @@ Simple example of using wp_update_category
 **Command:**
 
 ```bash
-wp_update_category --id="123"
+wp_update_category
 ```
 
 **Response:**
@@ -42,6 +39,29 @@ wp_update_category --id="123"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site taxonomy Usage
+
+Using wp_update_category with specific site targeting
+
+**Command:**
+
+```bash
+wp_update_category --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
 }
 ```
 

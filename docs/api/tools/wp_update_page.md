@@ -6,12 +6,7 @@ Updates an existing page.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                                   | Default   | Examples                                              |
-| --------- | -------- | -------- | --------------------------------------------- | --------- | ----------------------------------------------------- |
-| `id`      | `number` | ✅       | The ID of the page to update.                 | -         | `123`, `456`                                          |
-| `title`   | `string` | ❌       | The new title for the page.                   | -         | `My Blog Post`, `Hello World`                         |
-| `content` | `string` | ❌       | The new content for the page, in HTML format. | -         | `<p>Post content here</p>`, `This is my post content` |
-| `status`  | `string` | ❌       | The new status for the page.                  | `publish` | `example`                                             |
+_No parameters required._
 
 ## Examples
 
@@ -22,7 +17,7 @@ Simple example of using wp_update_page
 **Command:**
 
 ```bash
-wp_update_page --id="123"
+wp_update_page
 ```
 
 **Response:**
@@ -47,14 +42,14 @@ wp_update_page --id="123"
 }
 ```
 
-### Advanced page Configuration
+### Multi-Site page Usage
 
-Comprehensive example using all available parameters
+Using wp_update_page with specific site targeting
 
 **Command:**
 
 ```bash
-wp_update_page --id="123" --title="Example Post Title" --content="This is example content for the post." --status="publish"
+wp_update_page --site="site1"
 ```
 
 **Response:**

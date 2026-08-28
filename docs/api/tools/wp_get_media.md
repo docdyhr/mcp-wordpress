@@ -6,9 +6,7 @@ Retrieves a single media item by its ID.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                               | Default | Examples     |
-| --------- | -------- | -------- | ----------------------------------------- | ------- | ------------ |
-| `id`      | `number` | ✅       | The unique identifier for the media item. | -       | `123`, `456` |
+_No parameters required._
 
 ## Examples
 
@@ -19,7 +17,7 @@ Simple example of using wp_get_media
 **Command:**
 
 ```bash
-wp_get_media --id="123"
+wp_get_media
 ```
 
 **Response:**
@@ -43,6 +41,31 @@ wp_get_media --id="123"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site media Usage
+
+Using wp_get_media with specific site targeting
+
+**Command:**
+
+```bash
+wp_get_media --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Example media",
+    "content": "Example content",
+    "status": "publish",
+    "date": "2024-01-01T00:00:00Z"
+  }
 }
 ```
 

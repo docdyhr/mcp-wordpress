@@ -5,16 +5,16 @@
 Lists users from a WordPress site with comprehensive filtering and detailed user information including roles,
 registration dates, and activity status.
 
+**Note:** Role, email, and registration date fields require **administrator** privileges. Non-admin users will see
+limited metadata due to WordPress REST API restrictions.
+
 **Usage Examples:** • List all users: `wp_list_users` • Search users: `wp_list_users --search="john"` • Filter by role:
 `wp_list_users --roles=["editor","author"]` • Find admins: `wp_list_users --roles=["administrator"]` • Combined search:
 `wp_list_users --search="smith" --roles=["subscriber"]`
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                                    | Default | Examples                |
-| --------- | -------- | -------- | ---------------------------------------------- | ------- | ----------------------- |
-| `search`  | `string` | ❌       | Limit results to those matching a search term. | -       | `wordpress`, `tutorial` |
-| `roles`   | `array`  | ❌       | Limit results to users with specific roles.    | -       | `example`               |
+_No parameters required._
 
 ## Examples
 
@@ -56,6 +56,38 @@ wp_list_users
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site user Usage
+
+Using wp_list_users with specific site targeting
+
+**Command:**
+
+```bash
+wp_list_users --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "Example user 1",
+      "status": "publish"
+    },
+    {
+      "id": 2,
+      "title": "Example user 2",
+      "status": "draft"
+    }
+  ],
+  "total": 2,
+  "pages": 1
 }
 ```
 

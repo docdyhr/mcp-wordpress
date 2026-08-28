@@ -6,9 +6,7 @@ Get cache statistics for a WordPress site.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                                                                                               | Default | Examples              |
-| --------- | -------- | -------- | --------------------------------------------------------------------------------------------------------- | ------- | --------------------- |
-| `site`    | `string` | ❌       | Site ID to get cache stats for. If not provided, uses default site or fails if multiple sites configured. | -       | `site1`, `production` |
+_No parameters required._
 
 ## Examples
 

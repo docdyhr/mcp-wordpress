@@ -1,8 +1,8 @@
-# wp_update_media
+# wp_seo_track_serp
 
-![media](https://img.shields.io/badge/category-media-purple)
+![seo](https://img.shields.io/badge/category-seo-lightgrey)
 
-Updates the metadata of an existing media item.
+Track search engine result page positions for target keywords
 
 ## Parameters
 
@@ -10,14 +10,14 @@ _No parameters required._
 
 ## Examples
 
-### Basic media Usage
+### Basic seo Usage
 
-Simple example of using wp_update_media
+Simple example of using wp_seo_track_serp
 
 **Command:**
 
 ```bash
-wp_update_media
+wp_seo_track_serp
 ```
 
 **Response:**
@@ -25,11 +25,8 @@ wp_update_media
 ```json
 {
   "success": true,
-  "data": {
-    "id": 123,
-    "title": "Created/Updated successfully",
-    "status": "publish"
-  }
+  "data": {},
+  "message": "wp_seo_track_serp executed successfully"
 }
 ```
 
@@ -42,14 +39,14 @@ wp_update_media
 }
 ```
 
-### Multi-Site media Usage
+### Multi-Site seo Usage
 
-Using wp_update_media with specific site targeting
+Using wp_seo_track_serp with specific site targeting
 
 **Command:**
 
 ```bash
-wp_update_media --site="site1"
+wp_seo_track_serp --site="site1"
 ```
 
 **Response:**
@@ -57,27 +54,24 @@ wp_update_media --site="site1"
 ```json
 {
   "success": true,
-  "data": {
-    "id": 123,
-    "title": "Created/Updated successfully",
-    "status": "publish"
-  }
+  "data": {},
+  "message": "wp_seo_track_serp executed successfully"
 }
 ```
 
 ## Response Format
 
-**Return Type:** `media`
+**Return Type:** `object`
 
 ```json
 {
   "success": true,
   "data": {
-    // media response data
+    // object response data
   },
   "metadata": {
     "timestamp": "2024-01-01T00:00:00.000Z",
-    "tool": "wp_update_media",
+    "tool": "wp_seo_track_serp",
     "site": "site1"
   }
 }

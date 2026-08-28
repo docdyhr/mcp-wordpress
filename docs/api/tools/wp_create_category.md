@@ -6,10 +6,7 @@ Creates a new category.
 
 ## Parameters
 
-| Parameter     | Type     | Required | Description                       | Default | Examples  |
-| ------------- | -------- | -------- | --------------------------------- | ------- | --------- |
-| `name`        | `string` | ✅       | The name of the category.         | -       | `example` |
-| `description` | `string` | ❌       | The description for the category. | -       | `example` |
+_No parameters required._
 
 ## Examples
 
@@ -20,7 +17,7 @@ Simple example of using wp_create_category
 **Command:**
 
 ```bash
-wp_create_category --name="example_value"
+wp_create_category
 ```
 
 **Response:**
@@ -42,6 +39,29 @@ wp_create_category --name="example_value"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site taxonomy Usage
+
+Using wp_create_category with specific site targeting
+
+**Command:**
+
+```bash
+wp_create_category --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
 }
 ```
 

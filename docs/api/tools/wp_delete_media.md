@@ -6,10 +6,7 @@ Deletes a media item.
 
 ## Parameters
 
-| Parameter | Type      | Required | Description                                                              | Default | Examples     |
-| --------- | --------- | -------- | ------------------------------------------------------------------------ | ------- | ------------ |
-| `id`      | `number`  | ✅       | The ID of the media item to delete.                                      | -       | `123`, `456` |
-| `force`   | `boolean` | ❌       | If true, permanently delete. If false, move to trash. Defaults to false. | -       | `example`    |
+_No parameters required._
 
 ## Examples
 
@@ -20,7 +17,7 @@ Simple example of using wp_delete_media
 **Command:**
 
 ```bash
-wp_delete_media --id="123"
+wp_delete_media
 ```
 
 **Response:**
@@ -41,6 +38,28 @@ wp_delete_media --id="123"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site media Usage
+
+Using wp_delete_media with specific site targeting
+
+**Command:**
+
+```bash
+wp_delete_media --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "deleted": true,
+    "id": 123
+  }
 }
 ```
 

@@ -6,14 +6,7 @@ Uploads a file to the WordPress media library.
 
 ## Parameters
 
-| Parameter     | Type     | Required | Description                                              | Default | Examples                      |
-| ------------- | -------- | -------- | -------------------------------------------------------- | ------- | ----------------------------- |
-| `file_path`   | `string` | ✅       | The local, absolute path to the file to upload.          | -       | `example`                     |
-| `title`       | `string` | ❌       | The title for the media item.                            | -       | `My Blog Post`, `Hello World` |
-| `alt_text`    | `string` | ❌       | Alternative text for the media item (for accessibility). | -       | `example`                     |
-| `caption`     | `string` | ❌       | The caption for the media item.                          | -       | `example`                     |
-| `description` | `string` | ❌       | The description for the media item.                      | -       | `example`                     |
-| `post`        | `number` | ❌       | The ID of a post to attach this media to.                | -       | `example`                     |
+_No parameters required._
 
 ## Examples
 
@@ -24,7 +17,7 @@ Simple example of using wp_upload_media
 **Command:**
 
 ```bash
-wp_upload_media --file_path="example_value"
+wp_upload_media
 ```
 
 **Response:**
@@ -46,14 +39,14 @@ wp_upload_media --file_path="example_value"
 }
 ```
 
-### Advanced media Configuration
+### Multi-Site media Usage
 
-Comprehensive example using all available parameters
+Using wp_upload_media with specific site targeting
 
 **Command:**
 
 ```bash
-wp_upload_media --file_path="example_value" --title="Example Post Title" --alt_text="example_value" --caption="example_value" --description="example_value" --post="example_value"
+wp_upload_media --site="site1"
 ```
 
 **Response:**

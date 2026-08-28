@@ -6,9 +6,7 @@ Lists application passwords for a specific user.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                                          | Default | Examples  |
-| --------- | -------- | -------- | ---------------------------------------------------- | ------- | --------- |
-| `user_id` | `number` | ✅       | The ID of the user to get application passwords for. | -       | `example` |
+_No parameters required._
 
 ## Examples
 
@@ -19,7 +17,7 @@ Simple example of using wp_get_application_passwords
 **Command:**
 
 ```bash
-wp_get_application_passwords --user_id="example_value"
+wp_get_application_passwords
 ```
 
 **Response:**
@@ -43,6 +41,31 @@ wp_get_application_passwords --user_id="example_value"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site site Usage
+
+Using wp_get_application_passwords with specific site targeting
+
+**Command:**
+
+```bash
+wp_get_application_passwords --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Example site",
+    "content": "Example content",
+    "status": "publish",
+    "date": "2024-01-01T00:00:00Z"
+  }
 }
 ```
 

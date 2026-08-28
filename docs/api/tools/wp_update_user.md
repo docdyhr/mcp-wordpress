@@ -6,11 +6,7 @@ Updates an existing user.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                         | Default | Examples                             |
-| --------- | -------- | -------- | ----------------------------------- | ------- | ------------------------------------ |
-| `id`      | `number` | ✅       | The ID of the user to update.       | -       | `123`, `456`                         |
-| `email`   | `string` | ❌       | The new email address for the user. | -       | `user@example.com`, `admin@site.com` |
-| `name`    | `string` | ❌       | The new display name for the user.  | -       | `example`                            |
+_No parameters required._
 
 ## Examples
 
@@ -21,7 +17,7 @@ Simple example of using wp_update_user
 **Command:**
 
 ```bash
-wp_update_user --id="123"
+wp_update_user
 ```
 
 **Response:**
@@ -46,14 +42,14 @@ wp_update_user --id="123"
 }
 ```
 
-### Advanced user Configuration
+### Multi-Site user Usage
 
-Comprehensive example using all available parameters
+Using wp_update_user with specific site targeting
 
 **Command:**
 
 ```bash
-wp_update_user --id="123" --email="user@example.com" --name="example_value"
+wp_update_user --site="site1"
 ```
 
 **Response:**

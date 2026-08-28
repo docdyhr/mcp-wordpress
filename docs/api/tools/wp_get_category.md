@@ -6,9 +6,7 @@ Retrieves a single category by its ID.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                             | Default | Examples     |
-| --------- | -------- | -------- | --------------------------------------- | ------- | ------------ |
-| `id`      | `number` | ✅       | The unique identifier for the category. | -       | `123`, `456` |
+_No parameters required._
 
 ## Examples
 
@@ -19,7 +17,7 @@ Simple example of using wp_get_category
 **Command:**
 
 ```bash
-wp_get_category --id="123"
+wp_get_category
 ```
 
 **Response:**
@@ -43,6 +41,31 @@ wp_get_category --id="123"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site taxonomy Usage
+
+Using wp_get_category with specific site targeting
+
+**Command:**
+
+```bash
+wp_get_category --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Example taxonomy",
+    "content": "Example content",
+    "status": "publish",
+    "date": "2024-01-01T00:00:00Z"
+  }
 }
 ```
 

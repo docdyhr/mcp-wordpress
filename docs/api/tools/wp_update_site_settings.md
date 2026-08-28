@@ -2,15 +2,11 @@
 
 ![site](https://img.shields.io/badge/category-site-lightblue)
 
-Updates one or more general settings for a WordPress site.
+Updates one or more general settings for a WordPress site. Requires administrator role (manage_options capability).
 
 ## Parameters
 
-| Parameter     | Type     | Required | Description                                            | Default | Examples                      |
-| ------------- | -------- | -------- | ------------------------------------------------------ | ------- | ----------------------------- |
-| `title`       | `string` | ❌       | The title of the site.                                 | -       | `My Blog Post`, `Hello World` |
-| `description` | `string` | ❌       | The tagline or description of the site.                | -       | `example`                     |
-| `timezone`    | `string` | ❌       | A city in the same timezone, e.g., 'America/New_York'. | -       | `example`                     |
+_No parameters required._
 
 ## Examples
 
@@ -46,14 +42,14 @@ wp_update_site_settings
 }
 ```
 
-### Advanced site Configuration
+### Multi-Site site Usage
 
-Comprehensive example using all available parameters
+Using wp_update_site_settings with specific site targeting
 
 **Command:**
 
 ```bash
-wp_update_site_settings --title="Example Post Title" --description="example_value" --timezone="example_value"
+wp_update_site_settings --site="site1"
 ```
 
 **Response:**

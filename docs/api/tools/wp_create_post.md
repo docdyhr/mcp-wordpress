@@ -14,15 +14,7 @@ Creates a new WordPress post with comprehensive validation and detailed success 
 
 ## Parameters
 
-| Parameter        | Type     | Required | Description                                                                                                                                    | Default   | Examples                                              |
-| ---------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ----------------------------------------------------- |
-| `title`          | `string` | ✅       | The title for the post.                                                                                                                        | -         | `My Blog Post`, `Hello World`                         |
-| `content`        | `string` | ❌       | The content for the post, in HTML format.                                                                                                      | -         | `<p>Post content here</p>`, `This is my post content` |
-| `status`         | `string` | ❌       | The publishing status for the post.                                                                                                            | `publish` | `example`                                             |
-| `excerpt`        | `string` | ❌       | The excerpt for the post.                                                                                                                      | -         | `example`                                             |
-| `categories`     | `array`  | ❌       | An array of category IDs to assign to the post.                                                                                                | -         | `example`                                             |
-| `tags`           | `array`  | ❌       | An array of tag IDs to assign to the post.                                                                                                     | -         | `example`                                             |
-| `featured_media` | `number` | ❌       | The ID of the featured media (image) for the post. Use wp_upload_media first to get a media ID. Set to 0 or null to remove the featured image. | -         | `example`                                             |
+_No parameters required._
 
 ## Examples
 
@@ -33,7 +25,7 @@ Simple example of using wp_create_post
 **Command:**
 
 ```bash
-wp_create_post --title="Example Post Title"
+wp_create_post
 ```
 
 **Response:**
@@ -58,14 +50,14 @@ wp_create_post --title="Example Post Title"
 }
 ```
 
-### Advanced post Configuration
+### Multi-Site post Usage
 
-Comprehensive example using all available parameters
+Using wp_create_post with specific site targeting
 
 **Command:**
 
 ```bash
-wp_create_post --title="Example Post Title" --content="This is example content for the post." --status="publish" --excerpt="example_value" --categories="example_value" --tags="example_value" --featured_media="example_value"
+wp_create_post --site="site1"
 ```
 
 **Response:**

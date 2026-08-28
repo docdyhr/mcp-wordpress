@@ -2,16 +2,13 @@
 
 ![auth](https://img.shields.io/badge/category-auth-darkblue)
 
-Switches the authentication method for a site for the current session.
+Switches the authentication method for a site for the current session and verifies the new credentials with a live
+request. The switch is in-memory only — it does not persist across server restarts; update your configuration file for
+that.
 
 ## Parameters
 
-| Parameter   | Type     | Required | Description                                                               | Default | Examples            |
-| ----------- | -------- | -------- | ------------------------------------------------------------------------- | ------- | ------------------- |
-| `method`    | `string` | ✅       | The new authentication method to use.                                     | -       | `example`           |
-| `username`  | `string` | ❌       | The username for 'app-password' or 'basic' authentication.                | -       | `john_doe`, `admin` |
-| `password`  | `string` | ❌       | The Application Password for 'app-password' or password for 'basic' auth. | -       | `example`           |
-| `jwt_token` | `string` | ❌       | The token for 'jwt' authentication.                                       | -       | `example`           |
+_No parameters required._
 
 ## Examples
 
@@ -22,7 +19,7 @@ Simple example of using wp_switch_auth_method
 **Command:**
 
 ```bash
-wp_switch_auth_method --method="example_value"
+wp_switch_auth_method
 ```
 
 **Response:**
@@ -44,14 +41,14 @@ wp_switch_auth_method --method="example_value"
 }
 ```
 
-### Advanced auth Configuration
+### Multi-Site auth Usage
 
-Comprehensive example using all available parameters
+Using wp_switch_auth_method with specific site targeting
 
 **Command:**
 
 ```bash
-wp_switch_auth_method --method="example_value" --username="john_doe" --password="example_value" --jwt_token="example_value"
+wp_switch_auth_method --site="site1"
 ```
 
 **Response:**

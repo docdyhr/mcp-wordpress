@@ -10,7 +10,7 @@
 The WordPress MCP Server provides **71 tools** across **12 categories** for comprehensive WordPress management through
 the Model Context Protocol.
 
-**Last Updated:** 9.8.2025 **Version:** 1.2.0 **Coverage:** 71/71 tools with examples
+**Last Updated:** 28.8.2026 **Version:** 1.2.0 **Coverage:** 71/71 tools with examples
 
 ## Quick Start
 
@@ -43,6 +43,7 @@ wp_get_site_settings --site=production
 | ------------------------------------------ | ----- | ------------------------------------------------ |
 | [comment](./categories/comment.md)         | 7     | comment management tools                         |
 | [cache](./categories/cache.md)             | 4     | Performance caching and optimization tools       |
+| [system](./categories/system.md)           | 1     | system management tools                          |
 | [site](./categories/site.md)               | 6     | Site settings and configuration tools            |
 | [taxonomy](./categories/taxonomy.md)       | 10    | taxonomy management tools                        |
 | [page](./categories/page.md)               | 6     | page management tools                            |
@@ -51,21 +52,23 @@ wp_get_site_settings --site=production
 | [media](./categories/media.md)             | 5     | File upload, management, and media library tools |
 | [auth](./categories/auth.md)               | 3     | Authentication testing and management tools      |
 | [performance](./categories/performance.md) | 6     | Performance monitoring and analytics tools       |
+| [seo](./categories/seo.md)                 | 11    | seo management tools                             |
 
 ## Available Tools
 
-| Tool                                                                          | Category | Description                                                                                                          |
-| ----------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
-| [`wp_approve_comment`](./tools/wp_approve_comment.md)                         | comment  | Approves a pending comment.                                                                                          |
-| [`wp_cache_clear`](./tools/wp_cache_clear.md)                                 | cache    | Clear cache for a WordPress site.                                                                                    |
-| [`wp_cache_info`](./tools/wp_cache_info.md)                                   | cache    | Get detailed cache configuration and status information.                                                             |
-| [`wp_cache_stats`](./tools/wp_cache_stats.md)                                 | cache    | Get cache statistics for a WordPress site.                                                                           |
-| [`wp_cache_warm`](./tools/wp_cache_warm.md)                                   | cache    | Pre-warm cache with essential WordPress data.                                                                        |
-| [`wp_create_application_password`](./tools/wp_create_application_password.md) | site     | Creates a new application password for a user.                                                                       |
-| [`wp_create_category`](./tools/wp_create_category.md)                         | taxonomy | Creates a new category.                                                                                              |
-| [`wp_create_comment`](./tools/wp_create_comment.md)                           | comment  | Creates a new comment on a post.                                                                                     |
-| [`wp_create_page`](./tools/wp_create_page.md)                                 | page     | Creates a new page.                                                                                                  |
-| [`wp_create_post`](./tools/wp_create_post.md)                                 | post     | Creates a new WordPress post with comprehensive validation and detailed success feedback including management links. |
+| Tool                                                                          | Category | Description                                                                                                                               |
+| ----------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| [`wp_approve_comment`](./tools/wp_approve_comment.md)                         | comment  | Approves a pending comment.                                                                                                               |
+| [`wp_cache_clear`](./tools/wp_cache_clear.md)                                 | cache    | Clear cache for a WordPress site.                                                                                                         |
+| [`wp_cache_info`](./tools/wp_cache_info.md)                                   | cache    | Get detailed cache configuration and status information.                                                                                  |
+| [`wp_cache_stats`](./tools/wp_cache_stats.md)                                 | cache    | Get cache statistics for a WordPress site.                                                                                                |
+| [`wp_cache_warm`](./tools/wp_cache_warm.md)                                   | cache    | Pre-warm cache with essential WordPress data.                                                                                             |
+| [`wp_check_version`](./tools/wp_check_version.md)                             | system   | Check if a newer version of mcp-wordpress is available. Returns current version, latest version, and download URL if update is available. |
+| [`wp_create_application_password`](./tools/wp_create_application_password.md) | site     | Creates a new application password for a user.                                                                                            |
+| [`wp_create_category`](./tools/wp_create_category.md)                         | taxonomy | Creates a new category.                                                                                                                   |
+| [`wp_create_comment`](./tools/wp_create_comment.md)                           | comment  | Creates a new comment on a post.                                                                                                          |
+| [`wp_create_page`](./tools/wp_create_page.md)                                 | page     | Creates a new page.                                                                                                                       |
+| [`wp_create_post`](./tools/wp_create_post.md)                                 | post     | Creates a new WordPress post with comprehensive validation and detailed success feedback including management links.                      |
 
 **Usage Examples:** • Simple post: `wp_create_post --title="My New Post" --content="<p>Hello World!</p>"` • Draft post:
 `wp_create_post --title="Draft Post" --status="draft"` • Categorized post:
@@ -81,7 +84,11 @@ password. | | [`wp_delete_category`](./tools/wp_delete_category.md) | taxonomy |
 [`wp_delete_comment`](./tools/wp_delete_comment.md) | comment | Deletes a comment. | |
 [`wp_delete_media`](./tools/wp_delete_media.md) | media | Deletes a media item. | |
 [`wp_delete_page`](./tools/wp_delete_page.md) | page | Deletes a page. | | [`wp_delete_post`](./tools/wp_delete_post.md)
-| post | Deletes a WordPress post with option for permanent deletion or moving to trash. | |
+| post | Deletes a WordPress post with options for trash or permanent deletion. Includes safety confirmations and
+detailed feedback on the deletion action.
+
+**Usage Examples:** • Trash a post: `wp_delete_post --id=123` (moves to trash) • Permanent deletion:
+`wp_delete_post --id=123 --force=true` • Bulk operations: Use multiple calls with different IDs | |
 [`wp_delete_tag`](./tools/wp_delete_tag.md) | taxonomy | Deletes a tag. | |
 [`wp_delete_user`](./tools/wp_delete_user.md) | user | Deletes a user. | |
 [`wp_get_application_passwords`](./tools/wp_get_application_passwords.md) | site | Lists application passwords for a
@@ -95,12 +102,17 @@ comprehensive profile information including roles, capabilities, and account det
 user's capabilities and roles • Account verification: Confirm you're authenticated with the correct account • Profile
 details: View registration date, email, and user metadata | | [`wp_get_media`](./tools/wp_get_media.md) | media |
 Retrieves a single media item by its ID. | | [`wp_get_page`](./tools/wp_get_page.md) | page | Retrieves a single page by
-its ID. | | [`wp_get_page_revisions`](./tools/wp_get_page_revisions.md) | page | Retrieves revisions for a specific
-page. | | [`wp_get_post`](./tools/wp_get_post.md) | post | Retrieves detailed information about a single post including
-metadata, content statistics, and management links. | | [`wp_get_post_revisions`](./tools/wp_get_post_revisions.md) |
-post | Retrieves the revision history for a specific post showing author and modification dates. | |
-[`wp_get_site_settings`](./tools/wp_get_site_settings.md) | site | Retrieves the general settings for a WordPress site.
-| | [`wp_get_tag`](./tools/wp_get_tag.md) | taxonomy | Retrieves a single tag by its ID. | |
+its ID, optionally including full content for editing. | | [`wp_get_page_revisions`](./tools/wp_get_page_revisions.md) |
+page | Retrieves revisions for a specific page. | | [`wp_get_post`](./tools/wp_get_post.md) | post | Retrieves detailed
+information about a single post including metadata, content statistics, and management links. Optionally includes full
+HTML content for editing.
+
+**Usage Examples:** • Basic metadata: `wp_get_post --id=123` • With full content:
+`wp_get_post --id=123 --include_content=true` | | [`wp_get_post_revisions`](./tools/wp_get_post_revisions.md) | post |
+Retrieves the revision history for a specific post, including details about changes, dates, and authors for content
+management and auditing purposes. | | [`wp_get_site_settings`](./tools/wp_get_site_settings.md) | site | Retrieves the
+general settings for a WordPress site. Requires administrator role (manage_options capability). | |
+[`wp_get_tag`](./tools/wp_get_tag.md) | taxonomy | Retrieves a single tag by its ID. | |
 [`wp_get_user`](./tools/wp_get_user.md) | user | Retrieves a single user by their ID. | |
 [`wp_list_categories`](./tools/wp_list_categories.md) | taxonomy | Lists categories from a WordPress site. | |
 [`wp_list_comments`](./tools/wp_list_comments.md) | comment | Lists comments from a WordPress site, with filters. | |
@@ -117,25 +129,49 @@ taxonomy | Lists tags from a WordPress site. | | [`wp_list_users`](./tools/wp_li
 WordPress site with comprehensive filtering and detailed user information including roles, registration dates, and
 activity status.
 
+**Note:** Role, email, and registration date fields require **administrator** privileges. Non-admin users will see
+limited metadata due to WordPress REST API restrictions.
+
 **Usage Examples:** • List all users: `wp_list_users` • Search users: `wp_list_users --search="john"` • Filter by role:
 `wp_list_users --roles=["editor","author"]` • Find admins: `wp_list_users --roles=["administrator"]` • Combined search:
 `wp_list_users --search="smith" --roles=["subscriber"]` | | [`wp_performance_alerts`](./tools/wp_performance_alerts.md)
 | performance | Get performance alerts and anomaly detection results | |
 [`wp_performance_benchmark`](./tools/wp_performance_benchmark.md) | performance | Compare current performance against
-industry benchmarks | | [`wp_performance_export`](./tools/wp_performance_export.md) | performance | Export comprehensive
+industry benchmarks. Note: Benchmarks are based on session-wide aggregated metrics across all sites, not per-site
+metrics. | | [`wp_performance_export`](./tools/wp_performance_export.md) | performance | Export comprehensive
 performance report | | [`wp_performance_history`](./tools/wp_performance_history.md) | performance | Get historical
 performance data and trends | | [`wp_performance_optimize`](./tools/wp_performance_optimize.md) | performance | Get
 optimization recommendations and insights | | [`wp_performance_stats`](./tools/wp_performance_stats.md) | performance |
-Get real-time performance statistics and metrics | | [`wp_search_site`](./tools/wp_search_site.md) | site | Performs a
+Get real-time performance statistics and metrics. Note: Top-level metrics (totalRequests, averageResponseTime,
+errorRate) are session-wide aggregates across all sites. Per-site cache and client stats are shown in the siteSpecific
+section when a site parameter is provided. | | [`wp_search_site`](./tools/wp_search_site.md) | site | Performs a
 site-wide search for content across posts, pages, and media with comprehensive results and metadata.
 
 **Usage Examples:** • Search everything: `wp_search_site --term="WordPress"` • Search posts only:
 `wp_search_site --term="tutorial" --type="posts"` • Search pages: `wp_search_site --term="about" --type="pages"` •
 Search media: `wp_search_site --term="logo" --type="media"` • Find specific content:
-`wp_search_site --term="contact form"` | | [`wp_spam_comment`](./tools/wp_spam_comment.md) | comment | Marks a comment
-as spam. | | [`wp_switch_auth_method`](./tools/wp_switch_auth_method.md) | auth | Switches the authentication method for
-a site for the current session. | | [`wp_test_auth`](./tools/wp_test_auth.md) | auth | Tests the authentication and
-connectivity for a configured WordPress site with detailed connection diagnostics.
+`wp_search_site --term="contact form"` | | [`wp_seo_analyze_content`](./tools/wp_seo_analyze_content.md) | seo | Analyze
+WordPress post content for SEO optimization opportunities including readability, keyword density, structure, and
+technical factors | | [`wp_seo_bulk_update_metadata`](./tools/wp_seo_bulk_update_metadata.md) | seo | Update SEO
+metadata for multiple posts with progress tracking and error handling | |
+[`wp_seo_generate_metadata`](./tools/wp_seo_generate_metadata.md) | seo | Generate SEO-optimized metadata including
+title tags, meta descriptions, OpenGraph, and Twitter Card data | |
+[`wp_seo_generate_schema`](./tools/wp_seo_generate_schema.md) | seo | Generate JSON-LD structured data schema for
+enhanced search results | | [`wp_seo_get_live_data`](./tools/wp_seo_get_live_data.md) | seo | Retrieve live SEO data
+from WordPress including plugin-specific metadata and configurations | |
+[`wp_seo_keyword_research`](./tools/wp_seo_keyword_research.md) | seo | Research keywords and get suggestions based on
+topic and competition analysis | | [`wp_seo_site_audit`](./tools/wp_seo_site_audit.md) | seo | Perform comprehensive SEO
+audit of the WordPress site including technical, content, and performance analysis | |
+[`wp_seo_suggest_internal_links`](./tools/wp_seo_suggest_internal_links.md) | seo | Analyze content and suggest relevant
+internal linking opportunities for better SEO | | [`wp_seo_test_integration`](./tools/wp_seo_test_integration.md) | seo
+| Test SEO plugin integration and detect available SEO plugins on the WordPress site | |
+[`wp_seo_track_serp`](./tools/wp_seo_track_serp.md) | seo | Track search engine result page positions for target
+keywords | | [`wp_seo_validate_schema`](./tools/wp_seo_validate_schema.md) | seo | Validate JSON-LD schema markup for
+correctness and compliance | | [`wp_spam_comment`](./tools/wp_spam_comment.md) | comment | Marks a comment as spam. | |
+[`wp_switch_auth_method`](./tools/wp_switch_auth_method.md) | auth | Switches the authentication method for a site for
+the current session and verifies the new credentials with a live request. The switch is in-memory only — it does not
+persist across server restarts; update your configuration file for that. | | [`wp_test_auth`](./tools/wp_test_auth.md) |
+auth | Tests the authentication and connectivity for a configured WordPress site with detailed connection diagnostics.
 
 **Usage Examples:** • Test connection: `wp_test_auth` • Multi-site test: `wp_test_auth --site="my-site"` • Verify setup:
 Use this after configuring new credentials • Troubleshoot: Run when experiencing connection issues • Health check:
@@ -143,11 +179,19 @@ Regular verification of WordPress connectivity | | [`wp_update_category`](./tool
 Updates an existing category. | | [`wp_update_comment`](./tools/wp_update_comment.md) | comment | Updates an existing
 comment. | | [`wp_update_media`](./tools/wp_update_media.md) | media | Updates the metadata of an existing media item. |
 | [`wp_update_page`](./tools/wp_update_page.md) | page | Updates an existing page. | |
-[`wp_update_post`](./tools/wp_update_post.md) | post | Updates an existing WordPress post with validation and detailed
-confirmation. | | [`wp_update_site_settings`](./tools/wp_update_site_settings.md) | site | Updates one or more general
-settings for a WordPress site. | | [`wp_update_tag`](./tools/wp_update_tag.md) | taxonomy | Updates an existing tag. | |
-[`wp_update_user`](./tools/wp_update_user.md) | user | Updates an existing user. | |
-[`wp_upload_media`](./tools/wp_upload_media.md) | media | Uploads a file to the WordPress media library. |
+[`wp_update_post`](./tools/wp_update_post.md) | post | Updates an existing WordPress post with comprehensive validation
+and change tracking. All parameters except ID are optional - only provided fields will be updated.
+
+**Usage Examples:** • Update title: `wp_update_post --id=123 --title="New Title"` • Update content:
+`wp_update_post --id=123 --content="<p>Updated content</p>"` • Change status:
+`wp_update_post --id=123 --status="publish"` • Update categories: `wp_update_post --id=123 --categories=[1,5,10]` • Set
+featured image: `wp_update_post --id=123 --featured_media=42` • Remove featured image:
+`wp_update_post --id=123 --featured_media=0` • Multiple updates:
+`wp_update_post --id=123 --title="New Title" --status="publish" --categories=[1,2]` | |
+[`wp_update_site_settings`](./tools/wp_update_site_settings.md) | site | Updates one or more general settings for a
+WordPress site. Requires administrator role (manage_options capability). | | [`wp_update_tag`](./tools/wp_update_tag.md)
+| taxonomy | Updates an existing tag. | | [`wp_update_user`](./tools/wp_update_user.md) | user | Updates an existing
+user. | | [`wp_upload_media`](./tools/wp_upload_media.md) | media | Uploads a file to the WordPress media library. |
 
 ## Authentication
 

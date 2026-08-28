@@ -6,9 +6,7 @@ Retrieves revisions for a specific page.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                              | Default | Examples     |
-| --------- | -------- | -------- | ---------------------------------------- | ------- | ------------ |
-| `id`      | `number` | ✅       | The ID of the page to get revisions for. | -       | `123`, `456` |
+_No parameters required._
 
 ## Examples
 
@@ -19,7 +17,7 @@ Simple example of using wp_get_page_revisions
 **Command:**
 
 ```bash
-wp_get_page_revisions --id="123"
+wp_get_page_revisions
 ```
 
 **Response:**
@@ -43,6 +41,31 @@ wp_get_page_revisions --id="123"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site page Usage
+
+Using wp_get_page_revisions with specific site targeting
+
+**Command:**
+
+```bash
+wp_get_page_revisions --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Example page",
+    "content": "Example content",
+    "status": "publish",
+    "date": "2024-01-01T00:00:00Z"
+  }
 }
 ```
 
