@@ -1,5 +1,4 @@
 import { WordPressClient } from "@/client/api.js";
-import { CachedWordPressClient } from "@/client/CachedWordPressClient.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
 import type { AuthConfig } from "@/types/client.js";
 import { preserveToolError } from "@/utils/error.js";
@@ -54,9 +53,9 @@ export class AuthTools {
       {
         name: "wp_switch_auth_method",
         description:
-          "Switches the authentication method for a site for the current session and verifies the new " +
-          "credentials with a live request. The switch is in-memory only — it does not persist across " +
-          "server restarts; update your configuration file for that.",
+          "Validates an alternative authentication method for a site without mutating the shared " +
+          "client used by other tool invocations. The check is in-memory only and does not persist; " +
+          "update your configuration file for durable changes.",
         inputSchema: {
           type: "object",
           properties: {
@@ -184,10 +183,9 @@ export class AuthTools {
 
   /**
    * Handles the 'wp_switch_auth_method' tool request.
-   * Replaces the client's in-memory auth config with the requested method's
-   * credentials, then verifies them with a live authenticate() call. On
-   * failure, the client's previous auth config is restored so a bad switch
-   * attempt doesn't leave the connection broken.
+   * Verifies the requested method's credentials with an isolated client so
+   * the shared per-site client used by other tool invocations is never
+   * mutated in place.
    * @param client - The WordPressClient instance for the target site.
    * @param params - The parameters for the tool request, including the new auth details.
    * @returns A promise that resolves to an MCPToolResponse.
@@ -202,45 +200,25 @@ export class AuthTools {
     };
 
     try {
-      // Validating and building the new config first means a bad request
-      // (missing fields for the chosen method) never touches the client at
-      // all — nothing to restore because nothing changed yet.
       const newAuth = this.buildAuthConfig(method, { username, password, jwt_secret, api_key });
-      const previousAuth = client.config.auth;
+      await this.verifyAuthConfig(client, newAuth);
 
-      client.setAuthConfig(newAuth);
-      try {
-        await client.authenticate();
-      } catch (authError) {
-        client.setAuthConfig(previousAuth);
-        // setAuthConfig() always clears the in-memory JWT token, so restoring
-        // a JWT config leaves the client silently unauthenticated until some
-        // later explicit authenticate() call. Reacquire the token now so the
-        // restored config is actually usable, not just nominally in place.
-        if (previousAuth.method === "jwt") {
-          await client.authenticate().catch(() => {});
-        }
-        throw authError;
-      }
-
-      // Cached GET responses (e.g. users/me) are keyed before auth headers
-      // are added, so entries fetched under the old credentials could still
-      // be served after switching identities unless cleared here.
-      if (client instanceof CachedWordPressClient) {
-        client.clearCache();
-      }
-
-      // api-key has no server-side verification step (WordPressClient.authenticate()
-      // just sets a header and returns true), so it can't honestly claim "verified"
-      // the way app-password/basic/jwt do via a real request — say so instead.
       const confirmation =
         method === "api-key"
-          ? `✅ Switched to '${method}' authentication. Note: the key is not verified with a live request; an invalid key will only surface as a 401/403 on later calls.`
-          : `✅ Switched to '${method}' authentication and verified it successfully.`;
+          ? `✅ Validated '${method}' authentication in isolation. Note: the key is not verified with a live request; an invalid key will only surface as a 401/403 on later calls. The shared site client was not changed.`
+          : `✅ Validated '${method}' authentication successfully in isolation. The shared site client was not changed.`;
       return { content: confirmation };
     } catch (_error) {
       preserveToolError("Failed to switch auth method", _error);
     }
+  }
+
+  private async verifyAuthConfig(client: WordPressClient, auth: AuthConfig): Promise<void> {
+    const verificationClient = new WordPressClient({
+      ...client.config,
+      auth: { ...auth },
+    });
+    await verificationClient.authenticate();
   }
 
   /**

@@ -1,7 +1,27 @@
-import { vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthTools } from "@/tools/auth.js";
-import { CachedWordPressClient } from "@/client/CachedWordPressClient.js";
 import { WordPressAPIError } from "@/types/client.js";
+
+const authenticateSpy = vi.fn();
+
+vi.mock("@/client/api.js", async () => {
+  const actual = await vi.importActual("@/client/api.js");
+
+  class MockVerificationWordPressClient {
+    constructor(config) {
+      this.config = config;
+    }
+
+    authenticate() {
+      return authenticateSpy(this.config);
+    }
+  }
+
+  return {
+    ...actual,
+    WordPressClient: MockVerificationWordPressClient,
+  };
+});
 
 describe("AuthTools", () => {
   let authTools;
@@ -12,20 +32,17 @@ describe("AuthTools", () => {
     mockClient = {
       ping: vi.fn(),
       getCurrentUser: vi.fn(),
-      authenticate: vi.fn(),
       isAuthenticated: true,
       config: {
         baseUrl: "https://example.com",
         auth: {
           method: "app-password",
         },
+        timeout: 30000,
+        maxRetries: 3,
       },
     };
-    // Mirrors the real client: setAuthConfig() replaces the auth object
-    // that client.config.auth subsequently reflects.
-    mockClient.setAuthConfig = vi.fn((auth) => {
-      mockClient.config.auth = auth;
-    });
+    authenticateSpy.mockReset();
 
     authTools = new AuthTools();
   });
@@ -68,7 +85,7 @@ describe("AuthTools", () => {
       expect(statusTool.description).toContain("Gets the current authentication status");
 
       const switchTool = tools.find((t) => t.name === "wp_switch_auth_method");
-      expect(switchTool.description).toContain("Switches the authentication method");
+      expect(switchTool.description).toContain("Validates an alternative authentication method");
     });
 
     it("should have proper parameter definitions for wp_switch_auth_method", () => {
@@ -328,7 +345,7 @@ describe("AuthTools", () => {
 
   describe("handleSwitchAuthMethod", () => {
     it("switches to app-password and verifies it", async () => {
-      mockClient.authenticate.mockResolvedValue(true);
+      authenticateSpy.mockResolvedValue(true);
 
       const result = await authTools.handleSwitchAuthMethod(mockClient, {
         method: "app-password",
@@ -336,18 +353,27 @@ describe("AuthTools", () => {
         password: "app-password-value",
       });
 
-      expect(mockClient.setAuthConfig).toHaveBeenCalledWith({
-        method: "app-password",
-        username: "user",
-        appPassword: "app-password-value",
+      expect(authenticateSpy).toHaveBeenCalledWith({
+        baseUrl: "https://example.com",
+        timeout: 30000,
+        maxRetries: 3,
+        auth: {
+          method: "app-password",
+          username: "user",
+          appPassword: "app-password-value",
+        },
       });
-      expect(mockClient.authenticate).toHaveBeenCalledTimes(1);
-      expect(result.content).toContain("✅");
-      expect(result.content).toContain("app-password");
+      expect(mockClient.config.auth).toEqual({
+        method: "app-password",
+      });
+      expect(result.content).toContain("Validated");
+      expect(result.content).toContain("shared site client was not changed");
     });
 
-    it("switches to basic auth and verifies it", async () => {
-      mockClient.authenticate.mockResolvedValue(true);
+    it("does not mutate the shared client auth config on successful validation", async () => {
+      const originalAuth = { method: "app-password", username: "orig", appPassword: "origpass" };
+      mockClient.config.auth = originalAuth;
+      authenticateSpy.mockResolvedValue(true);
 
       await authTools.handleSwitchAuthMethod(mockClient, {
         method: "basic",
@@ -355,15 +381,33 @@ describe("AuthTools", () => {
         password: "pass",
       });
 
-      expect(mockClient.setAuthConfig).toHaveBeenCalledWith({
+      expect(mockClient.config.auth).toBe(originalAuth);
+      expect(mockClient.config.auth.method).toBe("app-password");
+    });
+
+    it("switches to basic auth and verifies it", async () => {
+      authenticateSpy.mockResolvedValue(true);
+
+      await authTools.handleSwitchAuthMethod(mockClient, {
         method: "basic",
         username: "user",
         password: "pass",
       });
+
+      expect(authenticateSpy).toHaveBeenCalledWith({
+        baseUrl: "https://example.com",
+        timeout: 30000,
+        maxRetries: 3,
+        auth: {
+          method: "basic",
+          username: "user",
+          password: "pass",
+        },
+      });
     });
 
     it("switches to jwt and verifies it", async () => {
-      mockClient.authenticate.mockResolvedValue(true);
+      authenticateSpy.mockResolvedValue(true);
 
       await authTools.handleSwitchAuthMethod(mockClient, {
         method: "jwt",
@@ -372,25 +416,35 @@ describe("AuthTools", () => {
         jwt_secret: "secret123",
       });
 
-      expect(mockClient.setAuthConfig).toHaveBeenCalledWith({
-        method: "jwt",
-        username: "user",
-        password: "pass",
-        secret: "secret123",
+      expect(authenticateSpy).toHaveBeenCalledWith({
+        baseUrl: "https://example.com",
+        timeout: 30000,
+        maxRetries: 3,
+        auth: {
+          method: "jwt",
+          username: "user",
+          password: "pass",
+          secret: "secret123",
+        },
       });
     });
 
     it("switches to api-key but does not claim the key was verified (regression: api-key has no live verification step)", async () => {
-      mockClient.authenticate.mockResolvedValue(true);
+      authenticateSpy.mockResolvedValue(true);
 
       const result = await authTools.handleSwitchAuthMethod(mockClient, {
         method: "api-key",
         api_key: "key123",
       });
 
-      expect(mockClient.setAuthConfig).toHaveBeenCalledWith({
-        method: "api-key",
-        apiKey: "key123",
+      expect(authenticateSpy).toHaveBeenCalledWith({
+        baseUrl: "https://example.com",
+        timeout: 30000,
+        maxRetries: 3,
+        auth: {
+          method: "api-key",
+          apiKey: "key123",
+        },
       });
       expect(result.content).not.toContain("verified it successfully");
       expect(result.content).toContain("not verified with a live request");
@@ -401,111 +455,52 @@ describe("AuthTools", () => {
         "'jwt' requires 'username', 'password', and 'jwt_secret'.",
       );
 
-      expect(mockClient.setAuthConfig).not.toHaveBeenCalled();
-      expect(mockClient.authenticate).not.toHaveBeenCalled();
+      expect(authenticateSpy).not.toHaveBeenCalled();
     });
 
-    it("restores the previous auth config when the new credentials fail verification", async () => {
+    it("leaves the shared client auth config unchanged when the new credentials fail verification", async () => {
       const originalAuth = { method: "app-password", username: "orig", appPassword: "origpass" };
       mockClient.config.auth = originalAuth;
-      mockClient.authenticate.mockRejectedValue(new Error("401 Unauthorized"));
+      authenticateSpy.mockRejectedValue(new Error("401 Unauthorized"));
 
       await expect(
         authTools.handleSwitchAuthMethod(mockClient, { method: "basic", username: "user", password: "wrong" }),
       ).rejects.toThrow("Failed to switch auth method: 401 Unauthorized");
 
-      // First call switches to the new (bad) config, second call restores the original.
-      expect(mockClient.setAuthConfig).toHaveBeenCalledTimes(2);
-      expect(mockClient.setAuthConfig).toHaveBeenLastCalledWith(originalAuth);
+      expect(mockClient.config.auth).toBe(originalAuth);
     });
 
     it("rejects an empty method", async () => {
       await expect(authTools.handleSwitchAuthMethod(mockClient, {})).rejects.toThrow("Failed to switch auth method:");
+      expect(authenticateSpy).not.toHaveBeenCalled();
+    });
+
+    it("does not touch the shared client instance while validating alternate credentials", async () => {
+      authenticateSpy.mockResolvedValue(true);
+      mockClient.setAuthConfig = vi.fn();
+      mockClient.clearCache = vi.fn();
+
+      await authTools.handleSwitchAuthMethod(mockClient, {
+        method: "basic",
+        username: "user",
+        password: "pass",
+      });
+
       expect(mockClient.setAuthConfig).not.toHaveBeenCalled();
-    });
-
-    it("clears the cache after a successful switch so stale auth-sensitive GETs aren't served under the new identity", async () => {
-      mockClient.authenticate.mockResolvedValue(true);
-      mockClient.clearCache = vi.fn().mockReturnValue(0);
-      Object.setPrototypeOf(mockClient, CachedWordPressClient.prototype);
-
-      await authTools.handleSwitchAuthMethod(mockClient, {
-        method: "basic",
-        username: "user",
-        password: "pass",
-      });
-
-      expect(mockClient.clearCache).toHaveBeenCalledTimes(1);
-    });
-
-    it("does not touch the cache when the client isn't a CachedWordPressClient", async () => {
-      mockClient.authenticate.mockResolvedValue(true);
-      mockClient.clearCache = vi.fn();
-
-      await authTools.handleSwitchAuthMethod(mockClient, {
-        method: "basic",
-        username: "user",
-        password: "pass",
-      });
-
       expect(mockClient.clearCache).not.toHaveBeenCalled();
     });
 
-    it("does not clear the cache when the switch fails", async () => {
-      mockClient.clearCache = vi.fn();
-      Object.setPrototypeOf(mockClient, CachedWordPressClient.prototype);
-      mockClient.authenticate.mockRejectedValue(new Error("401 Unauthorized"));
-
-      await expect(
-        authTools.handleSwitchAuthMethod(mockClient, { method: "basic", username: "user", password: "wrong" }),
-      ).rejects.toThrow();
-
-      expect(mockClient.clearCache).not.toHaveBeenCalled();
-    });
-
-    it("re-authenticates to reacquire a JWT token when restoring after a failed switch (setAuthConfig always clears jwtToken)", async () => {
+    it("surfaces isolated verification failures without mutating the shared client", async () => {
       const originalAuth = { method: "jwt", username: "orig", password: "origpass", secret: "origsecret" };
       mockClient.config.auth = originalAuth;
-      mockClient.authenticate = vi
-        .fn()
-        .mockRejectedValueOnce(new Error("401 Unauthorized"))
-        .mockResolvedValueOnce(true);
+      authenticateSpy.mockRejectedValue(new Error("401 Unauthorized"));
 
       await expect(
         authTools.handleSwitchAuthMethod(mockClient, { method: "basic", username: "user", password: "wrong" }),
       ).rejects.toThrow("Failed to switch auth method: 401 Unauthorized");
 
-      // Second setAuthConfig call restores the JWT config; the extra authenticate()
-      // call re-derives a usable token instead of leaving the client silently logged out.
-      expect(mockClient.setAuthConfig).toHaveBeenLastCalledWith(originalAuth);
-      expect(mockClient.authenticate).toHaveBeenCalledTimes(2);
-    });
-
-    it("still surfaces the original switch error if reacquiring the JWT token on restore also fails", async () => {
-      const originalAuth = { method: "jwt", username: "orig", password: "origpass", secret: "origsecret" };
-      mockClient.config.auth = originalAuth;
-      mockClient.authenticate = vi
-        .fn()
-        .mockRejectedValueOnce(new Error("401 Unauthorized"))
-        .mockRejectedValueOnce(new Error("network down"));
-
-      await expect(
-        authTools.handleSwitchAuthMethod(mockClient, { method: "basic", username: "user", password: "wrong" }),
-      ).rejects.toThrow("Failed to switch auth method: 401 Unauthorized");
-
-      expect(mockClient.authenticate).toHaveBeenCalledTimes(2);
-    });
-
-    it("does not re-authenticate on restore when the previous method wasn't jwt", async () => {
-      const originalAuth = { method: "app-password", username: "orig", appPassword: "origpass" };
-      mockClient.config.auth = originalAuth;
-      mockClient.authenticate = vi.fn().mockRejectedValue(new Error("401 Unauthorized"));
-
-      await expect(
-        authTools.handleSwitchAuthMethod(mockClient, { method: "basic", username: "user", password: "wrong" }),
-      ).rejects.toThrow("Failed to switch auth method: 401 Unauthorized");
-
-      expect(mockClient.authenticate).toHaveBeenCalledTimes(1);
+      expect(mockClient.config.auth).toBe(originalAuth);
+      expect(authenticateSpy).toHaveBeenCalledTimes(1);
     });
   });
 
