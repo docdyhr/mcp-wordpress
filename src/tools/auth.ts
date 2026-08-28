@@ -61,7 +61,7 @@ export class AuthTools {
           properties: {
             method: {
               type: "string",
-              description: "The new authentication method to use.",
+              description: "The authentication method to validate.",
               enum: ["app-password", "jwt", "basic", "api-key"],
             },
             username: {
@@ -209,7 +209,7 @@ export class AuthTools {
           : `✅ Validated '${method}' authentication successfully in isolation. The shared site client was not changed.`;
       return { content: confirmation };
     } catch (_error) {
-      preserveToolError("Failed to switch auth method", _error);
+      preserveToolError("Failed to validate auth method", _error);
     }
   }
 

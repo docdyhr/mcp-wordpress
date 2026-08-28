@@ -465,13 +465,13 @@ describe("AuthTools", () => {
 
       await expect(
         authTools.handleSwitchAuthMethod(mockClient, { method: "basic", username: "user", password: "wrong" }),
-      ).rejects.toThrow("Failed to switch auth method: 401 Unauthorized");
+      ).rejects.toThrow("Failed to validate auth method: 401 Unauthorized");
 
       expect(mockClient.config.auth).toBe(originalAuth);
     });
 
     it("rejects an empty method", async () => {
-      await expect(authTools.handleSwitchAuthMethod(mockClient, {})).rejects.toThrow("Failed to switch auth method:");
+      await expect(authTools.handleSwitchAuthMethod(mockClient, {})).rejects.toThrow("Failed to validate auth method:");
       expect(authenticateSpy).not.toHaveBeenCalled();
     });
 
@@ -497,7 +497,7 @@ describe("AuthTools", () => {
 
       await expect(
         authTools.handleSwitchAuthMethod(mockClient, { method: "basic", username: "user", password: "wrong" }),
-      ).rejects.toThrow("Failed to switch auth method: 401 Unauthorized");
+      ).rejects.toThrow("Failed to validate auth method: 401 Unauthorized");
 
       expect(mockClient.config.auth).toBe(originalAuth);
       expect(authenticateSpy).toHaveBeenCalledTimes(1);
