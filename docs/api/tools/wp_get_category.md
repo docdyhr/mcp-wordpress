@@ -6,7 +6,9 @@ Retrieves a single category by its ID.
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type     | Required | Description                             | Default | Examples     |
+| --------- | -------- | -------- | --------------------------------------- | ------- | ------------ |
+| `id`      | `number` | ✅       | The unique identifier for the category. | -       | `123`, `456` |
 
 ## Examples
 
@@ -17,7 +19,7 @@ Simple example of using wp_get_category
 **Command:**
 
 ```bash
-wp_get_category
+wp_get_category --id="123"
 ```
 
 **Response:**
@@ -51,7 +53,7 @@ Using wp_get_category with specific site targeting
 **Command:**
 
 ```bash
-wp_get_category --site="site1"
+wp_get_category --site="site1" --id="123"
 ```
 
 **Response:**

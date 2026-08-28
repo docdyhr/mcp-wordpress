@@ -6,7 +6,11 @@ Lists pages from a WordPress site, with filters.
 
 ## Parameters
 
-_No parameters required._
+| Parameter  | Type     | Required | Description                                    | Default   | Examples                |
+| ---------- | -------- | -------- | ---------------------------------------------- | --------- | ----------------------- |
+| `per_page` | `number` | ❌       | Number of items to return per page (max 100).  | `10`      | `10`, `20`              |
+| `search`   | `string` | ❌       | Limit results to those matching a search term. | -         | `wordpress`, `tutorial` |
+| `status`   | `string` | ❌       | Filter by page status.                         | `publish` | `example`               |
 
 ## Examples
 
@@ -58,7 +62,39 @@ Using wp_list_pages with specific site targeting
 **Command:**
 
 ```bash
-wp_list_pages --site="site1"
+wp_list_pages --site="site1" --per_page="10"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "Example page 1",
+      "status": "publish"
+    },
+    {
+      "id": 2,
+      "title": "Example page 2",
+      "status": "draft"
+    }
+  ],
+  "total": 2,
+  "pages": 1
+}
+```
+
+### Advanced page Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_list_pages --per_page="10" --search="wordpress" --status="publish"
 ```
 
 **Response:**

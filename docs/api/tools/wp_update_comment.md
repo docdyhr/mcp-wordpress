@@ -6,7 +6,11 @@ Updates an existing comment.
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type     | Required | Description                          | Default   | Examples                                              |
+| --------- | -------- | -------- | ------------------------------------ | --------- | ----------------------------------------------------- |
+| `id`      | `number` | ✅       | The ID of the comment to update.     | -         | `123`, `456`                                          |
+| `content` | `string` | ❌       | The updated content for the comment. | -         | `<p>Post content here</p>`, `This is my post content` |
+| `status`  | `string` | ❌       | The new status for the comment.      | `publish` | `example`                                             |
 
 ## Examples
 
@@ -17,7 +21,7 @@ Simple example of using wp_update_comment
 **Command:**
 
 ```bash
-wp_update_comment
+wp_update_comment --id="123"
 ```
 
 **Response:**
@@ -49,7 +53,30 @@ Using wp_update_comment with specific site targeting
 **Command:**
 
 ```bash
-wp_update_comment --site="site1"
+wp_update_comment --site="site1" --id="123"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
+}
+```
+
+### Advanced comment Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_update_comment --id="123" --content="This is example content for the post." --status="publish"
 ```
 
 **Response:**

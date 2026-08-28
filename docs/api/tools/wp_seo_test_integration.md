@@ -6,7 +6,11 @@ Test SEO plugin integration and detect available SEO plugins on the WordPress si
 
 ## Parameters
 
-_No parameters required._
+| Parameter            | Type      | Required | Description                                      | Default | Examples              |
+| -------------------- | --------- | -------- | ------------------------------------------------ | ------- | --------------------- |
+| `checkPlugins`       | `boolean` | ❌       | Check which SEO plugins are installed and active | -       | `example`             |
+| `testMetadataAccess` | `boolean` | ❌       | Test ability to read/write SEO metadata          | -       | `example`             |
+| `site`               | `string`  | ❌       | Site identifier for multi-site setups            | -       | `site1`, `production` |
 
 ## Examples
 
@@ -46,7 +50,27 @@ Using wp_seo_test_integration with specific site targeting
 **Command:**
 
 ```bash
-wp_seo_test_integration --site="site1"
+wp_seo_test_integration --site="site1" --checkPlugins="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "wp_seo_test_integration executed successfully"
+}
+```
+
+### Advanced seo Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_seo_test_integration --checkPlugins="example_value" --testMetadataAccess="example_value" --site="site1"
 ```
 
 **Response:**

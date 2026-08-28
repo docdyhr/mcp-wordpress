@@ -6,7 +6,10 @@ Retrieves a single page by its ID, optionally including full content for editing
 
 ## Parameters
 
-_No parameters required._
+| Parameter         | Type      | Required | Description                                                                                                                         | Default | Examples     |
+| ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------- | ------------ |
+| `id`              | `number`  | ✅       | The unique identifier for the page.                                                                                                 | -       | `123`, `456` |
+| `include_content` | `boolean` | ❌       | If true, includes the full page content as raw source (context=edit), preserving Gutenberg block markup for editing. Default: false | -       | `example`    |
 
 ## Examples
 
@@ -17,7 +20,7 @@ Simple example of using wp_get_page
 **Command:**
 
 ```bash
-wp_get_page
+wp_get_page --id="123"
 ```
 
 **Response:**
@@ -51,7 +54,7 @@ Using wp_get_page with specific site targeting
 **Command:**
 
 ```bash
-wp_get_page --site="site1"
+wp_get_page --site="site1" --id="123"
 ```
 
 **Response:**

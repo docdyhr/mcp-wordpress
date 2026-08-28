@@ -192,6 +192,7 @@ ${tool.relatedTools.length > 0 ? this.generateRelatedTools(tool.relatedTools) : 
    * Generate category documentation
    */
   generateCategoryDocumentation(category: CategoryDocumentation): string {
+    const examples = this.buildCategoryExamples(category);
     return `# ${category.name} Tools
 
 ${category.description}
@@ -200,7 +201,7 @@ ${category.description}
 
 ## Available Tools
 
-${category.tools.map((tool) => `- [\`${tool}\`](./tools/${tool}.md)`).join("\n")}
+${category.tools.map((tool) => `- [\`${tool}\`](../tools/${tool}.md)`).join("\n")}
 
 ## Common Usage Patterns
 
@@ -208,27 +209,72 @@ ${category.usagePatterns.map((pattern) => `- ${pattern}`).join("\n")}
 
 ## Examples
 
-### Basic ${category.name} Workflow
-\`\`\`bash
-# List all ${category.name.toLowerCase()}
-wp_list_${category.name.toLowerCase()}
+${examples}`;
+  }
 
-# Get specific item
-wp_get_${category.name.toLowerCase().slice(0, -1)} --id=123
+  /**
+   * Flattens text for use inside a Markdown table cell.
+   *
+   * Tool descriptions are free-form and several embed newlines and bulleted "Usage
+   * Examples:" blocks. Interpolated raw, those newlines terminate the table row, so the
+   * generated index collapsed into unparseable prose partway down. Collapse whitespace,
+   * escape pipes, and clip to a length that stays readable in a table; the tool page
+   * linked from the row carries the full text.
+   */
+  private toTableCell(text: string, maxLength = 160): string {
+    const flattened = text.replace(/\s+/g, " ").replace(/\|/g, "\\|").trim();
+    return flattened.length > maxLength ? `${flattened.slice(0, maxLength - 1).trimEnd()}…` : flattened;
+  }
 
-# Create new item
-wp_create_${category.name.toLowerCase().slice(0, -1)} --title="Example"
-\`\`\`
+  /**
+   * Builds the Examples section of a category page from the tools the category actually
+   * registers.
+   *
+   * These examples used to be synthesised from the category name, with a naive
+   * `slice(0, -1)` standing in for de-pluralisation. That emitted commands that do not
+   * exist — the System category advertised `wp_list_system`, `wp_get_syste` and
+   * `wp_create_syste` while registering only `wp_check_version` — so anyone following
+   * a category page got unknown-tool errors. Naming a real tool or omitting the section
+   * is the only honest option.
+   */
+  private buildCategoryExamples(category: CategoryDocumentation): string {
+    const pick = (prefix: string): string | undefined => category.tools.find((tool) => tool.startsWith(prefix));
+
+    const listTool = pick("wp_list_");
+    const workflow = [
+      listTool ? [`# List all ${category.name.toLowerCase()}`, listTool] : null,
+      pick("wp_get_") ? [`# Get a single item`, `${pick("wp_get_")} --id=123`] : null,
+      pick("wp_create_") ? [`# Create a new item`, `${pick("wp_create_")} --title="Example"`] : null,
+    ].filter((entry): entry is string[] => entry !== null);
+
+    // A category with no list/get/create tool (e.g. System) gets its registered tools
+    // listed plainly rather than an invented workflow.
+    const body =
+      workflow.length > 0
+        ? workflow.map((lines) => lines.join("\n")).join("\n\n")
+        : category.tools.map((tool) => `# ${tool}\n${tool}`).join("\n\n");
+
+    const multiSite = listTool
+      ? `
 
 ### Multi-Site ${category.name} Management
+
 \`\`\`bash
-# Work with specific site
-wp_list_${category.name.toLowerCase()} --site=production
+# Work with a specific site
+${listTool} --site=production
 
 # Bulk operations
-wp_list_${category.name.toLowerCase()} --site=staging --limit=50
+${listTool} --site=staging --limit=50
 \`\`\`
-`;
+`
+      : "\n";
+
+    return `### Basic ${category.name} Workflow
+
+\`\`\`bash
+${body}
+\`\`\`
+${multiSite}`;
   }
 
   /**
@@ -416,7 +462,8 @@ ${relatedTools.map((tool) => `- [\`${tool}\`](./${tool}.md)`).join("\n")}
     const separator = "|----------|-------|-------------|";
 
     const rows = categories.map(
-      (cat) => `| [${cat.name}](./categories/${cat.name.toLowerCase()}.md) | ${cat.toolCount} | ${cat.description} |`,
+      (cat) =>
+        `| [${cat.name}](./categories/${cat.name.toLowerCase()}.md) | ${cat.toolCount} | ${this.toTableCell(cat.description)} |`,
     );
 
     return [headers, separator, ...rows].join("\n");
@@ -430,7 +477,8 @@ ${relatedTools.map((tool) => `- [\`${tool}\`](./${tool}.md)`).join("\n")}
     const separator = "|------|----------|-------------|";
 
     const rows = tools.map(
-      (tool) => `| [\`${tool.name}\`](./tools/${tool.name}.md) | ${tool.category} | ${tool.description} |`,
+      (tool) =>
+        `| [\`${tool.name}\`](./tools/${tool.name}.md) | ${tool.category} | ${this.toTableCell(tool.description)} |`,
     );
 
     return [headers, separator, ...rows].join("\n");

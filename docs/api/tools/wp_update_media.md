@@ -6,7 +6,13 @@ Updates the metadata of an existing media item.
 
 ## Parameters
 
-_No parameters required._
+| Parameter     | Type     | Required | Description                         | Default | Examples                      |
+| ------------- | -------- | -------- | ----------------------------------- | ------- | ----------------------------- |
+| `id`          | `number` | ✅       | The ID of the media item to update. | -       | `123`, `456`                  |
+| `title`       | `string` | ❌       | The new title for the media item.   | -       | `My Blog Post`, `Hello World` |
+| `alt_text`    | `string` | ❌       | The new alternative text.           | -       | `example`                     |
+| `caption`     | `string` | ❌       | The new caption.                    | -       | `example`                     |
+| `description` | `string` | ❌       | The new description.                | -       | `example`                     |
 
 ## Examples
 
@@ -17,7 +23,7 @@ Simple example of using wp_update_media
 **Command:**
 
 ```bash
-wp_update_media
+wp_update_media --id="123"
 ```
 
 **Response:**
@@ -49,7 +55,30 @@ Using wp_update_media with specific site targeting
 **Command:**
 
 ```bash
-wp_update_media --site="site1"
+wp_update_media --site="site1" --id="123"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
+}
+```
+
+### Advanced media Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_update_media --id="123" --title="Example Post Title" --alt_text="example_value" --caption="example_value" --description="example_value"
 ```
 
 **Response:**

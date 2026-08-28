@@ -6,12 +6,12 @@ Performance monitoring and analytics tools
 
 ## Available Tools
 
-- [`wp_performance_alerts`](./tools/wp_performance_alerts.md)
-- [`wp_performance_benchmark`](./tools/wp_performance_benchmark.md)
-- [`wp_performance_export`](./tools/wp_performance_export.md)
-- [`wp_performance_history`](./tools/wp_performance_history.md)
-- [`wp_performance_optimize`](./tools/wp_performance_optimize.md)
-- [`wp_performance_stats`](./tools/wp_performance_stats.md)
+- [`wp_performance_alerts`](../tools/wp_performance_alerts.md)
+- [`wp_performance_benchmark`](../tools/wp_performance_benchmark.md)
+- [`wp_performance_export`](../tools/wp_performance_export.md)
+- [`wp_performance_history`](../tools/wp_performance_history.md)
+- [`wp_performance_optimize`](../tools/wp_performance_optimize.md)
+- [`wp_performance_stats`](../tools/wp_performance_stats.md)
 
 ## Common Usage Patterns
 
@@ -25,22 +25,21 @@ Performance monitoring and analytics tools
 ### Basic performance Workflow
 
 ```bash
-# List all performance
-wp_list_performance
+# wp_performance_alerts
+wp_performance_alerts
 
-# Get specific item
-wp_get_performanc --id=123
+# wp_performance_benchmark
+wp_performance_benchmark
 
-# Create new item
-wp_create_performanc --title="Example"
-```
+# wp_performance_export
+wp_performance_export
 
-### Multi-Site performance Management
+# wp_performance_history
+wp_performance_history
 
-```bash
-# Work with specific site
-wp_list_performance --site=production
+# wp_performance_optimize
+wp_performance_optimize
 
-# Bulk operations
-wp_list_performance --site=staging --limit=50
+# wp_performance_stats
+wp_performance_stats
 ```

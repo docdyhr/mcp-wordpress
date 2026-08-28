@@ -6,7 +6,12 @@ Validate JSON-LD schema markup for correctness and compliance
 
 ## Parameters
 
-_No parameters required._
+| Parameter            | Type      | Required | Description                                       | Default | Examples              |
+| -------------------- | --------- | -------- | ------------------------------------------------- | ------- | --------------------- |
+| `schema`             | `object`  | ✅       | JSON-LD schema object to validate                 | -       | `example`             |
+| `schemaType`         | `string`  | ❌       | Expected schema type for validation               | -       | `example`             |
+| `useGoogleValidator` | `boolean` | ❌       | Use Google's Rich Results Test API for validation | -       | `example`             |
+| `site`               | `string`  | ❌       | Site identifier for multi-site setups             | -       | `site1`, `production` |
 
 ## Examples
 
@@ -17,7 +22,7 @@ Simple example of using wp_seo_validate_schema
 **Command:**
 
 ```bash
-wp_seo_validate_schema
+wp_seo_validate_schema --schema="example_value"
 ```
 
 **Response:**
@@ -46,7 +51,27 @@ Using wp_seo_validate_schema with specific site targeting
 **Command:**
 
 ```bash
-wp_seo_validate_schema --site="site1"
+wp_seo_validate_schema --site="site1" --schema="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "wp_seo_validate_schema executed successfully"
+}
+```
+
+### Advanced seo Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_seo_validate_schema --schema="example_value" --schemaType="example_value" --useGoogleValidator="example_value" --site="site1"
 ```
 
 **Response:**

@@ -6,7 +6,10 @@ Creates a new category.
 
 ## Parameters
 
-_No parameters required._
+| Parameter     | Type     | Required | Description                       | Default | Examples  |
+| ------------- | -------- | -------- | --------------------------------- | ------- | --------- |
+| `name`        | `string` | ✅       | The name of the category.         | -       | `example` |
+| `description` | `string` | ❌       | The description for the category. | -       | `example` |
 
 ## Examples
 
@@ -17,7 +20,7 @@ Simple example of using wp_create_category
 **Command:**
 
 ```bash
-wp_create_category
+wp_create_category --name="example_value"
 ```
 
 **Response:**
@@ -49,7 +52,7 @@ Using wp_create_category with specific site targeting
 **Command:**
 
 ```bash
-wp_create_category --site="site1"
+wp_create_category --site="site1" --name="example_value"
 ```
 
 **Response:**

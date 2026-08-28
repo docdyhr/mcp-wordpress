@@ -6,7 +6,10 @@ Creates a new application password for a user.
 
 ## Parameters
 
-_No parameters required._
+| Parameter  | Type     | Required | Description                                       | Default | Examples  |
+| ---------- | -------- | -------- | ------------------------------------------------- | ------- | --------- |
+| `user_id`  | `number` | ✅       | The ID of the user to create the password for.    | -       | `example` |
+| `app_name` | `string` | ✅       | The name of the application this password is for. | -       | `example` |
 
 ## Examples
 
@@ -17,7 +20,7 @@ Simple example of using wp_create_application_password
 **Command:**
 
 ```bash
-wp_create_application_password
+wp_create_application_password --user_id="example_value" --app_name="example_value"
 ```
 
 **Response:**
@@ -49,7 +52,7 @@ Using wp_create_application_password with specific site targeting
 **Command:**
 
 ```bash
-wp_create_application_password --site="site1"
+wp_create_application_password --site="site1" --user_id="example_value"
 ```
 
 **Response:**

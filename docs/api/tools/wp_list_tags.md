@@ -6,7 +6,9 @@ Lists tags from a WordPress site.
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type     | Required | Description                                    | Default | Examples                |
+| --------- | -------- | -------- | ---------------------------------------------- | ------- | ----------------------- |
+| `search`  | `string` | ❌       | Limit results to those matching a search term. | -       | `wordpress`, `tutorial` |
 
 ## Examples
 
@@ -58,7 +60,7 @@ Using wp_list_tags with specific site targeting
 **Command:**
 
 ```bash
-wp_list_tags --site="site1"
+wp_list_tags --site="site1" --search="wordpress"
 ```
 
 **Response:**

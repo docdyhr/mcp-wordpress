@@ -7,7 +7,9 @@ update is available.
 
 ## Parameters
 
-_No parameters required._
+| Parameter         | Type     | Required | Description                                     | Default | Examples  |
+| ----------------- | -------- | -------- | ----------------------------------------------- | ------- | --------- |
+| `current_version` | `string` | ❌       | Override current version for testing (optional) | -       | `example` |
 
 ## Examples
 
@@ -47,7 +49,7 @@ Using wp_check_version with specific site targeting
 **Command:**
 
 ```bash
-wp_check_version --site="site1"
+wp_check_version --site="site1" --current_version="example_value"
 ```
 
 **Response:**

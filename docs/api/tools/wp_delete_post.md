@@ -10,7 +10,10 @@ feedback on the deletion action.
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type      | Required | Description                                                                  | Default | Examples     |
+| --------- | --------- | -------- | ---------------------------------------------------------------------------- | ------- | ------------ |
+| `id`      | `number`  | ✅       | The ID of the post to delete.                                                | -       | `123`, `456` |
+| `force`   | `boolean` | ❌       | Whether to bypass trash and force deletion (default: false, moves to trash). | -       | `example`    |
 
 ## Examples
 
@@ -21,7 +24,7 @@ Simple example of using wp_delete_post
 **Command:**
 
 ```bash
-wp_delete_post
+wp_delete_post --id="123"
 ```
 
 **Response:**
@@ -52,7 +55,7 @@ Using wp_delete_post with specific site targeting
 **Command:**
 
 ```bash
-wp_delete_post --site="site1"
+wp_delete_post --site="site1" --id="123"
 ```
 
 **Response:**

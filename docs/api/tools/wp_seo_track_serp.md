@@ -6,7 +6,13 @@ Track search engine result page positions for target keywords
 
 ## Parameters
 
-_No parameters required._
+| Parameter      | Type     | Required | Description                                                      | Default | Examples              |
+| -------------- | -------- | -------- | ---------------------------------------------------------------- | ------- | --------------------- |
+| `keywords`     | `array`  | ✅       | Keywords to track positions for                                  | -       | `example`             |
+| `url`          | `string` | ❌       | Specific URL to track (optional, uses site home if not provided) | -       | `example`             |
+| `searchEngine` | `string` | ❌       | Search engine to track positions on                              | -       | `example`             |
+| `location`     | `string` | ❌       | Geographic location for localized results                        | -       | `example`             |
+| `site`         | `string` | ❌       | Site identifier for multi-site setups                            | -       | `site1`, `production` |
 
 ## Examples
 
@@ -17,7 +23,7 @@ Simple example of using wp_seo_track_serp
 **Command:**
 
 ```bash
-wp_seo_track_serp
+wp_seo_track_serp --keywords="example_value"
 ```
 
 **Response:**
@@ -46,7 +52,27 @@ Using wp_seo_track_serp with specific site targeting
 **Command:**
 
 ```bash
-wp_seo_track_serp --site="site1"
+wp_seo_track_serp --site="site1" --keywords="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "wp_seo_track_serp executed successfully"
+}
+```
+
+### Advanced seo Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_seo_track_serp --keywords="example_value" --url="example_value" --searchEngine="example_value" --location="example_value" --site="site1"
 ```
 
 **Response:**

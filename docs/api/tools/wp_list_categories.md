@@ -6,7 +6,10 @@ Lists categories from a WordPress site.
 
 ## Parameters
 
-_No parameters required._
+| Parameter    | Type      | Required | Description                                    | Default | Examples                |
+| ------------ | --------- | -------- | ---------------------------------------------- | ------- | ----------------------- |
+| `search`     | `string`  | ❌       | Limit results to those matching a search term. | -       | `wordpress`, `tutorial` |
+| `hide_empty` | `boolean` | ❌       | Whether to hide categories with no posts.      | -       | `example`               |
 
 ## Examples
 
@@ -58,7 +61,7 @@ Using wp_list_categories with specific site targeting
 **Command:**
 
 ```bash
-wp_list_categories --site="site1"
+wp_list_categories --site="site1" --search="wordpress"
 ```
 
 **Response:**

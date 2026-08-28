@@ -6,7 +6,9 @@ Retrieves revisions for a specific page.
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type     | Required | Description                              | Default | Examples     |
+| --------- | -------- | -------- | ---------------------------------------- | ------- | ------------ |
+| `id`      | `number` | ✅       | The ID of the page to get revisions for. | -       | `123`, `456` |
 
 ## Examples
 
@@ -17,7 +19,7 @@ Simple example of using wp_get_page_revisions
 **Command:**
 
 ```bash
-wp_get_page_revisions
+wp_get_page_revisions --id="123"
 ```
 
 **Response:**
@@ -51,7 +53,7 @@ Using wp_get_page_revisions with specific site targeting
 **Command:**
 
 ```bash
-wp_get_page_revisions --site="site1"
+wp_get_page_revisions --site="site1" --id="123"
 ```
 
 **Response:**

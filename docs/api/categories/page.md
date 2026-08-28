@@ -6,12 +6,12 @@ page management tools
 
 ## Available Tools
 
-- [`wp_create_page`](./tools/wp_create_page.md)
-- [`wp_delete_page`](./tools/wp_delete_page.md)
-- [`wp_get_page`](./tools/wp_get_page.md)
-- [`wp_get_page_revisions`](./tools/wp_get_page_revisions.md)
-- [`wp_list_pages`](./tools/wp_list_pages.md)
-- [`wp_update_page`](./tools/wp_update_page.md)
+- [`wp_create_page`](../tools/wp_create_page.md)
+- [`wp_delete_page`](../tools/wp_delete_page.md)
+- [`wp_get_page`](../tools/wp_get_page.md)
+- [`wp_get_page_revisions`](../tools/wp_get_page_revisions.md)
+- [`wp_list_pages`](../tools/wp_list_pages.md)
+- [`wp_update_page`](../tools/wp_update_page.md)
 
 ## Common Usage Patterns
 
@@ -25,21 +25,21 @@ page management tools
 
 ```bash
 # List all page
-wp_list_page
+wp_list_pages
 
-# Get specific item
-wp_get_pag --id=123
+# Get a single item
+wp_get_page --id=123
 
-# Create new item
-wp_create_pag --title="Example"
+# Create a new item
+wp_create_page --title="Example"
 ```
 
 ### Multi-Site page Management
 
 ```bash
-# Work with specific site
-wp_list_page --site=production
+# Work with a specific site
+wp_list_pages --site=production
 
 # Bulk operations
-wp_list_page --site=staging --limit=50
+wp_list_pages --site=staging --limit=50
 ```

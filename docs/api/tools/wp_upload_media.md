@@ -6,7 +6,14 @@ Uploads a file to the WordPress media library.
 
 ## Parameters
 
-_No parameters required._
+| Parameter     | Type     | Required | Description                                              | Default | Examples                      |
+| ------------- | -------- | -------- | -------------------------------------------------------- | ------- | ----------------------------- |
+| `file_path`   | `string` | ✅       | The local, absolute path to the file to upload.          | -       | `example`                     |
+| `title`       | `string` | ❌       | The title for the media item.                            | -       | `My Blog Post`, `Hello World` |
+| `alt_text`    | `string` | ❌       | Alternative text for the media item (for accessibility). | -       | `example`                     |
+| `caption`     | `string` | ❌       | The caption for the media item.                          | -       | `example`                     |
+| `description` | `string` | ❌       | The description for the media item.                      | -       | `example`                     |
+| `post`        | `number` | ❌       | The ID of a post to attach this media to.                | -       | `example`                     |
 
 ## Examples
 
@@ -17,7 +24,7 @@ Simple example of using wp_upload_media
 **Command:**
 
 ```bash
-wp_upload_media
+wp_upload_media --file_path="example_value"
 ```
 
 **Response:**
@@ -46,7 +53,27 @@ Using wp_upload_media with specific site targeting
 **Command:**
 
 ```bash
-wp_upload_media --site="site1"
+wp_upload_media --site="site1" --file_path="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "wp_upload_media executed successfully"
+}
+```
+
+### Advanced media Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_upload_media --file_path="example_value" --title="Example Post Title" --alt_text="example_value" --caption="example_value" --description="example_value" --post="example_value"
 ```
 
 **Response:**

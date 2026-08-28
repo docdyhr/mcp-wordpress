@@ -6,7 +6,10 @@ Deletes a page.
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type      | Required | Description                                                              | Default | Examples     |
+| --------- | --------- | -------- | ------------------------------------------------------------------------ | ------- | ------------ |
+| `id`      | `number`  | ✅       | The ID of the page to delete.                                            | -       | `123`, `456` |
+| `force`   | `boolean` | ❌       | If true, permanently delete. If false, move to trash. Defaults to false. | -       | `example`    |
 
 ## Examples
 
@@ -17,7 +20,7 @@ Simple example of using wp_delete_page
 **Command:**
 
 ```bash
-wp_delete_page
+wp_delete_page --id="123"
 ```
 
 **Response:**
@@ -48,7 +51,7 @@ Using wp_delete_page with specific site targeting
 **Command:**
 
 ```bash
-wp_delete_page --site="site1"
+wp_delete_page --site="site1" --id="123"
 ```
 
 **Response:**

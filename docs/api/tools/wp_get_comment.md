@@ -6,7 +6,9 @@ Retrieves a single comment by its ID.
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type     | Required | Description                            | Default | Examples     |
+| --------- | -------- | -------- | -------------------------------------- | ------- | ------------ |
+| `id`      | `number` | ✅       | The unique identifier for the comment. | -       | `123`, `456` |
 
 ## Examples
 
@@ -17,7 +19,7 @@ Simple example of using wp_get_comment
 **Command:**
 
 ```bash
-wp_get_comment
+wp_get_comment --id="123"
 ```
 
 **Response:**
@@ -51,7 +53,7 @@ Using wp_get_comment with specific site targeting
 **Command:**
 
 ```bash
-wp_get_comment --site="site1"
+wp_get_comment --site="site1" --id="123"
 ```
 
 **Response:**

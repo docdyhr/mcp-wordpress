@@ -14,7 +14,10 @@ limited metadata due to WordPress REST API restrictions.
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type     | Required | Description                                    | Default | Examples                |
+| --------- | -------- | -------- | ---------------------------------------------- | ------- | ----------------------- |
+| `search`  | `string` | ❌       | Limit results to those matching a search term. | -       | `wordpress`, `tutorial` |
+| `roles`   | `array`  | ❌       | Limit results to users with specific roles.    | -       | `example`               |
 
 ## Examples
 
@@ -66,7 +69,7 @@ Using wp_list_users with specific site targeting
 **Command:**
 
 ```bash
-wp_list_users --site="site1"
+wp_list_users --site="site1" --search="wordpress"
 ```
 
 **Response:**

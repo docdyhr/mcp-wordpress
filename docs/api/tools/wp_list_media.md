@@ -6,7 +6,11 @@ Lists media items from a WordPress site, with filters.
 
 ## Parameters
 
-_No parameters required._
+| Parameter    | Type     | Required | Description                                    | Default | Examples                |
+| ------------ | -------- | -------- | ---------------------------------------------- | ------- | ----------------------- |
+| `per_page`   | `number` | ❌       | Number of items to return per page (max 100).  | `10`    | `10`, `20`              |
+| `search`     | `string` | ❌       | Limit results to those matching a search term. | -       | `wordpress`, `tutorial` |
+| `media_type` | `string` | ❌       | Limit results to a specific media type.        | -       | `example`               |
 
 ## Examples
 
@@ -58,7 +62,39 @@ Using wp_list_media with specific site targeting
 **Command:**
 
 ```bash
-wp_list_media --site="site1"
+wp_list_media --site="site1" --per_page="10"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "Example media 1",
+      "status": "publish"
+    },
+    {
+      "id": 2,
+      "title": "Example media 2",
+      "status": "draft"
+    }
+  ],
+  "total": 2,
+  "pages": 1
+}
+```
+
+### Advanced media Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_list_media --per_page="10" --search="wordpress" --media_type="example_value"
 ```
 
 **Response:**

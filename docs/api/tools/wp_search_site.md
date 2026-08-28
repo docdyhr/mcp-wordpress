@@ -11,7 +11,10 @@ Search media: `wp_search_site --term="logo" --type="media"` • Find specific co
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type     | Required | Description                    | Default | Examples  |
+| --------- | -------- | -------- | ------------------------------ | ------- | --------- |
+| `term`    | `string` | ✅       | The search term to look for.   | -       | `example` |
+| `type`    | `string` | ❌       | The type of content to search. | -       | `example` |
 
 ## Examples
 
@@ -22,7 +25,7 @@ Simple example of using wp_search_site
 **Command:**
 
 ```bash
-wp_search_site
+wp_search_site --term="example_value"
 ```
 
 **Response:**
@@ -51,7 +54,7 @@ Using wp_search_site with specific site targeting
 **Command:**
 
 ```bash
-wp_search_site --site="site1"
+wp_search_site --site="site1" --term="example_value"
 ```
 
 **Response:**

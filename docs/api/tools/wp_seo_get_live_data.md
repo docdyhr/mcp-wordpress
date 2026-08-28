@@ -6,7 +6,12 @@ Retrieve live SEO data from WordPress including plugin-specific metadata and con
 
 ## Parameters
 
-_No parameters required._
+| Parameter                | Type      | Required | Description                           | Default | Examples              |
+| ------------------------ | --------- | -------- | ------------------------------------- | ------- | --------------------- |
+| `postId`                 | `number`  | ✅       | WordPress post ID to get SEO data for | -       | `example`             |
+| `includeAnalysis`        | `boolean` | ❌       | Include SEO analysis of the live data | -       | `example`             |
+| `includeRecommendations` | `boolean` | ❌       | Include optimization recommendations  | -       | `example`             |
+| `site`                   | `string`  | ❌       | Site identifier for multi-site setups | -       | `site1`, `production` |
 
 ## Examples
 
@@ -17,7 +22,7 @@ Simple example of using wp_seo_get_live_data
 **Command:**
 
 ```bash
-wp_seo_get_live_data
+wp_seo_get_live_data --postId="example_value"
 ```
 
 **Response:**
@@ -51,7 +56,32 @@ Using wp_seo_get_live_data with specific site targeting
 **Command:**
 
 ```bash
-wp_seo_get_live_data --site="site1"
+wp_seo_get_live_data --site="site1" --postId="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Example seo",
+    "content": "Example content",
+    "status": "publish",
+    "date": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+### Advanced seo Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_seo_get_live_data --postId="example_value" --includeAnalysis="example_value" --includeRecommendations="example_value" --site="site1"
 ```
 
 **Response:**

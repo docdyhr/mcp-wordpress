@@ -6,7 +6,13 @@ Generate SEO-optimized metadata including title tags, meta descriptions, OpenGra
 
 ## Parameters
 
-_No parameters required._
+| Parameter      | Type     | Required | Description                                                             | Default | Examples                      |
+| -------------- | -------- | -------- | ----------------------------------------------------------------------- | ------- | ----------------------------- |
+| `postId`       | `number` | ✅       | WordPress post ID                                                       | -       | `example`                     |
+| `title`        | `string` | ❌       | Custom title to optimize (optional, uses post title if not provided)    | -       | `My Blog Post`, `Hello World` |
+| `description`  | `string` | ❌       | Custom description to optimize (optional, uses excerpt if not provided) | -       | `example`                     |
+| `focusKeyword` | `string` | ❌       | Primary keyword to include in metadata                                  | -       | `example`                     |
+| `site`         | `string` | ❌       | Site identifier for multi-site setups                                   | -       | `site1`, `production`         |
 
 ## Examples
 
@@ -17,7 +23,7 @@ Simple example of using wp_seo_generate_metadata
 **Command:**
 
 ```bash
-wp_seo_generate_metadata
+wp_seo_generate_metadata --postId="example_value"
 ```
 
 **Response:**
@@ -46,7 +52,27 @@ Using wp_seo_generate_metadata with specific site targeting
 **Command:**
 
 ```bash
-wp_seo_generate_metadata --site="site1"
+wp_seo_generate_metadata --site="site1" --postId="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "wp_seo_generate_metadata executed successfully"
+}
+```
+
+### Advanced seo Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_seo_generate_metadata --postId="example_value" --title="Example Post Title" --description="example_value" --focusKeyword="example_value" --site="site1"
 ```
 
 **Response:**

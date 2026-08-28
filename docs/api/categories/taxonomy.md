@@ -6,16 +6,16 @@ taxonomy management tools
 
 ## Available Tools
 
-- [`wp_create_category`](./tools/wp_create_category.md)
-- [`wp_create_tag`](./tools/wp_create_tag.md)
-- [`wp_delete_category`](./tools/wp_delete_category.md)
-- [`wp_delete_tag`](./tools/wp_delete_tag.md)
-- [`wp_get_category`](./tools/wp_get_category.md)
-- [`wp_get_tag`](./tools/wp_get_tag.md)
-- [`wp_list_categories`](./tools/wp_list_categories.md)
-- [`wp_list_tags`](./tools/wp_list_tags.md)
-- [`wp_update_category`](./tools/wp_update_category.md)
-- [`wp_update_tag`](./tools/wp_update_tag.md)
+- [`wp_create_category`](../tools/wp_create_category.md)
+- [`wp_create_tag`](../tools/wp_create_tag.md)
+- [`wp_delete_category`](../tools/wp_delete_category.md)
+- [`wp_delete_tag`](../tools/wp_delete_tag.md)
+- [`wp_get_category`](../tools/wp_get_category.md)
+- [`wp_get_tag`](../tools/wp_get_tag.md)
+- [`wp_list_categories`](../tools/wp_list_categories.md)
+- [`wp_list_tags`](../tools/wp_list_tags.md)
+- [`wp_update_category`](../tools/wp_update_category.md)
+- [`wp_update_tag`](../tools/wp_update_tag.md)
 
 ## Common Usage Patterns
 
@@ -29,21 +29,21 @@ taxonomy management tools
 
 ```bash
 # List all taxonomy
-wp_list_taxonomy
+wp_list_categories
 
-# Get specific item
-wp_get_taxonom --id=123
+# Get a single item
+wp_get_category --id=123
 
-# Create new item
-wp_create_taxonom --title="Example"
+# Create a new item
+wp_create_category --title="Example"
 ```
 
 ### Multi-Site taxonomy Management
 
 ```bash
-# Work with specific site
-wp_list_taxonomy --site=production
+# Work with a specific site
+wp_list_categories --site=production
 
 # Bulk operations
-wp_list_taxonomy --site=staging --limit=50
+wp_list_categories --site=staging --limit=50
 ```

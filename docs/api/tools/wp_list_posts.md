@@ -12,7 +12,13 @@ status: `wp_list_posts --status="draft"` • Category filtering: `wp_list_posts 
 
 ## Parameters
 
-_No parameters required._
+| Parameter    | Type     | Required | Description                                      | Default   | Examples                |
+| ------------ | -------- | -------- | ------------------------------------------------ | --------- | ----------------------- |
+| `per_page`   | `number` | ❌       | Number of items to return per page (max 100).    | `10`      | `10`, `20`              |
+| `search`     | `string` | ❌       | Limit results to those matching a search term.   | -         | `wordpress`, `tutorial` |
+| `status`     | `string` | ❌       | Filter by post status.                           | `publish` | `example`               |
+| `categories` | `array`  | ❌       | Limit results to posts in specific category IDs. | -         | `example`               |
+| `tags`       | `array`  | ❌       | Limit results to posts with specific tag IDs.    | -         | `example`               |
 
 ## Examples
 
@@ -64,7 +70,39 @@ Using wp_list_posts with specific site targeting
 **Command:**
 
 ```bash
-wp_list_posts --site="site1"
+wp_list_posts --site="site1" --per_page="10"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "Example post 1",
+      "status": "publish"
+    },
+    {
+      "id": 2,
+      "title": "Example post 2",
+      "status": "draft"
+    }
+  ],
+  "total": 2,
+  "pages": 1
+}
+```
+
+### Advanced post Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_list_posts --per_page="10" --search="wordpress" --status="publish" --categories="example_value" --tags="example_value"
 ```
 
 **Response:**

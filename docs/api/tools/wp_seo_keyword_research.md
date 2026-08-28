@@ -6,7 +6,13 @@ Research keywords and get suggestions based on topic and competition analysis
 
 ## Parameters
 
-_No parameters required._
+| Parameter           | Type      | Required | Description                                       | Default | Examples              |
+| ------------------- | --------- | -------- | ------------------------------------------------- | ------- | --------------------- |
+| `seedKeyword`       | `string`  | ✅       | Seed keyword or topic to research                 | -       | `example`             |
+| `includeVariations` | `boolean` | ❌       | Include keyword variations and long-tail keywords | -       | `example`             |
+| `includeQuestions`  | `boolean` | ❌       | Include question-based keywords                   | -       | `example`             |
+| `maxResults`        | `number`  | ❌       | Maximum number of keyword suggestions             | -       | `example`             |
+| `site`              | `string`  | ❌       | Site identifier for multi-site setups             | -       | `site1`, `production` |
 
 ## Examples
 
@@ -17,7 +23,7 @@ Simple example of using wp_seo_keyword_research
 **Command:**
 
 ```bash
-wp_seo_keyword_research
+wp_seo_keyword_research --seedKeyword="example_value"
 ```
 
 **Response:**
@@ -46,7 +52,27 @@ Using wp_seo_keyword_research with specific site targeting
 **Command:**
 
 ```bash
-wp_seo_keyword_research --site="site1"
+wp_seo_keyword_research --site="site1" --seedKeyword="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "wp_seo_keyword_research executed successfully"
+}
+```
+
+### Advanced seo Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_seo_keyword_research --seedKeyword="example_value" --includeVariations="example_value" --includeQuestions="example_value" --maxResults="example_value" --site="site1"
 ```
 
 **Response:**

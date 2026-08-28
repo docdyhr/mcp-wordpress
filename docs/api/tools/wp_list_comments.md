@@ -6,7 +6,10 @@ Lists comments from a WordPress site, with filters.
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type     | Required | Description                                               | Default   | Examples  |
+| --------- | -------- | -------- | --------------------------------------------------------- | --------- | --------- |
+| `post`    | `number` | ❌       | Limit results to comments assigned to a specific post ID. | -         | `example` |
+| `status`  | `string` | ❌       | Filter by comment status.                                 | `publish` | `example` |
 
 ## Examples
 
@@ -58,7 +61,7 @@ Using wp_list_comments with specific site targeting
 **Command:**
 
 ```bash
-wp_list_comments --site="site1"
+wp_list_comments --site="site1" --post="example_value"
 ```
 
 **Response:**

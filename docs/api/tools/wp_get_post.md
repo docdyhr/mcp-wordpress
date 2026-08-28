@@ -10,7 +10,10 @@ Optionally includes full HTML content for editing.
 
 ## Parameters
 
-_No parameters required._
+| Parameter         | Type      | Required | Description                                                                                                                        | Default | Examples     |
+| ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------- | ------------ |
+| `id`              | `number`  | ✅       | The unique identifier for the post.                                                                                                | -       | `123`, `456` |
+| `include_content` | `boolean` | ❌       | If true, includes the full post content as raw source (context=edit), preserving Gutenberg block markup for editing. Default: true | -       | `example`    |
 
 ## Examples
 
@@ -21,7 +24,7 @@ Simple example of using wp_get_post
 **Command:**
 
 ```bash
-wp_get_post
+wp_get_post --id="123"
 ```
 
 **Response:**
@@ -55,7 +58,7 @@ Using wp_get_post with specific site targeting
 **Command:**
 
 ```bash
-wp_get_post --site="site1"
+wp_get_post --site="site1" --id="123"
 ```
 
 **Response:**

@@ -6,7 +6,10 @@ Updates an existing tag.
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type     | Required | Description                  | Default | Examples     |
+| --------- | -------- | -------- | ---------------------------- | ------- | ------------ |
+| `id`      | `number` | ✅       | The ID of the tag to update. | -       | `123`, `456` |
+| `name`    | `string` | ❌       | The new name for the tag.    | -       | `example`    |
 
 ## Examples
 
@@ -17,7 +20,7 @@ Simple example of using wp_update_tag
 **Command:**
 
 ```bash
-wp_update_tag
+wp_update_tag --id="123"
 ```
 
 **Response:**
@@ -49,7 +52,7 @@ Using wp_update_tag with specific site targeting
 **Command:**
 
 ```bash
-wp_update_tag --site="site1"
+wp_update_tag --site="site1" --id="123"
 ```
 
 **Response:**

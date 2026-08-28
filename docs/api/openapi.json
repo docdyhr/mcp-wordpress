@@ -27,7 +27,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the comment to approve."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -68,7 +76,12 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "pattern": {
+                    "type": "string",
+                    "description": "Optional pattern to clear specific cache entries (e.g., \"posts\", \"categories\")."
+                  }
+                }
               }
             }
           }
@@ -232,7 +245,12 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "current_version": {
+                    "type": "string",
+                    "description": "Override current version for testing (optional)"
+                  }
+                }
               }
             }
           }
@@ -273,7 +291,20 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "user_id": {
+                    "type": "number",
+                    "description": "The ID of the user to create the password for."
+                  },
+                  "app_name": {
+                    "type": "string",
+                    "description": "The name of the application this password is for."
+                  }
+                },
+                "required": [
+                  "user_id",
+                  "app_name"
+                ]
               }
             }
           }
@@ -314,7 +345,19 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the category."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "The description for the category."
+                  }
+                },
+                "required": [
+                  "name"
+                ]
               }
             }
           }
@@ -355,7 +398,28 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "post": {
+                    "type": "number",
+                    "description": "The ID of the post to comment on."
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "The content of the comment."
+                  },
+                  "author_name": {
+                    "type": "string",
+                    "description": "The name of the comment author."
+                  },
+                  "author_email": {
+                    "type": "string",
+                    "description": "The email of the comment author."
+                  }
+                },
+                "required": [
+                  "post",
+                  "content"
+                ]
               }
             }
           }
@@ -396,7 +460,31 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "The title for the page."
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "The content for the page, in HTML format."
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "The publishing status for the page.",
+                    "enum": [
+                      "publish",
+                      "draft",
+                      "private",
+                      "pending",
+                      "future"
+                    ],
+                    "default": "publish"
+                  }
+                },
+                "required": [
+                  "title"
+                ]
               }
             }
           }
@@ -437,7 +525,51 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "The title for the post."
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "The content for the post, in HTML format."
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "The publishing status for the post.",
+                    "enum": [
+                      "publish",
+                      "draft",
+                      "private",
+                      "pending",
+                      "future"
+                    ],
+                    "default": "publish"
+                  },
+                  "excerpt": {
+                    "type": "string",
+                    "description": "The excerpt for the post."
+                  },
+                  "categories": {
+                    "type": "array",
+                    "description": "An array of category IDs to assign to the post."
+                  },
+                  "tags": {
+                    "type": "array",
+                    "description": "An array of tag IDs to assign to the post."
+                  },
+                  "featured_media": {
+                    "type": "number",
+                    "description": "The ID of the featured media (image). Use 0 to remove featured media."
+                  },
+                  "date": {
+                    "type": "string",
+                    "description": "The date the post was published, in the site's timezone (ISO 8601 format)."
+                  }
+                },
+                "required": [
+                  "title"
+                ]
               }
             }
           }
@@ -478,7 +610,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the tag."
+                  }
+                },
+                "required": [
+                  "name"
+                ]
               }
             }
           }
@@ -519,7 +659,29 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "The username for the new user."
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "The email address for the new user."
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "The password for the new user."
+                  },
+                  "roles": {
+                    "type": "array",
+                    "description": "An array of roles to assign to the user."
+                  }
+                },
+                "required": [
+                  "username",
+                  "email",
+                  "password"
+                ]
               }
             }
           }
@@ -560,7 +722,20 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "user_id": {
+                    "type": "number",
+                    "description": "The ID of the user who owns the password."
+                  },
+                  "uuid": {
+                    "type": "string",
+                    "description": "The UUID of the application password to revoke."
+                  }
+                },
+                "required": [
+                  "user_id",
+                  "uuid"
+                ]
               }
             }
           }
@@ -601,7 +776,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the category to delete."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -642,7 +825,19 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the comment to delete."
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "description": "If true, the comment will be permanently deleted. Defaults to false (moved to trash)."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -683,7 +878,19 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the media item to delete."
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "description": "If true, permanently delete. If false, move to trash. Defaults to false."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -724,7 +931,19 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the page to delete."
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "description": "If true, permanently delete. If false, move to trash. Defaults to false."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -765,7 +984,19 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the post to delete."
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "description": "Whether to bypass trash and force deletion (default: false, moves to trash)."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -806,7 +1037,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the tag to delete."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -847,7 +1086,19 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the user to delete."
+                  },
+                  "reassign": {
+                    "type": "number",
+                    "description": "The ID of a user to reassign the deleted user's content to."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -888,7 +1139,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "user_id": {
+                    "type": "number",
+                    "description": "The ID of the user to get application passwords for."
+                  }
+                },
+                "required": [
+                  "user_id"
+                ]
               }
             }
           }
@@ -970,7 +1229,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The unique identifier for the category."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -1011,7 +1278,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The unique identifier for the comment."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -1093,7 +1368,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The unique identifier for the media item."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -1134,7 +1417,19 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The unique identifier for the page."
+                  },
+                  "include_content": {
+                    "type": "boolean",
+                    "description": "If true, includes the full page content as raw source (context=edit), preserving Gutenberg block markup for editing. Default: false"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -1175,7 +1470,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the page to get revisions for."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -1216,7 +1519,19 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The unique identifier for the post."
+                  },
+                  "include_content": {
+                    "type": "boolean",
+                    "description": "If true, includes the full post content as raw source (context=edit), preserving Gutenberg block markup for editing. Default: true"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -1257,7 +1572,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the post to get revisions for."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -1339,7 +1662,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The unique identifier for the tag."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -1380,7 +1711,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The unique identifier for the user."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -1421,7 +1760,16 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "search": {
+                    "type": "string",
+                    "description": "Limit results to those matching a search term."
+                  },
+                  "hide_empty": {
+                    "type": "boolean",
+                    "description": "Whether to hide categories with no posts."
+                  }
+                }
               }
             }
           }
@@ -1462,7 +1810,24 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "post": {
+                    "type": "number",
+                    "description": "Limit results to comments assigned to a specific post ID."
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "Filter by comment status.",
+                    "enum": [
+                      "publish",
+                      "draft",
+                      "private",
+                      "pending",
+                      "future"
+                    ],
+                    "default": "publish"
+                  }
+                }
               }
             }
           }
@@ -1503,7 +1868,21 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "per_page": {
+                    "type": "number",
+                    "description": "Number of items to return per page (max 100).",
+                    "default": 10
+                  },
+                  "search": {
+                    "type": "string",
+                    "description": "Limit results to those matching a search term."
+                  },
+                  "media_type": {
+                    "type": "string",
+                    "description": "Limit results to a specific media type."
+                  }
+                }
               }
             }
           }
@@ -1544,7 +1923,29 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "per_page": {
+                    "type": "number",
+                    "description": "Number of items to return per page (max 100).",
+                    "default": 10
+                  },
+                  "search": {
+                    "type": "string",
+                    "description": "Limit results to those matching a search term."
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "Filter by page status.",
+                    "enum": [
+                      "publish",
+                      "draft",
+                      "private",
+                      "pending",
+                      "future"
+                    ],
+                    "default": "publish"
+                  }
+                }
               }
             }
           }
@@ -1585,7 +1986,37 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "per_page": {
+                    "type": "number",
+                    "description": "Number of items to return per page (max 100).",
+                    "default": 10
+                  },
+                  "search": {
+                    "type": "string",
+                    "description": "Limit results to those matching a search term."
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "Filter by post status.",
+                    "enum": [
+                      "publish",
+                      "draft",
+                      "private",
+                      "pending",
+                      "future"
+                    ],
+                    "default": "publish"
+                  },
+                  "categories": {
+                    "type": "array",
+                    "description": "Limit results to posts in specific category IDs."
+                  },
+                  "tags": {
+                    "type": "array",
+                    "description": "Limit results to posts with specific tag IDs."
+                  }
+                }
               }
             }
           }
@@ -1626,7 +2057,12 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "search": {
+                    "type": "string",
+                    "description": "Limit results to those matching a search term."
+                  }
+                }
               }
             }
           }
@@ -1667,7 +2103,16 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "search": {
+                    "type": "string",
+                    "description": "Limit results to those matching a search term."
+                  },
+                  "roles": {
+                    "type": "array",
+                    "description": "Limit results to users with specific roles."
+                  }
+                }
               }
             }
           }
@@ -2120,7 +2565,19 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "term": {
+                    "type": "string",
+                    "description": "The search term to look for."
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "The type of content to search."
+                  }
+                },
+                "required": [
+                  "term"
+                ]
               }
             }
           }
@@ -2161,7 +2618,27 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "postId": {
+                    "type": "number",
+                    "description": "WordPress post ID to analyze"
+                  },
+                  "analysisType": {
+                    "type": "string",
+                    "description": "Type of SEO analysis to perform (default: full)"
+                  },
+                  "focusKeywords": {
+                    "type": "array",
+                    "description": "Primary keywords to analyze for optimization"
+                  },
+                  "site": {
+                    "type": "string",
+                    "description": "Site identifier for multi-site setups"
+                  }
+                },
+                "required": [
+                  "postId"
+                ]
               }
             }
           }
@@ -2202,7 +2679,28 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "postIds": {
+                    "type": "array",
+                    "description": "Array of WordPress post IDs to update"
+                  },
+                  "updates": {
+                    "type": "object",
+                    "description": "Metadata fields to update for all posts"
+                  },
+                  "dryRun": {
+                    "type": "boolean",
+                    "description": "Perform a dry run without making actual changes"
+                  },
+                  "site": {
+                    "type": "string",
+                    "description": "Site identifier for multi-site setups"
+                  }
+                },
+                "required": [
+                  "postIds",
+                  "updates"
+                ]
               }
             }
           }
@@ -2243,7 +2741,31 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "postId": {
+                    "type": "number",
+                    "description": "WordPress post ID"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Custom title to optimize (optional, uses post title if not provided)"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Custom description to optimize (optional, uses excerpt if not provided)"
+                  },
+                  "focusKeyword": {
+                    "type": "string",
+                    "description": "Primary keyword to include in metadata"
+                  },
+                  "site": {
+                    "type": "string",
+                    "description": "Site identifier for multi-site setups"
+                  }
+                },
+                "required": [
+                  "postId"
+                ]
               }
             }
           }
@@ -2284,7 +2806,28 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "postId": {
+                    "type": "number",
+                    "description": "WordPress post ID"
+                  },
+                  "schemaType": {
+                    "type": "string",
+                    "description": "Type of schema.org structured data to generate"
+                  },
+                  "customData": {
+                    "type": "object",
+                    "description": "Additional custom data for the schema"
+                  },
+                  "site": {
+                    "type": "string",
+                    "description": "Site identifier for multi-site setups"
+                  }
+                },
+                "required": [
+                  "postId",
+                  "schemaType"
+                ]
               }
             }
           }
@@ -2325,7 +2868,27 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "postId": {
+                    "type": "number",
+                    "description": "WordPress post ID to get SEO data for"
+                  },
+                  "includeAnalysis": {
+                    "type": "boolean",
+                    "description": "Include SEO analysis of the live data"
+                  },
+                  "includeRecommendations": {
+                    "type": "boolean",
+                    "description": "Include optimization recommendations"
+                  },
+                  "site": {
+                    "type": "string",
+                    "description": "Site identifier for multi-site setups"
+                  }
+                },
+                "required": [
+                  "postId"
+                ]
               }
             }
           }
@@ -2366,7 +2929,31 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "seedKeyword": {
+                    "type": "string",
+                    "description": "Seed keyword or topic to research"
+                  },
+                  "includeVariations": {
+                    "type": "boolean",
+                    "description": "Include keyword variations and long-tail keywords"
+                  },
+                  "includeQuestions": {
+                    "type": "boolean",
+                    "description": "Include question-based keywords"
+                  },
+                  "maxResults": {
+                    "type": "number",
+                    "description": "Maximum number of keyword suggestions"
+                  },
+                  "site": {
+                    "type": "string",
+                    "description": "Site identifier for multi-site setups"
+                  }
+                },
+                "required": [
+                  "seedKeyword"
+                ]
               }
             }
           }
@@ -2407,7 +2994,28 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "auditType": {
+                    "type": "string",
+                    "description": "Type of audit to perform (default: full)"
+                  },
+                  "maxPages": {
+                    "type": "number",
+                    "description": "Maximum number of pages to audit (default: 100)"
+                  },
+                  "includeExternalLinks": {
+                    "type": "boolean",
+                    "description": "Include external link validation in audit"
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "description": "Force refresh, bypassing cached audit results"
+                  },
+                  "site": {
+                    "type": "string",
+                    "description": "Site identifier for multi-site setups"
+                  }
+                }
               }
             }
           }
@@ -2448,7 +3056,27 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "postId": {
+                    "type": "number",
+                    "description": "WordPress post ID to analyze for linking opportunities"
+                  },
+                  "maxSuggestions": {
+                    "type": "number",
+                    "description": "Maximum number of link suggestions (default: 5)"
+                  },
+                  "minimumRelevance": {
+                    "type": "number",
+                    "description": "Minimum relevance score (0-100) for suggestions"
+                  },
+                  "site": {
+                    "type": "string",
+                    "description": "Site identifier for multi-site setups"
+                  }
+                },
+                "required": [
+                  "postId"
+                ]
               }
             }
           }
@@ -2489,7 +3117,20 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "checkPlugins": {
+                    "type": "boolean",
+                    "description": "Check which SEO plugins are installed and active"
+                  },
+                  "testMetadataAccess": {
+                    "type": "boolean",
+                    "description": "Test ability to read/write SEO metadata"
+                  },
+                  "site": {
+                    "type": "string",
+                    "description": "Site identifier for multi-site setups"
+                  }
+                }
               }
             }
           }
@@ -2530,7 +3171,31 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "keywords": {
+                    "type": "array",
+                    "description": "Keywords to track positions for"
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "Specific URL to track (optional, uses site home if not provided)"
+                  },
+                  "searchEngine": {
+                    "type": "string",
+                    "description": "Search engine to track positions on"
+                  },
+                  "location": {
+                    "type": "string",
+                    "description": "Geographic location for localized results"
+                  },
+                  "site": {
+                    "type": "string",
+                    "description": "Site identifier for multi-site setups"
+                  }
+                },
+                "required": [
+                  "keywords"
+                ]
               }
             }
           }
@@ -2571,7 +3236,27 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "schema": {
+                    "type": "object",
+                    "description": "JSON-LD schema object to validate"
+                  },
+                  "schemaType": {
+                    "type": "string",
+                    "description": "Expected schema type for validation"
+                  },
+                  "useGoogleValidator": {
+                    "type": "boolean",
+                    "description": "Use Google's Rich Results Test API for validation"
+                  },
+                  "site": {
+                    "type": "string",
+                    "description": "Site identifier for multi-site setups"
+                  }
+                },
+                "required": [
+                  "schema"
+                ]
               }
             }
           }
@@ -2612,7 +3297,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the comment to mark as spam."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -2653,7 +3346,31 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "description": "The new authentication method to use."
+                  },
+                  "username": {
+                    "type": "string",
+                    "description": "Required for 'app-password', 'basic', and 'jwt'."
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "The Application Password for 'app-password', or the account password for 'basic'/'jwt'."
+                  },
+                  "jwt_secret": {
+                    "type": "string",
+                    "description": "Required for 'jwt' — the WordPress JWT Authentication plugin's secret key."
+                  },
+                  "api_key": {
+                    "type": "string",
+                    "description": "Required for 'api-key'."
+                  }
+                },
+                "required": [
+                  "method"
+                ]
               }
             }
           }
@@ -2735,7 +3452,19 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the category to update."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "The new name for the category."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -2776,7 +3505,31 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the comment to update."
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "The updated content for the comment."
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "The new status for the comment.",
+                    "enum": [
+                      "publish",
+                      "draft",
+                      "private",
+                      "pending",
+                      "future"
+                    ],
+                    "default": "publish"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -2817,7 +3570,31 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the media item to update."
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "The new title for the media item."
+                  },
+                  "alt_text": {
+                    "type": "string",
+                    "description": "The new alternative text."
+                  },
+                  "caption": {
+                    "type": "string",
+                    "description": "The new caption."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "The new description."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -2858,7 +3635,35 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the page to update."
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "The new title for the page."
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "The new content for the page, in HTML format."
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "The new status for the page.",
+                    "enum": [
+                      "publish",
+                      "draft",
+                      "private",
+                      "pending",
+                      "future"
+                    ],
+                    "default": "publish"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -2899,7 +3704,55 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the post to update."
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "The new title for the post."
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "The new content for the post, in HTML format."
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "The new publishing status for the post.",
+                    "enum": [
+                      "publish",
+                      "draft",
+                      "private",
+                      "pending",
+                      "future"
+                    ],
+                    "default": "publish"
+                  },
+                  "excerpt": {
+                    "type": "string",
+                    "description": "The new excerpt for the post."
+                  },
+                  "categories": {
+                    "type": "array",
+                    "description": "An array of category IDs to assign to the post."
+                  },
+                  "tags": {
+                    "type": "array",
+                    "description": "An array of tag IDs to assign to the post."
+                  },
+                  "featured_media": {
+                    "type": "number",
+                    "description": "The ID of the featured media (image). Use 0 to remove featured media."
+                  },
+                  "date": {
+                    "type": "string",
+                    "description": "The date the post was published, in the site's timezone (ISO 8601 format)."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -2940,7 +3793,20 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "The title of the site."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "The tagline or description of the site."
+                  },
+                  "timezone": {
+                    "type": "string",
+                    "description": "A city in the same timezone, e.g., 'America/New_York'."
+                  }
+                }
               }
             }
           }
@@ -2981,7 +3847,19 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the tag to update."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "The new name for the tag."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -3022,7 +3900,23 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "The ID of the user to update."
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "The new email address for the user."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "The new display name for the user."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -3063,7 +3957,35 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "file_path": {
+                    "type": "string",
+                    "description": "The local, absolute path to the file to upload."
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "The title for the media item."
+                  },
+                  "alt_text": {
+                    "type": "string",
+                    "description": "Alternative text for the media item (for accessibility)."
+                  },
+                  "caption": {
+                    "type": "string",
+                    "description": "The caption for the media item."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "The description for the media item."
+                  },
+                  "post": {
+                    "type": "number",
+                    "description": "The ID of a post to attach this media to."
+                  }
+                },
+                "required": [
+                  "file_path"
+                ]
               }
             }
           }

@@ -6,7 +6,12 @@ Update SEO metadata for multiple posts with progress tracking and error handling
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type      | Required | Description                                     | Default | Examples              |
+| --------- | --------- | -------- | ----------------------------------------------- | ------- | --------------------- |
+| `postIds` | `array`   | ✅       | Array of WordPress post IDs to update           | -       | `example`             |
+| `updates` | `object`  | ✅       | Metadata fields to update for all posts         | -       | `example`             |
+| `dryRun`  | `boolean` | ❌       | Perform a dry run without making actual changes | -       | `example`             |
+| `site`    | `string`  | ❌       | Site identifier for multi-site setups           | -       | `site1`, `production` |
 
 ## Examples
 
@@ -17,7 +22,7 @@ Simple example of using wp_seo_bulk_update_metadata
 **Command:**
 
 ```bash
-wp_seo_bulk_update_metadata
+wp_seo_bulk_update_metadata --postIds="example_value" --updates="example_value"
 ```
 
 **Response:**
@@ -49,7 +54,30 @@ Using wp_seo_bulk_update_metadata with specific site targeting
 **Command:**
 
 ```bash
-wp_seo_bulk_update_metadata --site="site1"
+wp_seo_bulk_update_metadata --site="site1" --postIds="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
+}
+```
+
+### Advanced seo Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_seo_bulk_update_metadata --postIds="example_value" --updates="example_value" --dryRun="example_value" --site="site1"
 ```
 
 **Response:**

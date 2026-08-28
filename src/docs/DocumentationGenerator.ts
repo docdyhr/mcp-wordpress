@@ -202,6 +202,36 @@ export class DocumentationGenerator {
   }
 
   /**
+   * Returns a tool's parameters in the legacy array shape.
+   *
+   * Tool definitions declare arguments one of two ways: a `parameters` array (only
+   * PerformanceTools still does) or an `inputSchema` JSON Schema (every other tool file).
+   * Reading `parameters` alone documented 65 of 71 tools as taking no arguments and
+   * emitted empty OpenAPI request schemas, so flatten `inputSchema.properties` when no
+   * array is present.
+   */
+  private resolveParameters(toolDef: ToolDefinition): NonNullable<ToolDefinition["parameters"]> {
+    if (toolDef.parameters?.length) {
+      return toolDef.parameters;
+    }
+
+    const schema = toolDef.inputSchema;
+    if (!schema?.properties) {
+      return [];
+    }
+
+    const required = new Set(schema.required ?? []);
+    return Object.entries(schema.properties).map(([name, property]) => ({
+      name,
+      type: property.type,
+      required: required.has(name),
+      ...(property.description !== undefined ? { description: property.description } : {}),
+      ...(property.enum ? { enum: property.enum.map((value) => String(value)) } : {}),
+      ...(property.items ? { items: { type: property.items.type } } : {}),
+    }));
+  }
+
+  /**
    * Extract documentation for a single tool
    */
   private async extractToolDocumentation(
@@ -209,7 +239,7 @@ export class DocumentationGenerator {
     category: string,
     className: string,
   ): Promise<ToolDocumentation> {
-    const parameters = this.extractParameterDocumentation(toolDef.parameters || []);
+    const parameters = this.extractParameterDocumentation(this.resolveParameters(toolDef));
     const examples = this.generateToolExamples(toolDef, category);
     const wordpressEndpoint = this.wordpressEndpoints.get(toolDef.name);
     const returnType = this.inferReturnType(toolDef.name, category);
@@ -290,7 +320,7 @@ export class DocumentationGenerator {
     const basicParams: Record<string, unknown> = {};
 
     // Add essential parameters
-    const requiredParams = (toolDef.parameters || []).filter((p) => p.required);
+    const requiredParams = this.resolveParameters(toolDef).filter((p) => p.required);
     for (const param of requiredParams.slice(0, 2)) {
       // Limit to 2 for basic example
       basicParams[param.name] = this.generateExampleValue(param);
@@ -737,7 +767,7 @@ export class DocumentationGenerator {
 
   private getExampleParameters(toolDef: ToolDefinition, type: string | number): Record<string, unknown> {
     const params: Record<string, unknown> = {};
-    const parameters = toolDef.parameters || [];
+    const parameters = this.resolveParameters(toolDef);
 
     if (type === "all") {
       // Include all parameters

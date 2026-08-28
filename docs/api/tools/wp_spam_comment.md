@@ -6,7 +6,9 @@ Marks a comment as spam.
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type     | Required | Description                            | Default | Examples     |
+| --------- | -------- | -------- | -------------------------------------- | ------- | ------------ |
+| `id`      | `number` | ✅       | The ID of the comment to mark as spam. | -       | `123`, `456` |
 
 ## Examples
 
@@ -17,7 +19,7 @@ Simple example of using wp_spam_comment
 **Command:**
 
 ```bash
-wp_spam_comment
+wp_spam_comment --id="123"
 ```
 
 **Response:**
@@ -46,7 +48,7 @@ Using wp_spam_comment with specific site targeting
 **Command:**
 
 ```bash
-wp_spam_comment --site="site1"
+wp_spam_comment --site="site1" --id="123"
 ```
 
 **Response:**

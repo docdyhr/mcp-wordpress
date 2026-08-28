@@ -7,7 +7,9 @@ management and auditing purposes.
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type     | Required | Description                              | Default | Examples     |
+| --------- | -------- | -------- | ---------------------------------------- | ------- | ------------ |
+| `id`      | `number` | ✅       | The ID of the post to get revisions for. | -       | `123`, `456` |
 
 ## Examples
 
@@ -18,7 +20,7 @@ Simple example of using wp_get_post_revisions
 **Command:**
 
 ```bash
-wp_get_post_revisions
+wp_get_post_revisions --id="123"
 ```
 
 **Response:**
@@ -52,7 +54,7 @@ Using wp_get_post_revisions with specific site targeting
 **Command:**
 
 ```bash
-wp_get_post_revisions --site="site1"
+wp_get_post_revisions --site="site1" --id="123"
 ```
 
 **Response:**

@@ -6,7 +6,12 @@ Analyze content and suggest relevant internal linking opportunities for better S
 
 ## Parameters
 
-_No parameters required._
+| Parameter          | Type     | Required | Description                                            | Default | Examples              |
+| ------------------ | -------- | -------- | ------------------------------------------------------ | ------- | --------------------- |
+| `postId`           | `number` | ✅       | WordPress post ID to analyze for linking opportunities | -       | `example`             |
+| `maxSuggestions`   | `number` | ❌       | Maximum number of link suggestions (default: 5)        | -       | `example`             |
+| `minimumRelevance` | `number` | ❌       | Minimum relevance score (0-100) for suggestions        | -       | `example`             |
+| `site`             | `string` | ❌       | Site identifier for multi-site setups                  | -       | `site1`, `production` |
 
 ## Examples
 
@@ -17,7 +22,7 @@ Simple example of using wp_seo_suggest_internal_links
 **Command:**
 
 ```bash
-wp_seo_suggest_internal_links
+wp_seo_suggest_internal_links --postId="example_value"
 ```
 
 **Response:**
@@ -46,7 +51,27 @@ Using wp_seo_suggest_internal_links with specific site targeting
 **Command:**
 
 ```bash
-wp_seo_suggest_internal_links --site="site1"
+wp_seo_suggest_internal_links --site="site1" --postId="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "wp_seo_suggest_internal_links executed successfully"
+}
+```
+
+### Advanced seo Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_seo_suggest_internal_links --postId="example_value" --maxSuggestions="example_value" --minimumRelevance="example_value" --site="site1"
 ```
 
 **Response:**

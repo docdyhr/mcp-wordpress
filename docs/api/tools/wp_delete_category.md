@@ -6,7 +6,9 @@ Deletes a category.
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type     | Required | Description                       | Default | Examples     |
+| --------- | -------- | -------- | --------------------------------- | ------- | ------------ |
+| `id`      | `number` | ✅       | The ID of the category to delete. | -       | `123`, `456` |
 
 ## Examples
 
@@ -17,7 +19,7 @@ Simple example of using wp_delete_category
 **Command:**
 
 ```bash
-wp_delete_category
+wp_delete_category --id="123"
 ```
 
 **Response:**
@@ -48,7 +50,7 @@ Using wp_delete_category with specific site targeting
 **Command:**
 
 ```bash
-wp_delete_category --site="site1"
+wp_delete_category --site="site1" --id="123"
 ```
 
 **Response:**

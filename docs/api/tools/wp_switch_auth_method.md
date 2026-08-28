@@ -8,7 +8,13 @@ that.
 
 ## Parameters
 
-_No parameters required._
+| Parameter    | Type     | Required | Description                                                                             | Default | Examples            |
+| ------------ | -------- | -------- | --------------------------------------------------------------------------------------- | ------- | ------------------- |
+| `method`     | `string` | ✅       | The new authentication method to use.                                                   | -       | `example`           |
+| `username`   | `string` | ❌       | Required for 'app-password', 'basic', and 'jwt'.                                        | -       | `john_doe`, `admin` |
+| `password`   | `string` | ❌       | The Application Password for 'app-password', or the account password for 'basic'/'jwt'. | -       | `example`           |
+| `jwt_secret` | `string` | ❌       | Required for 'jwt' — the WordPress JWT Authentication plugin's secret key.              | -       | `example`           |
+| `api_key`    | `string` | ❌       | Required for 'api-key'.                                                                 | -       | `example`           |
 
 ## Examples
 
@@ -19,7 +25,7 @@ Simple example of using wp_switch_auth_method
 **Command:**
 
 ```bash
-wp_switch_auth_method
+wp_switch_auth_method --method="example_value"
 ```
 
 **Response:**
@@ -48,7 +54,27 @@ Using wp_switch_auth_method with specific site targeting
 **Command:**
 
 ```bash
-wp_switch_auth_method --site="site1"
+wp_switch_auth_method --site="site1" --method="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "wp_switch_auth_method executed successfully"
+}
+```
+
+### Advanced auth Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_switch_auth_method --method="example_value" --username="john_doe" --password="example_value" --jwt_secret="example_value" --api_key="example_value"
 ```
 
 **Response:**

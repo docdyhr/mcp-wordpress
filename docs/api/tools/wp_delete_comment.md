@@ -6,7 +6,10 @@ Deletes a comment.
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type      | Required | Description                                                                           | Default | Examples     |
+| --------- | --------- | -------- | ------------------------------------------------------------------------------------- | ------- | ------------ |
+| `id`      | `number`  | ✅       | The ID of the comment to delete.                                                      | -       | `123`, `456` |
+| `force`   | `boolean` | ❌       | If true, the comment will be permanently deleted. Defaults to false (moved to trash). | -       | `example`    |
 
 ## Examples
 
@@ -17,7 +20,7 @@ Simple example of using wp_delete_comment
 **Command:**
 
 ```bash
-wp_delete_comment
+wp_delete_comment --id="123"
 ```
 
 **Response:**
@@ -48,7 +51,7 @@ Using wp_delete_comment with specific site targeting
 **Command:**
 
 ```bash
-wp_delete_comment --site="site1"
+wp_delete_comment --site="site1" --id="123"
 ```
 
 **Response:**

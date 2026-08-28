@@ -6,7 +6,10 @@ Updates an existing category.
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type     | Required | Description                       | Default | Examples     |
+| --------- | -------- | -------- | --------------------------------- | ------- | ------------ |
+| `id`      | `number` | ✅       | The ID of the category to update. | -       | `123`, `456` |
+| `name`    | `string` | ❌       | The new name for the category.    | -       | `example`    |
 
 ## Examples
 
@@ -17,7 +20,7 @@ Simple example of using wp_update_category
 **Command:**
 
 ```bash
-wp_update_category
+wp_update_category --id="123"
 ```
 
 **Response:**
@@ -49,7 +52,7 @@ Using wp_update_category with specific site targeting
 **Command:**
 
 ```bash
-wp_update_category --site="site1"
+wp_update_category --site="site1" --id="123"
 ```
 
 **Response:**

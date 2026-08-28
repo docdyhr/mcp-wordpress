@@ -6,7 +6,9 @@ Creates a new tag.
 
 ## Parameters
 
-_No parameters required._
+| Parameter | Type     | Required | Description          | Default | Examples  |
+| --------- | -------- | -------- | -------------------- | ------- | --------- |
+| `name`    | `string` | ✅       | The name of the tag. | -       | `example` |
 
 ## Examples
 
@@ -17,7 +19,7 @@ Simple example of using wp_create_tag
 **Command:**
 
 ```bash
-wp_create_tag
+wp_create_tag --name="example_value"
 ```
 
 **Response:**
@@ -49,7 +51,7 @@ Using wp_create_tag with specific site targeting
 **Command:**
 
 ```bash
-wp_create_tag --site="site1"
+wp_create_tag --site="site1" --name="example_value"
 ```
 
 **Response:**
