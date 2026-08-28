@@ -222,7 +222,9 @@ ${examples}`;
    * linked from the row carries the full text.
    */
   private toTableCell(text: string, maxLength = 160): string {
-    const flattened = text.replace(/\s+/g, " ").replace(/\|/g, "\\|").trim();
+    // Backslashes must be escaped before pipes, or the backslash this adds in front of a
+    // pipe would itself be re-escaped on a later pass and the cell boundary would break.
+    const flattened = text.replace(/\s+/g, " ").replace(/\\/g, "\\\\").replace(/\|/g, "\\|").trim();
     return flattened.length > maxLength ? `${flattened.slice(0, maxLength - 1).trimEnd()}…` : flattened;
   }
 
