@@ -2,7 +2,7 @@
 
 ![site](https://img.shields.io/badge/category-site-lightblue)
 
-Updates one or more general settings for a WordPress site.
+Updates one or more general settings for a WordPress site. Requires administrator role (manage_options capability).
 
 ## Parameters
 
@@ -43,6 +43,29 @@ wp_update_site_settings
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site site Usage
+
+Using wp_update_site_settings with specific site targeting
+
+**Command:**
+
+```bash
+wp_update_site_settings --site="site1" --title="Example Post Title"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
 }
 ```
 

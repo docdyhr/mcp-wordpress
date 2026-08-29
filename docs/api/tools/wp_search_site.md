@@ -47,6 +47,26 @@ wp_search_site --term="example_value"
 }
 ```
 
+### Multi-Site site Usage
+
+Using wp_search_site with specific site targeting
+
+**Command:**
+
+```bash
+wp_search_site --site="site1" --term="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "wp_search_site executed successfully"
+}
+```
+
 ## Response Format
 
 **Return Type:** `site[]`

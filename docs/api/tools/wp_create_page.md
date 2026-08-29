@@ -46,6 +46,29 @@ wp_create_page --title="Example Post Title"
 }
 ```
 
+### Multi-Site page Usage
+
+Using wp_create_page with specific site targeting
+
+**Command:**
+
+```bash
+wp_create_page --site="site1" --title="Example Post Title"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
+}
+```
+
 ### Advanced page Configuration
 
 Comprehensive example using all available parameters

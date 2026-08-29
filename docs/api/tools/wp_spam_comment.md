@@ -41,6 +41,26 @@ wp_spam_comment --id="123"
 }
 ```
 
+### Multi-Site comment Usage
+
+Using wp_spam_comment with specific site targeting
+
+**Command:**
+
+```bash
+wp_spam_comment --site="site1" --id="123"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "wp_spam_comment executed successfully"
+}
+```
+
 ## Response Format
 
 **Return Type:** `object`

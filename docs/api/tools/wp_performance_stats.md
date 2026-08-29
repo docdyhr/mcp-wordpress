@@ -2,7 +2,9 @@
 
 ![performance](https://img.shields.io/badge/category-performance-brightgreen)
 
-Get real-time performance statistics and metrics
+Get real-time performance statistics and metrics. Note: Top-level metrics (totalRequests, averageResponseTime,
+errorRate) are session-wide aggregates across all sites. Per-site cache and client stats are shown in the siteSpecific
+section when a site parameter is provided.
 
 ## Parameters
 

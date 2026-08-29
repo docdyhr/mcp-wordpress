@@ -44,6 +44,28 @@ wp_delete_user --id="123"
 }
 ```
 
+### Multi-Site user Usage
+
+Using wp_delete_user with specific site targeting
+
+**Command:**
+
+```bash
+wp_delete_user --site="site1" --id="123"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "deleted": true,
+    "id": 123
+  }
+}
+```
+
 ## Required Permissions
 
 This tool requires the following WordPress user capabilities:

@@ -2,7 +2,8 @@
 
 ![post](https://img.shields.io/badge/category-post-lightgrey)
 
-Retrieves the revision history for a specific post showing author and modification dates.
+Retrieves the revision history for a specific post, including details about changes, dates, and authors for content
+management and auditing purposes.
 
 ## Parameters
 
@@ -43,6 +44,31 @@ wp_get_post_revisions --id="123"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site post Usage
+
+Using wp_get_post_revisions with specific site targeting
+
+**Command:**
+
+```bash
+wp_get_post_revisions --site="site1" --id="123"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Example post",
+    "content": "Example content",
+    "status": "publish",
+    "date": "2024-01-01T00:00:00Z"
+  }
 }
 ```
 

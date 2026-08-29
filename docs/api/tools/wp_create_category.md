@@ -45,6 +45,29 @@ wp_create_category --name="example_value"
 }
 ```
 
+### Multi-Site taxonomy Usage
+
+Using wp_create_category with specific site targeting
+
+**Command:**
+
+```bash
+wp_create_category --site="site1" --name="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
+}
+```
+
 ## Response Format
 
 **Return Type:** `taxonomy`

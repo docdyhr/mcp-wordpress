@@ -11,7 +11,7 @@ Complete installation guide for MCP WordPress Server with all supported methods.
 | **[Smithery](#-smithery-package-manager)**       | MCP users    | 3 minutes  | Beginner     |
 | **[NPM Global](#-npm-global-installation)**      | Developers   | 10 minutes | Intermediate |
 | **[Docker](#-docker-deployment)**                | Production   | 15 minutes | Intermediate |
-| **[Development](#️-development-setup)**          | Contributors | 20 minutes | Advanced     |
+| **[Development](#️-development-setup)**           | Contributors | 20 minutes | Advanced     |
 
 ## 🏆 DXT Extension (Recommended)
 
@@ -34,7 +34,6 @@ The easiest way to get started with WordPress MCP in Claude Desktop.
    ```
 
 2. **Install in Claude Desktop**
-
    - Open Claude Desktop
    - Go to Extensions menu
    - Click "Install Extension"
@@ -375,19 +374,16 @@ npm run health
 ### Common Issues
 
 1. **"Cannot connect to WordPress"**
-
    - Verify `WORDPRESS_SITE_URL` format
    - Check if WordPress REST API is enabled
    - Test manually: `curl https://your-site.com/wp-json/wp/v2/`
 
 2. **"Authentication failed"**
-
    - Verify Application Password format (with spaces)
    - Check WordPress user permissions
    - Ensure Application Passwords are enabled
 
 3. **"Tools not working in Claude"**
-
    - Restart Claude Desktop
    - Check configuration file location
    - Verify JSON syntax

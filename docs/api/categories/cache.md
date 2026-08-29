@@ -6,10 +6,10 @@ Performance caching and optimization tools
 
 ## Available Tools
 
-- [`wp_cache_clear`](./tools/wp_cache_clear.md)
-- [`wp_cache_info`](./tools/wp_cache_info.md)
-- [`wp_cache_stats`](./tools/wp_cache_stats.md)
-- [`wp_cache_warm`](./tools/wp_cache_warm.md)
+- [`wp_cache_clear`](../tools/wp_cache_clear.md)
+- [`wp_cache_info`](../tools/wp_cache_info.md)
+- [`wp_cache_stats`](../tools/wp_cache_stats.md)
+- [`wp_cache_warm`](../tools/wp_cache_warm.md)
 
 ## Common Usage Patterns
 
@@ -22,22 +22,15 @@ Performance caching and optimization tools
 ### Basic cache Workflow
 
 ```bash
-# List all cache
-wp_list_cache
+# wp_cache_clear
+wp_cache_clear
 
-# Get specific item
-wp_get_cach --id=123
+# wp_cache_info
+wp_cache_info
 
-# Create new item
-wp_create_cach --title="Example"
-```
+# wp_cache_stats
+wp_cache_stats
 
-### Multi-Site cache Management
-
-```bash
-# Work with specific site
-wp_list_cache --site=production
-
-# Bulk operations
-wp_list_cache --site=staging --limit=50
+# wp_cache_warm
+wp_cache_warm
 ```

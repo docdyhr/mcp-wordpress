@@ -41,6 +41,26 @@ wp_approve_comment --id="123"
 }
 ```
 
+### Multi-Site comment Usage
+
+Using wp_approve_comment with specific site targeting
+
+**Command:**
+
+```bash
+wp_approve_comment --site="site1" --id="123"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "wp_approve_comment executed successfully"
+}
+```
+
 ## Response Format
 
 **Return Type:** `object`

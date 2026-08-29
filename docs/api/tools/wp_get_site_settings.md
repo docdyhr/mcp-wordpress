@@ -2,7 +2,7 @@
 
 ![site](https://img.shields.io/badge/category-site-lightblue)
 
-Retrieves the general settings for a WordPress site.
+Retrieves the general settings for a WordPress site. Requires administrator role (manage_options capability).
 
 ## Parameters
 
@@ -41,6 +41,31 @@ wp_get_site_settings
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site site Usage
+
+Using wp_get_site_settings with specific site targeting
+
+**Command:**
+
+```bash
+wp_get_site_settings --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Example site",
+    "content": "Example content",
+    "status": "publish",
+    "date": "2024-01-01T00:00:00Z"
+  }
 }
 ```
 

@@ -53,6 +53,38 @@ wp_list_tags
 }
 ```
 
+### Multi-Site taxonomy Usage
+
+Using wp_list_tags with specific site targeting
+
+**Command:**
+
+```bash
+wp_list_tags --site="site1" --search="wordpress"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "Example taxonomy 1",
+      "status": "publish"
+    },
+    {
+      "id": 2,
+      "title": "Example taxonomy 2",
+      "status": "draft"
+    }
+  ],
+  "total": 2,
+  "pages": 1
+}
+```
+
 ## Response Format
 
 **Return Type:** `taxonomy[]`

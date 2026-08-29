@@ -46,6 +46,29 @@ wp_update_comment --id="123"
 }
 ```
 
+### Multi-Site comment Usage
+
+Using wp_update_comment with specific site targeting
+
+**Command:**
+
+```bash
+wp_update_comment --site="site1" --id="123"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
+}
+```
+
 ### Advanced comment Configuration
 
 Comprehensive example using all available parameters

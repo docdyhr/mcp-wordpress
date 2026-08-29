@@ -46,6 +46,31 @@ wp_get_application_passwords --user_id="example_value"
 }
 ```
 
+### Multi-Site site Usage
+
+Using wp_get_application_passwords with specific site targeting
+
+**Command:**
+
+```bash
+wp_get_application_passwords --site="site1" --user_id="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Example site",
+    "content": "Example content",
+    "status": "publish",
+    "date": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
 ## Response Format
 
 **Return Type:** `site`

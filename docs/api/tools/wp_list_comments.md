@@ -54,6 +54,38 @@ wp_list_comments
 }
 ```
 
+### Multi-Site comment Usage
+
+Using wp_list_comments with specific site targeting
+
+**Command:**
+
+```bash
+wp_list_comments --site="site1" --post="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "Example comment 1",
+      "status": "publish"
+    },
+    {
+      "id": 2,
+      "title": "Example comment 2",
+      "status": "draft"
+    }
+  ],
+  "total": 2,
+  "pages": 1
+}
+```
+
 ## Response Format
 
 **Return Type:** `comment[]`

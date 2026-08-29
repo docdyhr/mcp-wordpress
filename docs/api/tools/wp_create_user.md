@@ -47,6 +47,29 @@ wp_create_user --username="john_doe" --email="user@example.com"
 }
 ```
 
+### Multi-Site user Usage
+
+Using wp_create_user with specific site targeting
+
+**Command:**
+
+```bash
+wp_create_user --site="site1" --username="john_doe"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
+}
+```
+
 ### Advanced user Configuration
 
 Comprehensive example using all available parameters
