@@ -343,6 +343,12 @@ describe("ToolRegistry", () => {
       expect(registry.isAuthenticationError(new WordPressAPIError("Not found", 404))).toBe(false);
     });
 
+    it("does not treat a 403 with an explicit local code (e.g. UPLOADS_DISABLED) as an authentication error", () => {
+      expect(registry.isAuthenticationError(new WordPressAPIError("Uploads disabled", 403, "UPLOADS_DISABLED"))).toBe(
+        false,
+      );
+    });
+
     it("does not treat a plain Error as an authentication error", () => {
       expect(registry.isAuthenticationError(new Error("boom"))).toBe(false);
     });
