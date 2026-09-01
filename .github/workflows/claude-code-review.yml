@@ -13,8 +13,14 @@ on:
 jobs:
   claude-review:
     runs-on: ubuntu-latest
-    # OIDC tokens are unavailable for fork PRs (GitHub restriction); skip to avoid spurious failures
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    # OIDC tokens are unavailable for fork PRs (GitHub restriction); skip to avoid spurious failures.
+    # Also skip when the triggering push's sender is a bot/app (e.g. GitHub Copilot's coding agent,
+    # login "Copilot" / https://github.com/apps/copilot-swe-agent): the action's OIDC-to-app-token
+    # exchange rejects bot actors with "User does not have write access on this repository" even on
+    # same-repo PRs, so the job fails before it can review anything.
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.sender.type != 'Bot'
     permissions:
       contents: read
       pull-requests: write

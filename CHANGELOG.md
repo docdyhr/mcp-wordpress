@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.33](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.32...v3.3.33) (2026-09-01)
+
+### 🐛 Bug Fixes
+
+- **ci:** skip claude-review for bot-triggered PR pushes ([#239](https://github.com/docdyhr/mcp-wordpress/issues/239))
+  ([36a2f1d](https://github.com/docdyhr/mcp-wordpress/commit/36a2f1dc42a81d66693ff41bf9b33b1952a5f0d1)), closes
+  [#238](https://github.com/docdyhr/mcp-wordpress/issues/238)
+
 ## [3.3.32](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.31...v3.3.32) (2026-08-13)
 
 ### 🐛 Bug Fixes
