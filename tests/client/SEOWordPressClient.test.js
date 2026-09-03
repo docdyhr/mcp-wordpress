@@ -145,6 +145,74 @@ describe("SEOWordPressClient", () => {
     });
   });
 
+  // Regression tests for #235. The WordPress REST API GET /wp/v2/plugins does not
+  // return a `slug` field at all — it identifies a plugin by `plugin`, the plugin
+  // file path relative to the plugins directory without its .php extension
+  // (e.g. "seo-by-rank-math/rank-math"). The directory segment is the slug.
+  describe("Plugin Detection (actual /wp/v2/plugins response shape)", () => {
+    const restPlugin = (plugin, overrides = {}) => ({
+      plugin,
+      status: "active",
+      name: plugin,
+      textdomain: plugin.split("/")[0],
+      ...overrides,
+    });
+
+    it("should detect Yoast SEO from the plugin path", async () => {
+      mockWordPressClient.get.mockResolvedValueOnce([restPlugin("wordpress-seo/wp-seo")]);
+
+      await client.initializeSEO();
+
+      expect(client.detectedPlugin).toBe("yoast");
+    });
+
+    it("should detect RankMath from the plugin path", async () => {
+      mockWordPressClient.get.mockResolvedValueOnce([restPlugin("seo-by-rank-math/rank-math")]);
+
+      await client.initializeSEO();
+
+      expect(client.detectedPlugin).toBe("rankmath");
+    });
+
+    it("should detect SEOPress from the plugin path", async () => {
+      mockWordPressClient.get.mockResolvedValueOnce([restPlugin("wp-seopress/seopress")]);
+
+      await client.initializeSEO();
+
+      expect(client.detectedPlugin).toBe("seopress");
+    });
+
+    it("should detect RankMath when the PRO add-on is active alongside it", async () => {
+      mockWordPressClient.get.mockResolvedValueOnce([
+        restPlugin("seo-by-rank-math/rank-math"),
+        restPlugin("seo-by-rank-math-pro/rank-math-pro"),
+      ]);
+
+      await client.initializeSEO();
+
+      expect(client.detectedPlugin).toBe("rankmath");
+    });
+
+    it("should not match a plugin whose directory merely starts with a known slug", async () => {
+      mockWordPressClient.get.mockResolvedValueOnce([restPlugin("wordpress-seo-extra/plugin")]);
+
+      await client.initializeSEO();
+
+      expect(client.detectedPlugin).toBe("none");
+    });
+
+    it("should ignore inactive plugins given in REST shape", async () => {
+      mockWordPressClient.get.mockResolvedValueOnce([
+        restPlugin("wordpress-seo/wp-seo", { status: "inactive" }),
+        restPlugin("seo-by-rank-math/rank-math"),
+      ]);
+
+      await client.initializeSEO();
+
+      expect(client.detectedPlugin).toBe("rankmath");
+    });
+  });
+
   describe("SEO Metadata Extraction", () => {
     beforeEach(async () => {
       // Set up with Yoast detected

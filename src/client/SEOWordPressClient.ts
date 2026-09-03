@@ -25,14 +25,25 @@ import type { SchemaType } from "@/types/seo.js";
 import type { SEOMetadata, SchemaMarkup } from "@/types/seo.js";
 
 /**
- * WordPress Plugin interface for API responses
+ * WordPress Plugin interface for API responses.
+ *
+ * GET /wp/v2/plugins identifies a plugin by `plugin` — its file path relative to the
+ * plugins directory with the .php extension stripped, e.g. "wordpress-seo/wp-seo". The
+ * response carries no `slug` field at all.
+ *
+ * Both identifying fields are optional because this describes an external payload we do
+ * not control: `slug` so that a hand-built `{ slug, status }` object still type-checks,
+ * and `plugin` so a response missing it degrades to no match rather than a crash.
+ * pluginSlug() resolves whichever is present.
  */
 interface WordPressPlugin {
-  slug: string;
+  plugin?: string;
   status: "active" | "inactive";
+  slug?: string;
   name?: string;
   description?: string;
   version?: string;
+  textdomain?: string;
 }
 
 /**
@@ -180,6 +191,17 @@ export class SEOWordPressClient extends WordPressClient {
   }
 
   /**
+   * Derives a plugin slug from a /wp/v2/plugins entry. The REST response has no `slug`
+   * field, so the slug is the directory segment of `plugin`: "seo-by-rank-math/rank-math"
+   * yields "seo-by-rank-math". Matching the whole segment rather than a prefix keeps
+   * "seo-by-rank-math-pro" from being mistaken for the base plugin. An explicit `slug`,
+   * if some caller supplied one, takes precedence.
+   */
+  private static pluginSlug(plugin: WordPressPlugin): string {
+    return plugin.slug ?? plugin.plugin?.split("/")[0] ?? "";
+  }
+
+  /**
    * Detect active SEO plugins on the WordPress site
    */
   private async detectSEOPlugins(): Promise<void> {
@@ -193,22 +215,26 @@ export class SEOWordPressClient extends WordPressClient {
       }
 
       // Check for active SEO plugins in order of preference
-      const activePlugins = (plugins as WordPressPlugin[]).filter((plugin) => plugin.status === "active");
+      const activeSlugs = new Set(
+        (plugins as WordPressPlugin[])
+          .filter((plugin) => plugin.status === "active")
+          .map((plugin) => SEOWordPressClient.pluginSlug(plugin)),
+      );
 
       // Check for Yoast SEO
-      if (activePlugins.some((plugin) => plugin.slug === "wordpress-seo")) {
+      if (activeSlugs.has("wordpress-seo")) {
         this.detectedPlugin = "yoast";
         return;
       }
 
       // Check for RankMath
-      if (activePlugins.some((plugin) => plugin.slug === "seo-by-rank-math")) {
+      if (activeSlugs.has("seo-by-rank-math")) {
         this.detectedPlugin = "rankmath";
         return;
       }
 
       // Check for SEOPress
-      if (activePlugins.some((plugin) => plugin.slug === "wp-seopress")) {
+      if (activeSlugs.has("wp-seopress")) {
         this.detectedPlugin = "seopress";
         return;
       }
