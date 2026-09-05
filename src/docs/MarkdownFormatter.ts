@@ -322,7 +322,7 @@ ${type.examples.length > 1 ? this.generateAdditionalExamples(type.examples.slice
       const defaultVal = param.defaultValue !== undefined ? `\`${param.defaultValue}\`` : "-";
       const required = param.required ? "✅" : "❌";
 
-      return `| \`${param.name}\` | \`${param.type}\` | ${required} | ${param.description} | ${defaultVal} | ${
+      return `| \`${param.name}\` | \`${param.type}\` | ${required} | ${this.toTableCell(param.description)} | ${defaultVal} | ${
         examples || "-"
       } |`;
     });
@@ -496,7 +496,7 @@ ${relatedTools.map((tool) => `- [\`${tool}\`](./${tool}.md)`).join("\n")}
     const rows = properties.map((prop) => {
       const propObj = prop as Record<string, unknown>;
       const required = propObj.required ? "✅" : "❌";
-      return `| \`${propObj.name}\` | \`${propObj.type}\` | ${required} | ${propObj.description} |`;
+      return `| \`${propObj.name}\` | \`${propObj.type}\` | ${required} | ${this.toTableCell(String(propObj.description ?? ""))} |`;
     });
 
     return [headers, separator, ...rows].join("\n");
