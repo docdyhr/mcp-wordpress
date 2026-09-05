@@ -1,6 +1,6 @@
 {
   "name": "mcp-wordpress",
-  "version": "3.3.33",
+  "version": "3.3.34",
   "description": "Comprehensive Model Context Protocol server for WordPress management with composition-based architecture, 71 tools, SEO toolkit, performance monitoring, intelligent caching, and production-ready authentication",
   "keywords": [
     "mcp",
@@ -131,7 +131,7 @@
     "axios": ">=1.18.0",
     "brace-expansion": ">=5.0.7",
     "express-rate-limit": ">=8.5.1",
-    "fast-uri": ">=4.1.2",
+    "fast-uri": ">=4.1.4 <5.0.0",
     "flatted": ">=3.4.2",
     "follow-redirects": ">=1.15.12",
     "hono": ">=4.12.34",
@@ -141,7 +141,7 @@
     "minimatch": "10.2.3",
     "path-to-regexp": ">=8.4.0",
     "postcss": ">=8.5.10",
-    "qs": ">=6.15.2",
+    "qs": ">=6.16.0 <7.0.0",
     "tar": ">=7.5.16",
     "underscore": "1.13.8",
     "undici": ">=6.28.0",

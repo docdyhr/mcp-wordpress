@@ -3335,7 +3335,7 @@
     },
     "/tools/wp_switch_auth_method": {
       "post": {
-        "summary": "Switches the authentication method for a site for the current session and verifies the new credentials with a live request. The switch is in-memory only — it does not persist across server restarts; update your configuration file for that.",
+        "summary": "Validates an alternative authentication method for a site without mutating the shared client used by other tool invocations. The check is in-memory only and does not persist; update your configuration file for durable changes.",
         "description": "Execute wp_switch_auth_method MCP tool",
         "tags": [
           "auth"
@@ -3349,7 +3349,7 @@
                 "properties": {
                   "method": {
                     "type": "string",
-                    "description": "The new authentication method to use."
+                    "description": "The authentication method to validate."
                   },
                   "username": {
                     "type": "string",

@@ -2,15 +2,14 @@
 
 ![auth](https://img.shields.io/badge/category-auth-darkblue)
 
-Switches the authentication method for a site for the current session and verifies the new credentials with a live
-request. The switch is in-memory only — it does not persist across server restarts; update your configuration file for
-that.
+Validates an alternative authentication method for a site without mutating the shared client used by other tool
+invocations. The check is in-memory only and does not persist; update your configuration file for durable changes.
 
 ## Parameters
 
 | Parameter    | Type     | Required | Description                                                                             | Default | Examples            |
 | ------------ | -------- | -------- | --------------------------------------------------------------------------------------- | ------- | ------------------- |
-| `method`     | `string` | ✅       | The new authentication method to use.                                                   | -       | `example`           |
+| `method`     | `string` | ✅       | The authentication method to validate.                                                  | -       | `example`           |
 | `username`   | `string` | ❌       | Required for 'app-password', 'basic', and 'jwt'.                                        | -       | `john_doe`, `admin` |
 | `password`   | `string` | ❌       | The Application Password for 'app-password', or the account password for 'basic'/'jwt'. | -       | `example`           |
 | `jwt_secret` | `string` | ❌       | Required for 'jwt' — the WordPress JWT Authentication plugin's secret key.              | -       | `example`           |

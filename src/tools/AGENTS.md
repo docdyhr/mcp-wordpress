@@ -18,33 +18,33 @@ function. Zod is applied centrally at registration time (`src/server/ToolRegistr
 don't add per-tool Zod schemas.
 
 **Registration contract**: each exported class (`src/tools/index.ts`) must implement
-`getTools(): { name, description, inputSchema, handler }[]`. `ToolRegistry.registerAllTools()` instantiates every
-class (some, like `CacheTools`/`PerformanceTools`, take the `wordpressClients` map in their constructor), converts
-each `inputSchema` to Zod at runtime, auto-injects a `site` parameter in multi-site mode, and wraps handlers in
-try/catch for auth-error/`EnhancedError` handling. A new tool must satisfy this contract to be picked up.
+`getTools(): { name, description, inputSchema, handler }[]`. `ToolRegistry.registerAllTools()` instantiates every class
+(some, like `CacheTools`/`PerformanceTools`, take the `wordpressClients` map in their constructor), converts each
+`inputSchema` to Zod at runtime, auto-injects a `site` parameter in multi-site mode, and wraps handlers in try/catch for
+auth-error/`EnhancedError` handling. A new tool must satisfy this contract to be picked up.
 
-**File pattern**: multiple tools per file, grouped by resource — not file-per-tool. Newer/larger categories
-(`posts/`, `seo/`, `performance/`) split into `*ToolDefinitions.ts` (schemas) + `*Handlers.ts` (logic) + `index.ts`
-(class wiring); older categories (`pages.ts`, `users.ts`, `comments.ts`, `taxonomies.ts`, `cache.ts`, `site.ts`,
-`auth.ts`) are single files. `posts.ts` and `performance.ts` are `@deprecated` re-export shims — edit the
-subdirectory versions, not the shims.
+**File pattern**: multiple tools per file, grouped by resource — not file-per-tool. Newer/larger categories (`posts/`,
+`seo/`, `performance/`) split into `*ToolDefinitions.ts` (schemas) + `*Handlers.ts` (logic) + `index.ts` (class wiring);
+older categories (`pages.ts`, `users.ts`, `comments.ts`, `taxonomies.ts`, `cache.ts`, `site.ts`, `auth.ts`) are single
+files. `posts.ts` and `performance.ts` are `@deprecated` re-export shims — edit the subdirectory versions, not the
+shims.
 
 **Category map** (71 tools / 12 categories — verified against source):
 
-| Category | File(s) | Count |
-| --- | --- | --- |
-| Posts | `posts/PostToolDefinitions.ts` | 6 |
-| Pages | `pages.ts` | 6 |
-| Media | `media.ts` | 5 |
-| Users | `users.ts` | 6 |
-| Comments | `comments.ts` | 7 |
-| Taxonomies | `taxonomies.ts` | 10 |
-| Site | `site.ts` (settings/search) | 3 |
-| Auth | `auth.ts` (3) + `site.ts` app-passwords (3) | 6 |
-| Cache | `cache.ts` | 4 |
-| Performance | `performance/PerformanceTools.ts` | 6 |
-| SEO | `seo/SEOToolDefinitions.ts` | 11 |
-| System | `version.ts` (wrapped by `system.ts`) | 1 |
+| Category    | File(s)                                     | Count |
+| ----------- | ------------------------------------------- | ----- |
+| Posts       | `posts/PostToolDefinitions.ts`              | 6     |
+| Pages       | `pages.ts`                                  | 6     |
+| Media       | `media.ts`                                  | 5     |
+| Users       | `users.ts`                                  | 6     |
+| Comments    | `comments.ts`                               | 7     |
+| Taxonomies  | `taxonomies.ts`                             | 10    |
+| Site        | `site.ts` (settings/search)                 | 3     |
+| Auth        | `auth.ts` (3) + `site.ts` app-passwords (3) | 6     |
+| Cache       | `cache.ts`                                  | 4     |
+| Performance | `performance/PerformanceTools.ts`           | 6     |
+| SEO         | `seo/SEOToolDefinitions.ts`                 | 11    |
+| System      | `version.ts` (wrapped by `system.ts`)       | 1     |
 
 **SEO engines** (`seo/`) — each subdirectory is one engine-per-concern, orchestrated by `seo/SEOTools.ts`:
 `analyzers/ContentAnalyzer.ts` (readability/keyword scoring), `auditors/SiteAuditor.ts` (site-wide audit),
@@ -54,6 +54,10 @@ subdirectory versions, not the shims.
 **Shared imports**: `@/client/api.js` (`WordPressClient`), `@/utils/error.js`, `@/types/wordpress.js`,
 `@/utils/validation/security.js` (`sanitizeHtml`), `src/tools/params.ts` (`toolParams<T>`, `parseId`,
 `parseIdAndForce`).
+
+**Auth tool isolation**: `wp_switch_auth_method` must never mutate the shared per-site `WordPressClient` instance stored
+by the server for later tool invocations. When validating alternate credentials, verify them with an isolated throwaway
+client and leave the shared client/config/cache untouched.
 
 ## Work Guidance
 
