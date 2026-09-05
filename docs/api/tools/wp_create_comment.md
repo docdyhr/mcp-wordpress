@@ -47,6 +47,29 @@ wp_create_comment --post="example_value" --content="This is example content for 
 }
 ```
 
+### Multi-Site comment Usage
+
+Using wp_create_comment with specific site targeting
+
+**Command:**
+
+```bash
+wp_create_comment --site="site1" --post="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
+}
+```
+
 ### Advanced comment Configuration
 
 Comprehensive example using all available parameters

@@ -225,7 +225,6 @@ If all automated methods fail:
    ```
 
 2. **Contact Repository Maintainer:**
-
    - Create detailed issue with error logs
    - Include attempted resolution steps
    - Mention urgency level and impact

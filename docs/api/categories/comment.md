@@ -6,13 +6,13 @@ comment management tools
 
 ## Available Tools
 
-- [`wp_approve_comment`](./tools/wp_approve_comment.md)
-- [`wp_create_comment`](./tools/wp_create_comment.md)
-- [`wp_delete_comment`](./tools/wp_delete_comment.md)
-- [`wp_get_comment`](./tools/wp_get_comment.md)
-- [`wp_list_comments`](./tools/wp_list_comments.md)
-- [`wp_spam_comment`](./tools/wp_spam_comment.md)
-- [`wp_update_comment`](./tools/wp_update_comment.md)
+- [`wp_approve_comment`](../tools/wp_approve_comment.md)
+- [`wp_create_comment`](../tools/wp_create_comment.md)
+- [`wp_delete_comment`](../tools/wp_delete_comment.md)
+- [`wp_get_comment`](../tools/wp_get_comment.md)
+- [`wp_list_comments`](../tools/wp_list_comments.md)
+- [`wp_spam_comment`](../tools/wp_spam_comment.md)
+- [`wp_update_comment`](../tools/wp_update_comment.md)
 
 ## Common Usage Patterns
 
@@ -26,21 +26,21 @@ comment management tools
 
 ```bash
 # List all comment
-wp_list_comment
+wp_list_comments
 
-# Get specific item
-wp_get_commen --id=123
+# Get a single item
+wp_get_comment --id=123
 
-# Create new item
-wp_create_commen --title="Example"
+# Create a new item
+wp_create_comment --title="Example"
 ```
 
 ### Multi-Site comment Management
 
 ```bash
-# Work with specific site
-wp_list_comment --site=production
+# Work with a specific site
+wp_list_comments --site=production
 
 # Bulk operations
-wp_list_comment --site=staging --limit=50
+wp_list_comments --site=staging --limit=50
 ```

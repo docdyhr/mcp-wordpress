@@ -2,7 +2,8 @@
 
 ![performance](https://img.shields.io/badge/category-performance-brightgreen)
 
-Compare current performance against industry benchmarks
+Compare current performance against industry benchmarks. Note: Benchmarks are based on session-wide aggregated metrics
+across all sites, not per-site metrics.
 
 ## Parameters
 

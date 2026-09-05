@@ -48,6 +48,29 @@ wp_update_media --id="123"
 }
 ```
 
+### Multi-Site media Usage
+
+Using wp_update_media with specific site targeting
+
+**Command:**
+
+```bash
+wp_update_media --site="site1" --id="123"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
+}
+```
+
 ### Advanced media Configuration
 
 Comprehensive example using all available parameters

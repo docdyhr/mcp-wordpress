@@ -55,6 +55,38 @@ wp_list_media
 }
 ```
 
+### Multi-Site media Usage
+
+Using wp_list_media with specific site targeting
+
+**Command:**
+
+```bash
+wp_list_media --site="site1" --per_page="10"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "Example media 1",
+      "status": "publish"
+    },
+    {
+      "id": 2,
+      "title": "Example media 2",
+      "status": "draft"
+    }
+  ],
+  "total": 2,
+  "pages": 1
+}
+```
+
 ### Advanced media Configuration
 
 Comprehensive example using all available parameters

@@ -43,6 +43,28 @@ wp_delete_tag --id="123"
 }
 ```
 
+### Multi-Site taxonomy Usage
+
+Using wp_delete_tag with specific site targeting
+
+**Command:**
+
+```bash
+wp_delete_tag --site="site1" --id="123"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "deleted": true,
+    "id": 123
+  }
+}
+```
+
 ## Response Format
 
 **Return Type:** `DeleteResult`

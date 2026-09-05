@@ -45,6 +45,29 @@ wp_create_application_password --user_id="example_value" --app_name="example_val
 }
 ```
 
+### Multi-Site site Usage
+
+Using wp_create_application_password with specific site targeting
+
+**Command:**
+
+```bash
+wp_create_application_password --site="site1" --user_id="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
+}
+```
+
 ## Response Format
 
 **Return Type:** `site`

@@ -44,6 +44,28 @@ wp_delete_comment --id="123"
 }
 ```
 
+### Multi-Site comment Usage
+
+Using wp_delete_comment with specific site targeting
+
+**Command:**
+
+```bash
+wp_delete_comment --site="site1" --id="123"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "deleted": true,
+    "id": 123
+  }
+}
+```
+
 ## Response Format
 
 **Return Type:** `DeleteResult`

@@ -2,16 +2,18 @@
 
 ![auth](https://img.shields.io/badge/category-auth-darkblue)
 
-Switches the authentication method for a site for the current session.
+Validates an alternative authentication method for a site without mutating the shared client used by other tool
+invocations. The check is in-memory only and does not persist; update your configuration file for durable changes.
 
 ## Parameters
 
-| Parameter   | Type     | Required | Description                                                               | Default | Examples            |
-| ----------- | -------- | -------- | ------------------------------------------------------------------------- | ------- | ------------------- |
-| `method`    | `string` | ✅       | The new authentication method to use.                                     | -       | `example`           |
-| `username`  | `string` | ❌       | The username for 'app-password' or 'basic' authentication.                | -       | `john_doe`, `admin` |
-| `password`  | `string` | ❌       | The Application Password for 'app-password' or password for 'basic' auth. | -       | `example`           |
-| `jwt_token` | `string` | ❌       | The token for 'jwt' authentication.                                       | -       | `example`           |
+| Parameter    | Type     | Required | Description                                                                             | Default | Examples            |
+| ------------ | -------- | -------- | --------------------------------------------------------------------------------------- | ------- | ------------------- |
+| `method`     | `string` | ✅       | The authentication method to validate.                                                  | -       | `example`           |
+| `username`   | `string` | ❌       | Required for 'app-password', 'basic', and 'jwt'.                                        | -       | `john_doe`, `admin` |
+| `password`   | `string` | ❌       | The Application Password for 'app-password', or the account password for 'basic'/'jwt'. | -       | `example`           |
+| `jwt_secret` | `string` | ❌       | Required for 'jwt' — the WordPress JWT Authentication plugin's secret key.              | -       | `example`           |
+| `api_key`    | `string` | ❌       | Required for 'api-key'.                                                                 | -       | `example`           |
 
 ## Examples
 
@@ -44,6 +46,26 @@ wp_switch_auth_method --method="example_value"
 }
 ```
 
+### Multi-Site auth Usage
+
+Using wp_switch_auth_method with specific site targeting
+
+**Command:**
+
+```bash
+wp_switch_auth_method --site="site1" --method="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "wp_switch_auth_method executed successfully"
+}
+```
+
 ### Advanced auth Configuration
 
 Comprehensive example using all available parameters
@@ -51,7 +73,7 @@ Comprehensive example using all available parameters
 **Command:**
 
 ```bash
-wp_switch_auth_method --method="example_value" --username="john_doe" --password="example_value" --jwt_token="example_value"
+wp_switch_auth_method --method="example_value" --username="john_doe" --password="example_value" --jwt_secret="example_value" --api_key="example_value"
 ```
 
 **Response:**

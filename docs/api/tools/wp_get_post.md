@@ -3,12 +3,17 @@
 ![post](https://img.shields.io/badge/category-post-lightgrey)
 
 Retrieves detailed information about a single post including metadata, content statistics, and management links.
+Optionally includes full HTML content for editing.
+
+**Usage Examples:** • Basic metadata: `wp_get_post --id=123` • With full content:
+`wp_get_post --id=123 --include_content=true`
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                         | Default | Examples     |
-| --------- | -------- | -------- | ----------------------------------- | ------- | ------------ |
-| `id`      | `number` | ✅       | The unique identifier for the post. | -       | `123`, `456` |
+| Parameter         | Type      | Required | Description                                                                                                                        | Default | Examples     |
+| ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------- | ------------ |
+| `id`              | `number`  | ✅       | The unique identifier for the post.                                                                                                | -       | `123`, `456` |
+| `include_content` | `boolean` | ❌       | If true, includes the full post content as raw source (context=edit), preserving Gutenberg block markup for editing. Default: true | -       | `example`    |
 
 ## Examples
 
@@ -43,6 +48,31 @@ wp_get_post --id="123"
 {
   "error": "Authentication failed",
   "message": "Invalid credentials or insufficient permissions"
+}
+```
+
+### Multi-Site post Usage
+
+Using wp_get_post with specific site targeting
+
+**Command:**
+
+```bash
+wp_get_post --site="site1" --id="123"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Example post",
+    "content": "Example content",
+    "status": "publish",
+    "date": "2024-01-01T00:00:00Z"
+  }
 }
 ```
 

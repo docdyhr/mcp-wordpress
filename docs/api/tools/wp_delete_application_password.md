@@ -44,6 +44,28 @@ wp_delete_application_password --user_id="example_value" --uuid="example_value"
 }
 ```
 
+### Multi-Site site Usage
+
+Using wp_delete_application_password with specific site targeting
+
+**Command:**
+
+```bash
+wp_delete_application_password --site="site1" --user_id="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "deleted": true,
+    "id": 123
+  }
+}
+```
+
 ## Response Format
 
 **Return Type:** `DeleteResult`

@@ -63,6 +63,38 @@ wp_list_posts
 }
 ```
 
+### Multi-Site post Usage
+
+Using wp_list_posts with specific site targeting
+
+**Command:**
+
+```bash
+wp_list_posts --site="site1" --per_page="10"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "Example post 1",
+      "status": "publish"
+    },
+    {
+      "id": 2,
+      "title": "Example post 2",
+      "status": "draft"
+    }
+  ],
+  "total": 2,
+  "pages": 1
+}
+```
+
 ### Advanced post Configuration
 
 Comprehensive example using all available parameters

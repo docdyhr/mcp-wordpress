@@ -46,6 +46,31 @@ wp_get_comment --id="123"
 }
 ```
 
+### Multi-Site comment Usage
+
+Using wp_get_comment with specific site targeting
+
+**Command:**
+
+```bash
+wp_get_comment --site="site1" --id="123"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Example comment",
+    "content": "Example content",
+    "status": "publish",
+    "date": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
 ## Response Format
 
 **Return Type:** `comment`

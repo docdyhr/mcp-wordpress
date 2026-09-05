@@ -46,6 +46,29 @@ wp_update_user --id="123"
 }
 ```
 
+### Multi-Site user Usage
+
+Using wp_update_user with specific site targeting
+
+**Command:**
+
+```bash
+wp_update_user --site="site1" --id="123"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
+}
+```
+
 ### Advanced user Configuration
 
 Comprehensive example using all available parameters

@@ -47,6 +47,29 @@ wp_update_page --id="123"
 }
 ```
 
+### Multi-Site page Usage
+
+Using wp_update_page with specific site targeting
+
+**Command:**
+
+```bash
+wp_update_page --site="site1" --id="123"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
+}
+```
+
 ### Advanced page Configuration
 
 Comprehensive example using all available parameters

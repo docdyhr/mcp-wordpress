@@ -6,9 +6,7 @@ Get detailed cache configuration and status information.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                    | Default | Examples              |
-| --------- | -------- | -------- | ------------------------------ | ------- | --------------------- |
-| `site`    | `string` | ❌       | Site ID to get cache info for. | -       | `site1`, `production` |
+_No parameters required._
 
 ## Examples
 

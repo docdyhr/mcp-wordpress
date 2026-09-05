@@ -6,10 +6,9 @@ Clear cache for a WordPress site.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                                                                     | Default | Examples              |
-| --------- | -------- | -------- | ------------------------------------------------------------------------------- | ------- | --------------------- |
-| `site`    | `string` | ❌       | Site ID to clear cache for.                                                     | -       | `site1`, `production` |
-| `pattern` | `string` | ❌       | Optional pattern to clear specific cache entries (e.g., "posts", "categories"). | -       | `example`             |
+| Parameter | Type     | Required | Description                                                                     | Default | Examples  |
+| --------- | -------- | -------- | ------------------------------------------------------------------------------- | ------- | --------- |
+| `pattern` | `string` | ❌       | Optional pattern to clear specific cache entries (e.g., "posts", "categories"). | -       | `example` |
 
 ## Examples
 
@@ -49,7 +48,7 @@ Using wp_cache_clear with specific site targeting
 **Command:**
 
 ```bash
-wp_cache_clear --site="site1"
+wp_cache_clear --site="site1" --pattern="example_value"
 ```
 
 **Response:**

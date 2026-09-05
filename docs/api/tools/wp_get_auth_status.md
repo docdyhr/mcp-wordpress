@@ -44,6 +44,31 @@ wp_get_auth_status
 }
 ```
 
+### Multi-Site auth Usage
+
+Using wp_get_auth_status with specific site targeting
+
+**Command:**
+
+```bash
+wp_get_auth_status --site="site1"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Example auth",
+    "content": "Example content",
+    "status": "publish",
+    "date": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
 ## Response Format
 
 **Return Type:** `auth`

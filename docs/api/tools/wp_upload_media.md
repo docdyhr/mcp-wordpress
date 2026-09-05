@@ -46,6 +46,26 @@ wp_upload_media --file_path="example_value"
 }
 ```
 
+### Multi-Site media Usage
+
+Using wp_upload_media with specific site targeting
+
+**Command:**
+
+```bash
+wp_upload_media --site="site1" --file_path="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "wp_upload_media executed successfully"
+}
+```
+
 ### Advanced media Configuration
 
 Comprehensive example using all available parameters

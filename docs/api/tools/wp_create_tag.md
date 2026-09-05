@@ -44,6 +44,29 @@ wp_create_tag --name="example_value"
 }
 ```
 
+### Multi-Site taxonomy Usage
+
+Using wp_create_tag with specific site targeting
+
+**Command:**
+
+```bash
+wp_create_tag --site="site1" --name="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Created/Updated successfully",
+    "status": "publish"
+  }
+}
+```
+
 ## Response Format
 
 **Return Type:** `taxonomy`
