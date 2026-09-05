@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.34](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.33...v3.3.34) (2026-09-05)
+
+### 🐛 Bug Fixes
+
+- **auth:** verify alternate credentials without mutating the shared client
+  ([#237](https://github.com/docdyhr/mcp-wordpress/issues/237))
+  ([b98db7b](https://github.com/docdyhr/mcp-wordpress/commit/b98db7b59693da8ee557130c8257d14ad2e405a8))
+- **deps:** bump fast-uri and qs overrides to close audit-gate CVEs
+  ([#242](https://github.com/docdyhr/mcp-wordpress/issues/242))
+  ([01f8893](https://github.com/docdyhr/mcp-wordpress/commit/01f8893ccafebc4f85cc7b4196fbd648bf721721))
+- don't classify local upload/validation 403s as auth errors
+  ([#234](https://github.com/docdyhr/mcp-wordpress/issues/234))
+  ([3626183](https://github.com/docdyhr/mcp-wordpress/commit/3626183b0079c09e93270f2bd2a249f0140d698b))
+- **seo:** detect SEO plugins from the REST plugin path, not a missing slug
+  ([#236](https://github.com/docdyhr/mcp-wordpress/issues/236))
+  ([cd4dfd7](https://github.com/docdyhr/mcp-wordpress/commit/cd4dfd781140383096a80cd612ff69529dd63ca7)), closes
+  [#235](https://github.com/docdyhr/mcp-wordpress/issues/235)
+
 ## [3.3.33](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.32...v3.3.33) (2026-09-01)
 
 ### 🐛 Bug Fixes
