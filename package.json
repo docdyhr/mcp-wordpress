@@ -172,7 +172,7 @@
     "fs-extra": "^11.3.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.3.1",
-    "markdownlint-cli": "^0.48.0",
+    "markdownlint-cli": "^0.49.1",
     "nock": "^14.0.11",
     "node-fetch": "^3.3.2",
     "open": "^11.0.0",
@@ -182,7 +182,7 @@
     "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.1"
+    "vitest": "^5.0.0"
   },
   "engines": {
     "node": ">=20.8.1"
