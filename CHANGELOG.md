@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.35](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.34...v3.3.35) (2026-09-10)
+
+### 🐛 Bug Fixes
+
+- **deps:** raise hono override floor to 4.13.5 to close audit-gate CVEs
+  ([#244](https://github.com/docdyhr/mcp-wordpress/issues/244))
+  ([64569ee](https://github.com/docdyhr/mcp-wordpress/commit/64569ee3b5e67a03aaab7ff0b7ad82ba579683aa))
+
 ## [3.3.34](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.33...v3.3.34) (2026-09-05)
 
 ### 🐛 Bug Fixes
