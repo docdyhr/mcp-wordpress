@@ -33,7 +33,7 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 
 <!-- Badges updated: 2025-12-23 -->
 
-### 🎉 **v3.3.21** - CI-Tested on Node 20/22/24
+### 🎉 **v3.3.21** - CI-Tested on Node 22/24
 
 </div>
 
@@ -50,7 +50,7 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 
 - 🏆 **Most Complete**: 71 tools vs 20-30 in alternatives
 - ⚡ **Fastest Setup**: 2-click Claude Desktop installation via DXT
-- 🔒 **CI-Tested**: 2750+ tests across Node 20/22/24, CodeQL + Trivy security scanning
+- 🔒 **CI-Tested**: 2750+ tests across Node 22/24, CodeQL + Trivy security scanning
 - 🎯 **TypeScript Native**: 100% type safety, best-in-class developer experience
 - 🌐 **Multi-Site**: Manage up to 50 WordPress sites from one place
 
