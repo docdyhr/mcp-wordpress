@@ -20,7 +20,7 @@ authenticated, and monitored" — not "a scaled, internet-facing HTTP service."
 
 ## Prerequisites
 
-- Node.js **>=22.12.0** (see `package.json`'s `engines` field) or Docker
+- Node.js **>=22.14.0** (see `package.json`'s `engines` field) or Docker
 - A WordPress site with the REST API enabled
 - An authentication method configured on that site: Application Passwords (recommended, WordPress 5.6+), Basic Auth, JWT
   (requires a JWT Authentication plugin), or an API key

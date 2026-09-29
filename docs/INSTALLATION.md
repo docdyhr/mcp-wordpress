@@ -62,7 +62,7 @@ Best for users who want the latest version without installation.
 
 ### NPX Prerequisites
 
-- Node.js 22.12+ and npm
+- Node.js 22.14+ and npm
 - WordPress site with REST API enabled
 - WordPress Application Password
 
@@ -249,7 +249,7 @@ For contributors and custom development.
 
 ### Development Prerequisites
 
-- Node.js 22.12+
+- Node.js 22.14+
 - npm or yarn
 - Git
 

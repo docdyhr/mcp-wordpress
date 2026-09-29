@@ -6,7 +6,7 @@ Welcome to the MCP WordPress Server project! This guide will help you get starte
 
 ### Prerequisites
 
-- **Node.js 22.12+** - Required for development
+- **Node.js 22.14+** - Required for development
 - **TypeScript 5+** - Primary development language
 - **Git** - Version control
 - **Docker** - For testing environment (optional)
