@@ -86,8 +86,8 @@ RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 ## CI/CD Pipeline
 
 Conventional commits trigger semantic-release versioning (`docs`, `style`, `test`, `build`, `ci`, `chore` do **not** cut
-a release — see `release.config.js`). Publishing: NPM + Docker Hub + DXT packaging. Node versions tested: 20, 22, 24
-(LTS). Quality gates: all tests pass, security scans clean.
+a release — see `release.config.js`). Publishing: NPM + Docker Hub + DXT packaging. Node versions tested: 22, 24 (LTS).
+Quality gates: all tests pass, security scans clean.
 
 **Workflow architecture (known audit deviation)**: all `.github/workflows/` files are intentionally self-contained
 inline definitions, not thin callers to `docdyhr/.github` — the shared library has no matching reusable workflows for
