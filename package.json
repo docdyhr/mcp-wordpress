@@ -140,6 +140,9 @@
     "hono": ">=4.13.5",
     "ip-address": ">=10.5.1",
     "markdown-it": ">=14.2.0 <15.0.0",
+    "markdownlint-cli": {
+      "js-yaml": ">=5.4.1 <6.0.0"
+    },
     "minimatch": "10.2.3",
     "path-to-regexp": ">=8.4.0",
     "postcss": ">=8.5.10",
