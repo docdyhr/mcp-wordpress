@@ -138,7 +138,7 @@
     "flatted": ">=3.4.2",
     "follow-redirects": ">=1.15.12",
     "hono": ">=4.13.5",
-    "ip-address": ">=10.3.1",
+    "ip-address": ">=10.5.1",
     "markdown-it": ">=14.2.0 <15.0.0",
     "minimatch": "10.2.3",
     "path-to-regexp": ">=8.4.0",
