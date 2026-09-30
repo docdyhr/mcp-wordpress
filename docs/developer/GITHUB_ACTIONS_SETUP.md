@@ -40,7 +40,7 @@ gh release create v1.1.3 --title "Release v1.1.3" --notes "Release notes here"
 
 **Features**:
 
-- 🧪 **Test Matrix**: Multiple Node.js versions (20, 22, 24)
+- 🧪 **Test Matrix**: Multiple Node.js versions (22, 24)
 - 🔍 **Quality Checks**: Linting, type checking, coverage
 - 📦 **Build Verification**: Package building and installation
 - 🌍 **WordPress Compatibility**: Tests against multiple WordPress versions

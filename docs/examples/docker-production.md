@@ -8,7 +8,7 @@ Complete configuration examples for deploying MCP WordPress in production enviro
 
 ```dockerfile
 # Multi-stage build for production
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -26,7 +26,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 
 # Install security updates
 RUN apk update && apk upgrade && apk add --no-cache \
@@ -723,7 +723,7 @@ echo "Restore completed from $BACKUP_FILE"
 ### Security-Enhanced Dockerfile
 
 ```dockerfile
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 
 # Install security updates and tools
 RUN apk update && apk upgrade && \

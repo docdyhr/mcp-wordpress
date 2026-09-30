@@ -215,7 +215,7 @@ docker buildx build --platform linux/amd64,linux/arm64 -t mcp-wordpress .
   "types": "dist/index.d.ts",
   "files": ["dist/", "src/", "README.md", "LICENSE"],
   "engines": {
-    "node": ">=20.8.1"
+    "node": ">=22.14.0"
   }
 }
 ```
@@ -331,7 +331,7 @@ build:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
-        node-version: "20"
+        node-version: "22"
         cache: "npm"
     - run: npm ci
     - run: npm run typecheck

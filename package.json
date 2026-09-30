@@ -130,15 +130,15 @@
     },
     "axios": ">=1.18.0",
     "brace-expansion": ">=5.0.7",
+    "cosmiconfig": {
+      "js-yaml": ">=4.3.2 <5.0.0"
+    },
     "express-rate-limit": ">=8.5.1",
     "fast-uri": ">=4.1.4 <5.0.0",
     "flatted": ">=3.4.2",
     "follow-redirects": ">=1.15.12",
     "hono": ">=4.13.5",
     "ip-address": ">=10.5.1",
-    "cosmiconfig": {
-      "js-yaml": ">=4.3.2 <5.0.0"
-    },
     "markdown-it": ">=14.2.0 <15.0.0",
     "minimatch": "10.2.3",
     "path-to-regexp": ">=8.4.0",
@@ -187,7 +187,7 @@
     "vitest": "^4.1.1"
   },
   "engines": {
-    "node": ">=20.8.1"
+    "node": ">=22.14.0"
   },
   "publishConfig": {
     "access": "public"

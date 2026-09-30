@@ -17,7 +17,7 @@ ensure:
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 22.14+
 - OpenAI API key (configured in GitHub secrets)
 - WordPress test site credentials
 
