@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.1](https://github.com/docdyhr/mcp-wordpress/compare/v4.0.0...v4.0.1) (2026-09-30)
+
+### 🐛 Bug Fixes
+
+- **deps:** close dev-only undici, brace-expansion and markdown-it alerts
+  ([#252](https://github.com/docdyhr/mcp-wordpress/issues/252))
+  ([1d0a93c](https://github.com/docdyhr/mcp-wordpress/commit/1d0a93c18719727de062544e3a2b92705748cb8b))
+
 ## [4.0.0](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.37...v4.0.0) (2026-09-30)
 
 ### ⚠ BREAKING CHANGES
