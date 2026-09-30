@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.37...v4.0.0) (2026-09-30)
+
+### ⚠ BREAKING CHANGES
+
+- **node:** Node.js 22.12 or newer is now required; Node 20 reached end-of-life in April 2026.
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
+
+- Update Node.js version in prerequisites
+
+Co-authored-by: Copilot Autofix powered by AI <175728472+Copilot@users.noreply.github.com>
+
+- docs: align Node version examples
+
+Co-authored-by: docdyhr <6048441+docdyhr@users.noreply.github.com>
+
+- docs: align CI Node test matrix
+
+Co-authored-by: docdyhr <6048441+docdyhr@users.noreply.github.com>
+
+- fix: align Node.js support floor with release tooling
+
+Co-authored-by: docdyhr <6048441+docdyhr@users.noreply.github.com>
+
+### 🐛 Bug Fixes
+
+- **deps:** close audit-gate CVEs in fast-uri and nested js-yaml
+  ([#250](https://github.com/docdyhr/mcp-wordpress/issues/250))
+  ([dbf0f4f](https://github.com/docdyhr/mcp-wordpress/commit/dbf0f4f50a66b0df65c84b7d4e189cc342d77d8a)), closes
+  [#38](https://github.com/docdyhr/mcp-wordpress/issues/38)
+
+### 🏗️ Build
+
+- **node:** drop Node 20 from CI and require Node >=22.14 ([#247](https://github.com/docdyhr/mcp-wordpress/issues/247))
+  ([254f45a](https://github.com/docdyhr/mcp-wordpress/commit/254f45ad4007572a9410816063ab75e1900b1f5e))
+
 ## [3.3.37](https://github.com/docdyhr/mcp-wordpress/compare/v3.3.36...v3.3.37) (2026-09-29)
 
 ### 🐛 Bug Fixes
