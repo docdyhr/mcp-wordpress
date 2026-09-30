@@ -134,7 +134,7 @@
       "js-yaml": ">=4.3.2 <5.0.0"
     },
     "express-rate-limit": ">=8.5.1",
-    "fast-uri": ">=4.1.4 <5.0.0",
+    "fast-uri": ">=4.1.5 <5.0.0",
     "flatted": ">=3.4.2",
     "follow-redirects": ">=1.15.12",
     "hono": ">=4.13.5",
