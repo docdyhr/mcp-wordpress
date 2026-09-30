@@ -85,12 +85,13 @@ function lastSummaryLine(text, label) {
  *      Test Files  33 passed (33)
  *           Tests  1070 passed | 2 skipped (1072)
  *
- * vitest colours these lines whenever it believes the terminal supports colour —
- * which, via tinyrainbow, is any environment with TERM set, even when stdout is a
- * pipe — so the digits are separated from their labels by ANSI escape sequences
- * (`\x1b[2m      Tests \x1b[22m \x1b[1m\x1b[32m1070 passed\x1b[39m…`). The escape
- * codes are stripped before matching so both coloured and plain output parse
- * identically.
+ * vitest colours these lines via tinyrainbow, which does not check whether stdout is
+ * a TTY: it colours whenever TERM is not "dumb" (unset included) unless NO_COLOR is
+ * set or an AI-agent environment is detected. In a normal terminal the piped output
+ * is therefore coloured, and the digits are separated from their labels by ANSI
+ * escape sequences (`\x1b[2m      Tests \x1b[22m \x1b[1m\x1b[32m1070 passed\x1b[39m…`).
+ * The escape codes are stripped before matching so both coloured and plain output
+ * parse identically.
  *
  * @param {string} output raw vitest stdout
  * @returns {{found: boolean, testFiles: number, tests: number, passed: number,
@@ -157,8 +158,16 @@ function evaluateBatch({ code, signal = null, summary }) {
   if (summary.failed > 0) {
     return { success: false, reason: `${summary.failed} test(s) failed` };
   }
-  if (summary.tests === 0 || summary.passed === 0) {
+  if (summary.tests === 0) {
     return { success: false, reason: 'batch ran zero tests' };
+  }
+  // vitest reports passing test.fails() cases as "expected fail", not "passed", so
+  // both count as executed. A batch where everything was skipped or todo ran nothing.
+  if (summary.passed + summary.expectedFail === 0) {
+    return {
+      success: false,
+      reason: `no tests executed (${summary.skipped} skipped, ${summary.todo} todo)`,
+    };
   }
   return { success: true, reason: null };
 }

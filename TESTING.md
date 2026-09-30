@@ -41,7 +41,7 @@ npm run test:safe
 
 Runs the same four path groups as `test:batch` under `vitest.memory-safe.config.ts` (which excludes a few heavy suites)
 and is what the pre-push hook runs. A batch fails on a non-zero exit code, any failed test, a missing vitest summary, or
-zero tests run.
+no executed tests (a zero total, or only skipped/todo; `test.fails()` expected fails count as executed).
 
 ## Memory Configuration
 

@@ -139,7 +139,25 @@ describe("scripts/run-tests-safe.cjs", () => {
 
     it("fails when every test was skipped even though the total is non-zero", () => {
       const summary = parseVitestSummary("      Tests  3 skipped (3)\n");
-      expect(evaluateBatch({ code: 0, summary }).success).toBe(false);
+      const verdict = evaluateBatch({ code: 0, summary });
+      expect(verdict.success).toBe(false);
+      expect(verdict.reason).toMatch(/no tests executed/);
+      expect(verdict.reason).not.toMatch(/zero tests/);
+    });
+
+    it("fails when every test was skipped or todo and names both counts", () => {
+      const summary = parseVitestSummary("      Tests  2 skipped | 1 todo (3)\n");
+      const verdict = evaluateBatch({ code: 0, summary });
+      expect(verdict.success).toBe(false);
+      expect(verdict.reason).toMatch(/2 skipped, 1 todo/);
+    });
+
+    it("regression: accepts a batch whose only executed tests are expected fails", () => {
+      // vitest excludes test.fails() outcomes from "passed", so passed === 0 here even
+      // though three tests ran and behaved as expected.
+      const summary = parseVitestSummary("      Tests  3 expected fail (3)\n");
+      expect(summary).toMatchObject({ tests: 3, passed: 0, expectedFail: 3 });
+      expect(evaluateBatch({ code: 0, summary })).toEqual({ success: true, reason: null });
     });
 
     it("fails on a non-zero exit code regardless of the summary", () => {
