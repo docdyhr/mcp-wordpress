@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.2](https://github.com/docdyhr/mcp-wordpress/compare/v4.0.1...v4.0.2) (2026-09-30)
+
+### 🐛 Bug Fixes
+
+- **ci:** parse coloured vitest summaries in run-tests-safe and fail zero-test batches
+  ([#253](https://github.com/docdyhr/mcp-wordpress/issues/253))
+  ([2f9bdfa](https://github.com/docdyhr/mcp-wordpress/commit/2f9bdfaa59e865f1a5d99a78c05a68215f1aa8d4))
+
 ## [4.0.1](https://github.com/docdyhr/mcp-wordpress/compare/v4.0.0...v4.0.1) (2026-09-30)
 
 ### 🐛 Bug Fixes
