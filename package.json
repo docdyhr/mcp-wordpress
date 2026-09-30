@@ -122,14 +122,20 @@
     ]
   },
   "overrides": {
+    "@actions/http-client": {
+      "undici": ">=6.28.1 <7.0.0"
+    },
     "@hono/node-server": "^2.0.12",
     "@pact-foundation/pact-node": {
       "@types/request": {
         "form-data": "^4.0.3"
       }
     },
+    "@semantic-release/github": {
+      "undici": ">=7.29.1 <8.0.0"
+    },
     "axios": ">=1.18.0",
-    "brace-expansion": ">=5.0.7",
+    "brace-expansion": ">=5.0.12 <6.0.0",
     "cosmiconfig": {
       "js-yaml": ">=4.3.2 <5.0.0"
     },
@@ -139,7 +145,7 @@
     "follow-redirects": ">=1.15.12",
     "hono": ">=4.13.5",
     "ip-address": ">=10.5.1",
-    "markdown-it": ">=14.2.0 <15.0.0",
+    "markdown-it": ">=14.3.1 <15.0.0",
     "markdownlint-cli": {
       "js-yaml": ">=5.4.1 <6.0.0"
     },
@@ -149,7 +155,6 @@
     "qs": ">=6.16.0 <7.0.0",
     "tar": ">=7.5.16",
     "underscore": "1.13.8",
-    "undici": ">=6.28.0",
     "vite": ">=7.3.2"
   },
   "dependencies": {
