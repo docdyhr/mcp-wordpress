@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-/* eslint-env node */
-/* eslint-disable no-console, no-undef, no-unused-vars */
+/* eslint-disable no-undef, no-unused-vars */
 
 /**
  * Memory-safe test runner
@@ -9,6 +8,7 @@
  */
 
 const { spawn, execSync } = require('child_process');
+const { stripVTControlCharacters } = require('node:util');
 const fs = require('fs');
 const path = require('path');
 
@@ -59,6 +59,119 @@ function expandGlob(pattern) {
   }
 }
 
+// Extract "<n> <label>" from a summary segment such as "2 failed | 108 passed (110)".
+function countLabelled(segment, label) {
+  const match = segment.match(new RegExp(`(\\d+)\\s+${label}\\b`));
+  return match ? parseInt(match[1], 10) : 0;
+}
+
+// Pull the "(N)" total that vitest appends to a summary line, if present.
+function parenthesisedTotal(segment) {
+  const match = segment.match(/\((\d+)\)\s*$/);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+// Return the payload of the LAST line whose label matches, e.g. the text after
+// "Tests" on "      Tests  1070 passed | 2 skipped (1072)". The summary block is
+// printed at the very end of a run, so the last occurrence is the authoritative one.
+function lastSummaryLine(text, label) {
+  const matches = [...text.matchAll(new RegExp(`^\\s*${label}\\s+(.+?)\\s*$`, 'gm'))];
+  return matches.length ? matches[matches.length - 1][1] : null;
+}
+
+/**
+ * Parse the summary block that vitest's default reporter prints at the end of a run:
+ *
+ *      Test Files  33 passed (33)
+ *           Tests  1070 passed | 2 skipped (1072)
+ *
+ * vitest colours these lines via tinyrainbow, which does not check whether stdout is
+ * a TTY: it colours whenever TERM is not "dumb" (unset included) unless NO_COLOR is
+ * set or an AI-agent environment is detected. In a normal terminal the piped output
+ * is therefore coloured, and the digits are separated from their labels by ANSI
+ * escape sequences (`\x1b[2m      Tests \x1b[22m \x1b[1m\x1b[32m1070 passed\x1b[39m…`).
+ * The escape codes are stripped before matching so both coloured and plain output
+ * parse identically.
+ *
+ * @param {string} output raw vitest stdout
+ * @returns {{found: boolean, testFiles: number, tests: number, passed: number,
+ *            failed: number, skipped: number, todo: number, expectedFail: number}}
+ *   `found` is false when no "Tests" summary line exists (crash, no tests
+ *   collected, unexpected reporter). Counts are 0 in that case, never estimated.
+ */
+function parseVitestSummary(output) {
+  const text = stripVTControlCharacters(String(output ?? ''));
+  const summary = {
+    found: false,
+    testFiles: 0,
+    tests: 0,
+    passed: 0,
+    failed: 0,
+    skipped: 0,
+    todo: 0,
+    expectedFail: 0,
+  };
+
+  const filesSegment = lastSummaryLine(text, 'Test Files');
+  if (filesSegment !== null) {
+    summary.testFiles =
+      parenthesisedTotal(filesSegment) ??
+      countLabelled(filesSegment, 'passed') +
+        countLabelled(filesSegment, 'failed') +
+        countLabelled(filesSegment, 'skipped');
+  }
+
+  const testsSegment = lastSummaryLine(text, 'Tests');
+  if (testsSegment !== null) {
+    summary.found = true;
+    summary.passed = countLabelled(testsSegment, 'passed');
+    summary.failed = countLabelled(testsSegment, 'failed');
+    summary.skipped = countLabelled(testsSegment, 'skipped');
+    summary.todo = countLabelled(testsSegment, 'todo');
+    summary.expectedFail = countLabelled(testsSegment, 'expected fail');
+    summary.tests =
+      parenthesisedTotal(testsSegment) ??
+      summary.passed + summary.failed + summary.skipped + summary.todo + summary.expectedFail;
+  }
+
+  return summary;
+}
+
+/**
+ * Decide whether a batch is healthy. A zero exit code alone is not enough: a batch
+ * that collected no tests, or whose summary could not be parsed, is treated as a
+ * failure so a silently skipped batch can never be reported as "all tests passed".
+ *
+ * @param {{code: number|null, signal?: string|null, summary: ReturnType<typeof parseVitestSummary>}} input
+ * @returns {{success: boolean, reason: string|null}}
+ */
+function evaluateBatch({ code, signal = null, summary }) {
+  if (code !== 0) {
+    return {
+      success: false,
+      reason: signal ? `vitest was killed by ${signal} (timeout?)` : `vitest exited with code ${code}`,
+    };
+  }
+  if (!summary || !summary.found) {
+    return { success: false, reason: 'no "Tests" summary line found in vitest output' };
+  }
+  if (summary.failed > 0) {
+    return { success: false, reason: `${summary.failed} test(s) failed` };
+  }
+  if (summary.tests === 0) {
+    return { success: false, reason: 'batch ran zero tests' };
+  }
+  // vitest reports passing test.fails() cases as "expected fail", not "passed", so
+  // both count as executed. A batch where everything was skipped or todo ran nothing.
+  if (summary.passed + summary.expectedFail === 0) {
+    return {
+      success: false,
+      reason: `no tests executed (${summary.skipped} skipped, ${summary.todo} todo)`,
+    };
+  }
+  return { success: true, reason: null };
+}
+
 class TestRunner {
   constructor() {
     this.results = [];
@@ -78,7 +191,15 @@ class TestRunner {
         execSync('npm run build', { stdio: 'pipe' });
       } catch (buildError) {
         console.error(`   ❌ Build failed: ${buildError.message}`);
-        resolve({ success: false, error: 'Build failed', tests: 0, passed: 0, failed: 0 });
+        resolve({
+          batch: batch.name,
+          success: false,
+          reason: 'Build failed',
+          error: 'Build failed',
+          tests: 0,
+          passed: 0,
+          failed: 0,
+        });
         return;
       }
 
@@ -118,71 +239,45 @@ class TestRunner {
         stderr += data.toString();
       });
 
-      child.on('close', (code) => {
-        // Parse results from stdout - handle multiple formats
-        let testFiles = 0;
-        let tests = 0;
-        let passed = 0;
-        let failed = 0;
+      child.on('close', (code, signal) => {
+        const summary = parseVitestSummary(stdout);
+        const { success, reason } = evaluateBatch({ code, signal, summary });
 
-        // Try different patterns for test results
-        const testFilesPassedMatch = stdout.match(/Test Files\s+(\d+)\s+passed/);
-        const testFilesTotalMatch = stdout.match(/Test Files\s+(\d+)\s+/);
-
-        if (testFilesPassedMatch) {
-          testFiles = parseInt(testFilesPassedMatch[1]) || 0;
-          passed = testFiles; // If no individual test count, use test files count
-        } else if (testFilesTotalMatch) {
-          testFiles = parseInt(testFilesTotalMatch[1]) || 0;
-          passed = testFiles;
-        }
-
-        // Match patterns like "Tests  248 passed" or "Tests  110 passed (110)"
-        const testsPassedMatch = stdout.match(/Tests\s+(\d+)\s+passed/);
-        const testsFailedMatch = stdout.match(/Tests\s+(\d+)\s+failed/);
-        const testsInParensMatch = stdout.match(/Tests\s+(\d+)\s+passed\s+\((\d+)\)/);
-
-        if (testsInParensMatch) {
-          // Use the number in parentheses as it's more accurate
-          passed = parseInt(testsInParensMatch[2]) || 0;
-          tests = passed;
-        } else if (testsPassedMatch) {
-          passed = parseInt(testsPassedMatch[1]) || 0;
-          tests = passed;
-        }
-
-        if (testsFailedMatch) {
-          failed = parseInt(testsFailedMatch[1]) || 0;
-          tests = passed + failed;
-        }
-
-        // If we still have no test count but have test files, use a reasonable estimate
-        if (tests === 0 && testFiles > 0) {
-          tests = passed = testFiles * 10; // Rough estimate
-        }
-
-        const success = code === 0;
         const result = {
           batch: batch.name,
           success,
+          reason,
           code,
-          testFiles,
-          tests,
-          passed,
-          failed,
+          signal,
+          testFiles: summary.testFiles,
+          tests: summary.tests,
+          passed: summary.passed,
+          failed: summary.failed,
+          skipped: summary.skipped,
           stdout: stdout.slice(-1000), // Keep last 1000 chars for debugging
           stderr: stderr.slice(-1000),
         };
 
         if (success) {
-          console.log(`   ✅ ${batch.name}: ${tests} tests passed`);
+          console.log(
+            `   ✅ ${batch.name}: ${summary.passed} passed` +
+              (summary.skipped ? `, ${summary.skipped} skipped` : '') +
+              ` (${summary.tests} tests, ${summary.testFiles} files)`
+          );
         } else {
-          console.log(`   ❌ ${batch.name}: ${failed} failed, ${passed} passed (${tests} total)`);
+          console.log(
+            `   ❌ ${batch.name}: ${reason} — ${summary.failed} failed, ${summary.passed} passed (${summary.tests} total)`
+          );
+          const tail = stripVTControlCharacters(stdout + stderr).trim().split('\n').slice(-20).join('\n');
+          if (tail) {
+            console.log('   --- last lines of vitest output ---');
+            console.log(tail.replace(/^/gm, '   '));
+          }
         }
 
-        this.totalTests += tests;
-        this.totalPassed += passed;
-        this.totalFailed += failed;
+        this.totalTests += summary.tests;
+        this.totalPassed += summary.passed;
+        this.totalFailed += summary.failed;
 
         resolve(result);
       });
@@ -192,6 +287,7 @@ class TestRunner {
         resolve({
           batch: batch.name,
           success: false,
+          reason: `Process error - ${error.message}`,
           error: error.message,
           tests: 0,
           passed: 0,
@@ -229,7 +325,10 @@ class TestRunner {
 
     for (const result of this.results) {
       const status = result.success ? '✅' : '❌';
-      console.log(`${status} ${result.batch}: ${result.passed || 0} passed, ${result.failed || 0} failed`);
+      const detail = result.success ? '' : ` — ${result.reason}`;
+      console.log(
+        `${status} ${result.batch}: ${result.passed || 0} passed, ${result.failed || 0} failed${detail}`
+      );
       if (result.success) successfulBatches++;
     }
 
@@ -258,3 +357,7 @@ if (require.main === module) {
 }
 
 module.exports = TestRunner;
+module.exports.TestRunner = TestRunner;
+module.exports.TEST_BATCHES = TEST_BATCHES;
+module.exports.parseVitestSummary = parseVitestSummary;
+module.exports.evaluateBatch = evaluateBatch;
