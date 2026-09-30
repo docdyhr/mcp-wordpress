@@ -129,12 +129,12 @@
       }
     },
     "axios": ">=1.18.0",
-    "brace-expansion": ">=5.0.7",
+    "brace-expansion": ">=5.0.12",
     "cosmiconfig": {
       "js-yaml": ">=4.3.2 <5.0.0"
     },
     "express-rate-limit": ">=8.5.1",
-    "fast-uri": ">=4.1.4 <5.0.0",
+    "fast-uri": ">=4.2.1 <5.0.0",
     "flatted": ">=3.4.2",
     "follow-redirects": ">=1.15.12",
     "hono": ">=4.13.5",
@@ -146,7 +146,7 @@
     "qs": ">=6.16.0 <7.0.0",
     "tar": ">=7.5.16",
     "underscore": "1.13.8",
-    "undici": ">=6.28.0",
+    "undici": ">=8.11.2",
     "vite": ">=7.3.2"
   },
   "dependencies": {
