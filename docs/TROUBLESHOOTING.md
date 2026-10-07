@@ -270,6 +270,24 @@ DEBUG=true npm run dev
    # See docs/api/tools/[tool-name].md
    ```
 
+### Issue: Server stops responding after a very large post or page request
+
+**Symptoms:**
+
+- Creating or updating a post/page with very large `content` never returns
+- Every tool call after that also hangs until the client times out
+
+**Cause:** the MCP SDK's stdio transport caps a single incoming message at 10 MB. A larger request closes the transport,
+so the server stops reading further requests. This is far above normal post sizes, and above PHP's default 8 MB
+`post_max_size`, so WordPress itself would usually reject such a request too.
+
+**Solutions:**
+
+1. Move inline (base64) images out of the content: upload them with `wp_upload_media` (which takes a `file_path`) and
+   reference the returned URL.
+2. Split very large content across several posts or pages.
+3. Restart the MCP client (e.g. Claude Desktop) to reconnect the server.
+
 ## ⚡ Performance Issues
 
 ### Issue: Slow response times
