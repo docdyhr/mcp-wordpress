@@ -94,7 +94,7 @@ export class TaxonomyTools {
       },
       {
         name: "wp_delete_category",
-        description: "Deletes a category.",
+        description: "Permanently deletes a category (WordPress terms have no trash).",
         inputSchema: {
           type: "object",
           properties: {
@@ -173,7 +173,7 @@ export class TaxonomyTools {
       },
       {
         name: "wp_delete_tag",
-        description: "Deletes a tag.",
+        description: "Permanently deletes a tag (WordPress terms have no trash).",
         inputSchema: {
           type: "object",
           properties: {
@@ -244,7 +244,8 @@ export class TaxonomyTools {
   public async handleDeleteCategory(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     const id = parseId(params);
     try {
-      await client.deleteCategory(id);
+      // WordPress terms have no trash — the REST API rejects DELETE without force=true.
+      await client.deleteCategory(id, true);
       return `✅ Category ${id} has been deleted.`;
     } catch (_error) {
       preserveToolError("Failed to delete category", _error);
@@ -305,7 +306,8 @@ export class TaxonomyTools {
   public async handleDeleteTag(client: WordPressClient, params: Record<string, unknown>): Promise<unknown> {
     const id = parseId(params);
     try {
-      await client.deleteTag(id);
+      // WordPress terms have no trash — the REST API rejects DELETE without force=true.
+      await client.deleteTag(id, true);
       return `✅ Tag ${id} has been deleted.`;
     } catch (_error) {
       preserveToolError("Failed to delete tag", _error);
