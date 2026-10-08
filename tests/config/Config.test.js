@@ -335,6 +335,35 @@ describe("Config.ts - Comprehensive Coverage", () => {
       const cfg = config();
       expect(cfg.debug.logLevel).toBe("info");
     });
+
+    // Regression: DXT "Debug Mode" only sets DEBUG=true. The minimum log level stayed "info",
+    // so every logger.debug() line was silently dropped and debug mode produced no extra output.
+    it("should default to debug log level when DEBUG=true and LOG_LEVEL is unset", () => {
+      process.env.DEBUG = "true";
+      delete process.env.LOG_LEVEL;
+      Config.reset();
+
+      const cfg = config();
+      expect(cfg.debug.logLevel).toBe("debug");
+    });
+
+    it("should let an explicit LOG_LEVEL win over DEBUG=true", () => {
+      process.env.DEBUG = "true";
+      process.env.LOG_LEVEL = "warn";
+      Config.reset();
+
+      const cfg = config();
+      expect(cfg.debug.logLevel).toBe("warn");
+    });
+
+    it("should keep the info default when DEBUG=false", () => {
+      process.env.DEBUG = "false";
+      delete process.env.LOG_LEVEL;
+      Config.reset();
+
+      const cfg = config();
+      expect(cfg.debug.logLevel).toBe("info");
+    });
   });
 
   describe("Cache Configuration", () => {
