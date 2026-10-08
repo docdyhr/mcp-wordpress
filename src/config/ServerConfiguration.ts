@@ -86,6 +86,16 @@ export class ServerConfiguration {
   }> {
     const { resolved, searched } = await this.resolveMultiSiteConfigFile();
     if (!resolved) {
+      // Opting in to multi-site and then finding no file is almost certainly a misconfiguration (the original
+      // symptom: an update wiped the file and the server quietly became single-site). Warn so it is visible
+      // even where info-level logging is suppressed.
+      if (process.env.MCP_WORDPRESS_ALLOW_MULTI_SITE === "true") {
+        this.logger.warn(
+          "MCP_WORDPRESS_ALLOW_MULTI_SITE is true but no multi-site config file was found; " +
+            "falling back to single-site mode",
+          { searched },
+        );
+      }
       if (ConfigHelpers.shouldLogInfo()) {
         this.logger.info("Multi-site config not found, using environment variables for single-site mode", {
           searched,
@@ -149,6 +159,13 @@ export class ServerConfiguration {
    * the user-level locations survive updates.
    */
   private async resolveMultiSiteConfigFile(): Promise<{ resolved?: ResolvedConfigFile; searched: string[] }> {
+    const homeDir = os.homedir();
+    const candidates: ResolvedConfigFile[] = [
+      { path: path.join(homeDir, ".config", "mcp-wordpress", "config.json"), source: "user-config-dir" },
+      { path: path.join(homeDir, "mcp-wordpress.config.json"), source: "home" },
+      { path: path.resolve(this.rootDir, "mcp-wordpress.config.json"), source: "install-dir" },
+    ];
+
     const explicitPath = this.readExplicitConfigPath();
     if (explicitPath) {
       if (!(await this.multiSiteConfigFileExists(explicitPath))) {
@@ -158,15 +175,9 @@ export class ServerConfiguration {
         this.logger.fatal(message, { configPath: explicitPath });
         throw new Error(message);
       }
+      await this.warnAboutShadowedConfigs(explicitPath, candidates);
       return { resolved: { path: explicitPath, source: "env" }, searched: [explicitPath] };
     }
-
-    const homeDir = os.homedir();
-    const candidates: ResolvedConfigFile[] = [
-      { path: path.join(homeDir, ".config", "mcp-wordpress", "config.json"), source: "user-config-dir" },
-      { path: path.join(homeDir, "mcp-wordpress.config.json"), source: "home" },
-      { path: path.resolve(this.rootDir, "mcp-wordpress.config.json"), source: "install-dir" },
-    ];
 
     const searched: string[] = [];
     for (const [index, candidate] of candidates.entries()) {
@@ -175,29 +186,34 @@ export class ServerConfiguration {
         continue;
       }
 
-      // Stale copies in several places are a real hazard (which one is live?),
-      // so say which file won and which ones were ignored.
-      const shadowed: string[] = [];
-      for (const other of candidates.slice(index + 1)) {
-        if (
-          await fsPromises.access(other.path).then(
-            () => true,
-            () => false,
-          )
-        ) {
-          shadowed.push(other.path);
-        }
-      }
-      if (shadowed.length > 0) {
-        this.logger.warn("Multiple multi-site config files found; using the first and ignoring the rest", {
-          configPath: candidate.path,
-          ignored: shadowed,
-        });
-      }
+      await this.warnAboutShadowedConfigs(candidate.path, candidates.slice(index + 1));
       return { resolved: candidate, searched };
     }
 
     return { searched };
+  }
+
+  /**
+   * Stale copies in several places are a real hazard (which one is live?), so
+   * say which file won and which lower-priority ones were ignored. Probing
+   * never throws: an unreadable shadowed copy must not break a good startup.
+   */
+  private async warnAboutShadowedConfigs(used: string, others: ResolvedConfigFile[]): Promise<void> {
+    const ignored: string[] = [];
+    for (const other of others) {
+      if (other.path === used) continue;
+      const exists = await fsPromises.access(other.path).then(
+        () => true,
+        () => false,
+      );
+      if (exists) ignored.push(other.path);
+    }
+    if (ignored.length > 0) {
+      this.logger.warn("Multiple multi-site config files found; using the first and ignoring the rest", {
+        configPath: used,
+        ignored,
+      });
+    }
   }
 
   /**

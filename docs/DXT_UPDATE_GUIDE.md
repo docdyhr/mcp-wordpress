@@ -98,7 +98,8 @@ Download: `mcp-wordpress.dxt`
 
 **Single-Site**: Enter your WordPress credentials in the UI
 
-**Multi-Site**: Skip the wizard, then open the extension's settings and turn on **Allow Multi-Site Config** (sets
+**Multi-Site**: The URL, username and app-password fields are still required by the wizard (enter placeholders; they are
+ignored once a multi-site file is loaded). Then turn on **Allow Multi-Site Config** in the extension's settings (sets
 `MCP_WORDPRESS_ALLOW_MULTI_SITE=true`; without it the server refuses to load a multi-site file). If your config is not
 in `~/.config/mcp-wordpress/config.json` or `~/mcp-wordpress.config.json`, set **Config File Path** to it.
 

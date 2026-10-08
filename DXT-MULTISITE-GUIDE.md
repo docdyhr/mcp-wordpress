@@ -291,12 +291,10 @@ The DXT package **includes everything needed**:
 - ✅ Full multi-site code
 - ✅ All dependencies
 
-**The only difference** between DXT and NPM is:
-
-- **DXT**: Config file lives in DXT installation directory
-- **NPM**: Config file lives in project working directory
-
-Both use the exact same code and work identically!
+**Both use the exact same code and the same config lookup** (see the order above): `MCP_WORDPRESS_CONFIG`,
+`~/.config/mcp-wordpress/config.json`, `~/mcp-wordpress.config.json`, then the legacy `mcp-wordpress.config.json` in the
+package root (the DXT install directory, or the npm package directory). The DXT differs only in that its install
+directory is replaced on every extension update, so keep the file in one of the user-level locations.
 
 ---
 

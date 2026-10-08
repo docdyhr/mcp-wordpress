@@ -76,14 +76,19 @@ describe("ServerConfiguration multi-site fail-closed behavior", () => {
     serverConfig = ServerConfiguration.getInstance();
     // Single-site env fallback must use known fake values, not leftover real
     // credentials from a prior test process/.env read.
-    previousEnv = Object.fromEntries(SINGLE_SITE_ENV_VARS.map((key) => [key, process.env[key]]));
+    previousEnv = Object.fromEntries(
+      [...SINGLE_SITE_ENV_VARS, "MCP_WORDPRESS_CONFIG"].map((key) => [key, process.env[key]]),
+    );
+    // A developer's exported MCP_WORDPRESS_CONFIG would turn the ENOENT fallback below into the
+    // explicit-path fatal error.
+    delete process.env.MCP_WORDPRESS_CONFIG;
     process.env.WORDPRESS_SITE_URL = "https://fallback.example.com";
     process.env.WORDPRESS_USERNAME = "fallback-user";
     process.env.WORDPRESS_APP_PASSWORD = "fallback-app-password-1234";
   });
 
   afterEach(() => {
-    for (const key of SINGLE_SITE_ENV_VARS) {
+    for (const key of [...SINGLE_SITE_ENV_VARS, "MCP_WORDPRESS_CONFIG"]) {
       if (previousEnv[key] === undefined) {
         delete process.env[key];
       } else {
@@ -172,7 +177,7 @@ describe("ServerConfiguration multi-site config file resolution", () => {
   let serverConfig;
   let installDirPath;
   let previousEnv;
-  const RESOLUTION_ENV_VARS = [...SINGLE_SITE_ENV_VARS, "MCP_WORDPRESS_CONFIG"];
+  const RESOLUTION_ENV_VARS = [...SINGLE_SITE_ENV_VARS, "MCP_WORDPRESS_CONFIG", "MCP_WORDPRESS_ALLOW_MULTI_SITE"];
 
   // Pretend only these paths exist; each file's content is a distinct single-site config
   // named after the path's role so the loaded site ID reveals which file was read.
@@ -302,6 +307,73 @@ describe("ServerConfiguration multi-site config file resolution", () => {
 
     expect(mockReadFile).not.toHaveBeenCalled();
     expect(result.configs.map((c) => c.id)).toEqual(["default"]);
+  });
+
+  describe("diagnostics", () => {
+    let warn;
+
+    beforeEach(() => {
+      warn = vi.spyOn(serverConfig.logger, "warn").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      warn.mockRestore();
+    });
+
+    it("warns about shadowed copies when a default location wins", async () => {
+      stubFiles({ [XDG_STYLE_PATH]: "xdg", [HOME_PATH]: "home", [installDirPath]: "install-dir" });
+
+      await serverConfig.loadClientConfigurations();
+
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining("Multiple multi-site config files"),
+        expect.objectContaining({ configPath: XDG_STYLE_PATH, ignored: [HOME_PATH, installDirPath] }),
+      );
+    });
+
+    it("also warns about shadowed copies when MCP_WORDPRESS_CONFIG wins", async () => {
+      process.env.MCP_WORDPRESS_CONFIG = EXPLICIT_PATH;
+      stubFiles({ [EXPLICIT_PATH]: "explicit", [HOME_PATH]: "home" });
+
+      await serverConfig.loadClientConfigurations();
+
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining("Multiple multi-site config files"),
+        expect.objectContaining({ configPath: EXPLICIT_PATH, ignored: [HOME_PATH] }),
+      );
+    });
+
+    it("does not warn when only one config file exists", async () => {
+      stubFiles({ [HOME_PATH]: "home" });
+
+      await serverConfig.loadClientConfigurations();
+
+      expect(warn).not.toHaveBeenCalled();
+    });
+
+    // The original incident: multi-site was intended, no file was found, and the server silently
+    // became single-site. If the opt-in is set that is almost certainly a misconfiguration.
+    it("warns when the multi-site opt-in is set but no config file was found", async () => {
+      process.env.MCP_WORDPRESS_ALLOW_MULTI_SITE = "true";
+      stubFiles({});
+
+      const result = await serverConfig.loadClientConfigurations();
+
+      expect(result.configs.map((c) => c.id)).toEqual(["default"]);
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining("MCP_WORDPRESS_ALLOW_MULTI_SITE is true but no multi-site config file was found"),
+        expect.objectContaining({ searched: expect.arrayContaining([HOME_PATH, installDirPath]) }),
+      );
+    });
+
+    it("stays quiet about a missing config when the opt-in is not set (plain single-site use)", async () => {
+      delete process.env.MCP_WORDPRESS_ALLOW_MULTI_SITE;
+      stubFiles({});
+
+      await serverConfig.loadClientConfigurations();
+
+      expect(warn).not.toHaveBeenCalled();
+    });
   });
 
   it("fails closed on a permission error for a default location instead of skipping it", async () => {
