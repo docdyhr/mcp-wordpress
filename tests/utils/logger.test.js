@@ -244,6 +244,37 @@ describe("Logger", () => {
     });
   });
 
+  describe("DXT mode with Debug Mode enabled", () => {
+    // NODE_ENV=dxt normally drops everything below warn. DEBUG=true is the user explicitly asking for
+    // more output (the DXT "Debug Mode" toggle), so it must not be swallowed by that suppression.
+    it("emits debug and info lines when DEBUG=true", () => {
+      process.env.NODE_ENV = "dxt";
+      process.env.DEBUG = "true";
+      delete process.env.LOG_LEVEL;
+      Config.reset();
+
+      const logger = new Logger();
+      logger.debug("Debug");
+      logger.info("Info");
+
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it("still honours an explicit LOG_LEVEL", () => {
+      process.env.NODE_ENV = "dxt";
+      process.env.DEBUG = "true";
+      process.env.LOG_LEVEL = "warn";
+      Config.reset();
+
+      const logger = new Logger();
+      logger.info("Info");
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+
+      logger.warn("Warning");
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe("LoggerFactory", () => {
     it("should create API logger", () => {
       process.env.NODE_ENV = "development";

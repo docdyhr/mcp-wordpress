@@ -176,7 +176,8 @@ export class Config {
 
       debug: {
         enabled: process.env.DEBUG === "true",
-        logLevel: process.env.LOG_LEVEL || "info",
+        // DEBUG=true (the DXT "Debug Mode" toggle) must actually surface debug lines; an explicit LOG_LEVEL still wins.
+        logLevel: process.env.LOG_LEVEL || (process.env.DEBUG === "true" ? "debug" : "info"),
       },
 
       cache: {
