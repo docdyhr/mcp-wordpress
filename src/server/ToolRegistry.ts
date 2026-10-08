@@ -44,7 +44,7 @@ export interface ToolDefinition {
  */
 export interface ToolExecutionTracker {
   startToolExecution(toolName: string, parameters: Record<string, unknown>, siteId?: string): string;
-  endToolExecution(executionId: string, success: boolean, error?: Error): void;
+  endToolExecution(executionId: string, success: boolean, error?: Error, siteId?: string): void;
 }
 
 /**
@@ -158,6 +158,7 @@ export class ToolRegistry {
           typeof args.site === "string" ? args.site : undefined,
         );
         let succeeded = false;
+        let failure: Error | undefined;
         // Declared outside the try so the catch can name the site that was actually resolved
         // (selectBestSite() may pick a configured ID other than "default" when `site` is omitted).
         let siteId = args.site;
@@ -211,6 +212,7 @@ export class ToolRegistry {
             ],
           };
         } catch (_error) {
+          failure = _error instanceof Error ? _error : undefined;
           if (this.isAuthenticationError(_error)) {
             return {
               content: [
@@ -259,7 +261,7 @@ export class ToolRegistry {
           };
         } finally {
           if (tracker && executionId !== undefined) {
-            tracker.endToolExecution(executionId, succeeded);
+            tracker.endToolExecution(executionId, succeeded, failure, typeof siteId === "string" ? siteId : undefined);
           }
         }
       },

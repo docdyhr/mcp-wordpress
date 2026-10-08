@@ -185,6 +185,62 @@ describe("PerformanceMonitor", () => {
     });
   });
 
+  describe("recent tool calls", () => {
+    it("records tool, site, status, duration and, for a failure, the error code and status", () => {
+      const error = Object.assign(new Error("Sorry, you are not allowed to do that."), {
+        statusCode: 403,
+        code: "rest_forbidden",
+      });
+
+      monitor.recordToolCall("wp_list_posts", 120, true, { site: "site1" });
+      monitor.recordToolCall("wp_get_site_settings", 80, false, { site: "site2", error });
+
+      const [newest, oldest] = monitor.getRecentToolCalls();
+      expect(oldest).toMatchObject({ tool: "wp_list_posts", site: "site1", status: "ok", durationMs: 120 });
+      expect(oldest.errorCode).toBeUndefined();
+      expect(newest).toMatchObject({
+        tool: "wp_get_site_settings",
+        site: "site2",
+        status: "error",
+        durationMs: 80,
+        statusCode: 403,
+        errorCode: "rest_forbidden",
+        error: "Sorry, you are not allowed to do that.",
+      });
+      expect(typeof newest.timestamp).toBe("number");
+    });
+
+    it("lists the newest call first and honours the limit", () => {
+      for (let i = 1; i <= 5; i++) monitor.recordToolCall(`tool_${i}`, i, true);
+
+      expect(monitor.getRecentToolCalls(3).map((c) => c.tool)).toEqual(["tool_5", "tool_4", "tool_3"]);
+    });
+
+    it("keeps only the last 50 calls", () => {
+      for (let i = 1; i <= 60; i++) monitor.recordToolCall(`tool_${i}`, 1, true);
+
+      const calls = monitor.getRecentToolCalls();
+      expect(calls).toHaveLength(50);
+      expect(calls[0].tool).toBe("tool_60");
+      expect(calls[49].tool).toBe("tool_11");
+    });
+
+    it("truncates a long error message and never stores call parameters", () => {
+      monitor.recordToolCall("wp_create_post", 5, false, { error: new Error("x".repeat(500)) });
+
+      const [call] = monitor.getRecentToolCalls();
+      expect(call.error.length).toBeLessThanOrEqual(161);
+      expect(Object.keys(call)).not.toContain("params");
+      expect(Object.keys(call)).not.toContain("parameters");
+    });
+
+    it("marks a failure without an error object (e.g. a result with success:false) as an error", () => {
+      monitor.recordToolCall("wp_cache_info", 5, false);
+
+      expect(monitor.getRecentToolCalls()[0]).toMatchObject({ tool: "wp_cache_info", status: "error" });
+    });
+  });
+
   describe("system memory metrics", () => {
     const MB = 1024 * 1024;
 

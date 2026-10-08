@@ -10,7 +10,7 @@
 The WordPress MCP Server provides **71 tools** across **12 categories** for comprehensive WordPress management through
 the Model Context Protocol.
 
-**Last Updated:** 8.10.2026 **Version:** 1.2.0 **Coverage:** 71/71 tools with examples
+**Last Updated:** 9.10.2026 **Version:** 1.2.0 **Coverage:** 71/71 tools with examples
 
 ## Quick Start
 
@@ -119,7 +119,7 @@ wp_get_site_settings --site=production
 | [`wp_seo_validate_schema`](./tools/wp_seo_validate_schema.md)                 | seo         | Validate JSON-LD schema markup for correctness and compliance                                                                                                      |
 | [`wp_spam_comment`](./tools/wp_spam_comment.md)                               | comment     | Marks a comment as spam.                                                                                                                                           |
 | [`wp_switch_auth_method`](./tools/wp_switch_auth_method.md)                   | auth        | Validates an alternative authentication method for a site without mutating the shared client used by other tool invocations. The check is in-memory only and do…   |
-| [`wp_test_auth`](./tools/wp_test_auth.md)                                     | auth        | Tests the authentication and connectivity for a configured WordPress site with detailed connection diagnostics. **Usage Examples:** • Test connection: `wp_test…   |
+| [`wp_test_auth`](./tools/wp_test_auth.md)                                     | auth        | Tests the authentication and connectivity for a configured WordPress site with detailed connection diagnostics, and reports which configuration is live (the mu…   |
 | [`wp_update_category`](./tools/wp_update_category.md)                         | taxonomy    | Updates an existing category.                                                                                                                                      |
 | [`wp_update_comment`](./tools/wp_update_comment.md)                           | comment     | Updates an existing comment.                                                                                                                                       |
 | [`wp_update_media`](./tools/wp_update_media.md)                               | media       | Updates the metadata of an existing media item.                                                                                                                    |

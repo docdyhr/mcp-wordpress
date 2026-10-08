@@ -3,7 +3,7 @@
  * Integrates with existing client and cache systems
  */
 
-import { PerformanceMonitor, PerformanceMetrics } from "./PerformanceMonitor.js";
+import { PerformanceMonitor, PerformanceMetrics, type ToolCallRecord } from "./PerformanceMonitor.js";
 import type { CacheStats } from "@/cache/CacheManager.js";
 import type { ClientStats } from "@/types/client.js";
 import { ConfigHelpers } from "@/config/Config.js";
@@ -120,7 +120,7 @@ export class MetricsCollector {
   /**
    * End tool execution and record metrics
    */
-  endToolExecution(executionId: string, success: boolean, error?: Error): void {
+  endToolExecution(executionId: string, success: boolean, error?: Error, siteId?: string): void {
     const context = this.activeTools.get(executionId);
     if (!context) return;
 
@@ -128,9 +128,19 @@ export class MetricsCollector {
 
     // A tool call is not an HTTP request (it may make several, or none); the client request
     // interceptor already counts the real requests, so record usage only.
-    this.monitor.recordToolCall(context.toolName, responseTime, success);
+    this.monitor.recordToolCall(context.toolName, responseTime, success, {
+      site: siteId ?? context.siteId,
+      error,
+    });
 
     this.activeTools.delete(executionId);
+  }
+
+  /**
+   * The most recent tool calls (newest first) for diagnostics via wp_performance_stats.
+   */
+  getRecentToolCalls(limit?: number): ToolCallRecord[] {
+    return this.monitor.getRecentToolCalls(limit);
   }
 
   /**

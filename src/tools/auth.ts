@@ -2,11 +2,36 @@ import { WordPressClient } from "@/client/api.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
 import type { AuthConfig } from "@/types/client.js";
 import { preserveToolError } from "@/utils/error.js";
+import { ServerConfiguration, type ConfigFileSource, type ConfigLoadInfo } from "@/config/ServerConfiguration.js";
 
 // Kept in sync with ConfigurationSchema's AuthMethodSchema: "cookie" is
 // deliberately excluded because it requires an already-established
 // WordPress session nonce this tool has no way to obtain.
 type SupportedAuthMethod = "app-password" | "jwt" | "basic" | "api-key";
+
+const CONFIG_SOURCE_LABELS: Record<ConfigFileSource, string> = {
+  env: "MCP_WORDPRESS_CONFIG",
+  "user-config-dir": "~/.config/mcp-wordpress",
+  home: "home directory",
+  "install-dir":
+    "extension install folder — replaced on every extension update; move it to ~/.config/mcp-wordpress/config.json",
+};
+
+/**
+ * Which configuration is live. The host does not capture an installed extension's stderr, so this is the
+ * reliable way for a user to see whether the multi-site file was found after an update.
+ */
+function describeConfiguration(info: ConfigLoadInfo | undefined): string {
+  if (!info) {
+    return "";
+  }
+  if (info.mode === "multi-site") {
+    const source = info.source ? ` (${CONFIG_SOURCE_LABELS[info.source]})` : "";
+    return `**Configuration:** multi-site, loaded from ${info.configPath}${source}\n**Configured sites:** ${info.siteIds.join(", ")}\n`;
+  }
+  const searched = info.searched?.length ? `; no multi-site config file found in: ${info.searched.join(", ")}` : "";
+  return `**Configuration:** single-site (environment variables)${searched}\n`;
+}
 
 /**
  * Provides authentication-related tools for WordPress sites.
@@ -27,7 +52,8 @@ export class AuthTools {
       {
         name: "wp_test_auth",
         description:
-          "Tests the authentication and connectivity for a configured WordPress site with detailed connection diagnostics.\n\n" +
+          "Tests the authentication and connectivity for a configured WordPress site with detailed connection diagnostics, " +
+          "and reports which configuration is live (the multi-site config file that was loaded, or the single-site fallback).\n\n" +
           "**Usage Examples:**\n" +
           "• Test connection: `wp_test_auth`\n" +
           '• Multi-site test: `wp_test_auth --site="my-site"`\n' +
@@ -132,8 +158,9 @@ export class AuthTools {
             `**Site:** ${siteConfig.baseUrl}\n` +
             `**Method:** ${siteConfig.auth.method}\n` +
             `**User:** ${user.name} (@${user.slug})\n` +
-            `**Roles:** ${user.roles?.join(", ") || "N/A"}\n\n` +
-            "Your WordPress connection is working properly.";
+            `**Roles:** ${user.roles?.join(", ") || "N/A"}\n` +
+            describeConfiguration(ServerConfiguration.getInstance().getLoadInfo()) +
+            "\nYour WordPress connection is working properly.";
 
           return { content };
         })(),

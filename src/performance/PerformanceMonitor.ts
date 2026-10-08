@@ -5,6 +5,30 @@
 
 import v8 from "v8";
 import { ConfigHelpers } from "@/config/Config.js";
+import { getErrorMessage } from "@/utils/error.js";
+
+/**
+ * One MCP tool invocation, kept in memory so a user can see "which tool, which site, did it work, why not"
+ * through a tool — the host (Claude Desktop) does not capture an installed extension's stderr. Call
+ * parameters are deliberately not stored.
+ */
+export interface ToolCallRecord {
+  /** Epoch milliseconds when the call finished. */
+  timestamp: number;
+  tool: string;
+  site?: string | undefined;
+  status: "ok" | "error";
+  durationMs: number;
+  /** HTTP status of the underlying WordPress error, when there was one. */
+  statusCode?: number | undefined;
+  /** WordPress/transport error code, e.g. "rest_forbidden". */
+  errorCode?: string | undefined;
+  /** Error message, truncated. */
+  error?: string | undefined;
+}
+
+const MAX_RECENT_TOOL_CALLS = 50;
+const MAX_RECORDED_ERROR_LENGTH = 160;
 
 export interface PerformanceMetrics {
   // Request Performance
@@ -109,6 +133,7 @@ export class PerformanceMonitor {
   private config: PerformanceConfig;
   private startTime: number;
   private responseTimes: number[] = [];
+  private recentToolCalls: ToolCallRecord[] = [];
   private collectionTimer?: NodeJS.Timeout;
   private lastAlertTime: Map<string, number> = new Map();
   private static readonly ALERT_COOLDOWN_MS = 15 * 60 * 1000; // 15 minutes
@@ -229,8 +254,36 @@ export class PerformanceMonitor {
    * Record one MCP tool invocation. A tool call is not an HTTP request — it may make several
    * or none (e.g. wp_performance_stats) — so this updates tool usage only, never request totals.
    */
-  recordToolCall(toolName: string, responseTime: number, success: boolean): void {
+  recordToolCall(
+    toolName: string,
+    responseTime: number,
+    success: boolean,
+    details: { site?: string | undefined; error?: Error | undefined } = {},
+  ): void {
     this.recordToolUsage(toolName, responseTime, success);
+
+    const { site, error } = details;
+    const wpError = error as (Error & { statusCode?: unknown; code?: unknown }) | undefined;
+    this.recentToolCalls.push({
+      timestamp: Date.now(),
+      tool: toolName,
+      site,
+      status: success ? "ok" : "error",
+      durationMs: responseTime,
+      statusCode: typeof wpError?.statusCode === "number" ? wpError.statusCode : undefined,
+      errorCode: typeof wpError?.code === "string" ? wpError.code : undefined,
+      error: error ? getErrorMessage(error).slice(0, MAX_RECORDED_ERROR_LENGTH) : undefined,
+    });
+    if (this.recentToolCalls.length > MAX_RECENT_TOOL_CALLS) {
+      this.recentToolCalls.shift();
+    }
+  }
+
+  /**
+   * The most recent tool calls, newest first (at most the last 50 are kept).
+   */
+  getRecentToolCalls(limit: number = MAX_RECENT_TOOL_CALLS): ToolCallRecord[] {
+    return limit > 0 ? this.recentToolCalls.slice(-limit).reverse() : [];
   }
 
   /**

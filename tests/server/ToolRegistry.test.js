@@ -346,7 +346,7 @@ describe("ToolRegistry", () => {
       await call({ site: "default" });
 
       expect(collector.startToolExecution).toHaveBeenCalledWith("wp_test_tool", { site: "default" }, "default");
-      expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", true);
+      expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", true, undefined, "default");
     });
 
     it("records a failed tool call and still returns the normal error result", async () => {
@@ -360,7 +360,7 @@ describe("ToolRegistry", () => {
 
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toBe("Error: boom");
-      expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", false);
+      expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", false, expect.any(Error), "default");
     });
 
     // Regression: tracking began only after site selection, so a call naming an unknown site returned an
@@ -382,7 +382,7 @@ describe("ToolRegistry", () => {
 
       expect(result.isError).toBe(true);
       expect(collector.startToolExecution).toHaveBeenCalledWith("wp_test_tool", { site: "nope" }, "nope");
-      expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", false);
+      expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", false, undefined, "nope");
     });
 
     // Some handlers catch their own errors and return a descriptive object instead of throwing
@@ -398,7 +398,7 @@ describe("ToolRegistry", () => {
       const result = await call();
 
       expect(result.isError).toBeUndefined();
-      expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", false);
+      expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", false, undefined, "default");
     });
 
     it.each([
@@ -412,7 +412,53 @@ describe("ToolRegistry", () => {
 
       await call();
 
-      expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", true);
+      expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", true, undefined, "default");
+    });
+
+    // Diagnostics for the DXT, whose stderr the host does not capture: which tool failed, on which site, why.
+    it("passes the thrown error and the resolved site so failures can be listed", async () => {
+      const server = createMockServer();
+      const registry = new ToolRegistry(server, new Map([["blog", {}]]));
+      registry.registerTool(
+        simpleTool({
+          handler: async () => {
+            throw new WordPressAPIError("Not allowed", 403, "rest_forbidden");
+          },
+        }),
+      );
+      const collector = createCollector();
+      registry.setMetricsCollector(collector);
+
+      await server._registeredTools.get("wp_test_tool").handler({});
+
+      expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", false, expect.any(WordPressAPIError), "blog");
+    });
+
+    it("shows recent calls in wp_performance_stats, including a failed call's code and status", async () => {
+      const server = createMockServer();
+      const registry = new ToolRegistry(server, new Map([["default", {}]]));
+      registry.registerAllTools();
+      registry.registerTool(
+        simpleTool({
+          handler: async () => {
+            throw new WordPressAPIError("Sorry, you are not allowed to do that.", 403, "rest_forbidden");
+          },
+        }),
+      );
+
+      await server._registeredTools.get("wp_test_tool").handler({});
+      const stats = await server._registeredTools.get("wp_performance_stats").handler({ category: "tools" });
+
+      const { recentCalls } = JSON.parse(stats.content[0].text).data.tools;
+      expect(recentCalls[0]).toMatchObject({
+        tool: "wp_test_tool",
+        site: "default",
+        status: "error",
+        statusCode: 403,
+        errorCode: "rest_forbidden",
+      });
+      expect(typeof recentCalls[0].durationMs).toBe("number");
+      expect(new Date(recentCalls[0].timestamp).toISOString()).toBe(recentCalls[0].timestamp);
     });
 
     it("works without a collector", async () => {

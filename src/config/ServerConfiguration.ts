@@ -21,7 +21,22 @@ import {
 // Re-export types from schema for backward compatibility
 export type { SiteConfig, MultiSiteConfig, McpConfigType };
 
-type ConfigFileSource = "env" | "user-config-dir" | "home" | "install-dir";
+export type ConfigFileSource = "env" | "user-config-dir" | "home" | "install-dir";
+
+/**
+ * How the last call to loadClientConfigurations() configured the server. Exposed so a tool can report it:
+ * the host does not capture an installed extension's stderr, so logging alone cannot tell a user which
+ * config file is live.
+ */
+export interface ConfigLoadInfo {
+  mode: "multi-site" | "single-site";
+  /** The multi-site file that was loaded (multi-site only). */
+  configPath?: string;
+  source?: ConfigFileSource;
+  siteIds: string[];
+  /** Where a multi-site file was looked for and not found (single-site only). */
+  searched?: string[];
+}
 
 interface ResolvedConfigFile {
   path: string;
@@ -37,6 +52,7 @@ export class ServerConfiguration {
   private readonly logger = LoggerFactory.server();
   private rootDir: string;
   private envPath: string;
+  private loadInfo: ConfigLoadInfo | undefined;
 
   constructor() {
     const __filename = fileURLToPath(import.meta.url);
@@ -101,7 +117,9 @@ export class ServerConfiguration {
           searched,
         });
       }
-      return this.loadSingleSiteFromEnv(mcpConfig);
+      const singleSite = this.loadSingleSiteFromEnv(mcpConfig);
+      this.loadInfo = { mode: "single-site", siteIds: singleSite.configs.map((site) => site.id), searched };
+      return singleSite;
     }
 
     const { path: configPath, source } = resolved;
@@ -126,7 +144,16 @@ export class ServerConfiguration {
     // IDs, client construction) must stop startup rather than silently
     // falling back to single-site env config — loadMultiSiteConfig() already
     // logs a fatal diagnostic and rethrows.
-    return await this.loadMultiSiteConfig(configPath, source);
+    const multiSite = await this.loadMultiSiteConfig(configPath, source);
+    this.loadInfo = { mode: "multi-site", configPath, source, siteIds: multiSite.configs.map((site) => site.id) };
+    return multiSite;
+  }
+
+  /**
+   * How the server was configured by the most recent load, or undefined before any load.
+   */
+  public getLoadInfo(): ConfigLoadInfo | undefined {
+    return this.loadInfo;
   }
 
   /**
