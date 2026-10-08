@@ -127,8 +127,13 @@ function outputLog(entry: LogEntry): void {
       return;
     }
 
-    // In DXT mode, suppress most logging
-    if (ConfigHelpers.isDXT() && LOG_LEVELS[entry.level] < LOG_LEVELS.warn) {
+    // In DXT mode, suppress most logging — unless Debug Mode (DEBUG=true) was switched on, which is the
+    // user explicitly asking for more output. shouldLog() has already applied the minimum level.
+    if (
+      ConfigHelpers.isDXT() &&
+      LOG_LEVELS[entry.level] < LOG_LEVELS.warn &&
+      !ConfigHelpers.get().get().debug.enabled
+    ) {
       return;
     }
   } catch {
