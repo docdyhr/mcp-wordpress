@@ -7,10 +7,27 @@ import type { WordPressClient } from "@/client/api.js";
 import { CachedWordPressClient } from "@/client/CachedWordPressClient.js";
 import { toolWrapper } from "@/utils/toolWrapper.js";
 import { LoggerFactory } from "@/utils/logger.js";
+import { SecurityConfig } from "@/security/SecurityConfig.js";
 
 /**
  * Cache management tools class
  */
+/** "14400000" -> "4 hours"; exact units only, otherwise raw milliseconds. */
+function formatDuration(ms: number): string {
+  const units: Array<[string, number]> = [
+    ["hour", 3_600_000],
+    ["minute", 60_000],
+    ["second", 1_000],
+  ];
+  for (const [name, size] of units) {
+    if (ms >= size && ms % size === 0) {
+      const count = ms / size;
+      return `${count} ${name}${count === 1 ? "" : "s"}`;
+    }
+  }
+  return `${ms} ms`;
+}
+
 export class CacheTools {
   private readonly logger = LoggerFactory.tool("cache");
 
@@ -185,18 +202,20 @@ export class CacheTools {
 
           return {
             caching_enabled: true,
+            // The same SecurityConfig.cache values CachedWordPressClient builds its CacheManager from.
             cache_configuration: {
-              max_size: "Configured in SecurityConfig.cache.maxSize",
-              default_ttl: "Configured in SecurityConfig.cache.defaultTTL",
-              lru_enabled: "Configured in SecurityConfig.cache.enableLRU",
-              stats_enabled: "Configured in SecurityConfig.cache.enableStats",
+              max_size: SecurityConfig.cache.maxSize,
+              default_ttl: formatDuration(SecurityConfig.cache.defaultTTL),
+              default_ttl_ms: SecurityConfig.cache.defaultTTL,
+              lru_enabled: SecurityConfig.cache.enableLRU,
+              stats_enabled: SecurityConfig.cache.enableStats,
             },
             ttl_presets: {
-              static_data: "4 hours (site settings, user roles)",
-              semi_static_data: "2 hours (categories, tags, user profiles)",
-              dynamic_data: "15 minutes (posts, pages, comments)",
-              session_data: "30 minutes (authentication, current user)",
-              realtime_data: "1 minute (real-time data)",
+              static_data: `${formatDuration(SecurityConfig.cache.ttlPresets.static)} (site settings, user roles)`,
+              semi_static_data: `${formatDuration(SecurityConfig.cache.ttlPresets.semiStatic)} (categories, tags, user profiles)`,
+              dynamic_data: `${formatDuration(SecurityConfig.cache.ttlPresets.dynamic)} (posts, pages, comments)`,
+              session_data: `${formatDuration(SecurityConfig.cache.ttlPresets.session)} (authentication, current user)`,
+              realtime_data: `${formatDuration(SecurityConfig.cache.ttlPresets.realtime)} (real-time data)`,
             },
             current_stats: {
               total_entries: stats.cache.totalSize,

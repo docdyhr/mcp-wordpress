@@ -6,10 +6,12 @@ Lists comments from a WordPress site, with filters.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                                               | Default   | Examples  |
-| --------- | -------- | -------- | --------------------------------------------------------- | --------- | --------- |
-| `post`    | `number` | ❌       | Limit results to comments assigned to a specific post ID. | -         | `example` |
-| `status`  | `string` | ❌       | Filter by comment status.                                 | `publish` | `example` |
+| Parameter  | Type     | Required | Description                                                                | Default   | Examples   |
+| ---------- | -------- | -------- | -------------------------------------------------------------------------- | --------- | ---------- |
+| `post`     | `number` | ❌       | Limit results to comments assigned to a specific post ID.                  | -         | `example`  |
+| `status`   | `string` | ❌       | Filter by comment status.                                                  | `publish` | `example`  |
+| `per_page` | `number` | ❌       | Number of comments to return per page (max 100). WordPress defaults to 10. | `10`      | `10`, `20` |
+| `page`     | `number` | ❌       | Page of results to return (1-based).                                       | `1`       | `example`  |
 
 ## Examples
 
@@ -62,6 +64,38 @@ Using wp_list_comments with specific site targeting
 
 ```bash
 wp_list_comments --site="site1" --post="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "Example comment 1",
+      "status": "publish"
+    },
+    {
+      "id": 2,
+      "title": "Example comment 2",
+      "status": "draft"
+    }
+  ],
+  "total": 2,
+  "pages": 1
+}
+```
+
+### Advanced comment Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_list_comments --post="example_value" --status="publish" --per_page="10" --page="1"
 ```
 
 **Response:**

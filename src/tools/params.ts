@@ -15,6 +15,23 @@ export function toolParams<T>(params: Record<string, unknown>): T {
   return params as T;
 }
 
+/**
+ * Trailing note for a list tool whose result filled a page, so the caller knows to ask for the next one.
+ * WordPress returns 10 items per page unless `per_page` says otherwise, and these tools do not receive
+ * the X-WP-Total header, so "the page is full" is the only signal that more may exist.
+ */
+export function pageHint(count: number, params: Record<string, unknown>): string {
+  const perPage = Number(params.per_page) || 10;
+  if (count < perPage) {
+    return "";
+  }
+  const page = Number(params.page) || 1;
+  return (
+    `\n\n📄 Page ${page} is full (${perPage} per page) — more may exist; ` +
+    `request \`page=${page + 1}\` or raise \`per_page\` (max 100).`
+  );
+}
+
 const IdSchema = z.object({
   id: z.number().int().positive("ID must be a positive integer"),
 });

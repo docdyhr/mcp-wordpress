@@ -191,9 +191,14 @@ export class UserTools {
       const metadata = [
         `👥 **Users Summary**: ${userCount} total users`,
         `🌐 **Source**: ${siteUrl}`,
-        `📊 **Roles Distribution**: ${Object.entries(rolesSummary)
-          .map(([role, count]) => `${role}: ${count}`)
-          .join(", ")}`,
+        // WordPress omits `roles` unless the caller may list/edit users; say so rather than print nothing.
+        `📊 **Roles Distribution**: ${
+          Object.keys(rolesSummary).length > 0
+            ? Object.entries(rolesSummary)
+                .map(([role, count]) => `${role}: ${count}`)
+                .join(", ")
+            : "Restricted (requires admin)"
+        }`,
         `📅 **Retrieved**: ${new Date().toLocaleString()}`,
       ];
 
