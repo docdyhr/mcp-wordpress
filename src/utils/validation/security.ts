@@ -20,12 +20,26 @@ import { WordPressAPIError } from "@/types/client.js";
  * itself must be a regular file — symlinks, directories, and other special
  * files are rejected outright regardless of where they point.
  */
+/**
+ * Error codes of the 403s `validateFilePath` raises itself. These are local configuration/validation failures,
+ * not WordPress permission denials — callers (e.g. `ToolRegistry`) use this set to tell the two apart, so every
+ * 403 thrown below must take its code from here.
+ */
+export const FILE_ACCESS_ERROR_CODES = {
+  uploadsDisabled: "UPLOADS_DISABLED",
+  symlinkNotAllowed: "SYMLINK_NOT_ALLOWED",
+  notARegularFile: "NOT_A_REGULAR_FILE",
+  pathTraversalAttempt: "PATH_TRAVERSAL_ATTEMPT",
+} as const;
+
+export const LOCAL_FILE_ACCESS_ERROR_CODES: ReadonlySet<string> = new Set(Object.values(FILE_ACCESS_ERROR_CODES));
+
 export function validateFilePath(userPath: string, allowedBasePath: string | undefined | null): string {
   if (!allowedBasePath) {
     throw new WordPressAPIError(
       "Local file uploads are disabled. Set MCP_UPLOAD_BASE_DIR to an explicit, existing directory to enable them.",
       403,
-      "UPLOADS_DISABLED",
+      FILE_ACCESS_ERROR_CODES.uploadsDisabled,
     );
   }
 
@@ -61,11 +75,19 @@ export function validateFilePath(userPath: string, allowedBasePath: string | und
   }
 
   if (candidateLstat.isSymbolicLink()) {
-    throw new WordPressAPIError("Invalid file path: symlinks are not allowed", 403, "SYMLINK_NOT_ALLOWED");
+    throw new WordPressAPIError(
+      "Invalid file path: symlinks are not allowed",
+      403,
+      FILE_ACCESS_ERROR_CODES.symlinkNotAllowed,
+    );
   }
 
   if (!candidateLstat.isFile()) {
-    throw new WordPressAPIError("Invalid file path: only regular files may be uploaded", 403, "NOT_A_REGULAR_FILE");
+    throw new WordPressAPIError(
+      "Invalid file path: only regular files may be uploaded",
+      403,
+      FILE_ACCESS_ERROR_CODES.notARegularFile,
+    );
   }
 
   // Resolves any symlinked ancestor directories so a path that only escapes
@@ -76,7 +98,7 @@ export function validateFilePath(userPath: string, allowedBasePath: string | und
     relative !== "" && relative !== ".." && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative);
 
   if (!isContained) {
-    throw new WordPressAPIError("Invalid file path: access denied", 403, "PATH_TRAVERSAL_ATTEMPT");
+    throw new WordPressAPIError("Invalid file path: access denied", 403, FILE_ACCESS_ERROR_CODES.pathTraversalAttempt);
   }
 
   return resolvedCandidate;

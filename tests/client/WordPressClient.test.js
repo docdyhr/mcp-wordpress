@@ -332,7 +332,7 @@ describe("WordPressClient", () => {
       });
 
       // A bare 401 on a non-media endpoint surfaces as WordPressAPIError with statusCode 401
-      // (not the AuthenticationError subclass, which is reserved for media-upload 401/403) —
+      // (not the AuthenticationError subclass, which is used for media-upload 401s and handshake failures) —
       // this must survive to the caller so ToolRegistry's isAuthenticationError() can act on it.
       const authError = await client.get("posts").catch((e) => e);
       expect(authError).toBeInstanceOf(WordPressAPIError);
@@ -401,6 +401,48 @@ describe("WordPressClient", () => {
       expect(error.code).toBe("rest_cannot_view");
       expect(error.data).toEqual({ status: 403 });
       expect(error.message).toBe("Sorry, you cannot view this.");
+    });
+
+    // Regression: a media-upload 403 was wrapped in AuthenticationError, whose constructor rewrites the
+    // status to 401 and drops the WordPress code — so wp_upload_media kept saying "check your credentials"
+    // for a capability or plugin denial.
+    it("keeps a media-upload 403 as a 403 permission error with its WordPress code", async () => {
+      const body =
+        '{"code":"rest_cannot_create","message":"Sorry, you are not allowed to upload files.","data":{"status":403}}';
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 403,
+        statusText: "Forbidden",
+        headers: new Map([["content-type", "application/json"]]),
+        json: vi.fn().mockResolvedValue(JSON.parse(body)),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf(body)),
+      });
+
+      const error = await client.post("media", {}).catch((e) => e);
+
+      expect(error).toBeInstanceOf(WordPressAPIError);
+      expect(error.name).toBe("WordPressAPIError");
+      expect(error.statusCode).toBe(403);
+      expect(error.code).toBe("rest_cannot_create");
+      expect(error.message).toContain("Media upload blocked");
+      expect(error.message).toContain("Sorry, you are not allowed to upload files.");
+    });
+
+    it("still reports a media-upload 401 as an authentication error", async () => {
+      const body = '{"code":"rest_cannot_create","message":"You are not logged in."}';
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 401,
+        statusText: "Unauthorized",
+        headers: new Map([["content-type", "application/json"]]),
+        json: vi.fn().mockResolvedValue(JSON.parse(body)),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf(body)),
+      });
+
+      const error = await client.post("media", {}).catch((e) => e);
+
+      expect(error.name).toBe("AuthenticationError");
+      expect(error.statusCode).toBe(401);
     });
 
     it("leaves the error code undefined when the 403 body is not JSON (e.g. a firewall page)", async () => {

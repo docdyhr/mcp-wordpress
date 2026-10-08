@@ -817,12 +817,17 @@ export class WordPressClient implements IWordPressClient {
     }
 
     if (response.status === 403 && originalEndpoint.includes("media") && fetchOptions.method === "POST") {
-      throw new AuthenticationError(
+      // A 403 means the credentials were accepted but the upload was refused (missing upload_files capability, or a
+      // plugin/firewall). Keep it a 403 with WordPress's code — AuthenticationError would rewrite it to a 401 and
+      // send callers off to check their credentials.
+      throw new WordPressAPIError(
         "Media upload blocked: WordPress REST API media uploads appear to be disabled or restricted by a plugin/security policy. " +
           `Error: ${errorMessage}. ` +
           "Common causes: W3 Total Cache, security plugins, or custom REST API restrictions. " +
           "Please check WordPress admin settings or contact your system administrator.",
-        this.auth.method,
+        403,
+        errorCode,
+        errorBody,
       );
     }
 
