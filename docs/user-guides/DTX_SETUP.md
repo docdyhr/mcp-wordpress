@@ -112,28 +112,35 @@ The DTX package supports multi-site configuration, but requires manual setup:
 }
 ```
 
-1. **Place the file in one of these locations:**
-   - **macOS/Linux**: `~/mcp-wordpress.config.json`
-   - **Windows**: `%USERPROFILE%\mcp-wordpress.config.json`
-   - **DTX Install Directory**: Next to the DTX package files
+1. **Place the file in one of these locations** (first existing file wins):
+   - `~/.config/mcp-wordpress/config.json` (`%USERPROFILE%\.config\mcp-wordpress\config.json` on Windows)
+   - `~/mcp-wordpress.config.json` (`%USERPROFILE%\mcp-wordpress.config.json` on Windows)
+   - _Legacy:_ the DTX install directory, next to the package files. Claude Desktop **replaces that directory on every
+     extension update**, so a config kept there disappears; prefer one of the locations above.
 
-2. **Skip the DTX configuration prompts (or enter dummy values)**
+2. **Fill in the DTX configuration prompts** — the site URL, username and application password are required fields, but
+   they are ignored once a multi-site file is loaded, so placeholder values are fine. Then turn on **Allow Multi-Site
+   Config** (sets `MCP_WORDPRESS_ALLOW_MULTI_SITE=true`; without it the server refuses to load a multi-site file and
+   stops with an error naming the file).
 
 3. **Restart Claude Desktop** - the server will detect and use your config file
 
 #### Method 2: Environment Variable Override
 
-Set the `MCP_WORDPRESS_CONFIG_PATH` environment variable to point to your config file:
+To keep the file somewhere else, set **Config File Path** in the extension's settings, or set the `MCP_WORDPRESS_CONFIG`
+environment variable (there is no `MCP_WORDPRESS_CONFIG_PATH`) to the file's absolute path:
 
 ```bash
 # macOS/Linux
-export MCP_WORDPRESS_CONFIG_PATH=/path/to/mcp-wordpress.config.json
+export MCP_WORDPRESS_CONFIG=/path/to/mcp-wordpress.config.json
 
 # Windows
-set MCP_WORDPRESS_CONFIG_PATH=C:\path\to\mcp-wordpress.config.json
+set MCP_WORDPRESS_CONFIG=C:\path\to\mcp-wordpress.config.json
 ```
 
-Then restart Claude Desktop.
+If the path is set but the file does not exist, the server stops with an error instead of falling back to the
+single-site settings. `MCP_WORDPRESS_ALLOW_MULTI_SITE=true` is still required (**Allow Multi-Site Config**). Then
+restart Claude Desktop.
 
 ### How Multi-Site Works with DTX
 

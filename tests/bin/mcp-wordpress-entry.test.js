@@ -70,7 +70,11 @@ describe("bin/mcp-wordpress.js entry-point dispatch", () => {
   });
 
   function runEntry(entryFileName) {
-    const cleanEnv = { ...process.env };
+    // HOME/USERPROFILE point at the sandbox too: ServerConfiguration also looks for
+    // ~/.config/mcp-wordpress/config.json and ~/mcp-wordpress.config.json, which on a
+    // dev machine can hold a real multi-site config and would defeat the isolation.
+    const cleanEnv = { ...process.env, HOME: sandboxDir, USERPROFILE: sandboxDir };
+    delete cleanEnv.MCP_WORDPRESS_CONFIG;
     for (const key of Object.keys(cleanEnv)) {
       if (key.startsWith("WORDPRESS_")) delete cleanEnv[key];
     }

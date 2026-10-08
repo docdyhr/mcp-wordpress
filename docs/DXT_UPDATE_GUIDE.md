@@ -63,14 +63,17 @@ The version is shown when the server starts.
 
 ### Step 1: Backup Your Configuration
 
-If you're using multi-site configuration:
+If you're using multi-site configuration, check where your config file lives. Claude Desktop replaces the extension
+install directory on every update, so only a config stored **outside** it survives:
+
+- `~/.config/mcp-wordpress/config.json`, `~/mcp-wordpress.config.json`, or the path set in the extension's **Config File
+  Path** setting — nothing to back up; the new version picks it up automatically.
+- `mcp-wordpress.config.json` inside the extension install directory (legacy) — move it out now:
 
 ```bash
-# Find your DXT installation directory
-cd ~/Library/Application\ Support/Claude/Claude\ Extensions/local.dxt.thomas-dyhr.mcp-wordpress/
-
-# Backup your config file (if it exists)
-cp mcp-wordpress.config.json ~/mcp-wordpress.config.json.backup
+mkdir -p ~/.config/mcp-wordpress
+cp ~/Library/Application\ Support/Claude/Claude\ Extensions/local.dxt.thomas-dyhr.mcp-wordpress/mcp-wordpress.config.json \
+   ~/.config/mcp-wordpress/config.json
 ```
 
 ### Step 2: Download Latest Version
@@ -95,11 +98,10 @@ Download: `mcp-wordpress.dxt`
 
 **Single-Site**: Enter your WordPress credentials in the UI
 
-**Multi-Site**: Skip the wizard, then copy your backed-up config:
-
-```bash
-cp ~/mcp-wordpress.config.json.backup ~/Library/Application\ Support/Claude/Claude\ Extensions/local.dxt.thomas-dyhr.mcp-wordpress/mcp-wordpress.config.json
-```
+**Multi-Site**: The URL, username and app-password fields are still required by the wizard (enter placeholders; they are
+ignored once a multi-site file is loaded). Then turn on **Allow Multi-Site Config** in the extension's settings (sets
+`MCP_WORDPRESS_ALLOW_MULTI_SITE=true`; without it the server refuses to load a multi-site file). If your config is not
+in `~/.config/mcp-wordpress/config.json` or `~/mcp-wordpress.config.json`, set **Config File Path** to it.
 
 ### Step 5: Restart Claude Desktop
 
