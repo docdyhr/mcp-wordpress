@@ -20,6 +20,14 @@ describe("decodeHtmlEntities", () => {
     );
   });
 
+  // Regression: names were looked up on a plain object, so "&constructor;" resolved to Object's
+  // inherited function and was replaced by its source text.
+  it("leaves references that match inherited Object properties untouched", () => {
+    expect(decodeHtmlEntities("&constructor; &toString; &valueOf; &hasOwnProperty;")).toBe(
+      "&constructor; &toString; &valueOf; &hasOwnProperty;",
+    );
+  });
+
   it("decodes hexadecimal numeric references", () => {
     expect(decodeHtmlEntities("&#x2019; &#X41;")).toBe("’ A");
   });
@@ -65,6 +73,19 @@ describe("htmlToPlainText", () => {
 
   it("drops script and style elements together with their contents", () => {
     expect(htmlToPlainText("a<script>alert('x > y')</script>b<STYLE>p{color:red}</STYLE>c")).toBe("abc");
+  });
+
+  // Regression: closing tags were found by prefix, so "</scripture>" ended a <script> element early.
+  it("only ends script/style at a real closing tag, not at a longer tag name", () => {
+    expect(htmlToPlainText('<script>const x="</scripture>"; leak();</script>visible')).toBe("visible");
+    expect(htmlToPlainText("<STYLE>a{}</stylesheet>b{}</STYLE >after")).toBe("after");
+  });
+
+  // Regression: offsets found in a lowercased copy were applied to the original, but toLowerCase() can
+  // change length ("\u0130" becomes two code units), so the visible tail was cut off.
+  it("keeps the visible text after a script when earlier text changes length under lowercasing", () => {
+    const dotted = "\u0130".repeat(10);
+    expect(htmlToPlainText(`${dotted}<script>x</script>visible tail`)).toBe(`${dotted}visible tail`);
   });
 
   it("handles a '>' inside a quoted attribute value", () => {

@@ -182,11 +182,21 @@ describe("wp_get_post output", () => {
     expect(text).toContain("**Word Count**: 4");
   });
 
+  // The rendered body is what wp_seo_analyze_content counts, even when it is empty.
+  it("counts an empty rendered body as zero words even if raw has text", async () => {
+    const client = makeClient();
+    client.getPost.mockResolvedValue(makePost({ content: { raw: "<p>some raw text</p>", rendered: "" } }));
+
+    const text = await handleGetPost(client, { id: 1 });
+
+    expect(text).toContain("**Word Count**: 0");
+  });
+
   it("counts the words of ordinary markup, not its tags or attributes", async () => {
     const client = makeClient();
     client.getPost.mockResolvedValue(
       makePost({
-        content: { raw: '<p>One <a href="https://x.example/a" class="b c">two three</a></p>', rendered: "" },
+        content: { raw: '<p>One <a href="https://x.example/a" class="b c">two three</a></p>' },
       }),
     );
 

@@ -292,7 +292,7 @@ export async function handleGetPost(
     const excerpt = htmlToPlainText(post.excerpt?.rendered);
     // Same source and pipeline as the SEO analyzer (the rendered body, which is what readers see) so the two tools
     // agree on a post's length even when raw block markup or shortcodes differ from the rendered output.
-    const wordCount = countWords(htmlToPlainText(post.content?.rendered || content));
+    const wordCount = countWords(htmlToPlainText(post.content?.rendered ?? content));
 
     // Build comprehensive response
     let response = `# ${displayTitle(post.title.rendered)}\n\n`;

@@ -94,7 +94,9 @@ export function decodeHtmlEntities(text: unknown): string {
   return text.replace(ENTITY_PATTERN, (match, decimal?: string, hex?: string, name?: string) => {
     if (decimal !== undefined) return codePointToString(parseInt(decimal, 10)) ?? match;
     if (hex !== undefined) return codePointToString(parseInt(hex, 16)) ?? match;
-    return (name !== undefined ? NAMED_ENTITIES[name] : undefined) ?? match;
+    // Own properties only: a plain object also answers for "constructor", "toString", ...
+    const known = name !== undefined && Object.prototype.hasOwnProperty.call(NAMED_ENTITIES, name);
+    return (known ? NAMED_ENTITIES[name] : undefined) ?? match;
   });
 }
 
@@ -102,6 +104,18 @@ export function decodeHtmlEntities(text: unknown): string {
 function startsMarkup(html: string, index: number): boolean {
   const next = html[index + 1];
   return next !== undefined && /[A-Za-z/!?]/.test(next);
+}
+
+/**
+ * Index of the next `</name` closing tag at or after `from`, or -1. Matched case-insensitively on the original
+ * string (lowercasing a copy can change its length, which would shift every offset) and only when the name is
+ * followed by a delimiter, so `</scripture>` does not end a `<script>`.
+ */
+function findClosingTag(html: string, name: string, from: number): number {
+  const pattern = new RegExp(`</${name}(?=[\\s/>]|$)`, "gi");
+  pattern.lastIndex = from;
+  const match = pattern.exec(html);
+  return match ? match.index : -1;
 }
 
 /** Index of the `>` that ends the tag starting at `start`, honouring quoted attribute values. */
@@ -136,7 +150,6 @@ export function htmlToPlainText(html: unknown, options: { maxLength?: number } =
     return "";
   }
 
-  const lower = html.toLowerCase();
   let text = "";
   let i = 0;
 
@@ -162,7 +175,7 @@ export function htmlToPlainText(html: unknown, options: { maxLength?: number } =
     i = end + 1;
 
     if (OPAQUE_TAGS.has(name) && !closing) {
-      const close = lower.indexOf(`</${name}`, i);
+      const close = findClosingTag(html, name, i);
       if (close === -1) break;
       const closeEnd = html.indexOf(">", close);
       if (closeEnd === -1) break;
