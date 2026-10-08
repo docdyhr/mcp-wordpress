@@ -17,6 +17,10 @@ sanitization internals (`src/security/AGENTS.md`) that tools call into.
 function. Zod is applied centrally at registration time (`src/server/ToolRegistry.ts`), not at the definition site —
 don't add per-tool Zod schemas.
 
+**Taxonomy deletes are permanent**: `wp_delete_category` and `wp_delete_tag` must pass `force=true` to the client.
+WordPress terms have no trash, so the client's default `force=false` is always rejected; there is deliberately no
+`force` input. Keep the tool descriptions saying "Permanently deletes".
+
 **Registration contract**: each exported class (`src/tools/index.ts`) must implement
 `getTools(): { name, description, inputSchema, handler }[]`. `ToolRegistry.registerAllTools()` instantiates every class
 (some, like `CacheTools`/`PerformanceTools`, take the `wordpressClients` map in their constructor), converts each
