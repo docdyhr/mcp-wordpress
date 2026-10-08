@@ -765,7 +765,7 @@
     },
     "/tools/wp_delete_category": {
       "post": {
-        "summary": "Deletes a category.",
+        "summary": "Permanently deletes a category (WordPress terms have no trash).",
         "description": "Execute wp_delete_category MCP tool",
         "tags": [
           "taxonomy"
@@ -1026,7 +1026,7 @@
     },
     "/tools/wp_delete_tag": {
       "post": {
-        "summary": "Deletes a tag.",
+        "summary": "Permanently deletes a tag (WordPress terms have no trash).",
         "description": "Execute wp_delete_tag MCP tool",
         "tags": [
           "taxonomy"

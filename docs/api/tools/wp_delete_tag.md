@@ -2,7 +2,7 @@
 
 ![taxonomy](https://img.shields.io/badge/category-taxonomy-lightgrey)
 
-Deletes a tag.
+Permanently deletes a tag (WordPress terms have no trash).
 
 ## Parameters
 
