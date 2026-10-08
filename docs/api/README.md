@@ -10,7 +10,7 @@
 The WordPress MCP Server provides **71 tools** across **12 categories** for comprehensive WordPress management through
 the Model Context Protocol.
 
-**Last Updated:** 5.9.2026 **Version:** 1.2.0 **Coverage:** 71/71 tools with examples
+**Last Updated:** 8.10.2026 **Version:** 1.2.0 **Coverage:** 71/71 tools with examples
 
 ## Quick Start
 
@@ -72,12 +72,12 @@ wp_get_site_settings --site=production
 | [`wp_create_tag`](./tools/wp_create_tag.md)                                   | taxonomy    | Creates a new tag.                                                                                                                                                 |
 | [`wp_create_user`](./tools/wp_create_user.md)                                 | user        | Creates a new user.                                                                                                                                                |
 | [`wp_delete_application_password`](./tools/wp_delete_application_password.md) | site        | Revokes an existing application password.                                                                                                                          |
-| [`wp_delete_category`](./tools/wp_delete_category.md)                         | taxonomy    | Deletes a category.                                                                                                                                                |
+| [`wp_delete_category`](./tools/wp_delete_category.md)                         | taxonomy    | Permanently deletes a category (WordPress terms have no trash).                                                                                                    |
 | [`wp_delete_comment`](./tools/wp_delete_comment.md)                           | comment     | Deletes a comment.                                                                                                                                                 |
 | [`wp_delete_media`](./tools/wp_delete_media.md)                               | media       | Deletes a media item.                                                                                                                                              |
 | [`wp_delete_page`](./tools/wp_delete_page.md)                                 | page        | Deletes a page.                                                                                                                                                    |
 | [`wp_delete_post`](./tools/wp_delete_post.md)                                 | post        | Deletes a WordPress post with options for trash or permanent deletion. Includes safety confirmations and detailed feedback on the deletion action. \*\*Usage Exam… |
-| [`wp_delete_tag`](./tools/wp_delete_tag.md)                                   | taxonomy    | Deletes a tag.                                                                                                                                                     |
+| [`wp_delete_tag`](./tools/wp_delete_tag.md)                                   | taxonomy    | Permanently deletes a tag (WordPress terms have no trash).                                                                                                         |
 | [`wp_delete_user`](./tools/wp_delete_user.md)                                 | user        | Deletes a user.                                                                                                                                                    |
 | [`wp_get_application_passwords`](./tools/wp_get_application_passwords.md)     | site        | Lists application passwords for a specific user.                                                                                                                   |
 | [`wp_get_auth_status`](./tools/wp_get_auth_status.md)                         | auth        | Gets the current authentication status for a configured WordPress site.                                                                                            |
