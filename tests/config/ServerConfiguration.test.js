@@ -11,6 +11,8 @@
  * fs and dotenv are mocked so this suite never touches the real,
  * credential-bearing .env / mcp-wordpress.config.json files at the repo root.
  */
+import * as os from "os";
+import * as path from "path";
 import { vi } from "vitest";
 
 const mockAccess = vi.fn();
@@ -144,6 +146,175 @@ describe("ServerConfiguration multi-site fail-closed behavior", () => {
   });
 });
 
+describe("ServerConfiguration multi-site config file resolution", () => {
+  // The DXT install dir is replaced on every extension update, so a config that
+  // only lives there silently disappears and the server falls back to the
+  // single-site env config. Resolution order (first existing file wins):
+  //   1. MCP_WORDPRESS_CONFIG (explicit; a missing file is fatal, never a fallback)
+  //   2. ~/.config/mcp-wordpress/config.json
+  //   3. ~/mcp-wordpress.config.json
+  //   4. <install dir>/mcp-wordpress.config.json (legacy location)
+  const home = os.homedir();
+  const XDG_STYLE_PATH = path.join(home, ".config", "mcp-wordpress", "config.json");
+  const HOME_PATH = path.join(home, "mcp-wordpress.config.json");
+  const EXPLICIT_PATH = path.join(os.tmpdir(), "explicit-mcp-wordpress.json");
+
+  const siteConfig = (id) => ({
+    sites: [
+      {
+        id,
+        name: `Site ${id}`,
+        config: { ...VALID_MULTI_SITE_CONFIG.sites[0].config },
+      },
+    ],
+  });
+
+  let serverConfig;
+  let installDirPath;
+  let previousEnv;
+  const RESOLUTION_ENV_VARS = [...SINGLE_SITE_ENV_VARS, "MCP_WORDPRESS_CONFIG"];
+
+  // Pretend only these paths exist; each file's content is a distinct single-site config
+  // named after the path's role so the loaded site ID reveals which file was read.
+  function stubFiles(files) {
+    mockAccess.mockImplementation(async (p) => {
+      if (!(p in files)) throw enoent();
+    });
+    mockReadFile.mockImplementation(async (p) => JSON.stringify(siteConfig(files[p])));
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockDotenvConfig.mockReturnValue({});
+    serverConfig = ServerConfiguration.getInstance();
+    installDirPath = path.resolve(serverConfig.getRootDir(), "mcp-wordpress.config.json");
+    previousEnv = Object.fromEntries(RESOLUTION_ENV_VARS.map((key) => [key, process.env[key]]));
+    delete process.env.MCP_WORDPRESS_CONFIG;
+    process.env.WORDPRESS_SITE_URL = "https://fallback.example.com";
+    process.env.WORDPRESS_USERNAME = "fallback-user";
+    process.env.WORDPRESS_APP_PASSWORD = "fallback-app-password-1234";
+  });
+
+  afterEach(() => {
+    for (const key of RESOLUTION_ENV_VARS) {
+      if (previousEnv[key] === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = previousEnv[key];
+      }
+    }
+  });
+
+  it("loads the legacy install-dir config when it is the only file present", async () => {
+    stubFiles({ [installDirPath]: "install-dir" });
+
+    const result = await serverConfig.loadClientConfigurations();
+
+    expect(mockReadFile).toHaveBeenCalledWith(installDirPath, "utf-8");
+    expect(result.configs.map((c) => c.id)).toEqual(["install-dir"]);
+  });
+
+  it("loads ~/mcp-wordpress.config.json when the install dir has no config (survives extension updates)", async () => {
+    stubFiles({ [HOME_PATH]: "home" });
+
+    const result = await serverConfig.loadClientConfigurations();
+
+    expect(mockReadFile).toHaveBeenCalledWith(HOME_PATH, "utf-8");
+    expect(result.configs.map((c) => c.id)).toEqual(["home"]);
+  });
+
+  it("prefers ~/.config/mcp-wordpress/config.json over ~/mcp-wordpress.config.json", async () => {
+    stubFiles({ [XDG_STYLE_PATH]: "xdg", [HOME_PATH]: "home", [installDirPath]: "install-dir" });
+
+    const result = await serverConfig.loadClientConfigurations();
+
+    expect(mockReadFile).toHaveBeenCalledTimes(1);
+    expect(mockReadFile).toHaveBeenCalledWith(XDG_STYLE_PATH, "utf-8");
+    expect(result.configs.map((c) => c.id)).toEqual(["xdg"]);
+  });
+
+  it("prefers ~/mcp-wordpress.config.json over the install-dir config", async () => {
+    stubFiles({ [HOME_PATH]: "home", [installDirPath]: "install-dir" });
+
+    const result = await serverConfig.loadClientConfigurations();
+
+    expect(result.configs.map((c) => c.id)).toEqual(["home"]);
+  });
+
+  it("prefers MCP_WORDPRESS_CONFIG over every default location", async () => {
+    process.env.MCP_WORDPRESS_CONFIG = EXPLICIT_PATH;
+    stubFiles({
+      [EXPLICIT_PATH]: "explicit",
+      [XDG_STYLE_PATH]: "xdg",
+      [HOME_PATH]: "home",
+      [installDirPath]: "install-dir",
+    });
+
+    const result = await serverConfig.loadClientConfigurations();
+
+    expect(mockReadFile).toHaveBeenCalledTimes(1);
+    expect(mockReadFile).toHaveBeenCalledWith(EXPLICIT_PATH, "utf-8");
+    expect(result.configs.map((c) => c.id)).toEqual(["explicit"]);
+  });
+
+  it("expands a leading ~ in MCP_WORDPRESS_CONFIG", async () => {
+    process.env.MCP_WORDPRESS_CONFIG = "~/custom/sites.json";
+    const expanded = path.join(home, "custom", "sites.json");
+    stubFiles({ [expanded]: "tilde" });
+
+    const result = await serverConfig.loadClientConfigurations();
+
+    expect(mockReadFile).toHaveBeenCalledWith(expanded, "utf-8");
+    expect(result.configs.map((c) => c.id)).toEqual(["tilde"]);
+  });
+
+  it("fails closed when MCP_WORDPRESS_CONFIG points at a missing file instead of falling back", async () => {
+    process.env.MCP_WORDPRESS_CONFIG = EXPLICIT_PATH;
+    // Default locations exist, but an explicit path that is wrong must not silently
+    // redirect to some other config (or to single-site env credentials).
+    stubFiles({ [HOME_PATH]: "home" });
+
+    const error = await serverConfig.loadClientConfigurations().catch((e) => e);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error.message).toContain("MCP_WORDPRESS_CONFIG");
+    expect(error.message).toContain(EXPLICIT_PATH);
+    expect(mockReadFile).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["empty", ""],
+    ["whitespace", "   "],
+    ["unresolved DXT placeholder", "${user_config.config_path}"],
+  ])("ignores an unset MCP_WORDPRESS_CONFIG (%s) and uses the default search", async (_label, value) => {
+    process.env.MCP_WORDPRESS_CONFIG = value;
+    stubFiles({ [HOME_PATH]: "home" });
+
+    const result = await serverConfig.loadClientConfigurations();
+
+    expect(result.configs.map((c) => c.id)).toEqual(["home"]);
+  });
+
+  it("falls back to single-site env config only when no candidate file exists", async () => {
+    stubFiles({});
+
+    const result = await serverConfig.loadClientConfigurations();
+
+    expect(mockReadFile).not.toHaveBeenCalled();
+    expect(result.configs.map((c) => c.id)).toEqual(["default"]);
+  });
+
+  it("fails closed on a permission error for a default location instead of skipping it", async () => {
+    mockAccess.mockImplementation(async (p) => {
+      if (p === HOME_PATH) throw eacces();
+      throw enoent();
+    });
+
+    await expect(serverConfig.loadClientConfigurations()).rejects.toThrow(/Failed to access multi-site/);
+    expect(mockReadFile).not.toHaveBeenCalled();
+  });
+});
+
 describe("ServerConfiguration multi-site production guard", () => {
   // Vitest sets NODE_ENV=test, which makes ConfigHelpers.isTest() true and
   // exempts these tests themselves from the guard by default — the tests
@@ -157,7 +328,15 @@ describe("ServerConfiguration multi-site production guard", () => {
   // silently no-ops in real CI, where GitHub Actions always sets
   // GITHUB_ACTIONS=true and isCI() stays true regardless of CI itself.
   let serverConfig;
-  const GUARD_ENV_VARS = ["NODE_ENV", "CI", "GITHUB_ACTIONS", "TRAVIS", "CIRCLECI", "MCP_WORDPRESS_ALLOW_MULTI_SITE"];
+  const GUARD_ENV_VARS = [
+    "NODE_ENV",
+    "CI",
+    "GITHUB_ACTIONS",
+    "TRAVIS",
+    "CIRCLECI",
+    "MCP_WORDPRESS_ALLOW_MULTI_SITE",
+    "MCP_WORDPRESS_CONFIG",
+  ];
   let previousEnv;
 
   beforeEach(() => {
@@ -191,6 +370,27 @@ describe("ServerConfiguration multi-site production guard", () => {
     mockReadFile.mockResolvedValue(JSON.stringify(VALID_MULTI_SITE_CONFIG));
 
     await expect(serverConfig.loadClientConfigurations()).rejects.toThrow(/MCP_WORDPRESS_ALLOW_MULTI_SITE/);
+    expect(mockReadFile).not.toHaveBeenCalled();
+  });
+
+  it("still requires the opt-in for a config discovered in the home directory, and names the file", async () => {
+    process.env.NODE_ENV = "production";
+    delete process.env.CI;
+    delete process.env.GITHUB_ACTIONS;
+    delete process.env.TRAVIS;
+    delete process.env.CIRCLECI;
+    delete process.env.MCP_WORDPRESS_ALLOW_MULTI_SITE;
+    delete process.env.MCP_WORDPRESS_CONFIG;
+    Config.reset();
+
+    // Home-directory discovery is implicit, so it must not be a way around the guard.
+    const homeConfig = path.join(os.homedir(), "mcp-wordpress.config.json");
+    mockAccess.mockImplementation(async (p) => {
+      if (p !== homeConfig) throw enoent();
+    });
+    mockReadFile.mockResolvedValue(JSON.stringify(VALID_MULTI_SITE_CONFIG));
+
+    await expect(serverConfig.loadClientConfigurations()).rejects.toThrow(homeConfig);
     expect(mockReadFile).not.toHaveBeenCalled();
   });
 

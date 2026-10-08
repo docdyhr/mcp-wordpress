@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import { promises as fsPromises } from "fs";
+import * as os from "os";
 import * as path from "path";
 import { fileURLToPath } from "url";
 import { WordPressClient } from "@/client/api.js";
@@ -19,6 +20,13 @@ import {
 
 // Re-export types from schema for backward compatibility
 export type { SiteConfig, MultiSiteConfig, McpConfigType };
+
+type ConfigFileSource = "env" | "user-config-dir" | "home" | "install-dir";
+
+interface ResolvedConfigFile {
+  path: string;
+  source: ConfigFileSource;
+}
 
 /**
  * Configuration loader for MCP WordPress Server
@@ -76,20 +84,19 @@ export class ServerConfiguration {
     clients: Map<string, WordPressClient>;
     configs: SiteConfig[];
   }> {
-    const configPath = path.resolve(this.rootDir, "mcp-wordpress.config.json");
-
-    const configFileExists = await this.multiSiteConfigFileExists(configPath);
-    if (!configFileExists) {
+    const { resolved, searched } = await this.resolveMultiSiteConfigFile();
+    if (!resolved) {
       if (ConfigHelpers.shouldLogInfo()) {
         this.logger.info("Multi-site config not found, using environment variables for single-site mode", {
-          configPath,
+          searched,
         });
       }
       return this.loadSingleSiteFromEnv(mcpConfig);
     }
 
+    const { path: configPath, source } = resolved;
     if (ConfigHelpers.shouldLogInfo()) {
-      this.logger.info("Found multi-site configuration file", { configPath });
+      this.logger.info("Found multi-site configuration file", { configPath, source });
     }
 
     // Fail closed against accidentally booting a multi-site config (real
@@ -99,7 +106,7 @@ export class ServerConfiguration {
     // CI/test, where the guard would only get in the way of existing suites.
     if (!ConfigHelpers.isCI() && !ConfigHelpers.isTest() && process.env.MCP_WORDPRESS_ALLOW_MULTI_SITE !== "true") {
       const message =
-        "Multi-site config file found but MCP_WORDPRESS_ALLOW_MULTI_SITE is not set to true. " +
+        `Multi-site config file found at ${configPath} but MCP_WORDPRESS_ALLOW_MULTI_SITE is not set to true. ` +
         "Set it to load production sites, or remove/rename the config file to use single-site env config.";
       this.logger.fatal(message, { configPath });
       throw new Error(message);
@@ -109,7 +116,88 @@ export class ServerConfiguration {
     // IDs, client construction) must stop startup rather than silently
     // falling back to single-site env config — loadMultiSiteConfig() already
     // logs a fatal diagnostic and rethrows.
-    return await this.loadMultiSiteConfig(configPath);
+    return await this.loadMultiSiteConfig(configPath, source);
+  }
+
+  /**
+   * Explicit config path from MCP_WORDPRESS_CONFIG, or undefined when unset.
+   *
+   * An optional DXT `user_config` field left blank can reach the server as an
+   * empty string or as the literal, unresolved `${user_config.config_path}`
+   * placeholder — both mean "not set", not a path.
+   */
+  private readExplicitConfigPath(): string | undefined {
+    const raw = process.env.MCP_WORDPRESS_CONFIG?.trim();
+    if (!raw || /^\$\{.*\}$/.test(raw)) {
+      return undefined;
+    }
+    if (raw.startsWith("~/") || raw.startsWith("~\\")) {
+      return path.join(os.homedir(), raw.slice(2));
+    }
+    return path.resolve(raw);
+  }
+
+  /**
+   * Find the multi-site config file. First existing candidate wins:
+   *   1. MCP_WORDPRESS_CONFIG (explicit — a missing file is fatal, never a fallback)
+   *   2. ~/.config/mcp-wordpress/config.json
+   *   3. ~/mcp-wordpress.config.json
+   *   4. <install dir>/mcp-wordpress.config.json (legacy)
+   *
+   * The install dir is replaced on every DXT update, so a config that only
+   * lives there silently vanishes and the server degrades to single-site mode;
+   * the user-level locations survive updates.
+   */
+  private async resolveMultiSiteConfigFile(): Promise<{ resolved?: ResolvedConfigFile; searched: string[] }> {
+    const explicitPath = this.readExplicitConfigPath();
+    if (explicitPath) {
+      if (!(await this.multiSiteConfigFileExists(explicitPath))) {
+        const message =
+          `MCP_WORDPRESS_CONFIG points to ${explicitPath}, but that file does not exist. ` +
+          "Fix the path, or unset MCP_WORDPRESS_CONFIG to use the default config locations.";
+        this.logger.fatal(message, { configPath: explicitPath });
+        throw new Error(message);
+      }
+      return { resolved: { path: explicitPath, source: "env" }, searched: [explicitPath] };
+    }
+
+    const homeDir = os.homedir();
+    const candidates: ResolvedConfigFile[] = [
+      { path: path.join(homeDir, ".config", "mcp-wordpress", "config.json"), source: "user-config-dir" },
+      { path: path.join(homeDir, "mcp-wordpress.config.json"), source: "home" },
+      { path: path.resolve(this.rootDir, "mcp-wordpress.config.json"), source: "install-dir" },
+    ];
+
+    const searched: string[] = [];
+    for (const [index, candidate] of candidates.entries()) {
+      searched.push(candidate.path);
+      if (!(await this.multiSiteConfigFileExists(candidate.path))) {
+        continue;
+      }
+
+      // Stale copies in several places are a real hazard (which one is live?),
+      // so say which file won and which ones were ignored.
+      const shadowed: string[] = [];
+      for (const other of candidates.slice(index + 1)) {
+        if (
+          await fsPromises.access(other.path).then(
+            () => true,
+            () => false,
+          )
+        ) {
+          shadowed.push(other.path);
+        }
+      }
+      if (shadowed.length > 0) {
+        this.logger.warn("Multiple multi-site config files found; using the first and ignoring the rest", {
+          configPath: candidate.path,
+          ignored: shadowed,
+        });
+      }
+      return { resolved: candidate, searched };
+    }
+
+    return { searched };
   }
 
   /**
@@ -135,7 +223,10 @@ export class ServerConfiguration {
   /**
    * Load multi-site configuration from JSON file
    */
-  private async loadMultiSiteConfig(configPath: string): Promise<{
+  private async loadMultiSiteConfig(
+    configPath: string,
+    source: ConfigFileSource,
+  ): Promise<{
     clients: Map<string, WordPressClient>;
     configs: SiteConfig[];
   }> {
@@ -171,7 +262,12 @@ export class ServerConfiguration {
       }
 
       if (ConfigHelpers.shouldLogInfo()) {
-        this.logger.info("Multi-site configuration loaded", { sitesConfigured: validConfigs.length });
+        this.logger.info("Multi-site configuration loaded", {
+          configPath,
+          source,
+          sitesConfigured: validConfigs.length,
+          siteIds: validConfigs.map((site) => site.id),
+        });
       }
 
       return { clients, configs: validConfigs };

@@ -28,31 +28,25 @@ This creates **environment variables** that configure ONE site.
 
 ### Advanced Configuration (Multi-Site via Config File)
 
-**The server always checks for `mcp-wordpress.config.json` first!**
+**The server looks for a multi-site config file on every start, in this order (first existing file wins):**
 
-From [src/config/ServerConfiguration.ts](src/config/ServerConfiguration.ts:89-100):
+1. `MCP_WORDPRESS_CONFIG` — an explicit path (set via the extension's **Config File Path** setting). If it is set but
+   the file is missing, startup fails — it never silently falls back.
+2. `~/.config/mcp-wordpress/config.json`
+3. `~/mcp-wordpress.config.json`
+4. `<extension install dir>/mcp-wordpress.config.json` — the legacy location.
 
-```typescript
-public async loadClientConfigurations(mcpConfig?: McpConfigType): Promise<{
-  clients: Map<string, WordPressClient>;
-  configs: SiteConfig[];
-}> {
-  const configPath = path.resolve(this.rootDir, "mcp-wordpress.config.json");
+> **⚠️ Keep your config outside the extension install dir.** Claude Desktop replaces that directory on every extension
+> update (the old one is renamed to `...backup-<timestamp>`), so a config that only lives there disappears and the
+> server quietly falls back to the single-site UI settings. Locations 1–3 survive updates.
 
-  try {
-    await fsPromises.access(configPath);
-    // ✅ CONFIG FILE FOUND - Use multi-site mode (overrides UI config!)
-    return await this.loadMultiSiteConfig(configPath);
-  } catch (_error) {
-    // ❌ No config file - Fall back to environment variables (single-site)
-    return this.loadSingleSiteFromEnv(mcpConfig);
-  }
-}
-```
+**Opt-in is required.** Because a multi-site file holds credentials for every listed site, the server refuses to load
+one unless `MCP_WORDPRESS_ALLOW_MULTI_SITE=true` (the extension's **Allow Multi-Site Config** setting). Without it,
+startup fails with an error naming the file it found.
 
 **Priority**:
 
-1. **First**: Check for `mcp-wordpress.config.json`
+1. **First**: Look for a config file (order above)
 2. **If found**: Load ALL sites from config (ignore UI settings)
 3. **If not found**: Use UI environment variables (single-site)
 
@@ -79,27 +73,20 @@ tail ~/Library/Logs/Claude/mcp-server-WordPress\ MCP\ Server.log
 
 ### Step 2: Copy the Example Config
 
-The DXT package **includes** `mcp-wordpress.config.json.example`:
+The DXT package **includes** `mcp-wordpress.config.json.example`. Copy it to a location that survives updates:
 
 ```bash
-cd /path/to/dxt/installation
-cp mcp-wordpress.config.json.example mcp-wordpress.config.json
+mkdir -p ~/.config/mcp-wordpress
+cp ~/Library/Application\ Support/Claude/Claude\ Extensions/local.dxt.thomas-dyhr.mcp-wordpress/mcp-wordpress.config.json.example \
+   ~/.config/mcp-wordpress/config.json
+chmod 600 ~/.config/mcp-wordpress/config.json
 ```
 
-> **💡 Pro tip — use a symlink instead of a copy**
->
-> If you keep your `mcp-wordpress.config.json` in a fixed location (e.g. `~/mcp-wordpress.config.json`), create a
-> symlink rather than a copy. The symlink survives every DXT reinstall automatically — no re-copying required after
-> updates:
->
-> ```bash
-> ln -sf ~/mcp-wordpress.config.json \
->   ~/Library/Application\ Support/Claude/Claude\ Extensions/local.dxt.thomas-dyhr.mcp-wordpress/mcp-wordpress.config.json
-> ```
->
-> The DXT installer only extracts files that are in the `.dxt` archive. Since `mcp-wordpress.config.json` is never
-> packaged (it is user data), the symlink is left untouched on every update. Edit your source file once; the extension
-> always sees the latest version.
+Then, in Claude Desktop → **Settings** → **Extensions** → **WordPress MCP Server**, turn on **Allow Multi-Site Config**.
+To keep the file somewhere else, set **Config File Path** to its absolute path.
+
+> **Heads up:** a symlink or copy placed _inside_ the extension install dir does **not** reliably survive updates —
+> Claude Desktop replaces the whole directory. Use one of the locations above instead.
 
 ### Step 3: Edit the Config File
 
@@ -141,7 +128,7 @@ cp mcp-wordpress.config.json.example mcp-wordpress.config.json
 
 The server will:
 
-1. Look for `mcp-wordpress.config.json`
+1. Look for the config file (see the lookup order above)
 2. Find it!
 3. Load all 3 sites
 4. **Override the UI single-site configuration**
@@ -202,8 +189,8 @@ wp_get_site_settings --site="site3"
 ### The Server Logic
 
 ```typescript
-// On startup:
-const configPath = path.resolve(this.rootDir, "mcp-wordpress.config.json");
+// On startup (see ServerConfiguration.resolveMultiSiteConfigFile for the real lookup order):
+const configPath = resolveMultiSiteConfigFile(); // MCP_WORDPRESS_CONFIG, ~/.config/..., ~/..., install dir
 
 // Check if config file exists
 if (fileExists(configPath)) {
@@ -244,8 +231,9 @@ The new manifest now correctly states:
 
 And the long description explains:
 
-> **Multi-Site (Advanced)**: Create `mcp-wordpress.config.json` in the DXT installation directory. Copy from included
-> `mcp-wordpress.config.json.example` file, configure multiple sites, and restart Claude Desktop.
+> **Multi-Site (Advanced)**: Create `~/.config/mcp-wordpress/config.json` (or `~/mcp-wordpress.config.json`, or point
+> **Config File Path** at any file). Copy from the included `mcp-wordpress.config.json.example`, configure multiple
+> sites, enable **Allow Multi-Site Config**, and restart Claude Desktop.
 
 ---
 
@@ -292,8 +280,10 @@ And the long description explains:
 
 You were absolutely correct:
 
-**Multi-site works in DXT** by creating `mcp-wordpress.config.json` in the DXT installation directory. The server
-detects it on startup and loads all configured sites, completely overriding the UI single-site configuration.
+**Multi-site works in DXT** by creating `mcp-wordpress.config.json` in a location that survives extension updates
+(`~/.config/mcp-wordpress/config.json`, `~/mcp-wordpress.config.json`, or a path set via **Config File Path**) and
+enabling **Allow Multi-Site Config**. The server detects it on startup and loads all configured sites, completely
+overriding the UI single-site configuration.
 
 The DXT package **includes everything needed**:
 
