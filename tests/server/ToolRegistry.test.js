@@ -363,6 +363,58 @@ describe("ToolRegistry", () => {
       expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", false);
     });
 
+    // Regression: tracking began only after site selection, so a call naming an unknown site returned an
+    // error without ever being counted, and totalToolCalls did not cover every dispatched call.
+    it("records a call that fails before the handler runs (unknown site)", async () => {
+      const server = createMockServer();
+      const registry = new ToolRegistry(
+        server,
+        new Map([
+          ["a", {}],
+          ["b", {}],
+        ]),
+      );
+      registry.registerTool(simpleTool());
+      const collector = createCollector();
+      registry.setMetricsCollector(collector);
+
+      const result = await server._registeredTools.get("wp_test_tool").handler({ site: "nope" });
+
+      expect(result.isError).toBe(true);
+      expect(collector.startToolExecution).toHaveBeenCalledWith("wp_test_tool", { site: "nope" }, "nope");
+      expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", false);
+    });
+
+    // Some handlers catch their own errors and return a descriptive object instead of throwing
+    // (wp_cache_info, wp_performance_benchmark); those are failed calls, not 100% successes.
+    it.each([
+      ["success: false", { success: false, error: "boom" }],
+      ['status: "unavailable"', { caching_enabled: false, status: "unavailable", error: "boom" }],
+    ])("records a handler that resolves with %s as a failure", async (_label, resolved) => {
+      const { registry, call } = createRegistryWithTool(async () => resolved);
+      const collector = createCollector();
+      registry.setMetricsCollector(collector);
+
+      const result = await call();
+
+      expect(result.isError).toBeUndefined();
+      expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", false);
+    });
+
+    it.each([
+      ["a string", "ok"],
+      ["an object", { success: true, data: {} }],
+      ["a disabled-cache report (an expected state, not an error)", { caching_enabled: false, message: "disabled" }],
+    ])("records a handler that resolves with %s as a success", async (_label, resolved) => {
+      const { registry, call } = createRegistryWithTool(async () => resolved);
+      const collector = createCollector();
+      registry.setMetricsCollector(collector);
+
+      await call();
+
+      expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", true);
+    });
+
     it("works without a collector", async () => {
       const { call } = createRegistryWithTool(async () => "ok");
 

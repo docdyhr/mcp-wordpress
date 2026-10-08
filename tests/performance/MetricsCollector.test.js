@@ -121,7 +121,7 @@ describe("MetricsCollector", () => {
         await client.request("posts/999", "GET").catch(() => {});
       }
 
-      it.each([[400], [401], [403], [404], [422]])(
+      it.each([[400], [403], [404], [422]])(
         "records a %i response as a client error, not a server failure",
         async (statusCode) => {
           await failWith(Object.assign(new Error("client error"), { statusCode }));
@@ -132,7 +132,9 @@ describe("MetricsCollector", () => {
         },
       );
 
-      it.each([[429], [500], [503]])("records a %i response as a failure", async (statusCode) => {
+      // 401 (expired/invalid credentials makes every authenticated tool unusable), 408 (timeout) and 429
+      // (rate limited) are operational problems, not a caller asking for something that does not exist.
+      it.each([[401], [408], [429], [500], [503]])("records a %i response as a failure", async (statusCode) => {
         await failWith(Object.assign(new Error("server error"), { statusCode }));
 
         expect(mockMonitor.recordRequest).toHaveBeenCalledWith(expect.any(Number), false);

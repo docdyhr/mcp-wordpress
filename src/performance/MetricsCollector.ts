@@ -39,11 +39,17 @@ export interface ToolExecutionContext {
  */
 /**
  * True for an expected 4xx caller mistake (not found, forbidden, invalid input).
- * 408 (timeout) and 429 (rate limited) are operational problems and still count as failures.
+ * 401 (credentials rejected — every authenticated tool is unusable), 408 (timeout) and 429 (rate limited)
+ * are operational problems and still count as failures.
  */
 function isClientErrorStatus(statusCode: unknown): boolean {
   return (
-    typeof statusCode === "number" && statusCode >= 400 && statusCode < 500 && statusCode !== 408 && statusCode !== 429
+    typeof statusCode === "number" &&
+    statusCode >= 400 &&
+    statusCode < 500 &&
+    statusCode !== 401 &&
+    statusCode !== 408 &&
+    statusCode !== 429
   );
 }
 

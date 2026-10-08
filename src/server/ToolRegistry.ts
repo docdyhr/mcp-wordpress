@@ -46,6 +46,17 @@ export interface ToolExecutionTracker {
   endToolExecution(executionId: string, success: boolean, error?: Error): void;
 }
 
+/**
+ * Some handlers catch their own errors and return a descriptive object instead of throwing
+ * (`wp_cache_info`, `wp_performance_benchmark` return `status: "unavailable"` / `success: false`).
+ * For usage metrics those are failed calls, not successes.
+ */
+function isFailedToolResult(result: unknown): boolean {
+  if (typeof result !== "object" || result === null) return false;
+  const { success, status } = result as { success?: unknown; status?: unknown };
+  return success === false || status === "unavailable";
+}
+
 export class ToolRegistry {
   // Exposed for tests that assert presence of these fields
   public server: McpServer;
@@ -136,6 +147,16 @@ export class ToolRegistry {
       tool.description || `WordPress tool: ${tool.name}`,
       parameterSchema,
       async (args: Record<string, unknown>) => {
+        // Track from entry so every dispatched call is counted, including ones that fail before the handler
+        // runs (unknown site, missing `site`). `succeeded` flips only when the handler returns a good result;
+        // every other exit — early error returns and the catch below — is recorded as a failure.
+        const tracker = this.toolExecutionTracker;
+        const executionId = tracker?.startToolExecution(
+          tool.name,
+          args,
+          typeof args.site === "string" ? args.site : undefined,
+        );
+        let succeeded = false;
         try {
           let siteId = args.site;
 
@@ -175,20 +196,9 @@ export class ToolRegistry {
             };
           }
 
-          // Call the tool handler with the client and parameters, reporting the outcome to the
-          // performance subsystem. Errors still propagate to the catch below.
-          const tracker = this.toolExecutionTracker;
-          const executionId = tracker?.startToolExecution(tool.name, args, siteId as string);
-          let succeeded = false;
-          let result: unknown;
-          try {
-            result = await tool.handler(client, args);
-            succeeded = true;
-          } finally {
-            if (tracker && executionId !== undefined) {
-              tracker.endToolExecution(executionId, succeeded);
-            }
-          }
+          // Call the tool handler with the client and parameters
+          const result = await tool.handler(client, args);
+          succeeded = !isFailedToolResult(result);
 
           return {
             content: [
@@ -233,6 +243,10 @@ export class ToolRegistry {
             ],
             isError: true,
           };
+        } finally {
+          if (tracker && executionId !== undefined) {
+            tracker.endToolExecution(executionId, succeeded);
+          }
         }
       },
     );
