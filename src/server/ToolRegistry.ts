@@ -177,6 +177,18 @@ export class ToolRegistry {
             };
           }
 
+          if (this.isPermissionDeniedError(_error)) {
+            return {
+              content: [
+                {
+                  type: "text" as const,
+                  text: this.formatPermissionDenied(tool, String(args.site || "default"), _error),
+                },
+              ],
+              isError: true,
+            };
+          }
+
           // Handle enhanced errors with suggestions
           if (_error instanceof EnhancedError) {
             return {
@@ -423,7 +435,7 @@ export class ToolRegistry {
   }
 
   /**
-   * Check if error is authentication-related.
+   * Check if error is authentication-related: the credentials were rejected (HTTP 401).
    *
    * Checks `statusCode` on the real `WordPressAPIError` hierarchy (`src/types/client.ts`),
    * not `error.response.status`/`error.code === "WORDPRESS_AUTH_ERROR"` — those never match
@@ -433,18 +445,47 @@ export class ToolRegistry {
    * non-media endpoint, which the client throws as a plain `WordPressAPIError`, not the
    * `AuthenticationError` subclass (that subtype is only used for media-upload 401/403).
    *
-   * A bare 403 from WordPress is treated as a permission denial (auth-related). But a 403
-   * carrying an explicit error code is NOT: `validateFilePath`
-   * (src/utils/validation/security.ts) throws 403s like `UPLOADS_DISABLED`,
-   * `PATH_TRAVERSAL_ATTEMPT`, `SYMLINK_NOT_ALLOWED`, `NOT_A_REGULAR_FILE` that are local
-   * configuration/validation failures, not authentication problems. Classifying them as
-   * authentication errors here made `wp_upload_media` report "Authentication failed for site
-   * 'default'" when the real cause was that MCP_UPLOAD_BASE_DIR was not set — hiding the
-   * actual fix behind a misleading credentials error.
+   * A 403 is deliberately NOT an authentication error: WordPress answers 401 when it does not
+   * know who you are and 403 when it does but you lack the capability (e.g. an editor calling
+   * `wp_get_site_settings`, which needs `manage_options`). Reporting that as "check your
+   * credentials" sends the user to fix the wrong thing — see `isPermissionDeniedError`.
    */
   private isAuthenticationError(error: unknown): boolean {
     if (error instanceof AuthenticationError) return true;
-    if (!(error instanceof WordPressAPIError)) return false;
-    return error.statusCode === 401 || (error.statusCode === 403 && error.code === undefined);
+    return error instanceof WordPressAPIError && error.statusCode === 401;
+  }
+
+  /**
+   * Check if error is a permission denial: the server accepted the credentials but refused the
+   * action (HTTP 403, e.g. `rest_forbidden`), or a firewall/security plugin blocked the request
+   * with a bare 403.
+   *
+   * A 403 carrying an UPPER_SNAKE_CASE code is NOT a WordPress denial: `validateFilePath`
+   * (src/utils/validation/security.ts) throws 403s like `UPLOADS_DISABLED`,
+   * `PATH_TRAVERSAL_ATTEMPT`, `SYMLINK_NOT_ALLOWED`, `NOT_A_REGULAR_FILE` that are local
+   * configuration/validation failures. WordPress and its plugins use lower_snake_case codes
+   * (`rest_forbidden`, `rest_cannot_view`, ...), which is what tells the two apart. Classifying
+   * the local ones as authentication/permission problems made `wp_upload_media` blame the
+   * credentials when the real cause was that MCP_UPLOAD_BASE_DIR was not set.
+   */
+  private isPermissionDeniedError(error: unknown): boolean {
+    if (!(error instanceof WordPressAPIError) || error.statusCode !== 403) return false;
+    return error.code === undefined || !/^[A-Z][A-Z0-9_]*$/.test(error.code);
+  }
+
+  /**
+   * Build the permission-denied message, naming the role when the tool's own description
+   * declares it ("Requires administrator role (manage_options capability).").
+   */
+  private formatPermissionDenied(tool: { name: string; description?: string }, site: string, error: unknown): string {
+    const apiError = error as WordPressAPIError;
+    const requirement = /Requires ([^.]*\brole\b[^.]*)\./i.exec(tool.description ?? "")?.[1];
+    const code = apiError.code ? `, ${apiError.code}` : "";
+    return (
+      `Permission denied for site '${site}' (HTTP 403${code}): ${getErrorMessage(error)}\n` +
+      `The server refused the request: this user is not allowed to run ${tool.name}` +
+      (requirement ? ` — it requires ${requirement}.` : ".") +
+      " Use an account with the required role, or check whether a security plugin or firewall is blocking the request."
+    );
   }
 }

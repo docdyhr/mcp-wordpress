@@ -381,6 +381,41 @@ describe("WordPressClient", () => {
       const forbiddenError = await client.get("posts").catch((e) => e);
       expect(forbiddenError).toBeInstanceOf(WordPressAPIError);
       expect(forbiddenError.statusCode).toBe(403);
+      // WordPress's own error code must survive: it is what lets callers tell a capability
+      // denial (rest_forbidden) from a bare 403 produced by a firewall or security plugin.
+      expect(forbiddenError.code).toBe("rest_forbidden");
+    });
+
+    it("keeps the WordPress error code and data from a JSON error body", async () => {
+      const body = '{"code":"rest_cannot_view","message":"Sorry, you cannot view this.","data":{"status":403}}';
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 403,
+        statusText: "Forbidden",
+        headers: new Map([["content-type", "application/json"]]),
+        json: vi.fn().mockResolvedValue(JSON.parse(body)),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf(body)),
+      });
+
+      const error = await client.get("settings").catch((e) => e);
+      expect(error.code).toBe("rest_cannot_view");
+      expect(error.data).toEqual({ status: 403 });
+      expect(error.message).toBe("Sorry, you cannot view this.");
+    });
+
+    it("leaves the error code undefined when the 403 body is not JSON (e.g. a firewall page)", async () => {
+      const body = "<html><body>Access denied</body></html>";
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 403,
+        statusText: "Forbidden",
+        headers: new Map([["content-type", "text/html"]]),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf(body)),
+      });
+
+      const error = await client.get("posts").catch((e) => e);
+      expect(error.statusCode).toBe(403);
+      expect(error.code).toBeUndefined();
     });
 
     it("should handle network errors", async () => {
