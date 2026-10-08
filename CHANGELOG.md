@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.4](https://github.com/docdyhr/mcp-wordpress/compare/v4.0.3...v4.0.4) (2026-10-08)
+
+### 🐛 Bug Fixes
+
+- **taxonomies:** pass force=true when deleting tags and categories
+  ([#258](https://github.com/docdyhr/mcp-wordpress/issues/258))
+  ([2296860](https://github.com/docdyhr/mcp-wordpress/commit/22968602c9fb2376e0a20f6c8801706554994b45))
+
 ## [4.0.3](https://github.com/docdyhr/mcp-wordpress/compare/v4.0.2...v4.0.3) (2026-10-07)
 
 ### 🐛 Bug Fixes
