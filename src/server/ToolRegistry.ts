@@ -8,6 +8,7 @@ import * as Tools from "@/tools/index.js";
 import { z } from "zod";
 import type { MCPToolSchema, JSONSchemaProperty } from "@/types/mcp.js";
 import { isUnsafePlainText, isUnsafeWordPressContent } from "@/security/InputValidator.js";
+import { LOCAL_FILE_ACCESS_ERROR_CODES } from "@/utils/validation/security.js";
 
 // Parameter names that carry WordPress post/page/comment body content — these legitimately
 // contain rich HTML and Gutenberg block markup, so they're validated against the narrower
@@ -114,9 +115,10 @@ export class ToolRegistry {
       tool.description || `WordPress tool: ${tool.name}`,
       parameterSchema,
       async (args: Record<string, unknown>) => {
+        // Declared outside the try so the catch can name the site that was actually resolved
+        // (selectBestSite() may pick a configured ID other than "default" when `site` is omitted).
+        let siteId = args.site;
         try {
-          let siteId = args.site;
-
           // If no site specified and multiple sites configured, require site parameter
           if (!siteId && this.wordpressClients.size > 1) {
             const availableSites = Array.from(this.wordpressClients.keys());
@@ -170,7 +172,19 @@ export class ToolRegistry {
               content: [
                 {
                   type: "text" as const,
-                  text: `Authentication failed for site '${args.site || "default"}'. Please check your credentials.`,
+                  text: `Authentication failed for site '${String(siteId || "default")}'. Please check your credentials.`,
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          if (this.isPermissionDeniedError(_error)) {
+            return {
+              content: [
+                {
+                  type: "text" as const,
+                  text: this.formatPermissionDenied(tool, String(siteId || "default"), _error),
                 },
               ],
               isError: true,
@@ -423,7 +437,7 @@ export class ToolRegistry {
   }
 
   /**
-   * Check if error is authentication-related.
+   * Check if error is authentication-related: the credentials were rejected (HTTP 401).
    *
    * Checks `statusCode` on the real `WordPressAPIError` hierarchy (`src/types/client.ts`),
    * not `error.response.status`/`error.code === "WORDPRESS_AUTH_ERROR"` — those never match
@@ -431,20 +445,60 @@ export class ToolRegistry {
    * with no `.response` wrapper, and uses `"authentication_failed"` as the code). Checking
    * `statusCode` rather than `instanceof AuthenticationError` also catches a bare 401 on a
    * non-media endpoint, which the client throws as a plain `WordPressAPIError`, not the
-   * `AuthenticationError` subclass (that subtype is only used for media-upload 401/403).
+   * `AuthenticationError` subclass (that subtype is used for media-upload 401s and credential-handshake failures).
    *
-   * A bare 403 from WordPress is treated as a permission denial (auth-related). But a 403
-   * carrying an explicit error code is NOT: `validateFilePath`
-   * (src/utils/validation/security.ts) throws 403s like `UPLOADS_DISABLED`,
-   * `PATH_TRAVERSAL_ATTEMPT`, `SYMLINK_NOT_ALLOWED`, `NOT_A_REGULAR_FILE` that are local
-   * configuration/validation failures, not authentication problems. Classifying them as
-   * authentication errors here made `wp_upload_media` report "Authentication failed for site
-   * 'default'" when the real cause was that MCP_UPLOAD_BASE_DIR was not set — hiding the
-   * actual fix behind a misleading credentials error.
+   * A 403 is deliberately NOT an authentication error: WordPress answers 401 when it does not
+   * know who you are and 403 when it does but you lack the capability (e.g. an editor calling
+   * `wp_get_site_settings`, which needs `manage_options`). Reporting that as "check your
+   * credentials" sends the user to fix the wrong thing — see `isPermissionDeniedError`.
    */
   private isAuthenticationError(error: unknown): boolean {
     if (error instanceof AuthenticationError) return true;
-    if (!(error instanceof WordPressAPIError)) return false;
-    return error.statusCode === 401 || (error.statusCode === 403 && error.code === undefined);
+    return error instanceof WordPressAPIError && error.statusCode === 401;
+  }
+
+  /**
+   * Check if error is a permission denial: the server accepted the credentials but refused the
+   * action (HTTP 403, e.g. `rest_forbidden`), or a firewall/security plugin blocked the request
+   * with a bare 403.
+   *
+   * A 403 whose code is in `LOCAL_FILE_ACCESS_ERROR_CODES` is NOT a WordPress denial:
+   * `validateFilePath` (src/utils/validation/security.ts) raises `UPLOADS_DISABLED`,
+   * `PATH_TRAVERSAL_ATTEMPT`, `SYMLINK_NOT_ALLOWED` and `NOT_A_REGULAR_FILE` itself — local
+   * configuration/validation failures. Classifying them as authentication/permission problems made
+   * `wp_upload_media` blame the credentials when the real cause was that MCP_UPLOAD_BASE_DIR was
+   * not set. Any other 403 code (including a plugin's, whatever its casing) is a server refusal.
+   */
+  private isPermissionDeniedError(error: unknown): boolean {
+    if (!(error instanceof WordPressAPIError) || error.statusCode !== 403) return false;
+    return error.code === undefined || !LOCAL_FILE_ACCESS_ERROR_CODES.has(error.code);
+  }
+
+  /**
+   * Build the permission-denied message, naming the role when the tool's own description
+   * declares it ("Requires administrator role (manage_options capability).").
+   */
+  private formatPermissionDenied(tool: { name: string; description?: string }, site: string, error: unknown): string {
+    const apiError = error as WordPressAPIError;
+    const requirement = /Requires ([^.]*\brole\b[^.]*)\./i.exec(tool.description ?? "")?.[1];
+    const code = apiError.code ? `, ${apiError.code}` : "";
+    const header = `Permission denied for site '${site}' (HTTP 403${code}): ${getErrorMessage(error)}\n`;
+
+    // A WordPress error code means WordPress itself refused the account. A bare 403 can just as well be a
+    // firewall, hosting rule or security plugin in front of WordPress, so do not accuse the user's role.
+    if (apiError.code) {
+      return (
+        header +
+        `The server refused the request: this user is not allowed to run ${tool.name}` +
+        (requirement ? ` — it requires ${requirement}.` : ".") +
+        " Use an account with the required role, or check whether a security plugin or firewall is blocking the request."
+      );
+    }
+    return (
+      header +
+      `The server refused the request without a WordPress error code, so a firewall, hosting rule or security ` +
+      `plugin may be blocking ${tool.name}` +
+      (requirement ? `; if not, the account's role may be the cause — it requires ${requirement}.` : ".")
+    );
   }
 }

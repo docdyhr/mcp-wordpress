@@ -335,8 +335,9 @@ describe("ToolRegistry", () => {
       expect(registry.isAuthenticationError(new WordPressAPIError("Not logged in", 401))).toBe(true);
     });
 
-    it("recognizes a bare 403 WordPressAPIError as an authentication error", () => {
-      expect(registry.isAuthenticationError(new WordPressAPIError("Forbidden", 403))).toBe(true);
+    it("does not treat a 403 as an authentication error — the credentials were accepted", () => {
+      expect(registry.isAuthenticationError(new WordPressAPIError("Forbidden", 403))).toBe(false);
+      expect(registry.isAuthenticationError(new WordPressAPIError("No", 403, "rest_forbidden"))).toBe(false);
     });
 
     it("does not treat a non-auth WordPressAPIError (e.g. 404) as an authentication error", () => {
@@ -351,6 +352,129 @@ describe("ToolRegistry", () => {
 
     it("does not treat a plain Error as an authentication error", () => {
       expect(registry.isAuthenticationError(new Error("boom"))).toBe(false);
+    });
+
+    describe("permission denial (403)", () => {
+      it.each([
+        ["a WordPress capability denial", new WordPressAPIError("Not allowed", 403, "rest_forbidden")],
+        ["a plugin-specific lower_snake_case code", new WordPressAPIError("Not allowed", 403, "rest_cannot_view")],
+        ["a bare 403 with no code (firewall / WAF)", new WordPressAPIError("Forbidden", 403)],
+      ])("recognizes %s", (_label, error) => {
+        expect(registry.isPermissionDeniedError(error)).toBe(true);
+      });
+
+      it.each([["UPLOADS_DISABLED"], ["PATH_TRAVERSAL_ATTEMPT"], ["SYMLINK_NOT_ALLOWED"], ["NOT_A_REGULAR_FILE"]])(
+        "does not treat the local validation code %s as a WordPress permission denial",
+        (code) => {
+          expect(registry.isPermissionDeniedError(new WordPressAPIError("Local", 403, code))).toBe(false);
+        },
+      );
+
+      // WordPress plugins are not obliged to use lower_snake_case; only the codes this server raises
+      // itself for local validation failures are excluded.
+      it("treats an UPPER_SNAKE_CASE 403 code from a plugin or WAF as a permission denial", () => {
+        expect(registry.isPermissionDeniedError(new WordPressAPIError("Blocked", 403, "SG_BLOCKED"))).toBe(true);
+        expect(registry.isPermissionDeniedError(new WordPressAPIError("Blocked", 403, "FORBIDDEN"))).toBe(true);
+      });
+
+      it("does not treat 401 or 404 as a permission denial", () => {
+        expect(registry.isPermissionDeniedError(new WordPressAPIError("Not logged in", 401))).toBe(false);
+        expect(registry.isPermissionDeniedError(new WordPressAPIError("Not found", 404))).toBe(false);
+        expect(registry.isPermissionDeniedError(new Error("boom"))).toBe(false);
+      });
+    });
+
+    describe("403 handling end-to-end", () => {
+      async function callToolThatThrows(error, toolOverrides = {}) {
+        const server = createMockServer();
+        const endToEndRegistry = new ToolRegistry(server, new Map([["default", {}]]));
+        endToEndRegistry.registerTool(
+          simpleTool({
+            handler: async () => {
+              throw error;
+            },
+            ...toolOverrides,
+          }),
+        );
+        const { handler } = server._registeredTools.get("wp_test_tool");
+        return handler({});
+      }
+
+      it("reports a capability denial as a permission problem, not a credentials problem", async () => {
+        const result = await callToolThatThrows(
+          new WordPressAPIError("Sorry, you are not allowed to do that.", 403, "rest_forbidden"),
+        );
+
+        expect(result.isError).toBe(true);
+        const text = result.content[0].text;
+        expect(text).toContain("Permission denied");
+        expect(text).toContain("rest_forbidden");
+        expect(text).toContain("Sorry, you are not allowed to do that.");
+        expect(text).not.toContain("Authentication failed");
+        expect(text).not.toContain("check your credentials");
+      });
+
+      it("names the role the tool documents as required", async () => {
+        const result = await callToolThatThrows(new WordPressAPIError("Not allowed", 403, "rest_forbidden"), {
+          description: "Retrieves the settings. Requires administrator role (manage_options capability).",
+        });
+
+        expect(result.content[0].text).toContain("administrator role (manage_options capability)");
+      });
+
+      // A 403 with a WordPress code is a role problem; a bare 403 (no code) can just as well be a WAF,
+      // so the wording must not accuse the account.
+      it("does not attribute a bare 403 to the user's role", async () => {
+        const result = await callToolThatThrows(new WordPressAPIError("Forbidden", 403), {
+          description: "Retrieves the settings. Requires administrator role (manage_options capability).",
+        });
+
+        const text = result.content[0].text;
+        expect(text).toContain("Permission denied");
+        expect(text).toContain("without a WordPress error code");
+        expect(text).toContain("firewall");
+        expect(text).not.toContain("this user is not allowed");
+        expect(text).toContain("administrator role (manage_options capability)");
+      });
+
+      it("names the configured site when `site` was omitted and the only site is not called 'default'", async () => {
+        const server = createMockServer();
+        const registry = new ToolRegistry(server, new Map([["blog", {}]]));
+        registry.registerTool(
+          simpleTool({
+            handler: async () => {
+              throw new WordPressAPIError("Not allowed", 403, "rest_forbidden");
+            },
+          }),
+        );
+        registry.registerTool(
+          simpleTool({
+            name: "wp_test_tool_401",
+            handler: async () => {
+              throw new WordPressAPIError("Not logged in", 401);
+            },
+          }),
+        );
+
+        const denied = await server._registeredTools.get("wp_test_tool").handler({});
+        const unauthenticated = await server._registeredTools.get("wp_test_tool_401").handler({});
+
+        expect(denied.content[0].text).toContain("site 'blog'");
+        expect(denied.content[0].text).not.toContain("'default'");
+        expect(unauthenticated.content[0].text).toContain("site 'blog'");
+      });
+
+      it("still reports a 401 as an authentication failure", async () => {
+        const result = await callToolThatThrows(new WordPressAPIError("Not logged in", 401, "rest_not_logged_in"));
+
+        expect(result.content[0].text).toContain("Authentication failed for site");
+      });
+
+      it("leaves local validation 403s (UPLOADS_DISABLED) as plain errors", async () => {
+        const result = await callToolThatThrows(new WordPressAPIError("Uploads are disabled", 403, "UPLOADS_DISABLED"));
+
+        expect(result.content[0].text).toBe("Error: Uploads are disabled");
+      });
     });
 
     it("surfaces the auth-specific guidance end-to-end when a tool handler throws a real 401", async () => {
