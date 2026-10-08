@@ -19,6 +19,7 @@
 import { WordPressClient } from "./api.js";
 import { LoggerFactory } from "@/utils/logger.js";
 import { handleToolError } from "@/utils/error.js";
+import { htmlToPlainText } from "@/utils/htmlText.js";
 import type { WordPressPost, WordPressPage } from "@/types/wordpress.js";
 import type { WordPressClientConfig } from "@/types/client.js";
 import type { SchemaType } from "@/types/seo.js";
@@ -538,8 +539,9 @@ export class SEOWordPressClient extends WordPressClient {
     const canonical = this.extractMetaValue(meta, fields?.canonical);
 
     const metadata: SEOMetadata = {
-      title: this.extractMetaValue(meta, fields?.title) || content.title?.rendered || "",
-      description: this.extractMetaValue(meta, fields?.description) || content.excerpt?.rendered || "",
+      // The rendered fallbacks are HTML with encoded entities; metadata must be plain text.
+      title: this.extractMetaValue(meta, fields?.title) || htmlToPlainText(content.title?.rendered),
+      description: this.extractMetaValue(meta, fields?.description) || htmlToPlainText(content.excerpt?.rendered),
       ...(focusKeyword && { focusKeyword }),
       ...(canonical && { canonical }),
     };

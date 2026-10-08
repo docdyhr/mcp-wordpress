@@ -168,6 +168,54 @@ describe("SiteTools", () => {
     });
   });
 
+  describe("wp_search_site output", () => {
+    beforeEach(() => {
+      mockClient.search = vi.fn();
+    });
+
+    it("decodes entities in result titles", async () => {
+      mockClient.search.mockResolvedValue([
+        {
+          id: 1,
+          title: "Q&#038;A &amp; Tips &#8211; Part 1",
+          url: "https://x.example/a",
+          type: "post",
+          subtype: "post",
+        },
+      ]);
+
+      const text = await siteTools.handleSearchSite(mockClient, { term: "q" });
+
+      expect(text).toContain("**Q&A & Tips \u2013 Part 1**");
+      expect(text).not.toMatch(/&amp;|&#\d+;/);
+    });
+
+    // Regression: a result with an empty title printed as "****" with nothing to identify it.
+    it("identifies a result with an empty title by its subtype and ID", async () => {
+      mockClient.search.mockResolvedValue([
+        { id: 1509, title: "", url: "https://x.example/feedzy-import/1509", type: "post", subtype: "feedzy-import" },
+      ]);
+
+      const text = await siteTools.handleSearchSite(mockClient, { term: "feed" });
+
+      expect(text).not.toContain("****");
+      expect(text).toContain("**(untitled)**");
+      expect(text).toContain("feedzy-import");
+      expect(text).toContain("ID 1509");
+    });
+
+    it("keeps the [type] prefix and link for a normal result", async () => {
+      mockClient.search.mockResolvedValue([
+        { id: 7, title: "Plain", url: "https://x.example/plain", type: "post", subtype: "page" },
+      ]);
+
+      const text = await siteTools.handleSearchSite(mockClient, { term: "plain" });
+
+      expect(text).toContain("- [post] **Plain**");
+      expect(text).toContain("Link: https://x.example/plain");
+    });
+  });
+
   describe("parameter validation", () => {
     it("should have proper parameter definitions", () => {
       const tools = siteTools.getTools();

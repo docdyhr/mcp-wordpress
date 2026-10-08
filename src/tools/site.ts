@@ -2,6 +2,7 @@ import { WordPressClient } from "@/client/api.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
 import { WordPressApplicationPassword } from "@/types/wordpress.js";
 import { preserveToolError } from "@/utils/error.js";
+import { htmlToPlainText } from "@/utils/htmlText.js";
 
 /**
  * Provides tools for managing general site settings and operations on a WordPress site.
@@ -211,7 +212,14 @@ export class SiteTools {
       }
       const content =
         `Found ${results.length} results for "${term}":\n\n` +
-        results.map((r) => `- [${r.type}] **${r.title}**\n  Link: ${r.url}`).join("\n");
+        results
+          .map((r) => {
+            // Titles arrive entity-encoded; an empty one (e.g. a custom post type) must still be identifiable.
+            const title = htmlToPlainText(r.title);
+            const label = title ? `**${title}**` : `**(untitled)** (${r.subtype || r.type}, ID ${r.id})`;
+            return `- [${r.type}] ${label}\n  Link: ${r.url}`;
+          })
+          .join("\n");
       return content;
     } catch (_error) {
       preserveToolError("Failed to perform search", _error);
