@@ -119,15 +119,24 @@ export function formatPostsResponse(
     })
     .join("\n\n");
 
-  let content = metadata.join("\n") + "\n\n" + postLines;
-  const perPage = sanitizedParams.per_page || 10;
-  if (posts.length >= perPage) {
-    const page = sanitizedParams.page || 1;
-    content +=
-      `\n\n📄 **Pagination**: page ${page}, ${perPage} per page. This page is full, so more results may exist — ` +
-      `request \`page=${page + 1}\` (use \`per_page\` to change the page size, max 100).`;
+  return metadata.join("\n") + "\n\n" + postLines + postsPaginationNote(posts.length, sanitizedParams);
+}
+
+/**
+ * Trailing note for a full page of posts. The list tools do not receive WordPress's X-WP-Total header, so
+ * "the page is full" is the only signal that more may exist. Shared by the normal and the streaming (>50)
+ * response paths so neither silently drops it.
+ */
+export function postsPaginationNote(count: number, params: PostQueryParams): string {
+  const perPage = params.per_page || 10;
+  if (count < perPage) {
+    return "";
   }
-  return content;
+  const page = params.page || 1;
+  return (
+    `\n\n📄 **Pagination**: page ${page}, ${perPage} per page. This page is full, so more results may exist — ` +
+    `request \`page=${page + 1}\` (use \`per_page\` to change the page size, max 100).`
+  );
 }
 
 /**
@@ -158,7 +167,10 @@ export async function handleListPosts(
       })) {
         streamResults.push(result);
       }
-      return StreamingUtils.formatStreamingResponse(streamResults, "posts");
+      return (
+        StreamingUtils.formatStreamingResponse(streamResults, "posts") +
+        postsPaginationNote(posts.length, sanitizedParams)
+      );
     }
 
     const siteUrl = client.getSiteUrl ? client.getSiteUrl() : "Unknown site";
@@ -278,8 +290,9 @@ export async function handleGetPost(
 
     const content = post.content?.raw ?? post.content?.rendered ?? "";
     const excerpt = htmlToPlainText(post.excerpt?.rendered);
-    // Same plain-text pipeline as the SEO analyzer so the two tools agree on a post's length.
-    const wordCount = countWords(htmlToPlainText(content));
+    // Same source and pipeline as the SEO analyzer (the rendered body, which is what readers see) so the two tools
+    // agree on a post's length even when raw block markup or shortcodes differ from the rendered output.
+    const wordCount = countWords(htmlToPlainText(post.content?.rendered || content));
 
     // Build comprehensive response
     let response = `# ${displayTitle(post.title.rendered)}\n\n`;
@@ -403,16 +416,12 @@ export async function handleUpdatePost(
     if (params.tags !== undefined) {
       changes.push(params.tags.length > 0 ? `Tags updated: ${params.tags.join(", ")}` : "Tags cleared");
     }
-    if (params.slug) changes.push(`Slug updated: ${params.slug}`);
     if (params.featured_media !== undefined) {
       changes.push(
         params.featured_media === 0 ? "Featured image removed" : `Featured image updated: ${params.featured_media}`,
       );
     }
     if (params.date) changes.push(`Date updated: ${params.date}`);
-    if (params.author !== undefined) changes.push(`Author updated: ${params.author}`);
-    if (params.comment_status) changes.push(`Comment status: "${params.comment_status}"`);
-    if (params.sticky !== undefined) changes.push(params.sticky ? "Marked sticky" : "Unmarked sticky");
 
     if (changes.length > 0) {
       response += `\n**Changes Made**:\n${changes.map((c) => `- ${c}`).join("\n")}\n`;

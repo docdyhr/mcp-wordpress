@@ -14,36 +14,35 @@ const NAMED_ENTITIES: Record<string, string> = {
   gt: ">",
   quot: '"',
   apos: "'",
-  nbsp: " ",
-  hellip: "…",
-  mdash: "—",
-  ndash: "–",
-  lsquo: "‘",
-  rsquo: "’",
-  sbquo: "‚",
-  ldquo: "“",
-  rdquo: "”",
-  bdquo: "„",
-  laquo: "«",
-  raquo: "»",
-  lsaquo: "‹",
-  rsaquo: "›",
-  copy: "©",
-  reg: "®",
-  trade: "™",
-  bull: "•",
-  middot: "·",
-  times: "×",
-  divide: "÷",
-  euro: "€",
-  pound: "£",
-  yen: "¥",
-  cent: "¢",
-  deg: "°",
-  plusmn: "±",
-  sect: "§",
-  para: "¶",
+  hellip: "\u2026",
+  mdash: "\u2014",
+  ndash: "\u2013",
+  lsquo: "\u2018",
+  rsquo: "\u2019",
+  sbquo: "\u201a",
+  ldquo: "\u201c",
+  rdquo: "\u201d",
+  bdquo: "\u201e",
+  lsaquo: "\u2039",
+  rsaquo: "\u203a",
+  trade: "\u2122",
+  bull: "\u2022",
+  euro: "\u20ac",
 };
+
+/** HTML 4 Latin-1 entity names in code point order, U+00A0 through U+00FF. */
+const LATIN1_ENTITY_NAMES = [
+  "nbsp,iexcl,cent,pound,curren,yen,brvbar,sect,uml,copy,ordf,laquo,not,shy,reg,macr",
+  "deg,plusmn,sup2,sup3,acute,micro,para,middot,cedil,sup1,ordm,raquo,frac14,frac12,frac34,iquest",
+  "Agrave,Aacute,Acirc,Atilde,Auml,Aring,AElig,Ccedil,Egrave,Eacute,Ecirc,Euml,Igrave,Iacute,Icirc,Iuml",
+  "ETH,Ntilde,Ograve,Oacute,Ocirc,Otilde,Ouml,times,Oslash,Ugrave,Uacute,Ucirc,Uuml,Yacute,THORN,szlig",
+  "agrave,aacute,acirc,atilde,auml,aring,aelig,ccedil,egrave,eacute,ecirc,euml,igrave,iacute,icirc,iuml",
+  "eth,ntilde,ograve,oacute,ocirc,otilde,ouml,divide,oslash,ugrave,uacute,ucirc,uuml,yacute,thorn,yuml",
+].flatMap((row) => row.split(","));
+
+LATIN1_ENTITY_NAMES.forEach((name, index) => {
+  NAMED_ENTITIES[name] = String.fromCharCode(0xa0 + index);
+});
 
 /** Tags after which the text must not run into the next word ("one</p><p>two" is two words). */
 const BREAKING_TAGS = new Set([
@@ -176,9 +175,13 @@ export function htmlToPlainText(html: unknown, options: { maxLength?: number } =
   // \s already matches the non-breaking space (U+00A0) that &nbsp; decodes to.
   const plain = decodeHtmlEntities(text).replace(/\s+/g, " ").trim();
 
+  // Count and cut by code point so an emoji is one character on both sides of the comparison.
   const { maxLength } = options;
-  if (maxLength !== undefined && plain.length > maxLength) {
-    return `${Array.from(plain).slice(0, maxLength).join("")}…`;
+  if (maxLength !== undefined) {
+    const characters = Array.from(plain);
+    if (characters.length > maxLength) {
+      return `${characters.slice(0, maxLength).join("")}\u2026`;
+    }
   }
   return plain;
 }

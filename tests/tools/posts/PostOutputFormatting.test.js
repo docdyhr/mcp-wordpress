@@ -87,6 +87,19 @@ describe("wp_list_posts output", () => {
     expect(text).not.toMatch(/\b2 total\b/);
   });
 
+  // Regression: the >50-post streaming path returned before the pagination note was added.
+  it("keeps the next-page note on the streaming path (more than 50 posts)", async () => {
+    const client = makeClient();
+    const posts = Array.from({ length: 60 }, (_, i) => makePost({ id: i + 1 }));
+    client.getPosts.mockResolvedValue(posts);
+
+    const full = await handleListPosts(client, { per_page: 60, page: 2 });
+    const notFull = await handleListPosts(client, { per_page: 100 });
+
+    expect(full).toContain("`page=3`");
+    expect(notFull).not.toContain("**Pagination**");
+  });
+
   it("points at the next page when the page is full", async () => {
     const client = makeClient();
     client.getPosts.mockResolvedValue([makePost({ id: 1 }), makePost({ id: 2 })]);
@@ -151,6 +164,24 @@ describe("wp_get_post output", () => {
     expect(text).toContain("**Word Count**: 4");
   });
 
+  // wp_seo_analyze_content counts the rendered body; wp_get_post must count the same representation or the
+  // two tools disagree whenever raw (block markup, shortcodes) and rendered differ.
+  it("counts the rendered body when raw and rendered differ", async () => {
+    const client = makeClient();
+    client.getPost.mockResolvedValue(
+      makePost({
+        content: {
+          raw: "<!-- wp:shortcode -->[gallery ids=1,2,3]<!-- /wp:shortcode -->",
+          rendered: "<p>one two three four</p>",
+        },
+      }),
+    );
+
+    const text = await handleGetPost(client, { id: 1 });
+
+    expect(text).toContain("**Word Count**: 4");
+  });
+
   it("counts the words of ordinary markup, not its tags or attributes", async () => {
     const client = makeClient();
     client.getPost.mockResolvedValue(
@@ -197,15 +228,15 @@ describe("wp_update_post output", () => {
       content: "<p>New body</p>",
       tags: [5, 6],
       categories: [2],
-      slug: "new-slug",
       featured_media: 9,
+      date: "2026-12-01T10:00:00",
     });
 
     expect(text).toContain("- Content updated");
     expect(text).toContain("- Categories updated: 2");
     expect(text).toContain("- Tags updated: 5, 6");
-    expect(text).toContain("- Slug updated: new-slug");
     expect(text).toContain("- Featured image updated: 9");
+    expect(text).toContain("- Date updated: 2026-12-01T10:00:00");
   });
 
   it("reports removing the featured image and clearing tags", async () => {
@@ -225,6 +256,6 @@ describe("wp_update_post output", () => {
     const text = await handleUpdatePost(client, { id: 1, title: "Only title" });
 
     expect(text).toContain("- Title:");
-    expect(text).not.toMatch(/Tags|Categories|Slug|Featured|Content updated/);
+    expect(text).not.toMatch(/Tags|Categories|Featured|Date updated|Content updated/);
   });
 });

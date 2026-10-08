@@ -10,6 +10,16 @@ describe("decodeHtmlEntities", () => {
     );
   });
 
+  // WordPress stores author-typed entities as typed, so rendered fields can contain any HTML 4 name.
+  it("decodes the Latin-1 named entities, not just the common punctuation ones", () => {
+    expect(decodeHtmlEntities("Caf&eacute; &Uuml;ber &szlig; ma&ntilde;ana &yuml; &AElig;on &THORN;")).toBe(
+      "Caf\u00e9 \u00dcber \u00df ma\u00f1ana \u00ff \u00c6on \u00de",
+    );
+    expect(decodeHtmlEntities("&iexcl;Hola&iquest; &frac12; &sup2; &micro; &shy;")).toBe(
+      "\u00a1Hola\u00bf \u00bd \u00b2 \u00b5 \u00ad",
+    );
+  });
+
   it("decodes hexadecimal numeric references", () => {
     expect(decodeHtmlEntities("&#x2019; &#X41;")).toBe("’ A");
   });
@@ -88,6 +98,15 @@ describe("htmlToPlainText", () => {
   it("truncates to maxLength on a character boundary and marks the cut", () => {
     expect(htmlToPlainText("<p>abcdefghij</p>", { maxLength: 5 })).toBe("abcde…");
     expect(htmlToPlainText("<p>abcde</p>", { maxLength: 5 })).toBe("abcde");
+  });
+
+  // Regression: the length check used UTF-16 units while the cut used code points, so text of exactly
+  // maxLength visible characters containing an emoji got a false ellipsis.
+  it("counts code points, not UTF-16 units, when deciding whether to truncate", () => {
+    const emoji = "\u{1F600}";
+    expect(htmlToPlainText(`<p>${"a".repeat(149)}${emoji}</p>`, { maxLength: 150 })).toBe(`${"a".repeat(149)}${emoji}`);
+    expect(htmlToPlainText(emoji.repeat(3), { maxLength: 3 })).toBe(emoji.repeat(3));
+    expect(htmlToPlainText(emoji.repeat(4), { maxLength: 3 })).toBe(`${emoji.repeat(3)}\u2026`);
   });
 
   it("does not cut an entity in half when truncating", () => {
