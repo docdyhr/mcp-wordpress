@@ -16,7 +16,15 @@ logger.debug("Environment variables passed from DXT:");
 logger.debug(`  WORDPRESS_SITE_URL: ${process.env.WORDPRESS_SITE_URL ? "SET" : "NOT SET"}`);
 logger.debug(`  WORDPRESS_USERNAME: ${process.env.WORDPRESS_USERNAME ? "SET" : "NOT SET"}`);
 logger.debug(`  WORDPRESS_APP_PASSWORD: ${process.env.WORDPRESS_APP_PASSWORD ? "SET" : "NOT SET"}`);
-logger.debug("Note: Single-site configured via UI. For multi-site, create mcp-wordpress.config.json in DXT directory.");
+logger.debug(`  MCP_WORDPRESS_CONFIG: ${process.env.MCP_WORDPRESS_CONFIG ? "SET" : "NOT SET"}`);
+logger.debug(
+  `  MCP_WORDPRESS_ALLOW_MULTI_SITE: ${process.env.MCP_WORDPRESS_ALLOW_MULTI_SITE === "true" ? "true" : "not true"}`,
+);
+logger.debug(
+  "Note: Single-site configured via UI. For multi-site, keep a config file outside the extension folder " +
+    "(~/.config/mcp-wordpress/config.json, ~/mcp-wordpress.config.json, or the Config File Path setting) " +
+    "and enable Allow Multi-Site Config.",
+);
 
 async function startDXTServer() {
   try {
