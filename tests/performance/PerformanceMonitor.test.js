@@ -1,3 +1,4 @@
+import v8 from "v8";
 import { vi } from "vitest";
 import { PerformanceMonitor } from "@/performance/PerformanceMonitor.js";
 
@@ -81,6 +82,24 @@ describe("PerformanceMonitor", () => {
       expect(metrics.requests.averageResponseTime).toBe(300);
     });
 
+    it("should count client errors (4xx) separately so they do not inflate the error rate", () => {
+      monitor.recordRequest(100, true);
+      monitor.recordRequest(120, false, undefined, { clientError: true });
+      monitor.recordRequest(130, false, undefined, { clientError: true });
+      monitor.recordRequest(900, false);
+
+      const metrics = monitor.getMetrics();
+      expect(metrics.requests.total).toBe(4);
+      expect(metrics.requests.successful).toBe(1);
+      expect(metrics.requests.clientErrors).toBe(2);
+      // Only the server/network failure counts toward `failed` (and so toward the error rate)
+      expect(metrics.requests.failed).toBe(1);
+    });
+
+    it("should initialise clientErrors to zero", () => {
+      expect(monitor.getMetrics().requests.clientErrors).toBe(0);
+    });
+
     it("should calculate response time percentiles", () => {
       // Record multiple requests to get percentile calculations
       const responseTimes = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
@@ -146,6 +165,51 @@ describe("PerformanceMonitor", () => {
 
       const metrics = monitor.getMetrics();
       expect(metrics.tools.mostUsedTool).toBe("wp_list_posts");
+    });
+  });
+
+  describe("tool call tracking", () => {
+    it("should record tool usage without counting the call as an HTTP request", () => {
+      monitor.recordToolCall("wp_get_site_settings", 120, true);
+      monitor.recordToolCall("wp_get_site_settings", 80, false);
+      monitor.recordToolCall("wp_list_posts", 40, true);
+
+      const metrics = monitor.getMetrics();
+      expect(metrics.tools.toolUsageCount).toEqual({ wp_get_site_settings: 2, wp_list_posts: 1 });
+      expect(metrics.tools.mostUsedTool).toBe("wp_get_site_settings");
+      expect(metrics.tools.toolPerformance["wp_get_site_settings"].callCount).toBe(2);
+      expect(metrics.tools.toolPerformance["wp_get_site_settings"].successRate).toBe(0.5);
+      // Tool calls are not HTTP requests: totals and latency stats must be untouched
+      expect(metrics.requests.total).toBe(0);
+      expect(metrics.requests.averageResponseTime).toBe(0);
+    });
+  });
+
+  describe("system memory metrics", () => {
+    const MB = 1024 * 1024;
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    // Regression: memoryUsage used to be heapUsed/heapTotal, which sits near 100% on any healthy
+    // process because V8 only grows the heap as needed — so it read "97%" while using ~100 MB.
+    it("should report heap usage against the V8 heap limit, not the current heap size", () => {
+      vi.spyOn(process, "memoryUsage").mockReturnValue({
+        rss: 300 * MB,
+        heapTotal: 101 * MB,
+        heapUsed: 100 * MB,
+        external: 0,
+        arrayBuffers: 0,
+      });
+      vi.spyOn(v8, "getHeapStatistics").mockReturnValue({ heap_size_limit: 4000 * MB });
+
+      const { system } = monitor.getMetrics();
+
+      expect(system.memoryUsage).toBe(2.5);
+      expect(system.heapUsedMB).toBe(100);
+      expect(system.heapLimitMB).toBe(4000);
+      expect(system.rssMB).toBe(300);
     });
   });
 

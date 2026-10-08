@@ -187,13 +187,29 @@ export function formatBenchmarkStatus(status: string): string {
  * Get benchmark improvement description
  */
 export function getBenchmarkImprovementDescription(benchmark: BenchmarkComparison): string {
-  const improvements: Record<string, string> = {
-    "Response Time": `Reduce by ${benchmark.improvement.toFixed(0)}ms`,
-    "Cache Hit Rate": `Increase by ${benchmark.improvement.toFixed(1)}%`,
-    "Error Rate": `Reduce by ${benchmark.improvement.toFixed(2)}%`,
-    "Memory Usage": `Reduce by ${benchmark.improvement.toFixed(0)}%`,
+  const formats: Record<string, { verb: string; unit: string; decimals: number }> = {
+    "Response Time": { verb: "Reduce", unit: "ms", decimals: 0 },
+    "Cache Hit Rate": { verb: "Increase", unit: "%", decimals: 1 },
+    "Error Rate": { verb: "Reduce", unit: "%", decimals: 2 },
+    "Memory Usage": { verb: "Reduce", unit: "%", decimals: 0 },
   };
-  return improvements[benchmark.category] || `Improve by ${benchmark.improvement}`;
+  const format = formats[benchmark.category];
+  if (!format) {
+    return `Improve by ${benchmark.improvement}`;
+  }
+
+  const fmt = (value: number) => `${value.toFixed(format.decimals)}${format.unit}`;
+  let description = `${format.verb} by ${fmt(benchmark.improvement)}`;
+
+  // `improvement` is the distance to the NEXT tier, which is not the excellent target shown beside
+  // it — say which tier it refers to so "507ms vs 200 → reduce by 7ms" is not read as a bad sum.
+  if (benchmark.nextTierStatus !== undefined && benchmark.nextTierValue !== undefined) {
+    description += ` to reach "${benchmark.nextTierStatus}" (${fmt(benchmark.nextTierValue)})`;
+    if (benchmark.nextTierStatus !== "excellent") {
+      description += `; excellent is ${fmt(benchmark.benchmarkValue)}`;
+    }
+  }
+  return description;
 }
 
 /**

@@ -9,6 +9,7 @@ describe("MetricsCollector", () => {
     // Create a mock PerformanceMonitor
     mockMonitor = {
       recordRequest: vi.fn(),
+      recordToolCall: vi.fn(),
       updateCacheMetrics: vi.fn(),
       getMetrics: vi.fn().mockReturnValue({
         requests: {
@@ -113,6 +114,37 @@ describe("MetricsCollector", () => {
       expect(() => collector.registerClient("site2", mockClient)).not.toThrow();
     });
 
+    describe("request outcome classification", () => {
+      async function failWith(error) {
+        const client = { request: vi.fn().mockRejectedValue(error) };
+        collector.registerClient("site1", client);
+        await client.request("posts/999", "GET").catch(() => {});
+      }
+
+      it.each([[400], [401], [403], [404], [422]])(
+        "records a %i response as a client error, not a server failure",
+        async (statusCode) => {
+          await failWith(Object.assign(new Error("client error"), { statusCode }));
+
+          expect(mockMonitor.recordRequest).toHaveBeenCalledWith(expect.any(Number), false, undefined, {
+            clientError: true,
+          });
+        },
+      );
+
+      it.each([[429], [500], [503]])("records a %i response as a failure", async (statusCode) => {
+        await failWith(Object.assign(new Error("server error"), { statusCode }));
+
+        expect(mockMonitor.recordRequest).toHaveBeenCalledWith(expect.any(Number), false);
+      });
+
+      it("records an error without a status code (network failure) as a failure", async () => {
+        await failWith(new Error("ECONNRESET"));
+
+        expect(mockMonitor.recordRequest).toHaveBeenCalledWith(expect.any(Number), false);
+      });
+    });
+
     it("should handle client without request method", () => {
       const mockClient = {}; // No request method
 
@@ -152,7 +184,10 @@ describe("MetricsCollector", () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       collector.endToolExecution(executionId, true);
-      expect(mockMonitor.recordRequest).toHaveBeenCalledWith(expect.any(Number), true, "wp_list_posts");
+      // A tool call is not an HTTP request: it is recorded as tool usage only, so totals and
+      // latency stats are not double-counted against the client request interceptor.
+      expect(mockMonitor.recordToolCall).toHaveBeenCalledWith("wp_list_posts", expect.any(Number), true);
+      expect(mockMonitor.recordRequest).not.toHaveBeenCalled();
     });
 
     it("should handle tool execution errors", () => {
@@ -160,13 +195,13 @@ describe("MetricsCollector", () => {
       const error = new Error("Test error");
 
       collector.endToolExecution(executionId, false, error);
-      expect(mockMonitor.recordRequest).toHaveBeenCalledWith(expect.any(Number), false, "wp_list_posts");
+      expect(mockMonitor.recordToolCall).toHaveBeenCalledWith("wp_list_posts", expect.any(Number), false);
     });
 
     it("should handle invalid execution IDs gracefully", () => {
       // Should not throw
       expect(() => collector.endToolExecution("invalid-id", true)).not.toThrow();
-      expect(mockMonitor.recordRequest).not.toHaveBeenCalled();
+      expect(mockMonitor.recordToolCall).not.toHaveBeenCalled();
     });
   });
 
@@ -376,7 +411,7 @@ describe("MetricsCollector", () => {
 
       // Verify tool execution is cleaned up (should not throw or record)
       collector.endToolExecution(executionId, true);
-      expect(mockMonitor.recordRequest).not.toHaveBeenCalled();
+      expect(mockMonitor.recordToolCall).not.toHaveBeenCalled();
     });
   });
 });

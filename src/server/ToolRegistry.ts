@@ -37,11 +37,23 @@ export interface ToolDefinition {
  * Registry for managing MCP tools
  * Handles tool registration, parameter validation, and execution
  */
+/**
+ * What the registry needs from the performance subsystem to record tool invocations.
+ * Structural on purpose: `MetricsCollector` satisfies it, and tests can pass a stub.
+ */
+export interface ToolExecutionTracker {
+  startToolExecution(toolName: string, parameters: Record<string, unknown>, siteId?: string): string;
+  endToolExecution(executionId: string, success: boolean, error?: Error): void;
+}
+
 export class ToolRegistry {
   // Exposed for tests that assert presence of these fields
   public server: McpServer;
   public wordpressClients: Map<string, WordPressClient>;
   private _cachedToolsListResponse: { tools: unknown[] } | null = null;
+  // Read at call time (not captured at registration) because PerformanceTools may be instantiated
+  // after the tools that are registered before it.
+  private toolExecutionTracker: ToolExecutionTracker | undefined;
 
   constructor(server: McpServer, wordpressClients: Map<string, WordPressClient>) {
     this.server = server;
@@ -59,6 +71,9 @@ export class ToolRegistry {
       // Cache and Performance tools need the clients map
       if (ToolClass.name === "CacheTools" || ToolClass.name === "PerformanceTools") {
         toolInstance = new ToolClass(this.wordpressClients);
+        if (ToolClass.name === "PerformanceTools") {
+          this.setMetricsCollector((toolInstance as InstanceType<typeof Tools.PerformanceTools>).getMetricsCollector());
+        }
       } else {
         toolInstance = new (ToolClass as new () => { getTools(): unknown[] })();
       }
@@ -73,6 +88,13 @@ export class ToolRegistry {
     // After all tools are registered, install a cached tools/list handler to avoid
     // repeated Zod→JSON-Schema conversion on every tools/list request.
     this.installCachedToolsListHandler();
+  }
+
+  /**
+   * Report every tool invocation to `tracker` so wp_performance_stats can show tool usage.
+   */
+  public setMetricsCollector(tracker: ToolExecutionTracker | undefined): void {
+    this.toolExecutionTracker = tracker;
   }
 
   /**
@@ -153,8 +175,20 @@ export class ToolRegistry {
             };
           }
 
-          // Call the tool handler with the client and parameters
-          const result = await tool.handler(client, args);
+          // Call the tool handler with the client and parameters, reporting the outcome to the
+          // performance subsystem. Errors still propagate to the catch below.
+          const tracker = this.toolExecutionTracker;
+          const executionId = tracker?.startToolExecution(tool.name, args, siteId as string);
+          let succeeded = false;
+          let result: unknown;
+          try {
+            result = await tool.handler(client, args);
+            succeeded = true;
+          } finally {
+            if (tracker && executionId !== undefined) {
+              tracker.endToolExecution(executionId, succeeded);
+            }
+          }
 
           return {
             content: [

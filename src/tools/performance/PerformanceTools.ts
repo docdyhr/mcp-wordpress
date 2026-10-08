@@ -93,6 +93,13 @@ export default class PerformanceTools {
   }
 
   /**
+   * The collector that tool dispatch reports invocations to (see ToolRegistry.setMetricsCollector).
+   */
+  getMetricsCollector(): MetricsCollector {
+    return this.collector;
+  }
+
+  /**
    * Get all performance monitoring tools
    */
   getTools(): ToolDefinition[] {
@@ -330,7 +337,9 @@ export default class PerformanceTools {
           totalRequests: metrics.requests.total,
           averageResponseTime: `${metrics.requests.averageResponseTime.toFixed(0)}ms`,
           cacheHitRate: `${(metrics.cache.hitRate * 100).toFixed(1)}%`,
+          // Server/network failures only; expected 4xx responses are reported separately.
           errorRate: `${((metrics.requests.failed / Math.max(metrics.requests.total, 1)) * 100).toFixed(2)}%`,
+          clientErrors: metrics.requests.clientErrors,
           uptime: formatUptime(metrics.system.uptime),
         };
       }
@@ -357,7 +366,7 @@ export default class PerformanceTools {
       if (category === "system" || category === "all") {
         result.system = {
           ...metrics.system,
-          memoryUsage: `${metrics.system.memoryUsage}%`,
+          memoryUsage: `${metrics.system.memoryUsage}% of V8 heap limit`,
           cpuUsage: `${metrics.system.cpuUsage}%`,
           uptime: formatUptime(metrics.system.uptime),
         };

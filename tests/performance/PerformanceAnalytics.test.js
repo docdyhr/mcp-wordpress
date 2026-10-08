@@ -308,6 +308,35 @@ describe("PerformanceAnalytics", () => {
       });
     });
 
+    it("should report which tier `improvement` is measured to, and that tier's value", () => {
+      mockMetricsCollector.collectCurrentMetrics.mockReturnValue({
+        ...mockMetrics,
+        requests: { ...mockMetrics.requests, averageResponseTime: 507 }, // average: 500ms-1s
+      });
+
+      const responseTime = analytics.benchmarkPerformance().find((b) => b.category === "Response Time");
+
+      expect(responseTime.status).toBe("average");
+      // 507ms -> the "good" tier at 500ms is 7ms away; the excellent target (200ms) is a different number
+      expect(responseTime.improvement).toBeCloseTo(7);
+      expect(responseTime.nextTierStatus).toBe("good");
+      expect(responseTime.nextTierValue).toBe(500);
+      expect(responseTime.benchmarkValue).toBe(200);
+    });
+
+    it("should not report a next tier when performance is already excellent", () => {
+      mockMetricsCollector.collectCurrentMetrics.mockReturnValue({
+        ...mockMetrics,
+        requests: { ...mockMetrics.requests, averageResponseTime: 150 },
+      });
+
+      const responseTime = analytics.benchmarkPerformance().find((b) => b.category === "Response Time");
+
+      expect(responseTime.status).toBe("excellent");
+      expect(responseTime.nextTierStatus).toBeUndefined();
+      expect(responseTime.nextTierValue).toBeUndefined();
+    });
+
     it("should classify excellent performance correctly", () => {
       mockMetricsCollector.collectCurrentMetrics.mockReturnValue({
         ...mockMetrics,

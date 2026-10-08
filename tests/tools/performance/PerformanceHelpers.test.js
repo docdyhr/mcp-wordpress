@@ -399,6 +399,63 @@ describe("PerformanceHelpers", () => {
       expect(getBenchmarkImprovementDescription(benchmark)).toBe("Reduce by 20%");
     });
 
+    // Regression: `improvement` is the distance to the NEXT tier, but the output sat next to the
+    // excellent target — "507ms vs 200 target → Reduce by 7ms" read as an arithmetic error.
+    it("should name the next tier and the excellent target for Response Time", () => {
+      const benchmark = {
+        category: "Response Time",
+        currentValue: 507,
+        benchmarkValue: 200,
+        improvement: 7,
+        status: "average",
+        nextTierStatus: "good",
+        nextTierValue: 500,
+      };
+      expect(getBenchmarkImprovementDescription(benchmark)).toBe(
+        'Reduce by 7ms to reach "good" (500ms); excellent is 200ms',
+      );
+    });
+
+    it("should name the next tier and the excellent target for Cache Hit Rate", () => {
+      const benchmark = {
+        category: "Cache Hit Rate",
+        currentValue: 25,
+        benchmarkValue: 95,
+        improvement: 25,
+        status: "poor",
+        nextTierStatus: "below_average",
+        nextTierValue: 50,
+      };
+      expect(getBenchmarkImprovementDescription(benchmark)).toBe(
+        'Increase by 25.0% to reach "below_average" (50.0%); excellent is 95.0%',
+      );
+    });
+
+    it("should name the next tier for Memory Usage and Error Rate", () => {
+      expect(
+        getBenchmarkImprovementDescription({
+          category: "Memory Usage",
+          currentValue: 60,
+          benchmarkValue: 50,
+          improvement: 10,
+          status: "good",
+          nextTierStatus: "excellent",
+          nextTierValue: 50,
+        }),
+      ).toBe('Reduce by 10% to reach "excellent" (50%)');
+      expect(
+        getBenchmarkImprovementDescription({
+          category: "Error Rate",
+          currentValue: 3,
+          benchmarkValue: 0.5,
+          improvement: 2,
+          status: "average",
+          nextTierStatus: "good",
+          nextTierValue: 1,
+        }),
+      ).toBe('Reduce by 2.00% to reach "good" (1.00%); excellent is 0.50%');
+    });
+
     it("should handle unknown categories", () => {
       const benchmark = { category: "Unknown", improvement: 10, status: "average" };
       expect(getBenchmarkImprovementDescription(benchmark)).toBe("Improve by 10");
