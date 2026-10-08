@@ -398,7 +398,8 @@ describe("TaxonomyTools", () => {
         id: 1,
       });
 
-      expect(mockClient.deleteCategory).toHaveBeenCalledWith(1);
+      // WP terms have no trash: DELETE without force=true is always rejected
+      expect(mockClient.deleteCategory).toHaveBeenCalledWith(1, true);
       expect(typeof result).toBe("string");
       expect(result).toContain("Category 1 has been deleted");
     });
@@ -710,7 +711,8 @@ describe("TaxonomyTools", () => {
         id: 1,
       });
 
-      expect(mockClient.deleteTag).toHaveBeenCalledWith(1);
+      // WP terms have no trash: DELETE without force=true is always rejected
+      expect(mockClient.deleteTag).toHaveBeenCalledWith(1, true);
       expect(typeof result).toBe("string");
       expect(result).toContain("Tag 1 has been deleted");
     });
