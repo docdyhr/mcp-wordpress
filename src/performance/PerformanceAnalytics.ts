@@ -55,7 +55,9 @@ export interface BenchmarkComparison {
   benchmarkValue: number;
   percentile: number; // Where current performance ranks (0-100)
   status: "excellent" | "good" | "average" | "below_average" | "poor";
-  improvement: number; // How much improvement needed to reach next tier
+  improvement: number; // How much improvement needed to reach the NEXT tier (not the excellent benchmark)
+  nextTierStatus?: string | undefined; // Tier that `improvement` is measured to; absent when already excellent
+  nextTierValue?: number | undefined; // Threshold value of that tier
 }
 
 /**
@@ -670,6 +672,12 @@ export class PerformanceAnalytics {
   ): BenchmarkComparison {
     let status: "excellent" | "good" | "average" | "below_average" | "poor" = "poor";
     let improvement = 0;
+    const nextTierByStatus = {
+      good: "excellent",
+      average: "good",
+      below_average: "average",
+      poor: "below_average",
+    } as const;
 
     if (higherIsBetter) {
       if (currentValue >= (benchmarks.excellent as number)) status = "excellent";
@@ -679,15 +687,7 @@ export class PerformanceAnalytics {
 
       // Calculate improvement needed
       if (status !== "excellent") {
-        const nextTier =
-          status === "good"
-            ? (benchmarks.excellent as number)
-            : status === "average"
-              ? (benchmarks.good as number)
-              : status === "below_average"
-                ? (benchmarks.average as number)
-                : (benchmarks.below_average as number);
-        improvement = nextTier - currentValue;
+        improvement = (benchmarks[nextTierByStatus[status]] as number) - currentValue;
       }
     } else {
       if (currentValue <= (benchmarks.excellent as number)) status = "excellent";
@@ -697,15 +697,7 @@ export class PerformanceAnalytics {
 
       // Calculate improvement needed
       if (status !== "excellent") {
-        const nextTier =
-          status === "good"
-            ? benchmarks.excellent
-            : status === "average"
-              ? benchmarks.good
-              : status === "below_average"
-                ? benchmarks.average
-                : benchmarks.below_average;
-        improvement = currentValue - (nextTier as number);
+        improvement = currentValue - (benchmarks[nextTierByStatus[status]] as number);
       }
     }
 
@@ -728,6 +720,8 @@ export class PerformanceAnalytics {
       percentile,
       status,
       improvement,
+      nextTierStatus: status === "excellent" ? undefined : nextTierByStatus[status],
+      nextTierValue: status === "excellent" ? undefined : (benchmarks[nextTierByStatus[status]] as number),
     };
   }
 

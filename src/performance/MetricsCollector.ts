@@ -37,6 +37,22 @@ export interface ToolExecutionContext {
 /**
  * Metrics Collector - Central hub for all performance data
  */
+/**
+ * True for an expected 4xx caller mistake (not found, forbidden, invalid input).
+ * 401 (credentials rejected — every authenticated tool is unusable), 408 (timeout) and 429 (rate limited)
+ * are operational problems and still count as failures.
+ */
+function isClientErrorStatus(statusCode: unknown): boolean {
+  return (
+    typeof statusCode === "number" &&
+    statusCode >= 400 &&
+    statusCode < 500 &&
+    statusCode !== 401 &&
+    statusCode !== 408 &&
+    statusCode !== 429
+  );
+}
+
 export class MetricsCollector {
   private monitor: PerformanceMonitor;
   private config: CollectorConfig;
@@ -110,8 +126,9 @@ export class MetricsCollector {
 
     const responseTime = Date.now() - context.startTime;
 
-    // Record in performance monitor
-    this.monitor.recordRequest(responseTime, success, context.toolName);
+    // A tool call is not an HTTP request (it may make several, or none); the client request
+    // interceptor already counts the real requests, so record usage only.
+    this.monitor.recordToolCall(context.toolName, responseTime, success);
 
     this.activeTools.delete(executionId);
   }
@@ -490,7 +507,12 @@ export class MetricsCollector {
         return result;
       } catch (_error) {
         const responseTime = Date.now() - startTime;
-        this.monitor.recordRequest(responseTime, false);
+        if (isClientErrorStatus((_error as { statusCode?: unknown } | null)?.statusCode)) {
+          // Expected 4xx (not found, forbidden, invalid input): keep out of the server error rate.
+          this.monitor.recordRequest(responseTime, false, undefined, { clientError: true });
+        } else {
+          this.monitor.recordRequest(responseTime, false);
+        }
         this.activeRequests.delete(requestId);
 
         throw _error;

@@ -795,10 +795,18 @@ export class WordPressClient implements IWordPressClient {
   ): Promise<RawResponse<T> | undefined> {
     const errorText = new TextDecoder("utf-8").decode(await response.arrayBuffer());
     let errorMessage: string;
+    // WordPress REST errors carry a machine-readable `code` (e.g. "rest_forbidden") and `data`;
+    // keep them so callers can tell a capability denial from a bare 403 raised by a firewall.
+    let errorCode: string | undefined;
+    let errorBody: unknown;
 
     try {
       const errorData = JSON.parse(errorText);
       errorMessage = errorData.message || errorData.error || `HTTP ${response.status}`;
+      if (typeof errorData.code === "string") {
+        errorCode = errorData.code;
+      }
+      errorBody = errorData.data;
     } catch {
       errorMessage = errorText || `HTTP ${response.status}: ${response.statusText}`;
     }
@@ -809,12 +817,17 @@ export class WordPressClient implements IWordPressClient {
     }
 
     if (response.status === 403 && originalEndpoint.includes("media") && fetchOptions.method === "POST") {
-      throw new AuthenticationError(
+      // A 403 means the credentials were accepted but the upload was refused (missing upload_files capability, or a
+      // plugin/firewall). Keep it a 403 with WordPress's code — AuthenticationError would rewrite it to a 401 and
+      // send callers off to check their credentials.
+      throw new WordPressAPIError(
         "Media upload blocked: WordPress REST API media uploads appear to be disabled or restricted by a plugin/security policy. " +
           `Error: ${errorMessage}. ` +
           "Common causes: W3 Total Cache, security plugins, or custom REST API restrictions. " +
           "Please check WordPress admin settings or contact your system administrator.",
-        this.auth.method,
+        403,
+        errorCode,
+        errorBody,
       );
     }
 
@@ -835,7 +848,7 @@ export class WordPressClient implements IWordPressClient {
       }
     }
 
-    throw new WordPressAPIError(errorMessage, response.status);
+    throw new WordPressAPIError(errorMessage, response.status, errorCode, errorBody);
   }
 
   private async tryIndexPhpFallback<T>(
