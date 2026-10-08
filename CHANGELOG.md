@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.6](https://github.com/docdyhr/mcp-wordpress/compare/v4.0.5...v4.0.6) (2026-10-08)
+
+### 🐛 Bug Fixes
+
+- **config:** find the multi-site config outside the DXT install dir
+  ([#259](https://github.com/docdyhr/mcp-wordpress/issues/259))
+  ([4677e46](https://github.com/docdyhr/mcp-wordpress/commit/4677e46f3f1e56514bdce10b52ad0ff1b5760aa0))
+
 ## [4.0.5](https://github.com/docdyhr/mcp-wordpress/compare/v4.0.4...v4.0.5) (2026-10-08)
 
 ### 🐛 Bug Fixes
