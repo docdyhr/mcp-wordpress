@@ -11,7 +11,7 @@ import { CreatePostRequest, PostQueryParams, PostStatus, UpdatePostRequest, Word
 import { getErrorMessage, isPermissionError } from "@/utils/error.js";
 import { ErrorHandlers } from "@/utils/enhancedError.js";
 import { validateId, validatePaginationParams, validatePostParams } from "@/utils/validation.js";
-import { sanitizeHtml } from "@/utils/validation/security.js";
+import { countWords, htmlToPlainText } from "@/utils/htmlText.js";
 import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "@/utils/streaming.js";
 
 export function buildListParams(params: PostQueryParams): PostQueryParams {
@@ -53,6 +53,21 @@ export function buildListParams(params: PostQueryParams): PostQueryParams {
   return sanitized;
 }
 
+/** Display title for a `title.rendered` value: markup stripped, entities decoded, never empty. */
+function displayTitle(rendered: string | undefined): string {
+  return htmlToPlainText(rendered) || "(untitled)";
+}
+
+/**
+ * Label for a post's `date` field. For a draft or pending post it is when the post was created,
+ * not when it was published, so calling it "Published" is wrong.
+ */
+function dateLabel(status: string): string {
+  if (status === "publish" || status === "private") return "Published";
+  if (status === "future") return "Scheduled";
+  return "Created";
+}
+
 export function formatPostsResponse(
   posts: WordPressPost[],
   siteUrl: string,
@@ -70,7 +85,7 @@ export function formatPostsResponse(
   );
 
   const metadata = [
-    `📊 **Posts Summary**: ${posts.length} total`,
+    `📊 **Posts Summary**: ${posts.length} on this page`,
     `📝 **Status Breakdown**: ${Object.entries(statusCounts)
       .map(([status, count]) => `${status}: ${count}`)
       .join(", ")}`,
@@ -88,14 +103,14 @@ export function formatPostsResponse(
         month: "short",
         day: "numeric",
       });
-      const excerpt = p.excerpt?.rendered ? sanitizeHtml(p.excerpt.rendered).substring(0, 80) + "..." : "";
+      const excerpt = htmlToPlainText(p.excerpt?.rendered, { maxLength: 80 });
       const authorName = authorMap.get(p.author) || (p.author != null ? `User ${p.author}` : "Unknown Author");
       const postCategories = (p.categories || []).map((id) => categoryMap.get(id) || `Category ${id}`);
       const postTags = (p.tags || []).map((id) => tagMap.get(id) || `Tag ${id}`);
 
-      let postInfo = `- ID ${p.id}: **${p.title.rendered}** (${p.status})\n`;
+      let postInfo = `- ID ${p.id}: **${displayTitle(p.title.rendered)}** (${p.status})\n`;
       postInfo += `  👤 Author: ${authorName}\n`;
-      postInfo += `  📅 Published: ${formattedDate}\n`;
+      postInfo += `  📅 ${dateLabel(p.status)}: ${formattedDate}\n`;
       if (postCategories.length > 0) postInfo += `  📁 Categories: ${postCategories.join(", ")}\n`;
       if (postTags.length > 0) postInfo += `  🏷️ Tags: ${postTags.join(", ")}\n`;
       if (excerpt) postInfo += `  📝 Excerpt: ${excerpt}\n`;
@@ -105,8 +120,12 @@ export function formatPostsResponse(
     .join("\n\n");
 
   let content = metadata.join("\n") + "\n\n" + postLines;
-  if (posts.length >= (sanitizedParams.per_page || 10)) {
-    content += `\n\n📄 **Pagination Tip**: Use \`per_page\` parameter to control results (max 100). Current: ${sanitizedParams.per_page || 10}`;
+  const perPage = sanitizedParams.per_page || 10;
+  if (posts.length >= perPage) {
+    const page = sanitizedParams.page || 1;
+    content +=
+      `\n\n📄 **Pagination**: page ${page}, ${perPage} per page. This page is full, so more results may exist — ` +
+      `request \`page=${page + 1}\` (use \`per_page\` to change the page size, max 100).`;
   }
   return content;
 }
@@ -258,15 +277,16 @@ export async function handleGetPost(
     });
 
     const content = post.content?.raw ?? post.content?.rendered ?? "";
-    const excerpt = post.excerpt?.rendered ? sanitizeHtml(post.excerpt.rendered).trim() : "";
-    const wordCount = sanitizeHtml(content).split(/\s+/).filter(Boolean).length;
+    const excerpt = htmlToPlainText(post.excerpt?.rendered);
+    // Same plain-text pipeline as the SEO analyzer so the two tools agree on a post's length.
+    const wordCount = countWords(htmlToPlainText(content));
 
     // Build comprehensive response
-    let response = `# ${post.title.rendered}\n\n`;
+    let response = `# ${displayTitle(post.title.rendered)}\n\n`;
     response += `**Post ID**: ${post.id}\n`;
     response += `**Status**: ${post.status}\n`;
     response += `**Author**: ${author?.name || author?.username || `User ${post.author}`}\n`;
-    response += `**Published**: ${formattedDate}\n`;
+    response += `**${dateLabel(post.status)}**: ${formattedDate}\n`;
     response += `**Modified**: ${formattedModified}\n`;
 
     if (categories.length > 0) {
@@ -364,17 +384,35 @@ export async function handleUpdatePost(
 
     // Build change summary
     let response = `✅ **Post Updated Successfully**\n\n`;
-    response += `**Title**: ${updatedPost.title.rendered}\n`;
+    response += `**Title**: ${displayTitle(updatedPost.title.rendered)}\n`;
     response += `**ID**: ${updatedPost.id}\n`;
     response += `**Status**: ${updatedPost.status}\n`;
     response += `**Modified**: ${new Date(updatedPost.modified).toLocaleString()}\n`;
 
     // Show which fields were updated
     const changes: string[] = [];
-    if (params.title) changes.push(`Title: "${updatedPost.title.rendered}"`);
+    if (params.title) changes.push(`Title: "${displayTitle(updatedPost.title.rendered)}"`);
     if (params.status) changes.push(`Status: "${updatedPost.status}"`);
-    if (params.content) changes.push("Content updated");
-    if (params.excerpt) changes.push("Excerpt updated");
+    if (params.content !== undefined) changes.push("Content updated");
+    if (params.excerpt !== undefined) changes.push("Excerpt updated");
+    if (params.categories !== undefined) {
+      changes.push(
+        params.categories.length > 0 ? `Categories updated: ${params.categories.join(", ")}` : "Categories cleared",
+      );
+    }
+    if (params.tags !== undefined) {
+      changes.push(params.tags.length > 0 ? `Tags updated: ${params.tags.join(", ")}` : "Tags cleared");
+    }
+    if (params.slug) changes.push(`Slug updated: ${params.slug}`);
+    if (params.featured_media !== undefined) {
+      changes.push(
+        params.featured_media === 0 ? "Featured image removed" : `Featured image updated: ${params.featured_media}`,
+      );
+    }
+    if (params.date) changes.push(`Date updated: ${params.date}`);
+    if (params.author !== undefined) changes.push(`Author updated: ${params.author}`);
+    if (params.comment_status) changes.push(`Comment status: "${params.comment_status}"`);
+    if (params.sticky !== undefined) changes.push(params.sticky ? "Marked sticky" : "Unmarked sticky");
 
     if (changes.length > 0) {
       response += `\n**Changes Made**:\n${changes.map((c) => `- ${c}`).join("\n")}\n`;

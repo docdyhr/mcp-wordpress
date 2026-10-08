@@ -1992,6 +1992,11 @@
                     "description": "Number of items to return per page (max 100).",
                     "default": 10
                   },
+                  "page": {
+                    "type": "number",
+                    "description": "Page of results to return (1-based). Combine with per_page to walk through a large site.",
+                    "default": 1
+                  },
                   "search": {
                     "type": "string",
                     "description": "Limit results to those matching a search term."
