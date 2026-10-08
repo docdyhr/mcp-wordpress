@@ -10,6 +10,7 @@
 
 import { LoggerFactory } from "@/utils/logger.js";
 import { Config } from "@/config/Config.js";
+import { countWords, htmlToPlainText } from "@/utils/htmlText.js";
 import type { WordPressPost } from "@/types/wordpress.js";
 import type { SEOAnalysisResult, SEOMetrics, SEORecommendation, SEOToolParams } from "@/types/seo.js";
 
@@ -36,7 +37,10 @@ export class ContentAnalyzer {
       const plainText = this.stripHtml(content);
 
       // Perform various analyses
-      const metrics = await this.calculateMetrics(plainText, content, params);
+      // The post's length is its body only. `content` also carries the title and excerpt (useful for
+      // keyword/readability analysis), and counting those inflated wordCount relative to wp_get_post.
+      const bodyWordCount = countWords(this.stripHtml(this.extractBody(post)));
+      const metrics = await this.calculateMetrics(plainText, content, params, bodyWordCount);
       const recommendations = await this.generateRecommendations(post, metrics, params);
       const keywordAnalysis = params.focusKeywords?.length
         ? await this.analyzeKeywords(plainText, params.focusKeywords[0])
@@ -73,10 +77,19 @@ export class ContentAnalyzer {
    */
   private extractContent(post: WordPressPost): string {
     const titleContent = typeof post.title === "object" ? post.title.rendered : post.title || "";
-    const bodyContent = typeof post.content === "object" ? post.content.rendered : post.content || "";
+    const bodyContent = this.extractBody(post);
     const excerptContent = typeof post.excerpt === "object" ? post.excerpt.rendered : post.excerpt || "";
 
     return `${titleContent} ${bodyContent} ${excerptContent}`.trim();
+  }
+
+  /**
+   * Extract just the post body (no title or excerpt)
+   *
+   * @private
+   */
+  private extractBody(post: WordPressPost): string {
+    return typeof post.content === "object" ? post.content.rendered : post.content || "";
   }
 
   /**
@@ -87,29 +100,8 @@ export class ContentAnalyzer {
    * @private
    */
   private stripHtml(html: string): string {
-    // Remove HTML tags, scripts, and styles
-    // Apply repeatedly to handle nested/malformed tags
-    let result = html;
-    let previous = "";
-
-    while (result !== previous) {
-      previous = result;
-      result = result
-        .replace(/<script[^>]*>/gi, "")
-        .replace(/<\/script[^>]*>/gi, "")
-        .replace(/<style[^>]*>/gi, "")
-        .replace(/<\/style[^>]*>/gi, "");
-    }
-
-    // Remove remaining content between script/style tags and other HTML
-    result = result
-      .replace(/<[^>]*>/g, "")
-      .replace(/&nbsp;/g, " ")
-      .replace(/&[#\w]+;/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    return result;
+    // Shared with wp_get_post so both tools see the same text (and the same word count).
+    return htmlToPlainText(html);
   }
 
   /**
@@ -121,7 +113,14 @@ export class ContentAnalyzer {
    * @returns SEO metrics
    * @private
    */
-  private async calculateMetrics(plainText: string, htmlContent: string, params: SEOToolParams): Promise<SEOMetrics> {
+  private async calculateMetrics(
+    plainText: string,
+    htmlContent: string,
+    params: SEOToolParams,
+    wordCount: number,
+  ): Promise<SEOMetrics> {
+    // getWords() is ASCII-word oriented (readability, syllables); the reported length (`wordCount`) comes
+    // from the shared, CJK-aware counter over the body so it matches wp_get_post.
     const words = this.getWords(plainText);
     const sentences = this.getSentences(plainText);
     const syllables = this.countSyllables(plainText);
@@ -145,7 +144,7 @@ export class ContentAnalyzer {
     const images = this.countImages(htmlContent);
 
     return {
-      wordCount: words.length,
+      wordCount,
       avgWordsPerSentence,
       avgSyllablesPerWord,
       fleschReadingEase,
@@ -156,7 +155,7 @@ export class ContentAnalyzer {
       externalLinkCount: links.external,
       imageCount: images.total,
       imagesWithAltText: images.withAlt,
-      readingTime: Math.ceil(words.length / 200), // Assume 200 WPM reading speed
+      readingTime: Math.ceil(wordCount / 200), // Assume 200 WPM reading speed
     };
   }
 

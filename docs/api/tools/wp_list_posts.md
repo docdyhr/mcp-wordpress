@@ -12,13 +12,14 @@ status: `wp_list_posts --status="draft"` • Category filtering: `wp_list_posts 
 
 ## Parameters
 
-| Parameter    | Type     | Required | Description                                      | Default   | Examples                |
-| ------------ | -------- | -------- | ------------------------------------------------ | --------- | ----------------------- |
-| `per_page`   | `number` | ❌       | Number of items to return per page (max 100).    | `10`      | `10`, `20`              |
-| `search`     | `string` | ❌       | Limit results to those matching a search term.   | -         | `wordpress`, `tutorial` |
-| `status`     | `string` | ❌       | Filter by post status.                           | `publish` | `example`               |
-| `categories` | `array`  | ❌       | Limit results to posts in specific category IDs. | -         | `example`               |
-| `tags`       | `array`  | ❌       | Limit results to posts with specific tag IDs.    | -         | `example`               |
+| Parameter    | Type     | Required | Description                                                                              | Default   | Examples                |
+| ------------ | -------- | -------- | ---------------------------------------------------------------------------------------- | --------- | ----------------------- |
+| `per_page`   | `number` | ❌       | Number of items to return per page (max 100).                                            | `10`      | `10`, `20`              |
+| `page`       | `number` | ❌       | Page of results to return (1-based). Combine with per_page to walk through a large site. | `1`       | `example`               |
+| `search`     | `string` | ❌       | Limit results to those matching a search term.                                           | -         | `wordpress`, `tutorial` |
+| `status`     | `string` | ❌       | Filter by post status.                                                                   | `publish` | `example`               |
+| `categories` | `array`  | ❌       | Limit results to posts in specific category IDs.                                         | -         | `example`               |
+| `tags`       | `array`  | ❌       | Limit results to posts with specific tag IDs.                                            | -         | `example`               |
 
 ## Examples
 
@@ -102,7 +103,7 @@ Comprehensive example using all available parameters
 **Command:**
 
 ```bash
-wp_list_posts --per_page="10" --search="wordpress" --status="publish" --categories="example_value" --tags="example_value"
+wp_list_posts --per_page="10" --page="1" --search="wordpress" --status="publish" --categories="example_value" --tags="example_value"
 ```
 
 **Response:**

@@ -55,6 +55,12 @@ shims.
 `generators/MetaGenerator.ts` + `SchemaGenerator.ts` (meta tags, JSON-LD), `optimizers/InternalLinkingSuggester.ts`,
 `providers/SearchConsoleProvider.ts` (Google Search Console). `validators/` is currently empty (reserved).
 
+**Pagination contract**: list tools accept `page` and `per_page` (max 100) in their `inputSchema` — a property missing
+from the schema is stripped by the argument validator, so it never reaches the handler. Handlers forward them to
+WordPress, which defaults to 10 per page, and end a full page with a next-page note (`pageHint()` in `params.ts`;
+`postsPaginationNote()` for posts, including the >50-post streaming path). The note is the only signal that more results
+exist because the X-WP-Total header is not exposed to tools; never label a page's size as a site total.
+
 **Shared imports**: `@/client/api.js` (`WordPressClient`), `@/utils/error.js`, `@/types/wordpress.js`,
 `@/utils/validation/security.js` (`sanitizeHtml`), `src/tools/params.ts` (`toolParams<T>`, `parseId`,
 `parseIdAndForce`).

@@ -2,7 +2,8 @@ import { WordPressClient } from "@/client/api.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
 import { CreateCategoryRequest, CreateTagRequest, UpdateCategoryRequest, UpdateTagRequest } from "@/types/wordpress.js";
 import { preserveToolError } from "@/utils/error.js";
-import { parseId, toolParams } from "./params.js";
+import { htmlToPlainText } from "@/utils/htmlText.js";
+import { pageHint, parseId, toolParams } from "./params.js";
 
 /**
  * Provides tools for managing taxonomies (categories and tags) on a WordPress site.
@@ -34,6 +35,14 @@ export class TaxonomyTools {
             hide_empty: {
               type: "boolean",
               description: "Whether to hide categories with no posts.",
+            },
+            per_page: {
+              type: "number",
+              description: "Number of categories to return per page (max 100). WordPress defaults to 10.",
+            },
+            page: {
+              type: "number",
+              description: "Page of results to return (1-based).",
             },
           },
         },
@@ -118,6 +127,14 @@ export class TaxonomyTools {
               type: "string",
               description: "Limit results to those matching a search term.",
             },
+            per_page: {
+              type: "number",
+              description: "Number of tags to return per page (max 100). WordPress defaults to 10.",
+            },
+            page: {
+              type: "number",
+              description: "Page of results to return (1-based).",
+            },
           },
         },
         handler: this.handleListTags.bind(this),
@@ -198,7 +215,8 @@ export class TaxonomyTools {
       }
       const content =
         `Found ${categories.length} categories:\n\n` +
-        categories.map((c) => `- ID ${c.id}: **${c.name}** (Posts: ${c.count})`).join("\n");
+        categories.map((c) => `- ID ${c.id}: **${htmlToPlainText(c.name)}** (Posts: ${c.count})`).join("\n") +
+        pageHint(categories.length, params);
       return content;
     } catch (_error) {
       preserveToolError("Failed to list categories", _error);
@@ -261,7 +279,8 @@ export class TaxonomyTools {
       }
       const content =
         `Found ${tags.length} tags:\n\n` +
-        tags.map((t) => `- ID ${t.id}: **${t.name}** (Posts: ${t.count})`).join("\n");
+        tags.map((t) => `- ID ${t.id}: **${htmlToPlainText(t.name)}** (Posts: ${t.count})`).join("\n") +
+        pageHint(tags.length, params);
       return content;
     } catch (_error) {
       preserveToolError("Failed to list tags", _error);

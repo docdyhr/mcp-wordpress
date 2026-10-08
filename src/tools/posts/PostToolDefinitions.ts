@@ -29,6 +29,10 @@ export const listPostsTool: MCPTool = {
         type: "number",
         description: "Number of items to return per page (max 100).",
       },
+      page: {
+        type: "number",
+        description: "Page of results to return (1-based). Combine with per_page to walk through a large site.",
+      },
       search: {
         type: "string",
         description: "Limit results to those matching a search term.",

@@ -27,6 +27,38 @@ describe("SEO Content Analyzer", () => {
     });
   });
 
+  describe("Word count", () => {
+    const params = { site: "test", postId: 1, analysisType: "full", focusKeywords: [] };
+    const postWith = (html) => ({
+      id: 1,
+      title: { rendered: "T" },
+      content: { rendered: html },
+      excerpt: { rendered: "" },
+    });
+
+    async function wordCount(html) {
+      const result = await analyzer.analyzePost(postWith(html), params);
+      return result.metrics.wordCount;
+    }
+
+    // Regression: wp_get_post and wp_seo_analyze_content disagreed on the same post (102 vs 156).
+    // Both now count with countWords() over htmlToPlainText().
+    it("agrees with the shared plain-text counter used by wp_get_post", async () => {
+      const html =
+        '<!-- wp:paragraph --><p>One <a href="https://x.example/a" class="b c">two three</a>, don&#8217;t stop &mdash; now.</p><!-- /wp:paragraph -->' +
+        "<script>var ignored = 1;</script><p>Four five.</p>";
+      const { countWords, htmlToPlainText } = await import("../../../dist/utils/htmlText.js");
+
+      expect(await wordCount(html)).toBe(countWords(htmlToPlainText(html)));
+      // One, two, three, don\u2019t, stop, now + Four, five; the em dash and the script body are not words.
+      expect(await wordCount(html)).toBe(8);
+    });
+
+    it("counts CJK characters instead of treating a run of them as nothing or one word", async () => {
+      expect(await wordCount("<p>\u4e2d\u6587\u6d4b\u8bd5</p>")).toBe(4);
+    });
+  });
+
   describe("Content analysis", () => {
     const samplePost = {
       id: 1,

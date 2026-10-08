@@ -3,7 +3,7 @@ import { MCPToolSchema } from "@/types/mcp.js";
 import { CommentQueryParams, CreateCommentRequest, UpdateCommentRequest } from "@/types/wordpress.js";
 import { preserveToolError } from "@/utils/error.js";
 import { sanitizeHtml } from "@/utils/validation/security.js";
-import { parseId, parseIdAndForce, toolParams } from "./params.js";
+import { pageHint, parseId, parseIdAndForce, toolParams } from "./params.js";
 
 /**
  * Provides tools for managing comments on a WordPress site.
@@ -35,6 +35,14 @@ export class CommentTools {
               type: "string",
               description: "Filter by comment status.",
               enum: ["hold", "approve", "spam", "trash"],
+            },
+            per_page: {
+              type: "number",
+              description: "Number of comments to return per page (max 100). WordPress defaults to 10.",
+            },
+            page: {
+              type: "number",
+              description: "Page of results to return (1-based).",
             },
           },
         },
@@ -174,7 +182,8 @@ export class CommentTools {
                 c.status
               })\n  > ${c.content.rendered.substring(0, 100)}...`,
           )
-          .join("\n");
+          .join("\n") +
+        pageHint(comments.length, params);
       return content;
     } catch (_error) {
       preserveToolError("Failed to list comments", _error);

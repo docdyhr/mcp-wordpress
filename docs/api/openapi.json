@@ -1768,6 +1768,16 @@
                   "hide_empty": {
                     "type": "boolean",
                     "description": "Whether to hide categories with no posts."
+                  },
+                  "per_page": {
+                    "type": "number",
+                    "description": "Number of categories to return per page (max 100). WordPress defaults to 10.",
+                    "default": 10
+                  },
+                  "page": {
+                    "type": "number",
+                    "description": "Page of results to return (1-based).",
+                    "default": 1
                   }
                 }
               }
@@ -1826,6 +1836,16 @@
                       "future"
                     ],
                     "default": "publish"
+                  },
+                  "per_page": {
+                    "type": "number",
+                    "description": "Number of comments to return per page (max 100). WordPress defaults to 10.",
+                    "default": 10
+                  },
+                  "page": {
+                    "type": "number",
+                    "description": "Page of results to return (1-based).",
+                    "default": 1
                   }
                 }
               }
@@ -1992,6 +2012,11 @@
                     "description": "Number of items to return per page (max 100).",
                     "default": 10
                   },
+                  "page": {
+                    "type": "number",
+                    "description": "Page of results to return (1-based). Combine with per_page to walk through a large site.",
+                    "default": 1
+                  },
                   "search": {
                     "type": "string",
                     "description": "Limit results to those matching a search term."
@@ -2061,6 +2086,16 @@
                   "search": {
                     "type": "string",
                     "description": "Limit results to those matching a search term."
+                  },
+                  "per_page": {
+                    "type": "number",
+                    "description": "Number of tags to return per page (max 100). WordPress defaults to 10.",
+                    "default": 10
+                  },
+                  "page": {
+                    "type": "number",
+                    "description": "Page of results to return (1-based).",
+                    "default": 1
                   }
                 }
               }

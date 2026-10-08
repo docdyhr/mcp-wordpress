@@ -266,6 +266,43 @@ describe("SEOWordPressClient", () => {
       expect(mockWordPressClient.getPost).toHaveBeenCalledWith(123, "edit");
     });
 
+    // Regression: with no explicit meta description the excerpt's rendered HTML was used verbatim,
+    // so wp_seo_test_integration showed "<p>It&#8217;s &amp; ...</p>" as the description.
+    it("falls back to the excerpt and title as plain text, with entities decoded", async () => {
+      mockWordPressClient.getPost.mockResolvedValueOnce({
+        id: 123,
+        title: { rendered: "Q&#038;A &#8211; Tips" },
+        excerpt: { rendered: "<p>It&#8217;s a &amp; b [&hellip;]</p>\n" },
+        content: { rendered: "Test content" },
+        type: "post",
+        link: "https://example.com/test-post",
+        meta: { yoast_head_json: { canonical: "https://example.com/test-post" } },
+      });
+
+      const result = await client.getSEOMetadata(123);
+
+      expect(result.description).toBe("It\u2019s a & b [\u2026]");
+      expect(result.openGraph.description).toBe("It\u2019s a & b [\u2026]");
+      expect(result.title).toBe("Q&A \u2013 Tips");
+      expect(result.openGraph.title).toBe("Q&A \u2013 Tips");
+    });
+
+    it("leaves an explicit plugin meta description untouched", async () => {
+      mockWordPressClient.getPost.mockResolvedValueOnce({
+        id: 123,
+        title: { rendered: "T" },
+        excerpt: { rendered: "<p>ignored</p>" },
+        content: { rendered: "Test content" },
+        type: "post",
+        link: "https://example.com/test-post",
+        meta: { yoast_head_json: { title: "x" }, _yoast_wpseo_metadesc: "Written by hand & kept as is" },
+      });
+
+      const result = await client.getSEOMetadata(123);
+
+      expect(result.description).toBe("Written by hand & kept as is");
+    });
+
     it("should handle post without SEO metadata", async () => {
       const mockPost = {
         id: 123,

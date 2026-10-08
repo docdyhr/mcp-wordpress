@@ -6,10 +6,12 @@ Lists categories from a WordPress site.
 
 ## Parameters
 
-| Parameter    | Type      | Required | Description                                    | Default | Examples                |
-| ------------ | --------- | -------- | ---------------------------------------------- | ------- | ----------------------- |
-| `search`     | `string`  | ❌       | Limit results to those matching a search term. | -       | `wordpress`, `tutorial` |
-| `hide_empty` | `boolean` | ❌       | Whether to hide categories with no posts.      | -       | `example`               |
+| Parameter    | Type      | Required | Description                                                                  | Default | Examples                |
+| ------------ | --------- | -------- | ---------------------------------------------------------------------------- | ------- | ----------------------- |
+| `search`     | `string`  | ❌       | Limit results to those matching a search term.                               | -       | `wordpress`, `tutorial` |
+| `hide_empty` | `boolean` | ❌       | Whether to hide categories with no posts.                                    | -       | `example`               |
+| `per_page`   | `number`  | ❌       | Number of categories to return per page (max 100). WordPress defaults to 10. | `10`    | `10`, `20`              |
+| `page`       | `number`  | ❌       | Page of results to return (1-based).                                         | `1`     | `example`               |
 
 ## Examples
 
@@ -62,6 +64,38 @@ Using wp_list_categories with specific site targeting
 
 ```bash
 wp_list_categories --site="site1" --search="wordpress"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "Example taxonomy 1",
+      "status": "publish"
+    },
+    {
+      "id": 2,
+      "title": "Example taxonomy 2",
+      "status": "draft"
+    }
+  ],
+  "total": 2,
+  "pages": 1
+}
+```
+
+### Advanced taxonomy Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_list_categories --search="wordpress" --hide_empty="example_value" --per_page="10" --page="1"
 ```
 
 **Response:**

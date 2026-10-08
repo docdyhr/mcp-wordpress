@@ -142,12 +142,13 @@ describe("formatPostsResponse", () => {
 
   it("appends pagination tip when post count equals per_page", () => {
     const result = formatPostsResponse([makePost()], siteUrl, { per_page: 1 }, ...emptyMaps);
-    expect(result).toContain("Pagination Tip");
+    expect(result).toContain("**Pagination**");
+    expect(result).toContain("`page=2`");
   });
 
   it("does not append pagination tip when post count is below per_page", () => {
     const result = formatPostsResponse([makePost()], siteUrl, { per_page: 10 }, ...emptyMaps);
-    expect(result).not.toContain("Pagination Tip");
+    expect(result).not.toContain("**Pagination**");
   });
 
   it("shows post link", () => {
