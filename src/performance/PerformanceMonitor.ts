@@ -3,6 +3,7 @@
  * Collects, analyzes, and reports performance metrics
  */
 
+import v8 from "v8";
 import { ConfigHelpers } from "@/config/Config.js";
 
 export interface PerformanceMetrics {
@@ -10,7 +11,10 @@ export interface PerformanceMetrics {
   requests: {
     total: number;
     successful: number;
+    /** Server, network and rate-limit failures — the numerator of the error rate. */
     failed: number;
+    /** Expected 4xx responses (not found, forbidden, invalid input); not counted in `failed`. */
+    clientErrors: number;
     averageResponseTime: number;
     minResponseTime: number;
     maxResponseTime: number;
@@ -34,7 +38,11 @@ export interface PerformanceMetrics {
   // System Performance
   system: {
     cpuUsage: number;
+    /** Heap used as a % of the V8 heap limit (how close the process is to running out of heap). */
     memoryUsage: number;
+    rssMB: number;
+    heapUsedMB: number;
+    heapLimitMB: number;
     uptime: number;
     activeConnections: number;
     concurrentRequests: number;
@@ -140,6 +148,7 @@ export class PerformanceMonitor {
         total: 0,
         successful: 0,
         failed: 0,
+        clientErrors: 0,
         averageResponseTime: 0,
         minResponseTime: 0,
         maxResponseTime: 0,
@@ -160,6 +169,9 @@ export class PerformanceMonitor {
       system: {
         cpuUsage: 0,
         memoryUsage: 0,
+        rssMB: 0,
+        heapUsedMB: 0,
+        heapLimitMB: 0,
         uptime: 0,
         activeConnections: 0,
         concurrentRequests: 0,
@@ -182,11 +194,18 @@ export class PerformanceMonitor {
   /**
    * Record a request performance metric
    */
-  recordRequest(responseTime: number, success: boolean, toolName?: string): void {
+  recordRequest(
+    responseTime: number,
+    success: boolean,
+    toolName?: string,
+    options?: { clientError?: boolean | undefined },
+  ): void {
     this.metrics.requests.total++;
 
     if (success) {
       this.metrics.requests.successful++;
+    } else if (options?.clientError) {
+      this.metrics.requests.clientErrors++;
     } else {
       this.metrics.requests.failed++;
     }
@@ -204,6 +223,14 @@ export class PerformanceMonitor {
     if (this.config.enableAlerts) {
       this.checkPerformanceAlerts();
     }
+  }
+
+  /**
+   * Record one MCP tool invocation. A tool call is not an HTTP request — it may make several
+   * or none (e.g. wp_performance_stats) — so this updates tool usage only, never request totals.
+   */
+  recordToolCall(toolName: string, responseTime: number, success: boolean): void {
+    this.recordToolUsage(toolName, responseTime, success);
   }
 
   /**
@@ -226,10 +253,17 @@ export class PerformanceMonitor {
    */
   updateSystemMetrics(): void {
     const memUsage = process.memoryUsage();
+    const heapLimit = v8.getHeapStatistics().heap_size_limit;
+    const toMB = (bytes: number) => Math.round((bytes / (1024 * 1024)) * 10) / 10;
 
     this.metrics.system = {
       cpuUsage: this.getCpuUsage(),
-      memoryUsage: Math.round((memUsage.heapUsed / memUsage.heapTotal) * 100),
+      // heapUsed/heapTotal is ~100% on any healthy process (V8 only grows the heap as needed), so
+      // measure against the heap limit instead — that is the figure that predicts running out.
+      memoryUsage: heapLimit > 0 ? Math.round((memUsage.heapUsed / heapLimit) * 1000) / 10 : 0,
+      rssMB: toMB(memUsage.rss),
+      heapUsedMB: toMB(memUsage.heapUsed),
+      heapLimitMB: toMB(heapLimit),
       uptime: Date.now() - this.startTime,
       activeConnections: 1, // Will be updated by connection manager
       concurrentRequests: 0, // Will be updated by request manager

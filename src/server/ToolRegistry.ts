@@ -38,11 +38,34 @@ export interface ToolDefinition {
  * Registry for managing MCP tools
  * Handles tool registration, parameter validation, and execution
  */
+/**
+ * What the registry needs from the performance subsystem to record tool invocations.
+ * Structural on purpose: `MetricsCollector` satisfies it, and tests can pass a stub.
+ */
+export interface ToolExecutionTracker {
+  startToolExecution(toolName: string, parameters: Record<string, unknown>, siteId?: string): string;
+  endToolExecution(executionId: string, success: boolean, error?: Error): void;
+}
+
+/**
+ * Some handlers catch their own errors and return a descriptive object instead of throwing
+ * (`wp_cache_info`, `wp_performance_benchmark` return `status: "unavailable"` / `success: false`).
+ * For usage metrics those are failed calls, not successes.
+ */
+function isFailedToolResult(result: unknown): boolean {
+  if (typeof result !== "object" || result === null) return false;
+  const { success, status } = result as { success?: unknown; status?: unknown };
+  return success === false || status === "unavailable";
+}
+
 export class ToolRegistry {
   // Exposed for tests that assert presence of these fields
   public server: McpServer;
   public wordpressClients: Map<string, WordPressClient>;
   private _cachedToolsListResponse: { tools: unknown[] } | null = null;
+  // Read at call time (not captured at registration) because PerformanceTools may be instantiated
+  // after the tools that are registered before it.
+  private toolExecutionTracker: ToolExecutionTracker | undefined;
 
   constructor(server: McpServer, wordpressClients: Map<string, WordPressClient>) {
     this.server = server;
@@ -60,6 +83,9 @@ export class ToolRegistry {
       // Cache and Performance tools need the clients map
       if (ToolClass.name === "CacheTools" || ToolClass.name === "PerformanceTools") {
         toolInstance = new ToolClass(this.wordpressClients);
+        if (ToolClass.name === "PerformanceTools") {
+          this.setMetricsCollector((toolInstance as InstanceType<typeof Tools.PerformanceTools>).getMetricsCollector());
+        }
       } else {
         toolInstance = new (ToolClass as new () => { getTools(): unknown[] })();
       }
@@ -74,6 +100,13 @@ export class ToolRegistry {
     // After all tools are registered, install a cached tools/list handler to avoid
     // repeated Zod→JSON-Schema conversion on every tools/list request.
     this.installCachedToolsListHandler();
+  }
+
+  /**
+   * Report every tool invocation to `tracker` so wp_performance_stats can show tool usage.
+   */
+  public setMetricsCollector(tracker: ToolExecutionTracker | undefined): void {
+    this.toolExecutionTracker = tracker;
   }
 
   /**
@@ -115,6 +148,16 @@ export class ToolRegistry {
       tool.description || `WordPress tool: ${tool.name}`,
       parameterSchema,
       async (args: Record<string, unknown>) => {
+        // Track from entry so every dispatched call is counted, including ones that fail before the handler
+        // runs (unknown site, missing `site`). `succeeded` flips only when the handler returns a good result;
+        // every other exit — early error returns and the catch below — is recorded as a failure.
+        const tracker = this.toolExecutionTracker;
+        const executionId = tracker?.startToolExecution(
+          tool.name,
+          args,
+          typeof args.site === "string" ? args.site : undefined,
+        );
+        let succeeded = false;
         // Declared outside the try so the catch can name the site that was actually resolved
         // (selectBestSite() may pick a configured ID other than "default" when `site` is omitted).
         let siteId = args.site;
@@ -157,6 +200,7 @@ export class ToolRegistry {
 
           // Call the tool handler with the client and parameters
           const result = await tool.handler(client, args);
+          succeeded = !isFailedToolResult(result);
 
           return {
             content: [
@@ -213,6 +257,10 @@ export class ToolRegistry {
             ],
             isError: true,
           };
+        } finally {
+          if (tracker && executionId !== undefined) {
+            tracker.endToolExecution(executionId, succeeded);
+          }
         }
       },
     );
