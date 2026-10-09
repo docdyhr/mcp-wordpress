@@ -100,7 +100,7 @@ describe("PerformanceAnalytics", () => {
       analytics.addDataPoint(recentMetrics);
 
       // The old point is beyond the 24h lookback period; the recent one stays.
-      expect(analytics.historicalData).toEqual([recentMetrics]);
+      expect(analytics.historicalData.map((d) => d.timestamp)).toEqual([recentMetrics.timestamp]);
     });
 
     it("should run anomaly detection when enabled", () => {

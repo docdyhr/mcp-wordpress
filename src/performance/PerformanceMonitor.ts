@@ -97,6 +97,17 @@ export interface PerformanceMetrics {
   };
 }
 
+/**
+ * A metrics reading as kept in the history: everything except the per-tool maps, which nothing that reads history uses
+ * and which made each of the (up to 2880 per day) snapshots several KB.
+ */
+export type PerformanceSnapshot = Omit<PerformanceMetrics, "tools">;
+
+export function toSnapshot(metrics: PerformanceSnapshot): PerformanceSnapshot {
+  const { timestamp, requests, cache, system, wordpress } = metrics;
+  return { timestamp, requests, cache, system, wordpress };
+}
+
 export interface PerformanceAlert {
   id: string;
   timestamp: number;
@@ -229,7 +240,7 @@ export interface PerformanceConfig {
  */
 export class PerformanceMonitor {
   private metrics: PerformanceMetrics;
-  private historicalData: PerformanceMetrics[] = [];
+  private historicalData: PerformanceSnapshot[] = [];
   private alerts: PerformanceAlert[] = [];
   private config: PerformanceConfig;
   private startTime: number;
@@ -426,13 +437,14 @@ export class PerformanceMonitor {
     this.updateSystemMetrics();
     // A deep copy: recordRequest() updates the nested counters in place, so a shallow copy stored in the history
     // would keep changing with the live metrics.
-    return structuredClone({ ...this.metrics, timestamp: Date.now() });
+    this.metrics.timestamp = Date.now();
+    return structuredClone(this.metrics);
   }
 
   /**
    * Get historical performance data
    */
-  getHistoricalData(startTime?: number, endTime?: number): PerformanceMetrics[] {
+  getHistoricalData(startTime?: number, endTime?: number): PerformanceSnapshot[] {
     if (!this.config.enableHistoricalData) {
       return [];
     }
@@ -522,7 +534,7 @@ export class PerformanceMonitor {
    */
   recordSnapshot(): void {
     if (!this.config.enableHistoricalData) return;
-    this.historicalData.push(this.getMetrics());
+    this.historicalData.push(toSnapshot(this.getMetrics()));
     this.cleanupOldData();
   }
 

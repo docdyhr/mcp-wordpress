@@ -3,8 +3,25 @@
  * Provides insights, predictions, and optimization recommendations
  */
 
-import { PerformanceMetrics } from "./PerformanceMonitor.js";
+import { PerformanceMetrics, type PerformanceSnapshot, toSnapshot } from "./PerformanceMonitor.js";
 import { MetricsCollector } from "./MetricsCollector.js";
+
+/**
+ * Smallest spread anomaly detection assumes for a metric. A steady metric has (near) zero standard deviation, which
+ * would turn a 1 ms or one-request wobble into a large z-score.
+ */
+function anomalyNoiseFloor(metricName: string, mean: number): number {
+  switch (metricName) {
+    case "responseTime":
+      return Math.max(25, Math.abs(mean) * 0.1); // ms
+    case "cacheHitRate":
+      return 0.02; // 2 percentage points
+    case "errorRate":
+      return 0.01; // 1 percentage point
+    default:
+      return Math.max(Math.abs(mean) * 0.1, Number.EPSILON);
+  }
+}
 
 export interface AnalyticsConfig {
   enablePredictiveAnalysis: boolean;
@@ -66,7 +83,7 @@ export interface BenchmarkComparison {
 export class PerformanceAnalytics {
   private collector: MetricsCollector;
   private config: AnalyticsConfig;
-  private historicalData: PerformanceMetrics[] = [];
+  private historicalData: PerformanceSnapshot[] = [];
   private detectedAnomalies: PerformanceAnomaly[] = [];
   private generatedInsights: PerformanceInsight[] = [];
 
@@ -117,17 +134,19 @@ export class PerformanceAnalytics {
   /**
    * Add historical data point for analysis
    */
-  addDataPoint(metrics: PerformanceMetrics): void {
-    this.historicalData.push(metrics);
+  addDataPoint(metrics: PerformanceSnapshot): void {
+    // Judge the new point against the points before it: included in its own baseline, it drags the mean towards
+    // itself, and on a flat baseline any change at all scored as an anomaly.
+    if (this.config.enableAnomalyDetection) {
+      this.detectAnomalies(metrics);
+    }
+
+    this.historicalData.push(toSnapshot(metrics));
 
     // Limit historical data to lookback period
     const cutoff = Date.now() - this.config.lookbackPeriod;
     this.historicalData = this.historicalData.filter((data) => data.timestamp > cutoff);
-
-    // Run analysis on new data
-    if (this.config.enableAnomalyDetection) {
-      this.detectAnomalies(metrics);
-    }
+    this.pruneAnomalies();
   }
 
   /**
@@ -442,6 +461,7 @@ export class PerformanceAnalytics {
    * Get anomalies detected in recent data
    */
   getAnomalies(severity?: string): PerformanceAnomaly[] {
+    this.pruneAnomalies();
     if (severity) {
       return this.detectedAnomalies.filter((a) => a.severity === severity);
     }
@@ -533,12 +553,14 @@ export class PerformanceAnalytics {
       })
       .reduce((a, b) => a + b, 0);
 
-    const rSquared = 1 - residualSumSquares / totalSumSquares;
+    // A flat series has nothing to explain (0/0): no trend, no confidence.
+    const rSquared = totalSumSquares > 0 ? 1 - residualSumSquares / totalSumSquares : 0;
 
     // Determine direction and change rate
-    const currentValue = values[values.length - 1];
-    const previousValue = values[values.length - 2];
-    const changeRate = Math.abs((currentValue - previousValue) / previousValue) * 100;
+    const currentValue = values[values.length - 1] as number;
+    const previousValue = values[values.length - 2] as number;
+    // From 0 there is no meaningful percentage; report no rate rather than Infinity.
+    const changeRate = previousValue !== 0 ? Math.abs((currentValue - previousValue) / previousValue) * 100 : 0;
 
     let direction: "improving" | "declining" | "stable" = "stable";
     if (Math.abs(slope) > 0.1) {
@@ -570,7 +592,7 @@ export class PerformanceAnalytics {
   /**
    * Detect anomalies in current metrics
    */
-  private detectAnomalies(metrics: PerformanceMetrics): void {
+  private detectAnomalies(metrics: PerformanceSnapshot): void {
     if (this.historicalData.length < 10) return; // Need historical context
 
     const recentData = this.historicalData.slice(-10);
@@ -607,7 +629,9 @@ export class PerformanceAnalytics {
 
     const mean = historicalValues.reduce((a, b) => a + b, 0) / historicalValues.length;
     const variance = historicalValues.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / historicalValues.length;
-    const standardDeviation = Math.sqrt(variance);
+    // A steady metric has (near) zero spread, which turns any wobble into a huge z-score. Below the noise floor a
+    // difference is not a signal.
+    const standardDeviation = Math.max(Math.sqrt(variance), anomalyNoiseFloor(metricName, mean));
 
     // Calculate z-score
     const zScore = Math.abs((currentValue - mean) / standardDeviation);
@@ -618,7 +642,8 @@ export class PerformanceAnalytics {
     if (this.config.sensitivityLevel === "high") threshold = 1.5;
 
     if (zScore > threshold) {
-      const deviation = ((currentValue - mean) / mean) * 100;
+      // Percent change from the mean; from a zero mean (e.g. no errors so far) any rise counts as +100%.
+      const deviation = mean !== 0 ? ((currentValue - mean) / mean) * 100 : Math.sign(currentValue) * 100;
 
       let severity: "minor" | "moderate" | "major" | "critical" = "minor";
       if (zScore > 4) severity = "critical";
@@ -642,6 +667,12 @@ export class PerformanceAnalytics {
         this.detectedAnomalies = this.detectedAnomalies.slice(-50);
       }
     }
+  }
+
+  /** Drop anomalies older than the lookback period: they are history, and the alert status counts them. */
+  private pruneAnomalies(): void {
+    const cutoff = Date.now() - this.config.lookbackPeriod;
+    this.detectedAnomalies = this.detectedAnomalies.filter((a) => a.timestamp > cutoff);
   }
 
   /**

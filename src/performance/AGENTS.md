@@ -30,7 +30,10 @@ Layered, not duplicative:
 - History (`PerformanceMonitor.recordSnapshot()` every `collectInterval`, `PerformanceAnalytics.addDataPoint()`) stores
   `getMetrics()` readings: deep copies stamped with `timestamp` (epoch ms). Select and prune them by `timestamp`, never
   by `system.uptime`, which is a duration since start — comparing it with a cut-off time once emptied the history on
-  every tick, so `wp_performance_history` had no data and trends/anomalies never ran.
+  every tick, so `wp_performance_history` had no data and trends/anomalies never ran. Snapshots are
+  `PerformanceSnapshot`s (no per-tool maps), and tool output samples history to `MAX_HISTORY_POINTS` (`downsample()`).
+  Anomaly detection judges a point against the points before it, with a per-metric noise floor on the spread, and
+  forgets anomalies after the lookback period; trend math must stay finite on flat or zero series.
 - Alert rules live in one pure function, `evaluateAlertConditions()` (`PerformanceMonitor.ts`). The monitor uses it to
   record alerts (a history that never expires) and `getActiveAlerts()` uses it for what breaches right now; the stats
   tool's `overallHealth` is capped by those active alerts and `alertStatus` is derived from them, so health and alerts
