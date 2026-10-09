@@ -122,7 +122,7 @@ export class PerformanceAnalytics {
 
     // Limit historical data to lookback period
     const cutoff = Date.now() - this.config.lookbackPeriod;
-    this.historicalData = this.historicalData.filter((data) => data.system.uptime > cutoff);
+    this.historicalData = this.historicalData.filter((data) => data.timestamp > cutoff);
 
     // Run analysis on new data
     if (this.config.enableAnomalyDetection) {

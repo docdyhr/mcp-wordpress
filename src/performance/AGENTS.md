@@ -32,6 +32,10 @@ Layered, not duplicative:
   tool's `overallHealth` is capped by those active alerts and `alertStatus` is derived from them, so health and alerts
   cannot contradict each other. Do not add a second set of thresholds elsewhere. A cache with no lookups (hits and
   misses both 0) is neutral, not a 0% hit rate.
+- History (`PerformanceMonitor.recordSnapshot()` every `collectInterval`, `PerformanceAnalytics.addDataPoint()`) stores
+  `getMetrics()` readings: deep copies stamped with `timestamp` (epoch ms). Select and prune them by `timestamp`, never
+  by `system.uptime`, which is a duration since start — comparing it with a cut-off time once emptied the history on
+  every tick, so `wp_performance_history` had no data and trends/anomalies never ran.
 
 New metrics belong in `PerformanceMonitor`; new collection hooks belong in `MetricsCollector`; new analysis belongs in
 `PerformanceAnalytics`.

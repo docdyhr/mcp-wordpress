@@ -187,7 +187,7 @@ export function processHistoricalDataForChart(
 
   for (const metric of metricsToProcess) {
     result[metric] = data.map((point, index) => ({
-      timestamp: point.system.uptime,
+      timestamp: point.timestamp,
       value: extractMetricValue(point, metric),
       index,
     }));
