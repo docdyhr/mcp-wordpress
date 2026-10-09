@@ -55,6 +55,10 @@ shims.
 `generators/MetaGenerator.ts` + `SchemaGenerator.ts` (meta tags, JSON-LD), `optimizers/InternalLinkingSuggester.ts`,
 `providers/SearchConsoleProvider.ts` (Google Search Console). `validators/` is currently empty (reserved).
 
+**Rendered fields are HTML**: WordPress returns `title.rendered`, `excerpt.rendered` and `caption.rendered`
+entity-encoded (`Q&#038;A`) and often wrapped in tags. Text output prints them through `displayTitle()` /
+`htmlToPlainText()` (`src/utils/htmlText.ts`), never raw.
+
 **Pagination contract**: list tools accept `page` and `per_page` (max 100) in their `inputSchema` — a property missing
 from the schema is stripped by the argument validator, so it never reaches the handler. Handlers forward them to
 WordPress, which defaults to 10 per page, and end a full page with a next-page note (`pageHint()` in `params.ts`;

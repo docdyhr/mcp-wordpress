@@ -3,7 +3,14 @@
  * date labels, the "Changes Made" summary and list pagination wording.
  */
 import { vi } from "vitest";
-import { handleListPosts, handleGetPost, handleUpdatePost } from "../../../dist/tools/posts/PostHandlers.js";
+import {
+  handleListPosts,
+  handleGetPost,
+  handleUpdatePost,
+  handleCreatePost,
+  handleDeletePost,
+  handleGetPostRevisions,
+} from "../../../dist/tools/posts/PostHandlers.js";
 import { listPostsTool } from "../../../dist/tools/posts/PostToolDefinitions.js";
 
 function makePost(overrides = {}) {
@@ -32,6 +39,9 @@ function makeClient(overrides = {}) {
     getUser: vi.fn().mockResolvedValue({ name: "Author" }),
     getCategory: vi.fn().mockResolvedValue({ name: "Cat" }),
     getTag: vi.fn().mockResolvedValue({ name: "Tag" }),
+    createPost: vi.fn(),
+    deletePost: vi.fn(),
+    getPostRevisions: vi.fn(),
     ...overrides,
   };
 }
@@ -267,5 +277,45 @@ describe("wp_update_post output", () => {
 
     expect(text).toContain("- Title:");
     expect(text).not.toMatch(/Tags|Categories|Featured|Date updated|Content updated/);
+  });
+});
+
+// Regression (v4.0.9 re-test): list/get/update decoded titles, but create, delete and revisions still
+// printed the raw `title.rendered`, so a title with "&" came back as "&#038;".
+describe("wp_create_post / wp_delete_post / wp_get_post_revisions titles", () => {
+  const ENCODED = { rendered: "Q&#038;A &#8220;Tips&#8221;" };
+
+  it("wp_create_post decodes the title", async () => {
+    const client = makeClient();
+    client.createPost.mockResolvedValue(makePost({ title: ENCODED, status: "draft" }));
+
+    const text = await handleCreatePost(client, { title: "Q&A \u201cTips\u201d", status: "draft" });
+
+    expect(text).toContain("**Title**: Q&A \u201cTips\u201d\n");
+    expect(text).not.toMatch(/&#\d+;/);
+  });
+
+  it("wp_delete_post decodes the title of the deleted post", async () => {
+    const client = makeClient();
+    client.deletePost.mockResolvedValue({ deleted: true, previous: makePost({ title: ENCODED }) });
+
+    const text = await handleDeletePost(client, { id: 1, force: true });
+
+    expect(text).toContain("**Title**: Q&A \u201cTips\u201d\n");
+    expect(text).not.toMatch(/&#\d+;/);
+  });
+
+  it("wp_get_post_revisions decodes each revision title", async () => {
+    const client = makeClient();
+    client.getPostRevisions.mockResolvedValue([
+      makePost({ id: 11, title: ENCODED }),
+      makePost({ id: 12, title: { rendered: "" } }),
+    ]);
+
+    const text = await handleGetPostRevisions(client, { id: 1 });
+
+    expect(text).toContain("- Title: Q&A \u201cTips\u201d\n");
+    expect(text).toContain("- Title: (untitled)");
+    expect(text).not.toMatch(/&#\d+;/);
   });
 });

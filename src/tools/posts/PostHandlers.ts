@@ -11,7 +11,7 @@ import { CreatePostRequest, PostQueryParams, PostStatus, UpdatePostRequest, Word
 import { isPermissionError, preserveToolError } from "@/utils/error.js";
 import { ErrorHandlers } from "@/utils/enhancedError.js";
 import { validateId, validatePaginationParams, validatePostParams } from "@/utils/validation.js";
-import { countWords, htmlToPlainText } from "@/utils/htmlText.js";
+import { countWords, displayTitle, htmlToPlainText } from "@/utils/htmlText.js";
 import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "@/utils/streaming.js";
 
 export function buildListParams(params: PostQueryParams): PostQueryParams {
@@ -51,11 +51,6 @@ export function buildListParams(params: PostQueryParams): PostQueryParams {
   if (!sanitized.per_page) sanitized.per_page = 10;
 
   return sanitized;
-}
-
-/** Display title for a `title.rendered` value: markup stripped, entities decoded, never empty. */
-function displayTitle(rendered: string | undefined): string {
-  return htmlToPlainText(rendered) || "(untitled)";
 }
 
 /**
@@ -356,7 +351,7 @@ export async function handleCreatePost(
 
     // Build success response with management links
     let response = `✅ **Post Created Successfully**\n\n`;
-    response += `**Title**: ${post.title.rendered}\n`;
+    response += `**Title**: ${displayTitle(post.title.rendered)}\n`;
     response += `**ID**: ${post.id}\n`;
     response += `**Status**: ${post.status}\n`;
     response += `**Link**: ${post.link}\n`;
@@ -454,7 +449,7 @@ export async function handleDeletePost(
       let response = `✅ **Post ${action} successfully**\n\n`;
 
       if (result.previous) {
-        response += `**Title**: ${result.previous.title.rendered}\n`;
+        response += `**Title**: ${displayTitle(result.previous.title.rendered)}\n`;
         response += `**ID**: ${result.previous.id}\n`;
       }
 
@@ -504,7 +499,7 @@ export async function handleGetPostRevisions(
       response += `**Revision ${index + 1}**\n`;
       response += `- ID: ${revision.id}\n`;
       response += `- Date: ${formattedDate}\n`;
-      response += `- Title: ${revision.title.rendered}\n`;
+      response += `- Title: ${displayTitle(revision.title.rendered)}\n`;
       if (index < revisions.length - 1) response += "\n";
     });
 

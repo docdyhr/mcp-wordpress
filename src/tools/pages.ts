@@ -4,6 +4,7 @@ import type { MCPToolSchema } from "@/types/mcp.js";
 import { CreatePageRequest, PostQueryParams as PageQueryParams, UpdatePageRequest } from "@/types/wordpress.js";
 import { isPermissionError, preserveToolError } from "@/utils/error.js";
 import { isUnsafeWordPressContent } from "@/security/InputValidator.js";
+import { displayTitle, htmlToPlainText } from "@/utils/htmlText.js";
 import { parseId, parseIdAndForce, toolParams } from "./params.js";
 
 /**
@@ -164,7 +165,9 @@ export class PageTools {
       }
       const content =
         `Found ${pages.length} pages:\n\n` +
-        pages.map((p) => `- ID ${p.id}: **${p.title.rendered}** (${p.status})\n  Link: ${p.link}`).join("\n");
+        pages
+          .map((p) => `- ID ${p.id}: **${displayTitle(p.title.rendered)}** (${p.status})\n  Link: ${p.link}`)
+          .join("\n");
       return content;
     } catch (_error) {
       preserveToolError("Failed to list pages", _error);
@@ -191,7 +194,7 @@ export class PageTools {
       }
       let content =
         `**Page Details (ID: ${page.id})**\n\n` +
-        `- **Title:** ${page.title.rendered}\n` +
+        `- **Title:** ${displayTitle(page.title.rendered)}\n` +
         `- **Status:** ${page.status}\n` +
         `- **Link:** ${page.link}\n` +
         `- **Date:** ${new Date(page.date).toLocaleString()}`;
@@ -222,7 +225,7 @@ export class PageTools {
         );
       }
       const page = await client.createPage(createParams);
-      return `✅ Page created successfully!\n- ID: ${page.id}\n- Title: ${page.title.rendered}\n- Link: ${page.link}`;
+      return `✅ Page created successfully!\n- ID: ${page.id}\n- Title: ${displayTitle(page.title.rendered)}\n- Link: ${page.link}`;
     } catch (_error) {
       preserveToolError("Failed to create page", _error);
     }
@@ -258,7 +261,7 @@ export class PageTools {
       }
 
       if (result?.deleted) {
-        const title = result.previous?.title?.rendered;
+        const title = htmlToPlainText(result.previous?.title?.rendered);
         return title ? `✅ Page "${title}" has been ${action}.` : `✅ Page ${id} has been ${action}.`;
       }
 

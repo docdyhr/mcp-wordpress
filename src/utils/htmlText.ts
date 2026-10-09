@@ -199,6 +199,11 @@ export function htmlToPlainText(html: unknown, options: { maxLength?: number } =
   return plain;
 }
 
+/** Display title for a `title.rendered` value: markup stripped, entities decoded, never empty. */
+export function displayTitle(rendered: unknown): string {
+  return htmlToPlainText(rendered) || "(untitled)";
+}
+
 const CJK_CHARACTER = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/gu;
 const HAS_LETTER_OR_NUMBER = /[\p{L}\p{N}]/u;
 

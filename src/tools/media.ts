@@ -2,6 +2,7 @@ import { WordPressClient } from "@/client/api.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
 import { MediaQueryParams, UpdateMediaRequest, UploadMediaRequest } from "@/types/wordpress.js";
 import { preserveToolError } from "@/utils/error.js";
+import { displayTitle, htmlToPlainText } from "@/utils/htmlText.js";
 import { validateFilePath } from "@/utils/validation/security.js";
 import { parseId, parseIdAndForce, toolParams } from "./params.js";
 
@@ -195,7 +196,9 @@ export class MediaTools {
       }
       const content =
         `Found ${media.length} media items:\n\n` +
-        media.map((m) => `- ID ${m.id}: **${m.title.rendered}** (${m.mime_type})\n  Link: ${m.source_url}`).join("\n");
+        media
+          .map((m) => `- ID ${m.id}: **${displayTitle(m.title.rendered)}** (${m.mime_type})\n  Link: ${m.source_url}`)
+          .join("\n");
       return content;
     } catch (_error) {
       preserveToolError("Failed to list media", _error);
@@ -206,14 +209,16 @@ export class MediaTools {
     const id = parseId(params);
     try {
       const media = await client.getMediaItem(id);
+      // caption.rendered is HTML ("<p>…</p>\n"), like the title.
+      const caption = htmlToPlainText(media.caption?.rendered);
       const content =
         `**Media Details (ID: ${media.id})**\n\n` +
-        `- **Title:** ${media.title.rendered}\n` +
+        `- **Title:** ${displayTitle(media.title.rendered)}\n` +
         `- **URL:** ${media.source_url}\n` +
         `- **Type:** ${media.media_type} (${media.mime_type})\n` +
         `- **Date:** ${new Date(media.date).toLocaleString()}\n` +
         (media.alt_text ? `- **Alt Text:** ${media.alt_text}\n` : "") +
-        (media.caption.rendered ? `- **Caption:** ${media.caption.rendered}\n` : "");
+        (caption ? `- **Caption:** ${caption}\n` : "");
       return content;
     } catch (_error) {
       preserveToolError("Failed to get media item", _error);
@@ -230,7 +235,7 @@ export class MediaTools {
       uploadParams.file_path = safePath;
 
       const media = await client.uploadMedia(uploadParams);
-      return `✅ Media uploaded successfully!\n- ID: ${media.id}\n- Title: ${media.title.rendered}\n- URL: ${media.source_url}`;
+      return `✅ Media uploaded successfully!\n- ID: ${media.id}\n- Title: ${displayTitle(media.title.rendered)}\n- URL: ${media.source_url}`;
     } catch (_error) {
       preserveToolError("Failed to upload media", _error);
     }
