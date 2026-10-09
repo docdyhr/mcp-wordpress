@@ -5,7 +5,6 @@
 
 import v8 from "v8";
 import { ConfigHelpers } from "@/config/Config.js";
-import { getErrorMessage } from "@/utils/error.js";
 
 /**
  * One MCP tool invocation, kept in memory so a user can see "which tool, which site, did it work, why not"
@@ -23,12 +22,11 @@ export interface ToolCallRecord {
   statusCode?: number | undefined;
   /** WordPress/transport error code, e.g. "rest_forbidden". */
   errorCode?: string | undefined;
-  /** Error message, truncated. */
-  error?: string | undefined;
+  /** The error's class name, e.g. "WordPressAPIError". Never the message: that can quote call arguments. */
+  errorType?: string | undefined;
 }
 
 const MAX_RECENT_TOOL_CALLS = 50;
-const MAX_RECORDED_ERROR_LENGTH = 160;
 
 export interface PerformanceMetrics {
   // Request Performance
@@ -366,7 +364,7 @@ export class PerformanceMonitor {
       durationMs: responseTime,
       statusCode: typeof wpError?.statusCode === "number" ? wpError.statusCode : undefined,
       errorCode: typeof wpError?.code === "string" ? wpError.code : undefined,
-      error: error ? getErrorMessage(error).slice(0, MAX_RECORDED_ERROR_LENGTH) : undefined,
+      errorType: error?.name || undefined,
     });
     if (this.recentToolCalls.length > MAX_RECENT_TOOL_CALLS) {
       this.recentToolCalls.shift();

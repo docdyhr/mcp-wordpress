@@ -333,7 +333,20 @@ describe("ServerConfiguration multi-site config file resolution", () => {
         mode: "single-site",
         siteIds: ["default"],
         searched: [XDG_STYLE_PATH, HOME_PATH, installDirPath],
+        singleSiteSource: "environment",
       });
+    });
+
+    it("tells client-supplied (programmatic) configuration apart from environment variables", async () => {
+      stubFiles({});
+
+      await serverConfig.loadClientConfigurations({
+        wordpressSiteUrl: "https://programmatic.example.com",
+        wordpressUsername: "api-user",
+        wordpressAppPassword: "abcd1234efgh5678",
+      });
+
+      expect(serverConfig.getLoadInfo()).toMatchObject({ mode: "single-site", singleSiteSource: "mcp-config" });
     });
 
     it("reports the explicit source for MCP_WORDPRESS_CONFIG", async () => {

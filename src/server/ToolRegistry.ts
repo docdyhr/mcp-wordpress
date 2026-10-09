@@ -58,6 +58,14 @@ function isFailedToolResult(result: unknown): boolean {
   return success === false || status === "unavailable";
 }
 
+/**
+ * A failure reason for the recent-calls diagnostics when nothing was thrown. Deliberately a fixed code and
+ * message: reasons derived from a call's arguments (a site name, a path) would leak them into the stats output.
+ */
+function codedFailure(code: string, message: string): Error {
+  return Object.assign(new Error(message), { code });
+}
+
 export class ToolRegistry {
   // Exposed for tests that assert presence of these fields
   public server: McpServer;
@@ -166,6 +174,7 @@ export class ToolRegistry {
           // If no site specified and multiple sites configured, require site parameter
           if (!siteId && this.wordpressClients.size > 1) {
             const availableSites = Array.from(this.wordpressClients.keys());
+            failure = codedFailure("site_required", "site parameter required");
             const error = ErrorHandlers.siteParameterMissing(availableSites);
             return {
               content: [
@@ -187,6 +196,7 @@ export class ToolRegistry {
 
           if (!client) {
             const availableSites = Array.from(this.wordpressClients.keys());
+            failure = codedFailure("site_not_found", "site not found");
             const error = ErrorHandlers.siteNotFound(siteId as string, availableSites);
             return {
               content: [
@@ -202,6 +212,9 @@ export class ToolRegistry {
           // Call the tool handler with the client and parameters
           const result = await tool.handler(client, args);
           succeeded = !isFailedToolResult(result);
+          if (!succeeded) {
+            failure = codedFailure("tool_reported_failure", "tool reported a failure");
+          }
 
           return {
             content: [

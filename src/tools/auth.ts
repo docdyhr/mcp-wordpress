@@ -21,16 +21,43 @@ const CONFIG_SOURCE_LABELS: Record<ConfigFileSource, string> = {
  * Which configuration is live. The host does not capture an installed extension's stderr, so this is the
  * reliable way for a user to see whether the multi-site file was found after an update.
  */
-function describeConfiguration(info: ConfigLoadInfo | undefined): string {
+function describeConfiguration(info: ConfigLoadInfo | undefined): { headline: string; sites?: string } | undefined {
   if (!info) {
-    return "";
+    return undefined;
   }
   if (info.mode === "multi-site") {
     const source = info.source ? ` (${CONFIG_SOURCE_LABELS[info.source]})` : "";
-    return `**Configuration:** multi-site, loaded from ${info.configPath}${source}\n**Configured sites:** ${info.siteIds.join(", ")}\n`;
+    return { headline: `multi-site, loaded from ${info.configPath}${source}`, sites: info.siteIds.join(", ") };
   }
+  const origin =
+    info.singleSiteSource === "mcp-config"
+      ? "client-supplied configuration; environment variables fill any gaps"
+      : "environment variables";
   const searched = info.searched?.length ? `; no multi-site config file found in: ${info.searched.join(", ")}` : "";
-  return `**Configuration:** single-site (environment variables)${searched}\n`;
+  return { headline: `single-site (${origin})${searched}` };
+}
+
+/** The configuration as extra lines of the success output (empty when nothing was recorded). */
+function configurationLines(info: ConfigLoadInfo | undefined): string {
+  const description = describeConfiguration(info);
+  if (!description) {
+    return "";
+  }
+  const sites = description.sites ? `**Configured sites:** ${description.sites}\n` : "";
+  return `**Configuration:** ${description.headline}\n${sites}`;
+}
+
+/**
+ * The configuration as a suffix for the failure message — the troubleshooting case (bad credentials, an
+ * unreachable site, a timeout) is exactly when a user needs to know which configuration is live.
+ */
+function configurationSuffix(info: ConfigLoadInfo | undefined): string {
+  const description = describeConfiguration(info);
+  if (!description) {
+    return "";
+  }
+  const sites = description.sites ? `; sites: ${description.sites}` : "";
+  return ` (configuration: ${description.headline}${sites})`;
 }
 
 /**
@@ -159,7 +186,7 @@ export class AuthTools {
             `**Method:** ${siteConfig.auth.method}\n` +
             `**User:** ${user.name} (@${user.slug})\n` +
             `**Roles:** ${user.roles?.join(", ") || "N/A"}\n` +
-            describeConfiguration(ServerConfiguration.getInstance().getLoadInfo()) +
+            configurationLines(ServerConfiguration.getInstance().getLoadInfo()) +
             "\nYour WordPress connection is working properly.";
 
           return { content };
@@ -167,7 +194,10 @@ export class AuthTools {
         timeoutSignal,
       ]);
     } catch (_error) {
-      preserveToolError("Authentication test failed", _error);
+      preserveToolError(
+        `Authentication test failed${configurationSuffix(ServerConfiguration.getInstance().getLoadInfo())}`,
+        _error,
+      );
     } finally {
       clearTimeout(timeoutHandle);
     }

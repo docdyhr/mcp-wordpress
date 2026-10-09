@@ -317,6 +317,46 @@ describe("AuthTools", () => {
         expect(content).toContain("no multi-site config file found in: /a/config.json, /b/config.json");
       });
 
+      // The troubleshooting case: bad credentials, unreachable site or a timeout never reach the success output.
+      it("includes the configuration in the failure message and keeps the typed error", async () => {
+        withLoadInfo({
+          mode: "multi-site",
+          configPath: "/Users/x/mcp-wordpress.config.json",
+          source: "home",
+          siteIds: ["site1", "site2"],
+        });
+        mockClient.ping.mockRejectedValue(new WordPressAPIError("Invalid credentials", 401, "incorrect_password"));
+
+        const error = await authTools.handleTestAuth(mockClient, {}).catch((e) => e);
+
+        expect(error).toBeInstanceOf(WordPressAPIError);
+        expect(error.statusCode).toBe(401);
+        expect(error.code).toBe("incorrect_password");
+        expect(error.message).toContain("Authentication test failed");
+        expect(error.message).toContain("multi-site, loaded from /Users/x/mcp-wordpress.config.json (home directory)");
+        expect(error.message).toContain("sites: site1, site2");
+        expect(error.message).toContain("Invalid credentials");
+      });
+
+      it("names the single-site fallback in the failure message too", async () => {
+        withLoadInfo({ mode: "single-site", siteIds: ["default"], searched: ["/a/config.json"] });
+        mockClient.ping.mockResolvedValue(false);
+
+        const error = await authTools.handleTestAuth(mockClient, {}).catch((e) => e);
+
+        expect(error.message).toContain("single-site (environment variables)");
+        expect(error.message).toContain("no multi-site config file found in: /a/config.json");
+      });
+
+      it("reports client-supplied configuration as such, not as environment variables", async () => {
+        withLoadInfo({ mode: "single-site", siteIds: ["default"], searched: [], singleSiteSource: "mcp-config" });
+
+        const { content } = await authTools.handleTestAuth(mockClient, {});
+
+        expect(content).toContain("**Configuration:** single-site (client-supplied configuration");
+        expect(content).not.toContain("(environment variables)");
+      });
+
       it("omits the section when the server has not recorded how it was configured", async () => {
         withLoadInfo(undefined);
 

@@ -36,6 +36,8 @@ export interface ConfigLoadInfo {
   siteIds: string[];
   /** Where a multi-site file was looked for and not found (single-site only). */
   searched?: string[];
+  /** Single-site only: values supplied by the caller (MCP client config) vs read from the environment. */
+  singleSiteSource?: "mcp-config" | "environment";
 }
 
 interface ResolvedConfigFile {
@@ -118,7 +120,12 @@ export class ServerConfiguration {
         });
       }
       const singleSite = this.loadSingleSiteFromEnv(mcpConfig);
-      this.loadInfo = { mode: "single-site", siteIds: singleSite.configs.map((site) => site.id), searched };
+      this.loadInfo = {
+        mode: "single-site",
+        siteIds: singleSite.configs.map((site) => site.id),
+        searched,
+        singleSiteSource: mcpConfig ? "mcp-config" : "environment",
+      };
       return singleSite;
     }
 

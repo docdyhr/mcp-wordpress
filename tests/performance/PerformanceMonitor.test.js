@@ -205,7 +205,7 @@ describe("PerformanceMonitor", () => {
         durationMs: 80,
         statusCode: 403,
         errorCode: "rest_forbidden",
-        error: "Sorry, you are not allowed to do that.",
+        errorType: "Error",
       });
       expect(typeof newest.timestamp).toBe("number");
     });
@@ -225,11 +225,18 @@ describe("PerformanceMonitor", () => {
       expect(calls[49].tool).toBe("tool_11");
     });
 
-    it("truncates a long error message and never stores call parameters", () => {
-      monitor.recordToolCall("wp_create_post", 5, false, { error: new Error("x".repeat(500)) });
+    // Error text can echo the call's arguments (validation messages quote the bad value, upload errors quote the
+    // path), so it is never retained — only the HTTP status, the error code and the error's type.
+    it("never retains error text, so call arguments cannot leak through it", () => {
+      const secret = "/Users/me/private-notes.txt";
+      monitor.recordToolCall("wp_upload_media", 5, false, {
+        error: Object.assign(new Error(`File not found at path: ${secret}`), { code: "FILE_NOT_FOUND" }),
+      });
 
       const [call] = monitor.getRecentToolCalls();
-      expect(call.error.length).toBeLessThanOrEqual(161);
+      expect(JSON.stringify(call)).not.toContain(secret);
+      expect(call).not.toHaveProperty("error");
+      expect(call).toMatchObject({ errorCode: "FILE_NOT_FOUND", errorType: "Error" });
       expect(Object.keys(call)).not.toContain("params");
       expect(Object.keys(call)).not.toContain("parameters");
     });

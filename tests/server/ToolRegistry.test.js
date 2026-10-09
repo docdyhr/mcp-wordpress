@@ -382,7 +382,12 @@ describe("ToolRegistry", () => {
 
       expect(result.isError).toBe(true);
       expect(collector.startToolExecution).toHaveBeenCalledWith("wp_test_tool", { site: "nope" }, "nope");
-      expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", false, undefined, "nope");
+      expect(collector.endToolExecution).toHaveBeenCalledWith(
+        "exec-1",
+        false,
+        expect.objectContaining({ code: "site_not_found" }),
+        "nope",
+      );
     });
 
     // Some handlers catch their own errors and return a descriptive object instead of throwing
@@ -398,7 +403,12 @@ describe("ToolRegistry", () => {
       const result = await call();
 
       expect(result.isError).toBeUndefined();
-      expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", false, undefined, "default");
+      expect(collector.endToolExecution).toHaveBeenCalledWith(
+        "exec-1",
+        false,
+        expect.objectContaining({ code: "tool_reported_failure" }),
+        "default",
+      );
     });
 
     it.each([
@@ -413,6 +423,50 @@ describe("ToolRegistry", () => {
       await call();
 
       expect(collector.endToolExecution).toHaveBeenCalledWith("exec-1", true, undefined, "default");
+    });
+
+    // A failure that does not throw still needs a reason in the recent-calls list. The reason is a fixed code,
+    // never text derived from the call's arguments.
+    it.each([
+      [
+        "a result with success:false",
+        async () => ({ success: false, error: "secret detail /private/path" }),
+        "tool_reported_failure",
+      ],
+      ["a result with status 'unavailable'", async () => ({ status: "unavailable" }), "tool_reported_failure"],
+    ])("gives %s the code %s", async (_label, handler, code) => {
+      const { registry, call } = createRegistryWithTool(handler);
+      const collector = createCollector();
+      registry.setMetricsCollector(collector);
+
+      await call();
+
+      const [, , failure] = collector.endToolExecution.mock.calls[0];
+      expect(failure).toMatchObject({ code });
+      expect(failure.message).not.toContain("/private/path");
+    });
+
+    it("gives an unknown site the code site_not_found and a missing one site_required, without echoing the value", async () => {
+      const server = createMockServer();
+      const registry = new ToolRegistry(
+        server,
+        new Map([
+          ["a", {}],
+          ["b", {}],
+        ]),
+      );
+      registry.registerTool(simpleTool());
+      const collector = createCollector();
+      registry.setMetricsCollector(collector);
+      const handler = server._registeredTools.get("wp_test_tool").handler;
+
+      await handler({ site: "nope-secret" });
+      await handler({});
+
+      const [unknown, missing] = collector.endToolExecution.mock.calls.map((c) => c[2]);
+      expect(unknown).toMatchObject({ code: "site_not_found" });
+      expect(unknown.message).not.toContain("nope-secret");
+      expect(missing).toMatchObject({ code: "site_required" });
     });
 
     // Diagnostics for the DXT, whose stderr the host does not capture: which tool failed, on which site, why.
