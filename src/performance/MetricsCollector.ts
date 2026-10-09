@@ -3,7 +3,12 @@
  * Integrates with existing client and cache systems
  */
 
-import { PerformanceMonitor, PerformanceMetrics, type ToolCallRecord } from "./PerformanceMonitor.js";
+import {
+  PerformanceMonitor,
+  PerformanceMetrics,
+  type AlertCondition,
+  type ToolCallRecord,
+} from "./PerformanceMonitor.js";
 import type { CacheStats } from "@/cache/CacheManager.js";
 import type { ClientStats } from "@/types/client.js";
 import { ConfigHelpers } from "@/config/Config.js";
@@ -141,6 +146,16 @@ export class MetricsCollector {
    */
   getRecentToolCalls(limit?: number): ToolCallRecord[] {
     return this.monitor.getRecentToolCalls(limit);
+  }
+
+  /**
+   * Thresholds the current metrics breach right now (see PerformanceMonitor.getActiveAlerts).
+   */
+  getActiveAlerts(): AlertCondition[] {
+    // Sync the registered cache managers and clients first, exactly as collectCurrentMetrics() callers see
+    // them; otherwise a freshly degraded cache reads healthy until the next background refresh.
+    this.collectCurrentMetrics();
+    return this.monitor.getActiveAlerts();
   }
 
   /**

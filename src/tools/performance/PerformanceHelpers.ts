@@ -3,7 +3,7 @@
  * Extracted helper functions for performance metrics formatting and calculations
  */
 
-import type { PerformanceMetrics } from "@/performance/PerformanceMonitor.js";
+import { hasCacheActivity, type PerformanceMetrics } from "@/performance/PerformanceMonitor.js";
 import type { BenchmarkComparison, PerformanceAnomaly } from "@/performance/PerformanceAnalytics.js";
 
 /**
@@ -19,10 +19,19 @@ export interface PerformanceAlert {
   timestamp: number;
 }
 
+const HEALTH_LEVELS = ["Critical", "Poor", "Fair", "Good", "Excellent"] as const;
+
 /**
- * Calculate overall health status from metrics
+ * Calculate overall health status from metrics.
+ *
+ * `activeAlerts` (the thresholds breached right now) caps the label so health never reads better than the
+ * alerts allow: any warning limits it to "Good", any error to "Fair", a critical alert to "Critical". The
+ * score alone could say "Excellent" next to an active cache or memory warning. The cap only ever lowers it.
  */
-export function calculateHealthStatus(metrics: PerformanceMetrics): string {
+export function calculateHealthStatus(
+  metrics: PerformanceMetrics,
+  activeAlerts: ReadonlyArray<{ severity: string }> = [],
+): string {
   let score = 100;
 
   if (metrics.requests.averageResponseTime > 2000) score -= 30;
@@ -32,16 +41,40 @@ export function calculateHealthStatus(metrics: PerformanceMetrics): string {
   if (errorRate > 0.05) score -= 30;
   else if (errorRate > 0.02) score -= 15;
 
-  if (metrics.cache.hitRate < 0.7) score -= 25;
-  else if (metrics.cache.hitRate < 0.85) score -= 10;
+  if (hasCacheActivity(metrics.cache)) {
+    if (metrics.cache.hitRate < 0.7) score -= 25;
+    else if (metrics.cache.hitRate < 0.85) score -= 10;
+  }
 
   if (metrics.system.memoryUsage > 85) score -= 15;
 
-  if (score >= 90) return "Excellent";
-  if (score >= 75) return "Good";
-  if (score >= 60) return "Fair";
-  if (score >= 40) return "Poor";
-  return "Critical";
+  let level: number;
+  if (score >= 90) level = 4;
+  else if (score >= 75) level = 3;
+  else if (score >= 60) level = 2;
+  else if (score >= 40) level = 1;
+  else level = 0;
+
+  const ceiling = activeAlerts.some((a) => a.severity === "critical")
+    ? 0
+    : activeAlerts.some((a) => a.severity === "error")
+      ? 2
+      : activeAlerts.length > 0
+        ? 3
+        : 4;
+
+  return HEALTH_LEVELS[Math.min(level, ceiling)] as string;
+}
+
+/**
+ * Status words for the thresholds breached right now. Same vocabulary as {@link calculateAlertStatus}, which
+ * summarises the recorded history instead (alerts never expire, so it cannot say what is wrong now).
+ */
+export function calculateActiveAlertStatus(activeAlerts: ReadonlyArray<{ severity: string }>): string {
+  if (activeAlerts.some((a) => a.severity === "critical")) return "Critical Issues Detected";
+  if (activeAlerts.some((a) => a.severity === "error")) return "High Priority Issues";
+  if (activeAlerts.length > 0) return "Performance Warnings";
+  return "System Healthy";
 }
 
 /**
@@ -62,9 +95,11 @@ export function calculatePerformanceScore(metrics: PerformanceMetrics): number {
   else if (errorRate > 0.02) score -= 10;
 
   // Cache performance scoring
-  if (metrics.cache.hitRate < 0.5) score -= 20;
-  else if (metrics.cache.hitRate < 0.75) score -= 10;
-  else if (metrics.cache.hitRate < 0.9) score -= 5;
+  if (hasCacheActivity(metrics.cache)) {
+    if (metrics.cache.hitRate < 0.5) score -= 20;
+    else if (metrics.cache.hitRate < 0.75) score -= 10;
+    else if (metrics.cache.hitRate < 0.9) score -= 5;
+  }
 
   // System resource scoring
   if (metrics.system.memoryUsage > 90) score -= 10;
@@ -264,6 +299,21 @@ export function calculateAlertStatus(
   if (high > 2) return "High Priority Issues";
   if (alertSummary.warning + anomalySummary.moderate > 5) return "Performance Warnings";
   return "System Healthy";
+}
+
+const ALERT_STATUS_SEVERITY = [
+  "System Healthy",
+  "Performance Warnings",
+  "High Priority Issues",
+  "Critical Issues Detected",
+];
+
+/**
+ * The more severe of two alert statuses (the words {@link calculateAlertStatus} and
+ * {@link calculateActiveAlertStatus} produce). An unknown status ranks as healthy.
+ */
+export function worseAlertStatus(a: string, b: string): string {
+  return ALERT_STATUS_SEVERITY.indexOf(b) > ALERT_STATUS_SEVERITY.indexOf(a) ? b : a;
 }
 
 /**

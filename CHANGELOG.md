@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.11](https://github.com/docdyhr/mcp-wordpress/compare/v4.0.10...v4.0.11) (2026-10-09)
+
+### 🐛 Bug Fixes
+
+- **performance:** make health and alert status agree ([#267](https://github.com/docdyhr/mcp-wordpress/issues/267))
+  ([064ae23](https://github.com/docdyhr/mcp-wordpress/commit/064ae2335bde7fd13a607b73d41ad159a0c75ad5))
+
+## [4.0.10](https://github.com/docdyhr/mcp-wordpress/compare/v4.0.9...v4.0.10) (2026-10-09)
+
+### 🐛 Bug Fixes
+
+- **posts:** keep typed WordPress errors from the post handlers
+  ([#265](https://github.com/docdyhr/mcp-wordpress/issues/265))
+  ([6a0b8f8](https://github.com/docdyhr/mcp-wordpress/commit/6a0b8f853380f84b8eec4cfb266967c4a389e432))
+
 ## [4.0.9](https://github.com/docdyhr/mcp-wordpress/compare/v4.0.8...v4.0.9) (2026-10-08)
 
 ### 🐛 Bug Fixes
