@@ -100,13 +100,59 @@ describe("cache hit rate scope labels", () => {
     expect(data.scope.alerts).toMatch(/when (the|each) alert was raised/);
     expect(data.scope.alerts).toMatch(/all sites combined/);
     expect(data.scope.activeAlerts).toMatch(/now/);
+    // Anomalies carry their own actualValue/expectedValue (a cacheHitRate anomaly is another hit-rate figure).
+    expect(data.scope.anomalies).toMatch(/all sites combined/);
   });
+
+  it("wp_performance_benchmark and wp_performance_optimize label their figures", async () => {
+    const benchmark = await run("wp_performance_benchmark", {});
+    expect(benchmark.data.metadata.scope).toMatch(/all sites combined/);
+
+    const optimize = await run("wp_performance_optimize", {});
+    expect(optimize.data.metadata.scope).toMatch(/all sites combined/);
+  });
+
+  it.each(["json", "csv", "summary"])(
+    "wp_performance_export (%s) carries a scope map in its metadata",
+    async (format) => {
+      const result = await run("wp_performance_export", { format });
+
+      expect(result.metadata.scope.currentMetrics).toMatch(/all sites combined/);
+      expect(result.metadata.scope.siteComparison).toMatch(/each site/);
+      expect(result.metadata.scope.historicalData).toMatch(/since the server started/);
+    },
+  );
 
   it("wp_performance_history labels its averages as a window over snapshots", async () => {
     const { data } = await run("wp_performance_history", { timeframe: "1h", includeTrends: false });
 
     expect(data.summary.scope).toMatch(/1h/);
     expect(data.summary.scope).toMatch(/all sites combined/);
+    // The timeframe only selects snapshots; each snapshot's counters run from server start.
+    expect(data.summary.scope).toMatch(/since the server started/);
+  });
+
+  // Each snapshot's requests.total is cumulative, so summing them counted the same requests once per snapshot.
+  it("wp_performance_history counts the requests made between the first and last snapshot", async () => {
+    const snapshot = (total) => ({
+      requests: { total, failed: 0, averageResponseTime: 100 },
+      cache: { hitRate: 0.5 },
+      system: { memoryUsage: 10, uptime: 0 },
+    });
+    vi.spyOn(tools.monitor, "getHistoricalData").mockReturnValue([snapshot(100), snapshot(150), snapshot(230)]);
+
+    const { data } = await run("wp_performance_history", { timeframe: "1h", includeTrends: false });
+
+    expect(data.dataPoints).toBe(3);
+    expect(data.summary.totalRequests).toBe(130); // not 100 + 150 + 230
+  });
+
+  it("wp_performance_history reports zero requests with fewer than two snapshots", async () => {
+    vi.spyOn(tools.monitor, "getHistoricalData").mockReturnValue([]);
+
+    const { data } = await run("wp_performance_history", { timeframe: "1h", includeTrends: false });
+
+    expect(data.summary.totalRequests).toBe(0);
   });
 });
 

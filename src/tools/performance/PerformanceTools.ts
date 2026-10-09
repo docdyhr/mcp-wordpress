@@ -43,6 +43,8 @@ import {
 
 // The session-wide cache figures sum every site's cache counters; wp_cache_stats and `siteSpecific` show one site.
 const CACHE_SCOPE_ALL_SITES = "all sites combined, since the server started";
+// Benchmarks, recommendations and exports read the same session-wide metrics.
+const CURRENT_METRICS_SCOPE = "current metrics, all sites combined, since the server started";
 
 /**
  * Performance Tools Class
@@ -490,13 +492,20 @@ export default class PerformanceTools {
           historicalData: chartData,
           trends: trends || [],
           summary: {
-            scope: `average of the ${historicalData.length} snapshots taken in the last ${timeframe}, all sites combined`,
+            scope:
+              `averages over the ${historicalData.length} snapshots taken in the last ${timeframe}, all sites combined. ` +
+              "Each snapshot's counters are totals since the server started, so these average cumulative figures; " +
+              "totalRequests counts the requests between the first and last snapshot",
             averageResponseTime: calculateAverage(historicalData.map((d) => d.requests.averageResponseTime)),
             averageCacheHitRate: calculateAverage(historicalData.map((d) => d.cache.hitRate)),
             averageErrorRate: calculateAverage(
               historicalData.map((d) => (d.requests.total > 0 ? d.requests.failed / d.requests.total : 0)),
             ),
-            totalRequests: historicalData.reduce((sum, d) => sum + d.requests.total, 0),
+            // requests.total is cumulative in every snapshot: the difference is what happened in between.
+            totalRequests:
+              historicalData.length > 1
+                ? historicalData[historicalData.length - 1]!.requests.total - historicalData[0]!.requests.total
+                : 0,
           },
           metadata: {
             timestamp: new Date().toISOString(),
@@ -586,6 +595,7 @@ export default class PerformanceTools {
                 timestamp: new Date().toISOString(),
                 category,
                 site: site || "all",
+                scope: CURRENT_METRICS_SCOPE,
                 benchmarkVersion: "2024-industry-standards",
               },
             },
@@ -696,6 +706,8 @@ export default class PerformanceTools {
               "recorded history, all sites combined: each message shows the value when the alert was raised, " +
               "so it can differ from the current figures",
             activeAlerts: "current metrics, all sites combined: what is breaching now",
+            anomalies:
+              "all sites combined: each anomaly compares a value with the recent snapshots when it was detected",
           },
           alerts: alerts.map((alert) => ({
             ...alert,
@@ -828,6 +840,7 @@ export default class PerformanceTools {
             focus,
             priority,
             site: site || "all",
+            scope: CURRENT_METRICS_SCOPE,
           },
         },
       };
@@ -918,6 +931,13 @@ export default class PerformanceTools {
           format,
           dataSize: JSON.stringify(exportData).length,
           site: site || "all",
+          // In the outer metadata so the CSV and summary formats carry it too.
+          scope: {
+            currentMetrics: CURRENT_METRICS_SCOPE,
+            aggregatedStats: CURRENT_METRICS_SCOPE,
+            siteComparison: "each site on its own, since the server started",
+            historicalData: `snapshots taken in the last ${timeRange}; each one's counters are totals since the server started`,
+          },
         },
       };
     });

@@ -251,6 +251,22 @@ wp_performance_export --format=summary --includeAnalytics=true
 - **Evictions**: Number of cache entries removed due to space limits
 - **Cache Efficiency**: Overall cache performance rating
 
+### Scope of the figures
+
+Request and cache counters are totals since the server started. The same minute can therefore show different hit rates,
+and each response labels which one it reports:
+
+| Scope                              | Where                                                                                                |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| All sites combined                 | `wp_performance_stats` overview/cache, `wp_performance_benchmark`, `wp_performance_optimize`, export |
+| One site                           | `wp_cache_stats`, `wp_cache_info`, `wp_performance_stats` `siteSpecific`, export `siteComparison`    |
+| The value when an alert was raised | each recorded alert in `wp_performance_alerts` (`activeAlerts` shows what is breaching now)          |
+
+The label is a `scope` field next to the figures, or `metadata.scope`. In `wp_performance_stats`,
+`siteSpecific.cache.hitRate` is a percentage string (`"16.7%"`) like the other hit rates. `wp_performance_history`
+averages snapshots taken in the timeframe; each snapshot holds totals since the server started, and `totalRequests` is
+the number of requests between the first and last snapshot.
+
 ### System Metrics
 
 - **Memory Usage**: Current memory consumption percentage
