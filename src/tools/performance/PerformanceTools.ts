@@ -31,6 +31,8 @@ import {
   formatAlertMessage,
   formatAnomalyDescription,
   calculateAlertStatus,
+  calculateActiveAlertStatus,
+  worseAlertStatus,
   formatPriority,
   formatEffort,
   calculateEstimatedImpact,
@@ -194,7 +196,11 @@ export default class PerformanceTools {
       },
       {
         name: "wp_performance_alerts",
-        description: "Get performance alerts and anomaly detection results",
+        description:
+          "Get performance alerts and anomaly detection results. summary.overallStatus covers every alert recorded this " +
+          "session (alerts never expire) and is never better than summary.currentStatus; summary.currentStatus and " +
+          "summary.activeAlerts show only what is breaching right now, using the same rules as wp_performance_stats " +
+          "(overview.alertStatus).",
         parameters: [
           {
             name: "site",
@@ -319,6 +325,8 @@ export default class PerformanceTools {
 
       // Get current metrics
       const metrics = this.collector.collectCurrentMetrics();
+      // What is breaching right now, from the same rules that raise alerts — health and alert status agree.
+      const activeAlerts = this.collector.getActiveAlerts();
 
       // Get site-specific metrics if requested
       let siteMetrics = null;
@@ -332,7 +340,14 @@ export default class PerformanceTools {
       if (category === "overview" || category === "all") {
         result.overview = {
           scope: site ? "session-wide (all sites combined)" : "session-wide",
-          overallHealth: calculateHealthStatus(metrics),
+          overallHealth: calculateHealthStatus(metrics, activeAlerts),
+          alertStatus: calculateActiveAlertStatus(activeAlerts),
+          activeAlerts: {
+            total: activeAlerts.length,
+            error: activeAlerts.filter((a) => a.severity === "error").length,
+            warning: activeAlerts.filter((a) => a.severity === "warning").length,
+            conditions: activeAlerts.map((a) => a.message),
+          },
           performanceScore: calculatePerformanceScore(metrics),
           totalRequests: metrics.requests.total,
           averageResponseTime: `${metrics.requests.averageResponseTime.toFixed(0)}ms`,
@@ -630,6 +645,9 @@ export default class PerformanceTools {
         info: alerts.filter((a) => a.severity === "info").length,
       };
 
+      // What is breaching right now. Unlike the recorded history below, it clears when a problem recovers.
+      const activeAlerts = this.collector.getActiveAlerts();
+
       const anomalySummary = {
         total: anomalies.length,
         critical: anomalies.filter((a) => a.severity === "critical").length,
@@ -637,6 +655,22 @@ export default class PerformanceTools {
         moderate: anomalies.filter((a) => a.severity === "moderate").length,
         minor: anomalies.filter((a) => a.severity === "minor").length,
       };
+
+      const recordedAlerts = this.monitor.getAlerts() as PerformanceAlert[];
+      const recordedAnomalies = includeAnomalies ? (this.analytics.getAnomalies() as PerformanceAnomaly[]) : [];
+      const historyStatus = calculateAlertStatus(
+        {
+          critical: recordedAlerts.filter((a) => a.severity === "critical").length,
+          error: recordedAlerts.filter((a) => a.severity === "error").length,
+          warning: recordedAlerts.filter((a) => a.severity === "warning").length,
+        },
+        {
+          critical: recordedAnomalies.filter((a) => a.severity === "critical").length,
+          major: recordedAnomalies.filter((a) => a.severity === "major").length,
+          moderate: recordedAnomalies.filter((a) => a.severity === "moderate").length,
+          minor: recordedAnomalies.filter((a) => a.severity === "minor").length,
+        },
+      );
 
       return {
         success: true,
@@ -654,7 +688,17 @@ export default class PerformanceTools {
           summary: {
             alerts: alertSummary,
             anomalies: anomalySummary,
-            overallStatus: calculateAlertStatus(alertSummary, anomalySummary),
+            // overallStatus covers the WHOLE recorded history (alerts never expire, and the severity/category/limit
+            // filters above shape only the returned list), so it can stay red after a problem recovers; it is also
+            // never better than currentStatus, which is the field that clears.
+            overallStatus: worseAlertStatus(historyStatus, calculateActiveAlertStatus(activeAlerts)),
+            currentStatus: calculateActiveAlertStatus(activeAlerts),
+            activeAlerts: {
+              total: activeAlerts.length,
+              error: activeAlerts.filter((a) => a.severity === "error").length,
+              warning: activeAlerts.filter((a) => a.severity === "warning").length,
+              conditions: activeAlerts.map((a) => a.message),
+            },
           },
           metadata: {
             timestamp: new Date().toISOString(),
