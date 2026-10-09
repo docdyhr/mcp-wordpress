@@ -110,6 +110,21 @@ describe("wp_list_posts output", () => {
     expect(notFull).not.toContain("**Pagination**");
   });
 
+  // The streaming path labelled an empty title "Untitled", every other path "(untitled)".
+  it("labels an untitled post the same way on the streaming path", async () => {
+    const client = makeClient();
+    const posts = Array.from({ length: 60 }, (_, i) =>
+      makePost({ id: i + 1, title: { rendered: i === 0 ? "" : "Q&#038;A" } }),
+    );
+    client.getPosts.mockResolvedValue(posts);
+
+    const text = await handleListPosts(client, { per_page: 60 });
+
+    expect(text).toContain("(untitled)");
+    expect(text).not.toContain("Untitled");
+    expect(text).toContain("Q&A");
+  });
+
   it("points at the next page when the page is full", async () => {
     const client = makeClient();
     client.getPosts.mockResolvedValue([makePost({ id: 1 }), makePost({ id: 2 })]);

@@ -608,6 +608,14 @@ describe("MediaTools", () => {
       expect(text).not.toMatch(/&amp;|<p>/);
     });
 
+    it("wp_get_media omits the caption line when the item has no caption field", async () => {
+      const { caption: _caption, ...withoutCaption } = item;
+      mockClient.getMediaItem.mockResolvedValue(withoutCaption);
+      const text = await mediaTools.handleGetMedia(mockClient, { id: 9 });
+      expect(text).toContain(`- **Title:** ${DECODED}`);
+      expect(text).not.toContain("Caption");
+    });
+
     it("wp_upload_media decodes the title", async () => {
       const filePath = path.join(tmpUploadDir, "a.jpg");
       fs.writeFileSync(filePath, "x");

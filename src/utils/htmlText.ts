@@ -200,7 +200,7 @@ export function htmlToPlainText(html: unknown, options: { maxLength?: number } =
 }
 
 /** Display title for a `title.rendered` value: markup stripped, entities decoded, never empty. */
-export function displayTitle(rendered: unknown): string {
+export function displayTitle(rendered: string | null | undefined): string {
   return htmlToPlainText(rendered) || "(untitled)";
 }
 

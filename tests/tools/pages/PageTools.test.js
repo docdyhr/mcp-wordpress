@@ -626,6 +626,15 @@ describe("PageTools", () => {
       expect(text).not.toMatch(RAW);
     });
 
+    it("wp_delete_page falls back to the ID when the title is empty or only markup", async () => {
+      mockClient.deletePage.mockResolvedValue({
+        deleted: true,
+        previous: { ...page, title: { rendered: "<em> </em>" } },
+      });
+      const text = await pageTools.handleDeletePage(mockClient, { id: 7, force: true });
+      expect(text).toBe("✅ Page 7 has been permanently deleted.");
+    });
+
     it("wp_delete_page decodes the title of the deleted page", async () => {
       mockClient.deletePage.mockResolvedValue({ deleted: true, previous: page });
       const text = await pageTools.handleDeletePage(mockClient, { id: 7, force: true });

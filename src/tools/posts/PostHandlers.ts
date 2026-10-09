@@ -341,11 +341,11 @@ export async function handleCreatePost(
   params: CreatePostRequest,
 ): Promise<WordPressPost | string> {
   try {
-    // validatePostParams sanitizes `content` (and validates title/status/categories/tags/
-    // featured_media/date) via the allowlist-based sanitizeHtml() — its returned, sanitized
-    // fields must actually be sent, not just the original `params`, or the sanitization has no
-    // effect at all (a real gap a security review caught: this used to be called only for its
-    // throwing side effect, then discarded).
+    // validatePostParams rejects unsafe `content` (script tags, javascript: URLs, event handlers) via
+    // isUnsafeWordPressContent and otherwise passes it through unchanged — never sanitizeHtml(), which
+    // corrupts Gutenberg block markup — and validates title/status/categories/tags/featured_media/date.
+    // Its returned fields must actually be sent, not just the original `params` (a real gap a security
+    // review caught: this used to be called only for its throwing side effect, then discarded).
     const validated = validatePostParams(params);
     const post = await client.createPost({ ...params, ...validated } as CreatePostRequest);
 
@@ -385,7 +385,7 @@ export async function handleUpdatePost(
     const postId = validateId(params.id, "post ID");
 
     const { id: _id, ...updateData } = params;
-    // See handleCreatePost: validated (sanitized) fields must be sent, not just updateData.
+    // See handleCreatePost: the validated fields must be sent, not just updateData.
     const validated = validatePostParams(updateData, true);
 
     const updatedPost = await client.updatePost({ id: postId, ...updateData, ...validated });
