@@ -4,7 +4,9 @@
 
 Get real-time performance statistics and metrics. Note: Top-level metrics (totalRequests, averageResponseTime,
 errorRate) are session-wide aggregates across all sites. Per-site cache and client stats are shown in the siteSpecific
-section when a site parameter is provided.
+section when a site parameter is provided. category=tools also lists the most recent tool calls (tool, site, status,
+duration, error code), which is the way to see what failed and why — an installed extension's own log output is not
+shown by the host.
 
 ## Parameters
 

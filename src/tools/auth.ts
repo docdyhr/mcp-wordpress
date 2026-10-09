@@ -2,11 +2,63 @@ import { WordPressClient } from "@/client/api.js";
 import type { MCPToolSchema } from "@/types/mcp.js";
 import type { AuthConfig } from "@/types/client.js";
 import { preserveToolError } from "@/utils/error.js";
+import { ServerConfiguration, type ConfigFileSource, type ConfigLoadInfo } from "@/config/ServerConfiguration.js";
 
 // Kept in sync with ConfigurationSchema's AuthMethodSchema: "cookie" is
 // deliberately excluded because it requires an already-established
 // WordPress session nonce this tool has no way to obtain.
 type SupportedAuthMethod = "app-password" | "jwt" | "basic" | "api-key";
+
+const CONFIG_SOURCE_LABELS: Record<ConfigFileSource, string> = {
+  env: "MCP_WORDPRESS_CONFIG",
+  "user-config-dir": "~/.config/mcp-wordpress",
+  home: "home directory",
+  "install-dir":
+    "extension install folder — replaced on every extension update; move it to ~/.config/mcp-wordpress/config.json",
+};
+
+/**
+ * Which configuration is live. The host does not capture an installed extension's stderr, so this is the
+ * reliable way for a user to see whether the multi-site file was found after an update.
+ */
+function describeConfiguration(info: ConfigLoadInfo | undefined): { headline: string; sites?: string } | undefined {
+  if (!info) {
+    return undefined;
+  }
+  if (info.mode === "multi-site") {
+    const source = info.source ? ` (${CONFIG_SOURCE_LABELS[info.source]})` : "";
+    return { headline: `multi-site, loaded from ${info.configPath}${source}`, sites: info.siteIds.join(", ") };
+  }
+  const origin =
+    info.singleSiteSource === "mcp-config"
+      ? "client-supplied configuration; environment variables fill any gaps"
+      : "environment variables";
+  const searched = info.searched?.length ? `; no multi-site config file found in: ${info.searched.join(", ")}` : "";
+  return { headline: `single-site (${origin})${searched}` };
+}
+
+/** The configuration as extra lines of the success output (empty when nothing was recorded). */
+function configurationLines(info: ConfigLoadInfo | undefined): string {
+  const description = describeConfiguration(info);
+  if (!description) {
+    return "";
+  }
+  const sites = description.sites ? `**Configured sites:** ${description.sites}\n` : "";
+  return `**Configuration:** ${description.headline}\n${sites}`;
+}
+
+/**
+ * The configuration as a suffix for the failure message — the troubleshooting case (bad credentials, an
+ * unreachable site, a timeout) is exactly when a user needs to know which configuration is live.
+ */
+function configurationSuffix(info: ConfigLoadInfo | undefined): string {
+  const description = describeConfiguration(info);
+  if (!description) {
+    return "";
+  }
+  const sites = description.sites ? `; sites: ${description.sites}` : "";
+  return ` (configuration: ${description.headline}${sites})`;
+}
 
 /**
  * Provides authentication-related tools for WordPress sites.
@@ -27,7 +79,8 @@ export class AuthTools {
       {
         name: "wp_test_auth",
         description:
-          "Tests the authentication and connectivity for a configured WordPress site with detailed connection diagnostics.\n\n" +
+          "Tests the authentication and connectivity for a configured WordPress site with detailed connection diagnostics, " +
+          "and reports which configuration is live (the multi-site config file that was loaded, or the single-site fallback).\n\n" +
           "**Usage Examples:**\n" +
           "• Test connection: `wp_test_auth`\n" +
           '• Multi-site test: `wp_test_auth --site="my-site"`\n' +
@@ -132,15 +185,19 @@ export class AuthTools {
             `**Site:** ${siteConfig.baseUrl}\n` +
             `**Method:** ${siteConfig.auth.method}\n` +
             `**User:** ${user.name} (@${user.slug})\n` +
-            `**Roles:** ${user.roles?.join(", ") || "N/A"}\n\n` +
-            "Your WordPress connection is working properly.";
+            `**Roles:** ${user.roles?.join(", ") || "N/A"}\n` +
+            configurationLines(ServerConfiguration.getInstance().getLoadInfo()) +
+            "\nYour WordPress connection is working properly.";
 
           return { content };
         })(),
         timeoutSignal,
       ]);
     } catch (_error) {
-      preserveToolError("Authentication test failed", _error);
+      preserveToolError(
+        `Authentication test failed${configurationSuffix(ServerConfiguration.getInstance().getLoadInfo())}`,
+        _error,
+      );
     } finally {
       clearTimeout(timeoutHandle);
     }

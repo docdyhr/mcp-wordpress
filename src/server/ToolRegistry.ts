@@ -44,7 +44,7 @@ export interface ToolDefinition {
  */
 export interface ToolExecutionTracker {
   startToolExecution(toolName: string, parameters: Record<string, unknown>, siteId?: string): string;
-  endToolExecution(executionId: string, success: boolean, error?: Error): void;
+  endToolExecution(executionId: string, success: boolean, error?: Error, siteId?: string): void;
 }
 
 /**
@@ -56,6 +56,14 @@ function isFailedToolResult(result: unknown): boolean {
   if (typeof result !== "object" || result === null) return false;
   const { success, status } = result as { success?: unknown; status?: unknown };
   return success === false || status === "unavailable";
+}
+
+/**
+ * A failure reason for the recent-calls diagnostics when nothing was thrown. Deliberately a fixed code and
+ * message: reasons derived from a call's arguments (a site name, a path) would leak them into the stats output.
+ */
+function codedFailure(code: string, message: string): Error {
+  return Object.assign(new Error(message), { code });
 }
 
 export class ToolRegistry {
@@ -158,6 +166,7 @@ export class ToolRegistry {
           typeof args.site === "string" ? args.site : undefined,
         );
         let succeeded = false;
+        let failure: Error | undefined;
         // Declared outside the try so the catch can name the site that was actually resolved
         // (selectBestSite() may pick a configured ID other than "default" when `site` is omitted).
         let siteId = args.site;
@@ -165,6 +174,7 @@ export class ToolRegistry {
           // If no site specified and multiple sites configured, require site parameter
           if (!siteId && this.wordpressClients.size > 1) {
             const availableSites = Array.from(this.wordpressClients.keys());
+            failure = codedFailure("site_required", "site parameter required");
             const error = ErrorHandlers.siteParameterMissing(availableSites);
             return {
               content: [
@@ -186,6 +196,7 @@ export class ToolRegistry {
 
           if (!client) {
             const availableSites = Array.from(this.wordpressClients.keys());
+            failure = codedFailure("site_not_found", "site not found");
             const error = ErrorHandlers.siteNotFound(siteId as string, availableSites);
             return {
               content: [
@@ -201,6 +212,9 @@ export class ToolRegistry {
           // Call the tool handler with the client and parameters
           const result = await tool.handler(client, args);
           succeeded = !isFailedToolResult(result);
+          if (!succeeded) {
+            failure = codedFailure("tool_reported_failure", "tool reported a failure");
+          }
 
           return {
             content: [
@@ -211,6 +225,7 @@ export class ToolRegistry {
             ],
           };
         } catch (_error) {
+          failure = _error instanceof Error ? _error : undefined;
           if (this.isAuthenticationError(_error)) {
             return {
               content: [
@@ -259,7 +274,7 @@ export class ToolRegistry {
           };
         } finally {
           if (tracker && executionId !== undefined) {
-            tracker.endToolExecution(executionId, succeeded);
+            tracker.endToolExecution(executionId, succeeded, failure, typeof siteId === "string" ? siteId : undefined);
           }
         }
       },

@@ -111,7 +111,9 @@ export default class PerformanceTools {
         description:
           "Get real-time performance statistics and metrics. " +
           "Note: Top-level metrics (totalRequests, averageResponseTime, errorRate) are session-wide aggregates across all sites. " +
-          "Per-site cache and client stats are shown in the siteSpecific section when a site parameter is provided.",
+          "Per-site cache and client stats are shown in the siteSpecific section when a site parameter is provided. " +
+          "category=tools also lists the most recent tool calls (tool, site, status, duration, error code), which is the way to see " +
+          "what failed and why — an installed extension's own log output is not shown by the host.",
         parameters: [
           {
             name: "site",
@@ -399,6 +401,11 @@ export default class PerformanceTools {
             .slice(0, 5)
             .map(([tool, count]) => ({ tool, count })),
           toolPerformance: format === "detailed" ? metrics.tools.toolPerformance : undefined,
+          // Newest first. Parameters are never recorded; errors carry their HTTP status and code.
+          recentCalls: this.collector.getRecentToolCalls(format === "detailed" ? 50 : 10).map((call) => ({
+            ...call,
+            timestamp: new Date(call.timestamp).toISOString(),
+          })),
         };
       }
 

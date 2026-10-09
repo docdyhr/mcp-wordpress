@@ -27,8 +27,10 @@ Owns `src/config/`.
   fatal, and an empty/unresolved `${user_config.*}` value counts as unset), validates via `ConfigurationSchema`, and
   builds one `WordPressClient`/`CachedWordPressClient` per site. **Fails startup loudly on invalid config — no silent
   fallback.** Outside CI/test, any resolved multi-site file (including an explicit `MCP_WORDPRESS_CONFIG`) also needs
-  `MCP_WORDPRESS_ALLOW_MULTI_SITE=true` or startup throws; the DXT manifest exposes both as `user_config` settings. Does
-  not define its own validation rules.
+  `MCP_WORDPRESS_ALLOW_MULTI_SITE=true` or startup throws; the DXT manifest exposes both as `user_config` settings.
+  After each load `getLoadInfo()` records the mode, the loaded file and its source, the site IDs and (single-site) the
+  paths searched; `wp_test_auth` reports it, because the host does not capture an installed extension's stderr. Does not
+  define its own validation rules.
 - `Config.ts` — singleton reading `process.env` into a typed `AppConfig`; exports `ConfigHelpers`.
 
 **Config files are never committed**: `mcp-wordpress.config.json` and `.env` are gitignored. Any example/test config

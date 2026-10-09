@@ -18,7 +18,10 @@ Layered, not duplicative:
   `ToolRegistry` via `MetricsCollector.start/endToolExecution` — never counted as requests), and expected 4xx responses
   (`requests.clientErrors`, excluded from `failed` and the error rate; 401, 408 and 429 still count as failures). A tool
   call that returns `success: false` / `status: "unavailable"` is recorded as failed. `system.memoryUsage` is heap used
-  vs the V8 heap limit, not heapUsed/heapTotal (which reads ~100% when healthy).
+  vs the V8 heap limit, not heapUsed/heapTotal (which reads ~100% when healthy). `recordToolCall()` also keeps the last
+  50 calls in memory (`getRecentToolCalls()`: tool, site, status, duration and, for a failure, HTTP status, error code
+  and error type — never error text or call parameters, which can quote the arguments), shown by
+  `wp_performance_stats category=tools` — the diagnostics channel for the DXT, whose stderr the host does not capture.
 - `MetricsCollector.ts` — thin real-time collection hub wrapping a constructor-injected `PerformanceMonitor` instance;
   most methods delegate straight to `this.monitor.*`. Adds tool-execution tracking, request interception hooks, and
   system-metrics collection config.

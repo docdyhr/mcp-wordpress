@@ -2520,7 +2520,7 @@
     },
     "/tools/wp_performance_stats": {
       "post": {
-        "summary": "Get real-time performance statistics and metrics. Note: Top-level metrics (totalRequests, averageResponseTime, errorRate) are session-wide aggregates across all sites. Per-site cache and client stats are shown in the siteSpecific section when a site parameter is provided.",
+        "summary": "Get real-time performance statistics and metrics. Note: Top-level metrics (totalRequests, averageResponseTime, errorRate) are session-wide aggregates across all sites. Per-site cache and client stats are shown in the siteSpecific section when a site parameter is provided. category=tools also lists the most recent tool calls (tool, site, status, duration, error code), which is the way to see what failed and why — an installed extension's own log output is not shown by the host.",
         "description": "Execute wp_performance_stats MCP tool",
         "tags": [
           "performance"
@@ -3435,7 +3435,7 @@
     },
     "/tools/wp_test_auth": {
       "post": {
-        "summary": "Tests the authentication and connectivity for a configured WordPress site with detailed connection diagnostics.\n\n**Usage Examples:**\n• Test connection: `wp_test_auth`\n• Multi-site test: `wp_test_auth --site=\"my-site\"`\n• Verify setup: Use this after configuring new credentials\n• Troubleshoot: Run when experiencing connection issues\n• Health check: Regular verification of WordPress connectivity",
+        "summary": "Tests the authentication and connectivity for a configured WordPress site with detailed connection diagnostics, and reports which configuration is live (the multi-site config file that was loaded, or the single-site fallback).\n\n**Usage Examples:**\n• Test connection: `wp_test_auth`\n• Multi-site test: `wp_test_auth --site=\"my-site\"`\n• Verify setup: Use this after configuring new credentials\n• Troubleshoot: Run when experiencing connection issues\n• Health check: Regular verification of WordPress connectivity",
         "description": "Execute wp_test_auth MCP tool",
         "tags": [
           "auth"

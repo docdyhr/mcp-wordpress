@@ -309,6 +309,60 @@ describe("ServerConfiguration multi-site config file resolution", () => {
     expect(result.configs.map((c) => c.id)).toEqual(["default"]);
   });
 
+  // Diagnostics reachable through a tool (the host log does not capture an extension's stderr).
+  describe("getLoadInfo", () => {
+    it("describes a multi-site load: file, source and site IDs", async () => {
+      stubFiles({ [HOME_PATH]: "home" });
+
+      await serverConfig.loadClientConfigurations();
+
+      expect(serverConfig.getLoadInfo()).toEqual({
+        mode: "multi-site",
+        configPath: HOME_PATH,
+        source: "home",
+        siteIds: ["home"],
+      });
+    });
+
+    it("describes a single-site fallback and the paths that were searched", async () => {
+      stubFiles({});
+
+      await serverConfig.loadClientConfigurations();
+
+      expect(serverConfig.getLoadInfo()).toEqual({
+        mode: "single-site",
+        siteIds: ["default"],
+        searched: [XDG_STYLE_PATH, HOME_PATH, installDirPath],
+        singleSiteSource: "environment",
+      });
+    });
+
+    it("tells client-supplied (programmatic) configuration apart from environment variables", async () => {
+      stubFiles({});
+
+      await serverConfig.loadClientConfigurations({
+        wordpressSiteUrl: "https://programmatic.example.com",
+        wordpressUsername: "api-user",
+        wordpressAppPassword: "abcd1234efgh5678",
+      });
+
+      expect(serverConfig.getLoadInfo()).toMatchObject({ mode: "single-site", singleSiteSource: "mcp-config" });
+    });
+
+    it("reports the explicit source for MCP_WORDPRESS_CONFIG", async () => {
+      process.env.MCP_WORDPRESS_CONFIG = EXPLICIT_PATH;
+      stubFiles({ [EXPLICIT_PATH]: "explicit" });
+
+      await serverConfig.loadClientConfigurations();
+
+      expect(serverConfig.getLoadInfo()).toMatchObject({
+        mode: "multi-site",
+        source: "env",
+        configPath: EXPLICIT_PATH,
+      });
+    });
+  });
+
   describe("diagnostics", () => {
     let warn;
 

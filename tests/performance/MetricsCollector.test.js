@@ -188,7 +188,10 @@ describe("MetricsCollector", () => {
       collector.endToolExecution(executionId, true);
       // A tool call is not an HTTP request: it is recorded as tool usage only, so totals and
       // latency stats are not double-counted against the client request interceptor.
-      expect(mockMonitor.recordToolCall).toHaveBeenCalledWith("wp_list_posts", expect.any(Number), true);
+      expect(mockMonitor.recordToolCall).toHaveBeenCalledWith("wp_list_posts", expect.any(Number), true, {
+        site: "site1",
+        error: undefined,
+      });
       expect(mockMonitor.recordRequest).not.toHaveBeenCalled();
     });
 
@@ -197,7 +200,28 @@ describe("MetricsCollector", () => {
       const error = new Error("Test error");
 
       collector.endToolExecution(executionId, false, error);
-      expect(mockMonitor.recordToolCall).toHaveBeenCalledWith("wp_list_posts", expect.any(Number), false);
+      expect(mockMonitor.recordToolCall).toHaveBeenCalledWith("wp_list_posts", expect.any(Number), false, {
+        site: "site1",
+        error,
+      });
+    });
+
+    it("prefers the site the registry actually resolved over the one named at start", () => {
+      const executionId = collector.startToolExecution("wp_list_posts", {}, undefined);
+
+      collector.endToolExecution(executionId, true, undefined, "blog");
+
+      expect(mockMonitor.recordToolCall).toHaveBeenCalledWith("wp_list_posts", expect.any(Number), true, {
+        site: "blog",
+        error: undefined,
+      });
+    });
+
+    it("exposes the monitor's recent tool calls", () => {
+      mockMonitor.getRecentToolCalls = vi.fn().mockReturnValue([{ tool: "wp_list_posts" }]);
+
+      expect(collector.getRecentToolCalls(5)).toEqual([{ tool: "wp_list_posts" }]);
+      expect(mockMonitor.getRecentToolCalls).toHaveBeenCalledWith(5);
     });
 
     it("should handle invalid execution IDs gracefully", () => {

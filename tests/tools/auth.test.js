@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthTools } from "@/tools/auth.js";
 import { WordPressAPIError } from "@/types/client.js";
+import { ServerConfiguration } from "@/config/ServerConfiguration.js";
 
 const authenticateSpy = vi.fn();
 
@@ -262,6 +263,108 @@ describe("AuthTools", () => {
       const result = await authTools.handleTestAuth(mockClient, {});
 
       expect(result.content).toContain("Roles:** N/A");
+    });
+
+    describe("configuration diagnostics", () => {
+      // The host log does not capture an extension's stderr, so which config file was loaded has to be
+      // visible in the tool output.
+      function withLoadInfo(info) {
+        vi.spyOn(ServerConfiguration, "getInstance").mockReturnValue({ getLoadInfo: () => info });
+        mockClient.ping.mockResolvedValue(true);
+        mockClient.getCurrentUser.mockResolvedValue({ name: "U", slug: "u", roles: ["editor"] });
+      }
+
+      afterEach(() => {
+        vi.restoreAllMocks();
+      });
+
+      it("reports the loaded multi-site file, its source and the site IDs", async () => {
+        withLoadInfo({
+          mode: "multi-site",
+          configPath: "/Users/x/mcp-wordpress.config.json",
+          source: "home",
+          siteIds: ["site1", "site2", "site3"],
+        });
+
+        const { content } = await authTools.handleTestAuth(mockClient, {});
+
+        expect(content).toContain(
+          "**Configuration:** multi-site, loaded from /Users/x/mcp-wordpress.config.json (home directory)",
+        );
+        expect(content).toContain("**Configured sites:** site1, site2, site3");
+      });
+
+      it("warns that the extension install folder is replaced on update", async () => {
+        withLoadInfo({
+          mode: "multi-site",
+          configPath: "/ext/mcp-wordpress.config.json",
+          source: "install-dir",
+          siteIds: ["a"],
+        });
+
+        const { content } = await authTools.handleTestAuth(mockClient, {});
+
+        expect(content).toContain("replaced on every extension update");
+        expect(content).toContain("~/.config/mcp-wordpress/config.json");
+      });
+
+      it("explains a single-site fallback and lists where a multi-site file was looked for", async () => {
+        withLoadInfo({ mode: "single-site", siteIds: ["default"], searched: ["/a/config.json", "/b/config.json"] });
+
+        const { content } = await authTools.handleTestAuth(mockClient, {});
+
+        expect(content).toContain("**Configuration:** single-site (environment variables)");
+        expect(content).toContain("no multi-site config file found in: /a/config.json, /b/config.json");
+      });
+
+      // The troubleshooting case: bad credentials, unreachable site or a timeout never reach the success output.
+      it("includes the configuration in the failure message and keeps the typed error", async () => {
+        withLoadInfo({
+          mode: "multi-site",
+          configPath: "/Users/x/mcp-wordpress.config.json",
+          source: "home",
+          siteIds: ["site1", "site2"],
+        });
+        mockClient.ping.mockRejectedValue(new WordPressAPIError("Invalid credentials", 401, "incorrect_password"));
+
+        const error = await authTools.handleTestAuth(mockClient, {}).catch((e) => e);
+
+        expect(error).toBeInstanceOf(WordPressAPIError);
+        expect(error.statusCode).toBe(401);
+        expect(error.code).toBe("incorrect_password");
+        expect(error.message).toContain("Authentication test failed");
+        expect(error.message).toContain("multi-site, loaded from /Users/x/mcp-wordpress.config.json (home directory)");
+        expect(error.message).toContain("sites: site1, site2");
+        expect(error.message).toContain("Invalid credentials");
+      });
+
+      it("names the single-site fallback in the failure message too", async () => {
+        withLoadInfo({ mode: "single-site", siteIds: ["default"], searched: ["/a/config.json"] });
+        mockClient.ping.mockResolvedValue(false);
+
+        const error = await authTools.handleTestAuth(mockClient, {}).catch((e) => e);
+
+        expect(error.message).toContain("single-site (environment variables)");
+        expect(error.message).toContain("no multi-site config file found in: /a/config.json");
+      });
+
+      it("reports client-supplied configuration as such, not as environment variables", async () => {
+        withLoadInfo({ mode: "single-site", siteIds: ["default"], searched: [], singleSiteSource: "mcp-config" });
+
+        const { content } = await authTools.handleTestAuth(mockClient, {});
+
+        expect(content).toContain("**Configuration:** single-site (client-supplied configuration");
+        expect(content).not.toContain("(environment variables)");
+      });
+
+      it("omits the section when the server has not recorded how it was configured", async () => {
+        withLoadInfo(undefined);
+
+        const { content } = await authTools.handleTestAuth(mockClient, {});
+
+        expect(content).not.toContain("**Configuration:**");
+        expect(content).toContain("Authentication successful");
+      });
     });
 
     it("should handle different authentication methods in config", async () => {
