@@ -39,6 +39,10 @@ describe("dxt-entry.js: server/discover before initialize", () => {
     const env = { ...process.env, HOME: sandboxDir, USERPROFILE: sandboxDir };
     delete env.MCP_WORDPRESS_CONFIG;
     delete env.MCP_WORDPRESS_ALLOW_MULTI_SITE;
+    // Vitest sets NODE_ENV=test, which (like CI) switches off the multi-site fail-closed guard. The installed
+    // extension runs with neither, so the child does too.
+    delete env.NODE_ENV;
+    delete env.CI;
     for (const key of Object.keys(env)) {
       if (key.startsWith("WORDPRESS_")) delete env[key];
     }
@@ -54,6 +58,23 @@ describe("dxt-entry.js: server/discover before initialize", () => {
       env,
       stdio: ["pipe", "pipe", "pipe"],
     });
+    child.stdout.setEncoding("utf8"); // a multi-byte character can straddle two chunks of the tools/list reply
+    child.stderr.setEncoding("utf8");
+    child.stdin.on("error", () => {}); // EPIPE after an exit; the exit itself fails the pending request
+
+    let stderr = "";
+    child.stderr.on("data", (chunk) => (stderr = (stderr + chunk).slice(-2000)));
+
+    // Fail fast with the exit code and the server's last stderr instead of waiting for the timeout.
+    let exitError = null;
+    const failures = new Set();
+    const exited = new Promise((resolve) =>
+      child.on("exit", (code, signal) => {
+        exitError = new Error(`server exited (code ${code}, signal ${signal}); stderr:\n${stderr}`);
+        failures.forEach((fail) => fail(exitError));
+        resolve();
+      }),
+    );
 
     const pending = new Map();
     let buffer = "";
@@ -70,12 +91,9 @@ describe("dxt-entry.js: server/discover before initialize", () => {
       }
     });
 
-    // Fail fast with the exit code instead of waiting for the timeout if the server dies mid-handshake.
-    const failures = new Set();
-    child.on("exit", (code) => failures.forEach((fail) => fail(new Error(`server exited with code ${code}`))));
-
     const request = (id, method, params = {}) =>
       new Promise((resolve, reject) => {
+        if (exitError) return reject(exitError);
         const timer = setTimeout(() => reject(new Error(`no response to ${method} within 15s`)), 15000);
         failures.add(reject);
         pending.set(id, (message) => {
@@ -86,15 +104,24 @@ describe("dxt-entry.js: server/discover before initialize", () => {
         child.stdin.write(JSON.stringify({ jsonrpc: "2.0", id, method, params }) + "\n");
       });
 
-    return { child, request };
+    const stop = async () => {
+      if (child.exitCode === null && child.signalCode === null) child.kill();
+      await exited;
+    };
+
+    return { child, request, stop };
   }
 
-  it("answers Method not found, stays up, and still completes the handshake", async () => {
-    const { child, request } = startServer();
+  it("answers the probe, stays up, and still completes the handshake", async () => {
+    const { child, request, stop } = startServer();
 
     try {
+      // What the host needs is an answer. Today the SDK has no server/discover handler and answers "Method not
+      // found"; a later SDK that implements it would answer with a result, which is fine too.
       const discover = await request(1, "server/discover");
-      expect(discover.error).toMatchObject({ code: -32601 });
+      expect(discover.id).toBe(1);
+      if (discover.error) expect(discover.error.code).toBe(-32601);
+      else expect(discover.result).toBeDefined();
 
       const init = await request(2, "initialize", {
         protocolVersion: "2025-06-18",
@@ -106,9 +133,12 @@ describe("dxt-entry.js: server/discover before initialize", () => {
 
       const list = await request(3, "tools/list");
       expect(list.result.tools.length).toBeGreaterThan(0);
-      expect(child.exitCode).toBeNull(); // still running
+
+      // Still serving after the whole exchange.
+      const ping = await request(4, "ping");
+      expect(ping.result).toEqual({});
     } finally {
-      child.kill();
+      await stop();
     }
   }, 30000);
 });
