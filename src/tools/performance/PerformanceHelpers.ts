@@ -269,7 +269,12 @@ export function calculateOverallRanking(benchmarks: BenchmarkComparison[]): { pe
  * Format alert message
  */
 export function formatAlertMessage(alert: PerformanceAlert): string {
-  return `${alert.severity.toUpperCase()}: ${alert.message} (${alert.metric}: ${alert.actualValue} vs threshold: ${alert.threshold})`;
+  return `${alert.severity.toUpperCase()}: ${alert.message} (${alert.metric}: ${roundTo2(alert.actualValue)} vs threshold: ${roundTo2(alert.threshold)})`;
+}
+
+/** 2096.285714285714 -> 2096.29, 0.0213 -> 0.02; integers stay as they are. */
+function roundTo2(value: number): number {
+  return Math.round(value * 100) / 100;
 }
 
 /**

@@ -156,7 +156,7 @@ export function evaluateAlertConditions(
       severity: "warning",
       category: "performance",
       metric: "averageResponseTime",
-      message: `High response time: ${requests.averageResponseTime}ms`,
+      message: `High response time: ${Math.round(requests.averageResponseTime)}ms`,
       threshold: thresholds.responseTime,
       actualValue: requests.averageResponseTime,
       suggestion: "Consider enabling caching or optimizing queries",

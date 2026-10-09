@@ -41,6 +41,9 @@ import {
   type PerformanceAlert,
 } from "./PerformanceHelpers.js";
 
+// The session-wide cache figures sum every site's cache counters; wp_cache_stats and `siteSpecific` show one site.
+const CACHE_SCOPE_ALL_SITES = "all sites combined, since the server started";
+
 /**
  * Performance Tools Class
  * Provides MCP tools for WordPress performance monitoring
@@ -373,6 +376,7 @@ export default class PerformanceTools {
 
       if (category === "cache" || category === "all") {
         result.cache = {
+          scope: CACHE_SCOPE_ALL_SITES,
           ...metrics.cache,
           hitRate: `${(metrics.cache.hitRate * 100).toFixed(1)}%`,
           memoryUsage: `${metrics.cache.memoryUsageMB.toFixed(1)}MB`,
@@ -413,7 +417,11 @@ export default class PerformanceTools {
       if (siteMetrics && siteMetrics.isActive) {
         result.siteSpecific = {
           siteId: site,
-          cache: siteMetrics.cache,
+          scope: `site ${site} only, since the server started`,
+          cache: siteMetrics.cache && {
+            ...siteMetrics.cache,
+            hitRate: `${(siteMetrics.cache.hitRate * 100).toFixed(1)}%`,
+          },
           client: siteMetrics.client,
         };
       }
@@ -482,6 +490,7 @@ export default class PerformanceTools {
           historicalData: chartData,
           trends: trends || [],
           summary: {
+            scope: `average of the ${historicalData.length} snapshots taken in the last ${timeframe}, all sites combined`,
             averageResponseTime: calculateAverage(historicalData.map((d) => d.requests.averageResponseTime)),
             averageCacheHitRate: calculateAverage(historicalData.map((d) => d.cache.hitRate)),
             averageErrorRate: calculateAverage(
@@ -682,6 +691,12 @@ export default class PerformanceTools {
       return {
         success: true,
         data: {
+          scope: {
+            alerts:
+              "recorded history, all sites combined: each message shows the value when the alert was raised, " +
+              "so it can differ from the current figures",
+            activeAlerts: "current metrics, all sites combined: what is breaching now",
+          },
           alerts: alerts.map((alert) => ({
             ...alert,
             timestamp: new Date(alert.timestamp).toISOString(),

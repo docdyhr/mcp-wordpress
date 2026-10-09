@@ -32,6 +32,10 @@ Layered, not duplicative:
   tool's `overallHealth` is capped by those active alerts and `alertStatus` is derived from them, so health and alerts
   cannot contradict each other. Do not add a second set of thresholds elsewhere. A cache with no lookups (hits and
   misses both 0) is neutral, not a 0% hit rate.
+- A cache hit rate has one of three scopes, and every tool output that shows one carries a `scope` label: all sites
+  combined since server start (`wp_performance_stats` overview/cache, history averages over their window), one site
+  (`wp_cache_stats`, `wp_cache_info`, `siteSpecific`), or a recorded alert's message (the value when it was raised).
+  Alert messages and `formattedMessage` round their numbers; `actualValue` keeps the raw value.
 
 New metrics belong in `PerformanceMonitor`; new collection hooks belong in `MetricsCollector`; new analysis belongs in
 `PerformanceAnalytics`.

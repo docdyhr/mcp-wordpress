@@ -28,6 +28,10 @@ function formatDuration(ms: number): string {
   return `${ms} ms`;
 }
 
+// Each site has its own cache whose counters run from server start (clearing entries keeps them). The
+// performance tools report every site's caches combined, so their hit rate can differ from this one.
+const CACHE_SCOPE_THIS_SITE = "this site only, since the server started";
+
 export class CacheTools {
   private readonly logger = LoggerFactory.tool("cache");
 
@@ -99,6 +103,7 @@ export class CacheTools {
       return {
         caching_enabled: true,
         cache_stats: {
+          scope: CACHE_SCOPE_THIS_SITE,
           hits: stats.cache.hits,
           misses: stats.cache.misses,
           hit_rate: Math.round(stats.cache.hitRate * 100) + "%",
@@ -218,6 +223,7 @@ export class CacheTools {
               realtime_data: `${formatDuration(SecurityConfig.cache.ttlPresets.realtime)} (real-time data)`,
             },
             current_stats: {
+              scope: CACHE_SCOPE_THIS_SITE,
               total_entries: stats.cache.totalSize,
               hit_rate: Math.round(stats.cache.hitRate * 100) + "%",
               hits: stats.cache.hits,
