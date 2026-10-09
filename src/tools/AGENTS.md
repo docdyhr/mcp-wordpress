@@ -61,6 +61,10 @@ WordPress, which defaults to 10 per page, and end a full page with a next-page n
 `postsPaginationNote()` for posts, including the >50-post streaming path). The note is the only signal that more results
 exist because the X-WP-Total header is not exposed to tools; never label a page's size as a site total.
 
+**Schema `required` is the contract**: a handler's `validateRequired()` list must not be stricter than its tool's
+`inputSchema.required`, and an optional property whose description names a default ("default: full") gets that default
+in code — `wp_seo_analyze_content` once rejected calls without `analysisType`.
+
 **Shared imports**: `@/client/api.js` (`WordPressClient`), `@/utils/error.js`, `@/types/wordpress.js`,
 `@/utils/validation/security.js` (`sanitizeHtml`), `src/tools/params.ts` (`toolParams<T>`, `parseId`,
 `parseIdAndForce`).
