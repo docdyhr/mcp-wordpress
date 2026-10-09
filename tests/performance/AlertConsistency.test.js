@@ -252,6 +252,36 @@ describe("wp_performance_stats / wp_performance_alerts tools", () => {
     expect(data.overview.alertStatus).toBe("System Healthy");
   });
 
+  // wp_performance_alerts used to evaluate the monitor's last cached cache sample, so a freshly degraded cache
+  // read "System Healthy" there while wp_performance_stats (which syncs first) already warned.
+  it("syncs the registered cache managers before judging wp_performance_alerts", async () => {
+    tools.collector.registerCacheManager("site1", {
+      getStats: () => ({ hits: 1, misses: 9, hitRate: 0.1, totalSize: 10, evictions: 0, expirations: 0 }),
+    });
+    for (let i = 0; i < 12; i++) tools.monitor.recordRequest(100, true);
+
+    const { data } = await run("wp_performance_alerts", {});
+
+    expect(data.summary.currentStatus).toBe("Performance Warnings");
+    expect(data.summary.activeAlerts.conditions.join(" ")).toContain("Low cache hit rate");
+  });
+
+  // overallStatus is documented as covering every alert recorded this session; filters and `limit` must only
+  // shape the returned list, not erase history from the status.
+  it("computes overallStatus from the unfiltered history, not from the filtered/limited list", async () => {
+    tools.monitor.updateCacheMetrics({ hits: 95, misses: 5, hitRate: 0.95 });
+    for (let i = 0; i < 12; i++) tools.monitor.recordRequest(100, true);
+    for (const metric of ["m1", "m2", "m3"])
+      tools.monitor.addAlert("error", "performance", `err ${metric}`, metric, 1, 2);
+    for (const metric of ["w1", "w2"]) tools.monitor.addAlert("warning", "cache", `warn ${metric}`, metric, 1, 2);
+
+    const filtered = (await run("wp_performance_alerts", { severity: "warning", limit: 1 })).data.summary;
+
+    expect(filtered.alerts.error).toBe(0); // the returned list is filtered…
+    expect(filtered.overallStatus).toBe("High Priority Issues"); // …the history status is not (3 errors > 2)
+    expect(filtered.currentStatus).toBe("System Healthy");
+  });
+
   it("gives wp_performance_alerts a currentStatus that ignores recovered history", async () => {
     for (let i = 0; i < 4; i++) tools.monitor.recordRequest(100, false);
     for (let i = 0; i < 300; i++) tools.monitor.recordRequest(100, true);

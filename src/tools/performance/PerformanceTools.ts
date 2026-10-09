@@ -645,8 +645,7 @@ export default class PerformanceTools {
         info: alerts.filter((a) => a.severity === "info").length,
       };
 
-      // `overallStatus` summarises every alert recorded this session (alerts never expire); this is what is
-      // breaching right now, so a recovered problem does not keep the status red.
+      // What is breaching right now. Unlike the recorded history below, it clears when a problem recovers.
       const activeAlerts = this.collector.getActiveAlerts();
 
       const anomalySummary = {
@@ -656,6 +655,22 @@ export default class PerformanceTools {
         moderate: anomalies.filter((a) => a.severity === "moderate").length,
         minor: anomalies.filter((a) => a.severity === "minor").length,
       };
+
+      const recordedAlerts = this.monitor.getAlerts() as PerformanceAlert[];
+      const recordedAnomalies = includeAnomalies ? (this.analytics.getAnomalies() as PerformanceAnomaly[]) : [];
+      const historyStatus = calculateAlertStatus(
+        {
+          critical: recordedAlerts.filter((a) => a.severity === "critical").length,
+          error: recordedAlerts.filter((a) => a.severity === "error").length,
+          warning: recordedAlerts.filter((a) => a.severity === "warning").length,
+        },
+        {
+          critical: recordedAnomalies.filter((a) => a.severity === "critical").length,
+          major: recordedAnomalies.filter((a) => a.severity === "major").length,
+          moderate: recordedAnomalies.filter((a) => a.severity === "moderate").length,
+          minor: recordedAnomalies.filter((a) => a.severity === "minor").length,
+        },
+      );
 
       return {
         success: true,
@@ -673,12 +688,10 @@ export default class PerformanceTools {
           summary: {
             alerts: alertSummary,
             anomalies: anomalySummary,
-            // Recorded history and the present can both only make this worse, never better: a history that has
-            // not accumulated enough alerts must not read "System Healthy" while something is breaching now.
-            overallStatus: worseAlertStatus(
-              calculateAlertStatus(alertSummary, anomalySummary),
-              calculateActiveAlertStatus(activeAlerts),
-            ),
+            // overallStatus covers the WHOLE recorded history (alerts never expire, and the severity/category/limit
+            // filters above shape only the returned list), so it can stay red after a problem recovers; it is also
+            // never better than currentStatus, which is the field that clears.
+            overallStatus: worseAlertStatus(historyStatus, calculateActiveAlertStatus(activeAlerts)),
             currentStatus: calculateActiveAlertStatus(activeAlerts),
             activeAlerts: {
               total: activeAlerts.length,

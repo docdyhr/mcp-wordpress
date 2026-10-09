@@ -137,6 +137,9 @@ export class MetricsCollector {
    * Thresholds the current metrics breach right now (see PerformanceMonitor.getActiveAlerts).
    */
   getActiveAlerts(): AlertCondition[] {
+    // Sync the registered cache managers and clients first, exactly as collectCurrentMetrics() callers see
+    // them; otherwise a freshly degraded cache reads healthy until the next background refresh.
+    this.collectCurrentMetrics();
     return this.monitor.getActiveAlerts();
   }
 
