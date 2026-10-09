@@ -46,6 +46,20 @@ describe("SEOTools.analyzeContent()", () => {
     expect(client.getPost).toHaveBeenCalledTimes(1);
   });
 
+  // The cache key left out focusKeywords, but the analysis scores the first keyword: a second call with other
+  // keywords got the first call's keyword analysis back.
+  it("does not share a cached analysis between different focus keywords", async () => {
+    const tools = new SEOTools();
+    const client = clientFor(9104);
+
+    const caching = await tools.analyzeContent(client, { postId: 9104, site: "s1", focusKeywords: ["caching"] });
+    const faster = await tools.analyzeContent(client, { postId: 9104, site: "s1", focusKeywords: ["faster"] });
+    await tools.analyzeContent(client, { postId: 9104, site: "s1", focusKeywords: ["caching"] });
+
+    expect(client.getPost).toHaveBeenCalledTimes(2); // the repeat of "caching" is a cache hit
+    expect(faster).not.toEqual(caching);
+  });
+
   it("still rejects a call without postId", async () => {
     await expect(new SEOTools().analyzeContent(clientFor(1), { site: "s1" })).rejects.toThrow(/postId/);
   });

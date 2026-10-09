@@ -116,7 +116,9 @@ export class SEOTools {
         validateRequired(params, ["postId"]);
 
         // Check cache first
-        const cacheKey = `seo:analyze:${params.site}:${params.postId as number}:${params.analysisType}`;
+        // The analysis scores the focus keywords (the first one as primary), so they are part of the key, in order.
+        const keywords = (params.focusKeywords ?? []).join(",");
+        const cacheKey = `seo:analyze:${params.site}:${params.postId as number}:${params.analysisType}:${keywords}`;
         const cached = await this.getCachedResult(cacheKey);
         if (cached) {
           siteLogger.debug("Cache hit for content analysis", { cacheKey });

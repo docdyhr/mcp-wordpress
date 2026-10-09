@@ -237,7 +237,7 @@ export const performSiteAuditTool: Tool = {
       },
       maxPages: {
         type: "number",
-        description: "Maximum number of posts, and of pages, to audit (default: 50 each)",
+        description: "Maximum number of posts, and of pages, to audit (default: 50 each, max 100)",
       },
       includeExternalLinks: {
         type: "boolean",
