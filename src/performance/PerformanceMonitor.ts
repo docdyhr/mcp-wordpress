@@ -84,6 +84,106 @@ export interface PerformanceAlert {
   suggestion?: string;
 }
 
+export const DEFAULT_ALERT_THRESHOLDS = {
+  responseTime: 2000, // 2 seconds
+  errorRate: 0.05, // 5%
+  cacheHitRate: 0.8, // 80%
+  memoryUsage: 80, // % of the V8 heap limit
+  cpuUsage: 80, // 80%
+};
+
+/**
+ * A threshold that is breached by the CURRENT metrics. Recorded alerts (getAlerts) are a history that never
+ * expires; these are what is wrong right now, and they are produced by the same rules that raise the alerts.
+ */
+export interface AlertCondition {
+  severity: "warning" | "error";
+  category: "performance" | "cache" | "system";
+  metric: string;
+  message: string;
+  threshold: number;
+  actualValue: number;
+  suggestion: string;
+}
+
+/**
+ * False only when the cache is known to have had no lookups at all (both counts explicitly 0), e.g. caching is
+ * disabled or nothing has been requested yet. A hit rate over zero lookups is undefined, not "0%", so it must
+ * not raise an alert or cost health points. Counts that are absent are treated as "unknown", i.e. active.
+ */
+export function hasCacheActivity(cache: { hits?: number; misses?: number }): boolean {
+  return !(cache.hits === 0 && cache.misses === 0);
+}
+
+// Heap usage this high leaves almost no headroom before V8 throws away the process.
+const MEMORY_ERROR_PERCENT = 95;
+
+/**
+ * Evaluate the alert rules against a metrics snapshot. Pure: the monitor uses it to raise alerts and the
+ * performance tools use it to report what is breaching now, so the two can never disagree.
+ */
+export function evaluateAlertConditions(
+  metrics: Pick<PerformanceMetrics, "requests" | "cache" | "system">,
+  thresholds: PerformanceConfig["alertThresholds"],
+): AlertCondition[] {
+  const conditions: AlertCondition[] = [];
+  const { requests, cache, system } = metrics;
+
+  if (requests.averageResponseTime > thresholds.responseTime) {
+    conditions.push({
+      severity: "warning",
+      category: "performance",
+      metric: "averageResponseTime",
+      message: `High response time: ${requests.averageResponseTime}ms`,
+      threshold: thresholds.responseTime,
+      actualValue: requests.averageResponseTime,
+      suggestion: "Consider enabling caching or optimizing queries",
+    });
+  }
+
+  if (requests.total > 0) {
+    const errorRate = requests.failed / requests.total;
+    if (errorRate > thresholds.errorRate) {
+      conditions.push({
+        severity: "error",
+        category: "performance",
+        metric: "errorRate",
+        message: `High error rate: ${Math.round(errorRate * 100)}%`,
+        threshold: thresholds.errorRate,
+        actualValue: errorRate,
+        suggestion: "Check WordPress connectivity and authentication",
+      });
+    }
+  }
+
+  if (hasCacheActivity(cache) && cache.hitRate < thresholds.cacheHitRate) {
+    conditions.push({
+      severity: "warning",
+      category: "cache",
+      metric: "cacheHitRate",
+      message: `Low cache hit rate: ${Math.round(cache.hitRate * 100)}%`,
+      threshold: thresholds.cacheHitRate,
+      actualValue: cache.hitRate,
+      suggestion: "Consider cache warming or adjusting TTL values",
+    });
+  }
+
+  // The memoryUsage threshold was configured but never evaluated anywhere.
+  if (system.memoryUsage > thresholds.memoryUsage) {
+    conditions.push({
+      severity: system.memoryUsage > MEMORY_ERROR_PERCENT ? "error" : "warning",
+      category: "system",
+      metric: "memoryUsage",
+      message: `High memory usage: ${system.memoryUsage}% of the V8 heap limit`,
+      threshold: thresholds.memoryUsage,
+      actualValue: system.memoryUsage,
+      suggestion: "Lower the cache size or restart the server before the heap limit is reached",
+    });
+  }
+
+  return conditions;
+}
+
 export interface PerformanceConfig {
   collectInterval: number; // Collection interval in ms
   retentionPeriod: number; // Data retention in ms
@@ -118,13 +218,7 @@ export class PerformanceMonitor {
     this.config = {
       collectInterval: 30000, // 30 seconds
       retentionPeriod: 24 * 60 * 60 * 1000, // 24 hours
-      alertThresholds: {
-        responseTime: 2000, // 2 seconds
-        errorRate: 0.05, // 5%
-        cacheHitRate: 0.8, // 80%
-        memoryUsage: 80, // 80%
-        cpuUsage: 80, // 80%
-      },
+      alertThresholds: { ...DEFAULT_ALERT_THRESHOLDS },
       enableRealTimeMonitoring: true,
       enableHistoricalData: true,
       enableAlerts: true,
@@ -475,47 +569,20 @@ export class PerformanceMonitor {
    * Check for performance alerts
    */
   private checkPerformanceAlerts(): void {
-    const thresholds = this.config.alertThresholds;
-
-    // Response time alert
-    if (this.metrics.requests.averageResponseTime > thresholds.responseTime) {
-      this.addAlert(
-        "warning",
-        "performance",
-        `High response time: ${this.metrics.requests.averageResponseTime}ms`,
-        "averageResponseTime",
-        thresholds.responseTime,
-        this.metrics.requests.averageResponseTime,
-        "Consider enabling caching or optimizing queries",
-      );
+    // Memory must be the current reading, not the last 30-second sample.
+    this.updateSystemMetrics();
+    for (const c of evaluateAlertConditions(this.metrics, this.config.alertThresholds)) {
+      this.addAlert(c.severity, c.category, c.message, c.metric, c.threshold, c.actualValue, c.suggestion);
     }
+  }
 
-    // Error rate alert
-    const errorRate = this.metrics.requests.failed / this.metrics.requests.total;
-    if (errorRate > thresholds.errorRate) {
-      this.addAlert(
-        "error",
-        "performance",
-        `High error rate: ${Math.round(errorRate * 100)}%`,
-        "errorRate",
-        thresholds.errorRate,
-        errorRate,
-        "Check WordPress connectivity and authentication",
-      );
-    }
-
-    // Cache hit rate alert
-    if (this.metrics.cache.hitRate < thresholds.cacheHitRate) {
-      this.addAlert(
-        "warning",
-        "cache",
-        `Low cache hit rate: ${Math.round(this.metrics.cache.hitRate * 100)}%`,
-        "cacheHitRate",
-        thresholds.cacheHitRate,
-        this.metrics.cache.hitRate,
-        "Consider cache warming or adjusting TTL values",
-      );
-    }
+  /**
+   * The thresholds the current metrics breach right now. Unlike getAlerts() (a history that never expires),
+   * this clears itself when the condition recovers.
+   */
+  getActiveAlerts(): AlertCondition[] {
+    this.updateSystemMetrics();
+    return evaluateAlertConditions(this.metrics, this.config.alertThresholds);
   }
 
   /**

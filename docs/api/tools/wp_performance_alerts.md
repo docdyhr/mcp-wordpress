@@ -2,7 +2,9 @@
 
 ![performance](https://img.shields.io/badge/category-performance-brightgreen)
 
-Get performance alerts and anomaly detection results
+Get performance alerts and anomaly detection results. summary.overallStatus covers every alert recorded this session
+(alerts never expire) and is never better than summary.currentStatus; summary.currentStatus and summary.activeAlerts
+show only what is breaching right now, using the same rules as wp_performance_stats (overview.alertStatus).
 
 ## Parameters
 

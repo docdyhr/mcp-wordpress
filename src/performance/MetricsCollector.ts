@@ -3,7 +3,7 @@
  * Integrates with existing client and cache systems
  */
 
-import { PerformanceMonitor, PerformanceMetrics } from "./PerformanceMonitor.js";
+import { PerformanceMonitor, PerformanceMetrics, type AlertCondition } from "./PerformanceMonitor.js";
 import type { CacheStats } from "@/cache/CacheManager.js";
 import type { ClientStats } from "@/types/client.js";
 import { ConfigHelpers } from "@/config/Config.js";
@@ -131,6 +131,13 @@ export class MetricsCollector {
     this.monitor.recordToolCall(context.toolName, responseTime, success);
 
     this.activeTools.delete(executionId);
+  }
+
+  /**
+   * Thresholds the current metrics breach right now (see PerformanceMonitor.getActiveAlerts).
+   */
+  getActiveAlerts(): AlertCondition[] {
+    return this.monitor.getActiveAlerts();
   }
 
   /**
