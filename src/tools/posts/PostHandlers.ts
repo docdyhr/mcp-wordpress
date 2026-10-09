@@ -8,7 +8,7 @@
 
 import { WordPressClient } from "@/client/api.js";
 import { CreatePostRequest, PostQueryParams, PostStatus, UpdatePostRequest, WordPressPost } from "@/types/wordpress.js";
-import { getErrorMessage, isPermissionError } from "@/utils/error.js";
+import { isPermissionError, preserveToolError } from "@/utils/error.js";
 import { ErrorHandlers } from "@/utils/enhancedError.js";
 import { validateId, validatePaginationParams, validatePostParams } from "@/utils/validation.js";
 import { countWords, htmlToPlainText } from "@/utils/htmlText.js";
@@ -223,7 +223,7 @@ export async function handleListPosts(
 
     return formatPostsResponse(posts, siteUrl, sanitizedParams, authorMap, categoryMap, tagMap);
   } catch (_error) {
-    throw new Error(`Failed to list posts: ${getErrorMessage(_error)}`);
+    preserveToolError("Failed to list posts", _error);
   }
 }
 
@@ -334,7 +334,7 @@ export async function handleGetPost(
     if (_error instanceof Error && _error.message.includes("404")) {
       return `Post with ID ${params.id} not found. Please verify the ID and try again.`;
     }
-    throw new Error(`Failed to get post: ${getErrorMessage(_error)}`);
+    preserveToolError("Failed to get post", _error);
   }
 }
 
@@ -375,7 +375,7 @@ export async function handleCreatePost(
 
     return response;
   } catch (_error) {
-    throw new Error(`Failed to create post: ${getErrorMessage(_error)}`);
+    preserveToolError("Failed to create post", _error);
   }
 }
 
@@ -434,7 +434,7 @@ export async function handleUpdatePost(
     if (_error instanceof Error && _error.message.includes("404")) {
       return `Post with ID ${params.id} not found. Please verify the ID and try again.`;
     }
-    throw new Error(`Failed to update post: ${getErrorMessage(_error)}`);
+    preserveToolError("Failed to update post", _error);
   }
 }
 
@@ -470,7 +470,7 @@ export async function handleDeletePost(
     if (_error instanceof Error && _error.message.includes("404")) {
       return `Post with ID ${params.id} not found. Please verify the ID and try again.`;
     }
-    throw new Error(`Failed to delete post: ${getErrorMessage(_error)}`);
+    preserveToolError("Failed to delete post", _error);
   }
 }
 
@@ -513,6 +513,6 @@ export async function handleGetPostRevisions(
     if (_error instanceof Error && _error.message.includes("404")) {
       return `Post with ID ${params.id} not found. Please verify the ID and try again.`;
     }
-    throw new Error(`Failed to get post revisions: ${getErrorMessage(_error)}`);
+    preserveToolError("Failed to get post revisions", _error);
   }
 }
