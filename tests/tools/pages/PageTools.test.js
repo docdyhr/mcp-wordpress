@@ -590,4 +590,47 @@ describe("PageTools", () => {
       ).rejects.toThrow("Failed to update page: 500 Internal Server Error");
     });
   });
+
+  describe("rendered titles", () => {
+    // WordPress returns title.rendered entity-encoded; these tools printed it as-is ("Q&#038;A").
+    const ENCODED = "Q&#038;A &amp; Tips &#8211; <em>Part</em> 2";
+    const DECODED = "Q&A & Tips – Part 2";
+    const RAW = /&amp;|&#\d+;|<em>/;
+    const page = {
+      id: 7,
+      title: { rendered: ENCODED },
+      content: { rendered: "<p>Body</p>" },
+      status: "draft",
+      link: "https://test.wordpress.com/?page_id=7",
+      date: "2026-10-09T00:00:00",
+    };
+
+    it("wp_list_pages decodes titles", async () => {
+      mockClient.getPages.mockResolvedValue([page]);
+      const text = await pageTools.handleListPages(mockClient, {});
+      expect(text).toContain(`**${DECODED}**`);
+      expect(text).not.toMatch(RAW);
+    });
+
+    it("wp_get_page decodes the title", async () => {
+      mockClient.getPage.mockResolvedValue(page);
+      const text = await pageTools.handleGetPage(mockClient, { id: 7 });
+      expect(text).toContain(`- **Title:** ${DECODED}`);
+      expect(text).not.toMatch(RAW);
+    });
+
+    it("wp_create_page decodes the title", async () => {
+      mockClient.createPage.mockResolvedValue(page);
+      const text = await pageTools.handleCreatePage(mockClient, { title: "Q&A & Tips", content: "<p>Body</p>" });
+      expect(text).toContain(`- Title: ${DECODED}`);
+      expect(text).not.toMatch(RAW);
+    });
+
+    it("wp_delete_page decodes the title of the deleted page", async () => {
+      mockClient.deletePage.mockResolvedValue({ deleted: true, previous: page });
+      const text = await pageTools.handleDeletePage(mockClient, { id: 7, force: true });
+      expect(text).toContain(`Page "${DECODED}" has been permanently deleted`);
+      expect(text).not.toMatch(RAW);
+    });
+  });
 });

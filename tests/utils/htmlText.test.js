@@ -1,4 +1,4 @@
-import { decodeHtmlEntities, htmlToPlainText, countWords } from "@/utils/htmlText.js";
+import { decodeHtmlEntities, htmlToPlainText, countWords, displayTitle } from "@/utils/htmlText.js";
 
 describe("decodeHtmlEntities", () => {
   it("decodes the entities WordPress emits in rendered titles and excerpts", () => {
@@ -168,5 +168,15 @@ describe("countWords", () => {
     expect(countWords("")).toBe(0);
     expect(countWords("   ")).toBe(0);
     expect(countWords(undefined)).toBe(0);
+  });
+});
+
+describe("displayTitle", () => {
+  it("decodes entities and strips markup from a rendered title", () => {
+    expect(displayTitle("Q&#038;A &amp; Tips &#8211; <em>Part</em> 2")).toBe("Q&A & Tips – Part 2");
+  });
+
+  it.each([[""], ["  "], [undefined], [null]])("falls back to (untitled) for %j", (value) => {
+    expect(displayTitle(value)).toBe("(untitled)");
   });
 });

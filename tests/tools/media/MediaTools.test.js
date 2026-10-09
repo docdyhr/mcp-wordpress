@@ -576,4 +576,45 @@ describe("MediaTools", () => {
       );
     });
   });
+
+  describe("rendered titles and captions", () => {
+    // WordPress returns title.rendered entity-encoded; these tools printed it as-is ("Q&#038;A").
+    const ENCODED = "Q&#038;A &amp; Tips &#8211; <em>Part</em> 2";
+    const DECODED = "Q&A & Tips – Part 2";
+    const RAW = /&amp;|&#\d+;|<em>/;
+    const item = {
+      id: 9,
+      title: { rendered: ENCODED },
+      caption: { rendered: "<p>Sun &amp; sea</p>\n" },
+      source_url: "https://test.wordpress.com/wp-content/uploads/a.jpg",
+      media_type: "image",
+      mime_type: "image/jpeg",
+      alt_text: "",
+      date: "2026-10-09T00:00:00",
+    };
+
+    it("wp_list_media decodes titles", async () => {
+      mockClient.getMedia.mockResolvedValue([item]);
+      const text = await mediaTools.handleListMedia(mockClient, {});
+      expect(text).toContain(`**${DECODED}**`);
+      expect(text).not.toMatch(RAW);
+    });
+
+    it("wp_get_media decodes the title and prints the caption as plain text", async () => {
+      mockClient.getMediaItem.mockResolvedValue(item);
+      const text = await mediaTools.handleGetMedia(mockClient, { id: 9 });
+      expect(text).toContain(`- **Title:** ${DECODED}`);
+      expect(text).toContain("- **Caption:** Sun & sea\n");
+      expect(text).not.toMatch(/&amp;|<p>/);
+    });
+
+    it("wp_upload_media decodes the title", async () => {
+      const filePath = path.join(tmpUploadDir, "a.jpg");
+      fs.writeFileSync(filePath, "x");
+      mockClient.uploadMedia.mockResolvedValue(item);
+      const text = await mediaTools.handleUploadMedia(mockClient, { file_path: filePath });
+      expect(text).toContain(`- Title: ${DECODED}`);
+      expect(text).not.toMatch(RAW);
+    });
+  });
 });

@@ -56,8 +56,9 @@ shims.
 `providers/SearchConsoleProvider.ts` (Google Search Console). `validators/` is currently empty (reserved).
 
 **Rendered fields are HTML**: WordPress returns `title.rendered`, `excerpt.rendered` and `caption.rendered`
-entity-encoded (`Q&#038;A`) and often wrapped in tags. Text output prints them through `displayTitle()` /
-`htmlToPlainText()` (`src/utils/htmlText.ts`), never raw.
+entity-encoded (`Q&#038;A`) and often wrapped in tags. The post, page and media tools print them through
+`displayTitle()` / `htmlToPlainText()` (`src/utils/htmlText.ts`); do the same in any new text output. The SEO engines
+(`seo/`) still pass `title.rendered` through unchanged in their structured results.
 
 **Pagination contract**: list tools accept `page` and `per_page` (max 100) in their `inputSchema` — a property missing
 from the schema is stripped by the argument validator, so it never reaches the handler. Handlers forward them to
