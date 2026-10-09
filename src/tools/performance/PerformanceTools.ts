@@ -23,6 +23,8 @@ import {
   calculateCacheEfficiency,
   formatUptime,
   parseTimeframe,
+  describeHistoryWindow,
+  HISTORY_RETENTION_MS,
   processHistoricalDataForChart,
   calculateAverage,
   formatBenchmarkStatus,
@@ -44,7 +46,9 @@ import {
 // The session-wide cache figures sum every site's cache counters; wp_cache_stats and `siteSpecific` show one site.
 const CACHE_SCOPE_ALL_SITES = "all sites combined, since the server started";
 // Benchmarks, recommendations and exports read the same session-wide metrics.
-const CURRENT_METRICS_SCOPE = "current metrics, all sites combined, since the server started";
+const CURRENT_METRICS_SCOPE = "current metrics, all sites combined (counters since the server started)";
+// PerformanceAnalytics keeps its own 24-hour history for trends, anomalies and predictions.
+const ANALYTICS_SCOPE = "all sites combined, from the analytics' own 24-hour history whatever the timeframe";
 
 /**
  * Performance Tools Class
@@ -65,6 +69,7 @@ export default class PerformanceTools {
     this.monitor = new PerformanceMonitor({
       enableRealTimeMonitoring: true,
       enableHistoricalData: true,
+      retentionPeriod: HISTORY_RETENTION_MS,
       enableAlerts: true,
     });
 
@@ -487,15 +492,18 @@ export default class PerformanceTools {
       return {
         success: true,
         data: {
+          scope: {
+            summary:
+              `averages over the ${historicalData.length} snapshots taken in ${describeHistoryWindow(timeframe)}, ` +
+              "all sites combined. Each snapshot's counters are totals since the server started, so these average " +
+              "cumulative figures; totalRequests counts the requests between the first and last snapshot",
+            trends: ANALYTICS_SCOPE,
+          },
           timeframe,
           dataPoints: historicalData.length,
           historicalData: chartData,
           trends: trends || [],
           summary: {
-            scope:
-              `averages over the ${historicalData.length} snapshots taken in the last ${timeframe}, all sites combined. ` +
-              "Each snapshot's counters are totals since the server started, so these average cumulative figures; " +
-              "totalRequests counts the requests between the first and last snapshot",
             averageResponseTime: calculateAverage(historicalData.map((d) => d.requests.averageResponseTime)),
             averageCacheHitRate: calculateAverage(historicalData.map((d) => d.cache.hitRate)),
             averageErrorRate: calculateAverage(
@@ -840,7 +848,7 @@ export default class PerformanceTools {
             focus,
             priority,
             site: site || "all",
-            scope: CURRENT_METRICS_SCOPE,
+            scope: { recommendations: CURRENT_METRICS_SCOPE, predictions: ANALYTICS_SCOPE },
           },
         },
       };
@@ -931,12 +939,17 @@ export default class PerformanceTools {
           format,
           dataSize: JSON.stringify(exportData).length,
           site: site || "all",
-          // In the outer metadata so the CSV and summary formats carry it too.
+          // In the outer metadata so the CSV and summary formats carry it too; one entry per included section.
           scope: {
             currentMetrics: CURRENT_METRICS_SCOPE,
             aggregatedStats: CURRENT_METRICS_SCOPE,
-            siteComparison: "each site on its own, since the server started",
-            historicalData: `snapshots taken in the last ${timeRange}; each one's counters are totals since the server started`,
+            ...(exportData.siteComparison ? { siteComparison: "each site on its own, since the server started" } : {}),
+            ...(includeHistorical
+              ? {
+                  historicalData: `snapshots taken in ${describeHistoryWindow(timeRange)}; each one's counters are totals since the server started`,
+                }
+              : {}),
+            ...(includeAnalytics ? { analytics: ANALYTICS_SCOPE } : {}),
           },
         },
       };

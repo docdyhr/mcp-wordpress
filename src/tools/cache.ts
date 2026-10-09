@@ -106,7 +106,7 @@ export class CacheTools {
           scope: CACHE_SCOPE_THIS_SITE,
           hits: stats.cache.hits,
           misses: stats.cache.misses,
-          hit_rate: Math.round(stats.cache.hitRate * 100) + "%",
+          hit_rate: `${(stats.cache.hitRate * 100).toFixed(1)}%`,
           total_entries: stats.cache.totalSize,
           evictions: stats.cache.evictions,
           expirations: stats.cache.expirations,
@@ -225,7 +225,7 @@ export class CacheTools {
             current_stats: {
               scope: CACHE_SCOPE_THIS_SITE,
               total_entries: stats.cache.totalSize,
-              hit_rate: Math.round(stats.cache.hitRate * 100) + "%",
+              hit_rate: `${(stats.cache.hitRate * 100).toFixed(1)}%`,
               hits: stats.cache.hits,
               misses: stats.cache.misses,
               evictions: stats.cache.evictions,

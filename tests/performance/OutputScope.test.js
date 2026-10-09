@@ -36,25 +36,17 @@ describe("alert messages", () => {
     expect(condition.actualValue).toBe(2096.285714285714); // the raw value stays available
   });
 
-  it("formattedMessage shows the actual value to at most two decimals", () => {
-    const text = formatAlertMessage({
-      severity: "warning",
-      message: "High response time: 2096ms",
-      metric: "averageResponseTime",
-      actualValue: 2096.285714285714,
-      threshold: 2000,
-    });
+  it("formattedMessage rounds without hiding a breach", () => {
+    const alert = (metric, actualValue, threshold) =>
+      formatAlertMessage({ severity: "warning", message: "m", metric, actualValue, threshold });
 
-    expect(text).toBe("WARNING: High response time: 2096ms (averageResponseTime: 2096.29 vs threshold: 2000)");
-    expect(
-      formatAlertMessage({
-        severity: "error",
-        message: "m",
-        metric: "errorRate",
-        actualValue: 0.0213,
-        threshold: 0.05,
-      }),
-    ).toBe("ERROR: m (errorRate: 0.02 vs threshold: 0.05)");
+    expect(alert("averageResponseTime", 2096.285714285714, 2000)).toBe(
+      "WARNING: m (averageResponseTime: 2096.29 vs threshold: 2000)",
+    );
+    // A rate keeps 3 significant digits: 1 error in 19 requests is 0.0526, not "0.05 vs threshold 0.05".
+    expect(alert("errorRate", 1 / 19, 0.05)).toBe("WARNING: m (errorRate: 0.0526 vs threshold: 0.05)");
+    // Where 3 digits would still equal the threshold, more are kept.
+    expect(alert("cacheHitRate", 0.7996, 0.8)).toBe("WARNING: m (cacheHitRate: 0.7996 vs threshold: 0.8)");
   });
 });
 
@@ -109,7 +101,9 @@ describe("cache hit rate scope labels", () => {
     expect(benchmark.data.metadata.scope).toMatch(/all sites combined/);
 
     const optimize = await run("wp_performance_optimize", {});
-    expect(optimize.data.metadata.scope).toMatch(/all sites combined/);
+    expect(optimize.data.metadata.scope.recommendations).toMatch(/all sites combined/);
+    // Predictions come from the analytics' history, not from the current metrics.
+    expect(optimize.data.metadata.scope.predictions).toMatch(/24-hour history/);
   });
 
   it.each(["json", "csv", "summary"])(
@@ -120,16 +114,39 @@ describe("cache hit rate scope labels", () => {
       expect(result.metadata.scope.currentMetrics).toMatch(/all sites combined/);
       expect(result.metadata.scope.siteComparison).toMatch(/each site/);
       expect(result.metadata.scope.historicalData).toMatch(/since the server started/);
+      expect(result.metadata.scope.analytics).toMatch(/24-hour history/);
     },
   );
+
+  it("wp_performance_export labels only the sections it includes", async () => {
+    const result = await run("wp_performance_export", {
+      format: "json",
+      site: "site1",
+      includeHistorical: false,
+      includeAnalytics: false,
+    });
+
+    expect(Object.keys(result.metadata.scope).sort()).toEqual(["aggregatedStats", "currentMetrics"]);
+  });
 
   it("wp_performance_history labels its averages as a window over snapshots", async () => {
     const { data } = await run("wp_performance_history", { timeframe: "1h", includeTrends: false });
 
-    expect(data.summary.scope).toMatch(/1h/);
-    expect(data.summary.scope).toMatch(/all sites combined/);
+    expect(data.scope.summary).toMatch(/the last 1h/);
+    expect(data.scope.summary).toMatch(/all sites combined/);
     // The timeframe only selects snapshots; each snapshot's counters run from server start.
-    expect(data.summary.scope).toMatch(/since the server started/);
+    expect(data.scope.summary).toMatch(/since the server started/);
+    // Trends come from the analytics' own history, whatever the timeframe.
+    expect(data.scope.trends).toMatch(/24-hour history/);
+  });
+
+  it.each([
+    ["6h", "the last 6h"],
+    ["7d", "history is kept for 24 hours; 7d was requested"],
+    ["2h", '"2h" is not a supported timeframe'],
+  ])("wp_performance_history describes the window it really covers for %s", async (timeframe, expected) => {
+    const { data } = await run("wp_performance_history", { timeframe, includeTrends: false });
+    expect(data.scope.summary).toContain(expected);
   });
 
   // Each snapshot's requests.total is cumulative, so summing them counted the same requests once per snapshot.
@@ -174,7 +191,7 @@ describe("wp_cache_stats / wp_cache_info scope", () => {
     const result = await cacheTools.handleGetCacheStats(cachedClient(), {});
     const data = result.data ?? result;
 
-    expect(data.cache_stats.hit_rate).toBe("17%");
+    expect(data.cache_stats.hit_rate).toBe("16.7%"); // same format as wp_performance_stats
     expect(data.cache_stats.scope).toMatch(/this site only/);
   });
 

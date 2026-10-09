@@ -265,7 +265,9 @@ and each response labels which one it reports:
 The label is a `scope` field next to the figures, or `metadata.scope`. In `wp_performance_stats`,
 `siteSpecific.cache.hitRate` is a percentage string (`"16.7%"`) like the other hit rates. `wp_performance_history`
 averages snapshots taken in the timeframe; each snapshot holds totals since the server started, and `totalRequests` is
-the number of requests between the first and last snapshot.
+the number of requests between the first and last snapshot. History is kept for 24 hours, so `7d` and `30d` cover the
+last 24 hours (the label says so). Trends, anomalies and predictions use the analytics' own 24-hour history whatever the
+timeframe. Hit rates are shown with one decimal everywhere (`"16.7%"`).
 
 ### System Metrics
 
