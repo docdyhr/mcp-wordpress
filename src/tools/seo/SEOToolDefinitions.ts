@@ -205,7 +205,7 @@ export const suggestInternalLinksTool: Tool = {
       },
       maxSuggestions: {
         type: "number",
-        description: "Maximum number of link suggestions (default: 5)",
+        description: "Maximum number of link suggestions (default: 10)",
       },
       minimumRelevance: {
         type: "number",
@@ -237,7 +237,7 @@ export const performSiteAuditTool: Tool = {
       },
       maxPages: {
         type: "number",
-        description: "Maximum number of pages to audit (default: 100)",
+        description: "Maximum number of posts, and of pages, to audit (default: 50 each)",
       },
       includeExternalLinks: {
         type: "boolean",

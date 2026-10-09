@@ -6,13 +6,13 @@ Perform comprehensive SEO audit of the WordPress site including technical, conte
 
 ## Parameters
 
-| Parameter              | Type      | Required | Description                                     | Default | Examples              |
-| ---------------------- | --------- | -------- | ----------------------------------------------- | ------- | --------------------- |
-| `auditType`            | `string`  | ❌       | Type of audit to perform (default: full)        | -       | `example`             |
-| `maxPages`             | `number`  | ❌       | Maximum number of pages to audit (default: 100) | -       | `example`             |
-| `includeExternalLinks` | `boolean` | ❌       | Include external link validation in audit       | -       | `example`             |
-| `force`                | `boolean` | ❌       | Force refresh, bypassing cached audit results   | -       | `example`             |
-| `site`                 | `string`  | ❌       | Site identifier for multi-site setups           | -       | `site1`, `production` |
+| Parameter              | Type      | Required | Description                                                        | Default | Examples              |
+| ---------------------- | --------- | -------- | ------------------------------------------------------------------ | ------- | --------------------- |
+| `auditType`            | `string`  | ❌       | Type of audit to perform (default: full)                           | -       | `example`             |
+| `maxPages`             | `number`  | ❌       | Maximum number of posts, and of pages, to audit (default: 50 each) | -       | `example`             |
+| `includeExternalLinks` | `boolean` | ❌       | Include external link validation in audit                          | -       | `example`             |
+| `force`                | `boolean` | ❌       | Force refresh, bypassing cached audit results                      | -       | `example`             |
+| `site`                 | `string`  | ❌       | Site identifier for multi-site setups                              | -       | `site1`, `production` |
 
 ## Examples
 

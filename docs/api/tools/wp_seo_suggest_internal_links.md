@@ -9,7 +9,7 @@ Analyze content and suggest relevant internal linking opportunities for better S
 | Parameter          | Type     | Required | Description                                            | Default | Examples              |
 | ------------------ | -------- | -------- | ------------------------------------------------------ | ------- | --------------------- |
 | `postId`           | `number` | ✅       | WordPress post ID to analyze for linking opportunities | -       | `example`             |
-| `maxSuggestions`   | `number` | ❌       | Maximum number of link suggestions (default: 5)        | -       | `example`             |
+| `maxSuggestions`   | `number` | ❌       | Maximum number of link suggestions (default: 10)       | -       | `example`             |
 | `minimumRelevance` | `number` | ❌       | Minimum relevance score (0-100) for suggestions        | -       | `example`             |
 | `site`             | `string` | ❌       | Site identifier for multi-site setups                  | -       | `site1`, `production` |
 
