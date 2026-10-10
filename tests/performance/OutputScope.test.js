@@ -6,7 +6,11 @@
  *    and nothing said which. Every place that reports a hit rate now labels its scope.
  */
 import { vi } from "vitest";
-import { evaluateAlertConditions, DEFAULT_ALERT_THRESHOLDS } from "../../dist/performance/PerformanceMonitor.js";
+import {
+  evaluateAlertConditions,
+  DEFAULT_ALERT_THRESHOLDS,
+  roundBreach,
+} from "../../dist/performance/PerformanceMonitor.js";
 import PerformanceTools from "../../dist/tools/performance/PerformanceTools.js";
 import { formatAlertMessage } from "../../dist/tools/performance/PerformanceHelpers.js";
 import { CacheTools } from "../../dist/tools/cache.js";
@@ -47,6 +51,32 @@ describe("alert messages", () => {
     expect(alert("errorRate", 1 / 19, 0.05)).toBe("WARNING: m (errorRate: 0.0526 vs threshold: 0.05)");
     // Where 3 digits would still equal the threshold, more are kept.
     expect(alert("cacheHitRate", 0.7996, 0.8)).toBe("WARNING: m (cacheHitRate: 0.7996 vs threshold: 0.8)");
+    // As many as it takes: a fixed 6 significant digits still printed these as "2000 vs 2000" and "0.8 vs 0.8".
+    expect(alert("averageResponseTime", 2000.004, 2000)).toBe(
+      "WARNING: m (averageResponseTime: 2000.004 vs threshold: 2000)",
+    );
+    expect(alert("cacheHitRate", 0.7999999, 0.8)).toBe("WARNING: m (cacheHitRate: 0.7999999 vs threshold: 0.8)");
+  });
+
+  // Whole-number rounding printed "High response time: 2000ms" for 2000.4 ms against a 2000 ms threshold.
+  it("messages never print a breach as its threshold", () => {
+    const messages = (requests, cache = { hitRate: 0.95, hits: 95, misses: 5 }) =>
+      evaluateAlertConditions({ requests, cache, system: { memoryUsage: 10 } }, DEFAULT_ALERT_THRESHOLDS).map(
+        (c) => c.message,
+      );
+
+    expect(messages({ total: 250, failed: 0, averageResponseTime: 2000.4 })).toEqual(["High response time: 2000.4ms"]);
+    expect(messages({ total: 19, failed: 1, averageResponseTime: 100 })).toEqual(["High error rate: 5.3%"]);
+    expect(
+      messages({ total: 1, failed: 0, averageResponseTime: 100 }, { hitRate: 0.7996, hits: 7996, misses: 2004 }),
+    ).toEqual(["Low cache hit rate: 79.96%"]);
+  });
+
+  it("roundBreach leaves exact and non-finite values to round()", () => {
+    expect(roundBreach(2000, 2000, Math.round)).toBe(2000);
+    expect(roundBreach(2096.3, 2000, Math.round)).toBe(2096);
+    expect(roundBreach(Infinity, 2000, Math.round)).toBe(Infinity);
+    expect(roundBreach(Number.NaN, 2000, Math.round)).toBeNaN();
   });
 });
 
@@ -84,12 +114,15 @@ describe("cache hit rate scope labels", () => {
     expect(data.siteSpecific.cache.hits).toBe(1);
   });
 
-  it("wp_performance_alerts says recorded messages are the value when the alert was raised", async () => {
+  // A repeat within the cooldown overwrites the recorded alert's message, value and timestamp, so it is not the value
+  // "when the alert was raised".
+  it("wp_performance_alerts says recorded messages are the value at the alert's timestamp", async () => {
     tools.monitor.addAlert("warning", "cache", "Low cache hit rate: 2%", "cacheHitRate", 0.8, 0.02);
 
     const { data } = await run("wp_performance_alerts", {});
 
-    expect(data.scope.alerts).toMatch(/when (the|each) alert was raised/);
+    expect(data.scope.alerts).toMatch(/value at the alert's timestamp/);
+    expect(data.scope.alerts).toMatch(/cooldown/);
     expect(data.scope.alerts).toMatch(/all sites combined/);
     expect(data.scope.activeAlerts).toMatch(/now/);
     // Anomalies carry their own actualValue/expectedValue (a cacheHitRate anomaly is another hit-rate figure).
@@ -114,7 +147,9 @@ describe("cache hit rate scope labels", () => {
       expect(result.metadata.scope.currentMetrics).toMatch(/all sites combined/);
       expect(result.metadata.scope.siteComparison).toMatch(/each site/);
       expect(result.metadata.scope.historicalData).toMatch(/since the server started/);
-      expect(result.metadata.scope.analytics).toMatch(/24-hour history/);
+      expect(result.metadata.scope.analytics).toMatch(/trends, anomalies and predictions: .*24-hour history/);
+      // benchmarks, insights and the plan are built from collectCurrentMetrics(), not from the history
+      expect(result.metadata.scope.analytics).toMatch(/optimizationPlan: current metrics/);
     },
   );
 

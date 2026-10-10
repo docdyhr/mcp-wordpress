@@ -137,6 +137,22 @@ export function hasCacheActivity(cache: { hits?: number; misses?: number }): boo
   return !(cache.hits === 0 && cache.misses === 0);
 }
 
+/**
+ * Round a breaching value for display without printing it as its threshold: when `round` gives both the same number
+ * (2000.004 ms against 2000 ms, a 79.96% hit rate against 80%), keep the fewest significant digits that tell them
+ * apart, on the breaching side.
+ */
+export function roundBreach(value: number, threshold: number, round: (v: number) => number): number {
+  const rounded = round(value);
+  const shownThreshold = round(threshold);
+  if (!Number.isFinite(value) || value === threshold || rounded !== shownThreshold) return rounded;
+  for (let digits = 1; digits <= 17; digits++) {
+    const precise = Number(value.toPrecision(digits));
+    if (precise !== shownThreshold && Math.sign(precise - threshold) === Math.sign(value - threshold)) return precise;
+  }
+  return value;
+}
+
 // Heap usage this high leaves almost no headroom before V8 throws away the process.
 const MEMORY_ERROR_PERCENT = 95;
 
@@ -156,7 +172,7 @@ export function evaluateAlertConditions(
       severity: "warning",
       category: "performance",
       metric: "averageResponseTime",
-      message: `High response time: ${Math.round(requests.averageResponseTime)}ms`,
+      message: `High response time: ${roundBreach(requests.averageResponseTime, thresholds.responseTime, Math.round)}ms`,
       threshold: thresholds.responseTime,
       actualValue: requests.averageResponseTime,
       suggestion: "Consider enabling caching or optimizing queries",
@@ -170,7 +186,7 @@ export function evaluateAlertConditions(
         severity: "error",
         category: "performance",
         metric: "errorRate",
-        message: `High error rate: ${Math.round(errorRate * 100)}%`,
+        message: `High error rate: ${roundBreach(errorRate * 100, thresholds.errorRate * 100, Math.round)}%`,
         threshold: thresholds.errorRate,
         actualValue: errorRate,
         suggestion: "Check WordPress connectivity and authentication",
@@ -183,7 +199,7 @@ export function evaluateAlertConditions(
       severity: "warning",
       category: "cache",
       metric: "cacheHitRate",
-      message: `Low cache hit rate: ${Math.round(cache.hitRate * 100)}%`,
+      message: `Low cache hit rate: ${roundBreach(cache.hitRate * 100, thresholds.cacheHitRate * 100, Math.round)}%`,
       threshold: thresholds.cacheHitRate,
       actualValue: cache.hitRate,
       suggestion: "Consider cache warming or adjusting TTL values",

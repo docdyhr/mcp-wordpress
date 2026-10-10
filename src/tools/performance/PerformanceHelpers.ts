@@ -3,7 +3,7 @@
  * Extracted helper functions for performance metrics formatting and calculations
  */
 
-import { hasCacheActivity, type PerformanceMetrics } from "@/performance/PerformanceMonitor.js";
+import { hasCacheActivity, type PerformanceMetrics, roundBreach } from "@/performance/PerformanceMonitor.js";
 import type { BenchmarkComparison, PerformanceAnomaly } from "@/performance/PerformanceAnalytics.js";
 
 /**
@@ -277,16 +277,12 @@ export function formatAlertMessage(alert: PerformanceAlert): string {
 /**
  * A readable alert number: 2 decimals from 1 up (2096.285714 -> 2096.29), 3 significant digits below (an error rate
  * of 1/19 -> 0.0526). If that would print a breaching value equal to its threshold (0.7996 -> 0.8 vs 0.8), more digits
- * are kept.
+ * are kept (`roundBreach()`).
  */
 function formatAlertValue(value: number, threshold?: number): number {
   const round = (v: number) =>
     !Number.isFinite(v) || v === 0 ? v : Math.abs(v) >= 1 ? Math.round(v * 100) / 100 : Number(v.toPrecision(3));
-  const rounded = round(value);
-  if (threshold !== undefined && value !== threshold && rounded === round(threshold)) {
-    return Number(value.toPrecision(6));
-  }
-  return rounded;
+  return threshold === undefined ? round(value) : roundBreach(value, threshold, round);
 }
 
 /** How long the server keeps performance history (`PerformanceMonitor` retentionPeriod, set by PerformanceTools). */

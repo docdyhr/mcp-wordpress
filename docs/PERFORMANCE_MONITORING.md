@@ -256,18 +256,21 @@ wp_performance_export --format=summary --includeAnalytics=true
 Request and cache counters are totals since the server started. The same minute can therefore show different hit rates,
 and each response labels which one it reports:
 
-| Scope                              | Where                                                                                                |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| All sites combined                 | `wp_performance_stats` overview/cache, `wp_performance_benchmark`, `wp_performance_optimize`, export |
-| One site                           | `wp_cache_stats`, `wp_cache_info`, `wp_performance_stats` `siteSpecific`, export `siteComparison`    |
-| The value when an alert was raised | each recorded alert in `wp_performance_alerts` (`activeAlerts` shows what is breaching now)          |
+| Scope                             | Where                                                                                                |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| All sites combined                | `wp_performance_stats` overview/cache, `wp_performance_benchmark`, `wp_performance_optimize`, export |
+| One site                          | `wp_cache_stats`, `wp_cache_info`, `wp_performance_stats` `siteSpecific`, export `siteComparison`    |
+| The value at an alert's timestamp | each recorded alert in `wp_performance_alerts` (`activeAlerts` shows what is breaching now)          |
 
 The label is a `scope` field next to the figures, or `metadata.scope`. In `wp_performance_stats`,
 `siteSpecific.cache.hitRate` is a percentage string (`"16.7%"`) like the other hit rates. `wp_performance_history`
 averages snapshots taken in the timeframe; each snapshot holds totals since the server started, and `totalRequests` is
 the number of requests between the first and last snapshot. History is kept for 24 hours, so `7d` and `30d` cover the
 last 24 hours (the label says so). Trends, anomalies and predictions use the analytics' own 24-hour history whatever the
-timeframe. Hit rates are shown with one decimal everywhere (`"16.7%"`).
+timeframe. Hit-rate percentage strings in `wp_performance_stats` and the cache tools have one decimal (`"16.7%"`);
+history's `averageCacheHitRate` and export's `siteComparison` keep the 0–1 fraction. A repeat of a recorded alert within
+the 15-minute cooldown updates that alert's message, value and timestamp. Alert messages round their numbers, but never
+so far that a breach reads as its threshold (`2000.004ms` against 2000 ms, not `2000ms`).
 
 ### System Metrics
 

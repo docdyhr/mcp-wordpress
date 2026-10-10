@@ -711,8 +711,8 @@ export default class PerformanceTools {
         data: {
           scope: {
             alerts:
-              "recorded history, all sites combined: each message shows the value when the alert was raised, " +
-              "so it can differ from the current figures",
+              "recorded history, all sites combined: each message shows the value at the alert's timestamp (a repeat " +
+              "within the 15-minute cooldown updates the same alert), so it can differ from the current figures",
             activeAlerts: "current metrics, all sites combined: what is breaching now",
             anomalies:
               "all sites combined: each anomaly compares a value with the recent snapshots when it was detected",
@@ -949,7 +949,13 @@ export default class PerformanceTools {
                   historicalData: `snapshots taken in ${describeHistoryWindow(timeRange)}; each one's counters are totals since the server started`,
                 }
               : {}),
-            ...(includeAnalytics ? { analytics: ANALYTICS_SCOPE } : {}),
+            ...(includeAnalytics
+              ? {
+                  analytics:
+                    `trends, anomalies and predictions: ${ANALYTICS_SCOPE}; ` +
+                    `benchmarks, insights and optimizationPlan: ${CURRENT_METRICS_SCOPE}`,
+                }
+              : {}),
           },
         },
       };
