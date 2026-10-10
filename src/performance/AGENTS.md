@@ -32,6 +32,17 @@ Layered, not duplicative:
   tool's `overallHealth` is capped by those active alerts and `alertStatus` is derived from them, so health and alerts
   cannot contradict each other. Do not add a second set of thresholds elsewhere. A cache with no lookups (hits and
   misses both 0) is neutral, not a 0% hit rate.
+- Counters (requests, cache hits/misses) are totals since the server started, in the live metrics and in every history
+  snapshot. A cache hit rate therefore has one of three scopes: all sites combined (`wp_performance_stats` overview and
+  cache, benchmark, optimize, export, history), one site (`wp_cache_stats`, `wp_cache_info`, `siteSpecific`,
+  `siteComparison`), or a recorded alert's message (the value at the alert's timestamp, which a repeat within the
+  cooldown updates). Every performance and cache tool response that reports one says which, in a `scope` field or map
+  (`metadata.scope` where the body is a report); keep that when adding output. Trends, anomalies and predictions come
+  from `PerformanceAnalytics`' own 24-hour history whatever the requested timeframe, and history is kept for 24 hours
+  (`HISTORY_RETENTION_MS`), so window labels go through `describeHistoryWindow()`. A history summary must not sum
+  cumulative counters across snapshots (it differences first and last). Alert messages and `formattedMessage` round
+  their numbers through `roundBreach()` (`PerformanceMonitor.ts`), which never prints a breach as equal to its
+  threshold; `actualValue` keeps the raw value.
 
 New metrics belong in `PerformanceMonitor`; new collection hooks belong in `MetricsCollector`; new analysis belongs in
 `PerformanceAnalytics`.

@@ -3,7 +3,7 @@
  * Extracted helper functions for performance metrics formatting and calculations
  */
 
-import { hasCacheActivity, type PerformanceMetrics } from "@/performance/PerformanceMonitor.js";
+import { hasCacheActivity, type PerformanceMetrics, roundBreach } from "@/performance/PerformanceMonitor.js";
 import type { BenchmarkComparison, PerformanceAnomaly } from "@/performance/PerformanceAnalytics.js";
 
 /**
@@ -139,6 +139,8 @@ export function formatUptime(uptimeMs: number): string {
 /**
  * Parse timeframe string to milliseconds
  */
+const SUPPORTED_TIMEFRAMES = ["1h", "6h", "12h", "24h", "7d", "30d"];
+
 export function parseTimeframe(timeframe: string): number {
   const map: Record<string, number> = {
     "1h": 60 * 60 * 1000,
@@ -269,7 +271,35 @@ export function calculateOverallRanking(benchmarks: BenchmarkComparison[]): { pe
  * Format alert message
  */
 export function formatAlertMessage(alert: PerformanceAlert): string {
-  return `${alert.severity.toUpperCase()}: ${alert.message} (${alert.metric}: ${alert.actualValue} vs threshold: ${alert.threshold})`;
+  return `${alert.severity.toUpperCase()}: ${alert.message} (${alert.metric}: ${formatAlertValue(alert.actualValue, alert.threshold)} vs threshold: ${formatAlertValue(alert.threshold)})`;
+}
+
+/**
+ * A readable alert number: 2 decimals from 1 up (2096.285714 -> 2096.29), 3 significant digits below (an error rate
+ * of 1/19 -> 0.0526). If that would print a breaching value equal to its threshold (0.7996 -> 0.8 vs 0.8), more digits
+ * are kept (`roundBreach()`).
+ */
+function formatAlertValue(value: number, threshold?: number): number {
+  const round = (v: number) =>
+    !Number.isFinite(v) || v === 0 ? v : Math.abs(v) >= 1 ? Math.round(v * 100) / 100 : Number(v.toPrecision(3));
+  return threshold === undefined ? round(value) : roundBreach(value, threshold, round);
+}
+
+/** How long the server keeps performance history (`PerformanceMonitor` retentionPeriod, set by PerformanceTools). */
+export const HISTORY_RETENTION_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * The window a history request really covers, for scope labels: an unknown timeframe falls back to 24h, and nothing
+ * older than the retention period is kept.
+ */
+export function describeHistoryWindow(timeframe: string): string {
+  if (!SUPPORTED_TIMEFRAMES.includes(timeframe)) {
+    return `the last 24h ("${timeframe}" is not a supported timeframe)`;
+  }
+  if (parseTimeframe(timeframe) > HISTORY_RETENTION_MS) {
+    return `the last 24h (history is kept for 24 hours; ${timeframe} was requested)`;
+  }
+  return `the last ${timeframe}`;
 }
 
 /**

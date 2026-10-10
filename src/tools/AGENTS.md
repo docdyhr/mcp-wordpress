@@ -79,6 +79,9 @@ parameter that changes its result: site, post, `analysisType`, and `focusKeyword
 by the server for later tool invocations. When validating alternate credentials, verify them with an isolated throwaway
 client and leave the shared client/config/cache untouched.
 
+**Performance and cache output** (`performance/`, `cache.ts`): scope labels, hit-rate formatting, history windows and
+alert-number rounding are contracts in `src/performance/AGENTS.md` — read it before editing these files.
+
 ## Work Guidance
 
 Adding a `wp_*` tool: define it alongside its category's existing tools, register a handler, and ensure the class's
