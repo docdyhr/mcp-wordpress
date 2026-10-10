@@ -60,6 +60,17 @@ describe("SEOTools.analyzeContent()", () => {
     expect(faster).not.toEqual(caching);
   });
 
+  // Joining with "," gave ["a,b"] and ["a", "b"] the same key, although the first keyword scored differs.
+  it("does not share a cached analysis between one comma keyword and two keywords", async () => {
+    const tools = new SEOTools();
+    const client = clientFor(9105);
+
+    await tools.analyzeContent(client, { postId: 9105, site: "s1", focusKeywords: ["caching,faster"] });
+    await tools.analyzeContent(client, { postId: 9105, site: "s1", focusKeywords: ["caching", "faster"] });
+
+    expect(client.getPost).toHaveBeenCalledTimes(2);
+  });
+
   it("still rejects a call without postId", async () => {
     await expect(new SEOTools().analyzeContent(clientFor(1), { site: "s1" })).rejects.toThrow(/postId/);
   });

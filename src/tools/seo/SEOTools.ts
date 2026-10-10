@@ -117,7 +117,8 @@ export class SEOTools {
 
         // Check cache first
         // The analysis scores the focus keywords (the first one as primary), so they are part of the key, in order.
-        const keywords = (params.focusKeywords ?? []).join(",");
+        // JSON keeps a keyword containing a comma apart from two keywords (["a,b"] vs ["a", "b"]).
+        const keywords = JSON.stringify(params.focusKeywords ?? []);
         const cacheKey = `seo:analyze:${params.site}:${params.postId as number}:${params.analysisType}:${keywords}`;
         const cached = await this.getCachedResult(cacheKey);
         if (cached) {

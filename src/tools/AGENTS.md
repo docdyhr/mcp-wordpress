@@ -63,8 +63,8 @@ exist because the X-WP-Total header is not exposed to tools; never label a page'
 
 **Schema and descriptions are the contract**: where a tool checks required parameters in code (the SEO tools'
 `validateRequired()`), the list must not be stricter than its `inputSchema.required`, and a default named in a property
-description ("default: full") must be the one the code applies. `wp_seo_analyze_content` once rejected calls without
-`analysisType`, and `maxSuggestions`/`maxPages` documented defaults (5, 100) the code never used (10, 50).
+description ("default: full") must be the one the code applies. `wp_seo_analyze_content`'s cache key includes every
+parameter that changes its result: site, post, `analysisType`, and `focusKeywords` in order.
 
 **Shared imports**: `@/client/api.js` (`WordPressClient`), `@/utils/error.js`, `@/types/wordpress.js`,
 `@/utils/validation/security.js` (`sanitizeHtml`), `src/tools/params.ts` (`toolParams<T>`, `parseId`,
