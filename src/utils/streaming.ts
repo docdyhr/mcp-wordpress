@@ -4,7 +4,7 @@
  */
 
 // Node.js streaming imports removed - not currently used but available for future enhancement
-import { htmlToPlainText } from "./htmlText.js";
+import { displayTitle, htmlToPlainText } from "./htmlText.js";
 
 export interface StreamingOptions {
   batchSize?: number;
@@ -155,7 +155,7 @@ export class WordPressDataStreamer {
         const excerpt = p.excerpt as Record<string, unknown> | undefined;
         return {
           id: p.id,
-          title: htmlToPlainText(title?.rendered) || "Untitled",
+          title: displayTitle(title?.rendered as string | undefined),
           excerpt: htmlToPlainText(excerpt?.rendered, { maxLength: 150 }) || "No excerpt",
           status: p.status,
           date: new Date(String(p.date)).toLocaleDateString(),

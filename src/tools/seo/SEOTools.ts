@@ -103,18 +103,23 @@ export class SEOTools {
    * - Content structure evaluation
    * - Meta tag optimization suggestions
    *
-   * @param params - Analysis parameters including post ID and analysis type
+   * @param rawParams - Analysis parameters: post ID, and an analysis type that defaults to "full"
    * @returns Detailed SEO analysis with scores and recommendations
    */
-  async analyzeContent(client: WordPressClient, params: SEOToolParams): Promise<SEOAnalysisResult> {
-    const siteLogger = LoggerFactory.tool("wp_seo_analyze_content", params.site);
+  async analyzeContent(client: WordPressClient, rawParams: SEOToolParams): Promise<SEOAnalysisResult> {
+    const siteLogger = LoggerFactory.tool("wp_seo_analyze_content", rawParams.site);
+    // The tool schema makes analysisType optional ("default: full"); apply that default here.
+    const params: SEOToolParams = { ...rawParams, analysisType: rawParams.analysisType ?? "full" };
 
     return await siteLogger.time("SEO content analysis", async () => {
       try {
-        validateRequired(params, ["postId", "analysisType"]);
+        validateRequired(params, ["postId"]);
 
         // Check cache first
-        const cacheKey = `seo:analyze:${params.site}:${params.postId as number}:${params.analysisType}`;
+        // The analysis scores the focus keywords (the first one as primary), so they are part of the key, in order.
+        // JSON keeps a keyword containing a comma apart from two keywords (["a,b"] vs ["a", "b"]).
+        const keywords = JSON.stringify(params.focusKeywords ?? []);
+        const cacheKey = `seo:analyze:${params.site}:${params.postId as number}:${params.analysisType}:${keywords}`;
         const cached = await this.getCachedResult(cacheKey);
         if (cached) {
           siteLogger.debug("Cache hit for content analysis", { cacheKey });
