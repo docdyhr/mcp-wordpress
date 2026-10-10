@@ -88,9 +88,10 @@ describe("CacheTools", () => {
 
       expect(result.caching_enabled).toBe(true);
       expect(result.cache_stats).toEqual({
+        scope: "this site only, since the server started",
         hits: 150,
         misses: 50,
-        hit_rate: "75%",
+        hit_rate: "75.0%",
         total_entries: 100,
         evictions: 5,
       });
@@ -239,8 +240,9 @@ describe("CacheTools", () => {
       expect(result.cache_configuration).toBeDefined();
       expect(result.ttl_presets).toBeDefined();
       expect(result.current_stats).toEqual({
+        scope: "this site only, since the server started",
         total_entries: 100,
-        hit_rate: "85%",
+        hit_rate: "85.0%",
         hits: 170,
         misses: 30,
         evictions: 5,
