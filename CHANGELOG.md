@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.1](https://github.com/docdyhr/mcp-wordpress/compare/v4.1.0...v4.1.1) (2026-10-10)
+
+### 🐛 Bug Fixes
+
+- **seo:** default analysisType to full in wp_seo_analyze_content
+  ([#268](https://github.com/docdyhr/mcp-wordpress/issues/268))
+  ([1705144](https://github.com/docdyhr/mcp-wordpress/commit/170514490be89c35f8c244e6dcf0da3cecbc7b20))
+
 ## [4.1.0](https://github.com/docdyhr/mcp-wordpress/compare/v4.0.11...v4.1.0) (2026-10-09)
 
 ### 🚀 Features
