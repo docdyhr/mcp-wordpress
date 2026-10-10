@@ -29,6 +29,7 @@ import {
 
 // Test fixtures
 const createMockMetrics = (overrides = {}) => ({
+  timestamp: 1791532800000,
   requests: {
     total: 1000,
     successful: 980,
@@ -327,7 +328,7 @@ describe("PerformanceHelpers", () => {
       const data = [createMockMetrics()];
       const result = processHistoricalDataForChart(data);
 
-      expect(result.responseTime[0]).toHaveProperty("timestamp");
+      expect(result.responseTime[0]).toHaveProperty("timestamp", 1791532800000);
       expect(result.responseTime[0]).toHaveProperty("value");
       expect(result.responseTime[0]).toHaveProperty("index");
       expect(result.responseTime[0].index).toBe(0);
