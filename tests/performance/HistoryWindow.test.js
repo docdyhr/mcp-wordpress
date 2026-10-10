@@ -178,12 +178,13 @@ describe("history tool output size", () => {
 describe("anomaly detection on real history", () => {
   let analytics;
   let monitor;
-  const point = ({ rt = 320, total = 100, failed = 0, hitRate = 0.9 } = {}) => ({
+  const point = ({ rt = 320, total = 100, failed = 0, hitRate = 0.9, hits, misses } = {}) => ({
     timestamp: Date.now(),
     requests: { averageResponseTime: rt, total, failed, requestsPerSecond: 1 },
-    cache: { hitRate },
+    cache: { hitRate, hits, misses },
     system: { memoryUsage: 10 },
   });
+  const idleCache = { hitRate: 0, hits: 0, misses: 0 };
   const baseline = (n = 10, values = {}) => {
     for (let i = 0; i < n; i++) {
       vi.setSystemTime(START + i * 30_000);
@@ -236,6 +237,43 @@ describe("anomaly detection on real history", () => {
     expect(analytics.getAnomalies()).toHaveLength(1);
 
     vi.setSystemTime(START + 25 * HOUR);
+    expect(analytics.getAnomalies()).toEqual([]);
+  });
+
+  // z-scores were taken as absolute values, so getting better scored as a "spike"/"drop" — critical at z > 4, which
+  // put the alerts tool at "Critical Issues Detected" for a day.
+  it("does not flag an improvement as an anomaly", () => {
+    baseline(10, { rt: 2000, hitRate: 0.5 });
+    analytics.addDataPoint(point({ rt: 1000, hitRate: 0.95 }));
+    expect(analytics.getAnomalies()).toEqual([]);
+  });
+
+  it("still flags a hit-rate drop", () => {
+    baseline();
+    analytics.addDataPoint(point({ hitRate: 0.3 }));
+    expect(analytics.getAnomalies().map((a) => a.metric)).toEqual(["cacheHitRate"]);
+  });
+
+  it("treats a cache with no lookups as neutral, not a 0% hit rate", () => {
+    baseline(10, { hits: 90, misses: 10 });
+    analytics.addDataPoint(point(idleCache));
+    expect(analytics.getAnomalies()).toEqual([]);
+  });
+
+  it("leaves idle-cache points out of the hit-rate baseline", () => {
+    for (let i = 0; i < 10; i++) {
+      vi.setSystemTime(START + i * 30_000);
+      analytics.addDataPoint(point(i < 5 ? idleCache : { hitRate: 0.9, hits: 90, misses: 10 }));
+    }
+    // Against the active points only (0.9), 0.3 is a real drop; with the idle zeros averaged in it was hidden.
+    analytics.addDataPoint(point({ hitRate: 0.3, hits: 30, misses: 70 }));
+    expect(analytics.getAnomalies().map((a) => a.metric)).toEqual(["cacheHitRate"]);
+  });
+
+  it("does not judge a point against readings older than the lookback period", () => {
+    baseline();
+    vi.setSystemTime(START + 25 * HOUR);
+    analytics.addDataPoint(point({ rt: 2000 }));
     expect(analytics.getAnomalies()).toEqual([]);
   });
 });

@@ -3,7 +3,7 @@
  * Provides insights, predictions, and optimization recommendations
  */
 
-import { PerformanceMetrics, type PerformanceSnapshot, toSnapshot } from "./PerformanceMonitor.js";
+import { hasCacheActivity, PerformanceMetrics, type PerformanceSnapshot, toSnapshot } from "./PerformanceMonitor.js";
 import { MetricsCollector } from "./MetricsCollector.js";
 
 /**
@@ -135,6 +135,12 @@ export class PerformanceAnalytics {
    * Add historical data point for analysis
    */
   addDataPoint(metrics: PerformanceSnapshot): void {
+    // Limit historical data to lookback period first, so a new point is never judged against readings older than it
+    // (points can arrive hours apart when only tool calls add them).
+    const cutoff = Date.now() - this.config.lookbackPeriod;
+    this.historicalData = this.historicalData.filter((data) => data.timestamp > cutoff);
+    this.pruneAnomalies();
+
     // Judge the new point against the points before it: included in its own baseline, it drags the mean towards
     // itself, and on a flat baseline any change at all scored as an anomaly.
     if (this.config.enableAnomalyDetection) {
@@ -142,11 +148,6 @@ export class PerformanceAnalytics {
     }
 
     this.historicalData.push(toSnapshot(metrics));
-
-    // Limit historical data to lookback period
-    const cutoff = Date.now() - this.config.lookbackPeriod;
-    this.historicalData = this.historicalData.filter((data) => data.timestamp > cutoff);
-    this.pruneAnomalies();
   }
 
   /**
@@ -604,26 +605,32 @@ export class PerformanceAnalytics {
       metrics.requests.averageResponseTime,
       responseTimes,
       "Response time spike detected",
+      "higher",
     );
 
-    // Check cache hit rate anomalies
-    const hitRates = recentData.map((d) => d.cache.hitRate);
-    this.checkMetricAnomaly("cacheHitRate", metrics.cache.hitRate, hitRates, "Cache hit rate drop detected");
+    // Check cache hit rate anomalies. A cache with no lookups yet is neutral, not a 0% hit rate: it is neither judged
+    // nor part of the baseline (an idle start would make the first warm-up look like a jump).
+    if (hasCacheActivity(metrics.cache)) {
+      const hitRates = recentData.filter((d) => hasCacheActivity(d.cache)).map((d) => d.cache.hitRate);
+      this.checkMetricAnomaly("cacheHitRate", metrics.cache.hitRate, hitRates, "Cache hit rate drop detected", "lower");
+    }
 
     // Check error rate anomalies
     const errorRates = recentData.map((d) => (d.requests.total > 0 ? d.requests.failed / d.requests.total : 0));
     const currentErrorRate = metrics.requests.total > 0 ? metrics.requests.failed / metrics.requests.total : 0;
-    this.checkMetricAnomaly("errorRate", currentErrorRate, errorRates, "Error rate spike detected");
+    this.checkMetricAnomaly("errorRate", currentErrorRate, errorRates, "Error rate spike detected", "higher");
   }
 
   /**
-   * Check if a metric value is anomalous
+   * Check if a metric value is anomalous. Only a move in the worse direction counts: a response time that drops or a
+   * hit rate that rises is an improvement, not an anomaly.
    */
   private checkMetricAnomaly(
     metricName: string,
     currentValue: number,
     historicalValues: number[],
     description: string,
+    worseWhen: "higher" | "lower",
   ): void {
     if (historicalValues.length < 5) return;
 
@@ -633,8 +640,8 @@ export class PerformanceAnalytics {
     // difference is not a signal.
     const standardDeviation = Math.max(Math.sqrt(variance), anomalyNoiseFloor(metricName, mean));
 
-    // Calculate z-score
-    const zScore = Math.abs((currentValue - mean) / standardDeviation);
+    // Calculate z-score, positive when the metric moved the worse way
+    const zScore = ((worseWhen === "higher" ? 1 : -1) * (currentValue - mean)) / standardDeviation;
 
     // Determine sensitivity threshold
     let threshold = 2; // Default for medium sensitivity
