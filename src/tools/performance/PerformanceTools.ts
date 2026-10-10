@@ -23,6 +23,8 @@ import {
   calculateCacheEfficiency,
   formatUptime,
   parseTimeframe,
+  describeHistoryWindow,
+  HISTORY_RETENTION_MS,
   processHistoricalDataForChart,
   downsample,
   MAX_HISTORY_POINTS,
@@ -43,6 +45,13 @@ import {
   type PerformanceAlert,
 } from "./PerformanceHelpers.js";
 
+// The session-wide cache figures sum every site's cache counters; wp_cache_stats and `siteSpecific` show one site.
+const CACHE_SCOPE_ALL_SITES = "all sites combined, since the server started";
+// Benchmarks, recommendations and exports read the same session-wide metrics.
+const CURRENT_METRICS_SCOPE = "current metrics, all sites combined (counters since the server started)";
+// PerformanceAnalytics keeps its own 24-hour history for trends, anomalies and predictions.
+const ANALYTICS_SCOPE = "all sites combined, from the analytics' own 24-hour history whatever the timeframe";
+
 /**
  * Performance Tools Class
  * Provides MCP tools for WordPress performance monitoring
@@ -62,6 +71,7 @@ export default class PerformanceTools {
     this.monitor = new PerformanceMonitor({
       enableRealTimeMonitoring: true,
       enableHistoricalData: true,
+      retentionPeriod: HISTORY_RETENTION_MS,
       enableAlerts: true,
     });
 
@@ -375,6 +385,7 @@ export default class PerformanceTools {
 
       if (category === "cache" || category === "all") {
         result.cache = {
+          scope: CACHE_SCOPE_ALL_SITES,
           ...metrics.cache,
           hitRate: `${(metrics.cache.hitRate * 100).toFixed(1)}%`,
           memoryUsage: `${metrics.cache.memoryUsageMB.toFixed(1)}MB`,
@@ -415,7 +426,11 @@ export default class PerformanceTools {
       if (siteMetrics && siteMetrics.isActive) {
         result.siteSpecific = {
           siteId: site,
-          cache: siteMetrics.cache,
+          scope: `site ${site} only, since the server started`,
+          cache: siteMetrics.cache && {
+            ...siteMetrics.cache,
+            hitRate: `${(siteMetrics.cache.hitRate * 100).toFixed(1)}%`,
+          },
           client: siteMetrics.client,
         };
       }
@@ -479,6 +494,13 @@ export default class PerformanceTools {
       return {
         success: true,
         data: {
+          scope: {
+            summary:
+              `averages over the ${historicalData.length} snapshots taken in ${describeHistoryWindow(timeframe)}, ` +
+              "all sites combined. Each snapshot's counters are totals since the server started, so these average " +
+              "cumulative figures; totalRequests counts the requests between the first and last snapshot",
+            trends: ANALYTICS_SCOPE,
+          },
           timeframe,
           dataPoints: historicalData.length,
           historicalData: chartData,
@@ -489,7 +511,11 @@ export default class PerformanceTools {
             averageErrorRate: calculateAverage(
               historicalData.map((d) => (d.requests.total > 0 ? d.requests.failed / d.requests.total : 0)),
             ),
-            totalRequests: historicalData.reduce((sum, d) => sum + d.requests.total, 0),
+            // requests.total is cumulative in every snapshot: the difference is what happened in between.
+            totalRequests:
+              historicalData.length > 1
+                ? historicalData[historicalData.length - 1]!.requests.total - historicalData[0]!.requests.total
+                : 0,
           },
           metadata: {
             timestamp: new Date().toISOString(),
@@ -579,6 +605,7 @@ export default class PerformanceTools {
                 timestamp: new Date().toISOString(),
                 category,
                 site: site || "all",
+                scope: CURRENT_METRICS_SCOPE,
                 benchmarkVersion: "2024-industry-standards",
               },
             },
@@ -684,6 +711,14 @@ export default class PerformanceTools {
       return {
         success: true,
         data: {
+          scope: {
+            alerts:
+              "recorded history, all sites combined: each message shows the value at the alert's timestamp (a repeat " +
+              "within the 15-minute cooldown updates the same alert), so it can differ from the current figures",
+            activeAlerts: "current metrics, all sites combined: what is breaching now",
+            anomalies:
+              "all sites combined: each anomaly compares a value with the recent snapshots when it was detected",
+          },
           alerts: alerts.map((alert) => ({
             ...alert,
             timestamp: new Date(alert.timestamp).toISOString(),
@@ -815,6 +850,7 @@ export default class PerformanceTools {
             focus,
             priority,
             site: site || "all",
+            scope: { recommendations: CURRENT_METRICS_SCOPE, predictions: ANALYTICS_SCOPE },
           },
         },
       };
@@ -908,6 +944,24 @@ export default class PerformanceTools {
           format,
           dataSize: JSON.stringify(exportData).length,
           site: site || "all",
+          // In the outer metadata so the CSV and summary formats carry it too; one entry per included section.
+          scope: {
+            currentMetrics: CURRENT_METRICS_SCOPE,
+            aggregatedStats: CURRENT_METRICS_SCOPE,
+            ...(exportData.siteComparison ? { siteComparison: "each site on its own, since the server started" } : {}),
+            ...(includeHistorical
+              ? {
+                  historicalData: `snapshots taken in ${describeHistoryWindow(timeRange)}; each one's counters are totals since the server started`,
+                }
+              : {}),
+            ...(includeAnalytics
+              ? {
+                  analytics:
+                    `trends, anomalies and predictions: ${ANALYTICS_SCOPE}; ` +
+                    `benchmarks, insights and optimizationPlan: ${CURRENT_METRICS_SCOPE}`,
+                }
+              : {}),
+          },
         },
       };
     });

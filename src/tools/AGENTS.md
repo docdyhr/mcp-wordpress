@@ -55,19 +55,32 @@ shims.
 `generators/MetaGenerator.ts` + `SchemaGenerator.ts` (meta tags, JSON-LD), `optimizers/InternalLinkingSuggester.ts`,
 `providers/SearchConsoleProvider.ts` (Google Search Console). `validators/` is currently empty (reserved).
 
+**Rendered fields are HTML**: WordPress returns `title.rendered`, `excerpt.rendered` and `caption.rendered`
+entity-encoded (`Q&#038;A`); excerpts and captions come wrapped in `<p>`, titles can contain inline markup. The post,
+page and media tools print them through `displayTitle()` / `htmlToPlainText()` (`src/utils/htmlText.ts`); do the same in
+any new text output. The SEO engines (`seo/`) still pass `title.rendered` through unchanged in their structured results.
+
 **Pagination contract**: list tools accept `page` and `per_page` (max 100) in their `inputSchema` — a property missing
 from the schema is stripped by the argument validator, so it never reaches the handler. Handlers forward them to
 WordPress, which defaults to 10 per page, and end a full page with a next-page note (`pageHint()` in `params.ts`;
 `postsPaginationNote()` for posts, including the >50-post streaming path). The note is the only signal that more results
 exist because the X-WP-Total header is not exposed to tools; never label a page's size as a site total.
 
+**Schema and descriptions are the contract**: where a tool checks required parameters in code (the SEO tools'
+`validateRequired()`), the list must not be stricter than its `inputSchema.required`, and a default named in a property
+description ("default: full") must be the one the code applies. `wp_seo_analyze_content`'s cache key includes every
+parameter that changes its result: site, post, `analysisType`, and `focusKeywords` in order.
+
 **Shared imports**: `@/client/api.js` (`WordPressClient`), `@/utils/error.js`, `@/types/wordpress.js`,
-`@/utils/validation/security.js` (`sanitizeHtml`), `src/tools/params.ts` (`toolParams<T>`, `parseId`,
-`parseIdAndForce`).
+`@/utils/validation/security.js` (`sanitizeHtml`), `@/utils/htmlText.js` (`displayTitle`, `htmlToPlainText`),
+`src/tools/params.ts` (`toolParams<T>`, `parseId`, `parseIdAndForce`).
 
 **Auth tool isolation**: `wp_switch_auth_method` must never mutate the shared per-site `WordPressClient` instance stored
 by the server for later tool invocations. When validating alternate credentials, verify them with an isolated throwaway
 client and leave the shared client/config/cache untouched.
+
+**Performance and cache output** (`performance/`, `cache.ts`): scope labels, hit-rate formatting, history windows and
+alert-number rounding are contracts in `src/performance/AGENTS.md` — read it before editing these files.
 
 ## Work Guidance
 
