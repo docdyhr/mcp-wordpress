@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.3](https://github.com/docdyhr/mcp-wordpress/compare/v4.1.2...v4.1.3) (2026-10-10)
+
+### 🐛 Bug Fixes
+
+- **performance:** round alert values and label cache hit-rate scope
+  ([#270](https://github.com/docdyhr/mcp-wordpress/issues/270))
+  ([d85a047](https://github.com/docdyhr/mcp-wordpress/commit/d85a0474611384fa032c91e6ecdccfe798348298))
+
 ## [4.1.2](https://github.com/docdyhr/mcp-wordpress/compare/v4.1.1...v4.1.2) (2026-10-10)
 
 ### 🐛 Bug Fixes
