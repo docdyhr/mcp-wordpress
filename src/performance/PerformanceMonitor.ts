@@ -29,6 +29,9 @@ export interface ToolCallRecord {
 const MAX_RECENT_TOOL_CALLS = 50;
 
 export interface PerformanceMetrics {
+  /** When this reading was taken (epoch ms). History is selected and pruned by it; `system.uptime` is a duration. */
+  timestamp: number;
+
   // Request Performance
   requests: {
     total: number;
@@ -92,6 +95,17 @@ export interface PerformanceMetrics {
       }
     >;
   };
+}
+
+/**
+ * A metrics reading as kept in the history: everything except the per-tool maps, which nothing that reads history uses
+ * and which made each of the (up to 2880 per day) snapshots several KB.
+ */
+export type PerformanceSnapshot = Omit<PerformanceMetrics, "tools">;
+
+export function toSnapshot(metrics: PerformanceSnapshot): PerformanceSnapshot {
+  const { timestamp, requests, cache, system, wordpress } = metrics;
+  return { timestamp, requests, cache, system, wordpress };
 }
 
 export interface PerformanceAlert {
@@ -226,7 +240,7 @@ export interface PerformanceConfig {
  */
 export class PerformanceMonitor {
   private metrics: PerformanceMetrics;
-  private historicalData: PerformanceMetrics[] = [];
+  private historicalData: PerformanceSnapshot[] = [];
   private alerts: PerformanceAlert[] = [];
   private config: PerformanceConfig;
   private startTime: number;
@@ -261,6 +275,7 @@ export class PerformanceMonitor {
    */
   private initializeMetrics(): PerformanceMetrics {
     return {
+      timestamp: Date.now(),
       requests: {
         total: 0,
         successful: 0,
@@ -420,13 +435,16 @@ export class PerformanceMonitor {
    */
   getMetrics(): PerformanceMetrics {
     this.updateSystemMetrics();
-    return { ...this.metrics };
+    // A deep copy: recordRequest() updates the nested counters in place, so a shallow copy stored in the history
+    // would keep changing with the live metrics.
+    this.metrics.timestamp = Date.now();
+    return structuredClone(this.metrics);
   }
 
   /**
    * Get historical performance data
    */
-  getHistoricalData(startTime?: number, endTime?: number): PerformanceMetrics[] {
+  getHistoricalData(startTime?: number, endTime?: number): PerformanceSnapshot[] {
     if (!this.config.enableHistoricalData) {
       return [];
     }
@@ -434,11 +452,11 @@ export class PerformanceMonitor {
     let data = [...this.historicalData];
 
     if (startTime) {
-      data = data.filter((m) => m.system.uptime >= startTime);
+      data = data.filter((m) => m.timestamp >= startTime);
     }
 
     if (endTime) {
-      data = data.filter((m) => m.system.uptime <= endTime);
+      data = data.filter((m) => m.timestamp <= endTime);
     }
 
     return data;
@@ -507,14 +525,17 @@ export class PerformanceMonitor {
   private startCollection(): void {
     // unref() so this background timer alone can never keep a process (or a
     // one-shot script that merely imports/instantiates this class) alive.
-    this.collectionTimer = setInterval(() => {
-      const snapshot = this.getMetrics();
+    this.collectionTimer = setInterval(() => this.recordSnapshot(), this.config.collectInterval).unref();
+  }
 
-      if (this.config.enableHistoricalData) {
-        this.historicalData.push(snapshot);
-        this.cleanupOldData();
-      }
-    }, this.config.collectInterval).unref();
+  /**
+   * Store the current metrics in the history (what the collection timer does every `collectInterval`) and drop
+   * snapshots older than `retentionPeriod`.
+   */
+  recordSnapshot(): void {
+    if (!this.config.enableHistoricalData) return;
+    this.historicalData.push(toSnapshot(this.getMetrics()));
+    this.cleanupOldData();
   }
 
   /**
@@ -841,6 +862,6 @@ export class PerformanceMonitor {
    */
   private cleanupOldData(): void {
     const cutoff = Date.now() - this.config.retentionPeriod;
-    this.historicalData = this.historicalData.filter((data) => data.system.uptime > cutoff);
+    this.historicalData = this.historicalData.filter((data) => data.timestamp > cutoff);
   }
 }

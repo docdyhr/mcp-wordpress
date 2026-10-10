@@ -24,6 +24,8 @@ import {
   formatUptime,
   parseTimeframe,
   processHistoricalDataForChart,
+  downsample,
+  MAX_HISTORY_POINTS,
   calculateAverage,
   formatBenchmarkStatus,
   getBenchmarkImprovementDescription,
@@ -860,7 +862,10 @@ export default class PerformanceTools {
       if (includeHistorical) {
         const timeframMs = parseTimeframe(timeRange);
         const startTime = Date.now() - timeframMs;
-        exportData.historicalData = this.monitor.getHistoricalData(startTime);
+        const history = this.monitor.getHistoricalData(startTime);
+        // A day of snapshots is thousands of entries; export an even sample and say how many there were.
+        exportData.historicalData = downsample(history, MAX_HISTORY_POINTS);
+        exportData.historicalDataPoints = history.length;
       }
 
       if (includeAnalytics) {

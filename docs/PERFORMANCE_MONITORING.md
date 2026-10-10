@@ -280,6 +280,8 @@ The system automatically analyzes performance trends using linear regression:
 Automatic detection of unusual performance patterns:
 
 - **Z-Score Analysis**: Statistical deviation from normal patterns
+- **Worse Direction Only**: a response time or error rate going up, or a cache hit rate going down; improvements are not
+  anomalies, and a cache with no lookups yet is not judged
 - **Configurable Sensitivity**: `low`, `medium`, `high` detection levels
 - **Severity Classification**: `minor`, `moderate`, `major`, `critical`
 - **Possible Causes**: AI-generated suggestions for anomaly causes

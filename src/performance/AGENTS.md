@@ -27,6 +27,14 @@ Layered, not duplicative:
   system-metrics collection config.
 - `PerformanceAnalytics.ts` — trend analysis, anomaly detection, predictive insights, benchmark comparisons, built on
   top of both.
+- History (`PerformanceMonitor.recordSnapshot()` every `collectInterval`, `PerformanceAnalytics.addDataPoint()`) stores
+  `getMetrics()` readings: deep copies stamped with `timestamp` (epoch ms). Select and prune them by `timestamp`, never
+  by `system.uptime`, which is a duration since start, not a point in time. Snapshots are `PerformanceSnapshot`s (no
+  per-tool maps), and tool output samples history to `MAX_HISTORY_POINTS` (`downsample()`). Anomaly detection prunes to
+  the lookback period first, then judges a point against the points before it, with a per-metric noise floor on the
+  spread, and forgets anomalies after the lookback period. Only a move in the worse direction is an anomaly (response
+  time and error rate up, hit rate down), and hit-rate points from a cache with no lookups are neither judged nor part
+  of the baseline. Trend math must stay finite on flat or zero series.
 - Alert rules live in one pure function, `evaluateAlertConditions()` (`PerformanceMonitor.ts`). The monitor uses it to
   record alerts (a history that never expires) and `getActiveAlerts()` uses it for what breaches right now; the stats
   tool's `overallHealth` is capped by those active alerts and `alertStatus` is derived from them, so health and alerts

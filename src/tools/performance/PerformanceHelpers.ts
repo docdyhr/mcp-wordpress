@@ -3,7 +3,11 @@
  * Extracted helper functions for performance metrics formatting and calculations
  */
 
-import { hasCacheActivity, type PerformanceMetrics } from "@/performance/PerformanceMonitor.js";
+import {
+  hasCacheActivity,
+  type PerformanceMetrics,
+  type PerformanceSnapshot,
+} from "@/performance/PerformanceMonitor.js";
 import type { BenchmarkComparison, PerformanceAnomaly } from "@/performance/PerformanceAnalytics.js";
 
 /**
@@ -154,7 +158,7 @@ export function parseTimeframe(timeframe: string): number {
 /**
  * Extract metric value from data point
  */
-export function extractMetricValue(dataPoint: PerformanceMetrics, metric: string): number {
+export function extractMetricValue(dataPoint: PerformanceSnapshot, metric: string): number {
   switch (metric) {
     case "responseTime":
       return dataPoint.requests.averageResponseTime;
@@ -175,10 +179,12 @@ export function extractMetricValue(dataPoint: PerformanceMetrics, metric: string
  * Process historical data for charting
  */
 export function processHistoricalDataForChart(
-  data: PerformanceMetrics[],
+  history: PerformanceSnapshot[],
   requestedMetrics?: string[],
+  maxPoints: number = MAX_HISTORY_POINTS,
 ): Record<string, unknown> {
-  if (!data.length) return {};
+  if (!history.length) return {};
+  const data = downsample(history, maxPoints);
 
   const allMetrics = ["responseTime", "cacheHitRate", "errorRate", "memoryUsage", "requestVolume"];
   const metricsToProcess = requestedMetrics || allMetrics;
@@ -187,13 +193,26 @@ export function processHistoricalDataForChart(
 
   for (const metric of metricsToProcess) {
     result[metric] = data.map((point, index) => ({
-      timestamp: point.system.uptime,
+      timestamp: point.timestamp,
       value: extractMetricValue(point, metric),
       index,
     }));
   }
 
   return result;
+}
+
+/** Most history points a tool response carries: a day at the 30 s collection interval is 2880 snapshots. */
+export const MAX_HISTORY_POINTS = 100;
+
+/**
+ * Evenly spaced sample of at most `max` items, always keeping the first and the last (the newest reading).
+ */
+export function downsample<T>(items: T[], max: number): T[] {
+  if (items.length <= max) return items;
+  if (max <= 1) return items.slice(-1);
+  const step = (items.length - 1) / (max - 1);
+  return Array.from({ length: max }, (_, i) => items[Math.round(i * step)] as T);
 }
 
 /**
