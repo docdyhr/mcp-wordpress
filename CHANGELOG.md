@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.4](https://github.com/docdyhr/mcp-wordpress/compare/v4.1.3...v4.1.4) (2026-10-10)
+
+### 🐛 Bug Fixes
+
+- **performance:** keep history snapshots by when they were taken
+  ([#272](https://github.com/docdyhr/mcp-wordpress/issues/272))
+  ([bcdbb2a](https://github.com/docdyhr/mcp-wordpress/commit/bcdbb2a9a767f46d0bc1be1557de401844182772))
+
 ## [4.1.3](https://github.com/docdyhr/mcp-wordpress/compare/v4.1.2...v4.1.3) (2026-10-10)
 
 ### 🐛 Bug Fixes
