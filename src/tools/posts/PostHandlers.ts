@@ -11,7 +11,7 @@ import { CreatePostRequest, PostQueryParams, PostStatus, UpdatePostRequest, Word
 import { isPermissionError, preserveToolError } from "@/utils/error.js";
 import { ErrorHandlers } from "@/utils/enhancedError.js";
 import { validateId, validatePaginationParams, validatePostParams } from "@/utils/validation.js";
-import { countWords, htmlToPlainText } from "@/utils/htmlText.js";
+import { countWords, displayTitle, htmlToPlainText } from "@/utils/htmlText.js";
 import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "@/utils/streaming.js";
 
 export function buildListParams(params: PostQueryParams): PostQueryParams {
@@ -51,11 +51,6 @@ export function buildListParams(params: PostQueryParams): PostQueryParams {
   if (!sanitized.per_page) sanitized.per_page = 10;
 
   return sanitized;
-}
-
-/** Display title for a `title.rendered` value: markup stripped, entities decoded, never empty. */
-function displayTitle(rendered: string | undefined): string {
-  return htmlToPlainText(rendered) || "(untitled)";
 }
 
 /**
@@ -346,17 +341,17 @@ export async function handleCreatePost(
   params: CreatePostRequest,
 ): Promise<WordPressPost | string> {
   try {
-    // validatePostParams sanitizes `content` (and validates title/status/categories/tags/
-    // featured_media/date) via the allowlist-based sanitizeHtml() — its returned, sanitized
-    // fields must actually be sent, not just the original `params`, or the sanitization has no
-    // effect at all (a real gap a security review caught: this used to be called only for its
-    // throwing side effect, then discarded).
+    // validatePostParams rejects unsafe `content` (script tags, javascript: URLs, event handlers) via
+    // isUnsafeWordPressContent and otherwise passes it through unchanged — never sanitizeHtml(), which
+    // corrupts Gutenberg block markup — and validates title/status/categories/tags/featured_media/date.
+    // Its returned fields must actually be sent, not just the original `params` (a real gap a security
+    // review caught: this used to be called only for its throwing side effect, then discarded).
     const validated = validatePostParams(params);
     const post = await client.createPost({ ...params, ...validated } as CreatePostRequest);
 
     // Build success response with management links
     let response = `✅ **Post Created Successfully**\n\n`;
-    response += `**Title**: ${post.title.rendered}\n`;
+    response += `**Title**: ${displayTitle(post.title.rendered)}\n`;
     response += `**ID**: ${post.id}\n`;
     response += `**Status**: ${post.status}\n`;
     response += `**Link**: ${post.link}\n`;
@@ -390,7 +385,7 @@ export async function handleUpdatePost(
     const postId = validateId(params.id, "post ID");
 
     const { id: _id, ...updateData } = params;
-    // See handleCreatePost: validated (sanitized) fields must be sent, not just updateData.
+    // See handleCreatePost: the validated fields must be sent, not just updateData.
     const validated = validatePostParams(updateData, true);
 
     const updatedPost = await client.updatePost({ id: postId, ...updateData, ...validated });
@@ -454,7 +449,7 @@ export async function handleDeletePost(
       let response = `✅ **Post ${action} successfully**\n\n`;
 
       if (result.previous) {
-        response += `**Title**: ${result.previous.title.rendered}\n`;
+        response += `**Title**: ${displayTitle(result.previous.title.rendered)}\n`;
         response += `**ID**: ${result.previous.id}\n`;
       }
 
@@ -504,7 +499,7 @@ export async function handleGetPostRevisions(
       response += `**Revision ${index + 1}**\n`;
       response += `- ID: ${revision.id}\n`;
       response += `- Date: ${formattedDate}\n`;
-      response += `- Title: ${revision.title.rendered}\n`;
+      response += `- Title: ${displayTitle(revision.title.rendered)}\n`;
       if (index < revisions.length - 1) response += "\n";
     });
 
