@@ -39,11 +39,14 @@ describe("SEOTools.analyzeContent()", () => {
     const tools = new SEOTools();
     const client = clientFor(9102);
 
+    const analyze = vi.spyOn(tools.contentAnalyzer, "analyzePost");
+
     await tools.analyzeContent(client, { postId: 9102, site: "s1", analysisType: "full" });
     await tools.analyzeContent(client, { postId: 9102, site: "s1" });
 
-    // The second call is a cache hit on the same key, so the post is fetched once.
-    expect(client.getPost).toHaveBeenCalledTimes(1);
+    // The second call is a cache hit on the same key, so the post is analysed once. (It is fetched both times: its
+    // last modification is part of the key.)
+    expect(analyze).toHaveBeenCalledTimes(1);
   });
 
   // The cache key left out focusKeywords, but the analysis scores the first keyword: a second call with other
@@ -51,12 +54,13 @@ describe("SEOTools.analyzeContent()", () => {
   it("does not share a cached analysis between different focus keywords", async () => {
     const tools = new SEOTools();
     const client = clientFor(9104);
+    const analyze = vi.spyOn(tools.contentAnalyzer, "analyzePost");
 
     const caching = await tools.analyzeContent(client, { postId: 9104, site: "s1", focusKeywords: ["caching"] });
     const faster = await tools.analyzeContent(client, { postId: 9104, site: "s1", focusKeywords: ["faster"] });
     await tools.analyzeContent(client, { postId: 9104, site: "s1", focusKeywords: ["caching"] });
 
-    expect(client.getPost).toHaveBeenCalledTimes(2); // the repeat of "caching" is a cache hit
+    expect(analyze).toHaveBeenCalledTimes(2); // the repeat of "caching" is a cache hit
     expect(faster).not.toEqual(caching);
   });
 
@@ -64,11 +68,12 @@ describe("SEOTools.analyzeContent()", () => {
   it("does not share a cached analysis between one comma keyword and two keywords", async () => {
     const tools = new SEOTools();
     const client = clientFor(9105);
+    const analyze = vi.spyOn(tools.contentAnalyzer, "analyzePost");
 
     await tools.analyzeContent(client, { postId: 9105, site: "s1", focusKeywords: ["caching,faster"] });
     await tools.analyzeContent(client, { postId: 9105, site: "s1", focusKeywords: ["caching", "faster"] });
 
-    expect(client.getPost).toHaveBeenCalledTimes(2);
+    expect(analyze).toHaveBeenCalledTimes(2);
   });
 
   it("still rejects a call without postId", async () => {

@@ -13,6 +13,23 @@ import { Config } from "@/config/Config.js";
 import { LoggerFactory } from "@/utils/logger.js";
 
 /**
+ * Cache key for an SEO result. Every parameter of the call goes in (sorted, without `force`), so no parameter that
+ * changes the result can be left out; a post-based result also carries the post's last modification, so it never
+ * outlives an edit.
+ */
+export function seoResultKey(
+  kind: string,
+  params: object,
+  post?: { modified_gmt?: string | undefined; modified?: string | undefined },
+): string {
+  const entries = Object.entries(params)
+    .filter(([name, value]) => name !== "force" && value !== undefined)
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  const version = post ? `@${post.modified_gmt || post.modified || "unknown"}` : "";
+  return `seo:${kind}${version}:${JSON.stringify(Object.fromEntries(entries))}`;
+}
+
+/**
  * SEO-specific cache manager
  *
  * Implements specialized caching strategies for SEO operations:
@@ -43,12 +60,25 @@ export class SEOCacheManager extends CacheManager {
   constructor() {
     const config: CacheConfig = {
       maxSize: 1000,
-      defaultTTL: 21600, // 6 hours default for SEO operations
+      defaultTTL: 21600 * 1000, // 6 hours default for SEO operations (the base cache counts milliseconds)
       enableLRU: true,
       enableStats: true,
       sitePrefix: "seo",
     };
     super(config);
+  }
+
+  /** The configured TTL for an SEO result type, in seconds (SEO_CACHE_*_TTL where one exists). */
+  public ttlFor(type: keyof typeof this.DEFAULT_TTL): number {
+    return this.DEFAULT_TTL[type];
+  }
+
+  /**
+   * Store an SEO result. SEO TTLs are seconds — the SEO_CACHE_*_TTL settings, DEFAULT_TTL and every SEO caller — while
+   * the base cache counts milliseconds, so the conversion happens here, once.
+   */
+  override set<T>(key: string, value: T, ttlSeconds?: number, etag?: string, lastModified?: string): void {
+    super.set(key, value, ttlSeconds === undefined ? undefined : ttlSeconds * 1000, etag, lastModified);
   }
 
   /**

@@ -112,9 +112,6 @@ export interface SEOToolParams {
   /** Maximum pages to audit */
   maxPages?: number;
 
-  /** Include external links in audit */
-  includeExternalLinks?: boolean;
-
   /** Include technical audit */
   includeTechnical?: boolean;
 

@@ -7,12 +7,12 @@ technical factors
 
 ## Parameters
 
-| Parameter       | Type     | Required | Description                                     | Default | Examples              |
-| --------------- | -------- | -------- | ----------------------------------------------- | ------- | --------------------- |
-| `postId`        | `number` | ✅       | WordPress post ID to analyze                    | -       | `example`             |
-| `analysisType`  | `string` | ❌       | Type of SEO analysis to perform (default: full) | -       | `example`             |
-| `focusKeywords` | `array`  | ❌       | Primary keywords to analyze for optimization    | -       | `example`             |
-| `site`          | `string` | ❌       | Site identifier for multi-site setups           | -       | `site1`, `production` |
+| Parameter       | Type     | Required | Description                                                                                                                                                      | Default | Examples              |
+| --------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | --------------------- |
+| `postId`        | `number` | ✅       | WordPress post ID to analyze                                                                                                                                     | -       | `example`             |
+| `analysisType`  | `string` | ❌       | Area to report on (default: full). readability, keywords or structure keep only that area's recommendations and details; the score and metrics always cover the… | -       | `example`             |
+| `focusKeywords` | `array`  | ❌       | Primary keywords to analyze for optimization                                                                                                                     | -       | `example`             |
+| `site`          | `string` | ❌       | Site identifier for multi-site setups                                                                                                                            | -       | `site1`, `production` |
 
 ## Examples
 

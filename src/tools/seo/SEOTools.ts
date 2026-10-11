@@ -26,7 +26,7 @@ import { SchemaGenerator } from "./generators/SchemaGenerator.js";
 import { InternalLinkingSuggester } from "./optimizers/InternalLinkingSuggester.js";
 import { SiteAuditor } from "./auditors/SiteAuditor.js";
 import { BulkOperations } from "./BulkOperations.js";
-import { SEOCacheManager } from "@/cache/SEOCacheManager.js";
+import { SEOCacheManager, seoResultKey } from "@/cache/SEOCacheManager.js";
 import { SearchConsoleProvider } from "./providers/SearchConsoleProvider.js";
 import { config } from "@/config/Config.js";
 import { seoToolDefinitions } from "./SEOToolDefinitions.js";
@@ -115,22 +115,18 @@ export class SEOTools {
       try {
         validateRequired(params, ["postId"]);
 
-        // Check cache first
-        // The analysis scores the focus keywords (the first one as primary), so they are part of the key, in order.
-        // JSON keeps a keyword containing a comma apart from two keywords (["a,b"] vs ["a", "b"]).
-        const keywords = JSON.stringify(params.focusKeywords ?? []);
-        const cacheKey = `seo:analyze:${params.site}:${params.postId as number}:${params.analysisType}:${keywords}`;
+        // The post is fetched first: its last modification is part of the cache key, so an edit is re-analysed.
+        const post = await client.getPost(params.postId as number);
+        const cacheKey = seoResultKey("analyze", params, post);
         const cached = await this.getCachedResult(cacheKey);
         if (cached) {
           siteLogger.debug("Cache hit for content analysis", { cacheKey });
           return cached as SEOAnalysisResult;
         }
 
-        // Perform analysis (implementation will be added in analyzers)
-        const result = await this.performAnalysis(client, params);
+        const result = await this.contentAnalyzer.analyzePost(post as WordPressPost, params);
 
-        // Cache the result
-        await this.cacheResult(cacheKey, result, 21600); // 6 hours
+        await this.cacheResult(cacheKey, result, "analysis");
 
         return result;
       } catch (_error) {
@@ -227,18 +223,20 @@ export class SEOTools {
       try {
         validateRequired(params, ["postId", "schemaType"]);
 
-        // Check cache
-        const cacheKey = `seo:schema:${params.site}:${params.postId as number}:${params.schemaType}`;
+        // The post is fetched first: its last modification is part of the cache key.
+        const post = await client.getPost(params.postId as number);
+        if (!post) {
+          throw new Error(`Post ${params.postId as number} not found`);
+        }
+        const cacheKey = seoResultKey("schema", params, post);
         const cached = await this.getCachedResult(cacheKey);
         if (cached) {
           return cached as SchemaMarkup;
         }
 
-        // Generate schema (implementation in generators)
-        const schema = await this.createSchema(client, params);
+        const schema = await this.createSchema(post as WordPressPost, params);
 
-        // Cache for 24 hours
-        await this.cacheResult(cacheKey, schema, 86400);
+        await this.cacheResult(cacheKey, schema, "schema");
 
         return schema;
       } catch (_error) {
@@ -334,18 +332,15 @@ export class SEOTools {
 
     return await siteLogger.time("Perform site audit", async () => {
       try {
-        // Cache key for audit results (1 hour TTL)
-        const cacheKey = `seo:audit:${params.site}:${params.auditType || "full"}`;
+        const cacheKey = seoResultKey("audit", { ...params, auditType: params.auditType || "full" });
         const cached = await this.getCachedResult(cacheKey);
         if (cached && (!params.force as boolean)) {
           return cached as SiteAuditResult;
         }
 
-        // Perform audit (implementation will be added)
         const audit = await this.executeSiteAudit(client, params);
 
-        // Cache for 1 hour
-        await this.cacheResult(cacheKey, audit, 3600);
+        await this.cacheResult(cacheKey, audit, "audit");
 
         return audit;
       } catch (_error) {
@@ -373,12 +368,13 @@ export class SEOTools {
           throw new Error("At least one keyword is required");
         }
 
-        const cacheKey = `seo:serp:${params.site}:${[...keywords].sort().join(",")}:${params.url ?? ""}`;
+        // Keyword order does not change the result, so it does not change the key.
+        const cacheKey = seoResultKey("serp", { ...params, keywords: [...keywords].sort() });
         const cached = await this.getCachedResult(cacheKey);
         if (cached) return cached as SERPTrackingResult;
 
         const result = await this.computeSERPPositions(client, params);
-        await this.cacheResult(cacheKey, result, 43200); // 12 hours
+        await this.cacheResult(cacheKey, result, "serp");
         return result;
       } catch (_error) {
         handleToolError(_error, "track SERP positions", { site: params.site });
@@ -397,12 +393,12 @@ export class SEOTools {
       try {
         validateRequired(params, ["seedKeyword"]);
 
-        const cacheKey = `seo:keywords:${params.site}:${params.seedKeyword as string}`;
+        const cacheKey = seoResultKey("keywords", params);
         const cached = await this.getCachedResult(cacheKey);
         if (cached) return cached as KeywordResearchResult;
 
         const result = await this.computeKeywordResearch(client, params);
-        await this.cacheResult(cacheKey, result, 604800); // 7 days
+        await this.cacheResult(cacheKey, result, "keywords");
         return result;
       } catch (_error) {
         handleToolError(_error, "keyword research", { site: params.site });
@@ -465,32 +461,28 @@ export class SEOTools {
   }
 
   /**
-   * Caches a result with specified TTL.
+   * Caches a result for the configured TTL of its type (seconds, SEO_CACHE_*_TTL where one exists).
    *
    * @param key - Cache key
    * @param result - Result to cache
-   * @param ttl - Time to live in seconds
+   * @param type - Result type, which selects the TTL
    * @private
    */
-  private async cacheResult(key: string, result: unknown, ttl: number): Promise<void> {
-    await this.cacheManager.set(key, result, ttl);
+  private async cacheResult(
+    key: string,
+    result: unknown,
+    type: Parameters<SEOCacheManager["ttlFor"]>[0],
+  ): Promise<void> {
+    this.cacheManager.set(key, result, this.cacheManager.ttlFor(type));
   }
 
   // Implementation methods
-  private async performAnalysis(client: WordPressClient, params: SEOToolParams): Promise<SEOAnalysisResult> {
-    // Fetch the post data
-    const post = await client.getPost(params.postId as number);
-
-    // Perform content analysis
-    return await this.contentAnalyzer.analyzePost(post as WordPressPost, params);
-  }
-
   private async createMetadata(client: WordPressClient, params: SEOToolParams): Promise<SEOMetadata> {
     // Fetch the post data
     const post = await client.getPost(params.postId as number);
 
-    // Check cache first
-    const cacheKey = `seo:metadata:${params.site}:${params.postId as number}`;
+    // Check cache first; the post's last modification is part of the key
+    const cacheKey = seoResultKey("metadata", params, post);
     const cached = await this.getCachedResult(cacheKey);
     if (cached) {
       this.logger.debug("Cache hit for metadata generation", { cacheKey });
@@ -505,8 +497,7 @@ export class SEOTools {
       preserveExisting: false,
     });
 
-    // Cache for 2 hours
-    await this.cacheResult(cacheKey, metadata, 7200);
+    await this.cacheResult(cacheKey, metadata, "metadata");
 
     return metadata;
   }
@@ -542,14 +533,7 @@ export class SEOTools {
     return await bulkOps.bulkUpdateMetadata(params, progressCallback);
   }
 
-  private async createSchema(client: WordPressClient, params: SEOToolParams): Promise<SchemaMarkup> {
-    // Fetch the post data
-    const post = await client.getPost(params.postId as number);
-
-    if (!post) {
-      throw new Error(`Post ${params.postId as number} not found`);
-    }
-
+  private async createSchema(post: WordPressPost, params: SEOToolParams): Promise<SchemaMarkup> {
     // Generate schema markup
     const options = {
       includeAuthor: true,
@@ -566,7 +550,7 @@ export class SEOTools {
       },
     };
 
-    return await this.schemaGenerator.generateSchema(post as WordPressPost, params, options);
+    return await this.schemaGenerator.generateSchema(post, params, options);
   }
 
   private async performSchemaValidation(params: SEOToolParams): Promise<unknown> {
@@ -731,12 +715,16 @@ export class SEOTools {
   }
 
   private async executeSiteAudit(client: WordPressClient, params: SEOToolParams): Promise<SiteAuditResult> {
+    // auditType picks the sections: technical covers site architecture too; full (the default) runs them all.
+    const auditType = params.auditType || "full";
+    const runs = (section: "technical" | "content" | "performance") => auditType === "full" || auditType === section;
+
     // Initialize site auditor for the specific client
     const siteAuditor = new SiteAuditor(client, {
-      includeTechnical: params.includeTechnical !== false,
-      includeContent: params.includeContent !== false,
-      includeArchitecture: params.includeArchitecture !== false,
-      includePerformance: params.includePerformance !== false,
+      includeTechnical: runs("technical") && params.includeTechnical !== false,
+      includeContent: runs("content") && params.includeContent !== false,
+      includeArchitecture: runs("technical") && params.includeArchitecture !== false,
+      includePerformance: runs("performance") && params.includePerformance !== false,
       includeAccessibility: params.includeAccessibility || false,
       maxPagesForContentAudit: params.maxPages || 50,
       minSeverityLevel: params.minSeverity || "medium",

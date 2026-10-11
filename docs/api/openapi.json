@@ -2660,7 +2660,7 @@
                   },
                   "analysisType": {
                     "type": "string",
-                    "description": "Type of SEO analysis to perform (default: full)"
+                    "description": "Area to report on (default: full). readability, keywords or structure keep only that area's recommendations and details; the score and metrics always cover the whole post"
                   },
                   "focusKeywords": {
                     "type": "array",
@@ -3032,19 +3032,15 @@
                 "properties": {
                   "auditType": {
                     "type": "string",
-                    "description": "Type of audit to perform (default: full)"
+                    "description": "Audit sections to run: technical (including site architecture), content, performance, or full for all of them (default: full)"
                   },
                   "maxPages": {
                     "type": "number",
                     "description": "Maximum number of posts, and of pages, to audit (default: 50 each, max 100)"
                   },
-                  "includeExternalLinks": {
-                    "type": "boolean",
-                    "description": "Include external link validation in audit"
-                  },
                   "force": {
                     "type": "boolean",
-                    "description": "Force refresh, bypassing cached audit results"
+                    "description": "Force refresh, bypassing the audit cached for an hour"
                   },
                   "site": {
                     "type": "string",
