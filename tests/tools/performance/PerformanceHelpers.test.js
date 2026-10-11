@@ -203,6 +203,12 @@ describe("PerformanceHelpers", () => {
       expect(calculateCacheEfficiency(cache)).toBe("Poor");
     });
 
+    // The same output showed hitRate "n/a (no lookups yet)" next to efficiency "Poor".
+    it("has no efficiency before the first lookup", () => {
+      const cache = { hits: 0, misses: 0, hitRate: 0, totalSize: 0, evictions: 0, memoryUsageMB: 0 };
+      expect(calculateCacheEfficiency(cache)).toBe("n/a (no lookups yet)");
+    });
+
     it("should penalize high evictions", () => {
       const highEvictions = { hitRate: 0.85, totalSize: 1000, evictions: 150, memoryUsageMB: 50 };
       const lowEvictions = { hitRate: 0.85, totalSize: 1000, evictions: 10, memoryUsageMB: 50 };

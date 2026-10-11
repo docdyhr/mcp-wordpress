@@ -117,6 +117,8 @@ export function calculatePerformanceScore(metrics: PerformanceMetrics): number {
  * Calculate cache efficiency rating
  */
 export function calculateCacheEfficiency(cacheMetrics: PerformanceMetrics["cache"]): string {
+  // A cache with no lookups is neutral, like its hit rate (formatHitRate): not "Poor".
+  if (!hasCacheActivity(cacheMetrics)) return "n/a (no lookups yet)";
   const efficiency =
     cacheMetrics.hitRate * 100 + (cacheMetrics.totalSize > 0 ? 10 : 0) - (cacheMetrics.evictions > 100 ? 10 : 0);
 

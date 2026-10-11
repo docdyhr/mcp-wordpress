@@ -269,11 +269,11 @@ the number of requests between the first and last snapshot. History is kept for 
 last 24 hours (the label says so). Trends, anomalies and predictions use the analytics' own 24-hour history whatever the
 timeframe. Hit-rate percentage strings in `wp_performance_stats` and the cache tools have one decimal (`"16.7%"`);
 history's `averageCacheHitRate` and export's `siteComparison` keep the 0–1 fraction. Before the first cache lookup there
-is no hit rate: the strings read `"n/a (no lookups yet)"`, and `averageCacheHitRate` leaves such snapshots out (`null`
-if all of them are). Chart series in history and export are sampled to at most 100 points; `dataPoints`,
-`historicalDataPoints` and the summary count every snapshot. A repeat of a recorded alert within the 15-minute cooldown
-updates that alert's message, value and timestamp. Alert messages round their numbers, but never so far that a breach
-reads as its threshold (`2000.004ms` against 2000 ms, not `2000ms`).
+is no hit rate: the strings read `"n/a (no lookups yet)"` (so does the cache `efficiency`), and `averageCacheHitRate`
+leaves such snapshots out (`null` if all of them are). Chart series in history and export are sampled to at most 100
+points; `dataPoints`, `historicalDataPoints` and the summary count every snapshot. A repeat of a recorded alert within
+the 15-minute cooldown updates that alert's message, value and timestamp. Alert messages round their numbers, but never
+so far that a breach reads as its threshold (`2000.004ms` against 2000 ms, not `2000ms`).
 
 ### System Metrics
 
