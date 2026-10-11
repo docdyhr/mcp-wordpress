@@ -401,7 +401,7 @@ export class BulkOperations {
 
     // Cache the result
     if (this.cacheManager) {
-      this.cacheManager.set(cacheKey, metadata, 3600); // 1 hour
+      this.cacheManager.set(cacheKey, metadata, this.cacheManager.ttlFor("metadata"));
     }
   }
 
@@ -435,7 +435,7 @@ export class BulkOperations {
 
     // Cache the result
     if (this.cacheManager) {
-      this.cacheManager.set(cacheKey, analysisResult, 21600); // 6 hours
+      this.cacheManager.set(cacheKey, analysisResult, this.cacheManager.ttlFor("analysis"));
     }
 
     return analysisResult;

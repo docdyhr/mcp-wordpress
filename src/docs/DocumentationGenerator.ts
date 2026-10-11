@@ -38,6 +38,8 @@ export interface ParameterDocumentation {
   description: string;
   defaultValue: unknown;
   allowedValues: string[] | undefined;
+  minimum?: number | undefined;
+  maximum?: number | undefined;
   examples: string[];
 }
 
@@ -228,6 +230,9 @@ export class DocumentationGenerator {
       ...(property.description !== undefined ? { description: property.description } : {}),
       ...(property.enum ? { enum: property.enum.map((value) => String(value)) } : {}),
       ...(property.items ? { items: { type: property.items.type } } : {}),
+      ...(property.minimum !== undefined ? { minimum: property.minimum } : {}),
+      ...(property.maximum !== undefined ? { maximum: property.maximum } : {}),
+      ...(property.default !== undefined ? { default: property.default } : {}),
     }));
   }
 
@@ -272,15 +277,30 @@ export class DocumentationGenerator {
       [key: string]: unknown;
     }>,
   ): ParameterDocumentation[] {
-    return parameters.map((param) => ({
-      name: param.name,
-      type: param.type || "string",
-      required: param.required || false,
-      description: param.description || `${param.name} parameter`,
-      defaultValue: this.getDefaultValue(param),
-      allowedValues: this.getAllowedValues(param) || undefined,
-      examples: this.generateParameterExamples(param),
-    }));
+    return parameters.map((param) => {
+      // The schema's own enum, bounds and default come first; the name-based tables only fill in where the schema has
+      // none, and a table default outside the parameter's values (comment status "publish") is dropped, not emitted.
+      const allowedValues =
+        (Array.isArray(param.enum) ? param.enum.map(String) : undefined) ?? this.getAllowedValues(param);
+      const tableDefault = this.getDefaultValue(param);
+      const defaultValue =
+        param.default !== undefined
+          ? param.default
+          : allowedValues && !allowedValues.includes(String(tableDefault))
+            ? undefined
+            : tableDefault;
+      return {
+        name: param.name,
+        type: param.type || "string",
+        required: param.required || false,
+        description: param.description || `${param.name} parameter`,
+        defaultValue,
+        allowedValues,
+        ...(typeof param.minimum === "number" ? { minimum: param.minimum } : {}),
+        ...(typeof param.maximum === "number" ? { maximum: param.maximum } : {}),
+        examples: this.generateParameterExamples(param),
+      };
+    });
   }
 
   /**
@@ -864,6 +884,13 @@ export class DocumentationGenerator {
 
       if (param.allowedValues) {
         (properties[param.name] as Record<string, unknown>).enum = param.allowedValues;
+      }
+
+      if (param.minimum !== undefined) {
+        (properties[param.name] as Record<string, unknown>).minimum = param.minimum;
+      }
+      if (param.maximum !== undefined) {
+        (properties[param.name] as Record<string, unknown>).maximum = param.maximum;
       }
 
       if (param.defaultValue !== undefined) {

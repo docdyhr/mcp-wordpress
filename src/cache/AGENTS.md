@@ -25,7 +25,9 @@ Owns `src/cache/`. Consumed by `src/client/AGENTS.md` (`CachedWordPressClient`).
   seconds** (`SEO_CACHE_*_TTL`, `DEFAULT_TTL`, `ttlFor()`, every SEO caller) while `CacheManager` counts milliseconds;
   its `set()` override converts, so never pass milliseconds to it. One instance serves every site, so SEO keys come from
   `seoResultKey()`: all call parameters (sorted, without `force`) plus, for post-based results, the post's last
-  modification.
+  modification. Every SEO key is `seo:<kind>:<site>:<postId or ->:...` (`getSEOCacheKey()` too), and
+  `invalidatePostSEO()`/`invalidateSiteSEO()`/`clearSEOCache()`/`getSEOCacheStats()` select entries by those segments
+  through the base cache's `keys()` — keep the site and post as segments in any new key.
 - **`get()` vs `peek()`**: `CacheManager.get()` deletes expired entries as a side effect. `peek()`
   (`CacheManager.ts:258-279`) exists so `HttpCacheWrapper` can inspect staleness without destroying the
   ETag/Last-Modified validators needed for conditional requests — use `peek()` for revalidation flows, `get()`

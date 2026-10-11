@@ -368,8 +368,8 @@ export class SEOTools {
           throw new Error("At least one keyword is required");
         }
 
-        // Keyword order does not change the result, so it does not change the key.
-        const cacheKey = seoResultKey("serp", { ...params, keywords: [...keywords].sort() });
+        // The result lists positions in the order the keywords were given, so the order is part of the key.
+        const cacheKey = seoResultKey("serp", params);
         const cached = await this.getCachedResult(cacheKey);
         if (cached) return cached as SERPTrackingResult;
 

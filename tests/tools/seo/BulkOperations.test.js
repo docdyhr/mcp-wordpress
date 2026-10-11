@@ -23,6 +23,7 @@ const createMockCache = () => ({
   set: vi.fn(),
   delete: vi.fn(),
   clear: vi.fn(),
+  ttlFor: vi.fn((type) => ({ analysis: 1111, metadata: 2222 })[type]),
 });
 
 describe("BulkOperations", () => {
@@ -281,6 +282,14 @@ describe("BulkOperations", () => {
         expect(cacheKey).toContain("bulk-analysis");
         expect(cacheKey).toContain("keywords");
       });
+    });
+
+    // SEO_CACHE_ANALYSIS_TTL reached SEOTools but bulk analysis still wrote a hard-coded 21600.
+    it("caches analyses for the configured analysis TTL", async () => {
+      await bulkOps.bulkAnalyzeContent({ postIds: [1], site: "test" });
+
+      expect(mockCache.ttlFor).toHaveBeenCalledWith("analysis");
+      expect(mockCache.set.mock.calls[0][2]).toBe(1111);
     });
   });
 

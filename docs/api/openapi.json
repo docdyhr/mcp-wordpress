@@ -475,9 +475,8 @@
                     "enum": [
                       "publish",
                       "draft",
-                      "private",
                       "pending",
-                      "future"
+                      "private"
                     ],
                     "default": "publish"
                   }
@@ -540,9 +539,8 @@
                     "enum": [
                       "publish",
                       "draft",
-                      "private",
                       "pending",
-                      "future"
+                      "private"
                     ],
                     "default": "publish"
                   },
@@ -1829,13 +1827,11 @@
                     "type": "string",
                     "description": "Filter by comment status.",
                     "enum": [
-                      "publish",
-                      "draft",
-                      "private",
-                      "pending",
-                      "future"
-                    ],
-                    "default": "publish"
+                      "hold",
+                      "approve",
+                      "spam",
+                      "trash"
+                    ]
                   },
                   "per_page": {
                     "type": "number",
@@ -1900,7 +1896,13 @@
                   },
                   "media_type": {
                     "type": "string",
-                    "description": "Limit results to a specific media type."
+                    "description": "Limit results to a specific media type.",
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio",
+                      "application"
+                    ]
                   }
                 }
               }
@@ -1958,10 +1960,10 @@
                     "description": "Filter by page status.",
                     "enum": [
                       "publish",
+                      "future",
                       "draft",
-                      "private",
                       "pending",
-                      "future"
+                      "private"
                     ],
                     "default": "publish"
                   }
@@ -2026,10 +2028,10 @@
                     "description": "Filter by post status.",
                     "enum": [
                       "publish",
+                      "future",
                       "draft",
-                      "private",
                       "pending",
-                      "future"
+                      "private"
                     ],
                     "default": "publish"
                   },
@@ -2607,7 +2609,12 @@
                   },
                   "type": {
                     "type": "string",
-                    "description": "The type of content to search."
+                    "description": "The type of content to search.",
+                    "enum": [
+                      "posts",
+                      "pages",
+                      "media"
+                    ]
                   }
                 },
                 "required": [
@@ -2660,7 +2667,13 @@
                   },
                   "analysisType": {
                     "type": "string",
-                    "description": "Area to report on (default: full). readability, keywords or structure keep only that area's recommendations and details; the score and metrics always cover the whole post"
+                    "description": "Area to report on (default: full). readability, keywords or structure keep only that area's recommendations and details; the score and metrics always cover the whole post",
+                    "enum": [
+                      "readability",
+                      "keywords",
+                      "structure",
+                      "full"
+                    ]
                   },
                   "focusKeywords": {
                     "type": "array",
@@ -2848,7 +2861,23 @@
                   },
                   "schemaType": {
                     "type": "string",
-                    "description": "Type of schema.org structured data to generate"
+                    "description": "Type of schema.org structured data to generate",
+                    "enum": [
+                      "Article",
+                      "Product",
+                      "FAQ",
+                      "HowTo",
+                      "Organization",
+                      "Website",
+                      "BreadcrumbList",
+                      "Event",
+                      "Recipe",
+                      "Course",
+                      "LocalBusiness",
+                      "Person",
+                      "Review",
+                      "VideoObject"
+                    ]
                   },
                   "customData": {
                     "type": "object",
@@ -3032,11 +3061,19 @@
                 "properties": {
                   "auditType": {
                     "type": "string",
-                    "description": "Audit sections to run: technical (including site architecture), content, performance, or full for all of them (default: full)"
+                    "description": "Audit sections to run: technical (including site architecture), content, performance, or full for all of them (default: full)",
+                    "enum": [
+                      "technical",
+                      "content",
+                      "performance",
+                      "full"
+                    ]
                   },
                   "maxPages": {
                     "type": "number",
-                    "description": "Maximum number of posts, and of pages, to audit (default: 50 each, max 100)"
+                    "description": "Maximum number of posts, and of pages, to audit (default: 50 each, max 100)",
+                    "minimum": 1,
+                    "maximum": 100
                   },
                   "force": {
                     "type": "boolean",
@@ -3213,7 +3250,12 @@
                   },
                   "searchEngine": {
                     "type": "string",
-                    "description": "Search engine to track positions on"
+                    "description": "Search engine to track positions on",
+                    "enum": [
+                      "google",
+                      "bing",
+                      "yahoo"
+                    ]
                   },
                   "location": {
                     "type": "string",
@@ -3380,7 +3422,13 @@
                 "properties": {
                   "method": {
                     "type": "string",
-                    "description": "The authentication method to validate."
+                    "description": "The authentication method to validate.",
+                    "enum": [
+                      "app-password",
+                      "jwt",
+                      "basic",
+                      "api-key"
+                    ]
                   },
                   "username": {
                     "type": "string",
@@ -3549,13 +3597,11 @@
                     "type": "string",
                     "description": "The new status for the comment.",
                     "enum": [
-                      "publish",
-                      "draft",
-                      "private",
-                      "pending",
-                      "future"
-                    ],
-                    "default": "publish"
+                      "hold",
+                      "approve",
+                      "spam",
+                      "trash"
+                    ]
                   }
                 },
                 "required": [
@@ -3685,9 +3731,8 @@
                     "enum": [
                       "publish",
                       "draft",
-                      "private",
                       "pending",
-                      "future"
+                      "private"
                     ],
                     "default": "publish"
                   }
@@ -3754,9 +3799,8 @@
                     "enum": [
                       "publish",
                       "draft",
-                      "private",
                       "pending",
-                      "future"
+                      "private"
                     ],
                     "default": "publish"
                   },

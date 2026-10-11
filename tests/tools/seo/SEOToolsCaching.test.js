@@ -111,6 +111,24 @@ describe("SEO result caching", () => {
   });
 });
 
+describe("SERP tracking cache", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  // Positions come back in the order the keywords were given, so ["b", "a"] must not reuse ["a", "b"].
+  it("keeps keyword order in the key", async () => {
+    const tools = new SEOTools();
+    const compute = vi
+      .spyOn(tools, "computeSERPPositions")
+      .mockImplementation(async (_client, params) => ({ positions: params.keywords.map((keyword) => ({ keyword })) }));
+
+    await tools.trackSERPPositions({}, { site: "s1", keywords: ["a", "b"] });
+    const reversed = await tools.trackSERPPositions({}, { site: "s1", keywords: ["b", "a"] });
+
+    expect(compute).toHaveBeenCalledTimes(2);
+    expect(reversed.positions.map((p) => p.keyword)).toEqual(["b", "a"]);
+  });
+});
+
 describe("analysisType narrows the analysis", () => {
   const analyze = (analysisType) =>
     new SEOTools().analyzeContent(

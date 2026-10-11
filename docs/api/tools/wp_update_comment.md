@@ -6,11 +6,11 @@ Updates an existing comment.
 
 ## Parameters
 
-| Parameter | Type     | Required | Description                          | Default   | Examples                                              |
-| --------- | -------- | -------- | ------------------------------------ | --------- | ----------------------------------------------------- |
-| `id`      | `number` | ✅       | The ID of the comment to update.     | -         | `123`, `456`                                          |
-| `content` | `string` | ❌       | The updated content for the comment. | -         | `<p>Post content here</p>`, `This is my post content` |
-| `status`  | `string` | ❌       | The new status for the comment.      | `publish` | `example`                                             |
+| Parameter | Type     | Required | Description                          | Default | Examples                                              |
+| --------- | -------- | -------- | ------------------------------------ | ------- | ----------------------------------------------------- |
+| `id`      | `number` | ✅       | The ID of the comment to update.     | -       | `123`, `456`                                          |
+| `content` | `string` | ❌       | The updated content for the comment. | -       | `<p>Post content here</p>`, `This is my post content` |
+| `status`  | `string` | ❌       | The new status for the comment.      | -       | `example`                                             |
 
 ## Examples
 

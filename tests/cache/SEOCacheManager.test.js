@@ -48,3 +48,45 @@ describe("SEOCacheManager TTLs are seconds", () => {
     expect(cache.getCachedAudit("full", "s1")).toBeNull();
   });
 });
+
+// getAllKeys() returned [] (a placeholder), so these never found an entry; and keys built by SEOTools must keep the
+// site and post as their own segments for them to work at all.
+describe("SEOCacheManager invalidation and stats", () => {
+  let cache;
+  const post = { modified_gmt: "2026-10-11T08:00:00" };
+
+  beforeEach(async () => {
+    const { seoResultKey } = await import("../../dist/cache/SEOCacheManager.js");
+    cache = new SEOCacheManager();
+    cache.set(seoResultKey("analyze", { site: "s1", postId: 5, focusKeywords: ["a"] }, post), "s1-p5-analysis", 3600);
+    cache.set(seoResultKey("schema", { site: "s1", postId: 5, schemaType: "Article" }, post), "s1-p5-schema", 3600);
+    cache.set(seoResultKey("analyze", { site: "s1", postId: 50 }, post), "s1-p50", 3600);
+    cache.set(seoResultKey("analyze", { site: "s10", postId: 5 }, post), "s10-p5", 3600);
+    cache.set(seoResultKey("audit", { site: "s1", maxPages: 10 }), "s1-audit", 3600);
+    await cache.cacheAnalysis(5, "full", "legacy-s1-p5", "s1");
+  });
+
+  const remaining = () => cache.keys().map((k) => cache.get(k));
+
+  it("invalidatePostSEO clears that post on that site only", async () => {
+    await cache.invalidatePostSEO(5, "s1");
+    expect(remaining().sort()).toEqual(["s1-audit", "s1-p50", "s10-p5"]);
+  });
+
+  it("invalidateSiteSEO clears that site only (not s10 for s1)", async () => {
+    await cache.invalidateSiteSEO("s1");
+    expect(remaining()).toEqual(["s10-p5"]);
+  });
+
+  it("clearSEOCache clears every SEO entry", async () => {
+    await cache.clearSEOCache();
+    expect(remaining()).toEqual([]);
+  });
+
+  it("getSEOCacheStats counts entries by kind", () => {
+    expect(cache.getSEOCacheStats()).toMatchObject({
+      totalEntries: 6,
+      byType: { analyze: 3, schema: 1, audit: 1, analysis: 1 },
+    });
+  });
+});
