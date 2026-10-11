@@ -4,7 +4,7 @@
  */
 
 import type { ToolDefinition } from "@/server/ToolRegistry.js";
-import { PerformanceMonitor, type PerformanceMetrics } from "@/performance/PerformanceMonitor.js";
+import { hasCacheActivity, PerformanceMonitor, type PerformanceMetrics } from "@/performance/PerformanceMonitor.js";
 import { MetricsCollector } from "@/performance/MetricsCollector.js";
 import {
   PerformanceAnalytics,
@@ -27,6 +27,7 @@ import {
   HISTORY_RETENTION_MS,
   processHistoricalDataForChart,
   downsample,
+  formatHitRate,
   MAX_HISTORY_POINTS,
   calculateAverage,
   formatBenchmarkStatus,
@@ -365,7 +366,7 @@ export default class PerformanceTools {
           performanceScore: calculatePerformanceScore(metrics),
           totalRequests: metrics.requests.total,
           averageResponseTime: `${metrics.requests.averageResponseTime.toFixed(0)}ms`,
-          cacheHitRate: `${(metrics.cache.hitRate * 100).toFixed(1)}%`,
+          cacheHitRate: formatHitRate(metrics.cache),
           // Server/network failures only; expected 4xx responses are reported separately.
           errorRate: `${((metrics.requests.failed / Math.max(metrics.requests.total, 1)) * 100).toFixed(2)}%`,
           clientErrors: metrics.requests.clientErrors,
@@ -387,7 +388,7 @@ export default class PerformanceTools {
         result.cache = {
           scope: CACHE_SCOPE_ALL_SITES,
           ...metrics.cache,
-          hitRate: `${(metrics.cache.hitRate * 100).toFixed(1)}%`,
+          hitRate: formatHitRate(metrics.cache),
           memoryUsage: `${metrics.cache.memoryUsageMB.toFixed(1)}MB`,
           efficiency: calculateCacheEfficiency(metrics.cache),
         };
@@ -429,7 +430,7 @@ export default class PerformanceTools {
           scope: `site ${site} only, since the server started`,
           cache: siteMetrics.cache && {
             ...siteMetrics.cache,
-            hitRate: `${(siteMetrics.cache.hitRate * 100).toFixed(1)}%`,
+            hitRate: formatHitRate(siteMetrics.cache),
           },
           client: siteMetrics.client,
         };
@@ -498,7 +499,9 @@ export default class PerformanceTools {
             summary:
               `averages over the ${historicalData.length} snapshots taken in ${describeHistoryWindow(timeframe)}, ` +
               "all sites combined. Each snapshot's counters are totals since the server started, so these average " +
-              "cumulative figures; totalRequests counts the requests between the first and last snapshot",
+              "cumulative figures; totalRequests counts the requests between the first and last snapshot, and " +
+              "averageCacheHitRate leaves out snapshots taken before any cache lookup (null if there are none)",
+            historicalData: `each series is sampled to at most ${MAX_HISTORY_POINTS} points; dataPoints and the summary use every snapshot`,
             trends: ANALYTICS_SCOPE,
           },
           timeframe,
@@ -507,7 +510,11 @@ export default class PerformanceTools {
           trends: trends || [],
           summary: {
             averageResponseTime: calculateAverage(historicalData.map((d) => d.requests.averageResponseTime)),
-            averageCacheHitRate: calculateAverage(historicalData.map((d) => d.cache.hitRate)),
+            // A snapshot before any cache lookup has no hit rate (hitRate 0 means "no data", not 0%).
+            averageCacheHitRate: (() => {
+              const rates = historicalData.filter((d) => hasCacheActivity(d.cache)).map((d) => d.cache.hitRate);
+              return rates.length ? calculateAverage(rates) : null;
+            })(),
             averageErrorRate: calculateAverage(
               historicalData.map((d) => (d.requests.total > 0 ? d.requests.failed / d.requests.total : 0)),
             ),
@@ -951,7 +958,7 @@ export default class PerformanceTools {
             ...(exportData.siteComparison ? { siteComparison: "each site on its own, since the server started" } : {}),
             ...(includeHistorical
               ? {
-                  historicalData: `snapshots taken in ${describeHistoryWindow(timeRange)}; each one's counters are totals since the server started`,
+                  historicalData: `snapshots taken in ${describeHistoryWindow(timeRange)}, sampled to at most ${MAX_HISTORY_POINTS} points (historicalDataPoints counts them all); each one's counters are totals since the server started`,
                 }
               : {}),
             ...(includeAnalytics

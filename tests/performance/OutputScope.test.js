@@ -146,6 +146,7 @@ describe("cache hit rate scope labels", () => {
 
       expect(result.metadata.scope.currentMetrics).toMatch(/all sites combined/);
       expect(result.metadata.scope.siteComparison).toMatch(/each site/);
+      expect(result.metadata.scope.historicalData).toMatch(/at most 100 points/);
       expect(result.metadata.scope.historicalData).toMatch(/since the server started/);
       expect(result.metadata.scope.analytics).toMatch(/trends, anomalies and predictions: .*24-hour history/);
       // benchmarks, insights and the plan are built from collectCurrentMetrics(), not from the history
@@ -205,6 +206,35 @@ describe("cache hit rate scope labels", () => {
     const { data } = await run("wp_performance_history", { timeframe: "1h", includeTrends: false });
 
     expect(data.summary.totalRequests).toBe(0);
+  });
+
+  // Snapshots from before the first cache lookup have hitRate 0, which is "no data", not 0%: averaging them in
+  // dragged the hit rate down.
+  it("wp_performance_history averages the hit rate over snapshots with cache lookups only", async () => {
+    const snapshot = (cache) => ({
+      timestamp: Date.now(),
+      requests: { total: 10, failed: 0, averageResponseTime: 100 },
+      cache,
+      system: { memoryUsage: 10, uptime: 0 },
+    });
+    const idle = { hits: 0, misses: 0, hitRate: 0 };
+    vi.spyOn(tools.monitor, "getHistoricalData").mockReturnValue([
+      snapshot(idle),
+      snapshot({ hits: 8, misses: 2, hitRate: 0.8 }),
+      snapshot({ hits: 9, misses: 1, hitRate: 0.9 }),
+    ]);
+
+    const { data } = await run("wp_performance_history", { timeframe: "1h", includeTrends: false });
+    expect(data.summary.averageCacheHitRate).toBeCloseTo(0.85, 10);
+
+    vi.spyOn(tools.monitor, "getHistoricalData").mockReturnValue([snapshot(idle), snapshot(idle)]);
+    const { data: idleOnly } = await run("wp_performance_history", { timeframe: "1h", includeTrends: false });
+    expect(idleOnly.summary.averageCacheHitRate).toBeNull();
+  });
+
+  it("wp_performance_history says the chart series are sampled", async () => {
+    const { data } = await run("wp_performance_history", { timeframe: "1h", includeTrends: false });
+    expect(data.scope.historicalData).toMatch(/at most 100 points/);
   });
 });
 

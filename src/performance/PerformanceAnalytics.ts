@@ -6,6 +6,9 @@
 import { hasCacheActivity, PerformanceMetrics, type PerformanceSnapshot, toSnapshot } from "./PerformanceMonitor.js";
 import { MetricsCollector } from "./MetricsCollector.js";
 
+/** How far ahead a trend predicts unless asked otherwise (`PerformanceTrend.prediction.timeframe`). */
+const TREND_HORIZON_MS = 30 * 60 * 1000;
+
 /**
  * Smallest spread anomaly detection assumes for a metric. A steady metric has (near) zero standard deviation, which
  * would turn a 1 ms or one-request wobble into a large z-score.
@@ -138,7 +141,7 @@ export class PerformanceAnalytics {
     // Limit historical data to lookback period first, so a new point is never judged against readings older than it
     // (points can arrive hours apart when only tool calls add them).
     const cutoff = Date.now() - this.config.lookbackPeriod;
-    this.historicalData = this.historicalData.filter((data) => data.timestamp > cutoff);
+    this.historicalData = this.historicalData.filter((data) => data.timestamp >= cutoff); // inclusive, as in the monitor
     this.pruneAnomalies();
 
     // Judge the new point against the points before it: included in its own baseline, it drags the mean towards
@@ -151,56 +154,48 @@ export class PerformanceAnalytics {
   }
 
   /**
-   * Analyze performance trends
+   * Analyze performance trends, predicting `horizonMs` past the newest point (default 30 minutes).
    */
-  analyzeTrends(): PerformanceTrend[] {
+  analyzeTrends(horizonMs: number = TREND_HORIZON_MS): PerformanceTrend[] {
     if (!this.config.enableTrendAnalysis || this.historicalData.length < 5) {
       return [];
     }
 
-    const trends: PerformanceTrend[] = [];
+    const series = (data: PerformanceSnapshot[], value: (d: PerformanceSnapshot) => number) =>
+      data.map((d) => ({ timestamp: d.timestamp, value: value(d) }));
+    const data = this.historicalData;
 
-    // Analyze response time trend
-    trends.push(
+    return [
       this.analyzeTrend(
         "responseTime",
-        this.historicalData.map((d) => d.requests.averageResponseTime),
+        series(data, (d) => d.requests.averageResponseTime),
+        horizonMs,
       ),
-    );
-
-    // Analyze cache hit rate trend
-    trends.push(
+      // A cache with no lookups is neutral, not a 0% hit rate: such points are not part of the hit-rate trend.
       this.analyzeTrend(
         "cacheHitRate",
-        this.historicalData.map((d) => d.cache.hitRate),
+        series(
+          data.filter((d) => hasCacheActivity(d.cache)),
+          (d) => d.cache.hitRate,
+        ),
+        horizonMs,
       ),
-    );
-
-    // Analyze error rate trend
-    trends.push(
       this.analyzeTrend(
         "errorRate",
-        this.historicalData.map((d) => (d.requests.total > 0 ? d.requests.failed / d.requests.total : 0)),
+        series(data, (d) => (d.requests.total > 0 ? d.requests.failed / d.requests.total : 0)),
+        horizonMs,
       ),
-    );
-
-    // Analyze memory usage trend
-    trends.push(
       this.analyzeTrend(
         "memoryUsage",
-        this.historicalData.map((d) => d.system.memoryUsage),
+        series(data, (d) => d.system.memoryUsage),
+        horizonMs,
       ),
-    );
-
-    // Analyze request volume trend
-    trends.push(
       this.analyzeTrend(
         "requestVolume",
-        this.historicalData.map((d) => d.requests.requestsPerSecond),
+        series(data, (d) => d.requests.requestsPerSecond),
+        horizonMs,
       ),
-    );
-
-    return trends;
+    ];
   }
 
   /**
@@ -376,7 +371,8 @@ export class PerformanceAnalytics {
       return { predictions: [], alerts: [] };
     }
 
-    const trends = this.analyzeTrends();
+    // Predict over the requested horizon: the alerts below say "in N minutes".
+    const trends = this.analyzeTrends(timeframeMinutes * 60 * 1000);
     const predictions: Array<{
       metric: string;
       currentValue: number;
@@ -387,7 +383,6 @@ export class PerformanceAnalytics {
     const alerts: string[] = [];
 
     for (const trend of trends) {
-      const _timeframeMs = timeframeMinutes * 60 * 1000;
       const predictedValue = trend.prediction.nextValue;
 
       predictions.push({
@@ -516,7 +511,12 @@ export class PerformanceAnalytics {
   /**
    * Analyze trend for a specific metric
    */
-  private analyzeTrend(metricName: string, values: number[]): PerformanceTrend {
+  private analyzeTrend(
+    metricName: string,
+    points: Array<{ timestamp: number; value: number }>,
+    horizonMs: number,
+  ): PerformanceTrend {
+    const values = points.map((p) => p.value);
     if (values.length < 3) {
       return {
         metric: metricName,
@@ -531,9 +531,14 @@ export class PerformanceAnalytics {
       };
     }
 
-    // Calculate linear regression
+    // Fit against time (minutes since the first point), not the sample index: points are not evenly spaced (the
+    // analytics timer and every wp_performance_history call add one). Points without a time spread (all stamped
+    // alike) fall back to the index, and the prediction is then one sample ahead.
     const n = values.length;
-    const x = Array.from({ length: n }, (_, i) => i);
+    const first = points[0]!.timestamp;
+    const timed = points[n - 1]!.timestamp > first;
+    const x = timed ? points.map((p) => (p.timestamp - first) / 60_000) : points.map((_, i) => i);
+    const ahead = timed ? horizonMs / 60_000 : 1;
     const y = values;
 
     const sumX = x.reduce((a, b) => a + b, 0);
@@ -563,8 +568,11 @@ export class PerformanceAnalytics {
     // From 0 there is no meaningful percentage; report no rate rather than Infinity.
     const changeRate = previousValue !== 0 ? Math.abs((currentValue - previousValue) / previousValue) * 100 : 0;
 
+    // A trend is a fitted change across the observed points larger than the metric's noise floor (the same floor
+    // anomaly detection uses), in the metric's own units — not a fixed slope that meant ms for one metric and a whole
+    // 10 percentage points for another. It describes the history, so the prediction horizon does not change it.
     let direction: "improving" | "declining" | "stable" = "stable";
-    if (Math.abs(slope) > 0.1) {
+    if (Math.abs(slope * (x[n - 1]! - x[0]!)) > anomalyNoiseFloor(metricName, yMean)) {
       // For metrics where lower is better (response time, error rate)
       if (["responseTime", "errorRate", "memoryUsage"].includes(metricName)) {
         direction = slope < 0 ? "improving" : "declining";
@@ -574,8 +582,8 @@ export class PerformanceAnalytics {
       }
     }
 
-    // Predict next value
-    const nextValue = slope * n + intercept;
+    // Predict the value one horizon past the newest point
+    const nextValue = slope * (x[n - 1]! + ahead) + intercept;
 
     return {
       metric: metricName,
@@ -584,7 +592,7 @@ export class PerformanceAnalytics {
       confidence: Math.max(0, Math.min(1, rSquared)),
       prediction: {
         nextValue: Math.max(0, nextValue),
-        timeframe: 30 * 60 * 1000, // 30 minutes
+        timeframe: timed ? horizonMs : 0, // 0: one sample ahead, the points carry no time spread
         confidence: Math.max(0, Math.min(1, rSquared * 0.8)), // Slightly lower confidence for predictions
       },
     };
@@ -679,7 +687,7 @@ export class PerformanceAnalytics {
   /** Drop anomalies older than the lookback period: they are history, and the alert status counts them. */
   private pruneAnomalies(): void {
     const cutoff = Date.now() - this.config.lookbackPeriod;
-    this.detectedAnomalies = this.detectedAnomalies.filter((a) => a.timestamp > cutoff);
+    this.detectedAnomalies = this.detectedAnomalies.filter((a) => a.timestamp >= cutoff);
   }
 
   /**

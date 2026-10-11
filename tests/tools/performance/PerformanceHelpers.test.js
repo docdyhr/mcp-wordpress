@@ -25,6 +25,9 @@ import {
   calculateEstimatedImpact,
   convertToCSV,
   createSummaryReport,
+  downsample,
+  formatHitRate,
+  describeHistoryWindow,
 } from "../../../dist/tools/performance/PerformanceHelpers.js";
 
 // Test fixtures
@@ -233,6 +236,40 @@ describe("PerformanceHelpers", () => {
     it("should handle large uptimes", () => {
       const thirtyDays = 30 * 24 * 60 * 60 * 1000;
       expect(formatUptime(thirtyDays)).toBe("30d 0h 0m");
+    });
+  });
+
+  describe("downsample", () => {
+    const items = [1, 2, 3, 4, 5];
+
+    it("returns the items unchanged when they fit", () => {
+      expect(downsample(items, 5)).toBe(items);
+      expect(downsample(items, 10)).toBe(items);
+    });
+
+    it("keeps the first and the newest item", () => {
+      expect(downsample(items, 3)).toEqual([1, 3, 5]);
+    });
+
+    it("keeps only the newest item for a budget of 1, and none for 0", () => {
+      expect(downsample(items, 1)).toEqual([5]);
+      expect(downsample(items, 0)).toEqual([]);
+    });
+  });
+
+  describe("formatHitRate", () => {
+    it("formats a hit rate with one decimal", () => {
+      expect(formatHitRate({ hits: 1, misses: 5, hitRate: 1 / 6 })).toBe("16.7%");
+    });
+
+    it("has no hit rate before the first lookup", () => {
+      expect(formatHitRate({ hits: 0, misses: 0, hitRate: 0 })).toBe("n/a (no lookups yet)");
+    });
+  });
+
+  describe("describeHistoryWindow", () => {
+    it.each(["1h", "6h", "12h", "24h", "7d", "30d"])("knows every timeframe parseTimeframe knows: %s", (tf) => {
+      expect(describeHistoryWindow(tf)).not.toMatch(/not a supported timeframe/);
     });
   });
 

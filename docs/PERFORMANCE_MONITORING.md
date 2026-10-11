@@ -268,9 +268,12 @@ averages snapshots taken in the timeframe; each snapshot holds totals since the 
 the number of requests between the first and last snapshot. History is kept for 24 hours, so `7d` and `30d` cover the
 last 24 hours (the label says so). Trends, anomalies and predictions use the analytics' own 24-hour history whatever the
 timeframe. Hit-rate percentage strings in `wp_performance_stats` and the cache tools have one decimal (`"16.7%"`);
-history's `averageCacheHitRate` and export's `siteComparison` keep the 0–1 fraction. A repeat of a recorded alert within
-the 15-minute cooldown updates that alert's message, value and timestamp. Alert messages round their numbers, but never
-so far that a breach reads as its threshold (`2000.004ms` against 2000 ms, not `2000ms`).
+history's `averageCacheHitRate` and export's `siteComparison` keep the 0–1 fraction. Before the first cache lookup there
+is no hit rate: the strings read `"n/a (no lookups yet)"`, and `averageCacheHitRate` leaves such snapshots out (`null`
+if all of them are). Chart series in history and export are sampled to at most 100 points; `dataPoints`,
+`historicalDataPoints` and the summary count every snapshot. A repeat of a recorded alert within the 15-minute cooldown
+updates that alert's message, value and timestamp. Alert messages round their numbers, but never so far that a breach
+reads as its threshold (`2000.004ms` against 2000 ms, not `2000ms`).
 
 ### System Metrics
 
@@ -289,12 +292,15 @@ so far that a breach reads as its threshold (`2000.004ms` against 2000 ms, not `
 
 ### Trend Analysis
 
-The system automatically analyzes performance trends using linear regression:
+The system automatically analyzes performance trends using linear regression over time (snapshots are not evenly spaced,
+so each point counts at the time it was taken):
 
-- **Direction**: `improving`, `declining`, or `stable`
+- **Direction**: `improving`, `declining`, or `stable` — a direction only when the fitted change over the history is
+  larger than the metric's noise floor
 - **Change Rate**: Percentage change over time
 - **Confidence**: Statistical confidence in the trend (0-1)
-- **Predictions**: Forecasted future values
+- **Predictions**: The value `prediction.timeframe` after the newest snapshot (30 minutes; `predictPerformance` uses its
+  own horizon)
 
 ### Anomaly Detection
 

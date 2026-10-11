@@ -8,6 +8,7 @@ import { CachedWordPressClient } from "@/client/CachedWordPressClient.js";
 import { toolWrapper } from "@/utils/toolWrapper.js";
 import { LoggerFactory } from "@/utils/logger.js";
 import { SecurityConfig } from "@/security/SecurityConfig.js";
+import { formatHitRate } from "@/tools/performance/PerformanceHelpers.js";
 
 /**
  * Cache management tools class
@@ -106,7 +107,7 @@ export class CacheTools {
           scope: CACHE_SCOPE_THIS_SITE,
           hits: stats.cache.hits,
           misses: stats.cache.misses,
-          hit_rate: `${(stats.cache.hitRate * 100).toFixed(1)}%`,
+          hit_rate: formatHitRate(stats.cache),
           total_entries: stats.cache.totalSize,
           evictions: stats.cache.evictions,
           expirations: stats.cache.expirations,
@@ -225,7 +226,7 @@ export class CacheTools {
             current_stats: {
               scope: CACHE_SCOPE_THIS_SITE,
               total_entries: stats.cache.totalSize,
-              hit_rate: `${(stats.cache.hitRate * 100).toFixed(1)}%`,
+              hit_rate: formatHitRate(stats.cache),
               hits: stats.cache.hits,
               misses: stats.cache.misses,
               evictions: stats.cache.evictions,
