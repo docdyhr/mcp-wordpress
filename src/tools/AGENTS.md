@@ -68,8 +68,10 @@ exist because the X-WP-Total header is not exposed to tools; never label a page'
 
 **Schema and descriptions are the contract**: where a tool checks required parameters in code (the SEO tools'
 `validateRequired()`), the list must not be stricter than its `inputSchema.required`, and a default named in a property
-description ("default: full") must be the one the code applies. `wp_seo_analyze_content`'s cache key includes every
-parameter that changes its result: site, post, `analysisType`, and `focusKeywords` in order.
+description ("default: full") must be the one the code applies, and a documented parameter must change the result —
+remove one the code ignores rather than keep it. SEO results are cached under `seoResultKey()` keys with
+`SEOCacheManager.ttlFor()` TTLs (seconds); a post-based tool fetches the post before the cache lookup, because the
+post's last modification is part of the key (contract: `src/cache/AGENTS.md`).
 
 **Shared imports**: `@/client/api.js` (`WordPressClient`), `@/utils/error.js`, `@/types/wordpress.js`,
 `@/utils/validation/security.js` (`sanitizeHtml`), `@/utils/htmlText.js` (`displayTitle`, `htmlToPlainText`),

@@ -13,6 +13,32 @@ import { Config } from "@/config/Config.js";
 import { LoggerFactory } from "@/utils/logger.js";
 
 /**
+ * Cache key for an SEO result: `seo:<kind>:<site>:<postId or ->:<post version or ->:<parameters>`. The site and post
+ * are their own segments, so `invalidatePostSEO()`/`invalidateSiteSEO()` and the stats can find them. Every parameter
+ * of the call goes in (sorted, without `force`), so no parameter that changes the result can be left out, and a
+ * post-based result carries the post's last modification, so it never outlives an edit.
+ */
+export function seoResultKey(
+  kind: string,
+  params: object,
+  post?: { modified_gmt?: string | undefined; modified?: string | undefined },
+): string {
+  const { site, postId } = params as { site?: unknown; postId?: unknown };
+  const entries = Object.entries(params)
+    .filter(([name, value]) => name !== "force" && value !== undefined)
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  const version = post ? post.modified_gmt || post.modified || "unknown" : "-";
+  return [
+    "seo",
+    kind,
+    typeof site === "string" && site ? site : "default",
+    postId === undefined ? "-" : String(postId),
+    version,
+    JSON.stringify(Object.fromEntries(entries)),
+  ].join(":");
+}
+
+/**
  * SEO-specific cache manager
  *
  * Implements specialized caching strategies for SEO operations:
@@ -43,12 +69,25 @@ export class SEOCacheManager extends CacheManager {
   constructor() {
     const config: CacheConfig = {
       maxSize: 1000,
-      defaultTTL: 21600, // 6 hours default for SEO operations
+      defaultTTL: 21600 * 1000, // 6 hours default for SEO operations (the base cache counts milliseconds)
       enableLRU: true,
       enableStats: true,
       sitePrefix: "seo",
     };
     super(config);
+  }
+
+  /** The configured TTL for an SEO result type, in seconds (SEO_CACHE_*_TTL where one exists). */
+  public ttlFor(type: keyof typeof this.DEFAULT_TTL): number {
+    return this.DEFAULT_TTL[type];
+  }
+
+  /**
+   * Store an SEO result. SEO TTLs are seconds — the SEO_CACHE_*_TTL settings, DEFAULT_TTL and every SEO caller — while
+   * the base cache counts milliseconds, so the conversion happens here, once.
+   */
+  override set<T>(key: string, value: T, ttlSeconds?: number, etag?: string, lastModified?: string): void {
+    super.set(key, value, ttlSeconds === undefined ? undefined : ttlSeconds * 1000, etag, lastModified);
   }
 
   /**
@@ -58,7 +97,7 @@ export class SEOCacheManager extends CacheManager {
    * @param site - Site identifier
    * @param identifier - Unique identifier (post ID, etc.)
    * @param suffix - Additional suffix for uniqueness
-   * @returns Formatted cache key
+   * @returns Formatted cache key, `seo:<type>:<site>:<identifier>[:<suffix>]` (the same segments as `seoResultKey()`)
    */
   public getSEOCacheKey(
     type: keyof typeof this.DEFAULT_TTL,
@@ -66,7 +105,8 @@ export class SEOCacheManager extends CacheManager {
     identifier: string | number,
     suffix?: string,
   ): string {
-    const parts = [this.SEO_CACHE_PREFIX, type, site, identifier];
+    // "seo", not SEO_CACHE_PREFIX: joining the prefix's own colon gave "seo::type", which nothing matched.
+    const parts = ["seo", type, site, identifier];
     if (suffix) {
       parts.push(suffix);
     }
@@ -205,18 +245,10 @@ export class SEOCacheManager extends CacheManager {
    * @param site - Site identifier
    */
   public async invalidatePostSEO(postId: number, site: string = "default"): Promise<void> {
-    const patterns = [
-      `${this.SEO_CACHE_PREFIX}analysis:${site}:${postId}:*`,
-      `${this.SEO_CACHE_PREFIX}schema:${site}:${postId}:*`,
-      `${this.SEO_CACHE_PREFIX}metadata:${site}:${postId}:*`,
-      `${this.SEO_CACHE_PREFIX}links:${site}:${postId}:*`,
-    ];
+    // Every SEO key is `seo:<kind>:<site>:<postId>:...` (seoResultKey(), getSEOCacheKey()).
+    const count = await this.invalidateWhere((parts) => parts[2] === site && parts[3] === String(postId));
 
-    for (const pattern of patterns) {
-      await this.invalidatePattern(pattern);
-    }
-
-    this.logger.info("Invalidated SEO cache for post", { postId, site });
+    this.logger.info("Invalidated SEO cache for post", { postId, site, count });
   }
 
   /**
@@ -227,41 +259,24 @@ export class SEOCacheManager extends CacheManager {
    * @param site - Site identifier
    */
   public async invalidateSiteSEO(site: string = "default"): Promise<void> {
-    const pattern = `${this.SEO_CACHE_PREFIX}*:${site}:*`;
-    await this.invalidatePattern(pattern);
+    const count = await this.invalidateWhere((parts) => parts[2] === site);
 
-    this.logger.info("Invalidated all SEO cache for site", { site });
+    this.logger.info("Invalidated all SEO cache for site", { site, count });
   }
 
   /**
-   * Invalidate cache entries matching a pattern
-   *
-   * @param pattern - Cache key pattern to match
-   * @private
+   * Delete the SEO entries whose key segments (`seo:<kind>:<site>:<postId>:...`) match. Comparing segments, not a glob,
+   * keeps site "s1" from matching "s10" and a post ID from matching inside the parameters.
    */
-  private async invalidatePattern(pattern: string): Promise<void> {
-    // Get all cache keys and filter by pattern
-    const allKeys = await this.getAllKeys();
-
-    // Escape regex special characters first, then convert glob * to regex .*
-    // This prevents regex injection and handles patterns correctly
-    const escapedPattern = pattern
-      .replace(/[.+?^${}()|[\]\\]/g, "\\$&") // Escape regex special chars except *
-      .replace(/\*/g, ".*"); // Convert glob wildcards to regex
-    const regex = new RegExp("^" + escapedPattern + "$");
-
-    const matchingKeys = allKeys.filter((key) => regex.test(key));
-
-    for (const key of matchingKeys) {
+  private async invalidateWhere(matches: (parts: string[]) => boolean): Promise<number> {
+    const keys = (await this.getAllKeys()).filter((key) => {
+      const parts = key.split(":");
+      return parts[0] === "seo" && matches(parts);
+    });
+    for (const key of keys) {
       await this.delete(key);
     }
-
-    if (matchingKeys.length > 0) {
-      this.logger.debug("Invalidated cache pattern", {
-        pattern,
-        count: matchingKeys.length,
-      });
-    }
+    return keys.length;
   }
 
   /**
@@ -316,17 +331,15 @@ export class SEOCacheManager extends CacheManager {
    * @private
    */
   private getAllKeys(): string[] {
-    // Access the private cache from the parent class if possible
-    // For now, we'll work around this by keeping our own key tracking
-    return [];
+    // This returned [] (a placeholder), so the invalidate/clear/stats methods never found an entry.
+    return this.keys();
   }
 
   /**
    * Clear all SEO-related cache entries
    */
   public async clearSEOCache(): Promise<void> {
-    const pattern = `${this.SEO_CACHE_PREFIX}*`;
-    await this.invalidatePattern(pattern);
+    await this.invalidateWhere(() => true);
 
     this.logger.info("Cleared all SEO cache");
   }

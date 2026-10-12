@@ -198,9 +198,6 @@ export async function handlePerformSiteAudit(client: WordPressClient, args: Reco
     if (args.maxPages) {
       params.maxPages = args.maxPages as number;
     }
-    if (args.includeExternalLinks) {
-      params.includeExternalLinks = args.includeExternalLinks as boolean;
-    }
 
     return await getSeoTools().performSiteAudit(client, params);
   } catch (error) {

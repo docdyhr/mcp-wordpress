@@ -7,11 +7,10 @@ subsystems.
 
 ## Ownership
 
-Owns everything under `src/` not covered by a child AGENTS.md: entry points (`index.ts`, `server.ts`,
-`dxt-entry.ts`), `src/server/` (MCP server wiring + `ToolRegistry.ts`), `src/utils/` (logger, error types,
-`CircuitBreaker`, validation helpers), `src/types/` (shared TS types), `src/docs/` (README/docs auto-generation).
-Domain-specific contracts for tools, the WordPress client, caching, security, performance, and config live in the
-child docs indexed below.
+Owns everything under `src/` not covered by a child AGENTS.md: entry points (`index.ts`, `server.ts`, `dxt-entry.ts`),
+`src/server/` (MCP server wiring + `ToolRegistry.ts`), `src/utils/` (logger, error types, `CircuitBreaker`, validation
+helpers), `src/types/` (shared TS types), `src/docs/` (README/docs auto-generation). Domain-specific contracts for
+tools, the WordPress client, caching, security, performance, and config live in the child docs indexed below.
 
 ## Local Contracts
 
@@ -21,6 +20,10 @@ child docs indexed below.
   and helpers in `src/utils/error.ts` / `enhancedError.ts` — don't throw raw `Error`.
 - Logging: use `src/utils/logger.ts`, not `console.*`.
 - Input sanitization: route all MCP tool input through `src/security/InputValidator.ts`, not ad hoc checks.
+- API docs (`src/docs/DocumentationGenerator.ts`, `npm run docs:generate` → `docs/api/`): a parameter's type, enum,
+  minimum/maximum and default come from the tool's `inputSchema`. The name-keyed tables (`getAllowedValues`,
+  `getDefaultValue`) only fill gaps, and a table default outside the parameter's enum is dropped. Regenerate after any
+  schema change.
 
 ## Work Guidance
 
