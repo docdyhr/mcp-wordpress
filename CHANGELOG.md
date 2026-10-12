@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.5](https://github.com/docdyhr/mcp-wordpress/compare/v4.1.4...v4.1.5) (2026-10-12)
+
+### 🐛 Bug Fixes
+
+- **seo:** cache SEO results for their TTL in seconds, keyed by every input
+  ([#273](https://github.com/docdyhr/mcp-wordpress/issues/273))
+  ([b0711c6](https://github.com/docdyhr/mcp-wordpress/commit/b0711c6dc6def64bd46b94b56917a306e64e0c18))
+
 ## [4.1.4](https://github.com/docdyhr/mcp-wordpress/compare/v4.1.3...v4.1.4) (2026-10-10)
 
 ### 🐛 Bug Fixes
