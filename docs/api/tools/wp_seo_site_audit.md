@@ -6,13 +6,12 @@ Perform comprehensive SEO audit of the WordPress site including technical, conte
 
 ## Parameters
 
-| Parameter              | Type      | Required | Description                                                                 | Default | Examples              |
-| ---------------------- | --------- | -------- | --------------------------------------------------------------------------- | ------- | --------------------- |
-| `auditType`            | `string`  | ❌       | Type of audit to perform (default: full)                                    | -       | `example`             |
-| `maxPages`             | `number`  | ❌       | Maximum number of posts, and of pages, to audit (default: 50 each, max 100) | -       | `example`             |
-| `includeExternalLinks` | `boolean` | ❌       | Include external link validation in audit                                   | -       | `example`             |
-| `force`                | `boolean` | ❌       | Force refresh, bypassing cached audit results                               | -       | `example`             |
-| `site`                 | `string`  | ❌       | Site identifier for multi-site setups                                       | -       | `site1`, `production` |
+| Parameter   | Type      | Required | Description                                                                                                                   | Default | Examples              |
+| ----------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- | ------- | --------------------- |
+| `auditType` | `string`  | ❌       | Audit sections to run: technical (including site architecture), content, performance, or full for all of them (default: full) | -       | `example`             |
+| `maxPages`  | `number`  | ❌       | Maximum number of posts, and of pages, to audit (default: 50 each, max 100)                                                   | -       | `example`             |
+| `force`     | `boolean` | ❌       | Force refresh, bypassing the audit cached for an hour                                                                         | -       | `example`             |
+| `site`      | `string`  | ❌       | Site identifier for multi-site setups                                                                                         | -       | `site1`, `production` |
 
 ## Examples
 
@@ -72,7 +71,7 @@ Comprehensive example using all available parameters
 **Command:**
 
 ```bash
-wp_seo_site_audit --auditType="example_value" --maxPages="example_value" --includeExternalLinks="example_value" --force="example_value" --site="site1"
+wp_seo_site_audit --auditType="example_value" --maxPages="example_value" --force="example_value" --site="site1"
 ```
 
 **Response:**

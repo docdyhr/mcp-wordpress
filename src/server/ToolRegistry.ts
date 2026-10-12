@@ -29,6 +29,8 @@ export interface ToolDefinition {
     required?: boolean;
     enum?: string[];
     items?: { type?: string };
+    minimum?: number;
+    maximum?: number;
   }>;
   inputSchema?: MCPToolSchema;
   handler: (client: WordPressClient, args: Record<string, unknown>) => Promise<unknown>;

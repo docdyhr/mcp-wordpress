@@ -11,7 +11,7 @@
 import { WordPressClient } from "@/client/api.js";
 import { MetaGenerator } from "./generators/MetaGenerator.js";
 import { ContentAnalyzer } from "./analyzers/ContentAnalyzer.js";
-import { SEOCacheManager } from "@/cache/SEOCacheManager.js";
+import { SEOCacheManager, seoResultKey } from "@/cache/SEOCacheManager.js";
 import { LoggerFactory } from "@/utils/logger.js";
 import { SEOToolParams, BulkOperationResult, SEOAnalysisResult } from "@/types/seo.js";
 import type { WordPressPost } from "@/types/wordpress.js";
@@ -362,8 +362,19 @@ export class BulkOperations {
    * Process metadata update for a single post
    */
   private async processMetadataUpdate(postId: number, params: SEOToolParams): Promise<void> {
-    // Check cache first
-    const cacheKey = `bulk-meta-${postId}`;
+    // Fetch post data first: the key carries the site, the focus keywords and the post's last modification, so
+    // one SEO cache shared by all sites never answers for another site, other keywords or an edited post.
+    const post = await this.client.getPost(postId);
+    if (!post) {
+      throw new Error(`Post ${postId} not found`);
+    }
+
+    const metadataParams = {
+      postId,
+      ...(params.focusKeywords && { focusKeywords: params.focusKeywords }),
+      ...(params.site && { site: params.site }),
+    };
+    const cacheKey = seoResultKey("bulk-meta", metadataParams, post);
     if (this.cacheManager && !params.force) {
       const cached = this.cacheManager.get(cacheKey);
       if (cached) {
@@ -372,18 +383,7 @@ export class BulkOperations {
       }
     }
 
-    // Fetch post data
-    const post = await this.client.getPost(postId);
-    if (!post) {
-      throw new Error(`Post ${postId} not found`);
-    }
-
     // Generate metadata
-    const metadataParams = {
-      postId,
-      ...(params.focusKeywords && { focusKeywords: params.focusKeywords }),
-      ...(params.site && { site: params.site }),
-    };
     const metadata = await this.metaGenerator.generateMetadata(post, metadataParams);
 
     if (!params.dryRun) {
@@ -401,7 +401,7 @@ export class BulkOperations {
 
     // Cache the result
     if (this.cacheManager) {
-      this.cacheManager.set(cacheKey, metadata, 3600); // 1 hour
+      this.cacheManager.set(cacheKey, metadata, this.cacheManager.ttlFor("metadata"));
     }
   }
 
@@ -409,8 +409,19 @@ export class BulkOperations {
    * Process content analysis for a single post
    */
   private async processContentAnalysis(postId: number, params: SEOToolParams): Promise<SEOAnalysisResult> {
-    // Check cache first
-    const cacheKey = `bulk-analysis-${postId}-${params.analysisType || "full"}`;
+    // Fetch post data first: its last modification is part of the cache key (see processMetadataUpdate)
+    const post = await this.client.getPost(postId);
+    if (!post) {
+      throw new Error(`Post ${postId} not found`);
+    }
+
+    const analysisParams = {
+      postId,
+      analysisType: params.analysisType || ("full" as const),
+      ...(params.site && { site: params.site }),
+      ...(params.focusKeywords && { focusKeywords: params.focusKeywords }),
+    };
+    const cacheKey = seoResultKey("bulk-analysis", analysisParams, post);
     if (this.cacheManager && !params.force) {
       const cached = this.cacheManager.get(cacheKey);
       if (cached) {
@@ -419,24 +430,12 @@ export class BulkOperations {
       }
     }
 
-    // Fetch post data
-    const post = await this.client.getPost(postId);
-    if (!post) {
-      throw new Error(`Post ${postId} not found`);
-    }
-
     // Analyze content
-    const analysisParams = {
-      postId,
-      analysisType: params.analysisType || ("full" as const),
-      ...(params.site && { site: params.site }),
-      ...(params.focusKeywords && { focusKeywords: params.focusKeywords }),
-    };
     const analysisResult = await this.contentAnalyzer.analyzePost(post as WordPressPost, analysisParams);
 
     // Cache the result
     if (this.cacheManager) {
-      this.cacheManager.set(cacheKey, analysisResult, 21600); // 6 hours
+      this.cacheManager.set(cacheKey, analysisResult, this.cacheManager.ttlFor("analysis"));
     }
 
     return analysisResult;

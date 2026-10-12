@@ -12,7 +12,18 @@ import { LoggerFactory } from "@/utils/logger.js";
 import { Config } from "@/config/Config.js";
 import { countWords, htmlToPlainText } from "@/utils/htmlText.js";
 import type { WordPressPost } from "@/types/wordpress.js";
-import type { SEOAnalysisResult, SEOMetrics, SEORecommendation, SEOToolParams } from "@/types/seo.js";
+import type { SEOAnalysisResult, SEOAnalysisType, SEOMetrics, SEORecommendation, SEOToolParams } from "@/types/seo.js";
+
+/**
+ * The recommendation types each analysisType keeps (`null`: all of them). Readability covers length and the Flesch
+ * score ("content"); structure covers headings, images and links ("structure", "technical").
+ */
+const ANALYSIS_AREA_RECOMMENDATIONS: Record<SEOAnalysisType, SEORecommendation["type"][] | null> = {
+  full: null,
+  readability: ["content"],
+  keywords: ["keyword"],
+  structure: ["structure", "technical"],
+};
 
 /**
  * Content analyzer for SEO evaluation
@@ -51,16 +62,22 @@ export class ContentAnalyzer {
       const score = this.calculateOverallScore(metrics, recommendations);
       const status = this.getScoreStatus(score);
 
+      // analysisType narrows the recommendations and detail sections to one area; the score, status and metrics
+      // always describe the whole post.
+      const area = params.analysisType ?? "full";
+      const areaTypes = ANALYSIS_AREA_RECOMMENDATIONS[area];
       const result: SEOAnalysisResult = {
         score,
         status,
         metrics,
-        recommendations,
-        structure,
+        recommendations: areaTypes ? recommendations.filter((r) => areaTypes.includes(r.type)) : recommendations,
         analyzedAt: new Date().toISOString(),
       };
 
-      if (keywordAnalysis) {
+      if (area === "full" || area === "structure") {
+        result.structure = structure;
+      }
+      if (keywordAnalysis && (area === "full" || area === "keywords")) {
         result.keywordAnalysis = keywordAnalysis;
       }
 

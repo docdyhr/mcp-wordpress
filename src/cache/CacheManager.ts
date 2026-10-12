@@ -186,6 +186,14 @@ export class CacheManager {
   }
 
   /**
+   * The keys currently stored (expired entries included until they are read or cleaned up), for subclasses that
+   * select entries by key.
+   */
+  protected keys(): string[] {
+    return [...this.cache.keys()];
+  }
+
+  /**
    * Clear cache entries for specific site
    */
   clearSite(siteId: string): number {

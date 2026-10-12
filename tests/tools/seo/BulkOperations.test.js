@@ -23,6 +23,7 @@ const createMockCache = () => ({
   set: vi.fn(),
   delete: vi.fn(),
   clear: vi.fn(),
+  ttlFor: vi.fn((type) => ({ analysis: 1111, metadata: 2222 })[type]),
 });
 
 describe("BulkOperations", () => {
@@ -177,10 +178,14 @@ describe("BulkOperations", () => {
         site: "test",
       };
 
+      const generate = vi.spyOn(bulkOps.metaGenerator, "generateMetadata");
+
       await bulkOps.bulkUpdateMetadata(params);
 
-      // Should only fetch posts that weren't cached
-      expect(mockClient.getPost).toHaveBeenCalledTimes(2);
+      // Should only regenerate posts that weren't cached. Every post is fetched: its last modification is part of
+      // the cache key, so an edited post is processed again.
+      expect(generate).toHaveBeenCalledTimes(2);
+      expect(mockClient.getPost).toHaveBeenCalledTimes(3);
       expect(mockCache.get).toHaveBeenCalledTimes(3);
     });
 
@@ -277,6 +282,14 @@ describe("BulkOperations", () => {
         expect(cacheKey).toContain("bulk-analysis");
         expect(cacheKey).toContain("keywords");
       });
+    });
+
+    // SEO_CACHE_ANALYSIS_TTL reached SEOTools but bulk analysis still wrote a hard-coded 21600.
+    it("caches analyses for the configured analysis TTL", async () => {
+      await bulkOps.bulkAnalyzeContent({ postIds: [1], site: "test" });
+
+      expect(mockCache.ttlFor).toHaveBeenCalledWith("analysis");
+      expect(mockCache.set.mock.calls[0][2]).toBe(1111);
     });
   });
 
@@ -465,5 +478,53 @@ describe("BulkOperations", () => {
       expect(endTime - startTime).toBeLessThan(10000); // Should complete within 10 seconds
       expect(result.processingTime).toBeGreaterThanOrEqual(0);
     });
+  });
+});
+
+// One SEOCacheManager serves every site, and the bulk keys were `bulk-analysis-<postId>-<type>` /
+// `bulk-meta-<postId>`: post 5 on one site was answered from post 5 of another, and an edit or other focus keywords
+// reused the old result. Hidden while SEO TTLs (seconds read as milliseconds) expired everything within seconds.
+describe("BulkOperations cache keys", () => {
+  const postFor = (id, text, modified = "2026-10-11T08:00:00") => ({
+    id,
+    modified,
+    modified_gmt: modified,
+    title: { rendered: `Post ${id}` },
+    content: { rendered: `<p>${text}</p>` },
+    excerpt: { rendered: "" },
+    link: `https://example.com/?p=${id}`,
+    status: "publish",
+  });
+  const fast = { batchSize: 5, maxRetries: 0, retryDelayMs: 1, maxRetryDelayMs: 1, enableProgress: false };
+  let cache;
+
+  beforeEach(async () => {
+    const { SEOCacheManager } = await import("../../../dist/cache/SEOCacheManager.js");
+    cache = new SEOCacheManager();
+  });
+
+  it("keeps the same post ID on two sites apart", async () => {
+    const siteA = { getPost: vi.fn(async (id) => postFor(id, "one two three")) };
+    const siteB = { getPost: vi.fn(async (id) => postFor(id, "one two three four five six seven eight")) };
+
+    const a = await new BulkOperations(siteA, cache, fast).bulkAnalyzeContent({ postIds: [5], site: "a" });
+    const b = await new BulkOperations(siteB, cache, fast).bulkAnalyzeContent({ postIds: [5], site: "b" });
+
+    expect(a.results[0].metrics.wordCount).toBe(3);
+    expect(b.results[0].metrics.wordCount).toBe(8);
+  });
+
+  it("re-analyses an edited post and other focus keywords", async () => {
+    let post = postFor(6, "caching makes pages faster");
+    const ops = new BulkOperations({ getPost: vi.fn(async () => post) }, cache, fast);
+    const analyze = vi.spyOn(ops.contentAnalyzer, "analyzePost");
+
+    await ops.bulkAnalyzeContent({ postIds: [6], site: "a", focusKeywords: ["caching"] });
+    await ops.bulkAnalyzeContent({ postIds: [6], site: "a", focusKeywords: ["caching"] }); // cache hit
+    await ops.bulkAnalyzeContent({ postIds: [6], site: "a", focusKeywords: ["speed"] });
+    post = postFor(6, "caching makes pages much faster", "2026-10-11T09:00:00");
+    await ops.bulkAnalyzeContent({ postIds: [6], site: "a", focusKeywords: ["speed"] });
+
+    expect(analyze).toHaveBeenCalledTimes(3);
   });
 });
