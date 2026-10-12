@@ -874,10 +874,11 @@ export class PerformanceMonitor {
   }
 
   /**
-   * Clean up old historical data
+   * Clean up old historical data. The window is inclusive, like `getHistoricalData(start)`: a snapshot exactly one
+   * retention period old is still in a request for that period.
    */
   private cleanupOldData(): void {
     const cutoff = Date.now() - this.config.retentionPeriod;
-    this.historicalData = this.historicalData.filter((data) => data.timestamp > cutoff);
+    this.historicalData = this.historicalData.filter((data) => data.timestamp >= cutoff);
   }
 }

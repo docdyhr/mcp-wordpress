@@ -117,6 +117,8 @@ export function calculatePerformanceScore(metrics: PerformanceMetrics): number {
  * Calculate cache efficiency rating
  */
 export function calculateCacheEfficiency(cacheMetrics: PerformanceMetrics["cache"]): string {
+  // A cache with no lookups is neutral, like its hit rate (formatHitRate): not "Poor".
+  if (!hasCacheActivity(cacheMetrics)) return "n/a (no lookups yet)";
   const efficiency =
     cacheMetrics.hitRate * 100 + (cacheMetrics.totalSize > 0 ? 10 : 0) - (cacheMetrics.evictions > 100 ? 10 : 0);
 
@@ -141,21 +143,21 @@ export function formatUptime(uptimeMs: number): string {
   return `${seconds}s`;
 }
 
-/**
- * Parse timeframe string to milliseconds
- */
-const SUPPORTED_TIMEFRAMES = ["1h", "6h", "12h", "24h", "7d", "30d"];
+const TIMEFRAME_MS: Record<string, number> = {
+  "1h": 60 * 60 * 1000,
+  "6h": 6 * 60 * 60 * 1000,
+  "12h": 12 * 60 * 60 * 1000,
+  "24h": 24 * 60 * 60 * 1000,
+  "7d": 7 * 24 * 60 * 60 * 1000,
+  "30d": 30 * 24 * 60 * 60 * 1000,
+};
+const SUPPORTED_TIMEFRAMES = Object.keys(TIMEFRAME_MS);
 
+/**
+ * Parse timeframe string to milliseconds (an unknown timeframe is 24h)
+ */
 export function parseTimeframe(timeframe: string): number {
-  const map: Record<string, number> = {
-    "1h": 60 * 60 * 1000,
-    "6h": 6 * 60 * 60 * 1000,
-    "12h": 12 * 60 * 60 * 1000,
-    "24h": 24 * 60 * 60 * 1000,
-    "7d": 7 * 24 * 60 * 60 * 1000,
-    "30d": 30 * 24 * 60 * 60 * 1000,
-  };
-  return map[timeframe] || map["24h"];
+  return TIMEFRAME_MS[timeframe] ?? (TIMEFRAME_MS["24h"] as number);
 }
 
 /**
@@ -209,11 +211,20 @@ export function processHistoricalDataForChart(
 export const MAX_HISTORY_POINTS = 100;
 
 /**
+ * A hit rate as tool output shows it: one decimal ("16.7%"), or no rate before the first lookup — a hit rate over
+ * zero lookups is undefined, not 0%.
+ */
+export function formatHitRate(cache: { hits?: number; misses?: number; hitRate: number }): string {
+  return hasCacheActivity(cache) ? `${(cache.hitRate * 100).toFixed(1)}%` : "n/a (no lookups yet)";
+}
+
+/**
  * Evenly spaced sample of at most `max` items, always keeping the first and the last (the newest reading).
  */
 export function downsample<T>(items: T[], max: number): T[] {
   if (items.length <= max) return items;
-  if (max <= 1) return items.slice(-1);
+  if (max <= 0) return [];
+  if (max === 1) return items.slice(-1);
   const step = (items.length - 1) / (max - 1);
   return Array.from({ length: max }, (_, i) => items[Math.round(i * step)] as T);
 }

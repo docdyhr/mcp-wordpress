@@ -69,6 +69,19 @@ describe("performance history window", () => {
     expect(monitor.getHistoricalData().map((s) => s.timestamp)).toEqual([START + 23 * HOUR, START + 25 * HOUR]);
   });
 
+  // The window is inclusive at both ends: a "last 24h" request includes a snapshot exactly 24h old, so pruning must
+  // keep it too (pruning used `>` while selection used `>=`).
+  it("keeps a snapshot exactly one retention period old, as a 24h request includes it", () => {
+    monitor.recordSnapshot(); // 08:00
+    vi.setSystemTime(START + 24 * HOUR);
+    monitor.recordSnapshot(); // prunes against a cut-off of exactly 08:00
+
+    expect(monitor.getHistoricalData(Date.now() - 24 * HOUR).map((s) => s.timestamp)).toEqual([
+      START,
+      START + 24 * HOUR,
+    ]);
+  });
+
   it("charts snapshots by their timestamp, not by uptime", () => {
     monitor.recordSnapshot();
     const chart = processHistoricalDataForChart(monitor.getHistoricalData(), ["requestVolume"]);
@@ -324,5 +337,44 @@ describe("trend analysis on real history", () => {
       expect(Number.isFinite(trend.changeRate), trend.metric).toBe(true);
     }
     expect(JSON.stringify(analytics.generateInsights())).not.toMatch(/Infinity|NaN/);
+  });
+
+  // Snapshots are not evenly spaced — the analytics timer and every wp_performance_history call add one — but the
+  // regression ran over the sample index and called "one sample ahead" a 30-minute prediction.
+  const at = (minutes, rt, cache = { hitRate: 0.9 }) => {
+    vi.setSystemTime(START + minutes * 60_000);
+    analytics.addDataPoint({
+      timestamp: Date.now(),
+      requests: { averageResponseTime: rt, total: 10, failed: 0, requestsPerSecond: 1 },
+      cache,
+      system: { memoryUsage: 10 },
+    });
+  };
+  // 10 ms per minute, sampled unevenly: four points a minute apart, then one an hour later.
+  const unevenRise = () => [0, 1, 2, 3, 60].forEach((m) => at(m, 100 + 10 * m));
+
+  it("fits a trend against time and predicts 30 minutes ahead", () => {
+    unevenRise();
+    const trend = analytics.analyzeTrends().find((t) => t.metric === "responseTime");
+
+    expect(trend.direction).toBe("declining"); // response time going up
+    expect(trend.prediction.timeframe).toBe(30 * 60_000);
+    expect(trend.prediction.nextValue).toBeCloseTo(1000, 6); // 700 ms at minute 60, +10 ms/min for 30 min
+  });
+
+  it("predictPerformance projects over the requested horizon", () => {
+    unevenRise();
+    const { predictions } = analytics.predictPerformance(60);
+
+    expect(predictions.find((p) => p.metric === "responseTime").predictedValue).toBeCloseTo(1300, 6);
+  });
+
+  // A cache with no lookups is neutral, not a 0% hit rate: an idle start must not read as a rising hit rate.
+  it("leaves idle-cache points out of the hit-rate trend", () => {
+    const idle = { hitRate: 0, hits: 0, misses: 0 };
+    const warm = { hitRate: 0.9, hits: 90, misses: 10 };
+    [idle, idle, idle, warm, warm, warm].forEach((cache, m) => at(m, 300, cache));
+
+    expect(analytics.analyzeTrends().find((t) => t.metric === "cacheHitRate").direction).toBe("stable");
   });
 });
