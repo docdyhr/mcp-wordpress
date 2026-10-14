@@ -19,40 +19,56 @@ import { parse } from "yaml";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CONFIG_PATH = join(__dirname, "../.github/dependabot.yml");
 
-const UPDATE_KEYS = new Set([
-  "allow",
-  "assignees",
-  "commit-message",
-  "cooldown",
-  "directories",
-  "directory",
-  "exclude-paths",
-  "groups",
-  "ignore",
-  "insecure-external-code-execution",
-  "labels",
-  "milestone",
-  "multi-ecosystem-group",
-  "name",
-  "open-pull-requests-limit",
-  "package-ecosystem",
-  "patterns",
-  "pull-request-branch-name",
-  "rebase-strategy",
-  "registries",
-  "schedule",
-  "target-branch",
-  "vendor",
-  "versioning-strategy",
-]);
-const GROUP_KEYS = new Set([
-  "applies-to",
-  "dependency-type",
-  "exclude-patterns",
-  "group-by",
-  "patterns",
-  "update-types",
-]);
+// Option -> allowed value types, from the schema. A key with nothing under it
+// parses as null, and GitHub rejects that: the first version of this file
+// had `ignore:` with only comments below it.
+const UPDATE_OPTIONS = {
+  allow: ["array"],
+  assignees: ["array"],
+  "commit-message": ["object"],
+  cooldown: ["object"],
+  directories: ["array"],
+  directory: ["string"],
+  "exclude-paths": ["array"],
+  groups: ["object"],
+  ignore: ["array"],
+  "insecure-external-code-execution": ["string"],
+  labels: ["array"],
+  milestone: ["integer"],
+  "multi-ecosystem-group": ["string"],
+  name: ["string"],
+  "open-pull-requests-limit": ["integer"],
+  "package-ecosystem": ["string"],
+  patterns: ["array"],
+  "pull-request-branch-name": ["object"],
+  "rebase-strategy": ["string"],
+  registries: ["array", "string"],
+  schedule: ["object"],
+  "target-branch": ["string"],
+  vendor: ["boolean"],
+  "versioning-strategy": ["string"],
+};
+const GROUP_OPTIONS = {
+  "applies-to": ["string"],
+  "dependency-type": ["string"],
+  "exclude-patterns": ["array"],
+  "group-by": ["string"],
+  patterns: ["array"],
+  "update-types": ["array"],
+};
+const typeOf = (value) => {
+  if (value === null) return "null";
+  if (Array.isArray(value)) return "array";
+  if (Number.isInteger(value)) return "integer";
+  return typeof value;
+};
+// "<where>: <key>" for each key the schema lacks, "<where>: <key> is <type>" for each wrong type
+const optionProblems = (where, entry, options) =>
+  Object.entries(entry).flatMap(([key, value]) => {
+    if (!(key in options)) return [`${where}: ${key}`];
+    const actual = typeOf(value);
+    return options[key].includes(actual) ? [] : [`${where}: ${key} is ${actual}`];
+  });
 const GROUP_UPDATE_TYPES = new Set(["major", "minor", "patch"]);
 const GROUP_APPLIES_TO = new Set(["version-updates", "security-updates"]);
 const INSECURE_EXEC_ECOSYSTEMS = new Set(["bundler", "mix", "pip"]);
@@ -81,31 +97,29 @@ describe("Dependabot configuration", () => {
     expect(updates.length).toBeGreaterThan(0);
   });
 
-  it("uses only update options Dependabot supports", () => {
+  it("uses only update options Dependabot supports, each with a value of the right type", () => {
     // `reviewers` was retired in May 2025 in favour of CODEOWNERS
-    const unknown = updates.flatMap((u) =>
-      Object.keys(u)
-        .filter((key) => !UPDATE_KEYS.has(key))
-        .map((key) => `${u["package-ecosystem"]}: ${key}`),
-    );
-    expect(unknown).toEqual([]);
+    const problems = updates.flatMap((u) => optionProblems(u["package-ecosystem"], u, UPDATE_OPTIONS));
+    expect(problems).toEqual([]);
   });
 
-  it("uses only supported group options", () => {
-    const unknown = updates.flatMap((u) =>
-      groupsOf(u).flatMap(([name, group]) =>
-        Object.keys(group)
-          .filter((key) => !GROUP_KEYS.has(key))
-          .map((key) => `${u["package-ecosystem"]}/${name}: ${key}`),
-      ),
+  it("uses only supported group options, each with a value of the right type", () => {
+    const problems = updates.flatMap((u) =>
+      groupsOf(u).flatMap(([name, group]) => {
+        const where = `${u["package-ecosystem"]}/${name}`;
+        return typeOf(group) === "object"
+          ? optionProblems(where, group, GROUP_OPTIONS)
+          : [`${where} is ${typeOf(group)}`];
+      }),
     );
-    expect(unknown).toEqual([]);
+    expect(problems).toEqual([]);
   });
 
   it("limits group update-types to major, minor and patch", () => {
     const invalid = updates.flatMap((u) =>
       groupsOf(u).flatMap(([name, group]) =>
-        (group["update-types"] ?? [])
+        [group?.["update-types"] ?? []]
+          .flat()
           .filter((type) => !GROUP_UPDATE_TYPES.has(type))
           .map((type) => `${u["package-ecosystem"]}/${name}: ${type}`),
       ),
@@ -116,7 +130,7 @@ describe("Dependabot configuration", () => {
   it("uses a valid applies-to on every group that sets one", () => {
     const invalid = updates.flatMap((u) =>
       groupsOf(u)
-        .filter(([, group]) => group["applies-to"] !== undefined && !GROUP_APPLIES_TO.has(group["applies-to"]))
+        .filter(([, group]) => group?.["applies-to"] !== undefined && !GROUP_APPLIES_TO.has(group["applies-to"]))
         .map(([name, group]) => `${u["package-ecosystem"]}/${name}: ${group["applies-to"]}`),
     );
     expect(invalid).toEqual([]);
@@ -132,7 +146,7 @@ describe("Dependabot configuration", () => {
   it("does not disable a security-updates group with target-branch", () => {
     // With target-branch set, the entry's options stop applying to security updates
     const disabled = updates
-      .filter((u) => "target-branch" in u && groupsOf(u).some(([, g]) => g["applies-to"] === "security-updates"))
+      .filter((u) => "target-branch" in u && groupsOf(u).some(([, g]) => g?.["applies-to"] === "security-updates"))
       .map((u) => u["package-ecosystem"]);
     expect(disabled).toEqual([]);
   });
