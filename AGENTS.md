@@ -95,6 +95,15 @@ this stack. `main-ci.yml` (4-suite × Node-version matrix), `wordpress-compatibi
 `release.yml` (DXT + Docker Hub + npm in one pipeline), `docker-modern.yml`, `dependency-review.yml` are all
 project-specific by design. `/repo-audit` flags these as P1 — expected and accepted.
 
+**`.github/dependabot.yml` fails as a whole**: one invalid value makes GitHub reject the entire file. Dependabot keeps
+using the last valid version, if there is one, so edits silently stop taking effect. The only trace is a failing
+`.github/dependabot.yml` check run on the commit that changed the file. That check is not required, so it was ignored
+and blocked nothing. This file was never valid on main from 2025-07 to 2026-10 (a group
+`update-types: ["security-update"]`), so no scheduled version update ever ran. Security updates kept running, which hid
+it. `tests/dependabot-config.test.js` (batch 4) checks the file against the schema's allowed keys and values. When you
+edit the file, check that check run too. Keep `target-branch` unset (once it is set, the entry's options stop applying
+to security updates) and keep the commit-message prefixes `chore`/`ci`.
+
 **Production Docker image has no npm**: `Dockerfile`'s production stage removes the `node:22-alpine` base image's
 bundled npm CLI (`node_modules`, `npm`, `npx` binaries) entirely — the container's entrypoint only ever runs
 `node dist/index.js` (`CMD`/`HEALTHCHECK`), and `docs/DOCKER.md`'s documented `docker exec` usage only ever invokes
