@@ -33,10 +33,11 @@ updates:
       prefix: "chore"
       prefix-development: "chore"
       include: "scope"
+    # Entry-level labels go on every PR from the entry, version updates
+    # included, so none of them may claim `security`
     labels:
       - "dependencies"
       - "javascript"
-      - "security"
     allow:
       - dependency-type: "all"
     # Group related updates together
@@ -90,8 +91,11 @@ updates:
     labels:
       - "dependencies"
       - "github-actions"
-      - "security"
     groups:
+      github-actions-security:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
       github-actions:
         patterns:
           - "*"
@@ -113,6 +117,10 @@ updates:
     labels:
       - "dependencies"
       - "docker"
-      - "security"
+    groups:
+      docker-security:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
 # Security updates are automatically created for all ecosystems
 # and take priority over the schedule defined above

@@ -151,6 +151,19 @@ describe("Dependabot configuration", () => {
     expect(disabled).toEqual([]);
   });
 
+  it("groups every ecosystem's security updates", () => {
+    const ungrouped = updates
+      .filter((u) => !groupsOf(u).some(([, g]) => g?.["applies-to"] === "security-updates"))
+      .map((u) => u["package-ecosystem"]);
+    expect(ungrouped).toEqual([]);
+  });
+
+  it("puts no security label on version-update PRs", () => {
+    // Entry-level labels apply to every PR the entry opens, version updates included
+    const labelled = updates.filter((u) => (u.labels ?? []).includes("security")).map((u) => u["package-ecosystem"]);
+    expect(labelled).toEqual([]);
+  });
+
   it("uses conventional-commit types as commit-message prefixes", () => {
     const invalid = updates.flatMap((u) =>
       ["prefix", "prefix-development"]
