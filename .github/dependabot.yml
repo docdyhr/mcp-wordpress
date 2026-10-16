@@ -1,5 +1,17 @@
 # Dependabot configuration for automated dependency updates
-# Docs: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+# Docs: https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference
+#
+# One invalid value makes GitHub reject this whole file. Dependabot then keeps
+# using the last valid version, if there is one, and edits silently stop taking
+# effect. The only trace is a failing `.github/dependabot.yml` check run on the
+# commit that changed it. This file was never valid on main from 2025-07 to
+# 2026-10, so no scheduled version update ever ran.
+# tests/dependabot-config.test.js guards the known traps.
+#
+# No `target-branch`: once it is set, the options below stop applying to
+# security updates, which always target the default branch.
+# No `reviewers`: Dependabot no longer supports it; .github/CODEOWNERS
+# requests the review instead.
 
 version: 2
 updates:
@@ -13,28 +25,29 @@ updates:
       timezone: "UTC"
     # Security updates are prioritized
     open-pull-requests-limit: 10
-    target-branch: "main"
-    reviewers:
-      - "docdyhr"
     assignees:
       - "docdyhr"
+    # chore(deps) / chore(deps-dev): the conventional-commit types this repo
+    # already uses for dependency bumps; `chore` does not cut a release
     commit-message:
-      prefix: "deps"
-      prefix-development: "deps-dev"
+      prefix: "chore"
+      prefix-development: "chore"
       include: "scope"
+    # Entry-level labels go on every PR from the entry, version updates
+    # included, so none of them may claim `security`
     labels:
       - "dependencies"
       - "javascript"
-      - "security"
     allow:
       - dependency-type: "all"
     # Group related updates together
     groups:
+      # A group's `update-types` accepts only major/minor/patch; security-only
+      # grouping is expressed with `applies-to`
       security-updates:
+        applies-to: "security-updates"
         patterns:
           - "*"
-        update-types:
-          - "security-update"
       production-dependencies:
         dependency-type: "production"
         patterns:
@@ -60,8 +73,6 @@ updates:
           - "@wordpress/*"
     # Rebase strategy for conflicts
     rebase-strategy: "auto"
-    # Enable security advisories
-    insecure-external-code-execution: "deny"
 
   # 🔧 GitHub Actions
   - package-ecosystem: "github-actions"
@@ -72,9 +83,6 @@ updates:
       time: "09:00"
       timezone: "UTC"
     open-pull-requests-limit: 5
-    target-branch: "main"
-    reviewers:
-      - "docdyhr"
     assignees:
       - "docdyhr"
     commit-message:
@@ -83,8 +91,11 @@ updates:
     labels:
       - "dependencies"
       - "github-actions"
-      - "security"
     groups:
+      github-actions-security:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
       github-actions:
         patterns:
           - "*"
@@ -98,17 +109,18 @@ updates:
       time: "09:00"
       timezone: "UTC"
     open-pull-requests-limit: 3
-    target-branch: "main"
-    reviewers:
-      - "docdyhr"
     assignees:
       - "docdyhr"
     commit-message:
-      prefix: "docker"
+      prefix: "chore"
       include: "scope"
     labels:
       - "dependencies"
       - "docker"
-      - "security"
+    groups:
+      docker-security:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
 # Security updates are automatically created for all ecosystems
 # and take priority over the schedule defined above

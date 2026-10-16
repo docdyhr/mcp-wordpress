@@ -197,7 +197,8 @@
     "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.1"
+    "vitest": "^4.1.1",
+    "yaml": "^2.8.3"
   },
   "engines": {
     "node": ">=22.14.0"
