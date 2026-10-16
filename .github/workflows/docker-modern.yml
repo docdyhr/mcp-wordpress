@@ -51,14 +51,14 @@ jobs:
       contents: read
     steps:
       - name: 📥 Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
       - name: 📝 Extract Metadata (Test)
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -67,7 +67,7 @@ jobs:
             type=raw,value=test
 
       - name: 🏗️ Build Docker Image (Test Only)
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/amd64 # Single platform for faster testing
@@ -123,7 +123,7 @@ jobs:
       id-token: write
     steps:
       - name: 📥 Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: 🐳 Set up QEMU (Multi-platform)
         uses: docker/setup-qemu-action@v4
@@ -147,7 +147,7 @@ jobs:
 
       - name: 📝 Extract Metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -171,7 +171,7 @@ jobs:
             build.revision=${{ github.sha }}
 
       - name: 🏗️ Build and Push Docker Image (v6 Full Features)
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         id: build
         with:
           context: .
