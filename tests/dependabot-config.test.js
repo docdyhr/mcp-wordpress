@@ -115,6 +115,19 @@ describe("Dependabot configuration", () => {
     expect(problems).toEqual([]);
   });
 
+  it("sets update-level patterns only together with multi-ecosystem-group", () => {
+    // The schema allows `patterns` on an update entry only to pick that entry's
+    // dependencies for a multi-ecosystem group, where it is required. Anywhere
+    // else it belongs inside a group.
+    const unpaired = updates
+      .filter((u) => "patterns" in u !== "multi-ecosystem-group" in u)
+      .map(
+        (u) =>
+          `${u["package-ecosystem"]}: ${"patterns" in u ? "patterns without" : "missing patterns for"} multi-ecosystem-group`,
+      );
+    expect(unpaired).toEqual([]);
+  });
+
   it("limits group update-types to major, minor and patch", () => {
     const invalid = updates.flatMap((u) =>
       groupsOf(u).flatMap(([name, group]) =>
