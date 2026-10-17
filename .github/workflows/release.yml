@@ -36,7 +36,7 @@ jobs:
       new-release-version: ${{ steps.semantic.outputs.new_release_version }}
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           # Use RELEASE_TOKEN if available for bypassing branch protection rules
@@ -44,7 +44,7 @@ jobs:
           token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: 📦 Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
@@ -124,7 +124,7 @@ jobs:
           - 5000:5000
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: 🐳 Set up QEMU (Multi-platform)
         # Without this, linux/arm64 emulation falls back to whatever QEMU binfmt the
@@ -178,7 +178,7 @@ jobs:
 
       - name: 📝 Extract Metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: docker.io/docdyhr/mcp-wordpress
           tags: |
@@ -221,7 +221,7 @@ jobs:
         # instead of consuming the run's entire time budget.
         timeout-minutes: 30
         continue-on-error: true
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/amd64,linux/arm64
@@ -263,7 +263,7 @@ jobs:
         if: steps.docker-build.outcome == 'failure' || steps.docker-build.outcome == 'cancelled'
         timeout-minutes: 30
         continue-on-error: true
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/amd64,linux/arm64
@@ -297,7 +297,7 @@ jobs:
         env:
           TRIVY_INSECURE: "true"
           TRIVY_PLATFORM: linux/amd64
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: "image"
           image-ref: localhost:5000/mcp-wordpress:scan
@@ -310,7 +310,7 @@ jobs:
         env:
           TRIVY_INSECURE: "true"
           TRIVY_PLATFORM: linux/arm64
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: "image"
           image-ref: localhost:5000/mcp-wordpress:scan
@@ -399,14 +399,14 @@ jobs:
       contents: write
     steps:
       - name: 📥 Checkout Release Tag
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # Checkout the release tag so package.json has the bumped version
           ref: v${{ needs.semantic-release.outputs.new-release-version }}
           fetch-depth: 0
 
       - name: 📦 Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
