@@ -1,6 +1,6 @@
 # Agent skills
 
-Installed from [github/awesome-copilot](https://github.com/github/awesome-copilot) at commit `cb64ad12e32737ae764becd6885462e9b4c7cb00`.
+Installed from [github/awesome-copilot](https://github.com/github/awesome-copilot) (MIT License, see [`LICENSE`](LICENSE)) at commit `cb64ad12e32737ae764becd6885462e9b4c7cb00`.
 Lives in `.claude/skills/`, which Claude Code loads as project skills and GitHub Copilot (cloud agent, CLI, VS Code agent mode) also reads.
 `github-release` and `conventional-commit` were deliberately left out: they conflict with this repo's release and commit conventions.
 
