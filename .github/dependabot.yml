@@ -65,12 +65,20 @@ updates:
           - "eslint*"
           - "prettier*"
           - "vitest*"
+          # @vitest/ui etc. must move with vitest: alone, @vitest/ui 5 cannot
+          # install against vitest 4 (#280, npm ERESOLVE)
+          - "@vitest/*"
           - "typescript*"
           - "@typescript-eslint/*"
       wordpress-packages:
         patterns:
           - "wordpress*"
           - "@wordpress/*"
+    # TypeScript majors wait until @typescript-eslint accepts them: TS 7 failed
+    # `npm ci` against @typescript-eslint 8.71 (#278, ERESOLVE). Bump by hand.
+    ignore:
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     # Rebase strategy for conflicts
     rebase-strategy: "auto"
 
@@ -122,5 +130,11 @@ updates:
         applies-to: "security-updates"
         patterns:
           - "*"
+    # Node majors move by hand to the next even-numbered (LTS) line, together
+    # with `engines` and the CI matrix (22/24). Dependabot proposed the odd,
+    # non-LTS node:25-alpine (#276).
+    ignore:
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
 # Security updates are automatically created for all ecosystems
 # and take priority over the schedule defined above
