@@ -178,7 +178,7 @@
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
     "@vitest/coverage-v8": "^4.1.1",
-    "@vitest/ui": "^4.1.1",
+    "@vitest/ui": "^5.0.4",
     "archiver": "^7.0.1",
     "conventional-changelog-conventionalcommits": "^9.2.0",
     "eslint": "^10.0.2",
