@@ -1,0 +1,2 @@
+# Vendored agent skills stay byte-identical to upstream (see .claude/skills/AGENTS.md)
+.claude/skills/*/

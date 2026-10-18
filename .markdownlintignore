@@ -4,3 +4,5 @@ README.md
 TODO.md
 # Auto-generated diagnostic and test reports
 docs/*.md
+# Vendored agent skills stay byte-identical to upstream (see .claude/skills/AGENTS.md)
+.claude/skills/*/
