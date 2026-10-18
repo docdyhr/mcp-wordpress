@@ -141,6 +141,14 @@ Quality gates before a PR: `npm test && npm run lint && npm run security:scan &&
 - Branch protection enforced on main; PRs required for all changes
 - CodeQL + Trivy scanning enabled in CI
 - Run `npm run security:scan` before commits
+- Vendored agent skills (`.claude/skills/`) are advisory: where one conflicts with an AGENTS.md rule, the AGENTS.md rule
+  wins. In particular:
+  - Dependabot edits keep the invariants under CI/CD Pipeline and never set `open-pull-requests-limit: 0`
+  - Never start the server or send tool calls against a site from `.env` or `mcp-wordpress.config.json`; use a
+    disposable test site or mocks
+  - Install smoke tests use `npm pack` then `npm install --prefix <tmp-dir> <tarball>`, never `npm install -g` or
+    `npx -y mcp-wordpress` (both run the published package, not the candidate)
+  - Never print secret values; report `.env` and config files only as present or ignored
 
 ---
 
@@ -236,6 +244,7 @@ When the user requests a durable behavior change, record it here or in the relev
 
 ### Child DOX Index
 
+- `.claude/skills/AGENTS.md` — vendored agent skills (Claude Code + Copilot); edit via upstream, not in place
 - `.zed/AGENTS.md` — project-scoped Zed language associations for configuration templates and generated output
 - `src/AGENTS.md` — source-wide TypeScript/ESLint conventions, composition-pattern DI, logger usage; indexes its own
   children
