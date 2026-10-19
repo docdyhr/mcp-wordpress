@@ -180,7 +180,7 @@
     "@vitest/coverage-v8": "^5.0.5",
     "@vitest/ui": "^5.0.5",
     "archiver": "^7.0.1",
-    "conventional-changelog-conventionalcommits": "^9.2.0",
+    "conventional-changelog-conventionalcommits": "^10.4.1",
     "eslint": "^10.0.2",
     "eslint-config-prettier": "^10.1.8",
     "fast-check": "^4.5.3",
