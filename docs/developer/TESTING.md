@@ -135,12 +135,8 @@ const { performance } = require("perf_hooks");
 
 // Global test utilities
 global.testUtils = {
-  createMockClient: () => ({
-    /* mock client */
-  }),
-  generateTestData: (schema) => ({
-    /* generated data */
-  }),
+  createMockClient: () => ({/* mock client */}),
+  generateTestData: (schema) => ({/* generated data */}),
   measurePerformance: (fn) => {
     const start = performance.now();
     const result = fn();

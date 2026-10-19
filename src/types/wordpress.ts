@@ -49,16 +49,7 @@ export interface WordPressLinks {
 // Post Types
 export type PostStatus = "publish" | "future" | "draft" | "pending" | "private" | "trash" | "auto-draft" | "inherit";
 export type PostFormat =
-  | "standard"
-  | "aside"
-  | "chat"
-  | "gallery"
-  | "link"
-  | "image"
-  | "quote"
-  | "status"
-  | "video"
-  | "audio";
+  "standard" | "aside" | "chat" | "gallery" | "link" | "image" | "quote" | "status" | "video" | "audio";
 export type CommentStatus = "open" | "closed";
 export type PingStatus = "open" | "closed";
 

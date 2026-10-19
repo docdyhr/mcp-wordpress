@@ -240,8 +240,7 @@ export interface StrictMCPToolSchema {
 
 // Result Types for Better Error Handling
 export type Result<TSuccess, TError = Error> =
-  | { readonly success: true; readonly data: TSuccess }
-  | { readonly success: false; readonly error: TError };
+  { readonly success: true; readonly data: TSuccess } | { readonly success: false; readonly error: TError };
 
 export const createSuccess = <T>(data: T): Result<T> => ({ success: true, data });
 export const createError = <T>(error: Error): Result<T> => ({ success: false, error });
