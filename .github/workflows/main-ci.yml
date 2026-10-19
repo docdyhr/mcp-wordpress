@@ -101,6 +101,12 @@ jobs:
       - name: Lint code
         run: npm run lint
 
+      # release.yml runs the same check on every push to main, before
+      # semantic-release. Without it here, an unformatted PR (e.g. a prettier
+      # bump that changes its output) passes PR CI and then fails the release.
+      - name: Format check
+        run: npm run format:check
+
       - name: Security audit
         run: node scripts/security-audit-gate.js
 
