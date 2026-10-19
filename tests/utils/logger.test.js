@@ -654,7 +654,9 @@ describe("Logger", () => {
     it("should redact numeric/object sensitive values but preserve null", () => {
       const logger = new Logger();
       logger.info("Test", {
-        password: 123, // numeric secrets (PINs/OTPs) must not leak either
+        // Numeric secrets (PINs/OTPs) must not leak either. The sentinel has 8 digits so it can never
+        // occur inside the ISO timestamp the logger prepends (a short value like 123 matches ".123Z").
+        password: 98765432,
         token: null,
         apiKey: undefined,
         secret: { nested: "value" },
@@ -662,7 +664,7 @@ describe("Logger", () => {
 
       expect(consoleErrorSpy).toHaveBeenCalled();
       const logOutput = consoleErrorSpy.mock.calls[0][0];
-      expect(logOutput).not.toContain("123");
+      expect(logOutput).not.toContain("98765432");
       expect(logOutput).toContain("null");
       // Object values under a sensitive key must never pass nested secrets through
       expect(logOutput).not.toContain("nested");
