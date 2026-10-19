@@ -104,7 +104,10 @@ it. `tests/dependabot-config.test.js` (batch 4) checks the file against the sche
 Dependabot validates only default-branch commits, so after merging an edit, check that check run on the merge commit (a
 PR head never gets one). Keep `target-branch` unset (once it is set, the entry's options stop applying to security
 updates), give every ecosystem an `applies-to: "security-updates"` group, put no `security` label at entry level (entry
-labels go on version-update PRs too), and keep the commit-message prefixes `chore`/`ci`.
+labels go on version-update PRs too), and keep the commit-message prefixes `chore`/`ci`. Two majors are ignored and
+bumped by hand: `typescript` (only once `@typescript-eslint` accepts the new major) and the Docker `node` image (moved
+to the next even-numbered LTS line together with `engines` and the CI matrix). `@vitest/*` stays in the
+`development-dependencies` group so it moves with `vitest`.
 
 **Production Docker image has no npm**: `Dockerfile`'s production stage removes the `node:22-alpine` base image's
 bundled npm CLI (`node_modules`, `npm`, `npx` binaries) entirely — the container's entrypoint only ever runs
