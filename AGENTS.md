@@ -136,7 +136,9 @@ self-heals instead of needing another manual patch each time. If this plugin is 
 ## Development Workflow
 
 Branch naming: `feature/...`, `fix/...`, `chore/...`. Commits: Conventional Commits (`feat:`, `fix:`, `chore:`, etc.).
-Quality gates before a PR: `npm test && npm run lint && npm run security:scan && npm run build`.
+Quality gates before a PR: `npm test && npm run lint && npm run format:check && npm run security:scan && npm run build`.
+`format:check` also runs in PR CI (`main-ci.yml` Quality Checks) and in `release.yml` before semantic-release. A
+formatter bump that changes prettier's output needs a reformat commit in the same PR.
 
 ## Security Notes
 
