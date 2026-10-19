@@ -31,6 +31,10 @@ Owns `src/config/`.
   After each load `getLoadInfo()` records the mode, the loaded file and its source, the site IDs and (single-site) the
   paths searched; `wp_test_auth` reports it, because the host does not capture an installed extension's stderr. Does not
   define its own validation rules.
+- `.env` load: `ServerConfiguration` passes `quiet: true` and `debug: false` to `dotenv.config` explicitly. stdout is
+  the MCP stdio JSON-RPC channel, dotenv's debug output goes to `console.log`, and dotenv 18 takes any option left unset
+  from `DOTENV_QUIET` / `DOTENV_DEBUG`. The last block of `tests/config/ServerConfiguration.test.js` runs the real
+  dotenv with the server's options and fails on any stdout write.
 - `Config.ts` — singleton reading `process.env` into a typed `AppConfig`; exports `ConfigHelpers`.
 
 **Config files are never committed**: `mcp-wordpress.config.json` and `.env` are gitignored. Any example/test config
