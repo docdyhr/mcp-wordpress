@@ -242,8 +242,7 @@ export type AsyncFunction<TArgs extends unknown[] = unknown[], TReturn = unknown
 ) => Promise<TReturn>;
 export type SyncFunction<TArgs extends unknown[] = unknown[], TReturn = unknown> = (...args: TArgs) => TReturn;
 export type AnyFunction<TArgs extends unknown[] = unknown[], TReturn = unknown> =
-  | SyncFunction<TArgs, TReturn>
-  | AsyncFunction<TArgs, TReturn>;
+  SyncFunction<TArgs, TReturn> | AsyncFunction<TArgs, TReturn>;
 
 // Conditional Types
 export type If<C extends boolean, T, F> = C extends true ? T : F;
