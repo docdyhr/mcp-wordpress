@@ -88,14 +88,7 @@ export type MCPCallToolRequest = typeof CallToolRequestSchema;
 
 // Tool Categories for Organization
 export type MCPToolCategory =
-  | "authentication"
-  | "posts"
-  | "pages"
-  | "media"
-  | "users"
-  | "comments"
-  | "taxonomies"
-  | "site";
+  "authentication" | "posts" | "pages" | "media" | "users" | "comments" | "taxonomies" | "site";
 
 // Enhanced Tool Definition with Category
 export interface CategorizedMCPTool extends MCPTool {

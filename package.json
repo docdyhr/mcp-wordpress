@@ -174,11 +174,11 @@
     "@pact-foundation/pact-node": "^10.18.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
-    "@types/node": "^25.3.3",
+    "@types/node": "^26.6.5",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
-    "@vitest/coverage-v8": "^4.1.1",
-    "@vitest/ui": "^4.1.1",
+    "@vitest/coverage-v8": "^5.0.5",
+    "@vitest/ui": "^5.0.5",
     "archiver": "^7.0.1",
     "conventional-changelog-conventionalcommits": "^9.2.0",
     "eslint": "^10.0.2",
@@ -197,7 +197,7 @@
     "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.1",
+    "vitest": "^5.0.5",
     "yaml": "^2.8.3"
   },
   "engines": {

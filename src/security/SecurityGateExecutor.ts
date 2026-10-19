@@ -223,9 +223,7 @@ export class SecurityGateExecutor {
     }
 
     const scanResultTyped = scanResult as
-      | { vulnerabilities?: unknown[]; summary?: Record<string, unknown> }
-      | null
-      | undefined;
+      { vulnerabilities?: unknown[]; summary?: Record<string, unknown> } | null | undefined;
     const vulns = Array.isArray(scanResultTyped?.vulnerabilities) ? scanResultTyped.vulnerabilities : [];
     const summary = scanResultTyped?.summary
       ? scanResultTyped.summary

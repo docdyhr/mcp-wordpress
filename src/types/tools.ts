@@ -98,16 +98,7 @@ export interface ListPostsParams extends BaseToolParams {
   readonly search?: string;
   readonly order?: "asc" | "desc";
   readonly orderby?:
-    | "author"
-    | "date"
-    | "id"
-    | "include"
-    | "modified"
-    | "parent"
-    | "relevance"
-    | "slug"
-    | "include_slugs"
-    | "title";
+    "author" | "date" | "id" | "include" | "modified" | "parent" | "relevance" | "slug" | "include_slugs" | "title";
   readonly author?: UserId;
   readonly author_exclude?: readonly UserId[];
   readonly before?: string;
@@ -294,16 +285,7 @@ export interface ListMediaParams extends BaseToolParams {
   readonly search?: string;
   readonly order?: "asc" | "desc";
   readonly orderby?:
-    | "author"
-    | "date"
-    | "id"
-    | "include"
-    | "modified"
-    | "parent"
-    | "relevance"
-    | "slug"
-    | "include_slugs"
-    | "title";
+    "author" | "date" | "id" | "include" | "modified" | "parent" | "relevance" | "slug" | "include_slugs" | "title";
   readonly author?: UserId;
   readonly author_exclude?: readonly UserId[];
   readonly before?: string;
@@ -622,16 +604,7 @@ export interface ToolDefinition<TParams extends BaseToolParams = BaseToolParams,
   readonly name: string;
   readonly description: string;
   readonly category:
-    | "posts"
-    | "pages"
-    | "users"
-    | "media"
-    | "comments"
-    | "taxonomies"
-    | "site"
-    | "auth"
-    | "cache"
-    | "performance";
+    "posts" | "pages" | "users" | "media" | "comments" | "taxonomies" | "site" | "auth" | "cache" | "performance";
   readonly handler: (params: DeepReadonly<TParams>) => Promise<TResult>;
   readonly schema: {
     readonly type: "object";
