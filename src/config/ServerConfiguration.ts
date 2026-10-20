@@ -62,8 +62,9 @@ export class ServerConfiguration {
     this.rootDir = path.resolve(__dirname, "../..");
     this.envPath = path.resolve(this.rootDir, ".env");
 
-    // Load environment variables silently. dotenv v17 logs an injection summary to
-    // console.log unless quiet:true is set, which would corrupt MCP stdio JSON-RPC.
+    // Load environment variables silently: stdout carries MCP stdio JSON-RPC. Pass quiet and
+    // debug explicitly. dotenv sends debug output to console.log (v17 also sent the injection
+    // summary there), and v18 fills any option left unset from DOTENV_QUIET / DOTENV_DEBUG.
     const dotenvResult = dotenv.config({
       path: this.envPath,
       debug: false,

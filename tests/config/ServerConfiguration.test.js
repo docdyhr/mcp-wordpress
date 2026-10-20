@@ -10,6 +10,9 @@
  *
  * fs and dotenv are mocked so this suite never touches the real,
  * credential-bearing .env / mcp-wordpress.config.json files at the repo root.
+ *
+ * The last block also checks that the .env load keeps stdout (MCP stdio
+ * JSON-RPC) clean, running the real dotenv against a temp .env file.
  */
 import * as os from "os";
 import * as path from "path";
@@ -37,6 +40,8 @@ vi.mock("fs", async (importOriginal) => {
 
 const { ServerConfiguration } = await import("../../dist/config/ServerConfiguration.js");
 const { Config } = await import("../../dist/config/Config.js");
+// The real fs, for the temp .env file in the stdout block; a static import would run the fs mock factory too early
+const fs = await vi.importActual("fs");
 
 function enoent() {
   const error = new Error("ENOENT: no such file or directory");
@@ -536,5 +541,70 @@ describe("ServerConfiguration multi-site production guard", () => {
 
     expect(result.configs).toHaveLength(1);
     expect(result.configs[0].id).toBe("site1");
+  });
+});
+
+describe("ServerConfiguration .env loading keeps stdout clean", () => {
+  // stdout carries MCP stdio JSON-RPC. dotenv sends debug output to console.log, and from v18 it fills any option
+  // left unset from DOTENV_QUIET / DOTENV_DEBUG, so the server has to pass both explicitly.
+  const DOTENV_ENV_VARS = ["DOTENV_QUIET", "DOTENV_DEBUG", "DOTENV_CONFIG_QUIET", "DOTENV_CONFIG_DEBUG"];
+  let previousEnv;
+  let tmpDir;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockDotenvConfig.mockReturnValue({});
+    previousEnv = Object.fromEntries(DOTENV_ENV_VARS.map((key) => [key, process.env[key]]));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "mcp-wp-dotenv-"));
+  });
+
+  afterEach(() => {
+    for (const [key, value] of Object.entries(previousEnv)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  function serverDotenvOptions() {
+    new ServerConfiguration();
+    expect(mockDotenvConfig).toHaveBeenCalledTimes(1);
+    return mockDotenvConfig.mock.calls[0][0];
+  }
+
+  it("passes quiet and debug explicitly so DOTENV_* variables cannot turn logging on", () => {
+    expect(serverDotenvOptions()).toMatchObject({ quiet: true, debug: false });
+  });
+
+  it("writes nothing to stdout when the real dotenv runs with the server's options", async () => {
+    const { default: realDotenv } = await vi.importActual("dotenv");
+    const envFile = path.join(tmpDir, ".env");
+    fs.writeFileSync(envFile, "MCP_WP_DOTENV_STDOUT_PROBE=1\n");
+    process.env.DOTENV_QUIET = "false";
+    process.env.DOTENV_DEBUG = "true";
+    // processEnv: {} keeps the probe value out of the real process.env
+    const options = { ...serverDotenvOptions(), path: envFile, processEnv: {} };
+
+    const stdoutWrite = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    const consoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
+    // silences the control's stderr injection notice; stderr is not the JSON-RPC channel
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      // Control: with the options left unset, the same environment does reach stdout, so the spies can see it
+      realDotenv.config({ path: envFile, processEnv: {} });
+      expect(consoleLog.mock.calls.length + stdoutWrite.mock.calls.length).toBeGreaterThan(0);
+      consoleLog.mockClear();
+      stdoutWrite.mockClear();
+
+      const result = realDotenv.config(options);
+
+      expect(result.parsed).toEqual({ MCP_WP_DOTENV_STDOUT_PROBE: "1" });
+      expect(consoleLog).not.toHaveBeenCalled();
+      expect(stdoutWrite).not.toHaveBeenCalled();
+    } finally {
+      stdoutWrite.mockRestore();
+      consoleLog.mockRestore();
+      consoleError.mockRestore();
+    }
   });
 });
