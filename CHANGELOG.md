@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.7](https://github.com/docdyhr/mcp-wordpress/compare/v4.1.6...v4.1.7) (2026-10-20)
+
+### 🐛 Bug Fixes
+
+- **deps:** ship dotenv 18 and lock the .env load's stdout contract
+  ([#317](https://github.com/docdyhr/mcp-wordpress/issues/317))
+  ([c218e2f](https://github.com/docdyhr/mcp-wordpress/commit/c218e2f2276b243ef15ef7f40f8a201ece9a2c4b)), closes
+  [#277](https://github.com/docdyhr/mcp-wordpress/issues/277)
+
 ## [4.1.6](https://github.com/docdyhr/mcp-wordpress/compare/v4.1.5...v4.1.6) (2026-10-12)
 
 ### 🐛 Bug Fixes
