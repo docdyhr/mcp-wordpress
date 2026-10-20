@@ -144,6 +144,7 @@ export class PostTools {
     if (params.categories !== undefined) queryParams.categories = params.categories as number[];
     if (params.tags !== undefined) queryParams.tags = params.tags as number[];
     if (params.offset !== undefined) queryParams.offset = params.offset as number;
+    if (params.post_type !== undefined) queryParams.post_type = params.post_type as string;
 
     return handleListPosts(client, queryParams);
   }
@@ -159,10 +160,13 @@ export class PostTools {
     client: WordPressClient,
     params: { id: number } | Record<string, unknown>,
   ): Promise<WordPressPost | string> {
+    const input = params as Record<string, unknown>;
     // Extract only the relevant parameters
-    const postParams = {
-      id: params.id as number,
+    const postParams: { id: number; post_type?: string; include_content?: boolean } = {
+      id: input.id as number,
     };
+    if (input.post_type !== undefined) postParams.post_type = input.post_type as string;
+    if (input.include_content !== undefined) postParams.include_content = input.include_content as boolean;
 
     return handleGetPost(client, postParams);
   }
@@ -178,11 +182,13 @@ export class PostTools {
     client: WordPressClient,
     params: CreatePostRequest | Record<string, unknown>,
   ): Promise<WordPressPost | string> {
+    const input = params as Record<string, unknown>;
     // Extract only the relevant post creation parameters, excluding MCP-specific fields like 'site'
-    const postParams: CreatePostRequest = {
+    const postParams: CreatePostRequest & { post_type?: string } = {
       title: params.title as string,
     };
 
+    if (input.post_type !== undefined) postParams.post_type = input.post_type as string;
     if (params.content !== undefined) postParams.content = params.content as string;
     if (params.status !== undefined) postParams.status = params.status as PostStatus;
     if (params.excerpt !== undefined) postParams.excerpt = params.excerpt as string;
@@ -205,11 +211,13 @@ export class PostTools {
     client: WordPressClient,
     params: (UpdatePostRequest & { id: number }) | Record<string, unknown>,
   ): Promise<WordPressPost | string> {
+    const input = params as Record<string, unknown>;
     // Extract only the relevant update parameters
-    const updateParams: UpdatePostRequest & { id: number } = {
+    const updateParams: UpdatePostRequest & { id: number; post_type?: string } = {
       id: params.id as number,
     };
 
+    if (input.post_type !== undefined) updateParams.post_type = input.post_type as string;
     if (params.title !== undefined) updateParams.title = params.title as string;
     if (params.content !== undefined) updateParams.content = params.content as string;
     if (params.status !== undefined) updateParams.status = params.status as PostStatus;
@@ -233,13 +241,17 @@ export class PostTools {
     client: WordPressClient,
     params: { id: number; force?: boolean } | Record<string, unknown>,
   ): Promise<{ deleted: boolean; previous?: WordPressPost } | string> {
+    const input = params as Record<string, unknown>;
     // Extract only the relevant parameters
-    const deleteParams: { id: number; force?: boolean } = {
+    const deleteParams: { id: number; force?: boolean; post_type?: string } = {
       id: params.id as number,
     };
 
     if (params.force !== undefined) {
       deleteParams.force = params.force as boolean;
+    }
+    if (input.post_type !== undefined) {
+      deleteParams.post_type = input.post_type as string;
     }
 
     return handleDeletePost(client, deleteParams);

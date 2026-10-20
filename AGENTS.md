@@ -19,11 +19,11 @@ npm run security:demo       # AI security-scanner demo (scripts/security-demo.js
 
 ## Architecture
 
-**Core**: MCP Server (`src/index.ts`) registers 71 WordPress tools via `src/server/ToolRegistry.ts`. **Client**:
+**Core**: MCP Server (`src/index.ts`) registers 73 WordPress tools via `src/server/ToolRegistry.ts`. **Client**:
 `src/client/api.ts` (`WordPressClient`) composes per-resource operation classes (`src/client/operations/`) via
 constructor injection; App Passwords, JWT, Basic, and API Key are configurable via `.env`/`mcp-wordpress.config.json` —
 Cookie auth is also implemented but is client/programmatic-only (see Authentication below). **Tools**: Posts(6) Pages(6)
-Media(5) Users(6) Comments(7) Taxonomies(10) Site(3) Auth(6) Cache(4) Performance(6) SEO(11) System(1) = 71. **Key
+Media(5) Users(6) Comments(7) Taxonomies(10) Site(3) Auth(6) Cache(4) Performance(6) SEO(11) System(3) = 73. **Key
 files**: `src/client/api.ts`, `src/server/ToolRegistry.ts`, `src/tools/`, `src/config/ServerConfiguration.ts`,
 `src/utils/logger.ts`.
 

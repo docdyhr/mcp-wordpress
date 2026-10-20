@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The 71 MCP tools the server exposes, grouped by WordPress resource.
+The 73 MCP tools the server exposes, grouped by WordPress resource.
 
 ## Ownership
 
@@ -33,7 +33,7 @@ older categories (`pages.ts`, `users.ts`, `comments.ts`, `taxonomies.ts`, `cache
 files. `posts.ts` and `performance.ts` are `@deprecated` re-export shims — edit the subdirectory versions, not the
 shims.
 
-**Category map** (71 tools / 12 categories — verified against source):
+**Category map** (73 tools / 12 categories — verified against source):
 
 | Category    | File(s)                                     | Count |
 | ----------- | ------------------------------------------- | ----- |
@@ -48,7 +48,7 @@ shims.
 | Cache       | `cache.ts`                                  | 4     |
 | Performance | `performance/PerformanceTools.ts`           | 6     |
 | SEO         | `seo/SEOToolDefinitions.ts`                 | 11    |
-| System      | `version.ts` (wrapped by `system.ts`)       | 1     |
+| System      | `system.ts`, `version.ts`                    | 3     |
 
 **SEO engines** (`seo/`) — each subdirectory is one engine-per-concern, orchestrated by `seo/SEOTools.ts`:
 `analyzers/ContentAnalyzer.ts` (readability/keyword scoring), `auditors/SiteAuditor.ts` (site-wide audit),

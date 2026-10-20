@@ -29,6 +29,11 @@ export const listPostsTool: MCPTool = {
         type: "number",
         description: "Number of items to return per page (max 100).",
       },
+      post_type: {
+        type: "string",
+        description: 'Post type to list (default: "post"). Supports registered custom post types.',
+        default: "post",
+      },
       page: {
         type: "number",
         description: "Page of results to return (1-based). Combine with per_page to walk through a large site.",
@@ -73,6 +78,11 @@ export const getPostTool: MCPTool = {
         type: "number",
         description: "The unique identifier for the post.",
       },
+      post_type: {
+        type: "string",
+        description: 'Post type to retrieve (default: "post"). Supports registered custom post types.',
+        default: "post",
+      },
       include_content: {
         type: "boolean",
         description:
@@ -104,6 +114,11 @@ export const createPostTool: MCPTool = {
       title: {
         type: "string",
         description: "The title for the post.",
+      },
+      post_type: {
+        type: "string",
+        description: 'Post type to create (default: "post"). Supports registered custom post types.',
+        default: "post",
       },
       content: {
         type: "string",
@@ -163,6 +178,11 @@ export const updatePostTool: MCPTool = {
         type: "number",
         description: "The ID of the post to update.",
       },
+      post_type: {
+        type: "string",
+        description: 'Post type to update (default: "post"). Supports registered custom post types.',
+        default: "post",
+      },
       title: {
         type: "string",
         description: "The new title for the post.",
@@ -220,6 +240,11 @@ export const deletePostTool: MCPTool = {
       id: {
         type: "number",
         description: "The ID of the post to delete.",
+      },
+      post_type: {
+        type: "string",
+        description: 'Post type to delete (default: "post"). Supports registered custom post types.',
+        default: "post",
       },
       force: {
         type: "boolean",

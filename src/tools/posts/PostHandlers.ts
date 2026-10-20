@@ -14,6 +14,32 @@ import { validateId, validatePaginationParams, validatePostParams } from "@/util
 import { countWords, displayTitle, htmlToPlainText } from "@/utils/htmlText.js";
 import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "@/utils/streaming.js";
 
+type PostTypeParams = { post_type?: string };
+
+function validatePostType(postType: unknown): string {
+  const value = postType ?? "post";
+  if (typeof value !== "string" || !/^[a-z0-9_-]+$/i.test(value)) {
+    throw ErrorHandlers.validationError("post_type", value, "a valid WordPress post type slug");
+  }
+  return value;
+}
+
+async function resolvePostTypeEndpoint(client: WordPressClient, postType: string): Promise<string> {
+  if (postType === "post") return "posts";
+
+  try {
+    const types = await client.get<Record<string, { rest_base?: unknown }>>("types");
+    const restBase = Object.hasOwn(types, postType) ? types[postType]?.rest_base : undefined;
+    if (typeof restBase === "string" && /^[a-z0-9_-]+$/i.test(restBase)) {
+      return restBase;
+    }
+  } catch {
+    // The post type slug is the REST base unless WordPress provides a custom one.
+  }
+
+  return postType;
+}
+
 export function buildListParams(params: PostQueryParams): PostQueryParams {
   if (!params || typeof params !== "object") {
     throw ErrorHandlers.validationError("params", params, "valid object");
@@ -143,8 +169,17 @@ export async function handleListPosts(
 ): Promise<WordPressPost[] | string> {
   try {
     const sanitizedParams = buildListParams(params);
+    const postType = validatePostType(sanitizedParams.post_type);
+    const { post_type: _postType, ...queryParams } = sanitizedParams;
+    let posts: WordPressPost[];
 
-    const posts = await client.getPosts(sanitizedParams);
+    if (postType === "post") {
+      posts = await client.getPosts(queryParams);
+    } else {
+      const endpoint = await resolvePostTypeEndpoint(client, postType);
+      const query = new URLSearchParams(queryParams as Record<string, string>).toString();
+      posts = await client.get<WordPressPost[]>(`${endpoint}${query ? `?${query}` : ""}`);
+    }
     if (posts.length === 0) {
       const searchInfo = sanitizedParams.search ? ` matching "${sanitizedParams.search}"` : "";
       const statusInfo = sanitizedParams.status ? ` with status "${sanitizedParams.status}"` : "";
@@ -227,26 +262,31 @@ export async function handleListPosts(
  */
 export async function handleGetPost(
   client: WordPressClient,
-  params: { id: number; include_content?: boolean },
+  params: { id: number; include_content?: boolean } & PostTypeParams,
 ): Promise<WordPressPost | string> {
   try {
     const postId = validateId(params.id, "post ID");
+    const postType = validatePostType(params.post_type);
+    const getPost = async (context: "view" | "edit") =>
+      postType === "post"
+        ? client.getPost(postId, context)
+        : client.get<WordPressPost>(`${await resolvePostTypeEndpoint(client, postType)}/${postId}?context=${context}`);
     // Only include full content if explicitly requested (for backward compatibility, default to true).
     // When content is wanted, fetch with context=edit so content.raw (Gutenberg block markup) is available.
     const includeContent = params.include_content !== false;
     let post;
     if (includeContent) {
       try {
-        post = await client.getPost(postId, "edit");
+        post = await getPost("edit");
       } catch (error) {
         if (!isPermissionError(error)) {
           throw error;
         }
         // Credentials lack edit capability for context=edit — fall back to rendered content
-        post = await client.getPost(postId, "view");
+        post = await getPost("view");
       }
     } else {
-      post = await client.getPost(postId, "view");
+      post = await getPost("view");
     }
 
     // Get additional metadata for comprehensive response
@@ -338,7 +378,7 @@ export async function handleGetPost(
  */
 export async function handleCreatePost(
   client: WordPressClient,
-  params: CreatePostRequest,
+  params: CreatePostRequest & PostTypeParams,
 ): Promise<WordPressPost | string> {
   try {
     // validatePostParams rejects unsafe `content` (script tags, javascript: URLs, event handlers) via
@@ -347,7 +387,15 @@ export async function handleCreatePost(
     // Its returned fields must actually be sent, not just the original `params` (a real gap a security
     // review caught: this used to be called only for its throwing side effect, then discarded).
     const validated = validatePostParams(params);
-    const post = await client.createPost({ ...params, ...validated } as CreatePostRequest);
+    const postType = validatePostType(params.post_type);
+    const { post_type: _postType, ...postData } = params;
+    const post =
+      postType === "post"
+        ? await client.createPost({ ...postData, ...validated } as CreatePostRequest)
+        : await client.post<WordPressPost>(
+            await resolvePostTypeEndpoint(client, postType),
+            { ...postData, ...validated },
+          );
 
     // Build success response with management links
     let response = `✅ **Post Created Successfully**\n\n`;
@@ -379,16 +427,23 @@ export async function handleCreatePost(
  */
 export async function handleUpdatePost(
   client: WordPressClient,
-  params: UpdatePostRequest & { id: number },
+  params: UpdatePostRequest & { id: number } & PostTypeParams,
 ): Promise<WordPressPost | string> {
   try {
     const postId = validateId(params.id, "post ID");
+    const postType = validatePostType(params.post_type);
 
-    const { id: _id, ...updateData } = params;
+    const { id: _id, post_type: _postType, ...updateData } = params;
     // See handleCreatePost: the validated fields must be sent, not just updateData.
     const validated = validatePostParams(updateData, true);
 
-    const updatedPost = await client.updatePost({ id: postId, ...updateData, ...validated });
+    const updatedPost =
+      postType === "post"
+        ? await client.updatePost({ id: postId, ...updateData, ...validated })
+        : await client.put<WordPressPost>(
+            `${await resolvePostTypeEndpoint(client, postType)}/${postId}`,
+            { ...updateData, ...validated },
+          );
 
     // Build change summary
     let response = `✅ **Post Updated Successfully**\n\n`;
@@ -438,11 +493,17 @@ export async function handleUpdatePost(
  */
 export async function handleDeletePost(
   client: WordPressClient,
-  params: { id: number; force?: boolean },
+  params: { id: number; force?: boolean } & PostTypeParams,
 ): Promise<{ deleted: boolean; previous?: WordPressPost } | string> {
   try {
     const postId = validateId(params.id, "post ID");
-    const result = await client.deletePost(postId, params.force);
+    const postType = validatePostType(params.post_type);
+    const result =
+      postType === "post"
+        ? await client.deletePost(postId, params.force)
+        : await client.delete<{ deleted: boolean; previous?: WordPressPost }>(
+            `${await resolvePostTypeEndpoint(client, postType)}/${postId}?force=${params.force ?? false}`,
+          );
 
     if (result.deleted) {
       const action = params.force ? "permanently deleted" : "moved to trash";

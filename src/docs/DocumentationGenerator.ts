@@ -592,11 +592,13 @@ export class DocumentationGenerator {
 
   private initializeWordPressMapping(): void {
     // Map MCP tools to WordPress REST API endpoints
-    this.wordpressEndpoints.set("wp_list_posts", "/wp-json/wp/v2/posts");
-    this.wordpressEndpoints.set("wp_get_post", "/wp-json/wp/v2/posts/{id}");
-    this.wordpressEndpoints.set("wp_create_post", "/wp-json/wp/v2/posts");
-    this.wordpressEndpoints.set("wp_update_post", "/wp-json/wp/v2/posts/{id}");
-    this.wordpressEndpoints.set("wp_delete_post", "/wp-json/wp/v2/posts/{id}");
+    this.wordpressEndpoints.set("wp_list_posts", "/wp-json/wp/v2/{rest_base}");
+    this.wordpressEndpoints.set("wp_get_post", "/wp-json/wp/v2/{rest_base}/{id}");
+    this.wordpressEndpoints.set("wp_create_post", "/wp-json/wp/v2/{rest_base}");
+    this.wordpressEndpoints.set("wp_update_post", "/wp-json/wp/v2/{rest_base}/{id}");
+    this.wordpressEndpoints.set("wp_delete_post", "/wp-json/wp/v2/{rest_base}/{id}");
+    this.wordpressEndpoints.set("wp_list_plugins", "/wp-json/wp/v2/plugins");
+    this.wordpressEndpoints.set("wp_list_themes", "/wp-json/wp/v2/themes");
     // Add more mappings...
   }
 
@@ -998,6 +1000,8 @@ export class DocumentationGenerator {
       wp_delete_user: ["delete_users"],
       wp_moderate_comment: ["moderate_comments"],
       wp_get_site_settings: ["manage_options"],
+      wp_list_plugins: ["activate_plugins"],
+      wp_list_themes: ["switch_themes"],
     };
     return permissions[toolName];
   }
