@@ -10,6 +10,7 @@ import { DocumentationGenerator } from "../../dist/docs/DocumentationGenerator.j
 describe("DocumentationGenerator OpenAPI parameters", () => {
   let spec;
   let outputDir;
+  let systemDocs;
 
   beforeAll(async () => {
     // It writes its files: never into the repository's docs/api.
@@ -21,6 +22,7 @@ describe("DocumentationGenerator OpenAPI parameters", () => {
       validateExamples: false,
     });
     ({ openApiSpec: spec } = await generator.generateFullDocumentation());
+    systemDocs = fs.readFileSync(path.join(outputDir, "categories", "system.md"), "utf8");
   }, 60_000);
 
   afterAll(() => fs.rmSync(outputDir, { recursive: true, force: true }));
@@ -52,5 +54,24 @@ describe("DocumentationGenerator OpenAPI parameters", () => {
       "structure",
       "full",
     ]);
+  });
+
+  it("documents CPT parameters and the new system inspection tools", () => {
+    expect(properties("wp_list_posts").post_type).toMatchObject({ type: "string", default: "post" });
+    expect(spec.paths["/tools/wp_list_plugins"]).toBeDefined();
+    expect(spec.paths["/tools/wp_list_themes"]).toBeDefined();
+    const pluginsDocs = fs.readFileSync(path.join(outputDir, "tools", "wp_list_plugins.md"), "utf8");
+    const themesDocs = fs.readFileSync(path.join(outputDir, "tools", "wp_list_themes.md"), "utf8");
+    expect(pluginsDocs).toContain("/wp-json/wp/v2/plugins");
+    expect(pluginsDocs).toContain("WooCommerce");
+    expect(pluginsDocs).toContain("WordPressPlugin[]");
+    expect(themesDocs).toContain("/wp-json/wp/v2/themes");
+    expect(themesDocs).toContain("storefront");
+    expect(themesDocs).toContain("WordPressTheme[]");
+  });
+
+  it("does not generate unsupported bulk parameters in system category examples", () => {
+    expect(systemDocs).toContain("wp_list_plugins --site=staging");
+    expect(systemDocs).not.toContain("--limit=50");
   });
 });

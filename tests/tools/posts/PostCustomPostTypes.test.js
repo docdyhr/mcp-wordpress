@@ -18,6 +18,7 @@ const post = {
 function createClient() {
   return {
     get: vi.fn(),
+    getPosts: vi.fn().mockResolvedValue([]),
     post: vi.fn(),
     put: vi.fn(),
     delete: vi.fn(),
@@ -52,6 +53,15 @@ describe("PostTools custom post types", () => {
     await tools.handleListPosts(client, { post_type: "event" });
 
     expect(client.get).toHaveBeenNthCalledWith(2, "event?per_page=10");
+  });
+
+  it("keeps the standard post route when post_type is explicitly set to post", async () => {
+    const client = createClient();
+
+    await tools.handleListPosts(client, { post_type: "post" });
+
+    expect(client.getPosts).toHaveBeenCalledWith({ per_page: 10 });
+    expect(client.get).not.toHaveBeenCalled();
   });
 
   it("uses the discovered REST base for get, create, update, and delete", async () => {

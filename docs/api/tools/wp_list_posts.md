@@ -15,6 +15,7 @@ status: `wp_list_posts --status="draft"` • Category filtering: `wp_list_posts 
 | Parameter    | Type     | Required | Description                                                                              | Default   | Examples                |
 | ------------ | -------- | -------- | ---------------------------------------------------------------------------------------- | --------- | ----------------------- |
 | `per_page`   | `number` | ❌       | Number of items to return per page (max 100).                                            | `10`      | `10`, `20`              |
+| `post_type`  | `string` | ❌       | Post type to list (default: "post"). Supports registered custom post types.              | `post`    | `example`               |
 | `page`       | `number` | ❌       | Page of results to return (1-based). Combine with per_page to walk through a large site. | `1`       | `example`               |
 | `search`     | `string` | ❌       | Limit results to those matching a search term.                                           | -         | `wordpress`, `tutorial` |
 | `status`     | `string` | ❌       | Filter by post status.                                                                   | `publish` | `example`               |
@@ -103,7 +104,7 @@ Comprehensive example using all available parameters
 **Command:**
 
 ```bash
-wp_list_posts --per_page="10" --page="1" --search="wordpress" --status="publish" --categories="example_value" --tags="example_value"
+wp_list_posts --per_page="10" --post_type="example_value" --page="1" --search="wordpress" --status="publish" --categories="example_value" --tags="example_value"
 ```
 
 **Response:**
@@ -130,7 +131,7 @@ wp_list_posts --per_page="10" --page="1" --search="wordpress" --status="publish"
 
 ## WordPress REST API Mapping
 
-**Endpoint:** `/wp-json/wp/v2/posts`
+**Endpoint:** `/wp-json/wp/v2/{rest_base}`
 
 This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters
 are determined by WordPress core functionality.

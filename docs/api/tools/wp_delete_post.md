@@ -10,10 +10,11 @@ feedback on the deletion action.
 
 ## Parameters
 
-| Parameter | Type      | Required | Description                                                                  | Default | Examples     |
-| --------- | --------- | -------- | ---------------------------------------------------------------------------- | ------- | ------------ |
-| `id`      | `number`  | ✅       | The ID of the post to delete.                                                | -       | `123`, `456` |
-| `force`   | `boolean` | ❌       | Whether to bypass trash and force deletion (default: false, moves to trash). | -       | `example`    |
+| Parameter   | Type      | Required | Description                                                                   | Default | Examples     |
+| ----------- | --------- | -------- | ----------------------------------------------------------------------------- | ------- | ------------ |
+| `id`        | `number`  | ✅       | The ID of the post to delete.                                                 | -       | `123`, `456` |
+| `post_type` | `string`  | ❌       | Post type to delete (default: "post"). Supports registered custom post types. | `post`  | `example`    |
+| `force`     | `boolean` | ❌       | Whether to bypass trash and force deletion (default: false, moves to trash).  | -       | `example`    |
 
 ## Examples
 
@@ -70,9 +71,31 @@ wp_delete_post --site="site1" --id="123"
 }
 ```
 
+### Advanced post Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_delete_post --id="123" --post_type="example_value" --force="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "deleted": true,
+    "id": 123
+  }
+}
+```
+
 ## WordPress REST API Mapping
 
-**Endpoint:** `/wp-json/wp/v2/posts/{id}`
+**Endpoint:** `/wp-json/wp/v2/{rest_base}/{id}`
 
 This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters
 are determined by WordPress core functionality.

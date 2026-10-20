@@ -324,7 +324,15 @@ export class CacheInvalidation {
    * Process single invalidation event
    */
   async processEvent(event: InvalidationEvent): Promise<void> {
+    if (typeof event.resource !== "string" || event.resource.length === 0) return;
+
     const rules = this.invalidationRules.get(event.resource) || [];
+
+    if (rules.length === 0) {
+      const resource = event.resource.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      this.httpCache.invalidatePattern(`${resource}(?:/\\d+)?(?=[:/]|$)`);
+      return;
+    }
 
     for (const rule of rules) {
       if (rule.trigger === event.type || rule.trigger === "*") {

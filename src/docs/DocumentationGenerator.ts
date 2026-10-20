@@ -720,6 +720,46 @@ export class DocumentationGenerator {
   }
 
   private generateExpectedResponse(toolName: string, category: string, type: string): unknown {
+    if (toolName === "wp_list_plugins") {
+      return {
+        success: true,
+        data: [
+          {
+            plugin: "woocommerce/woocommerce.php",
+            status: "active",
+            name: "WooCommerce",
+            version: "9.0",
+            author: "Automattic",
+          },
+          { plugin: "hello.php", status: "inactive", name: "Hello Dolly", version: "1.7.2", author: "Matt Mullenweg" },
+        ],
+      };
+    }
+
+    if (toolName === "wp_list_themes") {
+      return {
+        success: true,
+        data: [
+          {
+            stylesheet: "storefront-child",
+            name: "Storefront Child",
+            status: "active",
+            version: "1.0",
+            parent: "storefront",
+            tags: { features: ["custom-logo", "editor-styles"] },
+          },
+          {
+            stylesheet: "twentytwentyfive",
+            name: "Twenty Twenty-Five",
+            status: "inactive",
+            version: "1.2",
+            parent: "",
+            tags: { features: ["block-templates"] },
+          },
+        ],
+      };
+    }
+
     if (toolName.includes("list")) {
       return {
         success: true,
@@ -939,6 +979,8 @@ export class DocumentationGenerator {
   }
 
   private inferReturnType(toolName: string, category: string): string {
+    if (toolName === "wp_list_plugins") return "WordPressPlugin[]";
+    if (toolName === "wp_list_themes") return "WordPressTheme[]";
     if (toolName.includes("list")) return `${category}[]`;
     if (toolName.includes("get")) return category;
     if (toolName.includes("create")) return category;

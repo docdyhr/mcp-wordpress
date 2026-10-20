@@ -185,7 +185,7 @@ Alternative methods: JWT, Basic Auth, API Key — see
 
 ### Content Management
 
-- **📝 Posts** (6 tools) - Create, edit, delete, list posts and revisions
+- **📝 Posts** (6 tools) - Create, edit, delete, and list posts and custom post types
 - **📄 Pages** (6 tools) - Manage static pages and revisions
 - **🖼️ Media** (5 tools) - Upload, manage media library and files
 - **🔍 SEO** (11 tools) - Content analysis, metadata, schema markup, SERP tracking, keyword research

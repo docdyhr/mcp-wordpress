@@ -2,11 +2,13 @@
 
 system management tools
 
-**Tool Count:** 1
+**Tool Count:** 3
 
 ## Available Tools
 
 - [`wp_check_version`](../tools/wp_check_version.md)
+- [`wp_list_plugins`](../tools/wp_list_plugins.md)
+- [`wp_list_themes`](../tools/wp_list_themes.md)
 
 ## Common Usage Patterns
 
@@ -19,6 +21,16 @@ system management tools
 ### Basic system Workflow
 
 ```bash
-# wp_check_version
-wp_check_version
+# List all system
+wp_list_plugins
+```
+
+### Multi-Site system Management
+
+```bash
+# Work with a specific site
+wp_list_plugins --site=production
+
+# Use the same tool against another site
+wp_list_plugins --site=staging
 ```

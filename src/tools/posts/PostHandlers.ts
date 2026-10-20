@@ -392,10 +392,10 @@ export async function handleCreatePost(
     const post =
       postType === "post"
         ? await client.createPost({ ...postData, ...validated } as CreatePostRequest)
-        : await client.post<WordPressPost>(
-            await resolvePostTypeEndpoint(client, postType),
-            { ...postData, ...validated },
-          );
+        : await client.post<WordPressPost>(await resolvePostTypeEndpoint(client, postType), {
+            ...postData,
+            ...validated,
+          });
 
     // Build success response with management links
     let response = `✅ **Post Created Successfully**\n\n`;
@@ -440,10 +440,10 @@ export async function handleUpdatePost(
     const updatedPost =
       postType === "post"
         ? await client.updatePost({ id: postId, ...updateData, ...validated })
-        : await client.put<WordPressPost>(
-            `${await resolvePostTypeEndpoint(client, postType)}/${postId}`,
-            { ...updateData, ...validated },
-          );
+        : await client.put<WordPressPost>(`${await resolvePostTypeEndpoint(client, postType)}/${postId}`, {
+            ...updateData,
+            ...validated,
+          });
 
     // Build change summary
     let response = `✅ **Post Updated Successfully**\n\n`;

@@ -249,8 +249,7 @@ ${examples}`;
       pick("wp_create_") ? [`# Create a new item`, `${pick("wp_create_")} --title="Example"`] : null,
     ].filter((entry): entry is string[] => entry !== null);
 
-    // A category with no list/get/create tool (e.g. System) gets its registered tools
-    // listed plainly rather than an invented workflow.
+    // A category with no list/get/create tool gets its registered tools listed plainly.
     const body =
       workflow.length > 0
         ? workflow.map((lines) => lines.join("\n")).join("\n\n")
@@ -265,8 +264,8 @@ ${examples}`;
 # Work with a specific site
 ${listTool} --site=production
 
-# Bulk operations
-${listTool} --site=staging --limit=50
+# Use the same tool against another site
+${listTool} --site=staging
 \`\`\`
 `
       : "\n";

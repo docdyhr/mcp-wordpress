@@ -14,16 +14,17 @@ Creates a new WordPress post with comprehensive validation and detailed success 
 
 ## Parameters
 
-| Parameter        | Type     | Required | Description                                                                | Default   | Examples                                              |
-| ---------------- | -------- | -------- | -------------------------------------------------------------------------- | --------- | ----------------------------------------------------- |
-| `title`          | `string` | ✅       | The title for the post.                                                    | -         | `My Blog Post`, `Hello World`                         |
-| `content`        | `string` | ❌       | The content for the post, in HTML format.                                  | -         | `<p>Post content here</p>`, `This is my post content` |
-| `status`         | `string` | ❌       | The publishing status for the post.                                        | `publish` | `example`                                             |
-| `excerpt`        | `string` | ❌       | The excerpt for the post.                                                  | -         | `example`                                             |
-| `categories`     | `array`  | ❌       | An array of category IDs to assign to the post.                            | -         | `example`                                             |
-| `tags`           | `array`  | ❌       | An array of tag IDs to assign to the post.                                 | -         | `example`                                             |
-| `featured_media` | `number` | ❌       | The ID of the featured media (image). Use 0 to remove featured media.      | -         | `example`                                             |
-| `date`           | `string` | ❌       | The date the post was published, in the site's timezone (ISO 8601 format). | -         | `example`                                             |
+| Parameter        | Type     | Required | Description                                                                   | Default   | Examples                                              |
+| ---------------- | -------- | -------- | ----------------------------------------------------------------------------- | --------- | ----------------------------------------------------- |
+| `title`          | `string` | ✅       | The title for the post.                                                       | -         | `My Blog Post`, `Hello World`                         |
+| `post_type`      | `string` | ❌       | Post type to create (default: "post"). Supports registered custom post types. | `post`    | `example`                                             |
+| `content`        | `string` | ❌       | The content for the post, in HTML format.                                     | -         | `<p>Post content here</p>`, `This is my post content` |
+| `status`         | `string` | ❌       | The publishing status for the post.                                           | `publish` | `example`                                             |
+| `excerpt`        | `string` | ❌       | The excerpt for the post.                                                     | -         | `example`                                             |
+| `categories`     | `array`  | ❌       | An array of category IDs to assign to the post.                               | -         | `example`                                             |
+| `tags`           | `array`  | ❌       | An array of tag IDs to assign to the post.                                    | -         | `example`                                             |
+| `featured_media` | `number` | ❌       | The ID of the featured media (image). Use 0 to remove featured media.         | -         | `example`                                             |
+| `date`           | `string` | ❌       | The date the post was published, in the site's timezone (ISO 8601 format).    | -         | `example`                                             |
 
 ## Examples
 
@@ -89,7 +90,7 @@ Comprehensive example using all available parameters
 **Command:**
 
 ```bash
-wp_create_post --title="Example Post Title" --content="This is example content for the post." --status="publish" --excerpt="example_value" --categories="example_value" --tags="example_value" --featured_media="example_value" --date="example_value"
+wp_create_post --title="Example Post Title" --post_type="example_value" --content="This is example content for the post." --status="publish" --excerpt="example_value" --categories="example_value" --tags="example_value" --featured_media="example_value" --date="example_value"
 ```
 
 **Response:**
@@ -107,7 +108,7 @@ wp_create_post --title="Example Post Title" --content="This is example content f
 
 ## WordPress REST API Mapping
 
-**Endpoint:** `/wp-json/wp/v2/posts`
+**Endpoint:** `/wp-json/wp/v2/{rest_base}`
 
 This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters
 are determined by WordPress core functionality.

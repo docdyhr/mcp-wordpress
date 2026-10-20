@@ -13,6 +13,7 @@ Optionally includes full HTML content for editing.
 | Parameter         | Type      | Required | Description                                                                                                                        | Default | Examples     |
 | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------- | ------------ |
 | `id`              | `number`  | ✅       | The unique identifier for the post.                                                                                                | -       | `123`, `456` |
+| `post_type`       | `string`  | ❌       | Post type to retrieve (default: "post"). Supports registered custom post types.                                                    | `post`  | `example`    |
 | `include_content` | `boolean` | ❌       | If true, includes the full post content as raw source (context=edit), preserving Gutenberg block markup for editing. Default: true | -       | `example`    |
 
 ## Examples
@@ -76,9 +77,34 @@ wp_get_post --site="site1" --id="123"
 }
 ```
 
+### Advanced post Configuration
+
+Comprehensive example using all available parameters
+
+**Command:**
+
+```bash
+wp_get_post --id="123" --post_type="example_value" --include_content="example_value"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "title": "Example post",
+    "content": "Example content",
+    "status": "publish",
+    "date": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
 ## WordPress REST API Mapping
 
-**Endpoint:** `/wp-json/wp/v2/posts/{id}`
+**Endpoint:** `/wp-json/wp/v2/{rest_base}/{id}`
 
 This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters
 are determined by WordPress core functionality.

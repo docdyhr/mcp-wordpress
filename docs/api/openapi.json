@@ -529,6 +529,11 @@
                     "type": "string",
                     "description": "The title for the post."
                   },
+                  "post_type": {
+                    "type": "string",
+                    "description": "Post type to create (default: \"post\"). Supports registered custom post types.",
+                    "default": "post"
+                  },
                   "content": {
                     "type": "string",
                     "description": "The content for the post, in HTML format."
@@ -986,6 +991,11 @@
                   "id": {
                     "type": "number",
                     "description": "The ID of the post to delete."
+                  },
+                  "post_type": {
+                    "type": "string",
+                    "description": "Post type to delete (default: \"post\"). Supports registered custom post types.",
+                    "default": "post"
                   },
                   "force": {
                     "type": "boolean",
@@ -1522,6 +1532,11 @@
                     "type": "number",
                     "description": "The unique identifier for the post."
                   },
+                  "post_type": {
+                    "type": "string",
+                    "description": "Post type to retrieve (default: \"post\"). Supports registered custom post types.",
+                    "default": "post"
+                  },
                   "include_content": {
                     "type": "boolean",
                     "description": "If true, includes the full post content as raw source (context=edit), preserving Gutenberg block markup for editing. Default: true"
@@ -1995,6 +2010,47 @@
         }
       }
     },
+    "/tools/wp_list_plugins": {
+      "post": {
+        "summary": "Lists installed WordPress plugins with their active status, version, and author. Requires the activate_plugins capability.",
+        "description": "Execute wp_list_plugins MCP tool",
+        "tags": [
+          "system"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters"
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/tools/wp_list_posts": {
       "post": {
         "summary": "Lists posts from a WordPress site with comprehensive filtering options. Supports search, status filtering, and category/tag filtering with enhanced metadata display.\n\n**Usage Examples:**\n• Basic listing: `wp_list_posts`\n• Search posts: `wp_list_posts --search=\"AI trends\"`\n• Filter by status: `wp_list_posts --status=\"draft\"`\n• Category filtering: `wp_list_posts --categories=[1,2,3]`\n• Paginated results: `wp_list_posts --per_page=20 --page=2`\n• Combined filters: `wp_list_posts --search=\"WordPress\" --status=\"publish\" --per_page=10`",
@@ -2013,6 +2069,11 @@
                     "type": "number",
                     "description": "Number of items to return per page (max 100).",
                     "default": 10
+                  },
+                  "post_type": {
+                    "type": "string",
+                    "description": "Post type to list (default: \"post\"). Supports registered custom post types.",
+                    "default": "post"
                   },
                   "page": {
                     "type": "number",
@@ -2100,6 +2161,47 @@
                     "default": 1
                   }
                 }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters"
+          },
+          "401": {
+            "description": "Authentication failed"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/tools/wp_list_themes": {
+      "post": {
+        "summary": "Lists installed WordPress themes with their active status, version, parent theme, and features. Requires the switch_themes capability.",
+        "description": "Execute wp_list_themes MCP tool",
+        "tags": [
+          "system"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
               }
             }
           }
@@ -3784,6 +3886,11 @@
                   "id": {
                     "type": "number",
                     "description": "The ID of the post to update."
+                  },
+                  "post_type": {
+                    "type": "string",
+                    "description": "Post type to update (default: \"post\"). Supports registered custom post types.",
+                    "default": "post"
                   },
                   "title": {
                     "type": "string",
