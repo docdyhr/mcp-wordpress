@@ -331,6 +331,7 @@ export class CacheInvalidation {
     if (rules.length === 0) {
       const resource = event.resource.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       this.httpCache.invalidatePattern(`${resource}(?:/\\d+)?(?=[:/]|$)`);
+      this.httpCache.invalidatePattern("search(?=[:/]|$)");
       return;
     }
 
