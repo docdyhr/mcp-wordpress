@@ -187,6 +187,15 @@ describe("WordPressClient", () => {
   });
 
   describe("Authentication", () => {
+    it("treats an http-prefixed REST base as a relative endpoint", async () => {
+      await client.get("http_logs/12?context=edit");
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://test.example.com/wp-json/wp/v2/http_logs/12?context=edit",
+        expect.anything(),
+      );
+    });
+
     it("should set app-password authentication headers", async () => {
       await client.get("posts");
 

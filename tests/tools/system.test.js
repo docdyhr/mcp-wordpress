@@ -91,6 +91,26 @@ describe("System inspection tools", () => {
     expect(text).not.toContain("feature-13");
   });
 
+  it("strips HTML and decodes entities from raw theme names and authors", async () => {
+    const client = {
+      get: vi.fn().mockResolvedValue([
+        {
+          stylesheet: "example",
+          template: "example",
+          status: "active",
+          name: { raw: "<strong>Example &amp; Co</strong>", rendered: "Fallback name" },
+          author: { raw: '<a href="https://example.com">Author &amp; Co</a>', rendered: "Fallback author" },
+        },
+      ]),
+    };
+
+    const text = await handleListThemes(client);
+
+    expect(text).toContain("**Active theme**: Example & Co (`example`)");
+    expect(text).toContain("- **Example & Co** (`example`) — active · v? · by Author & Co");
+    expect(text).not.toMatch(/<strong>|<a href=/);
+  });
+
   it.each([
     [handleListPlugins, "No plugins are installed."],
     [handleListThemes, "No themes are installed."],

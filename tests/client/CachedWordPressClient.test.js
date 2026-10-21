@@ -144,6 +144,14 @@ describe("CachedWordPressClient", () => {
     });
   });
 
+  describe("URL resolution", () => {
+    it("treats an http-prefixed REST base as a relative endpoint", () => {
+      expect(cachedClient.buildRequestUrl("http_logs/12?context=edit")).toBe(
+        "https://test-site.com/wp-json/wp/v2/http_logs/12?context=edit",
+      );
+    });
+  });
+
   describe("getPost context forwarding", () => {
     it("should request context=edit when asked, so raw Gutenberg markup is fetchable through the cached client", async () => {
       vi.clearAllMocks();
@@ -204,6 +212,25 @@ describe("CachedWordPressClient", () => {
       // Verify that both requests returned consistent results
       // The cache implementation details are tested elsewhere
       expect(result1).toEqual(result2);
+    });
+
+    it("invalidates cached site-search results after a custom post mutation", async () => {
+      let searchCalls = 0;
+      WordPressClient.prototype.requestWithMetadata.mockImplementation(async (_method, endpoint) => ({
+        data: endpoint.startsWith("search?")
+          ? [{ id: ++searchCalls, title: `Search result ${searchCalls}` }]
+          : {},
+        status: 200,
+        headers: {},
+      }));
+
+      const firstSearch = await cachedClient.request("GET", "search?search=term");
+      await cachedClient.request("POST", "products", { title: "New product" });
+      const nextSearch = await cachedClient.request("GET", "search?search=term");
+
+      expect(firstSearch).toEqual([{ id: 1, title: "Search result 1" }]);
+      expect(nextSearch).toEqual([{ id: 2, title: "Search result 2" }]);
+      expect(WordPressClient.prototype.requestWithMetadata).toHaveBeenCalledTimes(2);
     });
 
     it("should not cache non-GET requests", async () => {
