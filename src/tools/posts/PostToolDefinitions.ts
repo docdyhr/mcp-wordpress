@@ -31,8 +31,11 @@ export const listPostsTool: MCPTool = {
       },
       post_type: {
         type: "string",
-        description: 'Post type to list (default: "post"). Supports registered custom post types.',
+        description:
+          'Post type to list (default: "post"). Supports custom post types exposed to the REST API (show_in_rest) in the wp/v2 namespace.',
         default: "post",
+        pattern: "^[a-z0-9_-]+$",
+        maxLength: 20,
       },
       page: {
         type: "number",
@@ -80,8 +83,11 @@ export const getPostTool: MCPTool = {
       },
       post_type: {
         type: "string",
-        description: 'Post type to retrieve (default: "post"). Supports registered custom post types.',
+        description:
+          'Post type to retrieve (default: "post"). Supports custom post types exposed to the REST API (show_in_rest) in the wp/v2 namespace.',
         default: "post",
+        pattern: "^[a-z0-9_-]+$",
+        maxLength: 20,
       },
       include_content: {
         type: "boolean",
@@ -117,8 +123,11 @@ export const createPostTool: MCPTool = {
       },
       post_type: {
         type: "string",
-        description: 'Post type to create (default: "post"). Supports registered custom post types.',
+        description:
+          'Post type to create (default: "post"). Supports custom post types exposed to the REST API (show_in_rest) in the wp/v2 namespace.',
         default: "post",
+        pattern: "^[a-z0-9_-]+$",
+        maxLength: 20,
       },
       content: {
         type: "string",
@@ -180,8 +189,11 @@ export const updatePostTool: MCPTool = {
       },
       post_type: {
         type: "string",
-        description: 'Post type to update (default: "post"). Supports registered custom post types.',
+        description:
+          'Post type to update (default: "post"). Supports custom post types exposed to the REST API (show_in_rest) in the wp/v2 namespace.',
         default: "post",
+        pattern: "^[a-z0-9_-]+$",
+        maxLength: 20,
       },
       title: {
         type: "string",
@@ -243,8 +255,11 @@ export const deletePostTool: MCPTool = {
       },
       post_type: {
         type: "string",
-        description: 'Post type to delete (default: "post"). Supports registered custom post types.',
+        description:
+          'Post type to delete (default: "post"). Supports custom post types exposed to the REST API (show_in_rest) in the wp/v2 namespace.',
         default: "post",
+        pattern: "^[a-z0-9_-]+$",
+        maxLength: 20,
       },
       force: {
         type: "boolean",

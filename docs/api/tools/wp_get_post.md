@@ -10,11 +10,11 @@ Optionally includes full HTML content for editing.
 
 ## Parameters
 
-| Parameter         | Type      | Required | Description                                                                                                                        | Default | Examples     |
-| ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------- | ------------ |
-| `id`              | `number`  | ✅       | The unique identifier for the post.                                                                                                | -       | `123`, `456` |
-| `post_type`       | `string`  | ❌       | Post type to retrieve (default: "post"). Supports registered custom post types.                                                    | `post`  | `example`    |
-| `include_content` | `boolean` | ❌       | If true, includes the full post content as raw source (context=edit), preserving Gutenberg block markup for editing. Default: true | -       | `example`    |
+| Parameter         | Type      | Required | Description                                                                                                                        | Default | Examples       |
+| ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------- | -------------- |
+| `id`              | `number`  | ✅       | The unique identifier for the post.                                                                                                | -       | `123`, `456`   |
+| `post_type`       | `string`  | ❌       | Post type to retrieve (default: "post"). Supports custom post types exposed to the REST API (show_in_rest) in the wp/v2 namespace. | `post`  | `post`, `page` |
+| `include_content` | `boolean` | ❌       | If true, includes the full post content as raw source (context=edit), preserving Gutenberg block markup for editing. Default: true | -       | `example`      |
 
 ## Examples
 
@@ -84,7 +84,7 @@ Comprehensive example using all available parameters
 **Command:**
 
 ```bash
-wp_get_post --id="123" --post_type="example_value" --include_content="example_value"
+wp_get_post --id="123" --post_type="event" --include_content="example_value"
 ```
 
 **Response:**

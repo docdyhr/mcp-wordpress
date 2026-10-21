@@ -26,22 +26,7 @@ wp_list_plugins
 ```json
 {
   "success": true,
-  "data": [
-    {
-      "plugin": "woocommerce/woocommerce.php",
-      "status": "active",
-      "name": "WooCommerce",
-      "version": "9.0",
-      "author": "Automattic"
-    },
-    {
-      "plugin": "hello.php",
-      "status": "inactive",
-      "name": "Hello Dolly",
-      "version": "1.7.2",
-      "author": "Matt Mullenweg"
-    }
-  ]
+  "data": "🔌 **Plugins**: 2 installed (1 active, 1 inactive)\n\n### Active (1)\n- **WooCommerce** (`woocommerce/woocommerce`) — v9.0 · by Automattic\n\n### Inactive (1)\n- **Hello Dolly** (`hello`) — v1.7.2 · by Matt Mullenweg\n"
 }
 ```
 
@@ -69,22 +54,7 @@ wp_list_plugins --site="site1"
 ```json
 {
   "success": true,
-  "data": [
-    {
-      "plugin": "woocommerce/woocommerce.php",
-      "status": "active",
-      "name": "WooCommerce",
-      "version": "9.0",
-      "author": "Automattic"
-    },
-    {
-      "plugin": "hello.php",
-      "status": "inactive",
-      "name": "Hello Dolly",
-      "version": "1.7.2",
-      "author": "Matt Mullenweg"
-    }
-  ]
+  "data": "🔌 **Plugins**: 2 installed (1 active, 1 inactive)\n\n### Active (1)\n- **WooCommerce** (`woocommerce/woocommerce`) — v9.0 · by Automattic\n\n### Inactive (1)\n- **Hello Dolly** (`hello`) — v1.7.2 · by Matt Mullenweg\n"
 }
 ```
 

@@ -1,6 +1,6 @@
 # mcp-wordpress
 
-MCP (Model Context Protocol) Server for WordPress. TypeScript ESM, 71 WordPress tools across 12 categories, exposed over
+MCP (Model Context Protocol) Server for WordPress. TypeScript ESM, 73 WordPress tools across 12 categories, exposed over
 the MCP SDK to any MCP-compatible client.
 
 ## Quick Start

@@ -26,28 +26,7 @@ wp_list_themes
 ```json
 {
   "success": true,
-  "data": [
-    {
-      "stylesheet": "storefront-child",
-      "name": "Storefront Child",
-      "status": "active",
-      "version": "1.0",
-      "parent": "storefront",
-      "tags": {
-        "features": ["custom-logo", "editor-styles"]
-      }
-    },
-    {
-      "stylesheet": "twentytwentyfive",
-      "name": "Twenty Twenty-Five",
-      "status": "inactive",
-      "version": "1.2",
-      "parent": "",
-      "tags": {
-        "features": ["block-templates"]
-      }
-    }
-  ]
+  "data": "🎨 **Themes**: 2 installed\n**Active theme**: Storefront Child (`storefront-child`) — child theme of Storefront (`storefront`)\n\n- **Storefront Child** (`storefront-child`) — active · v1.0 · child of `storefront`\n- **Storefront** (`storefront`) — inactive (parent of the active theme) · v4.6 · by WooCommerce\n  Features: e-commerce, custom-logo, editor-style\n"
 }
 ```
 
@@ -75,28 +54,7 @@ wp_list_themes --site="site1"
 ```json
 {
   "success": true,
-  "data": [
-    {
-      "stylesheet": "storefront-child",
-      "name": "Storefront Child",
-      "status": "active",
-      "version": "1.0",
-      "parent": "storefront",
-      "tags": {
-        "features": ["custom-logo", "editor-styles"]
-      }
-    },
-    {
-      "stylesheet": "twentytwentyfive",
-      "name": "Twenty Twenty-Five",
-      "status": "inactive",
-      "version": "1.2",
-      "parent": "",
-      "tags": {
-        "features": ["block-templates"]
-      }
-    }
-  ]
+  "data": "🎨 **Themes**: 2 installed\n**Active theme**: Storefront Child (`storefront-child`) — child theme of Storefront (`storefront`)\n\n- **Storefront Child** (`storefront-child`) — active · v1.0 · child of `storefront`\n- **Storefront** (`storefront`) — inactive (parent of the active theme) · v4.6 · by WooCommerce\n  Features: e-commerce, custom-logo, editor-style\n"
 }
 ```
 

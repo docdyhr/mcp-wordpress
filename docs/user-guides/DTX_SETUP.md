@@ -220,7 +220,7 @@ After installation, you'll have access to these prompts:
 
 ### Tool Categories
 
-The DTX includes 71 tools across:
+The DTX includes 73 tools across:
 
 - **Posts & Pages** - Content management
 - **Media Library** - File uploads and management
@@ -231,7 +231,7 @@ The DTX includes 71 tools across:
 - **Authentication** - Security and access management
 - **Cache Management** - Performance optimization
 - **Performance Monitoring** - Real-time analytics
-- **System** - Version checking
+- **System** - Version checking, plugin and theme inspection
 
 ## 🔍 DTX Troubleshooting
 

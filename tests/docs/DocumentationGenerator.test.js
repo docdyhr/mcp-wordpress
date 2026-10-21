@@ -65,9 +65,13 @@ describe("DocumentationGenerator OpenAPI parameters", () => {
     expect(pluginsDocs).toContain("/wp-json/wp/v2/plugins");
     expect(pluginsDocs).toContain("WooCommerce");
     expect(pluginsDocs).toContain("WordPressPlugin[]");
+    // The response example is the tool's own summary text, not a raw REST object.
+    expect(pluginsDocs).toContain("### Active (1)");
     expect(themesDocs).toContain("/wp-json/wp/v2/themes");
     expect(themesDocs).toContain("storefront");
     expect(themesDocs).toContain("WordPressTheme[]");
+    expect(themesDocs).toContain("child theme of Storefront (`storefront`)");
+    expect(properties("wp_list_posts").post_type).toMatchObject({ pattern: "^[a-z0-9_-]+$", maxLength: 20 });
   });
 
   it("does not generate unsupported bulk parameters in system category examples", () => {

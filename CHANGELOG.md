@@ -5,12 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### 🚀 Features
-
-- Support custom post types and expose plugin/theme inspection tools.
-
 ## [4.1.7](https://github.com/docdyhr/mcp-wordpress/compare/v4.1.6...v4.1.7) (2026-10-20)
 
 ### 🐛 Bug Fixes

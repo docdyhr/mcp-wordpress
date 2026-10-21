@@ -531,7 +531,9 @@
                   },
                   "post_type": {
                     "type": "string",
-                    "description": "Post type to create (default: \"post\"). Supports registered custom post types.",
+                    "description": "Post type to create (default: \"post\"). Supports custom post types exposed to the REST API (show_in_rest) in the wp/v2 namespace.",
+                    "maxLength": 20,
+                    "pattern": "^[a-z0-9_-]+$",
                     "default": "post"
                   },
                   "content": {
@@ -994,7 +996,9 @@
                   },
                   "post_type": {
                     "type": "string",
-                    "description": "Post type to delete (default: \"post\"). Supports registered custom post types.",
+                    "description": "Post type to delete (default: \"post\"). Supports custom post types exposed to the REST API (show_in_rest) in the wp/v2 namespace.",
+                    "maxLength": 20,
+                    "pattern": "^[a-z0-9_-]+$",
                     "default": "post"
                   },
                   "force": {
@@ -1534,7 +1538,9 @@
                   },
                   "post_type": {
                     "type": "string",
-                    "description": "Post type to retrieve (default: \"post\"). Supports registered custom post types.",
+                    "description": "Post type to retrieve (default: \"post\"). Supports custom post types exposed to the REST API (show_in_rest) in the wp/v2 namespace.",
+                    "maxLength": 20,
+                    "pattern": "^[a-z0-9_-]+$",
                     "default": "post"
                   },
                   "include_content": {
@@ -2072,7 +2078,9 @@
                   },
                   "post_type": {
                     "type": "string",
-                    "description": "Post type to list (default: \"post\"). Supports registered custom post types.",
+                    "description": "Post type to list (default: \"post\"). Supports custom post types exposed to the REST API (show_in_rest) in the wp/v2 namespace.",
+                    "maxLength": 20,
+                    "pattern": "^[a-z0-9_-]+$",
                     "default": "post"
                   },
                   "page": {
@@ -3889,7 +3897,9 @@
                   },
                   "post_type": {
                     "type": "string",
-                    "description": "Post type to update (default: \"post\"). Supports registered custom post types.",
+                    "description": "Post type to update (default: \"post\"). Supports custom post types exposed to the REST API (show_in_rest) in the wp/v2 namespace.",
+                    "maxLength": 20,
+                    "pattern": "^[a-z0-9_-]+$",
                     "default": "post"
                   },
                   "title": {

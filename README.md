@@ -181,7 +181,7 @@ Alternative methods: JWT, Basic Auth, API Key — see
 | **Test Coverage**          | ✅ 2750+ tests, ~76% line coverage | ⚠️ Limited      |
 | **Security Scanning**      | ✅ CodeQL + Trivy in CI            | ⚠️ Unknown      |
 
-## 📋 Available Tools (71 Tools)
+## 📋 Available Tools (73 Tools)
 
 ### Content Management
 

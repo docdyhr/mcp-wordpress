@@ -9,35 +9,73 @@
 import { WordPressClient } from "@/client/api.js";
 import { CreatePostRequest, PostQueryParams, PostStatus, UpdatePostRequest, WordPressPost } from "@/types/wordpress.js";
 import { isPermissionError, preserveToolError } from "@/utils/error.js";
-import { ErrorHandlers } from "@/utils/enhancedError.js";
+import { EnhancedError, ErrorHandlers } from "@/utils/enhancedError.js";
 import { validateId, validatePaginationParams, validatePostParams } from "@/utils/validation.js";
 import { countWords, displayTitle, htmlToPlainText } from "@/utils/htmlText.js";
 import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "@/utils/streaming.js";
 
 type PostTypeParams = { post_type?: string };
+type RestPostType = { rest_base?: unknown; rest_namespace?: unknown };
+
+/** WordPress post type keys: lowercase (sanitize_key), at most 20 characters. Also keeps the route unalterable. */
+const POST_TYPE_SLUG = /^[a-z0-9_-]{1,20}$/;
+const REST_ROUTE_SEGMENT = /^[a-z0-9_-]+$/i;
 
 function validatePostType(postType: unknown): string {
   const value = postType ?? "post";
-  if (typeof value !== "string" || !/^[a-z0-9_-]+$/i.test(value)) {
+  if (typeof value !== "string" || !POST_TYPE_SLUG.test(value)) {
     throw ErrorHandlers.validationError("post_type", value, "a valid WordPress post type slug");
   }
   return value;
 }
 
+/** Core types the post tools cannot meaningfully address: media uploads, menus and block-editor internals. */
+const INTERNAL_POST_TYPE = /^(attachment|nav_menu_item|wp_.+)$/;
+
+function unsupportedPostType(postType: string, reason: string, available: string[]): EnhancedError {
+  // Tool errors surface only the message, so the alternatives go into it rather than into `suggestions`.
+  const listed = available.filter((key) => !INTERNAL_POST_TYPE.test(key));
+  const hint = listed.length > 0 ? ` Available post types: ${listed.join(", ")}.` : "";
+  return new EnhancedError(`Post type "${postType}" ${reason}${hint}`, {
+    operation: "resolve post type",
+    parameters: { post_type: postType },
+  });
+}
+
+/**
+ * Map a post type to its wp/v2 route. A type missing from /wp/v2/types is not registered or not exposed to the
+ * REST API (show_in_rest), and a type registered under another rest_namespace has no wp/v2 route; both fail here
+ * with the available types instead of reaching WordPress as a bare "No route was found".
+ */
 async function resolvePostTypeEndpoint(client: WordPressClient, postType: string): Promise<string> {
   if (postType === "post") return "posts";
 
+  let types: Record<string, RestPostType>;
   try {
-    const types = await client.get<Record<string, { rest_base?: unknown }>>("types");
-    const restBase = Object.hasOwn(types, postType) ? types[postType]?.rest_base : undefined;
-    if (typeof restBase === "string" && /^[a-z0-9_-]+$/i.test(restBase)) {
-      return restBase;
-    }
+    types = await client.get<Record<string, RestPostType>>("types");
   } catch {
-    // The post type slug is the REST base unless WordPress provides a custom one.
+    // Type discovery unavailable: the slug is the REST base unless WordPress registered a custom one.
+    return postType;
+  }
+  if (!types || typeof types !== "object") return postType;
+
+  const wpV2Types = Object.keys(types).filter((key) => (types[key]?.rest_namespace ?? "wp/v2") === "wp/v2");
+  if (!Object.hasOwn(types, postType)) {
+    throw unsupportedPostType(postType, "is not registered or not exposed to the REST API (show_in_rest).", wpV2Types);
   }
 
-  return postType;
+  const { rest_base: restBase, rest_namespace: namespace } = types[postType] ?? {};
+  if (typeof namespace === "string" && namespace !== "wp/v2") {
+    throw unsupportedPostType(
+      postType,
+      `is served under the "${namespace}" REST namespace; only wp/v2 post types are supported.`,
+      wpV2Types,
+    );
+  }
+  if (restBase === undefined || restBase === null || restBase === false || restBase === "") return postType;
+  if (typeof restBase === "string" && REST_ROUTE_SEGMENT.test(restBase)) return restBase;
+
+  throw unsupportedPostType(postType, "has a REST route these tools cannot address.", wpV2Types);
 }
 
 export function buildListParams(params: PostQueryParams): PostQueryParams {
@@ -129,7 +167,7 @@ export function formatPostsResponse(
       const postCategories = (p.categories || []).map((id) => categoryMap.get(id) || `Category ${id}`);
       const postTags = (p.tags || []).map((id) => tagMap.get(id) || `Tag ${id}`);
 
-      let postInfo = `- ID ${p.id}: **${displayTitle(p.title.rendered)}** (${p.status})\n`;
+      let postInfo = `- ID ${p.id}: **${displayTitle(p.title?.rendered)}** (${p.status})\n`;
       postInfo += `  👤 Author: ${authorName}\n`;
       postInfo += `  📅 ${dateLabel(p.status)}: ${formattedDate}\n`;
       if (postCategories.length > 0) postInfo += `  📁 Categories: ${postCategories.join(", ")}\n`;
@@ -330,10 +368,12 @@ export async function handleGetPost(
     const wordCount = countWords(htmlToPlainText(post.content?.rendered ?? content));
 
     // Build comprehensive response
-    let response = `# ${displayTitle(post.title.rendered)}\n\n`;
+    let response = `# ${displayTitle(post.title?.rendered)}\n\n`;
     response += `**Post ID**: ${post.id}\n`;
     response += `**Status**: ${post.status}\n`;
-    response += `**Author**: ${author?.name || author?.username || `User ${post.author}`}\n`;
+    // Post types without author support carry no `author`; match the list formatter's wording for that case.
+    const fallbackAuthor = post.author != null ? `User ${post.author}` : "Unknown Author";
+    response += `**Author**: ${author?.name || author?.username || fallbackAuthor}\n`;
     response += `**${dateLabel(post.status)}**: ${formattedDate}\n`;
     response += `**Modified**: ${formattedModified}\n`;
 
@@ -399,7 +439,7 @@ export async function handleCreatePost(
 
     // Build success response with management links
     let response = `✅ **Post Created Successfully**\n\n`;
-    response += `**Title**: ${displayTitle(post.title.rendered)}\n`;
+    response += `**Title**: ${displayTitle(post.title?.rendered)}\n`;
     response += `**ID**: ${post.id}\n`;
     response += `**Status**: ${post.status}\n`;
     response += `**Link**: ${post.link}\n`;
@@ -447,14 +487,14 @@ export async function handleUpdatePost(
 
     // Build change summary
     let response = `✅ **Post Updated Successfully**\n\n`;
-    response += `**Title**: ${displayTitle(updatedPost.title.rendered)}\n`;
+    response += `**Title**: ${displayTitle(updatedPost.title?.rendered)}\n`;
     response += `**ID**: ${updatedPost.id}\n`;
     response += `**Status**: ${updatedPost.status}\n`;
     response += `**Modified**: ${new Date(updatedPost.modified).toLocaleString()}\n`;
 
     // Show which fields were updated
     const changes: string[] = [];
-    if (params.title) changes.push(`Title: "${displayTitle(updatedPost.title.rendered)}"`);
+    if (params.title) changes.push(`Title: "${displayTitle(updatedPost.title?.rendered)}"`);
     if (params.status) changes.push(`Status: "${updatedPost.status}"`);
     if (params.content !== undefined) changes.push("Content updated");
     if (params.excerpt !== undefined) changes.push("Excerpt updated");
@@ -505,13 +545,21 @@ export async function handleDeletePost(
             `${await resolvePostTypeEndpoint(client, postType)}/${postId}?force=${params.force ?? false}`,
           );
 
-    if (result.deleted) {
+    // WordPress answers a permanent delete with { deleted, previous } but a trash (force=false) with the trashed
+    // post itself, which has no `deleted` field: its status is the success signal.
+    const trashedPost =
+      !params.force && (result as Partial<WordPressPost> | null)?.status === "trash"
+        ? (result as unknown as WordPressPost)
+        : undefined;
+
+    if (result?.deleted || trashedPost) {
       const action = params.force ? "permanently deleted" : "moved to trash";
       let response = `✅ **Post ${action} successfully**\n\n`;
 
-      if (result.previous) {
-        response += `**Title**: ${displayTitle(result.previous.title.rendered)}\n`;
-        response += `**ID**: ${result.previous.id}\n`;
+      const previous = result?.previous ?? trashedPost;
+      if (previous) {
+        response += `**Title**: ${displayTitle(previous.title?.rendered)}\n`;
+        response += `**ID**: ${previous.id}\n`;
       }
 
       if (!params.force) {
@@ -560,7 +608,7 @@ export async function handleGetPostRevisions(
       response += `**Revision ${index + 1}**\n`;
       response += `- ID: ${revision.id}\n`;
       response += `- Date: ${formattedDate}\n`;
-      response += `- Title: ${displayTitle(revision.title.rendered)}\n`;
+      response += `- Title: ${displayTitle(revision.title?.rendered)}\n`;
       if (index < revisions.length - 1) response += "\n";
     });
 

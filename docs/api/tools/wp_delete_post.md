@@ -10,11 +10,11 @@ feedback on the deletion action.
 
 ## Parameters
 
-| Parameter   | Type      | Required | Description                                                                   | Default | Examples     |
-| ----------- | --------- | -------- | ----------------------------------------------------------------------------- | ------- | ------------ |
-| `id`        | `number`  | ✅       | The ID of the post to delete.                                                 | -       | `123`, `456` |
-| `post_type` | `string`  | ❌       | Post type to delete (default: "post"). Supports registered custom post types. | `post`  | `example`    |
-| `force`     | `boolean` | ❌       | Whether to bypass trash and force deletion (default: false, moves to trash).  | -       | `example`    |
+| Parameter   | Type      | Required | Description                                                                                                                      | Default | Examples       |
+| ----------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- | ------- | -------------- |
+| `id`        | `number`  | ✅       | The ID of the post to delete.                                                                                                    | -       | `123`, `456`   |
+| `post_type` | `string`  | ❌       | Post type to delete (default: "post"). Supports custom post types exposed to the REST API (show_in_rest) in the wp/v2 namespace. | `post`  | `post`, `page` |
+| `force`     | `boolean` | ❌       | Whether to bypass trash and force deletion (default: false, moves to trash).                                                     | -       | `example`      |
 
 ## Examples
 
@@ -78,7 +78,7 @@ Comprehensive example using all available parameters
 **Command:**
 
 ```bash
-wp_delete_post --id="123" --post_type="example_value" --force="example_value"
+wp_delete_post --id="123" --post_type="event" --force="example_value"
 ```
 
 **Response:**
