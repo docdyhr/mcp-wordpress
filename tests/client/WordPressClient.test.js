@@ -583,6 +583,12 @@ describe("WordPressClient", () => {
   });
 
   describe("Request Options", () => {
+    it("should treat an http-prefixed REST base as a relative endpoint", async () => {
+      await client.request("GET", "http_logs/12?context=edit");
+
+      expect(mockFetch.mock.calls[0][0]).toBe("https://test.example.com/wp-json/wp/v2/http_logs/12?context=edit");
+    });
+
     it("should set correct headers", async () => {
       await client.get("posts");
 

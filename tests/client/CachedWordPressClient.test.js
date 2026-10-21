@@ -182,6 +182,14 @@ describe("CachedWordPressClient", () => {
   });
 
   describe("request method caching behavior", () => {
+    it("should build the cache URL for an http-prefixed REST base", async () => {
+      const cacheRequest = vi.spyOn(cachedClient.httpCache, "request");
+
+      await cachedClient.request("GET", "http_logs/12?context=edit");
+
+      expect(cacheRequest.mock.calls[0][1].url).toBe("https://test-site.com/wp-json/wp/v2/http_logs/12?context=edit");
+    });
+
     it("should cache GET requests", async () => {
       // Reset call count
       vi.clearAllMocks();

@@ -582,7 +582,9 @@ export class WordPressClient implements IWordPressClient {
 
     const cleanEndpoint = endpoint.replace(/^\/+/, "");
     // Validate absolute URLs through the same SSRF guard as the site URL
-    const url = endpoint.startsWith("http") ? this.validateAndSanitizeUrl(endpoint) : `${this.apiUrl}/${cleanEndpoint}`;
+    const url = /^https?:\/\//i.test(endpoint)
+      ? this.validateAndSanitizeUrl(endpoint)
+      : `${this.apiUrl}/${cleanEndpoint}`;
 
     const {
       headers: customHeaders,
