@@ -80,13 +80,13 @@ This tool requires the following WordPress user capabilities:
 
 ## Response Format
 
-**Return Type:** `WordPressTheme[]`
+**Return Type:** `string`
 
 ```json
 {
   "success": true,
   "data": {
-    // WordPressTheme[] response data
+    // string response data
   },
   "metadata": {
     "timestamp": "2024-01-01T00:00:00.000Z",

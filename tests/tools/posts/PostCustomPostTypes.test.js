@@ -167,6 +167,25 @@ describe("PostTools custom post types against real WordPress response shapes", (
     );
   });
 
+  it("builds preview links WordPress resolves: a bare ?p= finds only the built-in post type", async () => {
+    const client = createClient();
+    client.get.mockResolvedValueOnce(types);
+    client.post.mockResolvedValueOnce({ ...post, id: 24, status: "draft" });
+    await expect(tools.handleCreatePost(client, { title: "Draft", post_type: "event" })).resolves.toContain(
+      "- Preview: https://example.com/?post_type=event&p=24&preview=true",
+    );
+
+    client.get.mockResolvedValueOnce(types).mockResolvedValueOnce({ ...post, id: 24, status: "draft" });
+    await expect(
+      tools.handleGetPost(client, { id: 24, post_type: "event", include_content: false }),
+    ).resolves.toContain("- **Preview**: https://example.com/?post_type=event&p=24&preview=true");
+
+    client.getPost = vi.fn().mockResolvedValueOnce({ ...post, id: 25, status: "draft" });
+    await expect(tools.handleGetPost(client, { id: 25, include_content: false })).resolves.toContain(
+      "- **Preview**: https://example.com/?p=25&preview=true",
+    );
+  });
+
   it("reports a trash as success: WordPress returns the trashed post, not { deleted }", async () => {
     const trashed = { ...post, id: 14, status: "trash", title: { rendered: "Probe" } };
 

@@ -43,6 +43,15 @@ function unsupportedPostType(postType: string, reason: string, available: string
 }
 
 /**
+ * WordPress's own preview URL shape (get_preview_post_link): a bare `?p=` query resolves only the built-in post type,
+ * so other types need `post_type` or their drafts preview as "not found".
+ */
+function previewLink(siteUrl: string, postType: string, id: number): string {
+  const typeQuery = postType === "post" ? "" : `post_type=${postType}&`;
+  return `${siteUrl}/?${typeQuery}p=${id}&preview=true`;
+}
+
+/**
  * Map a post type to its wp/v2 route. A type missing from /wp/v2/types is not registered or not exposed to the
  * REST API (show_in_rest), and a type registered under another rest_namespace has no wp/v2 route; both fail here
  * with the available types instead of reaching WordPress as a bare "No route was found".
@@ -401,7 +410,7 @@ export async function handleGetPost(
     if (siteUrl) {
       response += `\n## Management\n`;
       response += `- **Edit**: ${siteUrl}/wp-admin/post.php?post=${post.id}&action=edit\n`;
-      response += `- **Preview**: ${siteUrl}/?p=${post.id}&preview=true\n`;
+      response += `- **Preview**: ${previewLink(siteUrl, postType, post.id)}\n`;
     }
 
     return response;
@@ -452,7 +461,7 @@ export async function handleCreatePost(
       if (post.status === "publish") {
         response += `- View: ${post.link}\n`;
       } else {
-        response += `- Preview: ${siteUrl}/?p=${post.id}&preview=true\n`;
+        response += `- Preview: ${previewLink(siteUrl, postType, post.id)}\n`;
       }
     }
 

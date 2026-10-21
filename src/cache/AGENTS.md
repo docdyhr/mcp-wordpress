@@ -21,8 +21,9 @@ Owns `src/cache/`. Consumed by `src/client/AGENTS.md` (`CachedWordPressClient`).
   `setImmediate`/deferred-tick hop) — this is a read-after-write guarantee `CachedWordPressClient`'s mutating methods
   depend on: an immediate read after an awaited write must see fresh data. Don't reintroduce deferred processing without
   adding a separately-named method for it; no current caller wants fire-and-forget invalidation. Resources without
-  registered rules invalidate their matching collection and numeric item cache entries using an escaped route pattern;
-  this keeps custom REST resources such as CPTs read-after-write consistent.
+  registered rules invalidate their matching collection and numeric item cache entries using an escaped route pattern,
+  plus cached site search (as the post rules do); this keeps custom REST resources such as CPTs read-after-write
+  consistent (`tests/cache/CustomResourceInvalidation.test.js` runs it through the real cache classes).
 - `SEOCacheManager.ts` — `CacheManager` subclass with SEO-specific TTL tiers pulled from `Config`. **SEO TTLs are
   seconds** (`SEO_CACHE_*_TTL`, `DEFAULT_TTL`, `ttlFor()`, every SEO caller) while `CacheManager` counts milliseconds;
   its `set()` override converts, so never pass milliseconds to it. One instance serves every site, so SEO keys come from

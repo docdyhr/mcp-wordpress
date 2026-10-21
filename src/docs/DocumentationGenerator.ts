@@ -996,8 +996,8 @@ export class DocumentationGenerator {
   }
 
   private inferReturnType(toolName: string, category: string): string {
-    if (toolName === "wp_list_plugins") return "WordPressPlugin[]";
-    if (toolName === "wp_list_themes") return "WordPressTheme[]";
+    // The inspection tools print a Markdown summary (see generateExpectedResponse), not REST objects.
+    if (toolName === "wp_list_plugins" || toolName === "wp_list_themes") return "string";
     if (toolName.includes("list")) return `${category}[]`;
     if (toolName.includes("get")) return category;
     if (toolName.includes("create")) return category;

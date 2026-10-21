@@ -64,12 +64,13 @@ describe("DocumentationGenerator OpenAPI parameters", () => {
     const themesDocs = fs.readFileSync(path.join(outputDir, "tools", "wp_list_themes.md"), "utf8");
     expect(pluginsDocs).toContain("/wp-json/wp/v2/plugins");
     expect(pluginsDocs).toContain("WooCommerce");
-    expect(pluginsDocs).toContain("WordPressPlugin[]");
+    expect(pluginsDocs).not.toContain("WordPressPlugin[]");
+    expect(pluginsDocs).toContain("**Return Type:** `string`");
     // The response example is the tool's own summary text, not a raw REST object.
     expect(pluginsDocs).toContain("### Active (1)");
     expect(themesDocs).toContain("/wp-json/wp/v2/themes");
     expect(themesDocs).toContain("storefront");
-    expect(themesDocs).toContain("WordPressTheme[]");
+    expect(themesDocs).not.toContain("WordPressTheme[]");
     expect(themesDocs).toContain("child theme of Storefront (`storefront`)");
     expect(properties("wp_list_posts").post_type).toMatchObject({ pattern: "^[a-z0-9_-]+$", maxLength: 20 });
   });
