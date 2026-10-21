@@ -40,7 +40,7 @@ const MAX_FEATURES = 12;
 
 function plainText(field: TextField): string {
   if (typeof field === "string") return htmlToPlainText(field);
-  return field?.raw?.trim() || htmlToPlainText(field?.rendered);
+  return htmlToPlainText(field?.raw?.trim() || field?.rendered);
 }
 
 function requirements(item: { requires_wp?: string | undefined; requires_php?: string | undefined }): string {
