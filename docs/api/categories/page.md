@@ -40,6 +40,6 @@ wp_create_page --title="Example"
 # Work with a specific site
 wp_list_pages --site=production
 
-# Bulk operations
-wp_list_pages --site=staging --limit=50
+# Use the same tool against another site
+wp_list_pages --site=staging
 ```

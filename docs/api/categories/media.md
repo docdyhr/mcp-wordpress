@@ -37,6 +37,6 @@ wp_get_media --id=123
 # Work with a specific site
 wp_list_media --site=production
 
-# Bulk operations
-wp_list_media --site=staging --limit=50
+# Use the same tool against another site
+wp_list_media --site=staging
 ```

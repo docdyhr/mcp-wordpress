@@ -14,17 +14,18 @@ featured image: `wp_update_post --id=123 --featured_media=42` • Remove feature
 
 ## Parameters
 
-| Parameter        | Type     | Required | Description                                                                | Default   | Examples                                              |
-| ---------------- | -------- | -------- | -------------------------------------------------------------------------- | --------- | ----------------------------------------------------- |
-| `id`             | `number` | ✅       | The ID of the post to update.                                              | -         | `123`, `456`                                          |
-| `title`          | `string` | ❌       | The new title for the post.                                                | -         | `My Blog Post`, `Hello World`                         |
-| `content`        | `string` | ❌       | The new content for the post, in HTML format.                              | -         | `<p>Post content here</p>`, `This is my post content` |
-| `status`         | `string` | ❌       | The new publishing status for the post.                                    | `publish` | `example`                                             |
-| `excerpt`        | `string` | ❌       | The new excerpt for the post.                                              | -         | `example`                                             |
-| `categories`     | `array`  | ❌       | An array of category IDs to assign to the post.                            | -         | `example`                                             |
-| `tags`           | `array`  | ❌       | An array of tag IDs to assign to the post.                                 | -         | `example`                                             |
-| `featured_media` | `number` | ❌       | The ID of the featured media (image). Use 0 to remove featured media.      | -         | `example`                                             |
-| `date`           | `string` | ❌       | The date the post was published, in the site's timezone (ISO 8601 format). | -         | `example`                                             |
+| Parameter        | Type     | Required | Description                                                                                                                      | Default   | Examples                                              |
+| ---------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- | --------- | ----------------------------------------------------- |
+| `id`             | `number` | ✅       | The ID of the post to update.                                                                                                    | -         | `123`, `456`                                          |
+| `post_type`      | `string` | ❌       | Post type to update (default: "post"). Supports custom post types exposed to the REST API (show_in_rest) in the wp/v2 namespace. | `post`    | `post`, `page`                                        |
+| `title`          | `string` | ❌       | The new title for the post.                                                                                                      | -         | `My Blog Post`, `Hello World`                         |
+| `content`        | `string` | ❌       | The new content for the post, in HTML format.                                                                                    | -         | `<p>Post content here</p>`, `This is my post content` |
+| `status`         | `string` | ❌       | The new publishing status for the post.                                                                                          | `publish` | `example`                                             |
+| `excerpt`        | `string` | ❌       | The new excerpt for the post.                                                                                                    | -         | `example`                                             |
+| `categories`     | `array`  | ❌       | An array of category IDs to assign to the post.                                                                                  | -         | `example`                                             |
+| `tags`           | `array`  | ❌       | An array of tag IDs to assign to the post.                                                                                       | -         | `example`                                             |
+| `featured_media` | `number` | ❌       | The ID of the featured media (image). Use 0 to remove featured media.                                                            | -         | `example`                                             |
+| `date`           | `string` | ❌       | The date the post was published, in the site's timezone (ISO 8601 format).                                                       | -         | `example`                                             |
 
 ## Examples
 
@@ -90,7 +91,7 @@ Comprehensive example using all available parameters
 **Command:**
 
 ```bash
-wp_update_post --id="123" --title="Example Post Title" --content="This is example content for the post." --status="publish" --excerpt="example_value" --categories="example_value" --tags="example_value" --featured_media="example_value" --date="example_value"
+wp_update_post --id="123" --post_type="event" --title="Example Post Title" --content="This is example content for the post." --status="publish" --excerpt="example_value" --categories="example_value" --tags="example_value" --featured_media="example_value" --date="example_value"
 ```
 
 **Response:**
@@ -108,7 +109,7 @@ wp_update_post --id="123" --title="Example Post Title" --content="This is exampl
 
 ## WordPress REST API Mapping
 
-**Endpoint:** `/wp-json/wp/v2/posts/{id}`
+**Endpoint:** `/wp-json/wp/v2/{rest_base}/{id}`
 
 This tool directly interfaces with the WordPress REST API endpoint above. The response format and available parameters
 are determined by WordPress core functionality.

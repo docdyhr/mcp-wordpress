@@ -187,6 +187,22 @@ describe("WordPressClient", () => {
   });
 
   describe("Authentication", () => {
+    it("treats an http-prefixed REST base as a relative endpoint", async () => {
+      await client.get("http_logs/12?context=edit");
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://test.example.com/wp-json/wp/v2/http_logs/12?context=edit",
+        expect.anything(),
+      );
+    });
+
+    it("keeps a scheme without '//' on the configured site instead of parsing it as another host", async () => {
+      // `new URL("https:evil.example/x")` resolves to host evil.example; only an http(s):// endpoint is absolute.
+      await client.get("https:evil.example/x");
+
+      expect(mockFetch.mock.calls[0][0]).toBe("https://test.example.com/wp-json/wp/v2/https:evil.example/x");
+    });
+
     it("should set app-password authentication headers", async () => {
       await client.get("posts");
 
@@ -583,6 +599,12 @@ describe("WordPressClient", () => {
   });
 
   describe("Request Options", () => {
+    it("should treat an http-prefixed REST base as a relative endpoint", async () => {
+      await client.request("GET", "http_logs/12?context=edit");
+
+      expect(mockFetch.mock.calls[0][0]).toBe("https://test.example.com/wp-json/wp/v2/http_logs/12?context=edit");
+    });
+
     it("should set correct headers", async () => {
       await client.get("posts");
 

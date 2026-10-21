@@ -48,7 +48,7 @@ Manage WordPress sites with natural language through AI tools like Claude Deskto
 
 **Key Advantages:**
 
-- 🏆 **Most Complete**: 71 tools vs 20-30 in alternatives
+- 🏆 **Most Complete**: 73 tools vs 20-30 in alternatives
 - ⚡ **Fastest Setup**: 2-click Claude Desktop installation via DXT
 - 🔒 **CI-Tested**: 2750+ tests across Node 22/24, CodeQL + Trivy security scanning
 - 🎯 **TypeScript Native**: 100% type safety, best-in-class developer experience
@@ -173,7 +173,7 @@ Alternative methods: JWT, Basic Auth, API Key — see
 
 | Feature                    | This Server                        | Competition     |
 | -------------------------- | ---------------------------------- | --------------- |
-| **Tools Available**        | 71 tools                           | 20-30 tools     |
+| **Tools Available**        | 73 tools                           | 20-30 tools     |
 | **Claude Desktop DXT**     | ✅ 2-click install                 | ❌ Manual setup |
 | **Multi-Site Support**     | ✅ Up to 50 sites                  | ❌ Single site  |
 | **TypeScript**             | ✅ 100% TypeScript, strict mode    | ⚠️ Partial/None |
@@ -181,11 +181,11 @@ Alternative methods: JWT, Basic Auth, API Key — see
 | **Test Coverage**          | ✅ 2750+ tests, ~76% line coverage | ⚠️ Limited      |
 | **Security Scanning**      | ✅ CodeQL + Trivy in CI            | ⚠️ Unknown      |
 
-## 📋 Available Tools (71 Tools)
+## 📋 Available Tools (73 Tools)
 
 ### Content Management
 
-- **📝 Posts** (6 tools) - Create, edit, delete, list posts and revisions
+- **📝 Posts** (6 tools) - Create, edit, delete, and list posts and custom post types
 - **📄 Pages** (6 tools) - Manage static pages and revisions
 - **🖼️ Media** (5 tools) - Upload, manage media library and files
 - **🔍 SEO** (11 tools) - Content analysis, metadata, schema markup, SERP tracking, keyword research
@@ -202,7 +202,7 @@ Alternative methods: JWT, Basic Auth, API Key — see
 - **🔐 Authentication** (3 tools) - Auth testing and management
 - **⚡ Cache Management** (4 tools) - Performance caching control
 - **📊 Performance Monitoring** (6 tools) - Real-time metrics and optimization
-- **🛠️ System** (1 tool) - Version checking
+- **🛠️ System** (3 tools) - Version, plugin, and theme inspection
 
 📖 **[Complete Tool Documentation](docs/api/README.md)** | **[Live API Reference](docs/developer/API_REFERENCE.md)**
 

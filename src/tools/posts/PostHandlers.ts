@@ -9,10 +9,83 @@
 import { WordPressClient } from "@/client/api.js";
 import { CreatePostRequest, PostQueryParams, PostStatus, UpdatePostRequest, WordPressPost } from "@/types/wordpress.js";
 import { isPermissionError, preserveToolError } from "@/utils/error.js";
-import { ErrorHandlers } from "@/utils/enhancedError.js";
+import { EnhancedError, ErrorHandlers } from "@/utils/enhancedError.js";
 import { validateId, validatePaginationParams, validatePostParams } from "@/utils/validation.js";
 import { countWords, displayTitle, htmlToPlainText } from "@/utils/htmlText.js";
 import { WordPressDataStreamer, StreamingUtils, StreamingResult } from "@/utils/streaming.js";
+
+type PostTypeParams = { post_type?: string };
+type RestPostType = { rest_base?: unknown; rest_namespace?: unknown };
+
+/** WordPress post type keys: lowercase (sanitize_key), at most 20 characters. Also keeps the route unalterable. */
+const POST_TYPE_SLUG = /^[a-z0-9_-]{1,20}$/;
+const REST_ROUTE_SEGMENT = /^[a-z0-9_-]+$/i;
+
+function validatePostType(postType: unknown): string {
+  const value = postType ?? "post";
+  if (typeof value !== "string" || !POST_TYPE_SLUG.test(value)) {
+    throw ErrorHandlers.validationError("post_type", value, "a valid WordPress post type slug");
+  }
+  return value;
+}
+
+/** Core types the post tools cannot meaningfully address: media uploads, menus and block-editor internals. */
+const INTERNAL_POST_TYPE = /^(attachment|nav_menu_item|wp_.+)$/;
+
+function unsupportedPostType(postType: string, reason: string, available: string[]): EnhancedError {
+  // Tool errors surface only the message, so the alternatives go into it rather than into `suggestions`.
+  const listed = available.filter((key) => !INTERNAL_POST_TYPE.test(key));
+  const hint = listed.length > 0 ? ` Available post types: ${listed.join(", ")}.` : "";
+  return new EnhancedError(`Post type "${postType}" ${reason}${hint}`, {
+    operation: "resolve post type",
+    parameters: { post_type: postType },
+  });
+}
+
+/**
+ * WordPress's own preview URL shape (get_preview_post_link): a bare `?p=` query resolves only the built-in post type,
+ * so other types need `post_type` or their drafts preview as "not found".
+ */
+function previewLink(siteUrl: string, postType: string, id: number): string {
+  const typeQuery = postType === "post" ? "" : `post_type=${postType}&`;
+  return `${siteUrl}/?${typeQuery}p=${id}&preview=true`;
+}
+
+/**
+ * Map a post type to its wp/v2 route. A type missing from /wp/v2/types is not registered or not exposed to the
+ * REST API (show_in_rest), and a type registered under another rest_namespace has no wp/v2 route; both fail here
+ * with the available types instead of reaching WordPress as a bare "No route was found".
+ */
+async function resolvePostTypeEndpoint(client: WordPressClient, postType: string): Promise<string> {
+  if (postType === "post") return "posts";
+
+  let types: Record<string, RestPostType>;
+  try {
+    types = await client.get<Record<string, RestPostType>>("types");
+  } catch {
+    // Type discovery unavailable: the slug is the REST base unless WordPress registered a custom one.
+    return postType;
+  }
+  if (!types || typeof types !== "object") return postType;
+
+  const wpV2Types = Object.keys(types).filter((key) => (types[key]?.rest_namespace ?? "wp/v2") === "wp/v2");
+  if (!Object.hasOwn(types, postType)) {
+    throw unsupportedPostType(postType, "is not registered or not exposed to the REST API (show_in_rest).", wpV2Types);
+  }
+
+  const { rest_base: restBase, rest_namespace: namespace } = types[postType] ?? {};
+  if (typeof namespace === "string" && namespace !== "wp/v2") {
+    throw unsupportedPostType(
+      postType,
+      `is served under the "${namespace}" REST namespace; only wp/v2 post types are supported.`,
+      wpV2Types,
+    );
+  }
+  if (restBase === undefined || restBase === null || restBase === false || restBase === "") return postType;
+  if (typeof restBase === "string" && REST_ROUTE_SEGMENT.test(restBase)) return restBase;
+
+  throw unsupportedPostType(postType, "has a REST route these tools cannot address.", wpV2Types);
+}
 
 export function buildListParams(params: PostQueryParams): PostQueryParams {
   if (!params || typeof params !== "object") {
@@ -103,7 +176,7 @@ export function formatPostsResponse(
       const postCategories = (p.categories || []).map((id) => categoryMap.get(id) || `Category ${id}`);
       const postTags = (p.tags || []).map((id) => tagMap.get(id) || `Tag ${id}`);
 
-      let postInfo = `- ID ${p.id}: **${displayTitle(p.title.rendered)}** (${p.status})\n`;
+      let postInfo = `- ID ${p.id}: **${displayTitle(p.title?.rendered)}** (${p.status})\n`;
       postInfo += `  👤 Author: ${authorName}\n`;
       postInfo += `  📅 ${dateLabel(p.status)}: ${formattedDate}\n`;
       if (postCategories.length > 0) postInfo += `  📁 Categories: ${postCategories.join(", ")}\n`;
@@ -143,8 +216,17 @@ export async function handleListPosts(
 ): Promise<WordPressPost[] | string> {
   try {
     const sanitizedParams = buildListParams(params);
+    const postType = validatePostType(sanitizedParams.post_type);
+    const { post_type: _postType, ...queryParams } = sanitizedParams;
+    let posts: WordPressPost[];
 
-    const posts = await client.getPosts(sanitizedParams);
+    if (postType === "post") {
+      posts = await client.getPosts(queryParams);
+    } else {
+      const endpoint = await resolvePostTypeEndpoint(client, postType);
+      const query = new URLSearchParams(queryParams as Record<string, string>).toString();
+      posts = await client.get<WordPressPost[]>(`${endpoint}${query ? `?${query}` : ""}`);
+    }
     if (posts.length === 0) {
       const searchInfo = sanitizedParams.search ? ` matching "${sanitizedParams.search}"` : "";
       const statusInfo = sanitizedParams.status ? ` with status "${sanitizedParams.status}"` : "";
@@ -227,26 +309,31 @@ export async function handleListPosts(
  */
 export async function handleGetPost(
   client: WordPressClient,
-  params: { id: number; include_content?: boolean },
+  params: { id: number; include_content?: boolean } & PostTypeParams,
 ): Promise<WordPressPost | string> {
   try {
     const postId = validateId(params.id, "post ID");
+    const postType = validatePostType(params.post_type);
+    const getPost = async (context: "view" | "edit") =>
+      postType === "post"
+        ? client.getPost(postId, context)
+        : client.get<WordPressPost>(`${await resolvePostTypeEndpoint(client, postType)}/${postId}?context=${context}`);
     // Only include full content if explicitly requested (for backward compatibility, default to true).
     // When content is wanted, fetch with context=edit so content.raw (Gutenberg block markup) is available.
     const includeContent = params.include_content !== false;
     let post;
     if (includeContent) {
       try {
-        post = await client.getPost(postId, "edit");
+        post = await getPost("edit");
       } catch (error) {
         if (!isPermissionError(error)) {
           throw error;
         }
         // Credentials lack edit capability for context=edit — fall back to rendered content
-        post = await client.getPost(postId, "view");
+        post = await getPost("view");
       }
     } else {
-      post = await client.getPost(postId, "view");
+      post = await getPost("view");
     }
 
     // Get additional metadata for comprehensive response
@@ -290,10 +377,12 @@ export async function handleGetPost(
     const wordCount = countWords(htmlToPlainText(post.content?.rendered ?? content));
 
     // Build comprehensive response
-    let response = `# ${displayTitle(post.title.rendered)}\n\n`;
+    let response = `# ${displayTitle(post.title?.rendered)}\n\n`;
     response += `**Post ID**: ${post.id}\n`;
     response += `**Status**: ${post.status}\n`;
-    response += `**Author**: ${author?.name || author?.username || `User ${post.author}`}\n`;
+    // Post types without author support carry no `author`; match the list formatter's wording for that case.
+    const fallbackAuthor = post.author != null ? `User ${post.author}` : "Unknown Author";
+    response += `**Author**: ${author?.name || author?.username || fallbackAuthor}\n`;
     response += `**${dateLabel(post.status)}**: ${formattedDate}\n`;
     response += `**Modified**: ${formattedModified}\n`;
 
@@ -321,7 +410,7 @@ export async function handleGetPost(
     if (siteUrl) {
       response += `\n## Management\n`;
       response += `- **Edit**: ${siteUrl}/wp-admin/post.php?post=${post.id}&action=edit\n`;
-      response += `- **Preview**: ${siteUrl}/?p=${post.id}&preview=true\n`;
+      response += `- **Preview**: ${previewLink(siteUrl, postType, post.id)}\n`;
     }
 
     return response;
@@ -338,7 +427,7 @@ export async function handleGetPost(
  */
 export async function handleCreatePost(
   client: WordPressClient,
-  params: CreatePostRequest,
+  params: CreatePostRequest & PostTypeParams,
 ): Promise<WordPressPost | string> {
   try {
     // validatePostParams rejects unsafe `content` (script tags, javascript: URLs, event handlers) via
@@ -347,11 +436,19 @@ export async function handleCreatePost(
     // Its returned fields must actually be sent, not just the original `params` (a real gap a security
     // review caught: this used to be called only for its throwing side effect, then discarded).
     const validated = validatePostParams(params);
-    const post = await client.createPost({ ...params, ...validated } as CreatePostRequest);
+    const postType = validatePostType(params.post_type);
+    const { post_type: _postType, ...postData } = params;
+    const post =
+      postType === "post"
+        ? await client.createPost({ ...postData, ...validated } as CreatePostRequest)
+        : await client.post<WordPressPost>(await resolvePostTypeEndpoint(client, postType), {
+            ...postData,
+            ...validated,
+          });
 
     // Build success response with management links
     let response = `✅ **Post Created Successfully**\n\n`;
-    response += `**Title**: ${displayTitle(post.title.rendered)}\n`;
+    response += `**Title**: ${displayTitle(post.title?.rendered)}\n`;
     response += `**ID**: ${post.id}\n`;
     response += `**Status**: ${post.status}\n`;
     response += `**Link**: ${post.link}\n`;
@@ -364,7 +461,7 @@ export async function handleCreatePost(
       if (post.status === "publish") {
         response += `- View: ${post.link}\n`;
       } else {
-        response += `- Preview: ${siteUrl}/?p=${post.id}&preview=true\n`;
+        response += `- Preview: ${previewLink(siteUrl, postType, post.id)}\n`;
       }
     }
 
@@ -379,27 +476,34 @@ export async function handleCreatePost(
  */
 export async function handleUpdatePost(
   client: WordPressClient,
-  params: UpdatePostRequest & { id: number },
+  params: UpdatePostRequest & { id: number } & PostTypeParams,
 ): Promise<WordPressPost | string> {
   try {
     const postId = validateId(params.id, "post ID");
+    const postType = validatePostType(params.post_type);
 
-    const { id: _id, ...updateData } = params;
+    const { id: _id, post_type: _postType, ...updateData } = params;
     // See handleCreatePost: the validated fields must be sent, not just updateData.
     const validated = validatePostParams(updateData, true);
 
-    const updatedPost = await client.updatePost({ id: postId, ...updateData, ...validated });
+    const updatedPost =
+      postType === "post"
+        ? await client.updatePost({ id: postId, ...updateData, ...validated })
+        : await client.put<WordPressPost>(`${await resolvePostTypeEndpoint(client, postType)}/${postId}`, {
+            ...updateData,
+            ...validated,
+          });
 
     // Build change summary
     let response = `✅ **Post Updated Successfully**\n\n`;
-    response += `**Title**: ${displayTitle(updatedPost.title.rendered)}\n`;
+    response += `**Title**: ${displayTitle(updatedPost.title?.rendered)}\n`;
     response += `**ID**: ${updatedPost.id}\n`;
     response += `**Status**: ${updatedPost.status}\n`;
     response += `**Modified**: ${new Date(updatedPost.modified).toLocaleString()}\n`;
 
     // Show which fields were updated
     const changes: string[] = [];
-    if (params.title) changes.push(`Title: "${displayTitle(updatedPost.title.rendered)}"`);
+    if (params.title) changes.push(`Title: "${displayTitle(updatedPost.title?.rendered)}"`);
     if (params.status) changes.push(`Status: "${updatedPost.status}"`);
     if (params.content !== undefined) changes.push("Content updated");
     if (params.excerpt !== undefined) changes.push("Excerpt updated");
@@ -438,19 +542,33 @@ export async function handleUpdatePost(
  */
 export async function handleDeletePost(
   client: WordPressClient,
-  params: { id: number; force?: boolean },
+  params: { id: number; force?: boolean } & PostTypeParams,
 ): Promise<{ deleted: boolean; previous?: WordPressPost } | string> {
   try {
     const postId = validateId(params.id, "post ID");
-    const result = await client.deletePost(postId, params.force);
+    const postType = validatePostType(params.post_type);
+    const result =
+      postType === "post"
+        ? await client.deletePost(postId, params.force)
+        : await client.delete<{ deleted: boolean; previous?: WordPressPost }>(
+            `${await resolvePostTypeEndpoint(client, postType)}/${postId}?force=${params.force ?? false}`,
+          );
 
-    if (result.deleted) {
+    // WordPress answers a permanent delete with { deleted, previous } but a trash (force=false) with the trashed
+    // post itself, which has no `deleted` field: its status is the success signal.
+    const trashedPost =
+      !params.force && (result as Partial<WordPressPost> | null)?.status === "trash"
+        ? (result as unknown as WordPressPost)
+        : undefined;
+
+    if (result?.deleted || trashedPost) {
       const action = params.force ? "permanently deleted" : "moved to trash";
       let response = `✅ **Post ${action} successfully**\n\n`;
 
-      if (result.previous) {
-        response += `**Title**: ${displayTitle(result.previous.title.rendered)}\n`;
-        response += `**ID**: ${result.previous.id}\n`;
+      const previous = result?.previous ?? trashedPost;
+      if (previous) {
+        response += `**Title**: ${displayTitle(previous.title?.rendered)}\n`;
+        response += `**ID**: ${previous.id}\n`;
       }
 
       if (!params.force) {
@@ -499,7 +617,7 @@ export async function handleGetPostRevisions(
       response += `**Revision ${index + 1}**\n`;
       response += `- ID: ${revision.id}\n`;
       response += `- Date: ${formattedDate}\n`;
-      response += `- Title: ${displayTitle(revision.title.rendered)}\n`;
+      response += `- Title: ${displayTitle(revision.title?.rendered)}\n`;
       if (index < revisions.length - 1) response += "\n";
     });
 

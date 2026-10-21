@@ -284,7 +284,7 @@ export class CachedWordPressClient extends WordPressClient {
   }
 
   private buildRequestUrl(endpoint: string): string {
-    if (endpoint.startsWith("http")) {
+    if (/^https?:\/\//i.test(endpoint)) {
       return endpoint;
     }
 

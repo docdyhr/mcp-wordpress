@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The 71 MCP tools the server exposes, grouped by WordPress resource.
+The 73 MCP tools the server exposes, grouped by WordPress resource.
 
 ## Ownership
 
@@ -33,7 +33,7 @@ older categories (`pages.ts`, `users.ts`, `comments.ts`, `taxonomies.ts`, `cache
 files. `posts.ts` and `performance.ts` are `@deprecated` re-export shims — edit the subdirectory versions, not the
 shims.
 
-**Category map** (71 tools / 12 categories — verified against source):
+**Category map** (73 tools / 12 categories — verified against source):
 
 | Category    | File(s)                                     | Count |
 | ----------- | ------------------------------------------- | ----- |
@@ -48,7 +48,7 @@ shims.
 | Cache       | `cache.ts`                                  | 4     |
 | Performance | `performance/PerformanceTools.ts`           | 6     |
 | SEO         | `seo/SEOToolDefinitions.ts`                 | 11    |
-| System      | `version.ts` (wrapped by `system.ts`)       | 1     |
+| System      | `system.ts`, `version.ts`                   | 3     |
 
 **SEO engines** (`seo/`) — each subdirectory is one engine-per-concern, orchestrated by `seo/SEOTools.ts`:
 `analyzers/ContentAnalyzer.ts` (readability/keyword scoring), `auditors/SiteAuditor.ts` (site-wide audit),
@@ -59,6 +59,17 @@ shims.
 entity-encoded (`Q&#038;A`); excerpts and captions come wrapped in `<p>`, titles can contain inline markup. The post,
 page and media tools print them through `displayTitle()` / `htmlToPlainText()` (`src/utils/htmlText.ts`); do the same in
 any new text output. The SEO engines (`seo/`) still pass `title.rendered` through unchanged in their structured results.
+
+**Post types** (`posts/`): the five post CRUD tools take `post_type` (default `post`; the schema bounds it to a
+WordPress post type key, `^[a-z0-9_-]+$`, max 20). Any other type resolves through `/wp/v2/types` to its `rest_base`. A
+type missing there (not registered, or `show_in_rest` false) or registered under another `rest_namespace` fails with the
+available wp/v2 types, because the client only addresses `wp/v2` routes. Items of a type without title support carry no
+`title`, so read `title?.rendered`. A trash (`force=false`) succeeds when WordPress returns the item with
+`status: "trash"`; only a permanent delete returns `{ deleted, previous }`.
+
+**Inspection output** (`system.ts`): `wp_list_plugins` and `wp_list_themes` print a summary (status, version, plain-text
+author, WP/PHP requirements; active theme first with its parent, features capped at 12), never the raw REST objects,
+whose descriptions are third-party HTML.
 
 **Pagination contract**: list tools accept `page` and `per_page` (max 100) in their `inputSchema` — a property missing
 from the schema is stripped by the argument validator, so it never reaches the handler. Handlers forward them to

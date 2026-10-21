@@ -163,6 +163,32 @@ describe("CacheInvalidation", () => {
     });
   });
 
+  describe("processEvent", () => {
+    it("invalidates list and item entries for custom post type REST resources", async () => {
+      await invalidation.processEvent({
+        type: "update",
+        resource: "products",
+        id: 12,
+        siteId: "test-site",
+        timestamp: Date.now(),
+      });
+
+      expect(mockHttpCache.invalidatePattern).toHaveBeenCalledWith("products(?:/\\d+)?(?=[:/]|$)");
+    });
+
+    it("escapes custom resource names before using them in invalidation patterns", async () => {
+      await invalidation.processEvent({
+        type: "update",
+        resource: "custom+type",
+        id: 12,
+        siteId: "test-site",
+        timestamp: Date.now(),
+      });
+
+      expect(mockHttpCache.invalidatePattern).toHaveBeenCalledWith("custom\\+type(?:/\\d+)?(?=[:/]|$)");
+    });
+  });
+
   describe("invalidateResource", () => {
     it("should create and trigger invalidation event", async () => {
       const triggerSpy = vi.spyOn(invalidation, "trigger");

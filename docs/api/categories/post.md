@@ -40,6 +40,6 @@ wp_create_post --title="Example"
 # Work with a specific site
 wp_list_posts --site=production
 
-# Bulk operations
-wp_list_posts --site=staging --limit=50
+# Use the same tool against another site
+wp_list_posts --site=staging
 ```

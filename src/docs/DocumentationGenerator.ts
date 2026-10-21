@@ -6,6 +6,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as Tools from "@/tools/index.js";
+import { formatPlugins, formatThemes } from "@/tools/system.js";
 import type { ToolDefinition } from "@/server/ToolRegistry.js";
 import { LoggerFactory } from "@/utils/logger.js";
 
@@ -40,6 +41,9 @@ export interface ParameterDocumentation {
   allowedValues: string[] | undefined;
   minimum?: number | undefined;
   maximum?: number | undefined;
+  minLength?: number | undefined;
+  maxLength?: number | undefined;
+  pattern?: string | undefined;
   examples: string[];
 }
 
@@ -232,6 +236,9 @@ export class DocumentationGenerator {
       ...(property.items ? { items: { type: property.items.type } } : {}),
       ...(property.minimum !== undefined ? { minimum: property.minimum } : {}),
       ...(property.maximum !== undefined ? { maximum: property.maximum } : {}),
+      ...(property.minLength !== undefined ? { minLength: property.minLength } : {}),
+      ...(property.maxLength !== undefined ? { maxLength: property.maxLength } : {}),
+      ...(property.pattern !== undefined ? { pattern: property.pattern } : {}),
       ...(property.default !== undefined ? { default: property.default } : {}),
     }));
   }
@@ -298,6 +305,9 @@ export class DocumentationGenerator {
         allowedValues,
         ...(typeof param.minimum === "number" ? { minimum: param.minimum } : {}),
         ...(typeof param.maximum === "number" ? { maximum: param.maximum } : {}),
+        ...(typeof param.minLength === "number" ? { minLength: param.minLength } : {}),
+        ...(typeof param.maxLength === "number" ? { maxLength: param.maxLength } : {}),
+        ...(typeof param.pattern === "string" ? { pattern: param.pattern } : {}),
         examples: this.generateParameterExamples(param),
       };
     });
@@ -592,11 +602,13 @@ export class DocumentationGenerator {
 
   private initializeWordPressMapping(): void {
     // Map MCP tools to WordPress REST API endpoints
-    this.wordpressEndpoints.set("wp_list_posts", "/wp-json/wp/v2/posts");
-    this.wordpressEndpoints.set("wp_get_post", "/wp-json/wp/v2/posts/{id}");
-    this.wordpressEndpoints.set("wp_create_post", "/wp-json/wp/v2/posts");
-    this.wordpressEndpoints.set("wp_update_post", "/wp-json/wp/v2/posts/{id}");
-    this.wordpressEndpoints.set("wp_delete_post", "/wp-json/wp/v2/posts/{id}");
+    this.wordpressEndpoints.set("wp_list_posts", "/wp-json/wp/v2/{rest_base}");
+    this.wordpressEndpoints.set("wp_get_post", "/wp-json/wp/v2/{rest_base}/{id}");
+    this.wordpressEndpoints.set("wp_create_post", "/wp-json/wp/v2/{rest_base}");
+    this.wordpressEndpoints.set("wp_update_post", "/wp-json/wp/v2/{rest_base}/{id}");
+    this.wordpressEndpoints.set("wp_delete_post", "/wp-json/wp/v2/{rest_base}/{id}");
+    this.wordpressEndpoints.set("wp_list_plugins", "/wp-json/wp/v2/plugins");
+    this.wordpressEndpoints.set("wp_list_themes", "/wp-json/wp/v2/themes");
     // Add more mappings...
   }
 
@@ -680,6 +692,7 @@ export class DocumentationGenerator {
       site: ["site1", "production", "staging"],
       per_page: ["10", "20", "50"],
       search: ["wordpress", "tutorial"],
+      post_type: ["post", "page", "event"],
       author: ["1", "2"],
       email: ["user@example.com", "admin@site.com"],
       username: ["john_doe", "admin"],
@@ -703,6 +716,7 @@ export class DocumentationGenerator {
       per_page: 10,
       page: 1,
       search: "wordpress",
+      post_type: "event",
       author: 1,
       email: "user@example.com",
       username: "john_doe",
@@ -718,6 +732,48 @@ export class DocumentationGenerator {
   }
 
   private generateExpectedResponse(toolName: string, category: string, type: string): unknown {
+    // The inspection tools return a text summary; the example is the real formatter's output for WordPress-shaped
+    // REST data, so the docs cannot drift from what the tool prints.
+    if (toolName === "wp_list_plugins") {
+      return {
+        success: true,
+        data: formatPlugins([
+          {
+            plugin: "woocommerce/woocommerce",
+            status: "active",
+            name: "WooCommerce",
+            version: "9.0",
+            author: "Automattic",
+          },
+          { plugin: "hello", status: "inactive", name: "Hello Dolly", version: "1.7.2", author: "Matt Mullenweg" },
+        ]),
+      };
+    }
+
+    if (toolName === "wp_list_themes") {
+      return {
+        success: true,
+        data: formatThemes([
+          {
+            stylesheet: "storefront",
+            template: "storefront",
+            status: "inactive",
+            name: { raw: "Storefront" },
+            version: "4.6",
+            author: { raw: "WooCommerce" },
+            tags: { raw: ["e-commerce", "custom-logo", "editor-style"] },
+          },
+          {
+            stylesheet: "storefront-child",
+            template: "storefront",
+            status: "active",
+            name: { raw: "Storefront Child" },
+            version: "1.0",
+          },
+        ]),
+      };
+    }
+
     if (toolName.includes("list")) {
       return {
         success: true,
@@ -892,6 +948,9 @@ export class DocumentationGenerator {
       if (param.maximum !== undefined) {
         (properties[param.name] as Record<string, unknown>).maximum = param.maximum;
       }
+      for (const bound of ["minLength", "maxLength", "pattern"] as const) {
+        if (param[bound] !== undefined) (properties[param.name] as Record<string, unknown>)[bound] = param[bound];
+      }
 
       if (param.defaultValue !== undefined) {
         (properties[param.name] as Record<string, unknown>).default = param.defaultValue;
@@ -937,6 +996,8 @@ export class DocumentationGenerator {
   }
 
   private inferReturnType(toolName: string, category: string): string {
+    // The inspection tools print a Markdown summary (see generateExpectedResponse), not REST objects.
+    if (toolName === "wp_list_plugins" || toolName === "wp_list_themes") return "string";
     if (toolName.includes("list")) return `${category}[]`;
     if (toolName.includes("get")) return category;
     if (toolName.includes("create")) return category;
@@ -998,6 +1059,8 @@ export class DocumentationGenerator {
       wp_delete_user: ["delete_users"],
       wp_moderate_comment: ["moderate_comments"],
       wp_get_site_settings: ["manage_options"],
+      wp_list_plugins: ["activate_plugins"],
+      wp_list_themes: ["switch_themes"],
     };
     return permissions[toolName];
   }
