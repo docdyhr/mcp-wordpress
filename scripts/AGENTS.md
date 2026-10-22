@@ -47,10 +47,16 @@ one-off scripts don't need an npm alias but should still get a one-line comment 
 
 ## Verification
 
-Mostly none beyond each script's own behavior — there is no test suite for `scripts/` as a whole. Exception:
-`run-tests-safe.cjs` (what the pre-push hook runs) has regression tests in `tests/bin/run-tests-safe.test.js` covering
-its vitest-summary parsing (plain and ANSI-coloured output) and its batch pass/fail rules. Change the parser only
-together with those fixtures — a parser that silently matches nothing makes every batch report 0 tests.
+Mostly none beyond each script's own behavior — there is no test suite for `scripts/` as a whole. Exceptions:
+
+- `run-tests-safe.cjs` (what the pre-push hook runs) has regression tests in `tests/bin/run-tests-safe.test.js` covering
+  its vitest-summary parsing (plain and ANSI-coloured output) and its batch pass/fail rules. Change the parser only
+  together with those fixtures — a parser that silently matches nothing makes every batch report 0 tests.
+- `security-audit-gate.js` has tests in `tests/scripts/security-audit-gate.test.js`, which run the real script against a
+  fake `npm` on `PATH`. When `npm audit` itself fails (a registry outage), the gate retries once. A report with findings
+  is never retried. `--fetch-timeout` is bounded so that both attempts fit inside the Quality Checks job's
+  `timeout-minutes`, and a test checks that budget against `main-ci.yml`. Raise the job timeout before raising the fetch
+  timeout or the attempt count.
 
 ## Child DOX Index
 

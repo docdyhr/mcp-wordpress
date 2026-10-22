@@ -31,7 +31,7 @@ const TEST_BATCHES = [
   },
   {
     name: 'Root & Docs',
-    paths: ['tests/*.test.js', 'tests/docs/', 'tests/bin/'],
+    paths: ['tests/*.test.js', 'tests/docs/', 'tests/bin/', 'tests/scripts/'],
     timeout: 60000,
   },
 ];

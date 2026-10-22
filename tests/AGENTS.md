@@ -7,8 +7,13 @@ Vitest test suite for the MCP WordPress server: unit, integration, contract, sec
 ## Ownership
 
 Owns `tests/`: `baseline/`, `bin/`, `cache/`, `client/`, `config/`, `contracts/`, `fixtures/`, `performance/`,
-`property/`, `security/`, `server/`, `tools/`, `unit/`, `utils/`. `logs/` and `pacts/` are gitignored runtime output,
-not source.
+`property/`, `scripts/`, `security/`, `server/`, `tools/`, `unit/`, `utils/`. `logs/` and `pacts/` are gitignored
+runtime output, not source.
+
+**A new test directory runs only once it is added to a batch.** The four batches name their directories explicitly, in
+three places that must agree: `package.json` `test:batch:*`, the `main-ci.yml` test matrix `path`, and
+`scripts/run-tests-safe.cjs` (pre-push). `tests/scripts/` ran in none of them until 2026-10. `tests/unit/`,
+`tests/property/` and `tests/contracts/` still run in none.
 
 ## Local Contracts
 
