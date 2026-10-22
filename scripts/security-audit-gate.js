@@ -8,10 +8,14 @@
  * documented exception — replacing the previous audit steps (main-ci.yml,
  * package.json's security:scan) that swallowed their exit code or ran with
  * continue-on-error regardless of findings.
+ *
+ * When `npm audit` itself fails to run (a registry outage, a network error), it retries once
+ * before failing. A report with findings is never retried.
  */
 import { execSync } from "child_process";
 import { readFileSync } from "fs";
 import path from "path";
+import { setTimeout as delay } from "timers/promises";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -20,6 +24,17 @@ const EXCEPTIONS_PATH = path.join(repoRoot, "security-exceptions.json");
 const SEVERITY_ORDER = ["info", "low", "moderate", "high", "critical"];
 const MIN_SEVERITY = "moderate";
 const REVIEW_BY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+const AUDIT_ATTEMPTS = 2;
+// SECURITY_AUDIT_RETRY_DELAY_MS (whole milliseconds) overrides the pause between attempts; the
+// tests set it to 0. Anything else keeps the default.
+const retryDelayOverride = process.env.SECURITY_AUDIT_RETRY_DELAY_MS ?? "";
+const AUDIT_RETRY_DELAY_MS = /^\d+$/.test(retryDelayOverride) ? Number(retryDelayOverride) : 30_000;
+// npm's default fetch-timeout is 5 minutes, and npm 10 can wait it twice per attempt (the bulk
+// advisory endpoint, then the quick fallback). The two registry outages seen in CI (2026-09-04,
+// 2026-10-22) each held the gate for 5-7 minutes of the Quality Checks job's 10, so a retry at
+// the default would get the job cancelled. A healthy audit answers in about a second.
+const AUDIT_FETCH_TIMEOUT_MS = 60_000;
 
 function severityAtOrAbove(severity) {
   return SEVERITY_ORDER.indexOf(severity) >= SEVERITY_ORDER.indexOf(MIN_SEVERITY);
@@ -46,42 +61,65 @@ function parseAuditOutput(stdout) {
   // `vulnerabilities` key at all. Treating that as "zero vulnerabilities" would silently pass
   // the gate on a broken audit run instead of the real dependency tree — fail loudly instead.
   if (report.error) {
-    throw new Error(`npm audit itself failed to run: ${report.error.summary ?? report.error.code}`);
+    // npm leaves error.summary empty for registry failures and puts the cause in `message`.
+    const cause = report.error.summary || report.error.code || report.message;
+    throw new Error(`npm audit itself failed to run: ${cause}`);
   }
   return report;
 }
 
-function runNpmAudit() {
+function execNpmAudit() {
   // Strip any ambient npm_config_allow_scripts from the environment before invoking the
   // inner npm audit — some environments set this globally for unrelated reasons, and npm
   // rejects project-scoped installs/audits outright when it's set without a matching
   // "allowScripts" field in package.json.
   const { npm_config_allow_scripts: _unused, ...cleanEnv } = process.env;
 
+  return execSync(`npm audit --omit=dev --json --fetch-timeout=${AUDIT_FETCH_TIMEOUT_MS}`, {
+    encoding: "utf8",
+    cwd: repoRoot,
+    maxBuffer: 10 * 1024 * 1024,
+    env: cleanEnv,
+  });
+}
+
+/**
+ * One `npm audit` run: `{ report }` for a real audit report, with or without findings, or
+ * `{ failure, output }` when the audit itself did not run.
+ */
+function auditOnce() {
+  let stdout;
   try {
-    const stdout = execSync("npm audit --omit=dev --json", {
-      encoding: "utf8",
-      cwd: repoRoot,
-      maxBuffer: 10 * 1024 * 1024,
-      env: cleanEnv,
-    });
-    return parseAuditOutput(stdout);
+    stdout = execNpmAudit();
   } catch (error) {
     // npm audit exits non-zero as soon as it finds any vulnerability — the JSON report is
     // still written to stdout, so a thrown error here is the *expected* path, not a failure,
     // as long as it parses into a real report rather than an `{ error: {...} }` shape.
-    if (error.stdout) {
-      try {
-        return parseAuditOutput(error.stdout);
-      } catch (parseError) {
-        console.error("❌", parseError.message);
-        console.error(error.stdout);
-        process.exit(1);
-      }
+    if (!error.stdout) {
+      return { failure: `Failed to run npm audit: ${error.message}` };
     }
-    console.error("❌ Failed to run npm audit:", error.message);
-    process.exit(1);
+    stdout = error.stdout;
   }
+  try {
+    return { report: parseAuditOutput(stdout) };
+  } catch (parseError) {
+    return { failure: parseError.message, output: stdout };
+  }
+}
+
+async function runNpmAudit() {
+  let result;
+  for (let attempt = 1; attempt <= AUDIT_ATTEMPTS; attempt++) {
+    result = auditOnce();
+    if (result.report) return result.report;
+    if (attempt < AUDIT_ATTEMPTS) {
+      console.error(`⚠️  ${result.failure} (attempt ${attempt} of ${AUDIT_ATTEMPTS}); retrying.`);
+      await delay(AUDIT_RETRY_DELAY_MS);
+    }
+  }
+  console.error("❌", result.failure);
+  if (result.output) console.error(result.output);
+  process.exit(1);
 }
 
 function extractAdvisories(report) {
@@ -104,8 +142,8 @@ function loadExceptions() {
   return raw.exceptions ?? [];
 }
 
-function main() {
-  const report = runNpmAudit();
+async function main() {
+  const report = await runNpmAudit();
   const findings = extractAdvisories(report);
   const exceptions = loadExceptions();
   const today = new Date().toISOString().slice(0, 10);
@@ -167,7 +205,14 @@ function main() {
 // Guard so this module can be imported for unit tests (e.g. isExceptionExpiredOrInvalid)
 // without shelling out to a live `npm audit` or calling process.exit.
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
+  await main();
 }
 
-export { severityAtOrAbove, extractAdvisories, isExceptionExpiredOrInvalid };
+export {
+  severityAtOrAbove,
+  extractAdvisories,
+  isExceptionExpiredOrInvalid,
+  AUDIT_ATTEMPTS,
+  AUDIT_RETRY_DELAY_MS,
+  AUDIT_FETCH_TIMEOUT_MS,
+};
