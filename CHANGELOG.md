@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.1](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.0...v4.2.1) (2026-10-23)
+
+### 🐛 Bug Fixes
+
+- **deps:** raise ip-address override floor to 10.7.4 (GHSA-rxp7-6hxx-x8q5)
+  ([#322](https://github.com/docdyhr/mcp-wordpress/issues/322))
+  ([da09aef](https://github.com/docdyhr/mcp-wordpress/commit/da09aefbe5e2863b05fb420fa33b117a59dbdc52))
+
 ## [4.2.0](https://github.com/docdyhr/mcp-wordpress/compare/v4.1.7...v4.2.0) (2026-10-21)
 
 ### 🚀 Features
