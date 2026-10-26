@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.2](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.1...v4.2.2) (2026-10-26)
+
+### 🐛 Bug Fixes
+
+- **deps:** raise body-parser, fast-uri and qs override floors (GHSA-27r3-jxmh-p828)
+  ([#334](https://github.com/docdyhr/mcp-wordpress/issues/334))
+  ([7f849d9](https://github.com/docdyhr/mcp-wordpress/commit/7f849d915952ca866fe10ed92abf5de2959ba754))
+
 ## [4.2.1](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.0...v4.2.1) (2026-10-23)
 
 ### 🐛 Bug Fixes
