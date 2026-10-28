@@ -1,2 +1,2 @@
-# Vendored agent skills stay byte-identical to upstream (see .claude/skills/AGENTS.md)
+# Vendored agent skills: hooks must not rewrite them (upstream copy plus the correction in .claude/skills/AGENTS.md)
 .claude/skills/*/

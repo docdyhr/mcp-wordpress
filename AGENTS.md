@@ -249,7 +249,8 @@ When the user requests a durable behavior change, record it here or in the relev
 
 ### Child DOX Index
 
-- `.claude/skills/AGENTS.md` — vendored agent skills (Claude Code + Copilot); edit via upstream, not in place
+- `.claude/skills/AGENTS.md` — vendored agent skills (Claude Code + Copilot); edit via upstream, not in place (one
+  documented correction in `dependabot`)
 - `.zed/AGENTS.md` — project-scoped Zed language associations for configuration templates and generated output
 - `src/AGENTS.md` — source-wide TypeScript/ESLint conventions, composition-pattern DI, logger usage; indexes its own
   children
