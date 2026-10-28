@@ -86,7 +86,8 @@ We use **Conventional Commits** for automated versioning and changelog generatio
 # Format: type(scope): description
 feat(tools): add new WordPress custom fields tool
 fix(auth): resolve app password authentication issue
-chore(deps): update dependencies to latest versions
+fix(deps): update production dependencies
+chore(deps-dev): update development dependencies
 docs(readme): improve installation instructions
 test(posts): add comprehensive post tool unit tests
 ```
@@ -94,8 +95,10 @@ test(posts): add comprehensive post tool unit tests
 **Types:**
 
 - `feat`: New features
-- `fix`: Bug fixes
-- `chore`: Maintenance tasks
+- `fix`: Bug fixes, and production dependency bumps (`fix(deps)`), so a patch release ships them in the Docker image and
+  DXT bundle, which are built from the lockfile
+- `chore`: Maintenance tasks, including development-only dependency bumps (`chore(deps-dev)`); `chore` never cuts a
+  release
 - `docs`: Documentation changes
 - `test`: Adding or updating tests
 - `refactor`: Code refactoring
