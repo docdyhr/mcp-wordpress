@@ -27,10 +27,13 @@ updates:
     open-pull-requests-limit: 10
     assignees:
       - "docdyhr"
-    # chore(deps) / chore(deps-dev): the conventional-commit types this repo
-    # already uses for dependency bumps; `chore` does not cut a release
+    # fix(deps) for production bumps: `fix` cuts a patch release, so the Docker
+    # image and DXT bundle, built from the lockfile, ship them. chore(deps-dev)
+    # for development bumps, which do not release. Grouped security updates take
+    # `prefix` even when every package in them is dev-only (#335), so they
+    # release too.
     commit-message:
-      prefix: "chore"
+      prefix: "fix"
       prefix-development: "chore"
       include: "scope"
     # Entry-level labels go on every PR from the entry, version updates
