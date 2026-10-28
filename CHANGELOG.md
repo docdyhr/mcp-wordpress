@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.3](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.2...v4.2.3) (2026-10-28)
+
+### 🐛 Bug Fixes
+
+- **deps:** refresh dependencies within semver ranges (2026-10-28)
+  ([#338](https://github.com/docdyhr/mcp-wordpress/issues/338))
+  ([80beb57](https://github.com/docdyhr/mcp-wordpress/commit/80beb57d33e27d1e455f4f83e2e8eb2f84dd0ceb))
+
+### 📚 Documentation
+
+- **skills:** correct the [dependabot skip] wording in the dependabot skill
+  ([#337](https://github.com/docdyhr/mcp-wordpress/issues/337))
+  ([d79c9c1](https://github.com/docdyhr/mcp-wordpress/commit/d79c9c142c93c574c88ffeb25926e1cf2f155654))
+
 ## [4.2.2](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.1...v4.2.2) (2026-10-26)
 
 ### 🐛 Bug Fixes
