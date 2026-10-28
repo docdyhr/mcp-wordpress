@@ -14,9 +14,9 @@ one skill: a `SKILL.md` plus optional `references/` and `scripts/`.
 
 ## Local Contracts
 
-- Do not edit vendored skill files in place. To change one, update it from upstream (or replace it with a repo-owned
-  skill) and bump the source commit in `README.md`.
-- One deliberate exception: `dependabot/SKILL.md` (the `[dependabot skip]` line under "Rebase Strategy") and
+- Do not edit vendored skill files in place (the next bullet is the one exception). To change one, update it from
+  upstream (or replace it with a repo-owned skill) and bump the source commit in `README.md`.
+- The one deliberate exception: `dependabot/SKILL.md` (the `[dependabot skip]` line under "Rebase Strategy") and
   `dependabot/references/pr-commands.md` (the "Force push over extra commits" tip) are corrected locally. Upstream says
   the marker allows Dependabot to "rebase over" extra commits; per
   [GitHub's docs](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/managing-pull-requests-for-dependency-updates)
