@@ -95,6 +95,17 @@ this stack. `main-ci.yml` (4-suite × Node-version matrix), `wordpress-compatibi
 `release.yml` (DXT + Docker Hub + npm in one pipeline), `docker-modern.yml`, `dependency-review.yml` are all
 project-specific by design. `/repo-audit` flags these as P1 — expected and accepted.
 
+**Claude workflows authenticate with the owner's subscription token**: `claude.yml` (`@claude` mentions) and
+`claude-code-review.yml` (same-repo, non-bot PRs) pass `claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}`
+to `anthropics/claude-code-action@v1`, so their runs draw on the Claude subscription, not API billing.
+`claude setup-token` mints the token, valid for one year;
+`gh api repos/docdyhr/mcp-wordpress/actions/secrets/CLAUDE_CODE_OAUTH_TOKEN --jq .updated_at` shows when it was set.
+Rotate it with `claude setup-token`, then `gh secret set CLAUDE_CODE_OAUTH_TOKEN --repo docdyhr/mcp-wordpress` (paste at
+the prompt). The action hides Claude's output, so a rejected or expired token shows only as `is_error: true` and
+`total_cost_usd: 0` after about 200 ms. Never pass `anthropic_api_key` beside it: `ANTHROPIC_API_KEY` outranks the OAuth
+token and would silently resume API billing. A PR that edits either workflow skips the Claude job ("Skipping action due
+to workflow validation") and shows green, so an auth change is verified only by the first run after merge.
+
 **`.github/dependabot.yml` fails as a whole**: one invalid value makes GitHub reject the entire file. Dependabot keeps
 using the last valid version, if there is one, so edits silently stop taking effect. The only trace is a failing
 `.github/dependabot.yml` check run on the commit that changed the file. That check is not required, so it was ignored
