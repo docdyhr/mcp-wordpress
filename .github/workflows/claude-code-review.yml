@@ -21,6 +21,12 @@ jobs:
     if: |
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.sender.type != 'Bot'
+    # One review per PR: a newer push cancels the running review, and the next run resets its sticky comment.
+    # Bot-sender events, skipped above, get their own group so they never cancel a human's review.
+    concurrency:
+      group:
+        claude-review-${{ github.event.pull_request.number }}${{ github.event.sender.type == 'Bot' && '-bot' || '' }}
+      cancel-in-progress: true
     permissions:
       contents: read
       pull-requests: write
@@ -49,3 +55,8 @@ jobs:
             - Test coverage
 
             Be constructive and helpful in your feedback.
+
+          # Tag mode: the review is written into one top-level tracking comment, rewritten on each push. Without
+          # these, v1 runs a plain prompt in agent mode, which has no comment tools, so the review posts nothing.
+          track_progress: true
+          use_sticky_comment: true
