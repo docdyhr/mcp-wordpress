@@ -96,15 +96,18 @@ this stack. `main-ci.yml` (4-suite × Node-version matrix), `wordpress-compatibi
 project-specific by design. `/repo-audit` flags these as P1 — expected and accepted.
 
 **Claude workflows authenticate with the owner's subscription token**: `claude.yml` (`@claude` mentions) and
-`claude-code-review.yml` (same-repo, non-bot PRs) pass `claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}`
-to `anthropics/claude-code-action@v1`, so their runs draw on the Claude subscription, not API billing.
-`claude setup-token` mints the token, valid for one year;
-`gh api repos/docdyhr/mcp-wordpress/actions/secrets/CLAUDE_CODE_OAUTH_TOKEN --jq .updated_at` shows when it was set.
-Rotate it with `claude setup-token`, then `gh secret set CLAUDE_CODE_OAUTH_TOKEN --repo docdyhr/mcp-wordpress` (paste at
-the prompt). The action hides Claude's output, so a rejected or expired token shows only as `is_error: true` and
-`total_cost_usd: 0` after about 200 ms. Never pass `anthropic_api_key` beside it: `ANTHROPIC_API_KEY` outranks the OAuth
-token and would silently resume API billing. A PR that edits either workflow skips the Claude job ("Skipping action due
-to workflow validation") and shows green, so an auth change is verified only by the first run after merge.
+`claude-code-review.yml` (PR opens and pushes from a same-repo branch, unless the event's sender is a bot) pass
+`claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}` to `anthropics/claude-code-action@v1`, so their runs
+draw on the Claude subscription, not API billing. `claude setup-token` mints the token, valid for one year;
+`gh api repos/docdyhr/mcp-wordpress/actions/secrets/CLAUDE_CODE_OAUTH_TOKEN --jq .updated_at` shows when the secret was
+last set, not when the token was minted. Rotate it with `claude setup-token`, then
+`gh secret set CLAUDE_CODE_OAUTH_TOKEN --repo docdyhr/mcp-wordpress` (paste at the prompt). The action hides Claude's
+output by default, so a failed first request, such as a rejected or expired token, shows only as `is_error: true`,
+`total_cost_usd: 0` and a `duration_ms` of about 200 in the result block; re-run the job with debug logging to see the
+error. Never pass `anthropic_api_key`, or set an `ANTHROPIC_API_KEY` env, beside it: `ANTHROPIC_API_KEY` outranks the
+OAuth token and would silently resume API billing. A PR cannot exercise its own edits to these workflows: on the PR the
+action exits early ("Skipping action due to workflow validation") and the check shows green, and `@claude` issue
+comments run the default branch's copy. So an auth change is verified only by the first run after merge.
 
 **`.github/dependabot.yml` fails as a whole**: one invalid value makes GitHub reject the entire file. Dependabot keeps
 using the last valid version, if there is one, so edits silently stop taking effect. The only trace is a failing
