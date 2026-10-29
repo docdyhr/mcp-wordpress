@@ -62,8 +62,9 @@ jobs:
           use_sticky_comment: true
           include_fix_links: false
 
-          # Tag mode also grants file edits and git add/commit/rm, and it reads the PR's comments. Keep the
-          # automatic review read-only, and read comments only from the owner and bots (this repo is public).
-          include_comments_by_actor: "docdyhr,*[bot]"
+          # Tag mode also grants file edits, git add/commit/rm and a git push wrapper, and it reads the PR's
+          # comments. Deny every tool that could carry a change off the runner, and read comments only from the
+          # owner: this repo is public. Shell writes not listed here need a prompt, which headless mode denies.
+          include_comments_by_actor: "docdyhr"
           claude_args: |
-            --disallowedTools "Edit,MultiEdit,Write,NotebookEdit,Bash(git add:*),Bash(git commit:*),Bash(git rm:*),mcp__github_file_ops__commit_files,mcp__github_file_ops__delete_files"
+            --disallowedTools "Edit,MultiEdit,Write,NotebookEdit,Bash(git add:*),Bash(git commit:*),Bash(git rm:*),Bash(*git-push.sh*),mcp__github_file_ops__commit_files,mcp__github_file_ops__delete_files"
