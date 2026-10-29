@@ -43,7 +43,7 @@ jobs:
         id: claude-review
         uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
           # Prompt for automated review (no @claude mention needed)
           prompt: |
@@ -60,3 +60,10 @@ jobs:
           # these, v1 runs a plain prompt in agent mode, which has no comment tools, so the review posts nothing.
           track_progress: true
           use_sticky_comment: true
+          include_fix_links: false
+
+          # Tag mode also grants file edits and git add/commit/rm, and it reads the PR's comments. Keep the
+          # automatic review read-only, and read comments only from the owner and bots (this repo is public).
+          include_comments_by_actor: "docdyhr,*[bot]"
+          claude_args: |
+            --disallowedTools "Edit,MultiEdit,Write,NotebookEdit,Bash(git add:*),Bash(git commit:*),Bash(git rm:*),mcp__github_file_ops__commit_files,mcp__github_file_ops__delete_files"

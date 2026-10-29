@@ -137,9 +137,12 @@ self-heals instead of needing another manual patch each time. If this plugin is 
 `claude-code-action` runs in tag mode and writes the review into a top-level tracking comment, and
 `use_sticky_comment: true`, so each push rewrites that comment instead of adding one; a newer push cancels the running
 review (job-level `concurrency`). Keep both: with a plain `prompt` alone the action runs in agent mode, which has no
-comment tools, so the review runs and posts nothing. The comment opens no review thread, so it never blocks the merge.
-The sticky lookup reuses the first comment by the Claude app, so on a PR where `@claude` (`claude.yml`) answered first,
-the next review overwrites that answer.
+comment tools, so the review runs and posts nothing. Tag mode also grants file edits and `git add`/`commit`/`rm` and
+feeds the PR's comments into the prompt, so the job denies those tools in `claude_args` and reads comments only from
+`docdyhr` and bots (`include_comments_by_actor`): keep the automatic review read-only. The comment opens no review
+thread, so it never blocks the merge. The sticky lookup reuses the first top-level comment by a Claude bot on the PR's
+first page of comments, so a top-level `@claude` answer (`claude.yml`) that predates the PR's first review is
+overwritten; answers in review threads are not.
 
 ## Development Workflow
 
