@@ -180,7 +180,7 @@
     "@typescript-eslint/parser": "^8.56.1",
     "@vitest/coverage-v8": "^5.0.5",
     "@vitest/ui": "^5.0.5",
-    "archiver": "^7.0.1",
+    "archiver": "^8.0.0",
     "conventional-changelog-conventionalcommits": "^9.2.0",
     "eslint": "^10.0.2",
     "eslint-config-prettier": "^10.1.8",
