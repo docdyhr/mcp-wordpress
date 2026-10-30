@@ -4,6 +4,9 @@
 
 import nock from "nock";
 
+// nock 15 passes reply functions the intercepted Request; its Headers iterate with lowercase names.
+const headersOf = (request) => Object.fromEntries(request.headers.entries());
+
 describe("WordPress REST API Authentication Headers", () => {
   let client;
   let WordPressClient;
@@ -39,8 +42,8 @@ describe("WordPress REST API Authentication Headers", () => {
       // Mock successful response and capture headers
       nock(testBaseUrl)
         .get("/wp-json/wp/v2/users/me")
-        .reply(function () {
-          capturedHeaders = this.req.headers;
+        .reply((request) => {
+          capturedHeaders = headersOf(request);
           return [200, { id: 1, name: "Test User" }];
         });
 
@@ -63,8 +66,8 @@ describe("WordPress REST API Authentication Headers", () => {
       nock(testBaseUrl)
         .get("/wp-json/wp/v2/posts")
         .query({ per_page: 1 })
-        .reply(function () {
-          capturedHeaders = this.req.headers;
+        .reply((request) => {
+          capturedHeaders = headersOf(request);
           return [200, [{ id: 1, title: { rendered: "Test Post" } }]];
         });
 
@@ -82,9 +85,9 @@ describe("WordPress REST API Authentication Headers", () => {
       // Mock successful response
       nock(testBaseUrl)
         .post("/wp-json/wp/v2/posts")
-        .reply(function (uri, requestBody) {
-          capturedHeaders = this.req.headers;
-          capturedBody = requestBody;
+        .reply(async (request) => {
+          capturedHeaders = headersOf(request);
+          capturedBody = await request.json();
           return [200, { id: 123, title: { rendered: "New Post" } }];
         });
 
@@ -111,8 +114,8 @@ describe("WordPress REST API Authentication Headers", () => {
       // Mock successful response
       nock(testBaseUrl)
         .put("/wp-json/wp/v2/posts/123")
-        .reply(function () {
-          capturedHeaders = this.req.headers;
+        .reply((request) => {
+          capturedHeaders = headersOf(request);
           return [200, { id: 123, title: { rendered: "Updated Post" } }];
         });
 
@@ -133,8 +136,8 @@ describe("WordPress REST API Authentication Headers", () => {
       nock(testBaseUrl)
         .delete("/wp-json/wp/v2/posts/123")
         .query({ force: "true" })
-        .reply(function () {
-          capturedHeaders = this.req.headers;
+        .reply((request) => {
+          capturedHeaders = headersOf(request);
           return [200, { deleted: true }];
         });
 
@@ -151,8 +154,8 @@ describe("WordPress REST API Authentication Headers", () => {
       // Mock successful response
       nock(testBaseUrl)
         .get("/wp-json/wp/v2/posts")
-        .reply(function () {
-          capturedHeaders = this.req.headers;
+        .reply((request) => {
+          capturedHeaders = headersOf(request);
           return [200, []];
         });
 
@@ -208,8 +211,8 @@ describe("WordPress REST API Authentication Headers", () => {
       // Mock successful response
       nock(testBaseUrl)
         .get("/wp-json/wp/v2/users/me")
-        .reply(function () {
-          capturedHeaders = this.req.headers;
+        .reply((request) => {
+          capturedHeaders = headersOf(request);
           return [200, { id: 1, name: "Test User" }];
         });
 
@@ -241,8 +244,8 @@ describe("WordPress REST API Authentication Headers", () => {
       // Mock successful response
       nock(testBaseUrl)
         .get("/wp-json/wp/v2/users/me")
-        .reply(function () {
-          capturedHeaders = this.req.headers;
+        .reply((request) => {
+          capturedHeaders = headersOf(request);
           return [200, { id: 1, name: "Test User" }];
         });
 
@@ -265,8 +268,8 @@ describe("WordPress REST API Authentication Headers", () => {
       // Mock successful response
       nock(testBaseUrl)
         .get("/wp-json/wp/v2/users/me")
-        .reply(function () {
-          capturedHeaders = this.req.headers;
+        .reply((request) => {
+          capturedHeaders = headersOf(request);
           return [200, { id: 1, name: "Test User" }];
         });
 

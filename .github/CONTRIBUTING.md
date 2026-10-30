@@ -52,7 +52,7 @@ contributors.
 
 ### Prerequisites
 
-- Node.js 22.14+
+- Node.js 22.22.2+
 - NPM 8+
 - WordPress site for testing (optional)
 

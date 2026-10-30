@@ -7,7 +7,7 @@
 import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
-import archiver from "archiver";
+import { ZipArchive } from "archiver";
 
 const BUILD_DIR = "dxt-build";
 const DXT_DIR = "dxt";
@@ -110,7 +110,8 @@ For more information, visit: https://github.com/docdyhr/mcp-wordpress
     // Create the DXT package (ZIP file)
     console.log("📦 Creating DXT package...");
     const output = fs.createWriteStream(PACKAGE_NAME);
-    const archive = archiver("zip", { zlib: { level: 9 } });
+    // archiver 8 is ESM-only and exports one class per format; it has no default export
+    const archive = new ZipArchive({ zlib: { level: 9 } });
 
     archive.pipe(output);
     archive.directory(BUILD_DIR, false);

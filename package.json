@@ -146,7 +146,7 @@
     "follow-redirects": ">=1.16.1",
     "hono": ">=4.13.5",
     "ip-address": ">=10.7.4 <11.0.0",
-    "markdown-it": ">=14.3.3 <15.0.0",
+    "markdown-it": ">=15.0.3 <16.0.0",
     "markdownlint-cli": {
       "js-yaml": ">=5.4.1 <6.0.0",
       "smol-toml": ">=1.9.0 <2.0.0"
@@ -159,6 +159,7 @@
     "postcss": ">=8.5.10",
     "proxy-addr": ">=2.0.8 <3.0.0",
     "qs": ">=6.16.1 <7.0.0",
+    "re2js": ">=2.8.7 <2.9.0",
     "tar": ">=7.5.21",
     "underscore": "1.13.8",
     "vite": ">=8.3.3"
@@ -171,30 +172,30 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@pact-foundation/pact": "^16.2.0",
+    "@pact-foundation/pact": "^17.1.4",
     "@pact-foundation/pact-node": "^10.18.0",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/changelog": "^7.0.0",
+    "@semantic-release/git": "^11.0.1",
     "@types/node": "^26.6.5",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
     "@vitest/coverage-v8": "^5.0.5",
     "@vitest/ui": "^5.0.5",
-    "archiver": "^7.0.1",
+    "archiver": "^8.0.0",
     "conventional-changelog-conventionalcommits": "^9.2.0",
     "eslint": "^10.0.2",
     "eslint-config-prettier": "^10.1.8",
     "fast-check": "^4.5.3",
     "fs-extra": "^11.3.3",
     "husky": "^9.1.7",
-    "lint-staged": "^16.3.1",
-    "markdownlint-cli": "^0.49.1",
-    "nock": "^14.0.11",
+    "lint-staged": "^17.6.0",
+    "markdownlint-cli": "^0.50.0",
+    "nock": "^15.0.5",
     "node-fetch": "^3.3.2",
     "open": "^11.0.0",
     "prettier": "^3.8.1",
     "semantic-release": "^25.0.3",
-    "sort-package-json": "^3.6.1",
+    "sort-package-json": "^4.1.0",
     "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",
     "vite-tsconfig-paths": "^6.1.1",
@@ -202,9 +203,12 @@
     "yaml": "^2.8.3"
   },
   "engines": {
-    "node": ">=22.14.0"
+    "node": ">=22.22.2"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "scarfSettings": {
+    "enabled": false
   }
 }

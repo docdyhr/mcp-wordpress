@@ -58,7 +58,7 @@ mcp-wordpress/
 
 ### Prerequisites
 
-- **Node.js 22.14+** - Runtime environment
+- **Node.js 22.22.2+** - Runtime environment
 - **TypeScript 5+** - Primary development language
 - **Docker** - For containerization and testing
 - **Git** - Version control
