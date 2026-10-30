@@ -173,7 +173,7 @@
     "@eslint/js": "^10.0.1",
     "@pact-foundation/pact": "^16.2.0",
     "@pact-foundation/pact-node": "^10.18.0",
-    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/changelog": "^7.0.0",
     "@semantic-release/git": "^10.0.1",
     "@types/node": "^26.6.5",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
