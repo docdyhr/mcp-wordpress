@@ -741,12 +741,30 @@ export class WordPressClient implements IWordPressClient {
       if (error.name === "AbortError") {
         return new Error(`Request timeout after ${timeout}ms`);
       }
-      if (error.message.includes("socket hang up") || error.message.includes("ECONNRESET")) {
-        return new Error(`Network connection lost during request: ${error.message}`);
+      // Native fetch rejects every network failure as TypeError("fetch failed") and keeps the socket error, with its
+      // code (ECONNRESET, ENOTFOUND, UND_ERR_SOCKET, ...), in `cause`. Fold the cause into the message so the checks
+      // below, shouldRetryError and the callers' ECONNREFUSED/ENOTFOUND checks can see it.
+      const message = this.withCauseCode(error);
+      if (message.includes("socket hang up") || message.includes("ECONNRESET") || message.includes("UND_ERR_SOCKET")) {
+        return new Error(`Network connection lost during request: ${message}`, { cause: error });
       }
-      return error;
+      return message === error.message ? error : new Error(message, { cause: error });
     }
     return new Error(typeof error === "string" ? error : "Unknown error");
+  }
+
+  private withCauseCode(error: Error): string {
+    const cause: unknown = error.cause;
+    if (!(cause instanceof Error)) {
+      return error.message;
+    }
+    // The code alone when there is one: the cause's message carries hostnames, addresses and ports, and their digits
+    // would trip callers that look for status codes in messages (`includes("404")` in PostHandlers, CircuitBreaker).
+    const code = (cause as Error & { code?: unknown }).code;
+    if (typeof code === "string" && code) {
+      return `${error.message} (${code})`;
+    }
+    return cause.message ? `${error.message}: ${cause.message}` : error.message;
   }
 
   private shouldRetryError(error: Error): boolean {
@@ -755,8 +773,16 @@ export class WordPressClient implements IWordPressClient {
       return error.statusCode >= 500;
     }
     // Network-level errors worth retrying — includes "Network connection lost" which is the
-    // normalized form of both ECONNRESET and "socket hang up" from normalizeRequestError
-    const retryablePatterns = ["ECONNRESET", "ETIMEDOUT", "ENOTFOUND", "EAI_AGAIN", "Network connection lost"];
+    // normalized form of both ECONNRESET and "socket hang up" from normalizeRequestError, and
+    // UND_ERR_CONNECT_TIMEOUT, native fetch's code for what node:http reports as ETIMEDOUT
+    const retryablePatterns = [
+      "ECONNRESET",
+      "ETIMEDOUT",
+      "UND_ERR_CONNECT_TIMEOUT",
+      "ENOTFOUND",
+      "EAI_AGAIN",
+      "Network connection lost",
+    ];
     const message = String(error.message ?? "");
     return retryablePatterns.some((pattern) => message.includes(pattern));
   }
