@@ -498,6 +498,67 @@ describe("WordPressClient", () => {
       expect(result).toEqual({ id: 1 });
     });
 
+    // Native fetch rejects every network failure as TypeError("fetch failed") and keeps the socket error, with its
+    // code, in `cause`. These use that real shape (a dropped connection reports UND_ERR_SOCKET "other side closed").
+    describe("native fetch network errors", () => {
+      const fetchFailed = (cause) => new TypeError("fetch failed", { cause });
+      const socketError = (message, code) => Object.assign(new Error(message), { code });
+      const okResponse = () => ({
+        ok: true,
+        status: 200,
+        headers: new Map([["content-type", "application/json"]]),
+        arrayBuffer: vi.fn().mockResolvedValue(utf8Buf('{"id": 1}')),
+      });
+
+      it.each([
+        ["a dropped connection", socketError("other side closed", "UND_ERR_SOCKET")],
+        ["a DNS failure", socketError("getaddrinfo ENOTFOUND blog404.example.test", "ENOTFOUND")],
+        [
+          "a connect timeout",
+          socketError("Connect Timeout Error (attempted address: example.test:443)", "UND_ERR_CONNECT_TIMEOUT"),
+        ],
+        // nock 15's replyWithError("socket hang up") shape: a cause with no code
+        ["a hang-up without a code", new Error("socket hang up")],
+      ])("should retry %s", async (_label, cause) => {
+        mockFetch.mockRejectedValueOnce(fetchFailed(cause)).mockResolvedValueOnce(okResponse());
+
+        const result = await client.get("posts");
+
+        expect(mockFetch).toHaveBeenCalledTimes(2);
+        expect(result).toEqual({ id: 1 });
+      });
+
+      it("should add only the cause's code, never its address digits (ECONNREFUSED, not retried)", async () => {
+        mockFetch.mockRejectedValue(fetchFailed(socketError("connect ECONNREFUSED 10.0.4.4:4040", "ECONNREFUSED")));
+
+        const error = await client.get("posts").catch((e) => e);
+
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+        expect(error.message).toBe("Request failed after 1 attempt: fetch failed (ECONNREFUSED)");
+      });
+
+      it("should use the code of a dual-stack refusal (AggregateError with an empty message)", async () => {
+        const refused = (address) => socketError(`connect ECONNREFUSED ${address}`, "ECONNREFUSED");
+        const aggregate = Object.assign(new AggregateError([refused("::1:443"), refused("127.0.0.1:443")], ""), {
+          code: "ECONNREFUSED",
+        });
+        mockFetch.mockRejectedValue(fetchFailed(aggregate));
+
+        const error = await client.get("posts").catch((e) => e);
+
+        expect(error.message).toBe("Request failed after 1 attempt: fetch failed (ECONNREFUSED)");
+      });
+
+      it("should leave the message alone when the cause is not an Error", async () => {
+        mockFetch.mockRejectedValue(fetchFailed("not an error object"));
+
+        const error = await client.get("posts").catch((e) => e);
+
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+        expect(error.message).toBe("Request failed after 1 attempt: fetch failed");
+      });
+    });
+
     it("preserves statusCode when retries are exhausted on a persistent 5xx error", async () => {
       mockFetch.mockResolvedValue({
         ok: false,

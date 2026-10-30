@@ -89,6 +89,14 @@ Conventional commits trigger semantic-release versioning (`docs`, `style`, `test
 a release — see `release.config.js`). Publishing: NPM + Docker Hub + DXT packaging. Node versions tested: 22, 24 (LTS).
 Quality gates: all tests pass, security scans clean.
 
+**`engines.node` (`>=22.22.2`) follows the dev tooling, not the server**: lint-staged 17, nock 15, the semantic-release
+changelog and git plugins, and markdownlint-cli (through `ini` 7) need it. Those plugins and `ini` 7 also reject Node 23
+and 24.0 to 24.14, which the range admits; CI runs current 22 and 24. Before a major dev-tool bump, compare its
+`engines` with this floor. Raising it changes `package.json`, `PRODUCTION.md`, both CONTRIBUTING files and the Node
+mentions under `docs/` together. `release.yml` installs `@semantic-release/changelog` and `@semantic-release/git`
+through `extra_plugins` at pinned versions, so a release runs those, not `package.json`'s. Dependabot bumps only
+`package.json` and the lockfile; `tests/release-plugin-pins.test.js` fails until the pins match the lockfile.
+
 **Workflow architecture (known audit deviation)**: all `.github/workflows/` files are intentionally self-contained
 inline definitions, not thin callers to `docdyhr/.github` — the shared library has no matching reusable workflows for
 this stack. `main-ci.yml` (4-suite × Node-version matrix), `wordpress-compatibility.yml` (live WordPress API tests),
@@ -180,7 +188,9 @@ formatter bump that changes prettier's output needs a reformat commit in the sam
     disposable test site or mocks
   - Install smoke tests use `npm pack` then `npm install --prefix <tmp-dir> <tarball>`, never `npm install -g` or
     `npx -y mcp-wordpress` (both run the published package, not the candidate)
-  - Never print secret values; report `.env` and config files only as present or ignored
+    - Never print secret values; report `.env` and config files only as present or ignored
+- `package.json` sets `scarfSettings.enabled: false`: `@scarf/scarf` (a dependency of `@pact-foundation/pact`) otherwise
+  sends install analytics from its postinstall on every `npm ci`, in CI and in the Docker builder
 
 ---
 
