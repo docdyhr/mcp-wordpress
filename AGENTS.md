@@ -147,6 +147,17 @@ semantic-release writes raw conventional-changelog output (unwrapped lines, `*` 
 `format:check` on the very next release. This happened after 3.3.30 (patched by hand in #232); this plugin exists so it
 self-heals instead of needing another manual patch each time. If this plugin is ever removed, the failure mode returns.
 
+**Claude Code Review posts one sticky comment per PR**: `claude-code-review.yml` sets `track_progress: true`, so
+`claude-code-action` runs in tag mode and writes the review into a top-level tracking comment, and
+`use_sticky_comment: true`, so each push rewrites that comment instead of adding one; a newer push cancels the running
+review (job-level `concurrency`). Keep both: with a plain `prompt` alone the action runs in agent mode, which has no
+comment tools, so the review runs and posts nothing. Tag mode also grants file edits, `git add`/`commit`/`rm` and a
+`git-push.sh` wrapper, and it feeds the PR's comments into the prompt. So the job denies those tools in `claude_args`
+and reads comments only from `docdyhr` (`include_comments_by_actor`): keep the automatic review unable to change
+anything off the runner. The PR body is not filtered. The comment opens no review thread, so it never blocks the merge.
+The sticky lookup reuses the first top-level comment by a Claude bot on the PR's first page of comments, so a top-level
+`@claude` answer (`claude.yml`) that predates the PR's first review is overwritten; answers in review threads are not.
+
 ## Development Workflow
 
 Branch naming: `feature/...`, `fix/...`, `chore/...`. Commits: Conventional Commits (`feat:`, `fix:`, `chore:`, etc.).

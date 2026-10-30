@@ -21,6 +21,12 @@ jobs:
     if: |
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.sender.type != 'Bot'
+    # One review per PR: a newer push cancels the running review, and the next run resets its sticky comment.
+    # Bot-sender events, skipped above, get their own group so they never cancel a human's review.
+    concurrency:
+      group:
+        claude-review-${{ github.event.pull_request.number }}${{ github.event.sender.type == 'Bot' && '-bot' || '' }}
+      cancel-in-progress: true
     permissions:
       contents: read
       pull-requests: write
@@ -49,3 +55,16 @@ jobs:
             - Test coverage
 
             Be constructive and helpful in your feedback.
+
+          # Tag mode: the review is written into one top-level tracking comment, rewritten on each push. Without
+          # these, v1 runs a plain prompt in agent mode, which has no comment tools, so the review posts nothing.
+          track_progress: true
+          use_sticky_comment: true
+          include_fix_links: false
+
+          # Tag mode also grants file edits, git add/commit/rm and a git push wrapper, and it reads the PR's
+          # comments. Deny every tool that could carry a change off the runner, and read comments only from the
+          # owner: this repo is public. Shell writes not listed here need a prompt, which headless mode denies.
+          include_comments_by_actor: "docdyhr"
+          claude_args: |
+            --disallowedTools "Edit,MultiEdit,Write,NotebookEdit,Bash(git add:*),Bash(git commit:*),Bash(git rm:*),Bash(*git-push.sh*),mcp__github_file_ops__commit_files,mcp__github_file_ops__delete_files"
