@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.4](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.3...v4.2.4) (2026-11-02)
+
+### 🐛 Bug Fixes
+
+- **deps:** bump googleapis to ^189.0.0 to clear prod audit gate
+  ([#354](https://github.com/docdyhr/mcp-wordpress/issues/354))
+  ([33e20de](https://github.com/docdyhr/mcp-wordpress/commit/33e20deb9d08823496cf98f0a89697503a8ab579))
+
 ## [4.2.3](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.2...v4.2.3) (2026-10-28)
 
 ### 🐛 Bug Fixes
