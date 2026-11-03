@@ -557,6 +557,69 @@ describe("WordPressClient", () => {
         expect(mockFetch).toHaveBeenCalledTimes(1);
         expect(error.message).toBe("Request failed after 1 attempt: fetch failed");
       });
+
+      // Regression, PR #351 review (sourcery-ai, src/client/api.ts:766-767): a cause with NO `code` used to have
+      // its whole message folded into the error. That did two things at once — it disclosed the address to the MCP
+      // tool caller, and it put "404" into a message that PostHandlers (x4), CircuitBreaker and BulkOperations all
+      // classify with includes("404"), so a refused connection read as a missing post. The code-bearing path was
+      // already guarded (the ECONNREFUSED test above); only the no-code fallback was not.
+      it("should keep a no-code cause's address, and its digits, out of the message", async () => {
+        mockFetch.mockRejectedValue(fetchFailed(new Error("connect ECONNREFUSED 10.0.4.4:4040")));
+
+        const error = await client.get("posts").catch((e) => e);
+
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+        expect(error.message).toBe("Request failed after 1 attempt: fetch failed (ECONNREFUSED)");
+        expect(error.message).not.toContain("404");
+        expect(error.message).not.toContain("10.0.4.4");
+      });
+
+      it("should keep the unredacted no-code cause reachable on the cause chain", async () => {
+        mockFetch.mockRejectedValue(fetchFailed(new Error("connect ECONNREFUSED 10.0.4.4:4040")));
+
+        const error = await client.get("posts").catch((e) => e);
+
+        const chain = [];
+        for (let link = error, hops = 0; link instanceof Error && hops < 10; link = link.cause, hops++) {
+          chain.push(link.message);
+        }
+        expect(chain.some((message) => message.includes("10.0.4.4:4040"))).toBe(true);
+      });
+
+      it("should leave the message alone when a no-code cause matches no safe token", async () => {
+        const proxyFailure = new Error("tunneling socket could not be established, statusCode=407");
+        mockFetch.mockRejectedValue(fetchFailed(proxyFailure));
+
+        const error = await client.get("posts").catch((e) => e);
+
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+        expect(error.message).toBe("Request failed after 1 attempt: fetch failed");
+        expect(error.message).not.toContain("407");
+      });
+
+      // Self-review of the fix above: reading cause.message unguarded would throw out of requestRaw's catch block,
+      // losing the typed error and the failed-request stats. The replaced code was guarded by a truthiness check.
+      it("should not throw when a no-code cause carries no string message", async () => {
+        mockFetch.mockRejectedValue(fetchFailed(Object.assign(new Error("replaced"), { message: undefined })));
+
+        const error = await client.get("posts").catch((e) => e);
+
+        expect(error.name).toBe("WordPressAPIError");
+        expect(error.message).toBe("Request failed after 1 attempt: fetch failed");
+      });
+
+      // The no-code path is load-bearing for retry classification: normalizeRequestError reads "socket hang up"
+      // out of the message, so redacting it wholesale would have silently stopped these being retried.
+      it("should still classify a no-code hang-up as a lost connection, with only the safe token", async () => {
+        mockFetch.mockRejectedValue(fetchFailed(new Error("socket hang up")));
+
+        const error = await client.get("posts").catch((e) => e);
+
+        expect(mockFetch.mock.calls.length).toBeGreaterThan(1);
+        expect(error.message).toMatch(
+          /^Request failed after \d+ attempts: Network connection lost during request: fetch failed \(socket hang up\)$/,
+        );
+      });
     });
 
     it("preserves statusCode when retries are exhausted on a persistent 5xx error", async () => {
