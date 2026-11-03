@@ -1,6 +1,6 @@
 {
   "name": "mcp-wordpress",
-  "version": "4.2.3",
+  "version": "4.2.4",
   "description": "Comprehensive Model Context Protocol server for WordPress management with composition-based architecture, 73 tools, SEO toolkit, performance monitoring, intelligent caching, and production-ready authentication",
   "keywords": [
     "mcp",
@@ -167,7 +167,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",
     "dotenv": "^18.0.7",
-    "googleapis": "^188.0.0",
+    "googleapis": "^189.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
