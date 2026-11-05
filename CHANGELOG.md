@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.5](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.4...v4.2.5) (2026-11-05)
+
+### 🐛 Bug Fixes
+
+- fetch error causes, googleapis 188, dev-tool majors, Node >=22.22.2
+  ([#351](https://github.com/docdyhr/mcp-wordpress/issues/351))
+  ([63b4b51](https://github.com/docdyhr/mcp-wordpress/commit/63b4b51e361daafe85bc560e2f453db9d3b1ae97)), closes
+  [#343](https://github.com/docdyhr/mcp-wordpress/issues/343)
+
 ## [4.2.4](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.3...v4.2.4) (2026-11-02)
 
 ### 🐛 Bug Fixes
