@@ -66,6 +66,32 @@ import { CommentsOperations } from "./operations/comments.js";
 import { TaxonomiesOperations } from "./operations/taxonomies.js";
 import { SiteOperations } from "./operations/site.js";
 
+// The only cause text that may reach a caller-facing message. A native-fetch cause usually carries its socket
+// error code in `.code`, but some do not (nock's replyWithError, parts of the TLS and abort paths), and the
+// message is then the only signal that normalizeRequestError and shouldRetryError can classify on. These tokens
+// are safe to surface because each is a fixed code or phrase: none carries a hostname, address or port, and none
+// contains a digit that an `includes("404")` caller could read as a status code. Anything else in a cause message
+// stays on the error's `cause` chain only.
+const SAFE_CAUSE_TOKENS: readonly string[] = [
+  "ECONNRESET",
+  "ECONNREFUSED",
+  "ECONNABORTED",
+  "ENOTFOUND",
+  "ETIMEDOUT",
+  "EAI_AGAIN",
+  "EHOSTUNREACH",
+  "ENETUNREACH",
+  "EPIPE",
+  "UND_ERR_SOCKET",
+  "UND_ERR_CONNECT_TIMEOUT",
+  "UND_ERR_HEADERS_TIMEOUT",
+  "UND_ERR_BODY_TIMEOUT",
+  "socket hang up",
+  "other side closed",
+  "Client network socket disconnected",
+  "Premature close",
+];
+
 /**
  * WordPress REST API Client
  *
@@ -677,7 +703,11 @@ export class WordPressClient implements IWordPressClient {
           break;
         }
         lastError = this.normalizeRequestError(_error, requestTimeout);
-        log.debug(`Request failed (attempt ${attempt + 1}): ${lastError.message}`);
+        // lastError.message is redacted for the MCP caller (withCauseCode), so the address the socket actually
+        // refused would otherwise appear in no log at all. Debug output never reaches a tool response.
+        const causeDetail =
+          _error instanceof Error && _error.cause instanceof Error ? ` [cause: ${_error.cause.message}]` : "";
+        log.debug(`Request failed (attempt ${attempt + 1}): ${lastError.message}${causeDetail}`);
 
         const shouldRetry = this.shouldRetryError(lastError) && attempt < maxAttempts - 1;
         if (!shouldRetry) {
@@ -700,9 +730,13 @@ export class WordPressClient implements IWordPressClient {
     if (lastError instanceof WordPressAPIError) {
       throw lastError;
     }
-    throw new WordPressAPIError(
+    // `message` is deliberately redacted (withCauseCode), and WordPressAPIError's constructor does not forward a
+    // cause, so without this the socket detail would not survive anywhere on the thrown error.
+    const requestError = new WordPressAPIError(
       `Request failed after ${attemptsMade} attempt${attemptsMade === 1 ? "" : "s"}: ${lastError.message}`,
     );
+    requestError.cause = lastError;
+    throw requestError;
   }
 
   private attachRequestBody(
@@ -741,12 +775,38 @@ export class WordPressClient implements IWordPressClient {
       if (error.name === "AbortError") {
         return new Error(`Request timeout after ${timeout}ms`);
       }
-      if (error.message.includes("socket hang up") || error.message.includes("ECONNRESET")) {
-        return new Error(`Network connection lost during request: ${error.message}`);
+      // Native fetch rejects every network failure as TypeError("fetch failed") and keeps the socket error, with its
+      // code (ECONNRESET, ENOTFOUND, UND_ERR_SOCKET, ...), in `cause`. Fold the cause into the message so the checks
+      // below, shouldRetryError and the callers' ECONNREFUSED/ENOTFOUND checks can see it.
+      const message = this.withCauseCode(error);
+      if (message.includes("socket hang up") || message.includes("ECONNRESET") || message.includes("UND_ERR_SOCKET")) {
+        return new Error(`Network connection lost during request: ${message}`, { cause: error });
       }
-      return error;
+      return message === error.message ? error : new Error(message, { cause: error });
     }
     return new Error(typeof error === "string" ? error : "Unknown error");
+  }
+
+  private withCauseCode(error: Error): string {
+    const cause: unknown = error.cause;
+    if (!(cause instanceof Error)) {
+      return error.message;
+    }
+    // The code alone when there is one: the cause's message carries hostnames, addresses and ports, and their digits
+    // would trip callers that look for status codes in messages (`includes("404")` in PostHandlers, CircuitBreaker).
+    const code = (cause as Error & { code?: unknown }).code;
+    if (typeof code === "string" && code) {
+      return `${error.message} (${code})`;
+    }
+    // No code: take only a SAFE_CAUSE_TOKENS match, never the message. Appending it hit both hazards the comment
+    // above describes — a cause reading "connect ECONNREFUSED 10.0.4.4:4040" disclosed the address to the MCP tool
+    // caller AND put "404" in the message, which PostHandlers, CircuitBreaker and BulkOperations all read as a
+    // status code. The unredacted cause stays reachable on the `cause` chain; nothing here serialises it outward.
+    // `message` is typed string but can be absent on a hand-built Error; the replaced code was guarded by a
+    // truthiness check, and an unguarded .includes() here would throw out of requestRaw's catch block.
+    const causeMessage = typeof cause.message === "string" ? cause.message : "";
+    const token = SAFE_CAUSE_TOKENS.find((candidate) => causeMessage.includes(candidate));
+    return token ? `${error.message} (${token})` : error.message;
   }
 
   private shouldRetryError(error: Error): boolean {
@@ -755,8 +815,16 @@ export class WordPressClient implements IWordPressClient {
       return error.statusCode >= 500;
     }
     // Network-level errors worth retrying — includes "Network connection lost" which is the
-    // normalized form of both ECONNRESET and "socket hang up" from normalizeRequestError
-    const retryablePatterns = ["ECONNRESET", "ETIMEDOUT", "ENOTFOUND", "EAI_AGAIN", "Network connection lost"];
+    // normalized form of both ECONNRESET and "socket hang up" from normalizeRequestError, and
+    // UND_ERR_CONNECT_TIMEOUT, native fetch's code for what node:http reports as ETIMEDOUT
+    const retryablePatterns = [
+      "ECONNRESET",
+      "ETIMEDOUT",
+      "UND_ERR_CONNECT_TIMEOUT",
+      "ENOTFOUND",
+      "EAI_AGAIN",
+      "Network connection lost",
+    ];
     const message = String(error.message ?? "");
     return retryablePatterns.some((pattern) => message.includes(pattern));
   }

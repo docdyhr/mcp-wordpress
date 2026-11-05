@@ -37,6 +37,15 @@ three places that must agree: `package.json` `test:batch:*`, the `main-ci.yml` t
 **Contract testing**: `tests/contracts/provider-verification.test.js` runs Pact provider verification against `../pacts`
 (currently empty/gitignored — generated at runtime, not committed); self-skips in CI unless `WORDPRESS_TEST_URL` is set.
 
+**HTTP mocks (nock 15)**: nock intercepts at the socket, so `fetch` gets what a real server would send. A reply function
+receives the intercepted `Request` (headers from `request.headers`, the body from `await request.json()`; `this.req` and
+the `(uri, body)` arguments are gone), and `replyWithError()` with a string or an `Error` reaches the client as
+`TypeError("fetch failed")` with the error in `cause` (the object form `replyWithError({ code, message })` never
+settles). Don't mock a hanging server with nock for a timeout test: when the client aborts a request nock still has in
+flight, undici's socket teardown races the mock socket and throws an uncaught error (every time with `.delay()`,
+intermittently with a reply that never settles). Stub `fetch` instead with a promise that rejects on the request's abort
+signal (`hangingFetch` in `tests/client/api-upload-timeout.test.js`).
+
 **`tests/vitest.setup.ts`** deliberately has no global `uncaughtException`/`unhandledRejection` handlers, so real async
 bugs surface as failures instead of being silently swallowed — do not add them back.
 

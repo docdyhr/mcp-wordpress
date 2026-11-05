@@ -85,8 +85,8 @@ jobs:
         uses: cycjimmy/semantic-release-action@v8
         with:
           extra_plugins: |
-            @semantic-release/changelog@6.0.3
-            @semantic-release/git@10.0.1
+            @semantic-release/changelog@7.0.0
+            @semantic-release/git@11.0.1
         env:
           # Use RELEASE_TOKEN if available for bypassing branch protection rules
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}

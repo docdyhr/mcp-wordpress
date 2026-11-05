@@ -80,12 +80,14 @@ function checkNodeEnvironment() {
 
   try {
     const nodeVersion = process.version;
-    const majorVersion = parseInt(nodeVersion.slice(1).split(".")[0]);
+    // package.json engines.node is >=22.22.2
+    const [major, minor, patch] = nodeVersion.slice(1).split(".").map(Number);
+    const meetsFloor = major > 22 || (major === 22 && (minor > 22 || (minor === 22 && patch >= 2)));
 
-    log(`Node.js version: ${nodeVersion}`, majorVersion >= 18 ? "success" : "warning");
+    log(`Node.js version: ${nodeVersion}`, meetsFloor ? "success" : "warning");
 
-    if (majorVersion < 18) {
-      log("Recommended: Node.js 18 or higher", "warning");
+    if (!meetsFloor) {
+      log("Recommended: Node.js 22.22.2 or higher", "warning");
     }
 
     // Check if npm is available

@@ -9,15 +9,23 @@ import nock from "nock";
 import fs from "fs";
 
 /**
- * Tests below intentionally mock a response `.delay()` longer than the
- * client's own request timeout, so the client's AbortController wins the
- * race and rejects first. But nock schedules that delay via its own
- * independent timer, so — left alone — it fires afterward and tries to
- * deliver a response to a request nock considers already handled, throwing
- * an "already handled" InterceptorError asynchronously once the delay
- * elapses. `nock.abortPendingRequests()` (called in afterEach) clears that
- * still-pending timer before it ever fires, so the race never happens.
+ * The timeout tests below replace fetch with a stub that never answers and
+ * rejects when the client's own AbortController fires (`hangingFetch`). Don't
+ * mock a hanging server with nock: when the client aborts a request nock 15
+ * still has in flight, undici's socket teardown races the mock socket's late
+ * events and throws an uncaught error, every time with `.delay()`
+ * (`assert(!this.aborted)`) and intermittently with a reply that never settles
+ * (`Cannot read properties of null (reading 'statusCode')`).
  */
+const hangingFetch = (path) =>
+  vi.spyOn(globalThis, "fetch").mockImplementation((url, init) => {
+    if (!String(url).includes(path)) {
+      return Promise.reject(new Error(`unexpected request to ${url}`));
+    }
+    return new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener("abort", () => reject(init.signal.reason), { once: true });
+    });
+  });
 
 describe("WordPress API Client Upload Timeout", () => {
   let client;
@@ -61,10 +69,9 @@ describe("WordPress API Client Upload Timeout", () => {
   describe("uploadFile method timeout behavior", () => {
     it("should use custom timeout when provided in options", async () => {
       const customTimeout = 100; // Very short timeout for fast testing
-      const mockDelay = customTimeout + 50; // Short delay but still exceeds timeout
 
-      // Mock slow response that exceeds custom timeout
-      nock(testBaseUrl).post("/wp-json/wp/v2/media").delay(mockDelay).reply(200, { id: 123, title: "uploaded" });
+      // A server that never answers within the custom timeout
+      hangingFetch("/wp-json/wp/v2/media");
 
       await expect(
         client.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: customTimeout }),
@@ -91,11 +98,8 @@ describe("WordPress API Client Upload Timeout", () => {
         },
       });
 
-      // Mock slow response that exceeds timeout
-      nock(testBaseUrl)
-        .post("/wp-json/wp/v2/media")
-        .delay(100) // Short delay but longer than client timeout
-        .reply(200, { id: 123 });
+      // A server that never answers within the timeout
+      hangingFetch("/wp-json/wp/v2/media");
 
       // Use the client's default timeout instead of upload timeout by passing explicit 50ms
       await expect(fastClient.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: 50 })).rejects.toThrow(
@@ -127,11 +131,8 @@ describe("WordPress API Client Upload Timeout", () => {
         },
       });
 
-      // Mock slow response that exceeds timeout
-      nock(testBaseUrl)
-        .post("/wp-json/wp/v2/media")
-        .delay(200) // Longer than client timeout
-        .reply(200, { id: 456 });
+      // A server that never answers within the timeout
+      hangingFetch("/wp-json/wp/v2/media");
 
       // Test uploadFile with explicit timeout
       await expect(fastClient.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: 100 })).rejects.toThrow(
@@ -144,10 +145,7 @@ describe("WordPress API Client Upload Timeout", () => {
     it("should throw timeout error with proper message", async () => {
       const shortTimeout = 100; // Very short timeout
 
-      nock(testBaseUrl)
-        .post("/wp-json/wp/v2/media")
-        .delay(200) // Longer than timeout
-        .reply(200, { id: 789 });
+      hangingFetch("/wp-json/wp/v2/media");
 
       await expect(
         client.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: shortTimeout }),
@@ -155,24 +153,14 @@ describe("WordPress API Client Upload Timeout", () => {
     });
 
     it("should not retry timeout errors", async () => {
-      let requestCount = 0;
+      // A GET, because the client retries GETs on network errors and never retries a plain POST: with a POST this
+      // test could not see a timeout retry
+      const fetchSpy = hangingFetch("/wp-json/wp/v2/posts");
 
-      // Test timeout behavior using a regular POST request to avoid FormData parsing issues
-      nock(testBaseUrl)
-        .post("/wp-json/wp/v2/posts")
-        .times(3) // Allow up to 3 requests to check retry behavior
-        .delay(150) // Longer than our custom timeout
-        .reply(function (_uri, _requestBody) {
-          requestCount++;
-          return [200, { id: 999 }];
-        });
-
-      await expect(client.post("posts", { title: "Test Post" }, { timeout: 100 })).rejects.toThrow(
-        /Request timeout after/,
-      );
+      await expect(client.get("posts", { timeout: 100 })).rejects.toThrow(/Request timeout after/);
 
       // Should only make 1 request, no retries for timeout
-      expect(requestCount).toBe(1);
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -201,10 +189,7 @@ describe("WordPress API Client Upload Timeout", () => {
     it("should track failed requests when timeout occurs", async () => {
       const initialStats = client.stats;
 
-      nock(testBaseUrl)
-        .post("/wp-json/wp/v2/media")
-        .delay(150) // Longer than our custom timeout
-        .reply(200, { id: 222 });
+      hangingFetch("/wp-json/wp/v2/media");
 
       await expect(client.uploadFile(testFile, "test.txt", "text/plain", {}, { timeout: 100 })).rejects.toThrow(
         /Request timeout after/,
@@ -222,8 +207,10 @@ describe("WordPress API Client Upload Timeout", () => {
 
       nock(testBaseUrl)
         .post("/wp-json/wp/v2/media")
-        .reply(function () {
-          capturedHeaders = this.req.headers;
+        .reply((request) => {
+          // A Headers object joins duplicate fields into one value, so a second Content-Type shows up in the
+          // value checks below rather than as a second key.
+          capturedHeaders = Object.fromEntries(request.headers.entries());
           return [200, { id: 321, title: "uploaded" }];
         });
 
