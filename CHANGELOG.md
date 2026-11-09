@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.6](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.5...v4.2.6) (2026-11-09)
+
+### 🐛 Bug Fixes
+
+- **deps:** bump @hono/node-server from 2.1.5 to 2.1.6 ([#359](https://github.com/docdyhr/mcp-wordpress/issues/359))
+  ([689147d](https://github.com/docdyhr/mcp-wordpress/commit/689147d37f26bb08405dbb3b48fab14fe6a6b018))
+- **deps:** bump express-rate-limit from 8.7.1 to 8.7.3 ([#358](https://github.com/docdyhr/mcp-wordpress/issues/358))
+  ([81c87cb](https://github.com/docdyhr/mcp-wordpress/commit/81c87cb25daac3a8e69ee22ccb8d9dac2ee9c17a))
+- **deps:** bump hono ([#356](https://github.com/docdyhr/mcp-wordpress/issues/356))
+  ([9bc3573](https://github.com/docdyhr/mcp-wordpress/commit/9bc3573d78def5fbc9292693a7dd79e2b6be2f2c))
+- **deps:** bump jose from 6.2.13 to 6.2.16 ([#362](https://github.com/docdyhr/mcp-wordpress/issues/362))
+  ([547e63c](https://github.com/docdyhr/mcp-wordpress/commit/547e63c8ad08a5ae94aafbf6a74261d4b62e503f))
+
 ## [4.2.5](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.4...v4.2.5) (2026-11-05)
 
 ### 🐛 Bug Fixes
