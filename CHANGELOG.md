@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.8](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.7...v4.2.8) (2026-11-16)
+
+### 🐛 Bug Fixes
+
+- **deps:** bump google-logging-utils from 2.1.1 to 2.2.0 ([#371](https://github.com/docdyhr/mcp-wordpress/issues/371))
+  ([7aab835](https://github.com/docdyhr/mcp-wordpress/commit/7aab83594061efa41fccb2ab2ffc431604cff3e0))
+- **deps:** bump jose from 6.2.15 to 6.2.17 ([#376](https://github.com/docdyhr/mcp-wordpress/issues/376))
+  ([494c98f](https://github.com/docdyhr/mcp-wordpress/commit/494c98f00b51825297493015b490cf24480915ff))
+
 ## [4.2.7](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.6...v4.2.7) (2026-11-16)
 
 ### 🐛 Bug Fixes
