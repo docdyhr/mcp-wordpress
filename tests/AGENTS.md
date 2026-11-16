@@ -12,8 +12,8 @@ runtime output, not source.
 
 **A new test directory runs only once it is added to a batch.** The four batches name their directories explicitly, in
 three places that must agree: `package.json` `test:batch:*`, the `main-ci.yml` test matrix `path`, and
-`scripts/run-tests-safe.cjs` (pre-push). `tests/scripts/` ran in none of them until 2026-10. `tests/unit/`,
-`tests/property/` and `tests/contracts/` still run in none.
+`scripts/run-tests-safe.cjs` (pre-push). `tests/scripts/` ran in none of them until 2026-10; `tests/unit/`,
+`tests/property/` and `tests/contracts/` ran in none until 2026-11, when they were added to batch 4.
 
 ## Local Contracts
 
