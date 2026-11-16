@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.7](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.6...v4.2.7) (2026-11-16)
+
+### 🐛 Bug Fixes
+
+- **deps:** bump encodeurl from 2.0.0 to 2.0.3 ([#368](https://github.com/docdyhr/mcp-wordpress/issues/368))
+  ([6f333f8](https://github.com/docdyhr/mcp-wordpress/commit/6f333f85cc38f8fad712e9a3fc8754f60ae3a809))
+- **deps:** bump the production-dependencies group with 2 updates
+  ([#366](https://github.com/docdyhr/mcp-wordpress/issues/366))
+  ([b988a01](https://github.com/docdyhr/mcp-wordpress/commit/b988a017b11b430dcc6b9dcf9b4eca08025235db))
+
 ## [4.2.6](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.5...v4.2.6) (2026-11-09)
 
 ### 🐛 Bug Fixes
