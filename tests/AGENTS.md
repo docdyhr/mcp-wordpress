@@ -35,7 +35,10 @@ three places that must agree: `package.json` `test:batch:*`, the `main-ci.yml` t
 - `vitest.test.config.ts` — minimal manual/local debug config; not wired to any npm script.
 
 **Contract testing**: `tests/contracts/provider-verification.test.js` runs Pact provider verification against `../pacts`
-(currently empty/gitignored — generated at runtime, not committed); self-skips in CI unless `WORDPRESS_TEST_URL` is set.
+(gitignored, and nothing in the repo generates pact files). It runs only when `WORDPRESS_TEST_URL` is set **and**
+`tests/pacts/` holds `*.json` pact files, and self-skips otherwise, locally as well as in CI. The old skip rule, keyed
+on `CI`, failed every fresh clone and worktree once batch 4 started running `tests/contracts/` (a missing `tests/pacts/`
+is a Pact FFI error), and passed vacuously wherever an empty `tests/pacts/` existed.
 
 **HTTP mocks (nock 15)**: nock intercepts at the socket, so `fetch` gets what a real server would send. A reply function
 receives the intercepted `Request` (headers from `request.headers`, the body from `await request.json()`; `this.req` and

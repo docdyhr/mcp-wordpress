@@ -1,29 +1,72 @@
 import { Verifier } from "@pact-foundation/pact";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const PACTS_DIR = path.resolve(__dirname, "../pacts");
+
+/**
+ * Pact files to verify. `tests/pacts/` is gitignored runtime output that nothing in this repo generates, so a fresh
+ * clone or worktree has no such directory, and an existing one is usually empty.
+ */
+export function listPactFiles(dir = PACTS_DIR) {
+  try {
+    return fs.readdirSync(dir).filter((name) => name.endsWith(".json"));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Why provider verification cannot run here, or null when it can. It needs a WordPress test instance AND pact files:
+ * without the instance the verifier gets ECONNREFUSED, and without pact files Pact either rejects the missing directory
+ * (fresh checkout) or verifies nothing and passes vacuously (empty directory).
+ */
+export function providerVerificationSkipReason(env = process.env, pactFiles = listPactFiles()) {
+  if (!env.WORDPRESS_TEST_URL) return "WORDPRESS_TEST_URL is not set (no WordPress test instance)";
+  if (pactFiles.length === 0) return `no pact files in ${PACTS_DIR}`;
+  return null;
+}
+
 /**
  * Provider verification tests
  * These tests verify that a real WordPress instance satisfies our contracts
  */
 describe("WordPress Provider Verification", () => {
-  const skipInCI = process.env.CI && !process.env.WORDPRESS_TEST_URL;
+  const skipReason = providerVerificationSkipReason();
 
-  if (skipInCI) {
-    it("should skip provider verification in CI without test instance", () => {
-      console.log("⏭️ Skipping provider verification - no test WordPress instance");
-      expect(true).toBe(true);
+  describe("skip rule", () => {
+    it("skips without a WordPress test instance, even outside CI", () => {
+      expect(providerVerificationSkipReason({}, ["wp.json"])).toMatch(/WORDPRESS_TEST_URL/);
     });
-    return;
+
+    it("skips when there are no pact files to verify", () => {
+      expect(providerVerificationSkipReason({ WORDPRESS_TEST_URL: "http://wp.test" }, [])).toMatch(/no pact files/);
+    });
+
+    it("runs with both an instance and pact files", () => {
+      expect(providerVerificationSkipReason({ WORDPRESS_TEST_URL: "http://wp.test" }, ["wp.json"])).toBeNull();
+    });
+
+    it("finds no pact files in a directory that does not exist", () => {
+      expect(listPactFiles(path.join(__dirname, "does-not-exist"))).toEqual([]);
+    });
+  });
+
+  if (skipReason) {
+    it("should skip provider verification unless a test instance and pact files are both present", () => {
+      console.log(`⏭️ Skipping provider verification - ${skipReason}`);
+      expect(skipReason).toMatch(/WORDPRESS_TEST_URL|no pact files/);
+    });
   }
 
-  describe("WordPress REST API Provider Tests", () => {
+  describe.skipIf(skipReason)("WordPress REST API Provider Tests", () => {
     it("should verify WordPress satisfies consumer contracts", async () => {
       expect(true).toBe(true); // Assertion for jest/expect-expect
-      const providerUrl = process.env.WORDPRESS_TEST_URL || "http://localhost:8081";
+      const providerUrl = process.env.WORDPRESS_TEST_URL;
       console.log(`🔍 Verifying contracts against: ${providerUrl}`);
 
       const opts = {
@@ -31,7 +74,7 @@ describe("WordPress Provider Verification", () => {
         providerBaseUrl: providerUrl,
         provider: "wordpress-rest-api",
         providerVersion: "6.0",
-        pactUrls: [path.resolve(__dirname, "../pacts")],
+        pactUrls: [PACTS_DIR],
         publishVerificationResult: false,
         timeout: 30000,
 

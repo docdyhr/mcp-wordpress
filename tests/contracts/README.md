@@ -17,8 +17,9 @@ across different WordPress versions and configurations.
 
 ### 3. `provider-verification.test.js`
 
-**Purpose**: Pact contract verification and WordPress provider compliance **Status**: ✅ Verifies WordPress satisfies
-consumer contracts
+**Purpose**: Pact contract verification and WordPress provider compliance **Status**: ⏭️ The live verification runs only
+when `WORDPRESS_TEST_URL` is set and `tests/pacts/` holds `*.json` pact files (nothing in the repo generates them yet),
+so it is skipped by default. The skip-rule and compatibility-matrix tests always run.
 
 ## Testing Philosophy: No Skipped Tests
 
@@ -29,7 +30,8 @@ reducing meaningful coverage.
 
 - **Live Mode**: Tests against real WordPress when configured
 - **Mock Mode**: Stateful mocks that validate interface contracts
-- **Zero Skips**: Every test provides meaningful validation
+- **Zero Skips**: Every test provides meaningful validation, with one exception: Pact provider verification has no
+  meaningful mock, so it skips (and says why) until both a WordPress instance and pact files exist
 
 ## Configuration
 
@@ -52,13 +54,13 @@ export SKIP_LIVE_TESTS="true"
 
 ```bash
 # All compatibility tests (mock mode by default)
-npm run test:contracts
+npm run build && npx vitest run tests/contracts/
 
 # Force live mode for development
-WORDPRESS_TEST_URL="http://localhost:8081" npm run test:contracts
+npm run build && WORDPRESS_TEST_URL="http://localhost:8081" npx vitest run tests/contracts/
 
 # CI-friendly (always mocks, never fails due to environment)
-SKIP_LIVE_TESTS="true" npm run test:contracts
+npm run build && SKIP_LIVE_TESTS="true" npx vitest run tests/contracts/
 ```
 
 ## Mock vs Live Test Coverage
@@ -67,8 +69,8 @@ SKIP_LIVE_TESTS="true" npm run test:contracts
 | --------------------------------- | ------ | -------------------------- | ------------------------ | --------------------- |
 | `wordpress-compatibility.test.js` | 6      | ✅ Interface validation    | ✅ Real API testing      | Basic compatibility   |
 | `wordpress-api-live.test.js`      | 8      | ✅ Stateful contract mocks | ✅ End-to-end validation | Advanced contracts    |
-| `provider-verification.test.js`   | 3      | ✅ Pact verification       | ✅ Provider compliance   | Contract verification |
-| **Total**                         | **17** | **17 always pass**         | **17 when configured**   | **Complete coverage** |
+| `provider-verification.test.js`   | 9      | ⏭️ 8 run, 1 skipped        | ✅ Provider compliance   | Contract verification |
+| **Total**                         | **23** | **22 run, 1 skipped**      | **23 when configured**   | **Complete coverage** |
 
 ## Test Details
 
@@ -102,18 +104,18 @@ SKIP_LIVE_TESTS="true" npm run test:contracts
 
 ```bash
 # Quick validation (mocks)
-npm run test:contracts
+npm run build && npx vitest run tests/contracts/
 
 # Full validation (with WordPress)
 docker-compose up -d
-WORDPRESS_TEST_URL="http://localhost:8081" npm run test:contracts
+npm run build && WORDPRESS_TEST_URL="http://localhost:8081" npx vitest run tests/contracts/
 ```
 
 ### Before Merging PRs
 
 1. Tests pass in mock mode (always works)
 2. Tests pass in live mode (when WordPress configured)
-3. All 17 tests provide meaningful validation
+3. All 23 tests run (22 without a WordPress instance and pact files)
 
 ### CI/CD Pipeline
 
