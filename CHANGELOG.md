@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.10](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.9...v4.2.10) (2026-11-24)
+
+### 🐛 Bug Fixes
+
+- **deps:** bump express-rate-limit from 8.7.3 to 8.7.5 ([#380](https://github.com/docdyhr/mcp-wordpress/issues/380))
+  ([57f6448](https://github.com/docdyhr/mcp-wordpress/commit/57f6448cd177583c0c3a85aa7197968f915b57a5))
+
 ## [4.2.9](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.8...v4.2.9) (2026-11-24)
 
 ### 🐛 Bug Fixes
