@@ -2,7 +2,7 @@
  * Tests for AISecurityScanner
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { AISecurityScanner } from "@/security/AISecurityScanner.js";
 
 describe("AISecurityScanner", () => {
@@ -96,9 +96,22 @@ describe("AISecurityScanner", () => {
     });
 
     it("uses default scan targets when none provided", async () => {
-      // Just verify it doesn't throw with default targets (which may not exist in test env)
+      // Stub the directory walk: scanning the real src/, tests/ and scripts/ took 16 s on a loaded machine and timed
+      // out the 10 s test limit. What this test checks is which targets are scanned, not the scan itself.
+      const scanDirectory = vi.spyOn(scanner, "scanDirectory").mockResolvedValue(undefined);
+
       const result = await scanner.performScan();
+
       expect(result).toBeDefined();
+      expect(scanDirectory.mock.calls.map(([dir]) => dir)).toEqual(["src/", "tests/", "scripts/"]);
+    });
+
+    it("scans only the given targets when targets are provided", async () => {
+      const scanDirectory = vi.spyOn(scanner, "scanDirectory").mockResolvedValue(undefined);
+
+      await scanner.performScan({ targets: ["custom/"] });
+
+      expect(scanDirectory.mock.calls.map(([dir]) => dir)).toEqual(["custom/"]);
     });
   });
 
