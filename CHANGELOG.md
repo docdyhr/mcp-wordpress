@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.11](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.10...v4.2.11) (2026-11-24)
+
+### 🐛 Bug Fixes
+
+- **deps:** bump object-inspect from 1.13.4 to 1.14.0 ([#382](https://github.com/docdyhr/mcp-wordpress/issues/382))
+  ([ea04dab](https://github.com/docdyhr/mcp-wordpress/commit/ea04dab18c996157f71dc02a136563f89f392968))
+
 ## [4.2.10](https://github.com/docdyhr/mcp-wordpress/compare/v4.2.9...v4.2.10) (2026-11-24)
 
 ### 🐛 Bug Fixes
