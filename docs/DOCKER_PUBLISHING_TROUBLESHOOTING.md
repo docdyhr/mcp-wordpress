@@ -3,6 +3,26 @@
 This guide helps resolve Docker Hub publishing failures and provides tools for manual intervention when the automated
 release process encounters issues.
 
+## 🔁 "Docker Build Produced No Image" in a release run
+
+The `🐳 Publish to Docker Hub` job in `release.yml` builds into a local registry (`localhost:5000`), scans that image
+with Trivy, and only then copies it to Docker Hub. When both build attempts fail, the `🔎 Confirm the Scan Image Exists`
+step stops the job with a `Docker Build Produced No Image` error, and nothing is scanned or published. npm, the GitHub
+release and the DXT package are separate jobs and are not affected.
+
+The usual cause is a QEMU crash in the `linux/arm64` build's `npm ci` (`qemu: uncaught target signal 4` or `11` in the
+build step's log). It is intermittent, and re-running the failed jobs has fixed it every time (v3.3.19, .20, .25, .27,
+4.1.1, 4.2.12). The error line names the exact command:
+
+```bash
+gh run rerun <run-id> --repo docdyhr/mcp-wordpress --failed
+```
+
+Before this check existed, the same failure surfaced as `Docker Image Vulnerability Scan Failed` ("found HIGH/CRITICAL
+vulnerabilities"), because Trivy failed on the missing image with `MANIFEST_UNKNOWN`. That alert now fires only when
+Trivy itself ran and failed: a findings table in its log means real vulnerabilities, a `FATAL` line means a scanner
+error.
+
 ## 🚨 Current Status - Multiple Missing Versions
 
 **Investigation Results:**
