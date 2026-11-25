@@ -239,6 +239,7 @@ jobs:
           sbom: true
 
       - name: 🔄 Retry Build on Failure
+        id: docker-build-retry
         # A timed-out docker-build doesn't reliably report one specific outcome: the
         # v3.3.19 incident hit the job-level 6h ceiling, which marks in-progress steps
         # 'cancelled'; the v3.3.20 incident hit THIS step's own timeout-minutes (added
@@ -278,6 +279,47 @@ jobs:
             VCS_REF=${{ github.sha }}
           provenance: true
           sbom: true
+
+      - name: 🔎 Confirm the Scan Image Exists
+        # Both build steps above are continue-on-error, so a run in which neither attempt
+        # pushed an image used to reach Trivy anyway. Trivy then failed with
+        # MANIFEST_UNKNOWN, and the alert at the end of this job reported "HIGH/CRITICAL
+        # vulnerabilities" for an image that was never built. This is the flaky QEMU crash
+        # in the linux/arm64 `npm ci` (v3.3.19, .20, .25, .27, 4.1.1, 4.2.12); re-running
+        # the failed jobs has fixed it every time. The check probes the registry, not the
+        # build steps' outcomes: when the build action's wrapper hangs after a successful
+        # push, both steps time out but the image is there, and the scan should go ahead.
+        env:
+          PRIMARY_OUTCOME: ${{ steps.docker-build.outcome }}
+          RETRY_OUTCOME: ${{ steps.docker-build-retry.outcome }}
+          RERUN_HINT: gh run rerun ${{ github.run_id }} --repo ${{ github.repository }} --failed
+        run: |
+          set -euo pipefail
+          image=localhost:5000/mcp-wordpress:scan
+          # stderr goes to a file, not into $index: a warning printed on success would
+          # otherwise break the jq parse below with no error annotation.
+          err=$(mktemp)
+          if ! index=$(docker buildx imagetools inspect --raw "$image" 2>"$err"); then
+            cat "$err"
+            if [ "$PRIMARY_OUTCOME" = success ] || [ "$RETRY_OUTCOME" = success ]; then
+              echo "::error title=Docker Build Produced No Image::Could not read ${image} although a build step succeeded (primary: ${PRIMARY_OUTCOME}, retry: ${RETRY_OUTCOME}), so nothing was scanned or published. Check the registry service and this step's log, then re-run the failed jobs: ${RERUN_HINT}"
+            else
+              echo "::error title=Docker Build Produced No Image::Neither build attempt pushed ${image} (primary: ${PRIMARY_OUTCOME}, retry: ${RETRY_OUTCOME}), so nothing was scanned or published. Read the build steps' logs; for a QEMU crash in the linux/arm64 build, re-run the failed jobs: ${RERUN_HINT}"
+            fi
+            exit 1
+          fi
+          # Attestation manifests carry the platform unknown/unknown; skip them.
+          platforms=$(jq -r '[.manifests[]?.platform | select(.os != "unknown") | "\(.os)/\(.architecture)"] | unique | join(" ")' <<< "$index")
+          echo "Platforms in ${image}: ${platforms:-none}"
+          for want in linux/amd64 linux/arm64; do
+            case " ${platforms} " in
+              *" ${want} "*) ;;
+              *)
+                echo "::error title=Docker Build Produced No Image::${image} has no ${want} image (found: ${platforms:-none}), so nothing was scanned or published. Re-run the failed jobs: ${RERUN_HINT}"
+                exit 1
+                ;;
+            esac
+          done
 
       - name: 🔍 Trivy Vulnerability Scan (pre-publish gate, linux/amd64)
         id: trivy-scan-amd64
@@ -386,8 +428,8 @@ jobs:
       - name: 🚨 Trivy Scan Failed - Create Alert
         if: failure() && (steps.trivy-scan-amd64.outcome == 'failure' || steps.trivy-scan-arm64.outcome == 'failure')
         run: |
-          echo "::error title=Docker Image Vulnerability Scan Failed::Pre-publish scan found HIGH/CRITICAL vulnerabilities in localhost:5000/mcp-wordpress:scan — the image was NOT promoted to Docker Hub."
-          echo "Nothing public was affected. Fix the vulnerable dependency and release a new version."
+          echo "::error title=Docker Image Vulnerability Scan Failed::The pre-publish Trivy scan of localhost:5000/mcp-wordpress:scan failed, so the image was NOT promoted to Docker Hub. Read the scan step's log: a findings table means HIGH/CRITICAL vulnerabilities, a FATAL line means Trivy itself errored."
+          echo "Nothing public was affected. For findings, fix the vulnerable dependency and release a new version; for a Trivy error, re-run the failed jobs."
 
   # 📦 DXT Package Build and Upload
   dxt-package:
